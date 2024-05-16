@@ -87,7 +87,7 @@
 {#if isFeedPage}
   <div
     in:fly={{x: -100, duration: 200}}
-    class="fixed bottom-0 left-72 top-0 w-60 bg-tinted-700 pt-24 transition-colors">
+    class="fixed bottom-0 left-72 top-0 z-nav w-60 bg-tinted-700 pt-24 transition-colors">
     <MenuDesktopItem
       small
       isActive={equals(followsFeed.definition, normalizedFeedDefinition)}
@@ -110,7 +110,7 @@
     {/each}
     <FlexColumn
       small
-      class="staatliches absolute bottom-24 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
+      class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
       <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
         >Manage Feeds</Anchor>
       <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"
@@ -268,7 +268,8 @@
           <i class="fa fa-cloud-arrow-up" />
           {$hud.success.length}
         </div>
-        <div class="flex items-center gap-1"
+        <div
+          class="flex items-center gap-1"
           class:text-accent={$hud.failure.length > 0}
           class:text-tinted-500={$hud.failure.length === 0}>
           <i class="fa fa-triangle-exclamation" />

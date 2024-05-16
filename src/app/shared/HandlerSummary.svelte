@@ -1,61 +1,34 @@
 <script lang="ts">
   import {uniq, pluck} from "ramda"
-  import type {TrustedEvent} from "@welshman/util"
-  import {copyToClipboard} from "src/util/html"
-  import {tryJson, displayDomain} from "src/util/misc"
-  import {showInfo} from "src/partials/Toast.svelte"
-  import Card from "src/partials/Card.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Chip from "src/partials/Chip.svelte"
+  import {pluralize} from "hurdak"
+  import {getAddress} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
+  import {recommendationsByHandlerAddress, loadPubkeys} from "src/engine"
 
-  export let event
-  export let recs: TrustedEvent[] = []
+  export let handler
 
-  const meta = tryJson(() => JSON.parse(event.content)) || {}
+  const address = getAddress(handler.event)
+  const recommendations = $recommendationsByHandlerAddress.get(address) || []
+  const pubkeys = uniq(pluck("pubkey", recommendations))
+  const actionText = `${pluralize(pubkeys.length, "recommends", "recommend")} this app`
 
-  const copy = text => {
-    copyToClipboard(text)
-    showInfo("Copied to clipboard!")
-  }
+  loadPubkeys(pubkeys)
 </script>
 
-<Card>
-  <FlexColumn>
-    <div class="flex gap-3">
-      <ImageCircle class="h-10 w-10" src={meta.picture} />
-      <Subheading>{meta.display_name}</Subheading>
-    </div>
-    {#if meta.about}
-      <p>{meta.about}</p>
+<div class="flex gap-3">
+  <ImageCircle class="h-14 w-14" src={handler.image} />
+  <FlexColumn xs>
+    <p class="text-lg">{handler.name}</p>
+    {#if handler.about}
+      <p class="text-tinted-200">{handler.about}</p>
     {/if}
-    <div>
-      {#if meta.website}
-        <Anchor external href={meta.website} class="mb-2 mr-2 inline-block">
-          <Chip>
-            <i class="fa fa-link" />
-            {displayDomain(meta.website)}
-          </Chip>
-        </Anchor>
-      {/if}
-      {#if meta.lud16}
-        <Chip class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => copy(meta.lud16)}>
-          <i class="fa fa-bolt" />
-          {meta.lud16}
-        </Chip>
-      {/if}
-      {#if meta.nip05}
-        <Chip class="mb-2 mr-2 inline-block cursor-pointer" on:click={() => copy(meta.nip05)}>
-          <i class="fa fa-at" />
-          {meta.nip05}
-        </Chip>
-      {/if}
-    </div>
-    {#if recs.length > 0}
-      <PeopleAction pubkeys={uniq(pluck("pubkey", recs))} actionText="recommend this app" />
+    <slot />
+    {#if recommendations.length > 0}
+      <div class="text-tinted-200">
+        <PeopleAction {pubkeys} {actionText} />
+      </div>
     {/if}
   </FlexColumn>
-</Card>
+</div>

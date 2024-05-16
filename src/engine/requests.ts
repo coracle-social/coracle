@@ -9,7 +9,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, now, writable} from "@welshman/lib"
+import {Worker, now, writable, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -28,7 +28,7 @@ import {
   reactionKinds,
   repostKinds,
 } from "src/util/nostr"
-import {always, assocPath, find, max, partition, pluck, uniq, whereEq, without} from "ramda"
+import {always, assocPath, find, partition, pluck, uniq, whereEq, without} from "ramda"
 import {
   deriveUserCircles,
   getGroupReqInfo,
@@ -63,6 +63,7 @@ import {
   subscribePersistent,
   user,
   withFallbacks,
+  repository,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 
@@ -377,7 +378,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
       updateIn("notifications_last_synced", (t: number) =>
         pluck("created_at", events)
           .concat(t || 0)
-          .reduce(max, 0),
+          .reduce((a, b) => Math.max(a, b), 0),
       ),
     )
   }
@@ -493,13 +494,17 @@ export const listenForMessages = (pubkeys: string[]) => {
 
 export const loadHandlers = () => {
   const $follows = follows.get()
+  const handlers = repository.query([{kinds: [HANDLER_INFORMATION]}])
+  const recommendations = repository.query([{kinds: [HANDLER_RECOMMENDATION]}])
+  const handlersSince = max(handlers.map(e => e.created_at))
+  const recommendationsSince = max(recommendations.map(e => e.created_at))
 
   load({
     skipCache: true,
     relays: hints.ReadRelays().getUrls(),
     filters: [
-      {kinds: [HANDLER_RECOMMENDATION], authors: Array.from($follows)},
-      {kinds: [HANDLER_INFORMATION]},
+      {kinds: [HANDLER_RECOMMENDATION], authors: Array.from($follows), since: recommendationsSince},
+      {kinds: [HANDLER_INFORMATION], since: handlersSince},
     ],
   })
 }

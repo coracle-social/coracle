@@ -1,5 +1,6 @@
 import Fuse from "fuse.js"
 import {nip19} from "nostr-tools"
+import {throttle} from "throttle-debounce"
 import {
   Fetch,
   Storage as LocalStorage,
@@ -16,7 +17,6 @@ import {
   sleep,
   switcher,
   switcherFn,
-  throttle,
   tryFunc,
 } from "hurdak"
 import {
@@ -56,11 +56,13 @@ import {
   writable,
   now,
   inc,
+  groupBy,
 } from "@welshman/lib"
 import type {IWritable} from "@welshman/lib"
 import {
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
+  HANDLER_INFORMATION,
   FEED,
   Address,
   Repository,
@@ -120,7 +122,9 @@ import {
   FeedSearch,
   readFeed,
   readList,
+  readHandlers,
   mapListToFeed,
+  getHandlerAddress,
 } from "src/domain"
 import type {
   Channel,
@@ -1095,18 +1099,7 @@ export const searchTopics = topics.derived(getTopicSearch)
 
 export const searchTopicNames = searchTopics.derived(search => term => pluck("name", search(term)))
 
-// Feeds, lists
-
-export const feeds = repository.filter([{kinds: [FEED]}]).derived($events => $events.map(readFeed))
-
-export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[], string]) =>
-  sortBy(
-    f => f.title.toLowerCase(),
-    $feeds.filter(feed => feed.event.pubkey === $pubkey),
-  ),
-)
-
-export const feedSearch = feeds.derived($feeds => new FeedSearch($feeds))
+// Lists
 
 export const lists = repository
   .filter([{kinds: EDITABLE_LIST_KINDS}])
@@ -1120,6 +1113,19 @@ export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]: [List[
 )
 
 export const listSearch = lists.derived($lists => new ListSearch($lists))
+
+// Feeds
+
+export const feeds = repository.filter([{kinds: [FEED]}]).derived($events => $events.map(readFeed))
+
+export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[], string]) =>
+  sortBy(
+    f => f.title.toLowerCase(),
+    $feeds.filter(feed => feed.event.pubkey === $pubkey),
+  ),
+)
+
+export const feedSearch = feeds.derived($feeds => new FeedSearch($feeds))
 
 export const listFeeds = repository
   .filter([{kinds: [NAMED_BOOKMARKS]}])
@@ -1136,36 +1142,25 @@ export const userListFeeds = new Derived(
 
 // Handlers
 
+export const handlers = repository
+  .filter([{kinds: [HANDLER_INFORMATION]}])
+  .derived(events => events.flatMap(readHandlers))
+
+export const handlersByKind = handlers.derived($handlers =>
+  groupBy(handler => handler.kind, $handlers),
+)
+
+export const recommendations = repository.filter([{kinds: [HANDLER_RECOMMENDATION]}])
+
+export const recommendationsByHandlerAddress = recommendations.derived(events =>
+  groupBy(getHandlerAddress, events),
+)
+
 export const deriveHandlersForKind = cached({
   maxSize: 100,
   getKey: ([kind]: [number]) => kind,
-  getValue: ([kind]: [number]) => {
-    return repository.filter([{kinds: [HANDLER_RECOMMENDATION]}]).derived($recs => {
-      const result = {}
-
-      for (const event of $recs) {
-        const tags = Tags.fromEvent(event)
-
-        if (tags.get("d")?.value() !== String(kind)) {
-          continue
-        }
-
-        const aTags = tags.whereKey("a")
-        const tag = aTags.filter(t => t.last() === "web").first() || aTags.first()
-        const address = tag?.value()
-        const handler = repository.getEvent(address)
-
-        if (!handler) {
-          continue
-        }
-
-        result[address] = result[address] || {...handler, recs: []}
-        result[address].recs.push(event)
-      }
-
-      return sortBy((h: any) => -h.recs.length, Object.values(result))
-    })
-  },
+  getValue: ([kind]: [number]) =>
+    handlers.derived($handlers => $handlers.filter(h => h.kind === kind)),
 })
 
 // Zaps
@@ -1774,8 +1769,6 @@ export type DVMRequestOpts = {
 
 export const dvmRequest = async ({
   kind,
-  input = "",
-  inputOpts = [],
   tags = [],
   timeout = 30_000,
   relays = [],
@@ -1787,12 +1780,7 @@ export const dvmRequest = async ({
     relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
 
-  if (typeof input !== "string") {
-    input = JSON.stringify(input)
-  }
-
   tags = tags.concat([
-    ["i", input, ...inputOpts],
     ["expiration", String(now() + seconds(1, "hour"))],
   ])
 

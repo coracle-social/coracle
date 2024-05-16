@@ -345,6 +345,8 @@ export class SearchHelper<T, V> {
 
   constructor(readonly options: T[]) {}
 
+  getOption = (value: V): T => this.options.find(o => this.getValue(o) === value)
+
   getValue = (option: T): V => option as unknown as V
 
   display = (value: V) => String(value)

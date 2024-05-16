@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import {cached, now} from "@welshman/lib"
+import {cached, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tag,
@@ -14,7 +14,6 @@ import {Fetch, chunk, createMapOf, randomId, seconds, sleep, switcherFn, tryFunc
 import {
   assoc,
   flatten,
-  groupBy,
   identity,
   inc,
   map,
@@ -187,7 +186,7 @@ export const eventsToMeta = (events: TrustedEvent[]) => {
   const tagsByHash = groupBy((tags: Tags) => tags.get("ox").value(), events.map(Tags.fromEvent))
 
   // Merge all nip94 tags together so we can supply as much imeta as possible
-  return Object.values(tagsByHash).map(groupedTags => {
+  return Array.from(tagsByHash.values()).map(groupedTags => {
     return Tags.wrap(groupedTags.flatMap(tags => tags.unwrap())).uniq()
   })
 }

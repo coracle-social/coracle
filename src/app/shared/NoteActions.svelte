@@ -13,7 +13,7 @@
     createEvent,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
-  import {identity, filter, sum, uniqBy, prop, pluck} from "ramda"
+  import {identity, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats, tryJson} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
@@ -27,7 +27,7 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import HandlerSummary from "src/app/shared/HandlerSummary.svelte"
+  import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/util/router"
@@ -54,6 +54,7 @@
     getReplyTags,
     getClientTags,
   } from "src/engine"
+  import {getHandlerKey} from "src/domain"
 
   export let note: TrustedEvent
   export let replyCtrl
@@ -67,9 +68,7 @@
   const address = tags.context().values().first()
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
-  const kindHandlers = deriveHandlersForKind(note.kind).derived(
-    filter((h: any) => h.recs.length > 1),
-  )
+  const kindHandlers = deriveHandlersForKind(note.kind)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
@@ -325,7 +324,7 @@
         {#if handler}
           {@const meta = tryJson(() => JSON.parse(handler.content))}
           <p>This note was published using {meta?.display_name || meta?.name}.</p>
-          <HandlerSummary event={handler} />
+          <HandlerCard {handler} />
         {/if}
         {#if $kindHandlers.length > 0}
           <div class="flex justify-between">
@@ -344,8 +343,8 @@
           {#if handlersShown}
             <div in:fly={{y: 20}}>
               <FlexColumn>
-                {#each $kindHandlers as { address, event, recs } (address)}
-                  <HandlerSummary {event} {recs} />
+                {#each $kindHandlers as handler (getHandlerKey(handler))}
+                  <HandlerCard {handler} />
                 {/each}
               </FlexColumn>
             </div>

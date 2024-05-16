@@ -6,6 +6,7 @@ import type {List} from "./list"
 export * from "./kind"
 export * from "./feed"
 export * from "./list"
+export * from "./handler"
 
 export const mapListToFeed = (list: List) =>
   makeFeed({

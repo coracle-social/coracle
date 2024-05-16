@@ -118,8 +118,15 @@
   {/each}
 </FlexColumn>
 
-{#if !hideSpinner && !$done}
-  <div out:fade|local>
-    <Spinner />
-  </div>
+{#if !hideSpinner}
+  {#if $done}
+    <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
+      <img class="w-20 h-20" src="/images/pumpkin.png" />
+      That's all folks!
+    </div>
+  {:else}
+    <div out:fade|local>
+      <Spinner />
+    </div>
+  {/if}
 {/if}
