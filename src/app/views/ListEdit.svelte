@@ -9,16 +9,16 @@
   export let address
   export let tags = []
 
-  const event = repository.getEvent(address)
-
-  const list = {...readList(event), tags: uniqBy(nth(1), [...event.tags, ...tags])}
+  const event = repository.watchEvent(address)
 
   const exit = () => router.clearModals()
+
+  const getList = () => ({...readList($event), tags: uniqBy(nth(1), [...$event.tags, ...tags])})
 </script>
 
-{#if event}
+{#if $event}
   <Subheading class="text-center">Edit list</Subheading>
-  <ListForm showDelete {list} {exit} hide={["type"]} />
+  <ListForm showDelete list={getList()} {exit} hide={["type"]} />
 {:else}
   <p class="text-center">Sorry, we weren't able to find that list.</p>
 {/if}

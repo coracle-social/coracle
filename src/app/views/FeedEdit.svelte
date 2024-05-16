@@ -7,15 +7,15 @@
 
   export let address
 
-  const event = repository.getEvent(address)
+  const event = repository.watchEvent(address)
 
   const exit = () => router.clearModals()
 
   const getFeed = () =>
-    address.startsWith(NAMED_BOOKMARKS) ? mapListToFeed(readList(event)) : readFeed(event)
+    address.startsWith(NAMED_BOOKMARKS) ? mapListToFeed(readList($event)) : readFeed($event)
 </script>
 
-{#if event}
+{#if $event}
   <FeedForm showDelete showSave feed={getFeed()} {exit} />
 {:else}
   <p class="text-center">Sorry, we weren't able to find that feed.</p>

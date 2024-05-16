@@ -68,7 +68,7 @@ export const makeList = (list: Partial<List> = {}): List => ({
 })
 
 export const readList = (event: TrustedEvent) => {
-  const {d: identifier, name = "", title = "", description = ""} = fromPairs(event.tags)
+  const {d: identifier = randomId(), name = "", title = "", description = ""} = fromPairs(event.tags)
 
   return {
     kind: event.kind,

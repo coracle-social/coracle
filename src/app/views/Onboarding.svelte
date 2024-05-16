@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {sleep} from "hurdak"
+  import {uniq} from '@welshman/lib'
+  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -89,14 +90,14 @@
 
   onMount(async () => {
     const {DEFAULT_FOLLOWS, ONBOARDING_LISTS} = $env
-    const listOwners = ONBOARDING_LISTS.map(a => Address.from(a).pubkey)
+    const listOwners = uniq(ONBOARDING_LISTS.map(a => Address.from(a).pubkey))
 
     // Prime our database with our default follows and list owners
     loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
     load({
-      relays: hints.FromPubkeys(listOwners).getUrls(),
+      relays: hints.FromPubkeys(listOwners).redundancy(5).getUrls(),
       filters: getIdFilters($env.ONBOARDING_LISTS),
       onEvent: e => {
         if (!onboardingLists.find(l => getAddress(l) === getAddress(e))) {

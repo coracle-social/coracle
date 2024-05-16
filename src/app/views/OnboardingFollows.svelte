@@ -126,7 +126,7 @@
       on:click={() => openList(event)}>
       <p class="text-xl font-bold">{title}</p>
       <p class="pb-5">{description}</p>
-      <div class="absolute bottom-1 text-neutral-200">
+      <div class="absolute bottom-4 text-neutral-200">
         {Tags.fromEvent(event).values("p").count()} people
       </div>
     </Card>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {walkFeed, isAuthorFeed} from '@welshman/feeds'
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -9,8 +10,8 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {publishDeletionForEvent, createAndPublish, hints} from "src/engine"
+  import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
+  import {publishDeletionForEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -79,6 +80,14 @@
   let listDeleteIsOpen = false
 
   $: draft = shouldClone ? makeFeed({definition: feed.definition}) : feed
+
+  walkFeed(feed.definition, subFeed => {
+    if (isAuthorFeed(subFeed)) {
+      loadPubkeys(subFeed.slice(1))
+    } else if (isMentionFeed(subFeed)) {
+      loadPubkeys(subFeed.slice(2))
+    }
+  })
 </script>
 
 <FeedField bind:feed={feed.definition} />

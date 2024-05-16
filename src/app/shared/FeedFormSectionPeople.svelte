@@ -6,6 +6,7 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonNameOnly from "src/app/shared/PersonNameOnly.svelte"
   import {searchPubkeys, displayPubkey} from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -41,7 +42,7 @@
     <span slot="item" let:item let:context>
       {#if context === "value"}
         <Anchor modal href={router.at("people").of(item).toString()}>
-          {displayPubkey(item)}
+          <PersonNameOnly pubkey={item} />
         </Anchor>
       {:else}
         <PersonBadge inert pubkey={item} />

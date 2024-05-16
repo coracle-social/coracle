@@ -24,7 +24,7 @@
   const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
-  const deleted = repository.watchEvent(note).derived(() => repository.isDeleted(note))
+  const deleted = repository.watchEvent(note.id).derived(() => repository.isDeleted(note))
 
   const sendMessage = () => {
     const naddr = address.toNaddr()
