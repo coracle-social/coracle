@@ -21,6 +21,8 @@ import {
   loadGiftWrap,
   loadAllMessages,
   getUserRelayUrls,
+  loadGroupMessages,
+  loadNotifications,
   listenForNotifications,
   getSetting,
 } from "src/engine"
@@ -114,22 +116,13 @@ export const loadUserData = async () => {
     kinds: userKinds,
   })
 
-  // Load read receipts
   loadSeen()
-
-  // Load deletes
   loadDeletes()
-
-  // Load handlers
   loadHandlers()
-
-  // Load settings etc
   loadGiftWrap()
-
-  // Load messages
   loadAllMessages()
-
-  // Start our listener
+  loadGroupMessages()
+  loadNotifications()
   listenForNotifications()
 }
 

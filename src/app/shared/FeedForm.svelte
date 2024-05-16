@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {walkFeed, isAuthorFeed} from '@welshman/feeds'
+  import {walkFeed, isAuthorFeed} from "@welshman/feeds"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -85,7 +85,7 @@
     if (isAuthorFeed(subFeed)) {
       loadPubkeys(subFeed.slice(1))
     } else if (isMentionFeed(subFeed)) {
-      loadPubkeys(subFeed.slice(2))
+      loadPubkeys(subFeed.slice(2) as string[])
     }
   })
 </script>

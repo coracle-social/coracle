@@ -95,9 +95,11 @@ export class FeedLoader {
         const tracker = new Tracker()
         const signal = this.controller.signal
 
+        console.log(Array.from(getRequestItems({relays, filters})))
+
         await Promise.all(
           Array.from(getRequestItems({relays, filters})).map(opts =>
-            load({...opts, onEvent, tracker, signal}),
+            load({...opts, onEvent, tracker, signal, skipCache: relays?.length > 0}),
           ),
         )
       },

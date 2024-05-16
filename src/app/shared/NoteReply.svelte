@@ -141,10 +141,10 @@
     {/if}
     <div
       transition:slide|local
-      class="note-reply relative z-feature my-2 flex flex-col gap-1"
+      class="note-reply relative my-2 flex flex-col gap-1"
       bind:this={container}
       on:click|stopPropagation>
-      <AltColor background class="z-feature overflow-hidden rounded">
+      <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
           <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
             <div class="flex flex-col justify-start" slot="addon">

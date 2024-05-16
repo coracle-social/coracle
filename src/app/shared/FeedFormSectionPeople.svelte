@@ -7,7 +7,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import PersonNameOnly from "src/app/shared/PersonNameOnly.svelte"
-  import {searchPubkeys, displayPubkey} from "src/engine"
+  import {searchPubkeys} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let feed
