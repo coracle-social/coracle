@@ -80,6 +80,7 @@ import {
   getIdFilters,
   hasValidSignature,
   LOCAL_RELAY_URL,
+  getFilterResultCardinality,
 } from "@welshman/util"
 import type {
   Filter,
@@ -1390,6 +1391,27 @@ export type MySubscribeRequest = SubscribeRequest & {
 }
 
 export const subscribe = (request: MySubscribeRequest) => {
+  const events = []
+
+  // If we already have all results for any filter, don't send the filter to the network
+  for (const filter of request.filters.splice(0)) {
+    const cardinality = getFilterResultCardinality(filter)
+
+    if (cardinality !== null) {
+      const results = repository.query([filter])
+
+      if (results.length === cardinality) {
+        for (const event of results) {
+          events.push(event)
+        }
+
+        break
+      }
+    }
+
+    request.filters.push(filter)
+  }
+
   if (!request.skipCache) {
     request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
   }
@@ -1403,6 +1425,10 @@ export const subscribe = (request: MySubscribeRequest) => {
 
   if (request.onComplete) {
     sub.emitter.on("complete", request.onComplete)
+  }
+
+  for (const event of events) {
+    sub.emitter.emit("event", LOCAL_RELAY_URL, event)
   }
 
   return sub
@@ -1780,9 +1806,7 @@ export const dvmRequest = async ({
     relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
 
-  tags = tags.concat([
-    ["expiration", String(now() + seconds(1, "hour"))],
-  ])
+  tags = tags.concat([["expiration", String(now() + seconds(1, "hour"))]])
 
   const pub = await createAndPublish({kind, relays, sk, tags})
 

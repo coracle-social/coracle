@@ -47,12 +47,7 @@
 
   const handlerSearch = new HandlerSearch(allKinds.flatMap(k => $handlersByKind.get(k) || []))
 
-  let searchTerm =
-    getFeedArgs(feed)
-      .map(item => fromPairs(item.tags || []).i)
-      .find(identity) || ""
-
-  let addresses = getFeedArgs(feed).flatMap(item => {
+  const addresses = getFeedArgs(feed).flatMap(item => {
     const handlers = $handlersByKind.get(item.kind) || []
     const pubkey = fromPairs(item.tags || []).p
 
@@ -60,6 +55,11 @@
       .filter(handler => handler.event.pubkey === pubkey)
       .map(handler => getAddress(handler.event))
   })
+
+  let searchTerm =
+    getFeedArgs(feed)
+      .map(item => fromPairs(item.tags || []).i)
+      .find(identity) || ""
 </script>
 
 <span class="staatliches text-lg">Which DVMs would you like to request notes from?</span>
