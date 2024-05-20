@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {makeScopeFeed, Scope} from "@welshman/feeds"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import SliderMenu from "src/partials/SliderMenu.svelte"
@@ -6,8 +7,9 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
-  import {slowConnections, menuIsOpen} from "src/app/state"
+  import {globalFeed, slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
+  import {makeFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -43,6 +45,12 @@
 
   const openAccount = e => {
     setSubMenu("account")
+  }
+
+  const openFeeds = () => {
+    globalFeed.set(makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))}))
+    router.at("notes").push()
+    closeMenu()
   }
 
   let subMenu
@@ -118,7 +126,7 @@
           {/if}
         </div>
       </MenuMobileItem>
-      <MenuMobileItem href="/notes" on:click={closeMenu}>
+      <MenuMobileItem on:click={openFeeds}>
         <i class="fa fa-rss" /> Feeds
       </MenuMobileItem>
     </div>
