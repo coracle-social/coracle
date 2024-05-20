@@ -30,6 +30,7 @@
 - [x] Fix url hashes, render code blocks
 - [x] Use bitcoin connect instead of webln
 - [x] Fix double submit on group create dialog
+- [x] Add mentions to note info dialog
 
 # 0.4.4
 

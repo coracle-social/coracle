@@ -70,6 +70,7 @@
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlersForKind(note.kind)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
+  const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
@@ -316,6 +317,15 @@
         <div class="flex flex-col gap-2">
           {#each $seenOn as url}
             <RelayCard relay={{url}} />
+          {/each}
+        </div>
+      {/if}
+      {#if mentions.length > 0}
+        <h1 class="staatliches text-2xl">In this conversation</h1>
+        <p>{quantify(mentions.length, "person", "people")} are tagged in this note.</p>
+        <div class="grid grid-cols-2 gap-2">
+          {#each mentions as pubkey}
+            <PersonBadge pubkey={pubkey} />
           {/each}
         </div>
       {/if}
