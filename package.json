@@ -50,9 +50,9 @@
   "dependencies": {
     "@bugsnag/js": "^7.22.4",
     "@welshman/feeds": "^0.0.5",
-    "@welshman/lib": "^0.0.5",
-    "@welshman/net": "^0.0.5",
-    "@welshman/util": "^0.0.6",
+    "@welshman/lib": "^0.0.6",
+    "@welshman/net": "^0.0.6",
+    "@welshman/util": "^0.0.7",
     "@event-calendar/core": "^2.6.1",
     "@event-calendar/day-grid": "^2.6.1",
     "@event-calendar/interaction": "^2.6.1",
