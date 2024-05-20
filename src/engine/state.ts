@@ -1207,22 +1207,6 @@ export const getZapperForPubkey = async (pubkey, lnurl = null) => {
   return zapper?.lnurl === lnurl ? zapper : await getZapper(lnurl)
 }
 
-export const getLightningImplementation = async () => {
-  const {webln} = window as {webln?: any}
-
-  if (webln) {
-    return "webln"
-  }
-
-  const [bc] = await Promise.all([import("@getalby/bitcoin-connect"), sleep(300)])
-
-  if (bc?.isConnected()) {
-    return "bc"
-  }
-
-  return null
-}
-
 // Network
 
 export const addRepostFilters = (filters: Filter[]) =>

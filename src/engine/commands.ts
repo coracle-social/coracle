@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import * as bc from "@getalby/bitcoin-connect"
 import {cached, nth, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -11,7 +12,7 @@ import {
   normalizeRelayUrl,
   FOLLOWS,
 } from "@welshman/util"
-import {Fetch, chunk, createMapOf, randomId, seconds, sleep, switcherFn, tryFunc} from "hurdak"
+import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {
   assoc,
   flatten,
@@ -52,7 +53,6 @@ import {
   fetchHandle,
   forcePlatformRelays,
   getClientTags,
-  getLightningImplementation,
   getZapperForPubkey,
   groupAdminKeys,
   groupSharedKeys,
@@ -352,37 +352,10 @@ export const requestZap = async (
   return res?.pr
 }
 
-export async function collectInvoiceWithWebLn(invoice) {
-  const {webln} = window as {webln?: any}
+// Initialize bitcoin connect
+bc.init({appName: import.meta.env.VITE_APP_NAME})
 
-  if (webln) {
-    await webln.enable()
-
-    try {
-      await webln.sendPayment(invoice)
-
-      return true
-    } catch (e) {
-      warn(e)
-    }
-  }
-}
-
-export async function collectInvoiceWithBitcoinConnect(invoice) {
-  const bc = await import("@getalby/bitcoin-connect")
-
-  await sleep(300)
-
-  if (bc.isConnected()) {
-    bc.launchPaymentModal({invoice})
-  }
-}
-
-export const collectInvoice = async invoice =>
-  switcherFn(await getLightningImplementation(), {
-    webln: () => collectInvoiceWithWebLn(invoice),
-    bc: () => collectInvoiceWithBitcoinConnect(invoice),
-  })
+export const collectInvoice = invoice => bc.launchPaymentModal({invoice})
 
 // Groups
 

@@ -3,7 +3,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
-  import {collectInvoice, getLightningImplementation, displayPubkey} from "src/engine"
+  import {collectInvoice, displayPubkey} from "src/engine"
 
   export let zap
 
@@ -36,21 +36,17 @@
         <Input value={zap.invoice} class="flex-grow">
           <button slot="after" class="fa fa-copy" on:click={copy} />
         </Input>
-        {#await getLightningImplementation()}
-          <!-- pass -->
-        {:then impl}
-          {#if zap.status === "pending"}
-            <Anchor button accent on:click={collect} disabled={attemptingToPay} class="w-24">
-              {#if attemptingToPay}
-                <i class="fa fa-circle-notch fa-spin" />
-              {:else}
-                Pay
-              {/if}
-            </Anchor>
-          {:else}
-            <Anchor button accent disabled>Paid!</Anchor>
-          {/if}
-        {/await}
+        {#if zap.status === "pending"}
+          <Anchor button accent on:click={collect} disabled={attemptingToPay} class="w-24">
+            {#if attemptingToPay}
+              <i class="fa fa-circle-notch fa-spin" />
+            {:else}
+              Pay
+            {/if}
+          </Anchor>
+        {:else}
+          <Anchor button accent disabled>Paid!</Anchor>
+        {/if}
       </div>
     </QRCode>
   {:else if zap.status === "error:zapper"}

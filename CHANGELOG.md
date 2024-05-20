@@ -28,6 +28,7 @@
 - [x] Clean up onboarding with an invite
 - [x] Only tag parent event in reactions
 - [x] Fix url hashes, render code blocks
+- [x] Use bitcoin connect instead of webln
 
 # 0.4.4
 
