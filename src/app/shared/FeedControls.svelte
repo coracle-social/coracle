@@ -1,6 +1,7 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
+  import {boolCtrl} from 'src/partials/utils'
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
@@ -17,25 +18,19 @@
 
   feed.definition = normalizeFeedDefinition(feed.definition)
 
+  const form = boolCtrl()
+  const listMenu = boolCtrl()
   const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
   const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
 
-  const openListMenu = () => {
-    listMenuIsOpen = true
-  }
-
-  const closeListMenu = () => {
-    listMenuIsOpen = false
-  }
-
   const openForm = () => {
     savePoint = {...feed}
-    formIsOpen = true
+    $form.enable()
   }
 
   const closeForm = () => {
     feed = savePoint
-    formIsOpen = false
+    $form.disable()
   }
 
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
@@ -43,8 +38,8 @@
   const setFeedDefinition = definition => {
     feed.definition = definition
     search = getSearch(definition)
-    formIsOpen = false
-    closeListMenu()
+    $form.disable()
+    $listMenu.disable()
     updateFeed(feed)
   }
 
@@ -88,8 +83,6 @@
   })
 
   let savePoint
-  let formIsOpen = false
-  let listMenuIsOpen = false
   let search = getSearch(feed.definition)
 
   $: subFeeds = getFeedArgs(feed.definition as any)
@@ -111,11 +104,11 @@
     <div class="relative lg:hidden">
       <div
         class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
-        on:click={openListMenu}>
+        on:click={$listMenu.enable}>
         <i class="fa fa-sm fa-ellipsis-v" />
       </div>
-      {#if listMenuIsOpen}
-        <Popover2 absolute hideOnClick onClose={closeListMenu} class="right-0 top-8 w-60">
+      {#if $listMenu.enabled}
+        <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
           <Menu>
             <MenuItem inert class="staatliches bg-neutral-800 text-lg shadow">Your Feeds</MenuItem>
             <div class="max-h-96 overflow-auto">
@@ -146,7 +139,7 @@
   </div>
 </div>
 
-{#if formIsOpen}
+{#if $form.enabled}
   <Modal onEscape={closeForm}>
     <FeedForm {feed} exit={exitForm} apply={() => setFeedDefinition(feed.definition)} />
   </Modal>

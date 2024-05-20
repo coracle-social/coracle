@@ -20,6 +20,7 @@
   import {ucFirst} from "hurdak"
   import {Address} from "@welshman/util"
   import {fly} from "src/util/transition"
+  import {formCtrl} from "src/partials/utils"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -62,23 +63,23 @@
     values.feeds = values.feeds.toSpliced(i, 1)
   }
 
-  const submit = async () => {
-    if (values.relays.length < 1) {
-      showWarning("At least one relay is required.")
+  const ctrl = formCtrl({
+    submit: async () => {
+      if (values.relays.length < 1) {
+        showWarning("At least one relay is required.")
+      } else {
+        await onSubmit(values)
 
-      return
-    }
-
-    await onSubmit(values)
-
-    showInfo("Your group has been saved!")
-  }
+        showInfo("Your group has been saved!")
+      }
+    },
+  })
 
   let feedsInput
   let showAdvanced = false
 </script>
 
-<form on:submit|preventDefault={submit} in:fly={{y: 20}}>
+<form on:submit|preventDefault={$ctrl.submit} in:fly={{y: 20}}>
   <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>{ucFirst(mode)} Group</Heading>
@@ -180,7 +181,7 @@
           <span>Show Advanced Settings</span>
         </Anchor>
       {/if}
-      <Anchor button tag="button" type="submit">{buttonText}</Anchor>
+      <Anchor button loading={$ctrl.loading} tag="button" type="submit">{buttonText}</Anchor>
     </div>
   </FlexColumn>
 </form>

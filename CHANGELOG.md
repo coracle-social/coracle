@@ -29,6 +29,7 @@
 - [x] Only tag parent event in reactions
 - [x] Fix url hashes, render code blocks
 - [x] Use bitcoin connect instead of webln
+- [x] Fix double submit on group create dialog
 
 # 0.4.4
 
