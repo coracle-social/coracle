@@ -19,6 +19,7 @@
     load,
     hints,
     relays,
+    pubkey,
     follows,
     deriveRelay,
     derivePerson,
@@ -31,6 +32,7 @@
     sortEventsDesc,
     joinRelay,
     broadcastUserData,
+    loadPubkeyRelays,
   } from "src/engine"
 
   const tabs = ["search", "reviews"]
@@ -140,6 +142,11 @@
       return ""
     }
   }, reviews)
+
+  // Force reload user relays to make sure we're up to date
+  if ($pubkey) {
+    loadPubkeyRelays([$pubkey], {force: true})
+  }
 
   load({
     relays: hints.ReadRelays().getUrls(),
