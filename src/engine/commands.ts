@@ -787,29 +787,31 @@ export const publishProfile = profile =>
   })
 
 export const updateFollows = async ({add = [], remove = []}) => {
-  const filters = [{kinds: [FOLLOWS], authors: [pubkey.get()]}]
+  const updateTags = tags =>
+    uniqBy(nth(1), [...tags.filter(t => !remove.includes(t[1])), ...add.map(mention)])
 
-  let [event] = repository.query(filters)
+  // Eagerly update so we can support anonymous users
+  const person = people.key(stateKey.get())
 
-  // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
-  // dropping follow updates
-  if (!event || event.created_at < now() - seconds(5, "minute")) {
-    const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
-
-    if (loadedEvent) {
-      event = loadedEvent
-    }
-  }
-
-  const followList = event ? readFollowList(event) : makeFollowList()
-  const publicTags = uniqBy(nth(1), [
-    ...followList.publicTags.filter(t => !remove.includes(t[1])),
-    ...add.map(mention),
-  ])
-
-  updateStore(people.key(stateKey.get()), now(), {petnames: publicTags})
+  updateStore(person, now(), {petnames: updateTags(person.get()?.petnames)})
 
   if (canSign.get()) {
+    const filters = [{kinds: [FOLLOWS], authors: [pubkey.get()]}]
+
+    let [event] = repository.query(filters)
+
+    // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
+    // dropping follow updates
+    if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
+      const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
+
+      if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
+        event = loadedEvent
+      }
+    }
+
+    const followList = event ? readFollowList(event) : makeFollowList()
+    const publicTags = updateTags(followList.publicTags)
     const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
     const content = event?.content || ""
     const template = event

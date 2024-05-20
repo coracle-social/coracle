@@ -41,7 +41,7 @@
 
   let onboardingLists = []
 
-  let follows = $session ? [] : user.get()?.petnames.map(nth(1)) || []
+  let follows = $session ? [] : user.get()?.petnames?.map(nth(1)) || []
 
   let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
