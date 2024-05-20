@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {sleep} from "hurdak"
-  import {uniq} from '@welshman/lib'
+  import {uniq, nth} from "@welshman/lib"
   import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -17,7 +17,7 @@
     session,
     loadPubkeys,
     publishNote,
-    publishPetnames,
+    updateFollows,
     publishProfile,
     publishRelays,
     urlToRelayPolicy,
@@ -41,7 +41,7 @@
 
   let onboardingLists = []
 
-  let petnames = $session ? [] : user.get()?.petnames || []
+  let follows = $session ? [] : user.get()?.petnames.map(nth(1)) || []
 
   let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
@@ -77,7 +77,7 @@
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    publishPetnames(petnames)
+    updateFollows({add: follows})
 
     // Publish our welcome note
     if (noteContent) {
@@ -117,7 +117,7 @@
     {:else if stage === "profile"}
       <OnboardingProfile {setStage} {profile} />
     {:else if stage === "follows"}
-      <OnboardingFollows {setStage} {onboardingLists} bind:petnames bind:relays />
+      <OnboardingFollows {setStage} {onboardingLists} bind:follows bind:relays />
     {:else if stage === "note"}
       <OnboardingNote {setStage} {signup} />
     {/if}

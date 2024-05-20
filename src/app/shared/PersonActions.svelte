@@ -9,8 +9,7 @@
     hints,
     unmute,
     canSign,
-    follow,
-    unfollow,
+    updateFollows,
     deriveMuted,
     deriveFollowing,
   } from "src/engine"
@@ -81,9 +80,9 @@
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
-  const unfollowPerson = () => unfollow(pubkey)
+  const unfollowPerson = () => updateFollows({remove: [pubkey]})
 
-  const followPerson = () => follow("p", pubkey)
+  const followPerson = () => updateFollows({add: [pubkey]})
 
   const unmutePerson = () => unmute(pubkey)
 

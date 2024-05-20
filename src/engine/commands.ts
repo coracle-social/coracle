@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import {cached, groupBy, now} from "@welshman/lib"
+import {cached, nth, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tag,
@@ -9,6 +9,7 @@ import {
   getIdAndAddress,
   isShareableRelayUrl,
   normalizeRelayUrl,
+  FOLLOWS,
 } from "@welshman/util"
 import {Fetch, chunk, createMapOf, randomId, seconds, sleep, switcherFn, tryFunc} from "hurdak"
 import {
@@ -31,12 +32,15 @@ import {stripExifData, blobToFile} from "src/util/html"
 import {warn} from "src/util/logger"
 import {joinPath} from "src/util/misc"
 import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
+import {makeFollowList, editFollowList, createFollowList, readFollowList} from "src/domain"
 import type {RelayPolicy, Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {NostrConnectBroker} from "src/engine/utils"
 import {
   canSign,
   channels,
+  loadOne,
+  repository,
   tagsFromContent,
   createAndPublish,
   deriveAdminKeyForGroup,
@@ -782,30 +786,39 @@ export const publishProfile = profile =>
     relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
   })
 
-export const publishPetnames = (petnames: string[][]) => {
-  updateStore(people.key(stateKey.get()), now(), {petnames})
+export const updateFollows = async ({add = [], remove = []}) => {
+  const filters = [{kinds: [FOLLOWS], authors: [pubkey.get()]}]
+
+  let [event] = repository.query(filters)
+
+  // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
+  // dropping follow updates
+  if (!event || event.created_at < now() - seconds(5, "minute")) {
+    const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
+
+    if (loadedEvent) {
+      event = loadedEvent
+    }
+  }
+
+  const followList = event ? readFollowList(event) : makeFollowList()
+  const publicTags = uniqBy(nth(1), [
+    ...followList.publicTags.filter(t => !remove.includes(t[1])),
+    ...add.map(mention),
+  ])
+
+  updateStore(people.key(stateKey.get()), now(), {petnames: publicTags})
 
   if (canSign.get()) {
-    createAndPublish({
-      kind: 3,
-      tags: [...petnames, ...getClientTags()],
-      content: session.get().kind3?.content || "",
-      relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
-    })
+    const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
+    const content = event?.content || ""
+    const template = event
+      ? editFollowList({...followList, publicTags})
+      : createFollowList({...followList, publicTags})
+
+    await createAndPublish({...template, content, relays})
   }
 }
-
-export const follow = (type: string, value: string) => {
-  const tag = type === "p" ? mention(value) : [type, value]
-
-  return publishPetnames([
-    ...reject((t: string[]) => t[1] === value, user.get()?.petnames || []),
-    tag,
-  ])
-}
-
-export const unfollow = (value: string) =>
-  publishPetnames(reject((t: string[]) => t[1] === value, user.get()?.petnames || []))
 
 export const publishMutes = ($mutes: string[][]) => {
   updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})

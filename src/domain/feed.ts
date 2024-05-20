@@ -2,6 +2,7 @@ import {fromPairs, randomId} from "@welshman/lib"
 import {FEED, Tags, getAddress} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
+  feedFromTags,
   makeIntersectionFeed,
   hasSubFeeds,
   isTagFeed,
@@ -32,6 +33,15 @@ export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
   definition: makeIntersectionFeed(),
   ...feed,
 })
+
+export const mapListToFeed = (list: List) =>
+  makeFeed({
+    list,
+    title: list.title,
+    identifier: list.identifier,
+    description: list.description,
+    definition: feedFromTags(Tags.fromEvent(list.event)),
+  })
 
 export const readFeed = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)

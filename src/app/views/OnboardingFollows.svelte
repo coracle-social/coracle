@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {reject, uniqBy, nth} from "ramda"
+  import {reject, without, uniq, remove} from "ramda"
   import {quantify} from "hurdak"
   import {fromPairs} from "@welshman/lib"
   import {Tags, getAddress} from "@welshman/util"
@@ -12,10 +12,10 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
-  import {urlToRelay, mention, createPeopleLoader, searchPeople, searchRelays} from "src/engine"
+  import {urlToRelay, createPeopleLoader, searchPeople, searchRelays} from "src/engine"
 
   export let relays
-  export let petnames
+  export let follows
   export let setStage
   export let onboardingLists
 
@@ -49,24 +49,19 @@
   }
 
   const addFollow = pubkey => {
-    petnames = [...petnames, mention(pubkey)]
+    follows = [...follows, pubkey]
   }
 
   const removeFollow = pubkey => {
-    petnames = reject(t => t[1] === pubkey, petnames)
+    follows = remove(pubkey, follows)
   }
 
   const followAll = listEvent => {
-    petnames = uniqBy(nth(1), [
-      ...petnames,
-      ...Tags.fromEvent(listEvent).values("p").valueOf().map(mention),
-    ])
+    follows = uniq([...follows, ...Tags.fromEvent(listEvent).values("p").valueOf()])
   }
 
   const unfollowAll = listEvent => {
-    const pubkeys = Tags.fromEvent(listEvent).values("p").valueOf()
-
-    petnames = petnames.filter(t => !pubkeys.includes(t[1]))
+    follows = without(Tags.fromEvent(listEvent).values("p").valueOf(), follows)
   }
 
   const removeRelay = url => {
@@ -96,8 +91,6 @@
   }
 
   $: urls = relays.map(r => r.url)
-
-  $: pubkeys = petnames.map(t => t[1])
 
   $: {
     if (showPersonSearch) {
@@ -135,7 +128,7 @@
 <div class="flex justify-between">
   <div class="flex items-center gap-2">
     <i class="fa fa-info-circle" />
-    <span>Following {quantify(pubkeys.length, "person", "people")}</span>
+    <span>Following {quantify(follows.length, "person", "people")}</span>
     <span>•</span>
     <span>{quantify(relays.length, "relay")}</span>
   </div>
@@ -152,7 +145,7 @@
   <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{title}</p>
-      {#if listPubkeys.every(pubkey => pubkeys.includes(pubkey))}
+      {#if listPubkeys.every(pubkey => follows.includes(pubkey))}
         <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
           Unfollow all
         </Anchor>
@@ -166,7 +159,7 @@
     {#each listPubkeys as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
-          {#if pubkeys.includes(pubkey)}
+          {#if follows.includes(pubkey)}
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
             </Anchor>
@@ -192,13 +185,13 @@
       These are the people you'll be following once you finish creating your account.
     </p>
     <div />
-    {#if pubkeys.length === 0}
+    {#if follows.length === 0}
       <div class="my-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
         <span>No people selected</span>
       </div>
     {:else}
-      {#each pubkeys as pubkey (pubkey)}
+      {#each follows as pubkey (pubkey)}
         <PersonSummary {pubkey}>
           <div slot="actions" class="flex items-start justify-end">
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
@@ -255,7 +248,7 @@
     {#each $searchPeople(term).slice(0, 30) as person (person.pubkey)}
       <PersonSummary pubkey={person.pubkey}>
         <div slot="actions" class="flex items-start justify-end">
-          {#if pubkeys.includes(person.pubkey)}
+          {#if follows.includes(person.pubkey)}
             <Anchor
               button
               class="flex items-center gap-2"
