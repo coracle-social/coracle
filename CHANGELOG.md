@@ -27,6 +27,7 @@
 - [x] Make buttons, chips, and inputs sleeker
 - [x] Clean up onboarding with an invite
 - [x] Only tag parent event in reactions
+- [x] Fix url hashes, render code blocks
 
 # 0.4.4
 

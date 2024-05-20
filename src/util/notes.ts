@@ -7,6 +7,7 @@ import logger from "src/util/logger"
 export const NEWLINE = "newline"
 export const ELLIPSIS = "ellipsis"
 export const TEXT = "text"
+export const CODE = "code"
 export const TOPIC = "topic"
 export const LINK = "link"
 export const CASHU = "cashu"
@@ -18,7 +19,7 @@ export const NOSTR_NPROFILE = "nostr:nprofile"
 export const NOSTR_NADDR = "nostr:naddr"
 
 export const urlIsMedia = (url: string) =>
-  !url.match(/\.(apk|docx|xlsx|csv|dmg)/) &&
+  url.match(/\.(jpe?g|png|wav|mp3|mp4|mov|avi|webm|webp|gif|bmp|svg)$/) &&
   last(url.replace(/\/$/, "").split("://"))?.includes("/")
 
 export const parseContent = (event: {content: string; tags?: string[][]}) => {
@@ -78,6 +79,22 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
     // Skip numeric topics
     if (topic && !topic.match(/^#\d+$/)) {
       return [TOPIC, topic, topic.slice(1)]
+    }
+  }
+
+  const parseCodeBlock = () => {
+    const [raw, code] = text.match(/^```([^]*?)```/i) || []
+
+    if (raw) {
+      return [CODE, raw, code]
+    }
+  }
+
+  const parseCodeInline = () => {
+    const [raw, code] = text.match(/^`(.*?)`/i) || []
+
+    if (raw) {
+      return [CODE, raw, code]
     }
   }
 
@@ -157,6 +174,8 @@ export const parseContent = (event: {content: string; tags?: string[][]}) => {
       parseNewline() ||
       parseMention() ||
       parseTopic() ||
+      parseCodeBlock() ||
+      parseCodeInline() ||
       parseBech32() ||
       parseUrl() ||
       parseCashu() ||

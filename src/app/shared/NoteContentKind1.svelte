@@ -10,6 +10,7 @@
     NEWLINE,
     ELLIPSIS,
     TOPIC,
+    CODE,
     TEXT,
   } from "src/util/notes"
   import MediaSet from "src/partials/MediaSet.svelte"
@@ -17,6 +18,7 @@
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
+  import NoteContentCode from "src/app/shared/NoteContentCode.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
@@ -58,6 +60,8 @@
         <NoteContentNewline {value} />
       {:else if type === TOPIC}
         <NoteContentTopic {value} />
+      {:else if type === CODE}
+        <NoteContentCode {value} />
       {:else if type === CASHU}
         <div on:click|stopPropagation>
           <QRCode copyOnClick code={value} />
