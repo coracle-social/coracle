@@ -4,7 +4,6 @@ import {throttle} from "throttle-debounce"
 import {
   Fetch,
   Storage as LocalStorage,
-  chunk,
   createMapOf,
   defer,
   displayList,
@@ -111,6 +110,7 @@ import {
   isLike,
   isGiftWrap,
   personKinds,
+  giftWrapKinds,
   repostKinds,
   noteKinds,
   reactionKinds,
@@ -2096,47 +2096,44 @@ class IndexedDBAdapter {
   }
 
   async initialize(storage: Storage) {
-    const {key, keyPath, store} = this
+    const {key, keyPath, store, max, sort} = this
     const data = await storage.db.getAll(key)
     const filter = this.filter || identity
     const migrate = this.migrate || identity
 
-    store.set(migrate(data.filter(filter)))
+    let prev: any[] = migrate(data.filter(filter))
+
+    store.set(prev)
 
     store.subscribe(
-      throttle(randomInt(3000, 5000), async <T>(rows: T) => {
+      throttle(randomInt(3000, 5000), async current => {
         if (storage.dead.get()) {
           return
         }
 
-        // Do it in small steps to avoid clogging stuff up
-        for (const records of chunk(100, (rows as any[]).filter(prop(keyPath)))) {
-          await storage.db.bulkPut(key, records)
-          await sleep(50)
+        current = current.filter(prop(keyPath))
 
-          if (storage.dead.get()) {
-            return
-          }
+        const prevIds = new Set(prev.map(prop(keyPath)))
+        const currentIds = new Set(current.map(prop(keyPath)))
+        const newRecords = current.filter(r => !prevIds.has(r[keyPath]))
+        const removedRecords = prev.filter(r => !currentIds.has(r[keyPath]))
+
+        if (newRecords.length > 0) {
+          await storage.db.bulkPut(key, newRecords)
         }
+
+        if (removedRecords.length > 0) {
+          await storage.db.bulkDelete(key, removedRecords.map(prop(keyPath)))
+        }
+
+        // If we have much more than our max, prune our store. This will get persisted
+        // the next time around.
+        if (current.length > max * 1.5) {
+          store.set((sort ? sort(current) : current).slice(0, max))
+        }
+
+        prev = current
       }),
-    )
-  }
-
-  prune(storage) {
-    const {store, key, keyPath, max, sort} = this
-    const data = store.get()
-
-    if (data.length < max * 1.1 || storage.dead.get()) {
-      return
-    }
-
-    const [discard, keep] = splitAt(max, sort ? sort(data) : data)
-
-    store.set(keep)
-
-    storage.db.bulkDelete(
-      key,
-      discard.map(x => x[keyPath]),
     )
   }
 }
@@ -2184,13 +2181,6 @@ class Storage {
 
     await Promise.all(this.adapters.map(adapter => adapter.initialize(this)))
 
-    // Every so often randomly prune a store
-    setInterval(() => {
-      const adapter = indexedDBAdapters[Math.floor(indexedDBAdapters.length * Math.random())]
-
-      adapter.prune(this)
-    }, 30_000)
-
     this.ready.resolve()
   }
 }
@@ -2199,7 +2189,7 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
   const pubkeys = new Set(Object.values(sessions.get()).map(prop("pubkey")))
   const follows = new Set(
     Array.from(pubkeys)
-      .flatMap((pk: string) => people.key(pk).get().petnames || [])
+      .flatMap((pk: string) => people.key(pk).get()?.petnames || [])
       .map(nth(1)),
   )
 
@@ -2220,6 +2210,14 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
 const sessionsAdapter = {
   load: filter(($s: any) => $s.method !== "bunker"),
   dump: identity,
+}
+
+const scoreEvent = e => {
+  if (getSession(e.pubkey)) return -Infinity
+  if (giftWrapKinds.includes(e.kind)) return -Infinity
+  if (reactionKinds.includes(e.kind)) return 0
+  if (repostKinds.includes(e.kind)) return 0
+  return -e.created_at
 }
 
 export const storage = new Storage(12, [
@@ -2254,5 +2252,5 @@ export const storage = new Storage(12, [
     sortBy(prop("created_at")),
   ),
   new IndexedDBAdapter("groupAdminKeys", "pubkey", groupAdminKeys, 1000),
-  new IndexedDBAdapter("repository", "id", repository, 10000),
+  new IndexedDBAdapter("repository", "id", repository, 100000, sortBy(scoreEvent)),
 ])
