@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep} from "hurdak"
-  import {uniq, nth} from "@welshman/lib"
+  import {uniq, concat, nth} from "@welshman/lib"
   import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -43,28 +42,28 @@
 
   let follows = $session ? [] : user.get()?.petnames?.map(nth(1)) || []
 
+  if (invite?.people) {
+    follows = concat(follows, invite.people)
+  }
+
   let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
+  if (invite?.relays) {
+    relays = concat(relays, invite.relays.map(urlToRelayPolicy))
+  }
+
   const signup = async noteContent => {
-    const hasInvite =
-      invite?.groups.length > 0 ||
-      invite?.people.length > 0 ||
-      (invite?.relays.length > 0 && env.get().PLATFORM_RELAYS.length === 0)
-
-    // Go to our home page if we don't have an invite to finish up
-    if (!hasInvite) {
-      router.at("notes").push()
-
-      // Make things async since the `key` change in App.svelte prevents the modal
-      // animation from completing, and it gets stuck. This is a svelte bug
-      await sleep(10)
-    }
-
     loginWithPrivateKey(privkey, {onboarding_tasks_completed: []})
+
+    if (invite?.groups) {
+      router.at("invite").qp({groups: invite.groups}).push()
+    } else {
+      router.at("notes").push()
+    }
 
     // Immediately request access to any relays with a claim so that when we save our
     // profile information it doesn't get rejected
-    for (const {url, claim} of invite?.relays || []) {
+    for (const {url, claim} of invite?.parsedRelays || []) {
       if (claim) {
         const pub = await requestRelayAccess(url, claim, privkey)
 

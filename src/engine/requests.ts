@@ -28,7 +28,7 @@ import {
   reactionKinds,
   repostKinds,
 } from "src/util/nostr"
-import {always, assocPath, find, partition, pluck, uniq, whereEq, without} from "ramda"
+import {always, assocPath, partition, pluck, uniq, whereEq, without} from "ramda"
 import {
   deriveUserCircles,
   getGroupReqInfo,

@@ -25,6 +25,7 @@
 - [x] Re-work feed controls
 - [x] Re-work utility library
 - [x] Make buttons, chips, and inputs sleeker
+- [x] Clean up onboarding with an invite
 
 # 0.4.4
 

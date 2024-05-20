@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {without, prop, objOf} from "ramda"
+  import {prop} from "ramda"
+  import {without, identity} from "@welshman/lib"
   import {onMount} from "svelte"
   import {pickVals} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -18,7 +19,8 @@
     hints,
     derivePerson,
     displayRelay,
-    searchRelays,
+    displayRelayUrl,
+    searchRelayUrls,
     searchGroups,
     displayGroup,
     deriveGroup,
@@ -48,8 +50,10 @@
   }
 
   const addRelay = url => {
-    relayInput.clear()
-    relays = [...relays, {url, claim: ""}]
+    if (url) {
+      relayInput.clear()
+      relays = [...relays, {url, claim: ""}]
+    }
   }
 
   const removeRelay = i => {
@@ -57,15 +61,17 @@
   }
 
   const addGroup = address => {
-    groupInput.clear()
-    groups = [
-      ...groups,
-      {
-        address: address,
-        relay: hints.WithinContext(address).getUrl(),
-        claim: "",
-      },
-    ]
+    if (address) {
+      groupInput.clear()
+      groups = [
+        ...groups,
+        {
+          address: address,
+          relay: hints.WithinContext(address).getUrl(),
+          claim: "",
+        },
+      ]
+    }
   }
 
   const removeGroup = i => {
@@ -164,13 +170,12 @@
         <SearchSelect
           value={null}
           bind:this={relayInput}
-          search={$searchRelays}
-          getKey={prop("url")}
-          termToItem={objOf("url")}
-          onChange={r => addRelay(r.url)}>
+          search={$searchRelayUrls}
+          termToItem={identity}
+          onChange={url => addRelay(url)}>
           <i slot="before" class="fa fa-search" />
           <div slot="item" let:item>
-            {displayRelay(item)}
+            {displayRelayUrl(item)}
           </div>
         </SearchSelect>
       </FlexColumn>
@@ -199,7 +204,7 @@
           bind:this={groupInput}
           search={$searchGroups}
           getKey={prop("address")}
-          onChange={g => addGroup(g.address)}
+          onChange={g => g && addGroup(g.address)}
           displayItem={g => (g ? displayGroup(g) : "")}>
           <i slot="before" class="fa fa-search" />
           <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">

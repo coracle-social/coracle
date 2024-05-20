@@ -12,7 +12,7 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {env, session, loadGroups, groups as allGroups} from "src/engine"
+  import {session, loadGroups, groups as allGroups} from "src/engine"
 
   export let people = []
   export let relays = []
@@ -69,7 +69,7 @@
       </FlexColumn>
     </Card>
   {/if}
-  {#if parsedRelays.length > 0 && $env.PLATFORM_RELAYS.length === 0}
+  {#if parsedRelays.length > 0}
     <Card>
       <FlexColumn>
         <Subheading>Relays</Subheading>
@@ -99,5 +99,5 @@
   {/if}
   <Anchor button accent href="/">Done</Anchor>
 {:else}
-  <Onboarding invite={{people, relays: parsedRelays, groups: parsedGroups}} />
+  <Onboarding invite={{people, relays, groups, parsedRelays, parsedGroups}} />
 {/if}

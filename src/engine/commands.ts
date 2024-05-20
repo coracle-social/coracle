@@ -793,7 +793,7 @@ export const updateFollows = async ({add = [], remove = []}) => {
   // Eagerly update so we can support anonymous users
   const person = people.key(stateKey.get())
 
-  updateStore(person, now(), {petnames: updateTags(person.get()?.petnames)})
+  updateStore(person, now(), {petnames: updateTags(person.get()?.petnames || [])})
 
   if (canSign.get()) {
     const filters = [{kinds: [FOLLOWS], authors: [pubkey.get()]}]
