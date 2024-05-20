@@ -1703,7 +1703,7 @@ export const tagsFromContent = (content: string) => {
   return tags
 }
 
-export const getReplyTags = (parent: TrustedEvent, inherit = false) => {
+export const getReplyTags = (parent: TrustedEvent) => {
   const tags = Tags.fromEvent(parent)
   const replyTagValues = getIdAndAddress(parent)
   const userPubkey = pubkey.get()
@@ -1715,11 +1715,9 @@ export const getReplyTags = (parent: TrustedEvent, inherit = false) => {
   }
 
   // Inherit p-tag mentions
-  if (inherit) {
-    for (const pubkey of tags.values("p").valueOf()) {
-      if (pubkey !== userPubkey) {
-        replyTags.push(mention(pubkey))
-      }
+  for (const pubkey of tags.values("p").valueOf()) {
+    if (pubkey !== userPubkey) {
+      replyTags.push(mention(pubkey))
     }
   }
 
@@ -1737,23 +1735,21 @@ export const getReplyTags = (parent: TrustedEvent, inherit = false) => {
     }
   }
 
-  if (inherit) {
-    // Make sure we don't repeat any tag values
-    const isRepeated = v => replyTagValues.includes(v) || replyTags.find(t => t[1] === v)
+  // Make sure we don't repeat any tag values
+  const isRepeated = v => replyTagValues.includes(v) || replyTags.find(t => t[1] === v)
 
-    // Inherit mentions
-    for (const t of mentions.valueOf()) {
+  // Inherit mentions
+  for (const t of mentions.valueOf()) {
+    if (!isRepeated(t.value())) {
+      replyTags.push(t.set(3, "mention").valueOf())
+    }
+  }
+
+  // Inherit replies if they weren't already included
+  if (roots.exists()) {
+    for (const t of replies.valueOf()) {
       if (!isRepeated(t.value())) {
         replyTags.push(t.set(3, "mention").valueOf())
-      }
-    }
-
-    // Inherit replies if they weren't already included
-    if (roots.exists()) {
-      for (const t of replies.valueOf()) {
-        if (!isRepeated(t.value())) {
-          replyTags.push(t.set(3, "mention").valueOf())
-        }
       }
     }
   }
@@ -1761,6 +1757,22 @@ export const getReplyTags = (parent: TrustedEvent, inherit = false) => {
   // Add a/e-tags for the parent event
   const mark = replies.exists() ? "reply" : "root"
   for (const t of hints.tagEvent(parent, mark).valueOf()) {
+    replyTags.push(t.valueOf())
+  }
+
+  return replyTags
+}
+
+export const getReactionTags = (parent: TrustedEvent) => {
+  const replyTags = []
+
+  // Mention the parent's author
+  if (parent.pubkey !== pubkey.get()) {
+    replyTags.push(mention(parent.pubkey))
+  }
+
+  // Add a/e-tags for the parent event
+  for (const t of hints.tagEvent(parent, "root").valueOf()) {
     replyTags.push(t.valueOf())
   }
 

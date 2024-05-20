@@ -51,7 +51,7 @@
     getSetting,
     loadPubkeys,
     isEventMuted,
-    getReplyTags,
+    getReactionTags,
     getClientTags,
   } from "src/engine"
   import {getHandlerKey} from "src/domain"
@@ -108,7 +108,7 @@
       tags.context().values().valueOf(),
       createEvent(7, {
         content,
-        tags: [...getReplyTags(note), ...getClientTags()],
+        tags: [...getReactionTags(note), ...getClientTags()],
       }),
     )
 

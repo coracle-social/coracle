@@ -94,7 +94,7 @@
 
     const tags = uniqTags([
       ...mentions.map(mention),
-      ...getReplyTags(parent, true),
+      ...getReplyTags(parent),
       ...tagsFromContent(content),
       ...getClientTags(),
     ])

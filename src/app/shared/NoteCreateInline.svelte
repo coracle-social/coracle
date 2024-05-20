@@ -67,7 +67,7 @@
     const tags = [...tagsFromContent(content), ...getClientTags()]
 
     if (parent) {
-      for (const tag of getReplyTags(parent, true)) {
+      for (const tag of getReplyTags(parent)) {
         tags.push(tag)
       }
     }
