@@ -9,7 +9,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, now, writable, max} from "@welshman/lib"
+import {Worker, fromPairs, now, writable, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -149,42 +149,27 @@ export const dereferenceNote = async ({
   eid = null,
   kind = null,
   pubkey = null,
-  identifier = null,
+  identifier = "",
   relays = [],
   context = [],
 }) => {
+  relays = withFallbacks(relays)
+
   if (eid) {
-    const note = find(whereEq({id: eid}), context)
-
-    if (note) {
-      return note
-    }
-
-    return loadOne({
-      relays: withFallbacks(relays),
-      filters: getIdFilters([eid]),
-    })
+    return (
+      context.find(whereEq({id: eid})) ||
+      loadOne({relays, filters: getIdFilters([eid])})
+    )
   }
 
   if (kind && pubkey) {
-    const note = find(e => {
-      if (!whereEq({kind, pubkey}, e)) {
-        return false
-      }
+    const address = new Address(kind, pubkey, identifier).toString()
+    const addrData = {kind, pubkey, identifier}
 
-      return !identifier || Tags.fromEvent(e).get("d")?.value() === identifier
-    }, context)
-
-    if (note) {
-      return note
-    }
-
-    return loadOne({
-      relays: withFallbacks(relays),
-      filters: [{kinds: [kind], authors: [pubkey], "#d": [identifier]}],
-    }).then((event: TrustedEvent) => {
-      return note?.created_at > event.created_at ? note : event
-    })
+    return (
+      context.find(e => whereEq(addrData, {...e, identifier: fromPairs(e.tags).d || ""})) ||
+      loadOne({relays, filters: getIdFilters([address])})
+    )
   }
 
   return null

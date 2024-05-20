@@ -137,8 +137,6 @@
     FormType.Lists,
     FormType.DVMs,
   ]
-
-  $: console.log(JSON.stringify(normalize(feed), null, 2))
 </script>
 
 <FlexColumn>

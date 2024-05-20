@@ -62,7 +62,6 @@
   const saveFeed = async () => {
     const relays = hints.WriteRelays().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
-    console.log(draft, template)
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your feed has been saved!")

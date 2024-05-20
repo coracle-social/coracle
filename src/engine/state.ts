@@ -1427,9 +1427,12 @@ export const subscribe = (request: MySubscribeRequest) => {
     sub.emitter.on("complete", request.onComplete)
   }
 
-  for (const event of events) {
-    sub.emitter.emit("event", LOCAL_RELAY_URL, event)
-  }
+  // Keep it async so the caller can set up handlers
+  setTimeout(() => {
+    for (const event of events) {
+      sub.emitter.emit("event", LOCAL_RELAY_URL, event)
+    }
+  })
 
   return sub
 }
