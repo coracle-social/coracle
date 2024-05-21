@@ -38,7 +38,7 @@ import {
   without,
 } from "ramda"
 import {
-  Collection,
+  Collection as CollectionStore,
   Worker,
   Writable,
   bech32ToHex,
@@ -62,6 +62,7 @@ import {
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
+  LABEL,
   FEED,
   Address,
   Repository,
@@ -116,13 +117,15 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import type {Feed, List} from "src/domain"
+import type {Feed, Collection, List} from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
   ListSearch,
   FeedSearch,
   readFeed,
   readList,
+  readCollections,
+  CollectionSearch,
   readHandlers,
   mapListToFeed,
   getHandlerAddress,
@@ -172,17 +175,17 @@ export const env = new Writable({
 
 export const pubkey = new Writable<string | null>(null)
 export const sessions = new Writable<Record<string, Session>>({})
-export const relays = new Collection<Relay>("url")
-export const groups = new Collection<Group>("address")
-export const groupAdminKeys = new Collection<GroupKey>("pubkey")
-export const groupSharedKeys = new Collection<GroupKey>("pubkey")
-export const groupRequests = new Collection<GroupRequest>("id")
-export const groupAlerts = new Collection<GroupAlert>("id")
-export const people = new Collection<Person>("pubkey")
-export const seen = new Collection<ReadReceipt>("id", 1000)
-export const publishes = new Collection<PublishInfo>("id", 1000)
-export const topics = new Collection<Topic>("name")
-export const channels = new Collection<Channel>("id")
+export const relays = new CollectionStore<Relay>("url")
+export const groups = new CollectionStore<Group>("address")
+export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
+export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
+export const groupRequests = new CollectionStore<GroupRequest>("id")
+export const groupAlerts = new CollectionStore<GroupAlert>("id")
+export const people = new CollectionStore<Person>("pubkey")
+export const seen = new CollectionStore<ReadReceipt>("id", 1000)
+export const publishes = new CollectionStore<PublishInfo>("id", 1000)
+export const topics = new CollectionStore<Topic>("name")
+export const channels = new CollectionStore<Channel>("id")
 
 export const repository = new Repository({throttle: 300})
 
@@ -1163,6 +1166,25 @@ export const deriveHandlersForKind = cached({
   getValue: ([kind]: [number]) =>
     handlers.derived($handlers => $handlers.filter(h => h.kind === kind)),
 })
+
+// Collections
+
+export const collections = repository
+  .filter([{kinds: [LABEL], "#L": ["#t"]}])
+  .derived(readCollections)
+
+export const userCollections = new Derived(
+  [collections, pubkey],
+  ([$collections, $pubkey]: [Collection[], string]) =>
+    sortBy(
+      f => f.name.toLowerCase(),
+      $collections.filter(collection => collection.pubkey === $pubkey),
+    ),
+)
+
+export const collectionSearch = collections.derived(
+  $collections => new CollectionSearch($collections),
+)
 
 // Zaps
 

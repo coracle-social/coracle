@@ -1,56 +1,79 @@
 <script lang="ts">
-  import {showInfo} from "src/partials/Toast.svelte"
+  import {identity} from "@welshman/lib"
+  import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
-  import {publishLabel, searchTopics} from "src/engine"
+  import {
+    createAndPublish,
+    hints,
+    getClientTags,
+    searchTopicNames,
+    userCollections,
+    collectionSearch,
+  } from "src/engine"
 
   export let eid
 
+  const onTopicChange = name => {
+    if (name) {
+      topicInput.clear()
+      names = names.concat(name)
+      options = options.concat(name)
+    }
+  }
+
+  const onNamesChange = newNames => {
+    names = newNames
+  }
+
   const submit = () => {
-    const tags = [["e", eid]]
-
-    if (topics.length > 0) {
-      tags.push(["L", "#t"])
-
-      for (const topic of topics) {
-        tags.push(["l", topic.name, "#t"])
-      }
+    if (names.length === 0) {
+      return showWarning("Please select at least one collection.")
     }
 
-    publishLabel(tags)
+    createAndPublish({
+      kind: 1985,
+      relays: hints.User().getUrls(),
+      tags: [["e", eid], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
+    })
 
     showInfo("Your tag has been saved!")
     router.pop()
   }
 
-  let topics = []
+  let topicInput
+  let names = []
+  let options = $userCollections.map(c => c.name)
 </script>
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
-    <Heading class="text-center">Add Tags</Heading>
+    <Heading class="text-center">Add to collection</Heading>
     <p class="text-center">
-      Recommend content to people who follow you. You can find your recommendations under the
-      "Explore" tab.
+      Add this note to your collections. You can find your collections on your profile page.
     </p>
+    <SelectButton
+      multiple
+      value={names}
+      {options}
+      onChange={onNamesChange}
+      displayOption={$collectionSearch.display} />
     <div class="flex w-full flex-col gap-8">
-      <Field label="Tags">
+      <Field label="Collections">
         <SearchSelect
-          multiple
-          autofocus
-          search={$searchTopics}
-          bind:value={topics}
-          termToItem={name => ({name})}>
-          <div slot="item" let:item>
-            <strong>{item.name}</strong>
-          </div>
-        </SearchSelect>
-        <div slot="info">Tag this content so other people can find it.</div>
+          bind:this={topicInput}
+          search={$searchTopicNames}
+          termToItem={identity}
+          onChange={onTopicChange} />
+        <div slot="info">Search for existing topics, or create your own.</div>
       </Field>
+    </div>
+    <div class="flex justify-end">
       <Anchor button tag="button" type="submit">Save</Anchor>
     </div>
   </FlexColumn>

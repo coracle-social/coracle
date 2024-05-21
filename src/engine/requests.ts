@@ -17,6 +17,8 @@ import {
   getIdFilters,
   isGroupAddress,
   isSignedEvent,
+  EPOCH,
+  LABEL,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
@@ -156,10 +158,7 @@ export const dereferenceNote = async ({
   relays = withFallbacks(relays)
 
   if (eid) {
-    return (
-      context.find(whereEq({id: eid})) ||
-      loadOne({relays, filters: getIdFilters([eid])})
-    )
+    return context.find(whereEq({id: eid})) || loadOne({relays, filters: getIdFilters([eid])})
   }
 
   if (kind && pubkey) {
@@ -208,6 +207,18 @@ export const createPeopleLoader = ({
       }
     }),
   }
+}
+
+export const loadLabels = () => {
+  const filter = {kinds: [LABEL], authors: [pubkey.get()], "#L": ["#t"]}
+  const [event] = repository.query([{...filter, limit: 1}])
+  const since = (event?.created_at || EPOCH) - seconds(6, "hour")
+
+  return load({
+    skipCache: true,
+    relays: hints.User().getUrls(),
+    filters: [{...filter, since}],
+  })
 }
 
 export const loadDeletes = () => {

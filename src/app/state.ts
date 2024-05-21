@@ -15,6 +15,7 @@ import {
   session,
   loadSeen,
   loadGroups,
+  loadLabels,
   loadDeletes,
   loadHandlers,
   loadPubkeys,
@@ -117,6 +118,7 @@ export const loadUserData = async () => {
   })
 
   loadSeen()
+  loadLabels()
   loadDeletes()
   loadHandlers()
   loadGiftWrap()

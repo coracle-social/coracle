@@ -300,13 +300,6 @@ export const publishReview = (content, tags, relays = null) =>
     relays,
   })
 
-export const publishLabel = (tags, relays = null) =>
-  createAndPublish({
-    kind: 1985,
-    tags: [...tags, ...getClientTags()],
-    relays,
-  })
-
 // Zaps
 
 export const requestZap = async (

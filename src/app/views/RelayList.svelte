@@ -40,13 +40,13 @@
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
 
-    for (const pubkey of $follows) {
-      if (!personHasName(derivePerson(pubkey).get())) {
+    for (const pk of $follows) {
+      if (!personHasName(derivePerson(pk).get())) {
         continue
       }
 
-      for (const url of getPubkeyRelayUrls(pubkey, "write")) {
-        pushToKey(m, url, pubkey)
+      for (const url of getPubkeyRelayUrls(pk, "write")) {
+        pushToKey(m, url, pk)
       }
     }
 

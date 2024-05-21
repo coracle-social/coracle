@@ -92,7 +92,7 @@
     handlersShown = false
   }
 
-  const label = () => router.at("notes").of(note.id).at("label").open()
+  const createLabel = () => router.at("notes").of(note.id).at("label").open()
 
   const quote = () => router.at("notes/create").cx({quote: note}).open()
 
@@ -207,7 +207,7 @@
         actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
       }
 
-      actions.push({label: "Tag", icon: "tag", onClick: label})
+      actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
       if ($muted) {
         actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
@@ -325,7 +325,7 @@
         <p>{quantify(mentions.length, "person", "people")} are tagged in this note.</p>
         <div class="grid grid-cols-2 gap-2">
           {#each mentions as pubkey}
-            <PersonBadge pubkey={pubkey} />
+            <PersonBadge {pubkey} />
           {/each}
         </div>
       {/if}
