@@ -48,10 +48,12 @@
 
     load({
       relays,
+      skipCache: true,
       filters: [{kinds: giftWrapKinds, "#p": recipients, since}],
     })
 
     load({
+      skipCache: true,
       relays: forcePlatformRelays(hints.User().getUrls()),
       filters: [
         {kinds: [35834, 34550], authors: admins},

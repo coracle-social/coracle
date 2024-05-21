@@ -17,6 +17,19 @@
   $: pending = recent.filter(
     p => hasStatus(p, [PublishStatus.Pending]) && !hasStatus(p, [PublishStatus.Success]),
   )
+
+  // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
+  $: {
+    for (const p of recent) {
+      if (p.created_at < now() - seconds(1, "minute")) {
+        for (const [url, status] of p.status.entries()) {
+          if (status === PublishStatus.Pending) {
+            p.status.set(url, PublishStatus.Failure)
+          }
+        }
+      }
+    }
+  }
 </script>
 
 <Subheading>Published Events</Subheading>
