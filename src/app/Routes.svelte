@@ -5,13 +5,13 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {session, signer, stateKey} from "src/engine"
+  import {env, session, signer, stateKey} from "src/engine"
 
   const {current, page, modal, modals} = router
 
   let prevPage
 
-  $: isFeedPage = $page.path.match(/^\/(notes)?$/)
+  $: isFeedPage = $page.path.match(/^\/(notes)?$/) && !$env.FORCE_GROUP
 
   $: {
     if ($modal) {
