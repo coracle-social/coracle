@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {Address} from "@welshman/util"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
@@ -15,10 +16,11 @@
 {:else if type === "note"}
   <NoteDetail eid={data} {relays} />
 {:else if type === "naddr"}
+  {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
   {#if [35834, 34550].includes(data.kind)}
-    <GroupDetail address={data} relays={data.relays} activeTab="notes" />
+    <GroupDetail {address} relays={data.relays} activeTab="notes" />
   {:else if data.kind === 31923}
-    <EventDetail address={data} relays={data.relays} />
+    <EventDetail {address} relays={data.relays} />
   {:else}
     <NoteDetail {...data} />
   {/if}

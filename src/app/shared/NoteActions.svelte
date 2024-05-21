@@ -54,7 +54,7 @@
     getReactionTags,
     getClientTags,
   } from "src/engine"
-  import {getHandlerKey} from "src/domain"
+  import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let note: TrustedEvent
   export let replyCtrl
@@ -77,7 +77,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const handlerId = tags.get("client")?.nth(2)
-  const handler = handlerId ? repository.getEvent(handlerId) : null
+  const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const seenOn = tracker.data.derived(m =>
     Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
   )
@@ -327,12 +327,14 @@
           {/each}
         </div>
       {/if}
-      {#if $kindHandlers.length > 0 || handler}
+      {#if $kindHandlers.length > 0 || handlerEvent}
         <h1 class="staatliches text-2xl">Apps</h1>
-        {#if handler}
-          {@const meta = tryJson(() => JSON.parse(handler.content))}
-          <p>This note was published using {meta?.display_name || meta?.name}.</p>
-          <HandlerCard {handler} />
+        {#if handlerEvent}
+          {@const [handler] = readHandlers(handlerEvent)}
+          {#if handler}
+            <p>This note was published using {displayHandler(handler)}.</p>
+            <HandlerCard {handler} />
+          {/if}
         {/if}
         {#if $kindHandlers.length > 0}
           <div class="flex justify-between">

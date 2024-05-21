@@ -15,8 +15,10 @@ export const makeFollowList = (followList: Partial<FollowList> = {}): FollowList
 })
 
 export const readFollowList = (event: TrustedEvent) => {
-  const getPTags = tags => tags.filter(t => t[0] === "p" && t[1]?.length === 64)
-  const privateTags = getPTags(tryJson(() => JSON.parse(event.content)) || [])
+  const getPTags = tags =>
+    Array.isArray(tags) ? tags.filter(t => t[0] === "p" && t[1]?.length === 64) : []
+
+  const privateTags = getPTags(tryJson(() => JSON.parse(event.content)))
   const publicTags = getPTags(event.tags)
 
   return {event, publicTags, privateTags} as FollowList

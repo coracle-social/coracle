@@ -42,7 +42,6 @@
   const submit = async () => {
     const relays = hints.WriteRelays().getUrls()
     const template = list.event ? editList(list) : createList(list)
-    console.log(list, template)
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your list has been saved!")
@@ -122,7 +121,7 @@
       </Field>
     {/if}
     <div class="flex justify-between">
-      <Anchor button on:click={exit}>Discard</Anchor>
+      <Anchor button on:click={() => exit()}>Discard</Anchor>
       {#if showDelete}
         <Anchor button on:click={openDelete}>Delete</Anchor>
       {/if}
