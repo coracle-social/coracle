@@ -8,6 +8,7 @@
 
   export let value = null
   export let onChange = null
+  export let onInput = null
   export let inputClass = ""
   export let placeholder = ""
   export let delimiters = []
@@ -34,6 +35,10 @@
   export const clearValue = () => {
     value = multiple ? [] : null
     onChange?.(value)
+  }
+
+  export const getTerm = () => {
+    return term
   }
 
   export const clearTerm = () => {
@@ -138,6 +143,7 @@
     {placeholder}
     bind:value={term}
     bind:element={input}
+    on:input={onInput}
     on:keydown={onKeyDown}
     on:focus={onFocus}
     on:blur={onBlur}

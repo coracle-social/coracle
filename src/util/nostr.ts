@@ -133,12 +133,6 @@ export const getContentWarning = e => {
 export const isGiftWrap = e => giftWrapKinds.includes(e.kind)
 
 export const parseAnything = async entity => {
-  entity = fromNostrURI(entity)
-
-  if (isHex(entity)) {
-    return {type: "npub", data: entity}
-  }
-
   if (entity.includes("@")) {
     const profile = await nip05.queryProfile(entity)
 
@@ -147,9 +141,19 @@ export const parseAnything = async entity => {
     }
   }
 
+  return parseAnythingSync(entity)
+}
+
+export const parseAnythingSync = entity => {
+  entity = fromNostrURI(entity)
+
   // Interpret addresses as naddrs
   if (Address.isAddress(entity)) {
     entity = Address.from(entity).toNaddr()
+  }
+
+  if (isHex(entity)) {
+    return {type: "npub", data: entity}
   }
 
   try {

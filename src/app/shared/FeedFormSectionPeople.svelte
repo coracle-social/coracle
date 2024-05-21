@@ -1,7 +1,9 @@
 <script lang="ts">
   import {toTitle} from "hurdak"
   import {without} from "ramda"
+  import {identity, uniq} from "@welshman/lib"
   import {Scope, isScopeFeed, isAuthorFeed, makeAuthorFeed, makeScopeFeed} from "@welshman/feeds"
+  import {parseAnythingSync} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -15,6 +17,20 @@
 
   const scopeOptions = (Object.values(Scope) as string[]).concat("custom")
 
+  const parsePubkey = () => {
+    const result = parseAnythingSync(searchSelect.getTerm())
+
+    if (result?.type === "npub") {
+      searchSelect.clear()
+      onChange(uniq(feed.concat(result.data)))
+    }
+
+    if (result?.type === "nprofile") {
+      searchSelect.clear()
+      onChange(uniq(feed.concat(result.data.pubkey)))
+    }
+  }
+
   const onScopeChange = scopes => {
     if (isScopeFeed(feed) && scopes.includes("custom")) {
       onChange(makeAuthorFeed())
@@ -22,6 +38,8 @@
       onChange(makeScopeFeed(...(without(["custom"], scopes) as Scope[])))
     }
   }
+
+  let searchSelect
 
   $: scopes = isScopeFeed(feed) ? feed.slice(1) : ["custom"]
 </script>
@@ -36,9 +54,11 @@
 {#if isAuthorFeed(feed)}
   <SearchSelect
     multiple
+    bind:this={searchSelect}
     value={feed.slice(1)}
     search={$searchPubkeys}
-    onChange={pubkeys => onChange(makeAuthorFeed(...pubkeys))}>
+    onInput={parsePubkey}
+    onChange={pubkeys => onChange(makeAuthorFeed(...uniq(pubkeys)))}>
     <span slot="item" let:item let:context>
       {#if context === "value"}
         <Anchor modal href={router.at("people").of(item).toString()}>
