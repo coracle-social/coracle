@@ -60,12 +60,14 @@
   export let replyCtrl
   export let showMuted
   export let addToContext
+  export let contextAddress
   export let removeFromContext
   export let replies, likes, zaps
   export let zapper
 
   const tags = Tags.fromEvent(note)
-  const address = tags.context().values().first()
+  const address = contextAddress || tags.context().values().first()
+  const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
   const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlersForKind(note.kind)
@@ -105,16 +107,12 @@
       publish({event: note, relays: forcePlatformRelays(hints.PublishEvent(note).getUrls())})
     }
 
-    const pubs = await publishToZeroOrMoreGroups(
-      tags.context().values().valueOf(),
-      createEvent(7, {
-        content,
-        tags: [...getReactionTags(note), ...getClientTags()],
-      }),
-    )
+    const tags = [...getReactionTags(note), ...getClientTags()]
+    const template = createEvent(7, {content, tags})
+    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template)
 
-    for (const pub of pubs) {
-      addToContext(pub.request.event)
+    for (const event of events) {
+      addToContext(event)
     }
   }
 
@@ -134,7 +132,7 @@
       template = createEvent(16, {content, tags: [...tags, ["k", String(note.kind)]]})
     }
 
-    publishToZeroOrMoreGroups([address].filter(identity), template)
+    publishToZeroOrMoreGroups(addresses, template)
 
     showInfo("Note has been cross-posted!")
 

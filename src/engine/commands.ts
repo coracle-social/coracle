@@ -399,18 +399,18 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
 
   if (nip44.get().isEnabled()) {
     events.push(await nip59.get().wrap(template, {author, wrap}))
+  } else {
+    events.push(
+      await nip59.get().wrap(template, {
+        author,
+        wrap: {
+          ...wrap,
+          kind: 1060,
+          algo: "nip04",
+        },
+      }),
+    )
   }
-
-  events.push(
-    await nip59.get().wrap(template, {
-      author,
-      wrap: {
-        ...wrap,
-        kind: 1060,
-        algo: "nip04",
-      },
-    }),
-  )
 
   return events
 }
@@ -426,8 +426,6 @@ export const publishToGroupAdmin = async (address, template) => {
   const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
   const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
 
-  const pubs = []
-
   for (const pubkey of pubkeys) {
     const rumors = await wrapWithFallback(template, {
       wrap: {
@@ -438,11 +436,9 @@ export const publishToGroupAdmin = async (address, template) => {
     })
 
     for (const rumor of rumors) {
-      pubs.push(publish({event: rumor.wrap, relays}))
+      publish({event: rumor.wrap, relays})
     }
   }
-
-  return pubs
 }
 
 export const publishAsGroupAdminPublicly = async (address, template) => {
@@ -489,6 +485,7 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
 }
 
 export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
+  const events = []
   const pubs = []
   for (const address of addresses) {
     const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
@@ -512,36 +509,48 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
     })
 
     for (const rumor of rumors) {
+      events.push(rumor)
       pubs.push(publish({event: rumor.wrap, relays}))
     }
   }
 
-  return pubs
+  return {events, pubs}
 }
 
 export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous = false} = {}) => {
   const pubs = []
+  const events = []
 
   if (addresses.length === 0) {
     const event = await sign(template, {anonymous})
     const relays = forcePlatformRelays(hints.PublishEvent(event).getUrls())
 
+    events.push(event)
     pubs.push(publish({event, relays}))
   } else {
     const [wrap, nowrap] = partition((address: string) => address.startsWith("35834:"), addresses)
 
     if (wrap.length > 0) {
-      for (const pub of await publishToGroupsPrivately(wrap, template, {anonymous})) {
+      const result = await publishToGroupsPrivately(wrap, template, {anonymous})
+
+      for (const event of result.events) {
+        events.push(event)
+      }
+
+      for (const pub of result.pubs) {
         pubs.push(pub)
       }
     }
 
     if (nowrap.length > 0) {
-      pubs.push(await publishToGroupsPublicly(nowrap, template, {anonymous}))
+      const pub = await publishToGroupsPublicly(nowrap, template, {anonymous})
+
+      events.push(pub.request.event)
+      pubs.push(pub)
     }
   }
 
-  return pubs
+  return {events, pubs}
 }
 
 // Admin functions

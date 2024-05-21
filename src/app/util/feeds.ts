@@ -110,8 +110,8 @@ export class FeedLoader {
         const onEvent = this.onEvent(this.prependToFeed)
 
         for (const {relays, filters} of requests) {
-          for (const opts of Array.from(getRequestItems({relays, filters}))) {
-            subscribe({...opts, onEvent, tracker, signal, skipCache: opts.skipCache})
+          for (const request of Array.from(getRequestItems({relays, filters}))) {
+            subscribe({...request, onEvent, tracker, signal, skipCache: opts.skipCache})
           }
         }
       })

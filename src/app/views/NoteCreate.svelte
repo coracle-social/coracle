@@ -163,7 +163,7 @@
         }),
     })
 
-    const pubs = await publishToZeroOrMoreGroups(opts.groups, template, opts)
+    const {pubs} = await publishToZeroOrMoreGroups(opts.groups, template, opts)
 
     showPublishInfo(pubs[0])
     router.clearModals()

@@ -56,7 +56,7 @@
 
   const closeListDelete = () => {
     listDeleteIsOpen = false
-    exit()
+    setTimeout(exit)
   }
 
   const saveFeed = async () => {

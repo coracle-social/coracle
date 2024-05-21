@@ -19,6 +19,8 @@ import {
   isSignedEvent,
   EPOCH,
   LABEL,
+  DELETE,
+  READ_RECEIPT,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
@@ -70,6 +72,13 @@ import {
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 
 export const attemptedAddrs = new Map()
+
+export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
+  const events = repository.query([{...filter, limit: 1}])
+  const since = max(events.map(e => e.created_at).concat(EPOCH)) - overlap
+
+  return {...filter, since}
+}
 
 export const getStaleAddrs = (addrs: string[]) => {
   const stale = new Set<string>()
@@ -209,39 +218,26 @@ export const createPeopleLoader = ({
   }
 }
 
-export const loadLabels = () => {
-  const filter = {kinds: [LABEL], authors: [pubkey.get()], "#L": ["#t"]}
-  const [event] = repository.query([{...filter, limit: 1}])
-  const since = (event?.created_at || EPOCH) - seconds(6, "hour")
-
-  return load({
+export const loadLabels = () =>
+  load({
     skipCache: true,
     relays: hints.User().getUrls(),
-    filters: [{...filter, since}],
+    filters: [addSinceToFilter({kinds: [LABEL], authors: [pubkey.get()], "#L": ["#t"]})],
   })
-}
 
-export const loadDeletes = () => {
-  const {pubkey, deletes_last_synced = 0} = session.get()
-  const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
-
-  return load({
+export const loadDeletes = () =>
+  load({
     skipCache: true,
     relays: hints.User().getUrls(),
-    filters: [{kinds: [5], authors: [pubkey], since}],
+    filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
-}
 
-export const loadSeen = () => {
-  const {pubkey, deletes_last_synced = 0} = session.get()
-  const since = Math.max(0, deletes_last_synced - seconds(6, "hour"))
-
-  return load({
+export const loadSeen = () =>
+  load({
     skipCache: true,
     relays: hints.WriteRelays().getUrls(),
-    filters: [{kinds: [15], authors: [pubkey], since}],
+    filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
   })
-}
 
 export const loadGiftWrap = () => {
   const kinds = []
@@ -255,13 +251,10 @@ export const loadGiftWrap = () => {
   }
 
   if (kinds.length > 0) {
-    const {pubkey, nip59_messages_last_synced = 0} = session.get()
-    const since = Math.max(0, nip59_messages_last_synced - seconds(6, "hour"))
-
     return load({
       skipCache: true,
       relays: hints.User().getUrls(),
-      filters: [{kinds: giftWrapKinds, authors: [pubkey], since}],
+      filters: [addSinceToFilter({kinds, authors: [pubkey.get()]})],
     })
   }
 }
@@ -447,60 +440,44 @@ export const listenForNotifications = async () => {
 }
 
 export const loadAllMessages = ({reload = false} = {}) => {
-  const {pubkey, nip24_messages_last_synced = 0} = session.get()
-  const since = reload ? 0 : Math.max(0, nip24_messages_last_synced - seconds(6, "hour"))
+  let filters = [
+    {kinds: [1059], "#p": [pubkey.get()]},
+    {kinds: [4], authors: [pubkey.get()]},
+    {kinds: [4], "#p": [pubkey.get()]},
+  ]
 
-  sessions.update(assocPath([pubkey, "nip24_messages_last_synced"], now()))
+  if (reload) {
+    filters = filters.map(addSinceToFilter)
+  }
 
-  // To avoid unwrapping everything twice, listen to channels and load pubkeys there
-  const unsubscribePubkeys = channels.throttle(1000).subscribe($channels => {
-    loadPubkeys($channels.flatMap(c => c.members || []))
-  })
-
-  const loader = loadAll(
+  return loadAll(
     makeIntersectionFeed(
       makeRelayFeed(...hints.User().getUrls()),
-      makeUnionFeed(
-        feedFromFilter({kinds: [4], authors: [pubkey], since}),
-        feedFromFilter({kinds: [4, 1059], "#p": [pubkey], since}),
-      ),
+      makeUnionFeed(...filters.map(feedFromFilter)),
     ),
   )
-
-  loader.promise.then(() => {
-    unsubscribePubkeys()
-  })
-
-  return loader
 }
 
 export const listenForMessages = (pubkeys: string[]) => {
-  const {pubkey} = session.get()
-  const allPubkeys = uniq(pubkeys.concat(pubkey))
+  const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
 
   return subscribe({
     skipCache: true,
     relays: hints.Messages(pubkeys).getUrls(),
     filters: [
-      {kinds: [4], authors: allPubkeys, "#p": allPubkeys},
-      {kinds: [1059], "#p": [pubkey]},
+      addSinceToFilter({kinds: [1059], "#p": [pubkey.get()]}, seconds(30, "hour")),
+      addSinceToFilter({kinds: [4], authors: allPubkeys}),
+      addSinceToFilter({kinds: [4], "#p": allPubkeys}),
     ],
   })
 }
 
-export const loadHandlers = () => {
-  const $follows = follows.get()
-  const handlers = repository.query([{kinds: [HANDLER_INFORMATION]}])
-  const recommendations = repository.query([{kinds: [HANDLER_RECOMMENDATION]}])
-  const handlersSince = max(handlers.map(e => e.created_at))
-  const recommendationsSince = max(recommendations.map(e => e.created_at))
-
+export const loadHandlers = () =>
   load({
     skipCache: true,
     relays: hints.ReadRelays().getUrls(),
     filters: [
-      {kinds: [HANDLER_RECOMMENDATION], authors: Array.from($follows), since: recommendationsSince},
-      {kinds: [HANDLER_INFORMATION], since: handlersSince},
+      addSinceToFilter({kinds: [HANDLER_RECOMMENDATION], authors: Array.from(follows.get())}),
+      addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],
   })
-}

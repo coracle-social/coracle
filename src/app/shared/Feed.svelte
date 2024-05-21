@@ -16,6 +16,7 @@
   export let feed: Feed
   export let anchor = null
   export let eager = false
+  export let contextAddress = null
   export let skipCache = false
   export let skipNetwork = false
   export let skipPlatform = false
@@ -110,6 +111,7 @@
       <Note
         depth={$shouldHideReplies ? 0 : 2}
         context={note.replies || []}
+        {contextAddress}
         {showGroup}
         {filters}
         {anchor}
@@ -121,7 +123,7 @@
 {#if !hideSpinner}
   {#if $done}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
-      <img class="w-20 h-20" src="/images/pumpkin.png" />
+      <img class="h-20 w-20" src="/images/pumpkin.png" />
       That's all folks!
     </div>
   {:else}

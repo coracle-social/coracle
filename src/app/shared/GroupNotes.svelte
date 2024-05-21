@@ -72,6 +72,11 @@
     </Tabs>
   {/if}
   {#key feed}
-    <Feed eager {feed} shouldListen skipNetwork={isGroupAddress(address)} />
+    <Feed
+      {feed}
+      eager
+      shouldListen
+      contextAddress={address}
+      skipNetwork={isGroupAddress(address)} />
   {/key}
 </FlexColumn>

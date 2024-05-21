@@ -29,6 +29,7 @@
 
   export let parent
   export let addToContext
+  export let contextAddress = false
   export let showBorder = false
   export let forceOpen = false
 
@@ -113,10 +114,11 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const addresses = parentTags.context().values().valueOf()
-    const pubs = await publishToZeroOrMoreGroups(addresses, template, opts)
+    const addresses = contextAddress ? [contextAddress] : parentTags.context().values().valueOf()
+    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
 
-    addToContext(pubs[0].request.event)
+    // Only track one event/pub to avoid apprent duplicates
+    addToContext(events[0])
     showPublishInfo(pubs[0])
     clearDraft()
     reset()

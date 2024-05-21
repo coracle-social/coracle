@@ -83,21 +83,22 @@ export class Nip59 {
 
     let message
 
-    // Temporarily support nip04
     if (sk) {
+      // Temporarily support nip04
       if (this.nip04.isEnabled() && content.includes("?iv=")) {
         message = await this.nip04.decrypt(content, pubkey, sk)
       }
 
-      if (!message && this.nip44.isEnabled() && !content.includes('=')) {
+      if (!message && this.nip44.isEnabled() && !content.includes("=")) {
         message = await this.nip44.decrypt(content, pubkey, sk)
       }
     } else {
+      // Temporarily support nip04
       if (this.nip04.isEnabled() && content.includes("?iv=")) {
         message = await this.nip04.decryptAsUser(content, pubkey)
       }
 
-      if (!message && this.nip44.isEnabled() && !content.includes('=')) {
+      if (!message && this.nip44.isEnabled() && !content.includes("=")) {
         message = await this.nip44.decryptAsUser(content, pubkey)
       }
     }

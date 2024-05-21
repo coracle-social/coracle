@@ -398,17 +398,6 @@ projections.addHandler(10004, e => {
 projections.addHandler(
   15,
   batch(500, (chunk: TrustedEvent[]) => {
-    for (const pubkey of new Set(pluck("pubkey", chunk))) {
-      updateSession(
-        pubkey,
-        updateIn("seen_last_synced", (t: number) =>
-          pluck("created_at", chunk)
-            .concat(t || 0)
-            .reduce(max, 0),
-        ),
-      )
-    }
-
     seen.mapStore.update($m => {
       for (const e of chunk) {
         for (const id of Tags.fromEvent(e).values("e").valueOf()) {

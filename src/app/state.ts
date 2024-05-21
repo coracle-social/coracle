@@ -82,7 +82,7 @@ export const logUsage = async (path: string) => {
 export const slowConnections = writable([])
 
 setInterval(() => {
-  slowConnections.set(getUserRelayUrls().filter(url => hints.options.getRelayQuality(url) <= 0.5))
+  slowConnections.set(getUserRelayUrls().filter(url => hints.options.getRelayQuality(url) < 0.5))
 
   // Prune connections we haven't used in a while. Clear errors periodically
   for (const [url, connection] of NetworkContext.pool.data.entries()) {

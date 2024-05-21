@@ -56,6 +56,7 @@
   export let showLoading = false
   export let showMuted = false
   export let showGroup = false
+  export let contextAddress = null
 
   let zapper, unsubZapper
   let ready = false
@@ -309,6 +310,7 @@
                 note={event}
                 bind:this={actions}
                 {removeFromContext}
+                {contextAddress}
                 {addToContext}
                 {replyCtrl}
                 {showMuted}
@@ -348,6 +350,7 @@
 
       <NoteReply
         {addToContext}
+        {contextAddress}
         parent={event}
         showBorder={visibleReplies.length > 0}
         bind:this={replyCtrl}
