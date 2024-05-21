@@ -109,7 +109,7 @@
 
     const tags = [...getReactionTags(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
-    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template)
+    const {events} = await publishToZeroOrMoreGroups(addresses, template)
 
     for (const event of events) {
       addToContext(event)

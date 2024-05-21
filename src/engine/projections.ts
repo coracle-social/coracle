@@ -1,4 +1,4 @@
-import {always, max, mergeRight, pluck, prop, sortBy, uniq, uniqBy, whereEq, without} from "ramda"
+import {always, mergeRight, prop, sortBy, uniq, uniqBy, whereEq, without} from "ramda"
 import {batch, switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
@@ -28,7 +28,7 @@ import {
   normalizeRelayUrl,
 } from "@welshman/util"
 import {warn} from "src/util/logger"
-import {tryJson, updateIn} from "src/util/misc"
+import {tryJson} from "src/util/misc"
 import {isGiftWrap, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"

@@ -5,17 +5,14 @@
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {router} from "src/app/util/router"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
     hints,
     mention,
-    searchPubkeys,
-    displayPubkey,
     displayRelayUrl,
     searchRelayUrls,
     searchTopicNames,
@@ -98,21 +95,10 @@
     {#if !hide.includes("tags")}
       <Field label="List contents">
         {#if list.kind === NAMED_PEOPLE}
-          <SearchSelect
+          <PersonSelect
             multiple
             value={Tags.wrap(list.tags).whereKey("p").values().valueOf()}
-            search={$searchPubkeys}
-            onChange={onPubkeysChange}>
-            <span slot="item" let:item let:context>
-              {#if context === "value"}
-                <Anchor modal href={router.at("people").of(item).toString()}>
-                  {displayPubkey(item)}
-                </Anchor>
-              {:else}
-                <PersonBadge inert pubkey={item} />
-              {/if}
-            </span>
-          </SearchSelect>
+            onChange={onPubkeysChange} />
         {:else if list.kind === NAMED_RELAYS}
           <SearchSelect
             multiple

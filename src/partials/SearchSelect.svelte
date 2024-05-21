@@ -1,14 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {onMount} from "svelte"
-  import {reject, equals, identity} from "ramda"
+  import {reject, equals} from "ramda"
+  import {uniq, identity} from "@welshman/lib"
   import Input from "src/partials/Input.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
 
   export let value = null
   export let onChange = null
-  export let onInput = null
   export let inputClass = ""
   export let placeholder = ""
   export let delimiters = []
@@ -37,10 +37,6 @@
     onChange?.(value)
   }
 
-  export const getTerm = () => {
-    return term
-  }
-
   export const clearTerm = () => {
     term = multiple || !value ? "" : displayItem(value) || ""
   }
@@ -56,7 +52,7 @@
 
   const select = item => {
     if (multiple) {
-      value = value.concat([item])
+      value = uniq(value.concat([item]))
       term = ""
     } else {
       value = item
@@ -143,7 +139,6 @@
     {placeholder}
     bind:value={term}
     bind:element={input}
-    on:input={onInput}
     on:keydown={onKeyDown}
     on:focus={onFocus}
     on:blur={onBlur}

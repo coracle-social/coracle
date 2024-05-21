@@ -32,12 +32,11 @@ import {
   reactionKinds,
   repostKinds,
 } from "src/util/nostr"
-import {always, assocPath, partition, pluck, uniq, whereEq, without} from "ramda"
+import {always, partition, pluck, uniq, whereEq, without} from "ramda"
 import {
   deriveUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  channels,
   groups,
   dvmRequest,
   env,
@@ -62,7 +61,6 @@ import {
   publish,
   searchableRelays,
   session,
-  sessions,
   subscribe,
   subscribePersistent,
   user,
