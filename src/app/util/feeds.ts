@@ -97,7 +97,7 @@ export class FeedLoader {
 
         await Promise.all(
           Array.from(getRequestItems({relays, filters})).map(opts =>
-            load({...opts, onEvent, tracker, signal, skipCache: relays?.length > 0}),
+            load({...opts, onEvent, tracker, signal, skipCache: true}),
           ),
         )
       },
@@ -111,7 +111,7 @@ export class FeedLoader {
 
         for (const {relays, filters} of requests) {
           for (const opts of Array.from(getRequestItems({relays, filters}))) {
-            subscribe({...opts, onEvent, tracker, signal})
+            subscribe({...opts, onEvent, tracker, signal, skipCache: opts.skipCache})
           }
         }
       })
