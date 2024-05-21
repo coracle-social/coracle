@@ -84,7 +84,7 @@
   $: normalizedFeedDefinition = $globalFeed ? normalizeFeedDefinition($globalFeed.definition) : null
 </script>
 
-{#if isFeedPage}
+{#if isFeedPage && !$env.FORCE_GROUP}
   <div
     in:fly={{x: -100, duration: 200}}
     class="fixed bottom-0 left-72 top-0 z-nav w-60 bg-tinted-700 pt-24 transition-colors">
