@@ -30,6 +30,8 @@ import {
 
 // Global state
 
+export const drafts = new Map<string, string>()
+
 export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
@@ -111,7 +113,7 @@ export const loadAppData = () => {
 }
 
 export const loadUserData = async () => {
- // Make sure the user and their follows are loaded
+  // Make sure the user and their follows are loaded
   await loadPubkeys([pubkey.get()], {
     force: true,
     kinds: userKinds,

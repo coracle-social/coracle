@@ -8,6 +8,7 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
+  import Card from "src/partials/Card.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
@@ -26,6 +27,7 @@
     displayPubkey,
     mention,
   } from "src/engine"
+  import {drafts} from "src/app/state"
 
   export let parent
   export let addToContext
@@ -40,7 +42,6 @@
   let images, compose, container, options
   let isOpen = false
   let mentions = []
-  let draft = ""
   let opts = {warning: "", anonymous: false}
 
   export const start = () => {
@@ -52,7 +53,11 @@
       uniq(parentTags.values("p").valueOf().concat(parent.pubkey)),
     )
 
-    setTimeout(() => compose.write(draft), 10)
+    const draft = drafts.get(parent.id)
+
+    if (draft) {
+      setTimeout(() => compose.write(draft), 10)
+    }
   }
 
   const bypassNsecWarning = () => {
@@ -66,12 +71,12 @@
 
   const saveDraft = () => {
     if (compose) {
-      draft = compose.parse()
+      drafts.set(parent.id, compose.parse())
     }
   }
 
   const clearDraft = () => {
-    draft = ""
+    drafts.delete(parent.id)
   }
 
   const reset = () => {
@@ -108,7 +113,6 @@
       tags.push(["content-warning", opts.warning])
     }
 
-
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
       publish({event: parent, relays: forcePlatformRelays(hints.PublishEvent(parent).getUrls())})
@@ -117,7 +121,6 @@
     const template = createEvent(1, {content, tags})
     const addresses = contextAddress ? [contextAddress] : parentTags.context().values().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
-    console.log(pubs, events)
 
     // Only track one event/pub to avoid apprent duplicates
     addToContext(events[0])
