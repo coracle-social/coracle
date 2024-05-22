@@ -15,7 +15,7 @@
   import {tweened} from "svelte/motion"
   import {identity, sum, uniqBy, prop, pluck} from "ramda"
   import {fly} from "src/util/transition"
-  import {formatSats, tryJson} from "src/util/misc"
+  import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"

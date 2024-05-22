@@ -52,6 +52,7 @@ import {
   sessions,
   tracker,
   withFallbacks,
+  storage,
 } from "src/engine/state"
 import type {Channel} from "src/engine/model"
 import {GroupAccess, RelayMode} from "src/engine/model"
@@ -60,7 +61,9 @@ import {GroupAccess, RelayMode} from "src/engine/model"
 // repository, and when accepted, be propagated to projections. This avoids processing
 // the same event multiple times, since repository deduplicates
 
-repository.on("event", (event: TrustedEvent) => projections.push(event))
+storage.ready.then(() => {
+  repository.on("event", (event: TrustedEvent) => projections.push(event))
+})
 
 // Unwrap gift wraps and send them back to our local relay. They'll then get pushed
 // back onto projections if they haven't been seen before

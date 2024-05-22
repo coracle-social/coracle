@@ -89,7 +89,7 @@ export class Nip59 {
         message = await this.nip04.decrypt(content, pubkey, sk)
       }
 
-      if (!message && this.nip44.isEnabled() && !content.includes("=")) {
+      if (!message && this.nip44.isEnabled()) {
         message = await this.nip44.decrypt(content, pubkey, sk)
       }
     } else {
@@ -98,7 +98,7 @@ export class Nip59 {
         message = await this.nip04.decryptAsUser(content, pubkey)
       }
 
-      if (!message && this.nip44.isEnabled() && !content.includes("=")) {
+      if (!message && this.nip44.isEnabled()) {
         message = await this.nip44.decryptAsUser(content, pubkey)
       }
     }
