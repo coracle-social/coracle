@@ -14,7 +14,7 @@ import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import {isAddressFeed} from "src/domain"
+import {isAddressFeed, getFeedArgs} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
@@ -162,9 +162,7 @@ export class FeedLoader {
     // Be more tolerant when looking at communities
     walkFeed(this.opts.feed, feed => {
       if (isAddressFeed(feed)) {
-        const addresses = feed.slice(2) as string[]
-
-        strict = strict && !addresses.some(isContextAddress)
+        strict = strict && !getFeedArgs(feed).some(isContextAddress)
       }
     })
 

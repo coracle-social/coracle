@@ -1,13 +1,13 @@
 <script lang="ts">
   import {batch} from "hurdak"
-  import {makeWOTFeed, makeUnionFeed, makeScopeFeed, Scope, makeRelayFeed, makeIntersectionFeed, feedFromFilter} from "@welshman/feeds"
+  import {makeRelayFeed, feedFromFilter} from "@welshman/feeds"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {deriveRelay, normalizeRelayUrl, displayRelay, getMinWot} from "src/engine"
+  import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
   import {makeFeed} from "src/domain"
 
   export let url
@@ -16,13 +16,7 @@
   const tabs = ["notes", "reviews"]
 
   const notesFeed = makeFeed({
-    definition: makeIntersectionFeed(
-      makeRelayFeed(url),
-      makeUnionFeed(
-        makeScopeFeed(Scope.Self),
-        makeWOTFeed({min: getMinWot()}),
-      )
-    ),
+    definition: makeRelayFeed(url),
   })
 
   const reviewsFeed = makeFeed({

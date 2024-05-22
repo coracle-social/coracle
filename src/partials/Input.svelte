@@ -7,18 +7,24 @@
   export let element = null
   export let hideBefore = false
   export let hideAfter = false
-  export let format: (x: any) => string = identity
-  export let parse: (x: string) => any = identity
+  export let format: (x: any) => string = null
+  export let parse: (x: string) => any = null
   export let dark = false
 
   const showBefore = $$slots.before && !hideBefore
   const showAfter = $$slots.after && !hideAfter
 
   const onInput = e => {
-    value = parse(e.target.value)
+    if (parse) {
+      value = parse(e.target.value)
+    } else if (['range', 'number'].includes($$props.type)) {
+      value = parseFloat(e.target.value)
+    } else {
+      value = e.target.value
+    }
   }
 
-  $: inputValue = format(value)
+  $: inputValue = format ? format(value) : value
 </script>
 
 <div

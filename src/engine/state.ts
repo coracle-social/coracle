@@ -540,7 +540,7 @@ export const isEventMuted = new Derived(
         return true
       }
 
-      if (strict) {
+      if (!strict) {
         return false
       }
 
