@@ -1,5 +1,7 @@
 <script lang="ts">
   import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
+  import {slide} from "src/util/transition"
+  import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -13,6 +15,7 @@
 
   export let address
 
+  const expandDefinition = boolCtrl()
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
   const feed = address.startsWith(NAMED_BOOKMARKS)
@@ -46,9 +49,25 @@
     {/if}
     <div class="flex items-start justify-between">
       <FeedSummary feed={feed.definition} />
-      <div class="py-2">
+      <div class="flex gap-1">
+        <div
+          class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"
+          on:click={$expandDefinition.toggle}>
+          {#if $expandDefinition.enabled}
+            <i class="fa fa-angle-down" />
+          {:else}
+            <i class="fa fa-angle-right" />
+          {/if}
+        </div>
         <CopyValueSimple label="Feed address" value={toNostrURI(Address.from(address).toNaddr())} />
       </div>
     </div>
+    {#if $expandDefinition.enabled}
+      <pre class="overflow-auto rounded bg-neutral-900" transition:slide|local>{JSON.stringify(
+          feed.definition,
+          null,
+          2,
+        )}</pre>
+    {/if}
   </FlexColumn>
 </Card>
