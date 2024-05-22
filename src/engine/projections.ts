@@ -61,9 +61,12 @@ import {GroupAccess, RelayMode} from "src/engine/model"
 // repository, and when accepted, be propagated to projections. This avoids processing
 // the same event multiple times, since repository deduplicates
 
-storage.ready.then(() => {
-  repository.on("event", (event: TrustedEvent) => projections.push(event))
-})
+// Currently commented out because when storage gets pruned and profiles etc need to be re-loaded,
+// the event isn't recognized as new by repository and so it doesn't get pushed to projections. TODO
+
+// storage.ready.then(() => {
+//   repository.on("event", (event: TrustedEvent) => projections.push(event))
+// })
 
 // Unwrap gift wraps and send them back to our local relay. They'll then get pushed
 // back onto projections if they haven't been seen before

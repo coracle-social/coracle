@@ -37,6 +37,7 @@
 
         for (const event of newEvents) {
           repository.publish(event)
+          projections.push(event)
         }
 
         while (projections.buffer.length > 0) {

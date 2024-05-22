@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {toNostrURI} from '@welshman/util'
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
@@ -91,7 +92,7 @@
   const share = () =>
     router
       .at("qrcode")
-      .of(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()}))
+      .of(toNostrURI(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()})))
       .open()
 </script>
 

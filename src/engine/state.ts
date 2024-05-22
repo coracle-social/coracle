@@ -1426,6 +1426,7 @@ export const subscribe = (request: MySubscribeRequest) => {
 
   sub.emitter.on("event", (url: string, event: TrustedEvent) => {
     repository.publish(event)
+    projections.push(event)
     request.onEvent?.(event)
   })
 
@@ -1480,6 +1481,9 @@ export const publish = (request: PublishRequest) => {
   logger.info(`Publishing event`, request)
 
   const pub = basePublish(request)
+
+  // Add the event to projections
+  projections.push(request.event)
 
   // Listen to updates and update our publish queue
   if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {
