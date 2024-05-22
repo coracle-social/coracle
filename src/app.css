@@ -180,11 +180,18 @@ body,
 .long-form-content em {
   font-family: sans-serif;
 }
+
 .long-form-content code {
   background-color: var(--neutral-800);
   line-height: 1.5em;
   box-decoration-break: clone;
   padding: 1px 0.2em;
+  border-radius: 3px;
+}
+
+.long-form-content pre code {
+  display: block;
+  overflow: auto;
 }
 
 .long-form-content blockquote {
