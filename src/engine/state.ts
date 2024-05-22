@@ -1313,7 +1313,7 @@ export const getFilterSelections = (
       .clone(options)
       .getSelections()
       .map(({values, relay}) => ({
-        filters: values.map((id: string) => filtersById.get(id) as Filter),
+        filters: values.map((id: string) => filtersById.get(id)),
         relay,
       })),
   )

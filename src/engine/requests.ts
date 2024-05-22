@@ -444,7 +444,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
     {kinds: [4], "#p": [pubkey.get()]},
   ]
 
-  if (reload) {
+  if (!reload) {
     filters = filters.map(addSinceToFilter)
   }
 
