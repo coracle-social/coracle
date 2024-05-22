@@ -1,5 +1,4 @@
 import crypto from "crypto"
-import * as bc from "@getalby/bitcoin-connect"
 import {cached, nth, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -30,7 +29,6 @@ import {
   without,
 } from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
-import {warn} from "src/util/logger"
 import {joinPath} from "src/util/misc"
 import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {makeFollowList, editFollowList, createFollowList, readFollowList} from "src/domain"
@@ -53,7 +51,6 @@ import {
   fetchHandle,
   forcePlatformRelays,
   getClientTags,
-  getZapperForPubkey,
   groupAdminKeys,
   groupSharedKeys,
   groups,
@@ -299,56 +296,6 @@ export const publishReview = (content, tags, relays = null) =>
     content,
     relays,
   })
-
-// Zaps
-
-export const requestZap = async (
-  content,
-  amount,
-  {pubkey, relays, eid = null, lnurl = null, anonymous = false},
-) => {
-  const zapper = await getZapperForPubkey(pubkey, lnurl)
-
-  if (!zapper) {
-    throw new Error("Can't zap without a zapper")
-  }
-
-  const msats = amount * 1000
-  const tags = [
-    ...getClientTags(),
-    ["relays", ...relays],
-    ["amount", msats.toString()],
-    ["lnurl", zapper.lnurl],
-    ["p", pubkey],
-  ]
-
-  if (eid) {
-    tags.push(["e", eid])
-  }
-
-  if (anonymous) {
-    tags.push(["anon"])
-  }
-
-  const template = createEvent(9734, {content, tags})
-  const zap = anonymous
-    ? await signer.get().signWithKey(template, generatePrivateKey())
-    : await signer.get().signAsUser(template)
-  const zapString = encodeURI(JSON.stringify(zap))
-  const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-  const res = await Fetch.fetchJson(zapper.callback + qs)
-
-  if (!res.pr) {
-    warn(JSON.stringify(res))
-  }
-
-  return res?.pr
-}
-
-// Initialize bitcoin connect
-bc.init({appName: import.meta.env.VITE_APP_NAME})
-
-export const collectInvoice = invoice => bc.launchPaymentModal({invoice})
 
 // Groups
 

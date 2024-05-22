@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {identity} from "ramda"
 
   export let initialValue: string | number = ""
   export let value = initialValue
@@ -17,7 +16,7 @@
   const onInput = e => {
     if (parse) {
       value = parse(e.target.value)
-    } else if (['range', 'number'].includes($$props.type)) {
+    } else if (["range", "number"].includes($$props.type)) {
       value = parseFloat(e.target.value)
     } else {
       value = e.target.value

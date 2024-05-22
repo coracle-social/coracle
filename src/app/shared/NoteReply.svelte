@@ -8,7 +8,6 @@
   import ImageInput from "src/partials/ImageInput.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Card from "src/partials/Card.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"

@@ -67,14 +67,23 @@
 
 {#if tag === "a"}
   <a {style} class={className} on:click={onClick} href={externalHref || href} {target}>
+    {#if loading}
+      <i class="fa fa-circle-notch fa-spin fa-sm" />
+    {/if}
     <slot />
   </a>
 {:else if tag === "button"}
   <button {style} class={className} on:click={onClick} {type}>
+    {#if loading}
+      <i class="fa fa-circle-notch fa-spin fa-sm" />
+    {/if}
     <slot />
   </button>
 {:else}
   <svelte:element this={tag} {style} class={className} on:click={onClick}>
+    {#if loading}
+      <i class="fa fa-circle-notch fa-spin fa-sm" />
+    {/if}
     <slot />
   </svelte:element>
 {/if}

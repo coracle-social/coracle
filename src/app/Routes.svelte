@@ -61,7 +61,7 @@
   <div
     id="page"
     class={cx("relative pb-32 text-neutral-100 lg:pt-16", {
-      "lg:ml-60": !isFeedPage,
+      "lg:ml-72": !isFeedPage,
       "lg:ml-[33rem]": isFeedPage,
       "pointer-events-none": $menuIsOpen,
     })}>

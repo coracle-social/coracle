@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.4.6
+
+- [x] Improve search results loading indicator
+- [x] Make zaps prettier with bitcoin-connect
+
 # 0.4.5
 
 - [x] Accept npubs in people input

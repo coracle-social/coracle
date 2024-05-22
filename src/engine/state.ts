@@ -1221,14 +1221,6 @@ export const getZapper = cached({
   getValue: ([lnurl]) => fetchZapper(lnurl),
 })
 
-export const getZapperForPubkey = async (pubkey, lnurl = null) => {
-  const zapper = people.key(pubkey).get()?.zapper
-
-  // Allow the caller to specify a lnurl override, but don't fetch
-  // if we already know it
-  return zapper?.lnurl === lnurl ? zapper : await getZapper(lnurl)
-}
-
 // Network
 
 export const addRepostFilters = (filters: Filter[]) =>
