@@ -11,7 +11,21 @@
   export let feed
   export let onChange
 
-  const list = (() => {
+  const openForm = () => {
+    formIsOpen = true
+  }
+
+  const closeForm = event => {
+    formIsOpen = false
+
+    if (event) {
+      onChange(makeListFeed({addresses: [getAddress(event)]}))
+    }
+  }
+
+  let formIsOpen = false
+
+  $: list = (() => {
     if (isAuthorFeed(feed)) {
       return makeList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(mention)})
     } else if (isMentionFeed(feed)) {
@@ -27,20 +41,6 @@
       throw new Error(`Invalid feed type ${feed[0]} passed to FeedFormSaveAsList`)
     }
   })()
-
-  const openForm = () => {
-    formIsOpen = true
-  }
-
-  const closeForm = event => {
-    formIsOpen = false
-
-    if (event) {
-      onChange(makeListFeed({addresses: [getAddress(event)]}))
-    }
-  }
-
-  let formIsOpen = false
 </script>
 
 <div class="flex flex-col items-end">
