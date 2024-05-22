@@ -28,6 +28,7 @@ export const boolCtrl = ({defaultValue = false} = {}) => {
     enabled: defaultValue,
     disable: () => store.update(assoc('enabled', false)),
     enable: () => store.update(assoc('enabled', true)),
+    toggle: () => store.update($s => ({...$s, enabled: !$s.enabled})),
   })
 
   return store

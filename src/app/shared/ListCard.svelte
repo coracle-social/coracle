@@ -3,6 +3,8 @@
   import {first} from "@welshman/lib"
   import {Tags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
+  import {slide} from 'src/util/transition'
+  import {boolCtrl} from 'src/partials/utils'
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -16,6 +18,7 @@
   export let address
   export let inert = false
 
+  const expandTags = boolCtrl()
   const tagTypes = defaultTagFeedMappings.map(first) as string[]
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
@@ -50,11 +53,23 @@
       <p>{list.description}</p>
     {/if}
     <div class="flex items-center justify-between">
-      {quantify(tags.filterByKey(tagTypes).count(), "item")}
+      <div class="flex gap-2">
+        {quantify(tags.filterByKey(tagTypes).count(), "item")}
+        <Anchor underline on:click={$expandTags.toggle}>
+          {#if $expandTags.enabled}
+            Hide tags
+          {:else}
+            Show all
+          {/if}
+        </Anchor>
+      </div>
       <CopyValueSimple
         label="List address"
         value={toNostrURI(Address.from(address).toNaddr())}
         class="text-neutral-400" />
     </div>
+    {#if $expandTags.enabled}
+      <pre transition:slide|local>{JSON.stringify(event.tags, null, 2)}</pre>
+    {/if}
   </FlexColumn>
 </Card>
