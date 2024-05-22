@@ -1,7 +1,7 @@
 <script lang="ts">
   import {quantify} from "hurdak"
   import {first} from "@welshman/lib"
-  import {Tags, Address} from "@welshman/util"
+  import {Tags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -53,7 +53,7 @@
       {quantify(tags.filterByKey(tagTypes).count(), "item")}
       <CopyValueSimple
         label="List address"
-        value={Address.from(address).toNaddr()}
+        value={toNostrURI(Address.from(address).toNaddr())}
         class="text-neutral-400" />
     </div>
   </FlexColumn>

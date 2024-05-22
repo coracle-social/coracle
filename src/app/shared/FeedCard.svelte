@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {NAMED_BOOKMARKS, Address} from "@welshman/util"
+  import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -47,7 +47,7 @@
     <div class="flex items-start justify-between">
       <FeedSummary feed={feed.definition} />
       <div class="py-2">
-        <CopyValueSimple label="Feed address" value={Address.from(address).toNaddr()} />
+        <CopyValueSimple label="Feed address" value={toNostrURI(Address.from(address).toNaddr())} />
       </div>
     </div>
   </FlexColumn>
