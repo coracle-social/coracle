@@ -19,6 +19,7 @@
   import {pluck, join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
   import {Address} from "@welshman/util"
+  import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
   import {formCtrl} from "src/partials/utils"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
@@ -60,7 +61,7 @@
   }
 
   const removeFeed = i => {
-    values.feeds = values.feeds.toSpliced(i, 1)
+    values.feeds = toSpliced(values.feeds, i, 1)
   }
 
   const ctrl = formCtrl({

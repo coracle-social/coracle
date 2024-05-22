@@ -1,7 +1,8 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
-  import {boolCtrl} from 'src/partials/utils'
+  import {toSpliced} from "src/util/misc"
+  import {boolCtrl} from "src/partials/utils"
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
@@ -47,7 +48,7 @@
     const idx = feed.definition.findIndex(f => f[0] === subFeed[0])
 
     setFeedDefinition(
-      idx >= 0 ? feed.definition.toSpliced(idx, 1, subFeed) : [...feed.definition, subFeed],
+      idx >= 0 ? toSpliced(feed.definition, idx, 1, subFeed) : [...feed.definition, subFeed],
     )
   }
 

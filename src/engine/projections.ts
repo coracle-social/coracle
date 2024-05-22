@@ -35,7 +35,6 @@ import {getNip04, getNip44, getNip59} from "src/engine/utils"
 import {updateSession, setSession} from "src/engine/commands"
 import {
   relay,
-  repository,
   channels,
   getSession,
   getZapper,
@@ -52,7 +51,6 @@ import {
   sessions,
   tracker,
   withFallbacks,
-  storage,
 } from "src/engine/state"
 import type {Channel} from "src/engine/model"
 import {GroupAccess, RelayMode} from "src/engine/model"

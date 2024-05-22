@@ -2,7 +2,7 @@
   import {prop} from "ramda"
   import {without, identity} from "@welshman/lib"
   import {onMount} from "svelte"
-  import {pickVals} from "src/util/misc"
+  import {pickVals, toSpliced} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -57,7 +57,7 @@
   }
 
   const removeRelay = i => {
-    relays = relays.toSpliced(i, 1)
+    relays = toSpliced(relays, i, 1)
   }
 
   const addGroup = address => {
@@ -75,7 +75,7 @@
   }
 
   const removeGroup = i => {
-    groups = groups.toSpliced(i, 1)
+    groups = toSpliced(groups, i, 1)
   }
 
   const displayGroupFromAddress = a => displayGroup(deriveGroup(a).get())

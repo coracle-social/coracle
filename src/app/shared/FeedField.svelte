@@ -18,6 +18,7 @@
     makeRelayFeed,
     Scope,
   } from "@welshman/feeds"
+  import {toSpliced} from "src/util/misc"
   import Icon from "src/partials/Icon.svelte"
   import SelectTiles from "src/partials/SelectTiles.svelte"
   import Card from "src/partials/Card.svelte"
@@ -51,7 +52,7 @@
 
   const prependDefaultSubFeed = (condition, subFeed) => {
     if (!getFeedArgs(feed).some(condition)) {
-      feed = feed.toSpliced(1, 0, subFeed)
+      feed = toSpliced(feed, 1, 0, subFeed)
     }
 
     feed = [feed[0], ...partition(condition, feed.slice(1)).flatMap(identity)]

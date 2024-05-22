@@ -16,6 +16,7 @@
     makeListFeed,
     makeDVMFeed,
   } from "@welshman/feeds"
+  import {toSpliced} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -38,9 +39,9 @@
 
   const addFeed = newFeed => onChange([...feed, newFeed])
 
-  const onSubFeedChange = (i, newFeed) => onChange(feed.toSpliced(i, 1, newFeed))
+  const onSubFeedChange = (i, newFeed) => onChange(toSpliced(feed, i, 1, newFeed))
 
-  const onSubFeedRemove = i => onChange(feed.toSpliced(i, 1))
+  const onSubFeedRemove = i => onChange(toSpliced(feed, i, 1))
 
   const openMenu = () => {
     menuIsOpen = true

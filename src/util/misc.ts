@@ -361,3 +361,15 @@ export class SearchHelper<T, V> {
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)
+
+export const toSpliced = <T>(xs: T[], start: number, deleteCount?: number, ...items: T[]) => {
+  const copy = [...xs]
+
+  if (deleteCount) {
+    copy.splice(start, deleteCount, ...items)
+  } else {
+    copy.splice(start)
+  }
+
+  return copy
+}
