@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {slide} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
@@ -9,6 +10,7 @@
   import {env, pubkey, canSign, hasNewNotifications, hasNewMessages} from "src/engine"
 
   let innerWidth = 0
+  let searching = false
   let searchInput
 
   const {page} = router
@@ -65,16 +67,28 @@
       </div>
       {#if $searchTerm}
         <div
-          class="absolute right-0 top-10 max-h-[70vh] w-96 overflow-auto rounded bg-tinted-700 shadow-2xl">
-          <SearchResults showLoading term={searchTerm}>
-            <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800">
-              {#if result.type === "topic"}
-                #{result.topic.name}
-              {:else if result.type === "profile"}
-                <PersonBadge inert pubkey={result.id} class="cursor-pointer" />
-              {/if}
+          class="absolute right-0 top-10 w-96 rounded shadow-2xl">
+          <div class="max-h-[70vh] overflow-auto bg-tinted-700 rounded">
+            <SearchResults bind:searching term={searchTerm}>
+              <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800">
+                {#if result.type === "topic"}
+                  #{result.topic.name}
+                {:else if result.type === "profile"}
+                  <PersonBadge inert pubkey={result.id} class="cursor-pointer" />
+                {/if}
+              </div>
+            </SearchResults>
+          </div>
+          {#if searching}
+            <div
+              transition:slide|local
+              class="flex justify-center gap-2 bg-neutral-900 px-4 py-2 text-neutral-200">
+              <div>
+                <i class="fa fa-circle-notch fa-spin" />
+              </div>
+              Loading more options...
             </div>
-          </SearchResults>
+          {/if}
         </div>
       {/if}
     </div>

@@ -39,6 +39,7 @@
 
 {#if data.length > 0 || (create && term)}
   <div
+    transition:slide|local
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
     {#if create && term}
       {@const i = data.length}
@@ -67,7 +68,7 @@
     {/each}
   </div>
 {/if}
-{#if loading}
+{#if loading && data.length > 0}
   <div transition:slide|local class="flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200">
     <div>
       <i class="fa fa-circle-notch fa-spin" />

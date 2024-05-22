@@ -1,7 +1,6 @@
 <script lang="ts">
   import {throttle} from "throttle-debounce"
   import {derived} from "@welshman/lib"
-  import {slide} from "src/util/transition"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,7 +10,7 @@
 
   export let term
   export let replace = false
-  export let showLoading = false
+  export let searching = null
 
   const openTopic = topic => router.at("topics").of(topic).open({replace})
 
@@ -71,6 +70,8 @@
   // Suppress the dialog for a moment if we're pasting an entity in since we'll immediately redirect
   let visible = false
 
+  $: searching = $loadingPeople
+
   $: {
     if ($term) {
       loadPeople($term)
@@ -94,14 +95,4 @@
       <p class="text-center py-12">No results found.</p>
     {/each}
   </FlexColumn>
-  {#if showLoading && $loadingPeople}
-    <div
-      transition:slide|local
-      class="absolute bottom-0 left-0 right-0 flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200">
-      <div>
-        <i class="fa fa-circle-notch fa-spin" />
-      </div>
-      Loading more options...
-    </div>
-  {/if}
 {/if}
