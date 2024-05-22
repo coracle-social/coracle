@@ -108,6 +108,7 @@
       tags.push(["content-warning", opts.warning])
     }
 
+
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
       publish({event: parent, relays: forcePlatformRelays(hints.PublishEvent(parent).getUrls())})
@@ -116,6 +117,7 @@
     const template = createEvent(1, {content, tags})
     const addresses = contextAddress ? [contextAddress] : parentTags.context().values().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
+    console.log(pubs, events)
 
     // Only track one event/pub to avoid apprent duplicates
     addToContext(events[0])

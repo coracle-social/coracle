@@ -38,17 +38,17 @@
   <div class="flex flex-col gap-2">
     <div class="flex justify-between gap-2 text-xl">
       <div class="flex items-center gap-3">
-        <strong class={cx({"line-through": deleted})}>
+        <strong class={cx({"line-through": $deleted})}>
           {title}
         </strong>
-        {#if note.pubkey === $pubkey && !deleted}
+        {#if note.pubkey === $pubkey && !$deleted}
           <Anchor modal stopPropagation href={editLink} class="flex items-center">
             <i class="fa fa-edit text-base text-neutral-200" />
           </Anchor>
           <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
             <i class="fa fa-trash text-base text-neutral-200" />
           </Anchor>
-        {:else if deleted}
+        {:else if $deleted}
           <Chip danger small>Deleted</Chip>
         {:else if status === "sold"}
           <Chip danger small>Sold</Chip>
@@ -83,7 +83,7 @@
     </div>
   {/if}
   <NoteContentTopics {note} />
-  {#if !deleted}
+  {#if !$deleted}
     <div class="flex justify-center">
       <Anchor button accent on:click={sendMessage}>Make an offer</Anchor>
     </div>
