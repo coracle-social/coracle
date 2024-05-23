@@ -9,6 +9,7 @@ import {
   getIdFilters,
   isContextAddress,
   LOCAL_RELAY_URL,
+  DIRECT_MESSAGE,
   REACTION,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
@@ -170,6 +171,7 @@ export class FeedLoader {
     return events.filter(e => {
       if (repository.isDeleted(e)) return false
       if (e.kind === REACTION && !isLike(e)) return false
+      if ([4, DIRECT_MESSAGE].includes(e.kind)) return false
       if (this.isEventMuted(e, strict)) return false
       if (this.opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
       if (getIdOrAddress(e) === this.opts.anchor) return false
