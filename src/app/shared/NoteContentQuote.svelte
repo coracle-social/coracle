@@ -14,6 +14,7 @@
   export let value
 
   let quote
+  let depth = 0
   let muted = false
   let loading = true
 
@@ -101,7 +102,7 @@
             </Anchor>
           </div>
         {/if}
-        <slot name="note-content" {quote} />
+        <slot name="note-content" {quote} {depth} />
       {/if}
     {:else}
       <p class="mb-1 py-24 text-center text-neutral-600">

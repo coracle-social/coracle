@@ -26,7 +26,7 @@
   import {LIST_KINDS} from "src/domain"
 
   export let note
-  export let isQuote = false
+  export let depth = 0
   export let maxLength = 700
   export let showEntire = false
   export let expandable = true
@@ -88,9 +88,9 @@
 {:else if LIST_KINDS.includes(note.kind)}
   <NoteContentKindList {note} />
 {:else}
-  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable} {isQuote}>
+  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable} {depth}>
     <div slot="note-content" let:quote>
-      <svelte:self isQuote note={quote} {maxLength} />
+      <svelte:self depth={depth + 1} note={quote} {maxLength} />
     </div>
   </NoteContentKind1>
 {/if}

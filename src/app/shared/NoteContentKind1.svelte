@@ -30,7 +30,7 @@
   export let showMedia = false
   export let skipMedia = false
   export let expandable = true
-  export let isQuote = false
+  export let depth = 0
 
   const fullContent = parseContent(note)
 
@@ -74,8 +74,8 @@
         <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
       {:else if type.match(/^nostr:np(rofile|ub)$/)}
         <PersonLink pubkey={value.pubkey} />
-      {:else if type.startsWith("nostr:") && isStartOrEnd(i)}
-        <NoteContentQuote {note} {value}>
+      {:else if type.startsWith("nostr:") && isStartOrEnd(i) && depth < 2}
+        <NoteContentQuote {depth} {note} {value}>
           <div slot="note-content" let:quote>
             <slot name="note-content" {quote} />
           </div>
@@ -94,7 +94,7 @@
 </div>
 
 {#if ellipsize}
-  <div class:-ml-12={!isQuote}>
+  <div class:-ml-12={depth > 0}>
     <NoteContentEllipsis on:click={expand} />
   </div>
 {/if}
