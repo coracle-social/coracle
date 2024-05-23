@@ -89,9 +89,7 @@
   onMount(() => {
     markChannelRead(channelId)
 
-    const sub = listenForMessages(pubkeys)
-
-    return () => sub.close()
+    return listenForMessages(pubkeys)
   })
 
   onDestroy(() => {

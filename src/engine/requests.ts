@@ -445,7 +445,11 @@ export const loadAllMessages = ({reload = false} = {}) => {
   ]
 
   if (!reload) {
-    filters = filters.map(addSinceToFilter)
+    filters = [
+      addSinceToFilter(filters[0], seconds(7, 'day')),
+      addSinceToFilter(filters[1]),
+      addSinceToFilter(filters[2]),
+    ]
   }
 
   return loadAll(
@@ -459,11 +463,11 @@ export const loadAllMessages = ({reload = false} = {}) => {
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
 
-  return subscribe({
+  return subscribePersistent({
     skipCache: true,
     relays: hints.Messages(pubkeys).getUrls(),
     filters: [
-      addSinceToFilter({kinds: [1059], "#p": [pubkey.get()]}, seconds(30, "hour")),
+      addSinceToFilter({kinds: [1059], "#p": [pubkey.get()]}, seconds(7, "day")),
       addSinceToFilter({kinds: [4], authors: allPubkeys}),
       addSinceToFilter({kinds: [4], "#p": allPubkeys}),
     ],

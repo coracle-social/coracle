@@ -1447,13 +1447,19 @@ export const subscribe = (request: MySubscribeRequest) => {
 }
 
 export const subscribePersistent = async (request: MySubscribeRequest) => {
+  let done = false
+
   /* eslint no-constant-condition: 0 */
-  while (true) {
+  while (!done) {
     // If the subscription gets closed quickly due to eose, don't start flapping
     await Promise.all([
       sleep(30_000),
       new Promise(resolve => subscribe(request).emitter.on("close", resolve)),
     ])
+  }
+
+  return () => {
+    done = true
   }
 }
 
