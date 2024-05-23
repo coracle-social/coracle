@@ -1,4 +1,4 @@
-import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
+import {always, uniqBy, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
@@ -372,7 +372,7 @@ projections.addHandler(3, e => {
   }
 
   updateStore(people.key(e.pubkey), e.created_at, {
-    petnames: Tags.fromEvent(e).whereKey("p").unwrap(),
+    petnames: uniqBy(nth(1), Tags.fromEvent(e).whereKey("p").unwrap()),
   })
 })
 
