@@ -162,7 +162,7 @@ export class FeedLoader {
     // Be more tolerant when looking at communities
     walkFeed(this.opts.feed, feed => {
       if (isAddressFeed(feed)) {
-        strict = strict && !getFeedArgs(feed as AddressFeed).some(isContextAddress)
+        strict = strict && !feed.slice(2).some(isContextAddress)
       }
     })
 

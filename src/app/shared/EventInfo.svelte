@@ -38,13 +38,13 @@
 <div class="flex flex-grow flex-col gap-2">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <Anchor class={cx("text-2xl", {"line-through": deleted})} href={detailPath}>
+      <Anchor class={cx("text-2xl", {"line-through": $deleted})} href={detailPath}>
         {title || name}
       </Anchor>
-      {#if deleted}
+      {#if $deleted}
         <Chip danger small>Deleted</Chip>
       {/if}
-      {#if actionsInline && event.pubkey === $pubkey && !deleted}
+      {#if actionsInline && event.pubkey === $pubkey && !$deleted}
         <Anchor modal stopPropagation href={editLink} class="flex items-center">
           <i class="fa fa-edit text-base text-neutral-200" />
         </Anchor>

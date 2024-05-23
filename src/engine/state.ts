@@ -81,14 +81,7 @@ import {
   LOCAL_RELAY_URL,
   getFilterResultCardinality,
 } from "@welshman/util"
-import type {
-  Filter,
-  RouterScenario,
-  RouterScenarioOptions,
-  TrustedEvent,
-  SignedEvent,
-  Zapper,
-} from "@welshman/util"
+import type {Filter, RouterScenario, TrustedEvent, SignedEvent, Zapper} from "@welshman/util"
 import {
   ConnectionStatus,
   Executor,
@@ -1248,10 +1241,7 @@ export type RelayFilters = {
   filters: Filter[]
 }
 
-export const getFilterSelections = (
-  filters: Filter[],
-  options: RouterScenarioOptions = {},
-): RelayFilters[] => {
+export const getFilterSelections = (filters: Filter[]): RelayFilters[] => {
   const scenarios: RouterScenario[] = []
   const filtersById = new Map<string, Filter>()
 
@@ -1301,7 +1291,8 @@ export const getFilterSelections = (
     ({filters}) => -filters[0].authors?.length,
     hints
       .merge(scenarios)
-      .clone(options)
+      // Use low redundancy because filters will be very low cardinality
+      .redundancy(1)
       .getSelections()
       .map(({values, relay}) => ({
         filters: values.map((id: string) => filtersById.get(id)),
