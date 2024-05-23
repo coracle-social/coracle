@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {isGiftWrap} from "src/util/nostr"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -10,7 +9,7 @@
   const submit = async () => {
     const events = Array.from(repository.query([userOnly ? {authors: [$user.pubkey]} : {}]))
     const jsonl = events
-      .filter(e => includeEncrypted || !isGiftWrap(e))
+      .filter(e => includeEncrypted || (!e.wrap && e.kind !== 4))
       // Important: re-wrap encrypted messages
       .map(e => JSON.stringify(e.wrap || e))
       .join("\n")
