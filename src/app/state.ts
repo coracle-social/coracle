@@ -41,7 +41,11 @@ export const globalFeed = writable<Feed>(
 // characters long, respectively. Put the threshold a little lower in case
 // someone accidentally enters a key with the last few digits missing
 const redactErrorInfo = (info: any) =>
-  JSON.parse(JSON.stringify(info || null).replace(/\w{60}\w+/g, "[REDACTED]"))
+  JSON.parse(
+    JSON.stringify(info || null)
+      .replace(/\d+:{60}\w+:\w+/g, "[REDACTED]")
+      .replace(/\w{60}\w+/g, "[REDACTED]")
+  )
 
 // Wait for bugsnag to be started in main
 setTimeout(() => {

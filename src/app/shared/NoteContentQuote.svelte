@@ -12,9 +12,9 @@
 
   export let note
   export let value
+  export let depth = 0
 
   let quote
-  let depth = 0
   let muted = false
   let loading = true
 

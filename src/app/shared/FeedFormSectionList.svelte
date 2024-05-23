@@ -10,6 +10,14 @@
 
   const onAddressesChange = addresses => onChange(makeListFeed({addresses}))
 
+  const displayAddress = address => {
+    const event = repository.getEvent(address)
+
+    return event
+      ? `${$listSearch.display(address)} by ${displayPubkey(event.pubkey)}`
+      : $listSearch.display(address)
+  }
+
   $: addresses = feed.slice(1).flatMap(it => it.addresses)
 </script>
 
@@ -17,10 +25,10 @@
 <SearchSelect multiple value={addresses} search={$listSearch.search} onChange={onAddressesChange}>
   <span slot="item" let:item let:context>
     {#if context === "option"}
-      {$listSearch.display(item)} by {displayPubkey(repository.getEvent(item).pubkey)}
+      {displayAddress(item)}
     {:else}
       <Anchor modal href={router.at("lists").of(item).toString()}>
-        {$listSearch.display(item)} by {displayPubkey(repository.getEvent(item).pubkey)}
+        {displayAddress(item)}
       </Anchor>
     {/if}
   </span>

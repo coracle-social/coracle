@@ -31,11 +31,14 @@ export const createFollowList = ({publicTags = [], privateTags = []}: FollowList
 })
 
 export const editFollowList = (followList: FollowList) => {
-  const addPTags = (oldTags, newTags) => oldTags.filter(t => t !== "p").concat(newTags)
+  const addPTags = (oldTags, newTags) =>
+    Array.isArray(oldTags) ? oldTags.filter(t => t !== "p").concat(newTags) : newTags
+
   const privateTags = addPTags(
     tryJson(() => JSON.parse(followList.event.content)) || [],
     followList.privateTags,
   )
+
   const publicTags = addPTags(followList.event.tags, followList.publicTags)
 
   return {
