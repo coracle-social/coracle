@@ -1,16 +1,7 @@
-import {debounce} from "throttle-debounce"
 import {fromPairs} from "ramda"
-import {Storage} from "hurdak"
 import {writable} from "@welshman/lib"
 import {parseHex} from "src/util/html"
-
-export const synced = (key: string, defaultValue: any) => {
-  const store = writable(Storage.getJson(key) || defaultValue)
-
-  store.subscribe(debounce(1000, $value => Storage.setJson(key, $value)))
-
-  return store
-}
+import {synced} from "src/util/misc"
 
 // Settings
 

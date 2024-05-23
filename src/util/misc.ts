@@ -1,6 +1,7 @@
-import {now, stripProtocol} from "@welshman/lib"
+import {throttle} from "throttle-debounce"
+import {now, stripProtocol, writable} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
-import {ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {Storage, ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
@@ -362,5 +363,16 @@ export class SearchHelper<T, V> {
 
 export const fromCsv = s => (s || "").split(",").filter(identity)
 
-export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ...items: T[]) =>
-  [...xs.slice(0, start), ...items, ...xs.slice(start + deleteCount)]
+export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ...items: T[]) => [
+  ...xs.slice(0, start),
+  ...items,
+  ...xs.slice(start + deleteCount),
+]
+
+export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
+  const store = writable<T>(Storage.getJson(key) || defaultValue)
+
+  store.subscribe(throttle(delay, ($value: T) => Storage.setJson(key, $value)))
+
+  return store
+}

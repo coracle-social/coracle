@@ -3,7 +3,6 @@ import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {
   Fetch,
-  Storage as LocalStorage,
   createMapOf,
   defer,
   displayList,
@@ -95,7 +94,7 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
-import {fuzzy, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
+import {fuzzy, synced, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {
   appDataKeys,
@@ -165,8 +164,9 @@ export const env = new Writable({
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
 })
 
-export const pubkey = new Writable<string | null>(null)
-export const sessions = new Writable<Record<string, Session>>({})
+export const pubkey = synced<string | null>("pubkey", null)
+export const sessions = synced<Record<string, Session>>("sessions", {})
+
 export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
 export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
@@ -2045,30 +2045,6 @@ class IndexedDB {
   }
 }
 
-type LocalStorageAdapterOpts = {
-  load: (x: any) => any
-  dump: (x: any) => any
-}
-
-class LocalStorageAdapter {
-  constructor(
-    readonly key: string,
-    readonly store: IWritable<any>,
-    readonly opts?: LocalStorageAdapterOpts,
-  ) {}
-
-  initialize(storage: Storage) {
-    const {key, store, opts} = this
-    const {load, dump} = opts || {load: identity, dump: identity}
-
-    if (key in localStorage) {
-      store.set(load(LocalStorage.getJson(key)))
-    }
-
-    store.subscribe(throttle(300, $value => LocalStorage.setJson(key, dump($value))))
-  }
-}
-
 class IndexedDBAdapter {
   constructor(
     readonly key: string,
@@ -2139,7 +2115,7 @@ class Storage {
 
   constructor(
     readonly version,
-    readonly adapters: (LocalStorageAdapter | IndexedDBAdapter)[],
+    readonly adapters: IndexedDBAdapter[],
   ) {
     this.initialize()
   }
@@ -2200,12 +2176,6 @@ const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<st
   }, rows)
 }
 
-// Removed support for bunker login
-const sessionsAdapter = {
-  load: filter(($s: any) => $s.method !== "bunker"),
-  dump: identity,
-}
-
 const scoreEvent = e => {
   if (getSession(e.pubkey)) return -Infinity
   if (giftWrapKinds.includes(e.kind)) return -Infinity
@@ -2215,8 +2185,6 @@ const scoreEvent = e => {
 }
 
 export const storage = new Storage(12, [
-  new LocalStorageAdapter("pubkey", pubkey),
-  new LocalStorageAdapter("sessions", sessions, sessionsAdapter),
   new IndexedDBAdapter("seen3", "id", seen, 10000, sortBy(prop("created_at"))),
   new IndexedDBAdapter(
     "publishes",
