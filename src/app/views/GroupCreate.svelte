@@ -7,7 +7,7 @@
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
   import {
     env,
-    user,
+    pubkey,
     initGroup,
     publishGroupMeta,
     publishGroupInvites,
@@ -23,7 +23,7 @@
     type: null,
     feeds: [],
     relays: $env.PLATFORM_RELAYS,
-    members: [$user],
+    members: [$pubkey],
     list_publicly: false,
     meta: {
       name: "",
@@ -39,18 +39,17 @@
 
   const onSubmit = async ({type, feeds, relays, members, list_publicly, meta}: Values) => {
     const kind = type === "open" ? 34550 : 35834
-    const memberPubkeys = pluck("pubkey", members)
     const {id, address} = initGroup(kind, relays)
 
-    await publishAdminKeyShares(address, [$user.pubkey])
+    await publishAdminKeyShares(address, [$pubkey])
 
     if (type === "open") {
       await publishCommunityMeta(address, id, feeds, relays, meta)
       await publishCommunitiesList(deriveUserCommunities().get().concat(address))
     } else {
       await publishGroupMeta(address, id, feeds, relays, meta, list_publicly)
-      await publishGroupMembers(address, "set", memberPubkeys)
-      await publishGroupInvites(address, memberPubkeys)
+      await publishGroupMembers(address, "set", members)
+      await publishGroupInvites(address, members)
     }
 
     router.at("groups").of(address).at("notes").replace()

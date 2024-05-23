@@ -6,7 +6,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {publishAdminKeyShares} from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -21,13 +21,13 @@
   }
 
   const confirm = () => {
-    publishAdminKeyShares(address, pluck("pubkey", people))
+    publishAdminKeyShares(address, pubkeys)
     showInfo("Key shares sent!")
     router.clearModals()
   }
 
   let modal = null
-  let people = []
+  let pubkeys = []
 </script>
 
 <Subheading>Invite Group Admin</Subheading>
@@ -35,8 +35,8 @@
   Keys are shared over nostr using encrypted messages. Be aware that this can reduce your group's
   privacy, for example if any receipient's key is compromised.
 </p>
-<PersonMultiSelect bind:value={people} />
-<Anchor button accent disabled={people.length === 0} on:click={submit}>Share Admin Key</Anchor>
+<PersonSelect multiple bind:value={pubkeys} />
+<Anchor button accent disabled={pubkeys.length === 0} on:click={submit}>Share Admin Key</Anchor>
 
 {#if modal === "confirm"}
   <Modal>
@@ -46,8 +46,8 @@
       people?
     </p>
     <ul>
-      {#each people as person (person.pubkey)}
-        <PersonBadgeSmall pubkey={person.pubkey} />
+      {#each pubkeys as pubkey}
+        <PersonBadgeSmall {pubkey} />
       {/each}
     </ul>
     <div class="flex gap-2">

@@ -39,7 +39,7 @@
 
 {#if data.length > 0 || (create && term)}
   <div
-    transition:slide|local
+    transition:slide|local={{duration: 100}}
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
     {#if create && term}
       {@const i = data.length}

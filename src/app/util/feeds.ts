@@ -12,7 +12,7 @@ import {
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, Loader, AddressFeed} from "@welshman/feeds"
-import {walkFeed, FeedLoader as CoreFeedLoader, getFeedArgs} from "@welshman/feeds"
+import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"

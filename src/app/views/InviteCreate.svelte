@@ -13,7 +13,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
-  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {
     hints,
@@ -37,7 +37,7 @@
     sections = without([section], sections)
 
     if (section === "people") {
-      people = []
+      pubkeys = []
     }
 
     if (section === "relays") {
@@ -82,7 +82,7 @@
 
   let relayInput, groupInput
   let sections = []
-  let people = []
+  let pubkeys = []
   let relays = []
   let groups = []
 
@@ -90,7 +90,7 @@
     const invite: any = {}
 
     if (sections.includes("people")) {
-      invite.people = people.map(p => p.pubkey).join(",")
+      invite.people = pubkeys.join(",")
     }
 
     if (sections.includes("relays")) {
@@ -112,7 +112,7 @@
   onMount(() => {
     if (initialPubkey) {
       showSection("people")
-      people = people.concat(derivePerson(initialPubkey).get())
+      pubkeys = pubkeys.concat(initialPubkey)
     }
 
     if (initialGroupAddress) {
@@ -145,7 +145,7 @@
           <i class="fa fa-times cursor-pointer" on:click={() => hideSection("people")} />
         </div>
         <p>Suggest people to follow - this is especially useful for new users.</p>
-        <PersonMultiSelect bind:value={people} />
+        <PersonSelect multiple bind:value={pubkeys} />
       </FlexColumn>
     </Card>
   {:else if section === "relays"}
@@ -227,6 +227,6 @@
     <i class="fa fa-plus" /> Add groups
   </Anchor>
 </div>
-<Anchor button accent disabled={[...people, ...relays, ...groups].length === 0} on:click={onSubmit}>
+<Anchor button accent disabled={[...pubkeys, ...relays, ...groups].length === 0} on:click={onSubmit}>
   Create Invite Link
 </Anchor>

@@ -4,7 +4,7 @@
     type: string
     feeds: string[][]
     relays: string[]
-    members?: Person[]
+    members?: string[]
     list_publicly: boolean
     meta: {
       name: string
@@ -34,7 +34,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {Person} from "src/engine"
   import {env, hints, searchRelays, feedSearch, normalizeRelayUrl} from "src/engine"
 
@@ -141,7 +141,7 @@
       {/if}
       {#if showMembers}
         <Field label="Member List">
-          <PersonMultiSelect bind:value={values.members} />
+          <PersonSelect multiple bind:value={values.members} />
           <div slot="info">All members will receive a fresh invitation with a new key.</div>
         </Field>
       {/if}

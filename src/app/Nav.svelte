@@ -81,7 +81,7 @@
           </div>
           {#if searching}
             <div
-              transition:slide|local
+              transition:slide|local={{duration: 100}}
               class="flex justify-center gap-2 bg-neutral-900 px-4 py-2 text-neutral-200">
               <div>
                 <i class="fa fa-circle-notch fa-spin" />

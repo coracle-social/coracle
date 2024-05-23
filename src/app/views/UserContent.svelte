@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
     user,
     getSettings,
@@ -31,7 +31,7 @@
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
-    const pubkeyMutes = mutedPeople.map(p => ["p", p.pubkey])
+    const pubkeyMutes = mutedPubkeys.map(pubkey => ["p", pubkey])
     const otherMutes = muteTags.reject(t => t.key() === "p").unwrap()
     const allMutes = [...pubkeyMutes, ...otherMutes]
 
@@ -41,7 +41,7 @@
     showInfo("Your preferences have been saved!")
   }
 
-  let mutedPeople = muteTags.values("p").uniq().valueOf().map(getPersonWithDefault)
+  let mutedPubkeys = muteTags.values("p").uniq().valueOf()
 
   onMount(() => {
     loadPubkeys(Array.from($mutes))
@@ -87,7 +87,7 @@
       </p>
     </Field>
     <Field label="Muted accounts">
-      <PersonMultiSelect bind:value={mutedPeople} />
+      <PersonSelect multiple bind:value={mutedPubkeys} />
       <p slot="info">Notes from these people will be hidden by default.</p>
     </Field>
     <Field label="Muted words and topics">

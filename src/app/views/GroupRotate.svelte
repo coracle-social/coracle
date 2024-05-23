@@ -8,7 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import PersonMultiSelect from "src/app/shared/PersonMultiSelect.svelte"
+  import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupRequest} from "src/engine"
   import {
     people,
@@ -36,7 +36,7 @@
       initSharedKey(address)
     }
 
-    const allMembers = new Set(pluck("pubkey", members))
+    const allMembers = new Set(members)
     const addedMembers = difference(allMembers, initialMembers)
     const removedMembers = difference(initialMembers, allMembers)
 
@@ -94,9 +94,7 @@
   }
 
   let soft = true
-  let members = people.mapStore
-    .derived(m => Array.from(initialMembers).map(pubkey => m.get(pubkey) || {pubkey}))
-    .get()
+  let members = Array.from(initialMembers)
 </script>
 
 <form on:submit|preventDefault={onSubmit}>
@@ -106,7 +104,7 @@
       Rotate keys periodically to change group membership and increase security.
     </p>
     <Field label="Member List">
-      <PersonMultiSelect bind:value={members} />
+      <PersonSelect multiple bind:value={members} />
       <div slot="info">All members will receive a fresh invitation with a new key.</div>
     </Field>
     <FieldInline label="Soft Rotate">
