@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {onMount, onDestroy} from "svelte"
-  import {formatTimestamp} from "src/util/misc"
+  import {DIRECT_MESSAGE, Tags} from "@welshman/util"
+  import {formatTimestamp, synced} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -14,30 +15,49 @@
   import {
     nip44,
     session,
-    channels,
     displayPubkey,
     sendMessage,
+    repository,
     sendLegacyMessage,
     markChannelRead,
+    getChannelIdFromEvent,
     listenForMessages,
     sortEventsDesc,
+    nip04,
   } from "src/engine"
 
   export let pubkeys
   export let channelId
   export let initialMessage = null
 
-  const channel = channels.key(channelId)
+  const contentCache = synced("ChannelsDetail/contentCache", {})
+
+  const messages = repository
+    .filter([{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}])
+    .derived($events => $events.filter(e => getChannelIdFromEvent(e) === channelId))
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const send = (content, useNip44) => {
+  const decryptContent = async e => {
+    if (e.kind !== 4) return e
+
+    if (!$contentCache[e.id]) {
+      const recipient = Tags.fromEvent(e).get("p")?.value()
+      const other = e.pubkey === $session.pubkey ? recipient : e.pubkey
+
+      $contentCache[e.id] = await nip04.get().decryptAsUser(e.content, other)
+    }
+
+    return {...e, content: $contentCache[e.id]}
+  }
+
+  const send = async (content, useNip44) => {
     // If we don't have nip44 support, just send a legacy message
     if (!$nip44.isEnabled() || !useNip44) {
       return sendLegacyMessage(channelId, content)
     }
 
-    const [message] = sortEventsDesc($channel.messages || [])
+    const [message] = sortEventsDesc($messages || [])
 
     if (!message || message?.kind === 4) {
       confirmMessage = content
@@ -81,12 +101,7 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel
-  bind:this={ctrl}
-  {pubkeys}
-  messages={$channel?.messages || []}
-  sendMessage={send}
-  {initialMessage}>
+<Channel {pubkeys} bind:this={ctrl} messages={$messages} sendMessage={send} {initialMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
@@ -120,9 +135,11 @@
       </Anchor>
     {/if}
     <div class="break-words">
-      {#if typeof message.content === "string"}
-        <NoteContent showEntire note={message} />
-      {/if}
+      {#await decryptContent(message)}
+        <!-- pass -->
+      {:then note}
+        <NoteContent showEntire {note} />
+      {/await}
     </div>
     <small
       class="mt-1 flex items-center justify-between gap-2"
@@ -146,8 +163,7 @@
               problems with legacy DMs. Read more <Anchor
                 underline
                 external
-                href="https://habla.news/u/hodlbod@welshman/0gmn3DDizCIesG-PCD-JK"
-                >here</Anchor
+                href="https://habla.news/u/hodlbod@welshman/0gmn3DDizCIesG-PCD-JK">here</Anchor
               >.
             </p>
             <p>

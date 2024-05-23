@@ -564,6 +564,9 @@ export const channelHasNewMessages = (c: Channel) =>
 
 export const getChannelId = (pubkeys: string[]) => uniq(pubkeys).toSorted().join(",")
 
+export const getChannelIdFromEvent = (event: TrustedEvent) =>
+  getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
+
 export const userChannels = new Derived(
   [channels.throttle(300), mutes, pubkey],
   ([$channels, $mutes, $pk]): Channel[] => {

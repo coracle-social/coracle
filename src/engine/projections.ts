@@ -1,4 +1,4 @@
-import {always, mergeRight, prop, sortBy, uniq, uniqBy, whereEq, without} from "ramda"
+import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
@@ -444,7 +444,6 @@ projections.addHandler(30078, async e => {
           $channels.set(id, {
             relays: [],
             members: [],
-            messages: [],
             ...channel,
             last_checked: Math.max(ts, channel?.last_checked || 0),
           })
@@ -469,12 +468,6 @@ const handleMessage = async e => {
     const $channel = channels.key(channelId).get()
 
     const relays = $channel?.relays || []
-    const messages = $channel?.messages || []
-
-    // If we already have the message we're done
-    if (messages.find(whereEq({id: e.id}))) {
-      return $channel
-    }
 
     // Handle nip04
     if (e.kind === 4) {
@@ -500,7 +493,6 @@ const handleMessage = async e => {
       ...$channel,
       id: channelId,
       relays: uniq([...tags.relays().valueOf(), ...relays]),
-      messages: uniqBy(prop("id"), [e, ...messages]),
       members: pubkeys,
     }
 
