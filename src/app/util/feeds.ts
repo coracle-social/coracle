@@ -11,7 +11,7 @@ import {
   LOCAL_RELAY_URL,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
-import type {Feed, Loader, AddressFeed} from "@welshman/feeds"
+import type {Feed, Loader} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
@@ -162,7 +162,7 @@ export class FeedLoader {
     // Be more tolerant when looking at communities
     walkFeed(this.opts.feed, feed => {
       if (isAddressFeed(feed)) {
-        strict = strict && !feed.slice(2).some(isContextAddress)
+        strict = strict && !(feed.slice(2) as string[]).some(isContextAddress)
       }
     })
 

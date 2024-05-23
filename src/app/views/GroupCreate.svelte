@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

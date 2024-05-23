@@ -18,6 +18,7 @@
   </span>
 {:else}
   <Anchor
+    modal
     href={router.at("people").of(pubkey).toString()}
     class={cx($$props.class, "relative z-feature flex items-center gap-2")}>
     <PersonCircle {pubkey} />

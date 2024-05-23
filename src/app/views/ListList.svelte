@@ -1,33 +1,69 @@
 <script lang="ts">
   import {getAddress} from "@welshman/util"
+  import {onMount} from "svelte"
+  import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
-  import Subheading from "src/partials/Subheading.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Input from "src/partials/Input.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util/router"
-  import {userLists} from "src/engine"
+  import {pubkey, userLists, listSearch} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
+
+  const loadMore = async () => {
+    limit += 20
+  }
+
+  let q = ""
+  let limit = 20
+  let element
+
+  onMount(() => {
+    const scroller = createScroller(loadMore, {element})
+
+    return () => scroller.stop()
+  })
 </script>
 
-<div class="flex items-center justify-between">
-  <Subheading>Your Lists</Subheading>
-  <Anchor button accent on:click={createList}>
-    <i class="fa fa-plus" /> List
-  </Anchor>
-</div>
-{#each $userLists as list (getAddress(list.event))}
-  {@const address = getAddress(list.event)}
-  <div in:fly={{y: 20}}>
-    <ListCard {address}>
-      <div slot="controls">
-        <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
-          <i class="fa fa-edit" /> Edit
-        </Anchor>
-      </div>
-    </ListCard>
+<FlexColumn bind:element>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i class="fa fa-list fa-lg" />
+      <h2 class="staatliches text-2xl">Your feeds</h2>
+    </div>
+    <Anchor button accent on:click={createList}>
+      <i class="fa fa-plus" /> List
+    </Anchor>
   </div>
-{/each}
-{#if $userLists.length === 0}
-  <p class="py-12 text-center">You don't have any lists yet.</p>
-{/if}
+  {#each $userLists as list (getAddress(list.event))}
+    {@const address = getAddress(list.event)}
+    <div in:fly={{y: 20}}>
+      <ListCard {address}>
+        <div slot="controls">
+          <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
+            <i class="fa fa-edit" /> Edit
+          </Anchor>
+        </div>
+      </ListCard>
+    </div>
+  {/each}
+  {#if $userLists.length === 0}
+    <p class="py-12 text-center">You don't have any lists yet.</p>
+  {/if}
+  <div class="flex items-center gap-2">
+    <i class="fa fa-circle-nodes fa-lg" />
+    <h2 class="staatliches text-2xl">Other lists</h2>
+  </div>
+  <p>Below are lists created by people in your network.</p>
+  <Input bind:value={q} placeholder="Search lists">
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each $listSearch
+    .search(q)
+    .filter(address => !address.includes($pubkey))
+    .slice(0, limit) as address (address)}
+    <ListCard {address} />
+  {/each}
+</FlexColumn>

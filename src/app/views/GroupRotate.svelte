@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, without} from "ramda"
+  import {without} from "ramda"
   import {difference} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -11,7 +11,6 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupRequest} from "src/engine"
   import {
-    people,
     groups,
     groupRequests,
     initSharedKey,

@@ -35,7 +35,6 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import type {Person} from "src/engine"
   import {env, hints, searchRelays, feedSearch, normalizeRelayUrl} from "src/engine"
 
   export let onSubmit

@@ -112,7 +112,7 @@
         <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
           <Menu>
             <MenuItem inert class="staatliches bg-neutral-800 text-lg shadow">Your Feeds</MenuItem>
-            <div class="max-h-96 overflow-auto">
+            <div class="max-h-80 overflow-auto">
               <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
               <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
               {#each $userFeeds as feed}
@@ -125,7 +125,8 @@
                   {displayList(feed.list)}
                 </MenuItem>
               {/each}
-              <div class="h-px bg-neutral-600" />
+            </div>
+            <div class="bg-neutral-900">
               <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
                 <i class="fa fa-rss" /> Manage feeds
               </MenuItem>

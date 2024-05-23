@@ -19,7 +19,6 @@
     publishSettings,
     searchTopics,
     mutes,
-    getPersonWithDefault,
     loadPubkeys,
     publishMutes,
   } from "src/engine"

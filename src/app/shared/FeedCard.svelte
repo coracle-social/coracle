@@ -8,6 +8,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
+  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readFeed, readList, displayFeed, mapListToFeed} from "src/domain"
   import {repository} from "src/engine"
   import {globalFeed} from "src/app/state"
@@ -28,26 +29,36 @@
   }
 </script>
 
-<Card>
-  <FlexColumn>
-    <div class="flex items-center justify-between">
-      <span class="staatliches flex items-center gap-3 text-xl">
-        <i class="fa fa-rss" />
-        <span class:text-neutral-400={!feed.title} class:line-through={deleted}>
-          {displayFeed(feed)}
-        </span>
-        {#if deleted}
-          <Chip danger small>Deleted</Chip>
-        {/if}
+<Card class="flex gap-3">
+  <div class="mt-[6px]">
+    <i class="fa fa-rss fa-2xl" />
+  </div>
+  <FlexColumn small>
+    <div class="flex justify-between">
+      <span class="flex items-start gap-3">
+        <div>
+          <span
+            class="staatliches text-xl"
+            class:text-neutral-400={!feed.title}
+            class:line-through={deleted}>
+            {displayFeed(feed)}
+          </span>
+          {#if deleted}
+            <Chip danger small>Deleted</Chip>
+          {/if}
+        </div>
+        <div class="flex gap-1">
+          by <PersonBadgeSmall pubkey={feed.event ? feed.event.pubkey : feed.list.event.pubkey} />
+        </div>
       </span>
       <slot name="controls">
-        <Anchor on:click={loadFeed}>Load feed</Anchor>
+        <Anchor underline on:click={loadFeed}>Load feed</Anchor>
       </slot>
     </div>
     {#if feed.description}
       <p>{feed.description}</p>
     {/if}
-    <div class="flex items-start justify-between">
+    <div class="mt-2 flex items-start justify-between">
       <FeedSummary feed={feed.definition} />
       <div class="flex gap-1">
         <div

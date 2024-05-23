@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {pluck} from "ramda"
   import {showInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Modal from "src/partials/Modal.svelte"

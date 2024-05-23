@@ -17,7 +17,6 @@
   import {router} from "src/app/util/router"
   import {
     hints,
-    derivePerson,
     displayRelay,
     displayRelayUrl,
     searchRelayUrls,
@@ -227,6 +226,10 @@
     <i class="fa fa-plus" /> Add groups
   </Anchor>
 </div>
-<Anchor button accent disabled={[...pubkeys, ...relays, ...groups].length === 0} on:click={onSubmit}>
+<Anchor
+  button
+  accent
+  disabled={[...pubkeys, ...relays, ...groups].length === 0}
+  on:click={onSubmit}>
   Create Invite Link
 </Anchor>

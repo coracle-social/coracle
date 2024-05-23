@@ -10,6 +10,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
+  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readList, displayList, mapListToFeed} from "src/domain"
   import {repository} from "src/engine"
   import {globalFeed} from "src/app/state"
@@ -33,20 +34,30 @@
   }
 </script>
 
-<Card>
-  <FlexColumn>
-    <div class="flex items-center justify-between">
-      <span class="staatliches flex items-center gap-3 text-xl">
-        <i class="fa fa-list" />
-        <span class:text-neutral-400={!list.title} class:line-through={deleted}>
-          {displayList(list)}
-        </span>
-        {#if deleted}
-          <Chip danger small>Deleted</Chip>
-        {/if}
+<Card class="flex gap-3">
+  <div class="mt-[6px]">
+    <i class="fa fa-list fa-2xl" />
+  </div>
+  <FlexColumn small>
+    <div class="flex justify-between">
+      <span class="flex items-start gap-3">
+        <div>
+          <span
+            class="staatliches text-xl"
+            class:text-neutral-400={!list.title}
+            class:line-through={deleted}>
+            {displayList(list)}
+          </span>
+          {#if deleted}
+            <Chip danger small>Deleted</Chip>
+          {/if}
+        </div>
+        <div class="flex gap-1">
+          by <PersonBadgeSmall pubkey={list.event.pubkey} />
+        </div>
       </span>
       <slot name="controls">
-        <Anchor on:click={loadFeed}>Load as feed</Anchor>
+        <Anchor underline on:click={loadFeed}>Load feed</Anchor>
       </slot>
     </div>
     {#if list.description}
