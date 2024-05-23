@@ -57,6 +57,7 @@ import {
 } from "@welshman/lib"
 import type {IWritable} from "@welshman/lib"
 import {
+  READ_RECEIPT,
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
@@ -132,7 +133,6 @@ import type {
   Handle,
   Person,
   PublishInfo,
-  ReadReceipt,
   Relay,
   RelayPolicy,
   Session,
@@ -174,7 +174,6 @@ export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
 export const people = new CollectionStore<Person>("pubkey")
-export const seen = new CollectionStore<ReadReceipt>("id", 1000)
 export const publishes = new CollectionStore<PublishInfo>("id", 1000)
 export const topics = new CollectionStore<Topic>("name")
 export const channels = new CollectionStore<Channel>("id")
@@ -555,8 +554,6 @@ export const isEventMuted = new Derived(
   },
 )
 
-export const isSeen = seen.mapStore.derived($m => e => $m.has(e.id))
-
 // Channels
 
 export const sortChannels = $channels =>
@@ -755,6 +752,26 @@ export const getUserCommunities = (session: Session) =>
   getUserCircles(session).filter(a => a.startsWith("34550:"))
 
 export const deriveUserCommunities = () => session.derived(getUserCommunities)
+
+// Read receipts
+
+export const optimisticReadReceipts = synced("seen", [])
+
+export const publishedReadReceipts = repository
+  .filter([{kinds: [READ_RECEIPT]}])
+  .derived(events => new Set(events.flatMap(e => e.tags.map(nth(1)))))
+
+export const unpublishedReadReceipts = new Derived(
+  [publishedReadReceipts, optimisticReadReceipts],
+  ([published, optimistic]: [Set<string>, string[]]) => optimistic.filter(id => !published.has(id)),
+)
+
+export const allReadReceipts = new Derived(
+  [publishedReadReceipts, optimisticReadReceipts],
+  ([published, optimistic]: [Set<string>, string[]]) => new Set([...published, ...optimistic]),
+)
+
+export const isSeen = allReadReceipts.derived($m => e => $m.has(e.id))
 
 // Notifications
 
@@ -2185,7 +2202,6 @@ const scoreEvent = e => {
 }
 
 export const storage = new Storage(12, [
-  new IndexedDBAdapter("seen3", "id", seen, 10000, sortBy(prop("created_at"))),
   new IndexedDBAdapter(
     "publishes",
     "id",

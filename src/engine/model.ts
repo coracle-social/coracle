@@ -127,11 +127,6 @@ export type Person = {
   zapper?: Zapper
 }
 
-export type ReadReceipt = {
-  id: string
-  published?: number
-}
-
 export type PublishInfo = Omit<Publish, "emitter" | "result">
 
 export type Notification = {

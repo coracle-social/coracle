@@ -1,5 +1,5 @@
 import {always, mergeRight, prop, sortBy, uniq, uniqBy, whereEq, without} from "ramda"
-import {batch, switcherFn, tryFunc} from "hurdak"
+import {switcherFn, tryFunc} from "hurdak"
 import {
   addTopic,
   modifyGroupStatus,
@@ -47,7 +47,6 @@ import {
   nip59,
   people,
   projections,
-  seen,
   sessions,
   tracker,
   withFallbacks,
@@ -398,21 +397,6 @@ projections.addHandler(10004, e => {
     communities: Tags.fromEvent(e).whereKey("a").unwrap(),
   })
 })
-
-projections.addHandler(
-  15,
-  batch(500, (chunk: TrustedEvent[]) => {
-    seen.mapStore.update($m => {
-      for (const e of chunk) {
-        for (const id of Tags.fromEvent(e).values("e").valueOf()) {
-          $m.set(id, {id, published: e.created_at})
-        }
-      }
-
-      return $m
-    })
-  }),
-)
 
 projections.addHandler(1, (e: TrustedEvent) => {
   const tagTopics = Tags.fromEvent(e).topics().valueOf()

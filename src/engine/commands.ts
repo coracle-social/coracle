@@ -64,7 +64,6 @@ import {
   publish,
   relayPolicies,
   relays,
-  seen,
   session,
   sessions,
   sign,
@@ -73,6 +72,8 @@ import {
   topics,
   user,
   withIndexers,
+  optimisticReadReceipts,
+  unpublishedReadReceipts,
 } from "src/engine/state"
 
 // Helpers
@@ -770,25 +771,16 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
     return
   }
 
-  const ids = pluck("id", events)
+  const allIds = [...unpublishedReadReceipts.get(), ...pluck("id", events)]
 
-  // Eagerly update to make the UX smooth
-  seen.mapStore.update($m => {
-    for (const id of ids) {
-      if (!$m.has(id)) {
-        $m.set(id, {id})
-      }
-    }
-
-    return $m
-  })
-
-  const notSynced = seen.get().filter(x => !x.published)
-
-  if (notSynced.length > 100) {
+  // If we have fewer than a hefty chunk, optimistically update instead so we're
+  // not creating tons of unnecessary events
+  if (allIds.length > 100) {
     const expirationTag = ["expiration", String(now() + seconds(90, "day"))]
 
-    for (const ids of chunk(500, pluck("id", notSynced))) {
+    optimisticReadReceipts.set([])
+
+    for (const ids of chunk(500, allIds)) {
       const template = createEvent(15, {
         tags: [expirationTag, ...ids.map(id => ["e", id])],
       })
@@ -813,6 +805,8 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
         })
       }
     }
+  } else {
+    optimisticReadReceipts.set(allIds)
   }
 }
 
