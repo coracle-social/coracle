@@ -14,7 +14,7 @@
   import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
-  import {loadAppData, loadUserData} from "src/app/state"
+  import {loadAppData, slowConnections, loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Toast from "src/partials/Toast.svelte"
   import Menu from "src/app/Menu.svelte"
@@ -429,7 +429,30 @@
       loadUserData()
     }
 
-    const interval = setInterval(async () => {
+    const interval1 = setInterval(() => {
+      slowConnections.set(
+        engine.getUserRelayUrls().filter(url => engine.hints.options.getRelayQuality(url) < 0.5),
+      )
+
+      // Prune connections we haven't used in a while. Clear errors periodically
+      for (const [url, connection] of network.NetworkContext.pool.data.entries()) {
+        const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
+        const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
+
+        if (lastFault) {
+          relays.key(url).update($r => ({
+            ...$r,
+            faults: lib.uniq(($r.faults || []).concat(lastFault)).slice(-10),
+          }))
+        }
+
+        if (lastActivity < Date.now() - 60_000) {
+          connection.disconnect()
+        }
+      }
+    }, 5_000)
+
+    const interval2 = setInterval(async () => {
       if (!getSetting("dufflepud_url")) {
         return
       }
@@ -459,7 +482,8 @@
     }, 30_000)
 
     return () => {
-      clearInterval(interval)
+      clearInterval(interval1)
+      clearInterval(interval2)
     }
   })
 </script>

@@ -2,7 +2,7 @@
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
   import {sortBy, uniqBy, filter, map, reject} from "ramda"
   import {doPipe, Fetch} from "hurdak"
-  import {now} from "@welshman/lib"
+  import {now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
@@ -94,7 +94,7 @@
           : await signer.get().signAsUser(template)
         const zapString = encodeURI(JSON.stringify(signedTemplate))
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCath(() => Fetch.fetchJson(zapper.callback + qs))
+        const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
 
         return {...zap, invoice: res?.pr}
       }),

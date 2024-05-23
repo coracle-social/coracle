@@ -9,7 +9,6 @@ import {
   displayList,
   doPipe,
   ellipsize,
-  pickVals,
   batch,
   randomInt,
   seconds,
@@ -1333,7 +1332,7 @@ export const getExecutor = (urls: string[]) => {
   if (muxUrl && (remoteUrls.length > 1 || NetworkContext.pool.has(muxUrl))) {
     const connection = NetworkContext.pool.get(muxUrl)
 
-    if (connection.socket.isHealthy()) {
+    if (connection.socket.isOpen()) {
       target = new Plex(remoteUrls, connection)
     }
   }
@@ -1525,20 +1524,6 @@ export const createAndPublish = async ({
 
   return publish({event, relays, verb, timeout})
 }
-
-setInterval(() => {
-  const activityKeys = ["lastRequest", "lastPublish", "lastEvent"]
-
-  for (const [url, con] of NetworkContext.pool.data.entries()) {
-    // @ts-ignore
-    const lastActivity: number = pickVals(activityKeys, con.meta).reduce(max)
-
-    // If our connection hasn't been used in a while, close it and reopen
-    if (lastActivity && lastActivity < Date.now() - 30_000) {
-      NetworkContext.pool.remove(url)
-    }
-  }
-}, 10_000)
 
 export const tracker = new Tracker()
 

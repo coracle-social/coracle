@@ -1,16 +1,12 @@
 import Bugsnag from "@bugsnag/js"
-import {uniq} from "ramda"
 import {writable} from "@welshman/lib"
-import {makeScopeFeed, Scope} from "@welshman/feeds"
-import {NetworkContext} from "@welshman/net"
+import {Scope, makeScopeFeed} from "@welshman/feeds"
 import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import type {Feed} from "src/domain"
 import {makeFeed} from "src/domain"
 import {
   env,
-  hints,
-  relays,
   pubkey,
   session,
   loadSeen,
@@ -21,7 +17,6 @@ import {
   loadPubkeys,
   loadGiftWrap,
   loadAllMessages,
-  getUserRelayUrls,
   loadGroupMessages,
   loadNotifications,
   listenForNotifications,
@@ -82,26 +77,6 @@ export const logUsage = async (path: string) => {
 }
 
 export const slowConnections = writable([])
-
-setInterval(() => {
-  slowConnections.set(getUserRelayUrls().filter(url => hints.options.getRelayQuality(url) < 0.5))
-
-  // Prune connections we haven't used in a while. Clear errors periodically
-  for (const [url, connection] of NetworkContext.pool.data.entries()) {
-    const {lastPublish, lastRequest, lastFault} = connection.meta
-    const lastActivity = Math.max(lastPublish, lastRequest)
-
-    if (lastFault) {
-      relays
-        .key(url)
-        .update($r => ({...$r, faults: uniq(($r.faults || []).concat(lastFault)).slice(-10)}))
-    }
-
-    if (lastActivity < Date.now() - 60_000) {
-      connection.disconnect()
-    }
-  }
-}, 5_000)
 
 // Synchronization from events to state
 
