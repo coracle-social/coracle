@@ -9,11 +9,12 @@ import {
   getIdFilters,
   isContextAddress,
   LOCAL_RELAY_URL,
+  REACTION,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, Loader} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
@@ -167,21 +168,11 @@ export class FeedLoader {
     })
 
     return events.filter(e => {
-      if (repository.isDeleted(e)) {
-        return false
-      }
-
-      if (this.isEventMuted(e, strict)) {
-        return false
-      }
-
-      if (this.opts.shouldHideReplies && Tags.fromEvent(e).parent()) {
-        return false
-      }
-
-      if (getIdOrAddress(e) === this.opts.anchor) {
-        return false
-      }
+      if (repository.isDeleted(e)) return false
+      if (e.kind === REACTION && !isLike(e)) return false
+      if (this.isEventMuted(e, strict)) return false
+      if (this.opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
+      if (getIdOrAddress(e) === this.opts.anchor) return false
 
       return true
     })
