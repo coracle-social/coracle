@@ -37,12 +37,11 @@
     <div class="flex justify-between">
       <span class="flex items-start gap-3">
         <div>
-          <span
-            class="staatliches text-xl"
-            class:text-neutral-400={!feed.title}
-            class:line-through={deleted}>
-            {displayFeed(feed)}
-          </span>
+          <Anchor on:click={loadFeed} class="staatliches text-xl">
+            <span class:text-neutral-400={!feed.title} class:line-through={deleted}>
+              {displayFeed(feed)}
+            </span>
+          </Anchor>
           {#if deleted}
             <Chip danger small>Deleted</Chip>
           {/if}

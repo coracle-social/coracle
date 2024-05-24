@@ -57,7 +57,7 @@
     "@scure/base": "^1.1.6",
     "@welshman/feeds": "^0.0.9",
     "@welshman/lib": "^0.0.8",
-    "@welshman/net": "^0.0.10",
+    "@welshman/net": "^0.0.11",
     "@welshman/util": "^0.0.11",
     "classnames": "^2.5.1",
     "compressorjs": "^1.2.1",
