@@ -25,13 +25,7 @@ import {
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
 import {updateIn} from "src/util/misc"
-import {
-  generatePrivateKey,
-  giftWrapKinds,
-  noteKinds,
-  reactionKinds,
-  repostKinds,
-} from "src/util/nostr"
+import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, whereEq, without} from "ramda"
 import {
   deriveUserCircles,
@@ -51,6 +45,7 @@ import {
   load,
   loadOne,
   loadPubkeys,
+  loadPubkeyRelays,
   maxWot,
   network,
   nip04,
@@ -269,13 +264,19 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
       )
     }
   },
-  requestDVM: async ({kind, tags = [], onEvent, ...request}) => {
-    const relays = request.relays?.length > 0
-      ? hints.fromRelays(request.relay || []).getUrls()
-      : hints.Messages(tags.filter(nthEq(0, 'p')).map(nth(1))).getUrls()
+  requestDVM: async ({kind, onEvent, ...request}) => {
+    const tags = [...request.tags, ["param", "user", pubkey.get()]]
 
-    tags.push(["param", "user", pubkey.get()])
-    tags.push(["max_results", "200"])
+    let relays
+    if (request.relays?.length > 0) {
+      relays = hints.fromRelays(request.relays).getUrls()
+    } else {
+      const pubkeys = tags.filter(nthEq(0, "p")).map(nth(1))
+
+      await loadPubkeyRelays(pubkeys)
+
+      relays = hints.Messages(pubkeys).getUrls()
+    }
 
     const event = await dvmRequest({kind, tags, relays})
 
@@ -452,7 +453,7 @@ export const loadAllMessages = ({reload = false} = {}) => {
 
   if (!reload) {
     filters = [
-      addSinceToFilter(filters[0], seconds(7, 'day')),
+      addSinceToFilter(filters[0], seconds(7, "day")),
       addSinceToFilter(filters[1]),
       addSinceToFilter(filters[2]),
     ]

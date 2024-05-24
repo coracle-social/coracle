@@ -1846,10 +1846,11 @@ export const dvmRequest = async ({
 
     const sub = subscribe({
       relays,
+      timeout,
       filters: [
         {
           kinds,
-          since: now() - seconds(5, "minute"),
+          since: now() - seconds(1, "minute"),
           "#e": [pub.request.event.id],
         },
       ],
@@ -1865,8 +1866,6 @@ export const dvmRequest = async ({
         resolve(null)
       },
     })
-
-    setTimeout(sub.close, timeout)
   })
 }
 

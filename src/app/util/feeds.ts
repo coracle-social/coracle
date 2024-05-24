@@ -13,7 +13,7 @@ import {
   REACTION,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
-import type {Feed, Loader} from "@welshman/feeds"
+import type {Feed, Loader, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
@@ -51,6 +51,7 @@ export type FeedOpts = {
 export class FeedLoader {
   done = writable(false)
   loader: Promise<Loader>
+  compiled?: Promise<RequestItem[]>
   feedLoader: CoreFeedLoader<TrustedEvent>
   controller = new AbortController()
   notes = writable<DisplayEvent[]>([])
@@ -90,6 +91,7 @@ export class FeedLoader {
         }
       }
     }
+
     // Use a custom feed loader so we can intercept the filters and infer relays
     this.feedLoader = new CoreFeedLoader({
       ...baseFeedLoader.options,
@@ -105,8 +107,12 @@ export class FeedLoader {
       },
     })
 
-    if (opts.shouldListen && this.feedLoader.compiler.canCompile(opts.feed)) {
-      this.feedLoader.compiler.compile(opts.feed).then(requests => {
+    this.compiled = this.feedLoader.compiler.canCompile(opts.feed)
+      ? this.feedLoader.compiler.compile(opts.feed)
+      : null
+
+    if (opts.shouldListen && this.compiled) {
+      this.compiled.then(requests => {
         const tracker = new Tracker()
         const signal = this.controller.signal
         const onEvent = this.onEvent(this.prependToFeed)
@@ -123,12 +129,16 @@ export class FeedLoader {
   // Public api
 
   start = () => {
-    this.loader = this.feedLoader.getLoader(this.opts.feed, {
+    const loadOpts = {
       onEvent: this.onEvent(this.appendToFeed),
       onExhausted: () => {
         this.done.set(true)
       },
-    })
+    }
+
+    this.loader = this.compiled
+      ? this.compiled.then(requests => this.feedLoader.getRequestsLoader(requests, loadOpts))
+      : this.feedLoader.getLoader(this.opts.feed, loadOpts)
   }
 
   stop = () => {

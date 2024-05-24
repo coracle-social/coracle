@@ -7,6 +7,7 @@ import {
   FEED,
   GENERIC_REPOST,
   NAMED_BOOKMARKS,
+  HANDLER_INFORMATION,
   HIGHLIGHT,
   LONG_FORM,
   NOTE,
@@ -52,7 +53,7 @@ export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
-export const personKinds = [...LIST_KINDS, NAMED_BOOKMARKS, FEED, PROFILE] as number[]
+export const personKinds = [...LIST_KINDS, HANDLER_INFORMATION, NAMED_BOOKMARKS, FEED, PROFILE] as number[]
 export const userKinds = [...personKinds, APPLICATION] as number[]
 
 export const appDataKeys = {

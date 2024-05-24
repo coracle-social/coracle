@@ -47,15 +47,12 @@
     limit = 0
     done = loader.done
     notes = loader.notes
+    filters = [{ids: []}]
+
     loader.start()
-
-    if (loader.feedLoader.compiler.canCompile(feed.definition)) {
-      const requests = await loader.feedLoader.compiler.compile(feed.definition)
-
+    loader.compiled.then(requests => {
       filters = requests.flatMap(r => r.filters || [])
-    } else {
-      filters = [{ids: []}]
-    }
+    })
   }
 
   const toggleReplies = () => {
@@ -123,7 +120,7 @@
   {#if $done}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
       <img class="h-20 w-20" src="/images/pumpkin.png" />
-      That's all folks!
+      That's all!
     </div>
   {:else}
     <div out:fade|local>
