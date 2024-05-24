@@ -778,7 +778,9 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
   if (allIds.length > 100) {
     const expirationTag = ["expiration", String(now() + seconds(90, "day"))]
 
-    optimisticReadReceipts.set([])
+    if (optimisticReadReceipts.get().length > 0) {
+      optimisticReadReceipts.set([])
+    }
 
     for (const ids of chunk(500, allIds)) {
       const template = createEvent(15, {

@@ -108,14 +108,16 @@
         {displayFeed(feed)}
       </MenuDesktopItem>
     {/each}
-    <FlexColumn
-      small
-      class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
-      <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
-        >Manage Feeds</Anchor>
-      <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"
-        >Manage Lists</Anchor>
-    </FlexColumn>
+    {#if $canSign}
+      <FlexColumn
+        small
+        class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
+        <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
+          >Manage Feeds</Anchor>
+        <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"
+          >Manage Lists</Anchor>
+      </FlexColumn>
+    {/if}
   </div>
 {/if}
 

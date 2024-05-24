@@ -11,7 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {publishDeletionForEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
+  import {canSign, publishDeletionForEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -91,25 +91,27 @@
 
 <FeedField bind:feed={feed.definition} />
 
-{#if !saveIsOpen}
-  <Card class="flex flex-col justify-between sm:flex-row">
-    <p>Would you like to save this feed?</p>
-    <Anchor underline on:click={openSave} class="text-neutral-400">Save this feed</Anchor>
-  </Card>
-{:else if draft.event || draft.list}
-  <Card class="flex flex-col justify-between sm:flex-row">
-    <p>You are currently editing your {displayFeed(draft)} feed.</p>
-    <Anchor underline on:click={startClone} class="text-neutral-400">
-      Create a new feed instead
-    </Anchor>
-  </Card>
-{:else if feed.event || feed.list}
-  <Card class="flex flex-col justify-between sm:flex-row">
-    <p>You are currently creating a new feed.</p>
-    <Anchor underline on:click={stopClone} class="text-neutral-400">
-      Edit your {displayFeed(feed)} feed instead
-    </Anchor>
-  </Card>
+{#if $canSign}
+  {#if !saveIsOpen}
+    <Card class="flex flex-col justify-between sm:flex-row">
+      <p>Would you like to save this feed?</p>
+      <Anchor underline on:click={openSave} class="text-neutral-400">Save this feed</Anchor>
+    </Card>
+  {:else if draft.event || draft.list}
+    <Card class="flex flex-col justify-between sm:flex-row">
+      <p>You are currently editing your {displayFeed(draft)} feed.</p>
+      <Anchor underline on:click={startClone} class="text-neutral-400">
+        Create a new feed instead
+      </Anchor>
+    </Card>
+  {:else if feed.event || feed.list}
+    <Card class="flex flex-col justify-between sm:flex-row">
+      <p>You are currently creating a new feed.</p>
+      <Anchor underline on:click={stopClone} class="text-neutral-400">
+        Edit your {displayFeed(feed)} feed instead
+      </Anchor>
+    </Card>
+  {/if}
 {/if}
 
 {#if saveIsOpen}

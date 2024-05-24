@@ -53,6 +53,7 @@ import {
   writable,
   now,
   inc,
+  sort,
   groupBy,
 } from "@welshman/lib"
 import type {IWritable} from "@welshman/lib"
@@ -562,7 +563,7 @@ export const sortChannels = $channels =>
 export const channelHasNewMessages = (c: Channel) =>
   c.last_received > Math.max(c.last_sent || 0, c.last_checked || 0)
 
-export const getChannelId = (pubkeys: string[]) => uniq(pubkeys).toSorted().join(",")
+export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
@@ -1446,17 +1447,22 @@ export const subscribe = (request: MySubscribeRequest) => {
   return sub
 }
 
-export const subscribePersistent = async (request: MySubscribeRequest) => {
+export const subscribePersistent = (request: MySubscribeRequest) => {
   let done = false
 
-  /* eslint no-constant-condition: 0 */
-  while (!done) {
+  const start = async () => {
     // If the subscription gets closed quickly due to eose, don't start flapping
     await Promise.all([
       sleep(30_000),
       new Promise(resolve => subscribe(request).emitter.on("close", resolve)),
     ])
+
+    if (!done) {
+      start()
+    }
   }
+
+  start()
 
   return () => {
     done = true

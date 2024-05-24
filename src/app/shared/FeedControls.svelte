@@ -12,7 +12,7 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, displayList, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {userListFeeds, publishDeletion, userFeeds} from "src/engine"
+  import {userListFeeds, canSign, publishDeletion, userFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -126,14 +126,16 @@
                 </MenuItem>
               {/each}
             </div>
-            <div class="bg-neutral-900">
-              <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
-                <i class="fa fa-rss" /> Manage feeds
-              </MenuItem>
-              <MenuItem href={router.at("lists").toString()} class="flex items-center gap-2">
-                <i class="fa fa-list" /> Manage lists
-              </MenuItem>
-            </div>
+            {#if $canSign}
+              <div class="bg-neutral-900">
+                <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
+                  <i class="fa fa-rss" /> Manage feeds
+                </MenuItem>
+                <MenuItem href={router.at("lists").toString()} class="flex items-center gap-2">
+                  <i class="fa fa-list" /> Manage lists
+                </MenuItem>
+              </div>
+            {/if}
           </Menu>
         </Popover2>
       {/if}
