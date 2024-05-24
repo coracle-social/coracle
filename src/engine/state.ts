@@ -1849,7 +1849,7 @@ export const dvmRequest = async ({
       filters: [
         {
           kinds,
-          since: now() - seconds(1, "minute"),
+          since: now() - seconds(5, "minute"),
           "#e": [pub.request.event.id],
         },
       ],

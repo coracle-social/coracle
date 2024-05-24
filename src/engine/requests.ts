@@ -9,7 +9,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, fromPairs, now, writable, max} from "@welshman/lib"
+import {Worker, nthEq, nth, fromPairs, now, writable, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -269,9 +269,15 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
       )
     }
   },
-  requestDVM: async ({kind, tags = [], relays = [], onEvent}) => {
-    const sk = generatePrivateKey()
-    const event = await dvmRequest({kind, tags, relays, sk, timeout: 3000})
+  requestDVM: async ({kind, tags = [], onEvent, ...request}) => {
+    const relays = request.relays?.length > 0
+      ? hints.fromRelays(request.relay || []).getUrls()
+      : hints.Messages(tags.filter(nthEq(0, 'p')).map(nth(1))).getUrls()
+
+    tags.push(["param", "user", pubkey.get()])
+    tags.push(["max_results", "200"])
+
+    const event = await dvmRequest({kind, tags, relays})
 
     if (event) {
       onEvent(event)
