@@ -109,6 +109,9 @@
       </MenuDesktopItem>
     {/each}
     {#if $canSign}
+      <div class="px-6 py-2 inline-block">
+        <Anchor modal button accent href="/feeds/create"><i class="fa fa-plus" />Feed</Anchor>
+      </div>
       <FlexColumn
         small
         class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
