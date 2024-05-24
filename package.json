@@ -16,10 +16,7 @@
     "watch": "find src -type f | entr -r"
   },
   "devDependencies": {
-    "@capacitor/android": "^5.7.5",
-    "@capacitor/cli": "^5.7.5",
-    "@capacitor/core": "^5.7.5",
-    "@capacitor/ios": "^5.7.5",
+    "@capacitor/cli": "^6.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.1.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/ramda": "^0.29.12",
@@ -49,6 +46,9 @@
   },
   "dependencies": {
     "@bugsnag/js": "^7.22.4",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
     "@event-calendar/core": "^2.6.1",
     "@event-calendar/day-grid": "^2.6.1",
     "@event-calendar/interaction": "^2.6.1",

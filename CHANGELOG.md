@@ -4,6 +4,9 @@
 
 - [x] Improve search results loading indicator
 - [x] Make zaps prettier with bitcoin-connect
+- [x] Improve DM loading and deliverability
+- [x] Add ability to search other people's lists and feeds
+- [x] Limit recursive quotes
 
 # 0.4.5
 
