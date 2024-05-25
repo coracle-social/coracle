@@ -109,12 +109,11 @@
       </MenuDesktopItem>
     {/each}
     {#if $canSign}
-      <div class="px-6 py-2 inline-block">
-        <Anchor modal button accent href="/feeds/create"><i class="fa fa-plus" />Feed</Anchor>
-      </div>
       <FlexColumn
         small
         class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
+        <Anchor modal class="text-accent px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds/create"
+          >Add a new feed</Anchor>
         <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
           >Manage Feeds</Anchor>
         <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"

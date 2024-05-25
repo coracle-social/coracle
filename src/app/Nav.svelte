@@ -94,7 +94,7 @@
     </div>
     {#if $canSign}
       <Anchor button accent on:click={createNote}>Post +</Anchor>
-    {:else}
+    {:else if !$pubkey}
       <Anchor modal button accent href="/login">Log In</Anchor>
     {/if}
   </div>
@@ -114,7 +114,7 @@
     <div>
       {#if $canSign}
         <Anchor button accent on:click={createNote}>Post +</Anchor>
-      {:else}
+      {:else if !$pubkey}
         <Anchor modal button accent href="/login">Log In</Anchor>
       {/if}
     </div>
