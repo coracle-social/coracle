@@ -34,7 +34,7 @@
   const contentCache = synced("ChannelsDetail/contentCache", {})
 
   const messages = derived(
-    deriveEvents([{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]),
+    deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]}),
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 

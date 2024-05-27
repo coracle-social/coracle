@@ -33,8 +33,8 @@ import {isGiftWrap, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {appDataKeys} from "src/util/nostr"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
 import {updateSession, setSession} from "src/engine/commands"
+import {relay} from "src/engine/repository"
 import {
-  relay,
   channels,
   getSession,
   getZapper,

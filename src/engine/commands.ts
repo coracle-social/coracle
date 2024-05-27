@@ -36,11 +36,11 @@ import {makeFollowList, editFollowList, createFollowList, readFollowList} from "
 import type {RelayPolicy, Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {NostrConnectBroker} from "src/engine/utils"
+import {repository} from "src/engine/repository"
 import {
   canSign,
   channels,
   loadOne,
-  repository,
   tagsFromContent,
   createAndPublish,
   deriveAdminKeyForGroup,

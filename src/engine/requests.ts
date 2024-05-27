@@ -27,6 +27,7 @@ import {
 import {updateIn} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, whereEq, without} from "ramda"
+import {repository} from "src/engine/repository"
 import {
   deriveUserCircles,
   getGroupReqInfo,
@@ -60,7 +61,6 @@ import {
   subscribePersistent,
   user,
   withFallbacks,
-  repository,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 
