@@ -20,6 +20,7 @@ import {
   ZAP_RESPONSE,
   Tags,
   Address,
+  isShareableRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
@@ -53,7 +54,13 @@ export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
-export const personKinds = [...LIST_KINDS, HANDLER_INFORMATION, NAMED_BOOKMARKS, FEED, PROFILE] as number[]
+export const personKinds = [
+  ...LIST_KINDS,
+  HANDLER_INFORMATION,
+  NAMED_BOOKMARKS,
+  FEED,
+  PROFILE,
+] as number[]
 export const userKinds = [...personKinds, APPLICATION] as number[]
 
 export const appDataKeys = {
@@ -163,3 +170,26 @@ export const parseAnythingSync = entity => {
     return null
   }
 }
+
+export const getTags =
+  (types: string[], testValue = null) =>
+  (tags: string[][]) =>
+    tags.filter(t => types.includes(t[0]) && (!testValue || testValue(t[1] || "")))
+
+export const getTagValues = (types: string[], testValue = null) => {
+  const _getTags = getTags(types, testValue)
+
+  return (tags: string[][]) => _getTags(tags).map(t => t[1] || "")
+}
+
+export const getAddressTags = getTags(["a"], Address.isAddress)
+
+export const getAddressTagValues = getTagValues(["a"], Address.isAddress)
+
+export const getPubkeyTags = getTags(["p"], pk => pk.length === 64)
+
+export const getPubkeyTagValues = getTagValues(["p"], pk => pk.length === 64)
+
+export const getRelayTags = getTags(["r", "relay"], isShareableRelayUrl)
+
+export const getRelayTagValues = getTagValues(["r", "relay"], isShareableRelayUrl)

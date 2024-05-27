@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {DIRECT_MESSAGE, Tags} from "@welshman/util"
   import {formatTimestamp, synced} from "src/util/misc"
@@ -17,7 +18,7 @@
     session,
     displayPubkey,
     sendMessage,
-    repository,
+    deriveEvents,
     sendLegacyMessage,
     markChannelRead,
     getChannelIdFromEvent,
@@ -32,9 +33,10 @@
 
   const contentCache = synced("ChannelsDetail/contentCache", {})
 
-  const messages = repository
-    .filter([{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}])
-    .derived($events => $events.filter(e => getChannelIdFromEvent(e) === channelId))
+  const messages = derived(
+    deriveEvents([{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]),
+    $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
+  )
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 

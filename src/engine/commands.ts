@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import {get} from "svelte/store"
 import {cached, nth, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -771,7 +772,7 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
     return
   }
 
-  const allIds = [...unpublishedReadReceipts.get(), ...pluck("id", events)]
+  const allIds = [...get(unpublishedReadReceipts), ...pluck("id", events)]
 
   // If we have fewer than a hefty chunk, optimistically update instead so we're
   // not creating tons of unnecessary events

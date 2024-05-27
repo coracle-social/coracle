@@ -58,6 +58,10 @@ export type List = {
   event?: TrustedEvent
 }
 
+export type PublishedList = Omit<List, "event"> & {
+  event: TrustedEvent
+}
+
 export const makeList = (list: Partial<List> = {}): List => ({
   kind: NAMED_PEOPLE,
   title: "",
@@ -68,7 +72,12 @@ export const makeList = (list: Partial<List> = {}): List => ({
 })
 
 export const readList = (event: TrustedEvent) => {
-  const {d: identifier = randomId(), name = "", title = "", description = ""} = fromPairs(event.tags)
+  const {
+    d: identifier = randomId(),
+    name = "",
+    title = "",
+    description = "",
+  } = fromPairs(event.tags)
 
   return {
     kind: event.kind,
@@ -77,7 +86,7 @@ export const readList = (event: TrustedEvent) => {
     identifier,
     tags: event.tags,
     event,
-  } as List
+  } as PublishedList
 }
 
 export const createList = ({kind, title, description, identifier, tags}: List) => ({

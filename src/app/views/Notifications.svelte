@@ -30,8 +30,6 @@
 
   const allTabs = ["Mentions & Replies", "Reactions", "Groups"]
 
-  const throttledNotifications = notifications.throttle(300)
-
   const setActiveTab = tab => router.at("notifications").at(tab).push()
 
   const loadMore = async () => {
@@ -60,7 +58,7 @@
 
   $: {
     const groupedNotifications = createNotificationGroups(
-      $throttledNotifications,
+      $notifications,
       getTabKinds(activeTab),
     ).slice(0, limit)
 

@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {Tags, getAddress} from "@welshman/util"
   import {fromPairs} from "ramda"
+  import {derived} from "svelte/store"
+  import {Tags, getAddress} from "@welshman/util"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -10,7 +11,7 @@
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {repository, getSetting, pubkey} from "src/engine"
+  import {deriveEvent, repository, getSetting, pubkey} from "src/engine"
 
   export let event
   export let showDate = false
@@ -32,7 +33,7 @@
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()
-  const deleted = repository.watchEvent(event.id).derived(() => repository.isDeleted(event))
+  const deleted = derived(deriveEvent(event.id), repository.isDeleted)
 </script>
 
 <div class="flex flex-grow flex-col gap-2">

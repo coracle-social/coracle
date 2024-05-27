@@ -1,5 +1,7 @@
 import {throttle} from "throttle-debounce"
-import {now, stripProtocol, writable} from "@welshman/lib"
+import {writable} from "svelte/store"
+import type {Readable, Writable} from "svelte/store"
+import {now, stripProtocol} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {Storage, ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
@@ -203,8 +205,9 @@ export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
 }
 
-export const memoize = f => {
-  let prevArgs, result
+export const memoize = <T>(f: (...args: any[]) => T) => {
+  let prevArgs
+  let result: T
 
   return (...args) => {
     if (!equals(prevArgs, args)) {
@@ -369,6 +372,8 @@ export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ..
   ...xs.slice(start + deleteCount),
 ]
 
+// Local storage
+
 export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
   const store = writable<T>(Storage.getJson(key) || defaultValue)
 
@@ -376,3 +381,56 @@ export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
 
   return store
 }
+
+export const getter = <T>(store: Readable<T>) => {
+  let value: T
+
+  store.subscribe((newValue: T) => {
+    value = newValue
+  })
+
+  return () => value
+}
+
+type Stop = () => void
+type Setter<T> = (x: T) => T
+type Sub<T> = (x: T) => void
+type Start<T> = (set: Setter<T>) => Stop
+
+export const custom = <T>(start: Start<T>) => {
+  const subs: Sub<T>[] = []
+
+  let stop: () => void
+
+  return {
+    subscribe: (sub: Sub<T>) => {
+      subs.push(sub)
+
+      if (subs.length === 1) {
+        stop = start((value: T) => {
+          for (const sub of subs) {
+            sub(value)
+          }
+
+          return value
+        })
+      }
+
+      return () => {
+        subs.splice(
+          subs.findIndex(s => s === sub),
+          1,
+        )
+
+        if (subs.length === 0) {
+          stop()
+        }
+      }
+    },
+  }
+}
+
+export const withGetter = <T>(store: Writable<T>) => ({...store, get: getter<T>(store)})
+
+export const throttled = <T>(delay: number, store: Readable<T>) =>
+  custom(set => store.subscribe(throttle(delay, set)))

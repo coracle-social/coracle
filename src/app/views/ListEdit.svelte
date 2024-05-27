@@ -4,12 +4,12 @@
   import ListForm from "src/app/shared/ListForm.svelte"
   import {router} from "src/app/util"
   import {readList} from "src/domain"
-  import {repository} from "src/engine"
+  import {deriveEvent} from "src/engine"
 
   export let address
   export let tags = []
 
-  const event = repository.watchEvent(address)
+  const event = deriveEvent(address)
 
   const exit = () => router.clearModals()
 

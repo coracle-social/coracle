@@ -1,4 +1,5 @@
 import {fromPairs} from "ramda"
+import {derived} from "svelte/store"
 import {writable} from "@welshman/lib"
 import {parseHex} from "src/util/html"
 import {synced} from "src/util/misc"
@@ -42,7 +43,7 @@ theme.subscribe(value => {
 
 export const toggleTheme = () => theme.update(t => (t === "dark" ? "light" : "dark"))
 
-export const themeColors = theme.derived($theme =>
+export const themeColors = derived(theme, $theme =>
   fromPairs(
     Object.entries($theme === "dark" ? DARK_THEME : LIGHT_THEME).flatMap(([k, v]) => [
       [k, v],
@@ -52,13 +53,13 @@ export const themeColors = theme.derived($theme =>
   ),
 )
 
-export const themeVariables = themeColors.derived($colors =>
+export const themeVariables = derived(themeColors, $colors =>
   Object.entries($colors)
     .map(([k, v]) => `--${k}: ${v};`)
     .join("\n"),
 )
 
-export const themeBackgroundGradient = themeColors.derived($colors => {
+export const themeBackgroundGradient = derived(themeColors, $colors => {
   const color = parseHex($colors["neutral-800"])
 
   return {

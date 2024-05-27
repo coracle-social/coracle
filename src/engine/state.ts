@@ -1,6 +1,7 @@
 import Fuse from "fuse.js"
 import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
+import {derived} from "svelte/store"
 import {
   Fetch,
   createMapOf,
@@ -51,12 +52,12 @@ import {
   uniq,
   uniqBy,
   writable,
+  first,
   now,
   inc,
   sort,
   groupBy,
 } from "@welshman/lib"
-import type {IWritable} from "@welshman/lib"
 import {
   READ_RECEIPT,
   NAMED_BOOKMARKS,
@@ -69,6 +70,7 @@ import {
   Relay as LocalRelay,
   Router,
   Tags,
+  matchFilters,
   createEvent,
   fromNostrURI,
   getFilterId,
@@ -96,7 +98,16 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
-import {fuzzy, synced, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
+import {
+  fuzzy,
+  custom,
+  synced,
+  withGetter,
+  createBatcher,
+  pushToKey,
+  tryJson,
+  fromCsv,
+} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {
   appDataKeys,
@@ -110,7 +121,7 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import type {Feed, Collection, List} from "src/domain"
+import type {PublishedFeed, PublishedListFeed, Collection, PublishedList} from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
   ListSearch,
@@ -165,8 +176,8 @@ export const env = new Writable({
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
 })
 
-export const pubkey = synced<string | null>("pubkey", null)
-export const sessions = synced<Record<string, Session>>("sessions", {})
+export const pubkey = withGetter(synced<string | null>("pubkey", null))
+export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
 
 export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
@@ -181,11 +192,121 @@ export const channels = new CollectionStore<Channel>("id")
 
 export const repository = new Repository({throttle: 300})
 
+// Sync to/from repository via a custom store
+export const events = {
+  _subs: [],
+  _onUpdate: () => {
+    const $events = repository.dump()
+
+    for (const sub of events._subs) {
+      sub($events)
+    }
+  },
+  get: () => repository.dump(),
+  set: (events: TrustedEvent[]) => repository.load(events),
+  subscribe: f => {
+    events._subs.push(f)
+
+    if (events._subs.length === 1) {
+      repository.on("update", events._onUpdate)
+    }
+
+    return () => {
+      events._subs = events._subs.filter(x => x !== f)
+
+      if (events._subs.length === 0) {
+        repository.off("update", events._onUpdate)
+      }
+    }
+  },
+}
+
 export const relay = new LocalRelay(repository)
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
+
+export const deriveEvents = (filters, includeDeleted = false) =>
+  custom<TrustedEvent[]>(setter => {
+    let data = setter(repository.query(filters, {includeDeleted}))
+
+    const onEvent = (event: TrustedEvent) => {
+      if (matchFilters(filters, event)) {
+        data = setter([...data, event])
+      }
+    }
+
+    const onDelete = (event: TrustedEvent) => {
+      const ids = new Set(event.tags.map(nth(1)))
+      const [deleted, ok] = partition(
+        (event: TrustedEvent) => getIdAndAddress(event).some(id => ids.has(id)),
+        data,
+      )
+
+      if (deleted.length > 0) {
+        data = setter(ok)
+      }
+    }
+
+    repository.on("event", onEvent)
+
+    if (!includeDeleted) {
+      repository.on("delete", onDelete)
+    }
+
+    return () => {
+      repository.off("event", onEvent)
+
+      if (!includeDeleted) {
+        repository.off("delete", onDelete)
+      }
+    }
+  })
+
+export const deriveEventsMapped = <T extends {event: TrustedEvent}>({
+  filters,
+  transform,
+}: {
+  filters: Filter[]
+  transform?: (event: TrustedEvent) => T | undefined
+}) =>
+  custom<T[]>(setter => {
+    let data = setter(repository.query(filters).map(transform))
+
+    const onEvent = (event: TrustedEvent) => {
+      if (matchFilters(filters, event)) {
+        const item = transform(event)
+
+        if (item) {
+          data = setter([...data, item])
+        }
+      }
+    }
+
+    const onDelete = (event: TrustedEvent) => {
+      const ids = new Set(event.tags.map(nth(1)))
+      const [deleted, ok] = partition(
+        (item: T) => getIdAndAddress(item.event).some(id => ids.has(id)),
+        data,
+      )
+
+      if (deleted.length > 0) {
+        data = setter(ok)
+      }
+    }
+
+    repository.on("event", onEvent)
+    repository.on("delete", onDelete)
+
+    return () => {
+      repository.off("event", onEvent)
+      repository.off("delete", onDelete)
+    }
+  })
+
+export const deriveEvent = (idOrAddress: string) =>
+  derived(deriveEvents(getIdFilters([idOrAddress]), true), first)
 
 // Session and settings
 
@@ -234,7 +355,7 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 
 export const dufflepud = (path: string) => `${getSetting("dufflepud_url")}/${path}`
 
-export const stateKey = pubkey.derived($pk => $pk || "anonymous")
+export const stateKey = new Derived(pubkey, $pk => $pk || "anonymous")
 
 export const session = new Derived(
   [pubkey, sessions],
@@ -759,27 +880,28 @@ export const deriveUserCommunities = () => session.derived(getUserCommunities)
 
 // Read receipts
 
-export const optimisticReadReceipts = synced("seen", [])
+export const optimisticReadReceipts = withGetter(synced("seen", []))
 
-export const publishedReadReceipts = repository
-  .filter([{kinds: [READ_RECEIPT]}])
-  .derived(events => new Set(events.flatMap(e => e.tags.map(nth(1)))))
+export const publishedReadReceipts = derived(
+  deriveEvents([{kinds: [READ_RECEIPT]}]),
+  events => new Set(events.flatMap(e => e.tags.map(nth(1)))),
+)
 
-export const unpublishedReadReceipts = new Derived(
+export const unpublishedReadReceipts = derived(
   [publishedReadReceipts, optimisticReadReceipts],
   ([published, optimistic]: [Set<string>, string[]]) => optimistic.filter(id => !published.has(id)),
 )
 
-export const allReadReceipts = new Derived(
+export const allReadReceipts = derived(
   [publishedReadReceipts, optimisticReadReceipts],
   ([published, optimistic]: [Set<string>, string[]]) => new Set([...published, ...optimistic]),
 )
 
-export const isSeen = allReadReceipts.derived($m => e => $m.has(e.id))
+export const isSeen = derived(allReadReceipts, $m => e => $m.has(e.id))
 
 // Notifications
 
-export const notifications = repository.derived($events => {
+export const notifications = derived(events, $events => {
   const $pubkey = pubkey.get()
   const $isEventMuted = isEventMuted.get()
   const kinds = [...noteKinds, ...reactionKinds]
@@ -793,19 +915,16 @@ export const notifications = repository.derived($events => {
   )
 })
 
-export const unreadNotifications = new Derived(
-  [isSeen, notifications],
-  ([$isSeen, $notifications]) => {
-    const since = now() - seconds(30, "day")
+export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $notifications]) => {
+  const since = now() - seconds(30, "day")
 
-    return $notifications.filter(
-      e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
-    )
-  },
-)
+  return $notifications.filter(
+    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
+  )
+})
 
 export const groupNotifications = new Derived(
-  [session, repository, groupRequests, groupAlerts, groupAdminKeys],
+  [session, events, groupRequests, groupAlerts, groupAdminKeys],
   x => x,
 )
   .throttle(3000)
@@ -845,7 +964,7 @@ export const groupNotifications = new Derived(
     )
   })
 
-export const unreadGroupNotifications = new Derived(
+export const unreadGroupNotifications = derived(
   [isSeen, groupNotifications],
   ([$isSeen, $groupNotifications]) => {
     const since = now() - seconds(30, "day")
@@ -854,7 +973,7 @@ export const unreadGroupNotifications = new Derived(
   },
 )
 
-export const hasNewNotifications = new Derived(
+export const hasNewNotifications = derived(
   [session, unreadNotifications],
   ([$session, $unread]) => {
     if ($unread.length > 0) {
@@ -1118,39 +1237,45 @@ export const searchTopicNames = searchTopics.derived(search => term => pluck("na
 
 // Lists
 
-export const lists = repository
-  .filter([{kinds: EDITABLE_LIST_KINDS}])
-  .derived($events => $events.filter(e => e.tags.length > 1).map(readList))
+export const lists = deriveEventsMapped<PublishedList>({
+  filters: [{kinds: EDITABLE_LIST_KINDS}],
+  transform: (event: TrustedEvent) => (event.tags.length > 1 ? readList(event) : null),
+})
 
-export const userLists = new Derived([lists, pubkey], ([$lists, $pubkey]: [List[], string]) =>
+export const userLists = derived([lists, pubkey], ([$lists, $pubkey]: [PublishedList[], string]) =>
   sortBy(
     l => l.title.toLowerCase(),
     $lists.filter(list => list.event.pubkey === $pubkey),
   ),
 )
 
-export const listSearch = lists.derived($lists => new ListSearch($lists))
+export const listSearch = derived(lists, $lists => new ListSearch($lists))
 
 // Feeds
 
-export const feeds = repository.filter([{kinds: [FEED]}]).derived($events => $events.map(readFeed))
+export const feeds = deriveEventsMapped<PublishedFeed>({
+  filters: [{kinds: [FEED]}],
+  transform: readFeed,
+})
 
-export const userFeeds = new Derived([feeds, pubkey], ([$feeds, $pubkey]: [Feed[], string]) =>
+export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [PublishedFeed[], string]) =>
   sortBy(
     f => f.title.toLowerCase(),
     $feeds.filter(feed => feed.event.pubkey === $pubkey),
   ),
 )
 
-export const feedSearch = feeds.derived($feeds => new FeedSearch($feeds))
+export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
-export const listFeeds = repository
-  .filter([{kinds: [NAMED_BOOKMARKS]}])
-  .derived($events => $events.filter(e => e.tags.length > 1).map($e => mapListToFeed(readList($e))))
+export const listFeeds = deriveEventsMapped<PublishedListFeed>({
+  filters: [{kinds: [NAMED_BOOKMARKS]}],
+  transform: (event: TrustedEvent) =>
+    event.tags.length > 1 ? mapListToFeed(readList(event)) : undefined,
+})
 
-export const userListFeeds = new Derived(
+export const userListFeeds = derived(
   [listFeeds, pubkey],
-  ([$listFeeds, $pubkey]: [Feed[], string]) =>
+  ([$listFeeds, $pubkey]: [PublishedListFeed[], string]) =>
     sortBy(
       l => l.title.toLowerCase(),
       $listFeeds.filter(feed => feed.list.event.pubkey === $pubkey),
@@ -1159,34 +1284,32 @@ export const userListFeeds = new Derived(
 
 // Handlers
 
-export const handlers = repository
-  .filter([{kinds: [HANDLER_INFORMATION]}])
-  .derived(events => events.flatMap(readHandlers))
+export const handlers = derived(deriveEvents([{kinds: [HANDLER_INFORMATION]}]), $events =>
+  $events.flatMap(readHandlers),
+)
 
-export const handlersByKind = handlers.derived($handlers =>
+export const handlersByKind = derived(handlers, $handlers =>
   groupBy(handler => handler.kind, $handlers),
 )
 
-export const recommendations = repository.filter([{kinds: [HANDLER_RECOMMENDATION]}])
+export const recommendations = deriveEvents([{kinds: [HANDLER_RECOMMENDATION]}])
 
-export const recommendationsByHandlerAddress = recommendations.derived(events =>
-  groupBy(getHandlerAddress, events),
+export const recommendationsByHandlerAddress = derived(recommendations, $events =>
+  groupBy(getHandlerAddress, $events),
 )
 
 export const deriveHandlersForKind = cached({
   maxSize: 100,
   getKey: ([kind]: [number]) => kind,
   getValue: ([kind]: [number]) =>
-    handlers.derived($handlers => $handlers.filter(h => h.kind === kind)),
+    derived(handlers, $handlers => $handlers.filter(h => h.kind === kind)),
 })
 
 // Collections
 
-export const collections = repository
-  .filter([{kinds: [LABEL], "#L": ["#t"]}])
-  .derived(readCollections)
+export const collections = derived(deriveEvents([{kinds: [LABEL], "#L": ["#t"]}]), readCollections)
 
-export const userCollections = new Derived(
+export const userCollections = derived(
   [collections, pubkey],
   ([$collections, $pubkey]: [Collection[], string]) =>
     sortBy(
@@ -1195,7 +1318,8 @@ export const userCollections = new Derived(
     ),
 )
 
-export const collectionSearch = collections.derived(
+export const collectionSearch = derived(
+  collections,
   $collections => new CollectionSearch($collections),
 )
 
@@ -2080,7 +2204,7 @@ class IndexedDBAdapter {
   constructor(
     readonly key: string,
     readonly keyPath: string,
-    readonly store: IWritable<any>,
+    readonly store: any,
     readonly max: number,
     readonly sort?: (xs: any[]) => any[],
     readonly filter?: (x: any) => boolean,
@@ -2244,5 +2368,5 @@ export const storage = new Storage(12, [
     sortBy(prop("created_at")),
   ),
   new IndexedDBAdapter("groupAdminKeys", "pubkey", groupAdminKeys, 1000),
-  new IndexedDBAdapter("repository", "id", repository, 100000, sortBy(scoreEvent)),
+  new IndexedDBAdapter("repository", "id", events, 100000, sortBy(scoreEvent)),
 ])

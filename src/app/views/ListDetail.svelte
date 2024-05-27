@@ -1,13 +1,12 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
-  import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {repository, pubkey} from "src/engine"
+  import {deriveEvent, pubkey} from "src/engine"
   import {router} from "src/app/util"
 
   export let address
 
-  const event = repository.watchEvent(address)
+  const event = deriveEvent(address)
 </script>
 
 {#if $event}

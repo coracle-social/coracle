@@ -12,7 +12,7 @@ import {
 import type {Feed as IFeed} from "@welshman/feeds"
 import {SearchHelper} from "src/util/misc"
 import {tryJson} from "src/util/misc"
-import type {List} from "./list"
+import type {PublishedList} from "./list"
 
 export type Feed = {
   title: string
@@ -20,7 +20,16 @@ export type Feed = {
   description: string
   definition: IFeed
   event?: TrustedEvent
-  list?: List
+  list?: PublishedList
+}
+
+export type PublishedFeed = Omit<Feed, "event"> & {
+  event: TrustedEvent
+}
+
+export type PublishedListFeed = Omit<Feed, "list"> & {
+  event: TrustedEvent
+  list: PublishedList
 }
 
 export const normalizeFeedDefinition = feed =>
@@ -34,20 +43,21 @@ export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
   ...feed,
 })
 
-export const mapListToFeed = (list: List) =>
+export const mapListToFeed = (list: PublishedList) =>
   makeFeed({
     list,
+    event: list.event,
     title: list.title,
     identifier: list.identifier,
     description: list.description,
     definition: feedFromTags(Tags.fromEvent(list.event)),
-  })
+  }) as PublishedListFeed
 
 export const readFeed = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)
   const definition = tryJson(() => JSON.parse(feed)) || makeIntersectionFeed()
 
-  return {title, identifier, description, definition, event} as Feed
+  return {title, identifier, description, definition, event} as PublishedFeed
 }
 
 export const createFeed = ({identifier, definition, title, description}: Feed) => ({
@@ -60,7 +70,7 @@ export const createFeed = ({identifier, definition, title, description}: Feed) =
   ],
 })
 
-export const editFeed = (feed: Feed) => ({
+export const editFeed = (feed: PublishedFeed) => ({
   kind: FEED,
   tags: Tags.fromEvent(feed.event)
     .setTag("title", feed.title)
