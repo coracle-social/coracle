@@ -84,7 +84,7 @@
     confirmMessage = null
   }
 
-  let confirmMessage, ctrl, unsubscribe
+  let confirmMessage, ctrl
 
   onMount(() => {
     markChannelRead(channelId)

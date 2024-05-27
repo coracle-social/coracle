@@ -5,13 +5,11 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, session, signer, stateKey} from "src/engine"
+  import {session, signer, stateKey} from "src/engine"
 
   const {current, page, modal, modals} = router
 
   let prevPage
-
-  $: isFeedPage = $page?.path.match(/^\/(notes)?$/) && !$env.FORCE_GROUP
 
   $: {
     if ($modal) {
@@ -60,9 +58,7 @@
 {#key $stateKey}
   <div
     id="page"
-    class={cx("relative pb-32 text-neutral-100 lg:pt-16", {
-      "lg:ml-72": !isFeedPage,
-      "lg:ml-[33rem]": isFeedPage,
+    class={cx("relative pb-32 text-neutral-100 lg:ml-72 lg:pt-16", {
       "pointer-events-none": $menuIsOpen,
     })}>
     {#if $page}

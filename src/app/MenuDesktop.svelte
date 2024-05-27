@@ -1,10 +1,7 @@
 <script lang="ts">
-  import {equals} from "ramda"
   import {seconds} from "hurdak"
-  import {randomId, now} from "@welshman/lib"
-  import {makeScopeFeed, Scope} from "@welshman/feeds"
+  import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {fly} from "src/util/transition"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -13,9 +10,8 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuDesktopItem from "src/app/MenuDesktopItem.svelte"
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
-  import {globalFeed, slowConnections} from "src/app/state"
+  import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {makeFeed, displayFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
     user,
@@ -26,14 +22,10 @@
     sessions,
     displayPerson,
     displayPubkey,
-    userListFeeds,
-    userFeeds,
     publishes,
   } from "src/engine"
 
   const {page} = router
-  const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
-  const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
 
   const hud = publishes.derived($publishes => {
     const pending = []
@@ -72,60 +64,13 @@
     )
   }
 
-  const loadFeed = newFeed => {
-    globalFeed.set(newFeed)
-    router.at("notes").push({key: randomId()})
-  }
-
   let subMenu
 
   $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
   $: isListPage = Boolean($page.path.match(/^\/(lists)?$/))
-  $: normalizedFeedDefinition = $globalFeed ? normalizeFeedDefinition($globalFeed.definition) : null
 </script>
 
-{#if isFeedPage && !$env.FORCE_GROUP}
-  <div
-    in:fly={{x: -100, duration: 200}}
-    class="fixed bottom-0 left-72 top-0 z-nav w-60 bg-tinted-700 pt-24 transition-colors">
-    <MenuDesktopItem
-      small
-      isActive={equals(followsFeed.definition, normalizedFeedDefinition)}
-      on:click={() => loadFeed(followsFeed)}>
-      Follows
-    </MenuDesktopItem>
-    <MenuDesktopItem
-      small
-      isActive={equals(networkFeed.definition, normalizedFeedDefinition)}
-      on:click={() => loadFeed(networkFeed)}>
-      Network
-    </MenuDesktopItem>
-    {#each $userFeeds.concat($userListFeeds) as feed}
-      <MenuDesktopItem
-        small
-        isActive={equals(feed.definition, normalizedFeedDefinition)}
-        on:click={() => loadFeed(feed)}>
-        {displayFeed(feed)}
-      </MenuDesktopItem>
-    {/each}
-    {#if $canSign}
-      <FlexColumn
-        small
-        class="staatliches absolute bottom-4 flex w-full flex-col text-neutral-400 dark:text-tinted-500">
-        <Anchor modal class="text-accent px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds/create"
-          >Add a new feed</Anchor>
-        <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/feeds"
-          >Manage Feeds</Anchor>
-        <Anchor class="px-6 hover:text-neutral-200 dark:hover:text-tinted-200" href="/lists"
-          >Manage Lists</Anchor>
-      </FlexColumn>
-    {/if}
-  </div>
-{/if}
-
-<div
-  class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors"
-  class:bg-tinted-800={isFeedPage}>
+<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
   <Anchor external class="mb-4 mt-4 flex items-center gap-2 px-6" href="https://coracle.tools">
     <img
       alt="App Logo"
@@ -133,13 +78,9 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage} isAlt={isFeedPage}
-    >Feeds</MenuDesktopItem>
+  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem
-      path="/settings/relays"
-      isActive={$page.path.startsWith("/settings/relays")}
-      isAlt={isFeedPage}>
+    <MenuDesktopItem path="/settings/relays" isActive={$page.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
@@ -151,8 +92,7 @@
   <MenuDesktopItem
     path="/notifications"
     disabled={!$canSign}
-    isActive={$page.path.startsWith("/notifications")}
-    isAlt={isFeedPage}>
+    isActive={$page.path.startsWith("/notifications")}>
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}
@@ -163,8 +103,7 @@
   <MenuDesktopItem
     path="/channels"
     disabled={!$canSign}
-    isActive={$page.path.startsWith("/channels")}
-    isAlt={isFeedPage}>
+    isActive={$page.path.startsWith("/channels")}>
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
@@ -172,16 +111,14 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")} isAlt={isFeedPage}
+  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")}
     >Calendar</MenuDesktopItem>
   {#if $env.ENABLE_MARKET}
-    <MenuDesktopItem
-      path="/listings"
-      isActive={$page.path.startsWith("/listings")}
-      isAlt={isFeedPage}>Market</MenuDesktopItem>
+    <MenuDesktopItem path="/listings" isActive={$page.path.startsWith("/listings")}
+      >Market</MenuDesktopItem>
   {/if}
   {#if !$env.FORCE_GROUP}
-    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")} isAlt={isFeedPage}
+    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")}
       >Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">

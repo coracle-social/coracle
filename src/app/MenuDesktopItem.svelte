@@ -5,7 +5,6 @@
   import Anchor from "src/partials/Anchor.svelte"
 
   export let path = null
-  export let isAlt = false
   export let isActive = false
   export let small = false
 
@@ -16,8 +15,6 @@
     "text-2xl": !small && !isActive,
     "text-accent": isActive,
     "text-tinted-400 hover:text-tinted-100": !isActive,
-    "hover:bg-tinted-800": !isActive && !isAlt,
-    "hover:bg-tinted-700": !isActive && isAlt,
   })
 </script>
 
