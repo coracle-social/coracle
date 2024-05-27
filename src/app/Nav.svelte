@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {slide} from "src/util/transition"
+  import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
@@ -19,7 +19,7 @@
 
   const openSearch = () => router.at("/search").open()
 
-  const onSearchBlur = () => setTimeout(() => searchTerm.set(null), 100)
+  const onSearchBlur = () => searchTerm.set(null)
 
   const onSearchKeydown = e => {
     if (e.key === "Escape") {
@@ -67,21 +67,23 @@
       </div>
       {#if $searchTerm}
         <div
-          class="absolute right-0 top-10 w-96 rounded shadow-2xl">
+          on:mousedown|preventDefault
+          out:fly|local={{y: 20, duration: 200}}
+          class="absolute right-0 top-10 w-96 rounded shadow-2xl opacity-100 transition-colors">
           <div class="max-h-[70vh] overflow-auto bg-tinted-700 rounded">
             <SearchResults bind:searching term={searchTerm}>
-              <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800">
+              <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800 cursor-pointer">
                 {#if result.type === "topic"}
                   #{result.topic.name}
                 {:else if result.type === "profile"}
-                  <PersonBadge inert pubkey={result.id} class="cursor-pointer" />
+                  <PersonBadge inert pubkey={result.id} />
                 {/if}
               </div>
             </SearchResults>
           </div>
           {#if searching}
             <div
-              transition:slide|local={{duration: 100}}
+              transition:slide|local={{duration: 200, delay: 100}}
               class="flex justify-center gap-2 bg-neutral-900 px-4 py-2 text-neutral-200">
               <div>
                 <i class="fa fa-circle-notch fa-spin" />

@@ -86,13 +86,11 @@
 </script>
 
 {#if visible}
-  <FlexColumn>
-    {#each $results.slice(0, 30) as result (result.type + result.id)}
-      <div on:click={() => onClick(result)}>
-        <slot name="result" {result} />
-      </div>
-    {:else}
-      <p class="text-center py-12">No results found.</p>
-    {/each}
-  </FlexColumn>
+  {#each $results.slice(0, 30) as result (result.type + result.id)}
+    <div on:click={() => onClick(result)}>
+      <slot name="result" {result} />
+    </div>
+  {:else}
+    <p class="text-center py-12">No results found.</p>
+  {/each}
 {/if}
