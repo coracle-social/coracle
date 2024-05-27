@@ -17,9 +17,6 @@
         <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
           <i class="fa fa-edit" /> Edit
         </Anchor>
-      {:else}
-        Created by
-        <PersonBadgeSmall inert pubkey={$event.pubkey} />
       {/if}
     </div>
   </ListCard>
