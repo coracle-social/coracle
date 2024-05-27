@@ -84,7 +84,7 @@
     confirmMessage = null
   }
 
-  let confirmMessage, ctrl
+  let confirmMessage, ctrl, unsubscribe
 
   onMount(() => {
     markChannelRead(channelId)
@@ -136,7 +136,9 @@
       {#await decryptContent(message)}
         <!-- pass -->
       {:then note}
-        <NoteContent showEntire {note} />
+        {#if note.content}
+          <NoteContent showEntire {note} />
+        {/if}
       {/await}
     </div>
     <small

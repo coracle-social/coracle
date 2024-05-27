@@ -11,7 +11,7 @@
 
   let prevPage
 
-  $: isFeedPage = $page.path.match(/^\/(notes)?$/) && !$env.FORCE_GROUP
+  $: isFeedPage = $page?.path.match(/^\/(notes)?$/) && !$env.FORCE_GROUP
 
   $: {
     if ($modal) {

@@ -264,7 +264,7 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
       )
     }
   },
-  requestDVM: async ({kind, tags, onEvent, ...request}) => {
+  requestDVM: async ({kind, onEvent, tags = [], ...request}) => {
     let relays
     if (request.relays?.length > 0) {
       relays = hints.fromRelays(request.relays).getUrls()
