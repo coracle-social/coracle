@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Coracle</string>
+    <string name="title_activity_main">Coracle</string>
+    <string name="package_name">social.coracle.app</string>
+    <string name="custom_url_scheme">nostr</string>
+</resources>

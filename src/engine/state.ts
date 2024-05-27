@@ -2228,7 +2228,7 @@ export const storage = new Storage(12, [
     "people",
     "pubkey",
     people,
-    5000,
+    100000,
     sortByPubkeyWhitelist(prop("last_fetched")),
   ),
   new IndexedDBAdapter("relays", "url", relays, 1000, sortBy(prop("count"))),

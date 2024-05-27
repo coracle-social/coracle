@@ -13,7 +13,6 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-android
 
 # Editor directories and files
 .vscode/*
