@@ -2104,7 +2104,7 @@ class IndexedDBAdapter {
 
     let prev: any[] = migrate(data.filter(filter))
 
-    store.set(prev)
+    await store.set(prev)
 
     store.subscribe(
       throttle(randomInt(3000, 5000), async current => {
