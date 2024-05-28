@@ -353,11 +353,13 @@ export class SearchHelper<T, V> {
 
   getValue = (option: T): V => option as unknown as V
 
+  getFuzzy = () => fuzzy(this.options, this.config)
+
   display = (value: V) => String(value)
 
   search = (term: string) => {
     if (!this.fuzzy) {
-      this.fuzzy = fuzzy(this.options, this.config)
+      this.fuzzy = this.getFuzzy()
     }
 
     return this.fuzzy(term).map(this.getValue)

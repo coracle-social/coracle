@@ -24,7 +24,7 @@
     deriveRelay,
     derivePerson,
     personHasName,
-    displayPubkey,
+    displayPersonByPubkey,
     relayPolicies,
     relayPolicyUrls,
     getRelaySearch,
@@ -58,7 +58,7 @@
       const pubkeys = pubkeysByUrl.get(r.url) || []
       const description =
         pubkeys.length > 0
-          ? "Used by " + displayList(pubkeys.map(pubkey => displayPubkey(pubkey)))
+          ? "Used by " + displayList(pubkeys.map(pubkey => displayPersonByPubkey(pubkey)))
           : r.info?.description
 
       return {...r, info: {...r.info, description}}

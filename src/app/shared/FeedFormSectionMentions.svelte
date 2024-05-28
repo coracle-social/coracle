@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {searchPubkeys, displayPubkey} from "src/engine"
+  import {searchPubkeys, displayPersonByPubkey} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let feed
@@ -19,7 +19,7 @@
   <span slot="item" let:item let:context>
     {#if context === "value"}
       <Anchor modal href={router.at("people").of(item).toString()}>
-        {displayPubkey(item)}
+        {displayPersonByPubkey(item)}
       </Anchor>
     {:else}
       <PersonBadge inert pubkey={item} />

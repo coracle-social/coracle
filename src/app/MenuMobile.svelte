@@ -19,7 +19,7 @@
     hasNewNotifications,
     pubkey,
     sessions,
-    displayPubkey,
+    displayPersonByPubkey,
   } from "src/engine"
 
   const closeSubMenu = () => {
@@ -216,7 +216,7 @@
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
           <div class="flex items-center justify-center gap-2">
             <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
-            {displayPubkey(s.pubkey)}
+            {displayPersonByPubkey(s.pubkey)}
           </div>
         </MenuItem>
       {/if}

@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import {router} from "src/app/util/router"
-  import {displayPubkey} from "src/engine"
+  import {displayPersonByPubkey} from "src/engine"
 
   export let note, showEntire
   export let showMedia = false
@@ -34,8 +34,8 @@
       }
 
       const display = switcherFn(type, {
-        npub: () => "@" + displayPubkey(data),
-        nprofile: () => "@" + displayPubkey(data.pubkey),
+        npub: () => "@" + displayPersonByPubkey(data),
+        nprofile: () => "@" + displayPersonByPubkey(data.pubkey),
         default: () => entity.slice(0, 16) + "...",
       })
 

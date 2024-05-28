@@ -17,13 +17,13 @@
   } from "@welshman/feeds"
   import {formatTimestampAsDate} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
-  import {displayRelayUrl, displayPubkey} from "src/engine"
+  import {displayRelayUrl, displayPersonByPubkey} from "src/engine"
 
   export let feed
   export let shallow = false
 
   const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? displayPubkey(pubkeys[0]) : `${pubkeys.length} people`
+    pubkeys.length === 1 ? displayPersonByPubkey(pubkeys[0]) : `${pubkeys.length} people`
 
   const displayTopics = topics =>
     topics.length === 1 ? `#${topics[0]}` : `${topics.length} topics`

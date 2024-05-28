@@ -47,7 +47,7 @@ import {
   deriveGroup,
   deriveIsGroupMember,
   deriveSharedKeyForGroup,
-  displayPubkey,
+  displayPersonByPubkey,
   env,
   fetchHandle,
   forcePlatformRelays,
@@ -655,7 +655,7 @@ export const publishGroupEntryRequest = (address, claim = null) => {
     publishToGroupAdmin(
       address,
       createEvent(25, {
-        content: `${displayPubkey(pubkey.get())} would like to join the group`,
+        content: `${displayPersonByPubkey(pubkey.get())} would like to join the group`,
         tags,
       }),
     )
@@ -669,7 +669,7 @@ export const publishGroupExitRequest = address => {
     publishToGroupAdmin(
       address,
       createEvent(26, {
-        content: `${displayPubkey(pubkey.get())} is leaving the group`,
+        content: `${displayPersonByPubkey(pubkey.get())} is leaving the group`,
         tags: [...getClientTags(), ["a", address]],
       }),
     )

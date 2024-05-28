@@ -16,9 +16,11 @@
   export let channel
 
   const pubkeys = channel.id.split(",") as string[]
-  const displayPubkeys = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
+  const displayPersonByPubkeys = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
   const showAlert = channels.key(channel.id).derived(channelHasNewMessages)
-  const members = people.mapStore.derived($p => displayPubkeys.map(pk => $p.get(pk) || {pubkey: pk}))
+  const members = people.mapStore.derived($p =>
+    displayPersonByPubkeys.map(pk => $p.get(pk) || {pubkey: pk}),
+  )
 
   const enter = () => router.at("channels").of(pubkeys).push()
 
@@ -28,7 +30,7 @@
 <Card interactive on:click={enter}>
   <div class="flex justify-between gap-8 px-2 py-4">
     <div class="flex gap-8">
-      <PersonCircles pubkeys={displayPubkeys} />
+      <PersonCircles pubkeys={displayPersonByPubkeys} />
       <h2>{displayList($members.map(displayPerson))}</h2>
     </div>
     <div class="relative">

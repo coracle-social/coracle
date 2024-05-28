@@ -17,11 +17,11 @@
   import {themeColors} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {displayPubkey} from "src/domain"
   import {
     deriveFollowing,
     derivePerson,
     displayPerson,
-    displayNpub,
     session,
     maxWot,
     getWotScore,
@@ -32,7 +32,7 @@
   const person = derivePerson(pubkey)
   const following = deriveFollowing(pubkey)
   const wotScore = getWotScore($session?.pubkey, pubkey)
-  const npubDisplay = displayNpub(pubkey)
+  const npubDisplay = displayPubkey(pubkey)
 
   $: superMaxWot = $maxWot * 1.5
   $: dashOffset = 100 - (Math.max(superMaxWot / 20, wotScore) / superMaxWot) * 100

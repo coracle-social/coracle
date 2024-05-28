@@ -63,6 +63,7 @@ import {
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
   LABEL,
+  PROFILE,
   FEED,
   Address,
   Router,
@@ -108,14 +109,16 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import type {PublishedFeed, PublishedListFeed, Collection, PublishedList} from "src/domain"
+import type {PublishedFeed, PublishedListFeed, Collection, PublishedList, Profile} from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
   ListSearch,
   FeedSearch,
   readFeed,
   readList,
+  readProfile,
   readCollections,
+  displayPubkey,
   CollectionSearch,
   readHandlers,
   mapListToFeed,
@@ -249,6 +252,14 @@ export const nip59 = session.derived(getNip59)
 export const canSign = signer.derived($signer => $signer.isEnabled())
 export const settings = user.derived(getSettings)
 
+// Profiles
+
+export const profiles = deriveEventsMapped<Profile>({
+  filters: [{kinds: [PROFILE]}],
+  eventToItem: readProfile,
+  itemToEvent: prop("event"),
+})
+
 // People
 
 export const fetchHandle = createBatcher(500, async (handles: string[]) => {
@@ -274,12 +285,6 @@ export const personHasName = ({profile: p}: Person) => Boolean(p?.name || p?.dis
 
 export const getPersonWithDefault = pubkey => ({pubkey, ...people.key(pubkey).get()})
 
-export const displayNpub = pubkey => {
-  const d = nip19.npubEncode(pubkey)
-
-  return d.slice(0, 8) + "…" + d.slice(-5)
-}
-
 export const displayPerson = ({pubkey, profile}: Person) => {
   if (profile) {
     const {display_name, name} = profile
@@ -294,7 +299,7 @@ export const displayPerson = ({pubkey, profile}: Person) => {
   }
 
   try {
-    return displayNpub(pubkey)
+    return displayPubkey(pubkey)
   } catch (e) {
     logger.error(e)
 
@@ -302,10 +307,10 @@ export const displayPerson = ({pubkey, profile}: Person) => {
   }
 }
 
+export const displayPersonByPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
+
 export const displayHandle = (handle: Handle) =>
   handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
-
-export const displayPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
 
 export const getMutedPubkeys = $person =>
   ($person?.mutes || []).map(nth(1)).filter(pk => pk?.length === 64) as string[]
@@ -1696,7 +1701,7 @@ export const uniqTags = tags =>
   uniqBy((t: string[]) => (t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")), tags)
 
 export const mention = (pubkey: string) =>
-  hints.tagPubkey(pubkey).append(displayPubkey(pubkey)).valueOf()
+  hints.tagPubkey(pubkey).append(displayPersonByPubkey(pubkey)).valueOf()
 
 export const tagsFromContent = (content: string) => {
   const tags = []

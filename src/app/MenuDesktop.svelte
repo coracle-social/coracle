@@ -21,7 +21,7 @@
     hasNewNotifications,
     sessions,
     displayPerson,
-    displayPubkey,
+    displayPersonByPubkey,
     publishes,
   } from "src/engine"
 
@@ -184,7 +184,7 @@
                 <PersonCircle
                   class="h-8 w-8 border border-solid border-tinted-200"
                   pubkey={s.pubkey} />
-                {displayPubkey(s.pubkey)}
+                {displayPersonByPubkey(s.pubkey)}
               </div>
             </MenuItem>
           {/if}
