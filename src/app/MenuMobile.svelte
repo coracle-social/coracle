@@ -12,14 +12,12 @@
   import {makeFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
-    user,
     canSign,
-    displayPerson,
     hasNewMessages,
     hasNewNotifications,
     pubkey,
     sessions,
-    displayPersonByPubkey,
+    displayProfileByPubkey,
   } from "src/engine"
 
   const closeSubMenu = () => {
@@ -66,7 +64,7 @@
           on:click={openAccount}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
-            <span>@{displayPerson($user)}</span>
+            <span>@{displayProfileByPubkey($pubkey)}</span>
             <PersonHandle class="text-sm" pubkey={$pubkey} />
           </div>
         </Anchor>
@@ -216,7 +214,7 @@
         <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
           <div class="flex items-center justify-center gap-2">
             <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
-            {displayPersonByPubkey(s.pubkey)}
+            {displayProfileByPubkey(s.pubkey)}
           </div>
         </MenuItem>
       {/if}

@@ -2,7 +2,7 @@
   import {makeListFeed} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {listSearch, displayPersonByPubkey, repository} from "src/engine"
+  import {listSearch, displayProfileByPubkey, repository} from "src/engine"
   import {router} from "src/app/util"
 
   export let feed
@@ -14,7 +14,7 @@
     const event = repository.getEvent(address)
 
     return event
-      ? `${$listSearch.displayValue(address)} by ${displayPersonByPubkey(event.pubkey)}`
+      ? `${$listSearch.displayValue(address)} by ${displayProfileByPubkey(event.pubkey)}`
       : $listSearch.displayValue(address)
   }
 

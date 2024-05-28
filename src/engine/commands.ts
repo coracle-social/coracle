@@ -47,9 +47,8 @@ import {
   deriveGroup,
   deriveIsGroupMember,
   deriveSharedKeyForGroup,
-  displayPersonByPubkey,
+  displayProfileByPubkey,
   env,
-  fetchHandle,
   forcePlatformRelays,
   getClientTags,
   groupAdminKeys,
@@ -76,6 +75,7 @@ import {
   optimisticReadReceipts,
   unpublishedReadReceipts,
 } from "src/engine/state"
+import {getHandle} from "src/engine/requests"
 
 // Helpers
 
@@ -655,7 +655,7 @@ export const publishGroupEntryRequest = (address, claim = null) => {
     publishToGroupAdmin(
       address,
       createEvent(25, {
-        content: `${displayPersonByPubkey(pubkey.get())} would like to join the group`,
+        content: `${displayProfileByPubkey(pubkey.get())} would like to join the group`,
         tags,
       }),
     )
@@ -669,7 +669,7 @@ export const publishGroupExitRequest = address => {
     publishToGroupAdmin(
       address,
       createEvent(26, {
-        content: `${displayPersonByPubkey(pubkey.get())} is leaving the group`,
+        content: `${displayProfileByPubkey(pubkey.get())} is leaving the group`,
         tags: [...getClientTags(), ["a", address]],
       }),
     )
@@ -916,7 +916,7 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
 
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
-  const {pubkey} = (await fetchHandle(`${username}@${connectHandler.domain}`)) || {}
+  const {pubkey} = (await getHandle(`${username}@${connectHandler.domain}`)) || {}
 
   let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
 

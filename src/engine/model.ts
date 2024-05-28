@@ -89,18 +89,6 @@ export type DisplayEvent = TrustedEvent & {
   reposts?: TrustedEvent[]
 }
 
-export type Profile = {
-  name?: string
-  nip05?: string
-  lud06?: string
-  lud16?: string
-  about?: string
-  banner?: string
-  picture?: string
-  website?: string
-  display_name?: string
-}
-
 export type Handle = {
   profile: Record<string, any>
   pubkey: string
@@ -109,9 +97,6 @@ export type Handle = {
 
 export type Person = {
   pubkey: string
-  profile_fetched_at?: number
-  profile_updated_at?: number
-  profile?: Profile
   petnames_updated_at?: number
   petnames?: string[][]
   mutes_updated_at?: number

@@ -3,14 +3,15 @@
   import {parseContent} from "src/util/notes"
   import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
-  import {displayPerson, derivePerson} from "src/engine"
+  import {displayProfile} from "src/domain"
+  import {getProfile, deriveProfile} from "src/engine"
 
   export let pubkey
   export let truncate = false
 
-  const person = derivePerson(pubkey)
+  const profile = deriveProfile(pubkey)
 
-  $: about = $person.profile?.about || ""
+  $: about = $profile?.about || ""
   $: content = parseContent({content: truncate ? ellipsize(about, 140) : about})
 </script>
 
@@ -27,7 +28,7 @@
     {:else if type.startsWith("nostr:")}
       <Anchor modal class="underline" href={value.entity}>
         {#if value.pubkey}
-          {displayPerson(derivePerson(value.pubkey).get())}
+          {displayProfile(getProfile(value.pubkey))}
         {:else if value.id}
           event {value.id}
         {:else}

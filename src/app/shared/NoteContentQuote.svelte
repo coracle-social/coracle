@@ -8,7 +8,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {hints, loadOne, loadPubkeys, displayPersonByPubkey, isEventMuted} from "src/engine"
+  import {hints, loadOne, loadPubkeys, displayProfileByPubkey, isEventMuted} from "src/engine"
 
   export let note
   export let value
@@ -98,7 +98,7 @@
               type="unstyled"
               class="flex items-center gap-2"
               href={router.at("people").of(quote.pubkey).toString()}>
-              <h2 class="text-lg">{displayPersonByPubkey(quote.pubkey)}</h2>
+              <h2 class="text-lg">{displayProfileByPubkey(quote.pubkey)}</h2>
             </Anchor>
           </div>
         {/if}

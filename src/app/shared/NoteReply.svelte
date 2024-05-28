@@ -23,7 +23,7 @@
     getClientTags,
     getReplyTags,
     session,
-    displayPersonByPubkey,
+    displayProfileByPubkey,
     mention,
   } from "src/engine"
   import {drafts} from "src/app/state"
@@ -181,7 +181,7 @@
           <div on:click|stopPropagation>
             {#each mentions as pubkey}
               <Chip class="mb-1 mr-1" onRemove={() => removeMention(pubkey)}>
-                {displayPersonByPubkey(pubkey)}
+                {displayProfileByPubkey(pubkey)}
               </Chip>
             {:else}
               <div class="text-neutral-100 inline-block py-2">No mentions</div>

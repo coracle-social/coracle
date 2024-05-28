@@ -17,19 +17,12 @@
   import {themeColors} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {displayPubkey} from "src/domain"
-  import {
-    deriveFollowing,
-    derivePerson,
-    displayPerson,
-    session,
-    maxWot,
-    getWotScore,
-  } from "src/engine"
+  import {displayPubkey, displayProfile} from "src/domain"
+  import {deriveFollowing, deriveProfile, session, maxWot, getWotScore} from "src/engine"
 
   export let pubkey
 
-  const person = derivePerson(pubkey)
+  const profile = deriveProfile(pubkey)
   const following = deriveFollowing(pubkey)
   const wotScore = getWotScore($session?.pubkey, pubkey)
   const npubDisplay = displayPubkey(pubkey)
@@ -38,7 +31,7 @@
   $: dashOffset = 100 - (Math.max(superMaxWot / 20, wotScore) / superMaxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 50}deg)`
   $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "neutral-200"]
-  $: personDisplay = displayPerson($person)
+  $: personDisplay = displayProfile($profile)
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>

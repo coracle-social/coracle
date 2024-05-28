@@ -23,8 +23,8 @@
     pubkey,
     follows,
     deriveRelay,
-    getProfileByPubkey,
-    displayPersonByPubkey,
+    getProfile,
+    displayProfileByPubkey,
     relayPolicies,
     relayPolicyUrls,
     getRelaySearch,
@@ -41,7 +41,7 @@
     const m = new Map<string, string[]>()
 
     for (const pk of $follows) {
-      if (!profileHasName(getProfileByPubkey(pk))) {
+      if (!profileHasName(getProfile(pk))) {
         continue
       }
 
@@ -58,7 +58,7 @@
       const pubkeys = pubkeysByUrl.get(r.url) || []
       const description =
         pubkeys.length > 0
-          ? "Used by " + displayList(pubkeys.map(pubkey => displayPersonByPubkey(pubkey)))
+          ? "Used by " + displayList(pubkeys.map(pubkey => displayProfileByPubkey(pubkey)))
           : r.info?.description
 
       return {...r, info: {...r.info, description}}

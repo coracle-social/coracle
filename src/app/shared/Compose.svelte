@@ -7,13 +7,7 @@
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {displayProfile} from "src/domain"
-  import {
-    hints,
-    follows,
-    profileSearch,
-    createPeopleLoader,
-    getProfileByPubkey,
-  } from "src/engine"
+  import {hints, follows, profileSearch, createPeopleLoader, getProfile} from "src/engine"
 
   export let onSubmit
   export let autofocus = false
@@ -179,7 +173,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({profile: getProfileByPubkey(pubkey), force: true})
+    autocomplete({profile: getProfile(pubkey), force: true})
   }
 
   const createNewLines = (n = 1) => {

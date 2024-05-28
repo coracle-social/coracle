@@ -8,7 +8,6 @@ import {
   defer,
   displayList,
   doPipe,
-  ellipsize,
   batch,
   randomInt,
   seconds,
@@ -136,7 +135,6 @@ import {
   readList,
   readProfile,
   readCollections,
-  displayPubkey,
   CollectionSearch,
   readHandlers,
   mapListToFeed,
@@ -285,11 +283,13 @@ export const profilesByPubkey = derived(profiles, $profiles =>
 
 export const getProfilesByPubkey = getter(profilesByPubkey)
 
-export const getProfileByPubkey = (pubkey: string) => getProfilesByPubkey().get(pubkey)
+export const getProfile = (pk: string) => getProfilesByPubkey().get(pk)
+
+export const deriveProfile = pk => derived(profilesByPubkey, $m => $m.get(pk))
+
+export const displayProfileByPubkey = (pk: string) => displayProfile(getProfile(pk))
 
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
-
-export const displayProfileByPubkey = (pk: string) => displayProfile(getProfileByPubkey(pk))
 
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   config = {
@@ -342,51 +342,6 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
 export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))
 
 // People
-
-export const fetchHandle = createBatcher(500, async (handles: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
-
-      return res?.data
-    })) || []
-
-  const infoByHandle = createMapOf("handle", "info", data)
-
-  return handles.map(h => infoByHandle[h])
-})
-
-export const getHandle = cached({
-  maxSize: 100,
-  getKey: ([handle]) => handle,
-  getValue: ([handle]) => fetchHandle(handle),
-})
-
-export const getPersonWithDefault = pubkey => ({pubkey, ...people.key(pubkey).get()})
-
-export const displayPerson = ({pubkey, profile}: Person) => {
-  if (profile) {
-    const {display_name, name} = profile
-
-    if (name) {
-      return ellipsize(name, 60)
-    }
-
-    if (display_name) {
-      return ellipsize(display_name, 60)
-    }
-  }
-
-  try {
-    return displayPubkey(pubkey)
-  } catch (e) {
-    logger.error(e)
-
-    return ""
-  }
-}
-
-export const displayPersonByPubkey = (pubkey: string) => displayPerson(getPersonWithDefault(pubkey))
 
 export const displayHandle = (handle: Handle) =>
   handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
@@ -641,9 +596,10 @@ export const deriveGroup = address => {
 
 export const getWotGroupMembers = address =>
   Array.from(follows.get()).filter(pk =>
-    derivePerson(pk)
+    people
+      .key(pk)
       .get()
-      .communities?.some(t => t[1] === address),
+      ?.communities?.some(t => t[1] === address),
   )
 
 export const searchGroups = groups.throttle(300).derived($groups => {
@@ -1743,7 +1699,7 @@ export const uniqTags = tags =>
   uniqBy((t: string[]) => (t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")), tags)
 
 export const mention = (pubkey: string) =>
-  hints.tagPubkey(pubkey).append(displayPersonByPubkey(pubkey)).valueOf()
+  hints.tagPubkey(pubkey).append(displayProfileByPubkey(pubkey)).valueOf()
 
 export const tagsFromContent = (content: string) => {
   const tags = []

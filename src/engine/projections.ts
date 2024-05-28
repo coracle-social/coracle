@@ -1,21 +1,5 @@
 import {always, uniqBy, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn, tryFunc} from "hurdak"
-import {
-  addTopic,
-  modifyGroupStatus,
-  saveRelayPolicy,
-  setGroupStatus,
-  updateRecord,
-  updateStore,
-} from "src/engine/commands"
-import {
-  deriveAdminKeyForGroup,
-  deriveGroupStatus,
-  getChannelId,
-  getHandle,
-  getRecipientKey,
-  nip04,
-} from "src/engine/state"
 import {nth} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -31,11 +15,16 @@ import {warn} from "src/util/logger"
 import {tryJson} from "src/util/misc"
 import {isGiftWrap, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {appDataKeys} from "src/util/nostr"
+import type {Channel} from "src/engine/model"
+import {GroupAccess, RelayMode} from "src/engine/model"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
-import {updateSession, setSession} from "src/engine/commands"
 import {relay} from "src/engine/repository"
 import {
   channels,
+  deriveAdminKeyForGroup,
+  deriveGroupStatus,
+  getChannelId,
+  getRecipientKey,
   getSession,
   getZapper,
   groupAdminKeys,
@@ -44,6 +33,7 @@ import {
   groupSharedKeys,
   groups,
   load,
+  nip04,
   nip59,
   people,
   projections,
@@ -51,8 +41,17 @@ import {
   tracker,
   withFallbacks,
 } from "src/engine/state"
-import type {Channel} from "src/engine/model"
-import {GroupAccess, RelayMode} from "src/engine/model"
+import {getHandle} from "src/engine/requests"
+import {
+  addTopic,
+  modifyGroupStatus,
+  saveRelayPolicy,
+  setGroupStatus,
+  updateRecord,
+  updateStore,
+  updateSession,
+  setSession,
+} from "src/engine/commands"
 
 // Synchronize repository with projections. All events should be published to the
 // repository, and when accepted, be propagated to projections. This avoids processing
@@ -347,17 +346,7 @@ const updateZapper = async (e, {lud16, lud06}) => {
 
 projections.addHandler(0, e => {
   tryJson(async () => {
-    const session = getSession(e.pubkey)
-
-    if (session) {
-      updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind0: e}))
-    }
-
     const content = JSON.parse(e.content)
-
-    updateStore(people.key(e.pubkey), e.created_at, {
-      profile: content,
-    })
 
     updateHandle(e, content)
     updateZapper(e, content)

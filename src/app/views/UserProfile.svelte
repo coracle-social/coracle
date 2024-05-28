@@ -6,7 +6,7 @@
   import Footer from "src/partials/Footer.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
-  import {pubkey, people, publishProfile} from "src/engine"
+  import {pubkey, getProfile, publishProfile} from "src/engine"
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
@@ -19,7 +19,7 @@
     router.pop()
   }
 
-  const values = {...people.key($pubkey).get()?.profile}
+  const values = {...getProfile($pubkey)}
 
   document.title = "Profile"
 </script>

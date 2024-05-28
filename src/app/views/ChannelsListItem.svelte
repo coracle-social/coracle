@@ -1,26 +1,25 @@
 <script lang="ts">
   import {without} from "ramda"
   import {displayList} from "hurdak"
+  import {derived} from "svelte/store"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
   import {
-    people,
     pubkey,
     channels,
-    displayPerson,
+    profiles,
     loadPubkeys,
     channelHasNewMessages,
+    displayProfileByPubkey,
   } from "src/engine"
 
   export let channel
 
   const pubkeys = channel.id.split(",") as string[]
-  const displayPersonByPubkeys = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
-  const showAlert = channels.key(channel.id).derived(channelHasNewMessages)
-  const members = people.mapStore.derived($p =>
-    displayPersonByPubkeys.map(pk => $p.get(pk) || {pubkey: pk}),
-  )
+  const members = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
+  const showAlert = derived(channels.key(channel.id), channelHasNewMessages)
+  const membersDisplay = derived(profiles, () => members.map(displayProfileByPubkey))
 
   const enter = () => router.at("channels").of(pubkeys).push()
 
@@ -30,8 +29,8 @@
 <Card interactive on:click={enter}>
   <div class="flex justify-between gap-8 px-2 py-4">
     <div class="flex gap-8">
-      <PersonCircles pubkeys={displayPersonByPubkeys} />
-      <h2>{displayList($members.map(displayPerson))}</h2>
+      <PersonCircles pubkeys={members} />
+      <h2>{displayList($membersDisplay)}</h2>
     </div>
     <div class="relative">
       <i class="fa fa-bell" class:text-neutral-600={!$showAlert} />

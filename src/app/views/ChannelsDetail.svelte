@@ -16,7 +16,7 @@
   import {
     nip44,
     session,
-    displayPersonByPubkey,
+    displayProfileByPubkey,
     sendMessage,
     deriveEvents,
     sendLegacyMessage,
@@ -112,7 +112,7 @@
         {#each pubkeys as pubkey, i (pubkey)}
           {#if i > 0}&bullet;{/if}
           <Anchor class="hover:underline" on:click={() => showPerson(pubkey)}>
-            {displayPersonByPubkey(pubkey)}
+            {displayProfileByPubkey(pubkey)}
           </Anchor>
         {/each}
       </div>
@@ -131,7 +131,7 @@
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}
       <Anchor class="mb-1" on:click={() => showPerson(message.pubkey)}>
-        <strong>{displayPersonByPubkey(message.pubkey)}</strong>
+        <strong>{displayProfileByPubkey(message.pubkey)}</strong>
       </Anchor>
     {/if}
     <div class="break-words">
@@ -193,7 +193,7 @@
         >.
       </p>
       <p>
-        You should make sure @{displayPersonByPubkey(pubkeys[0])} is using a compatible nostr client,
+        You should make sure @{displayProfileByPubkey(pubkeys[0])} is using a compatible nostr client,
         or you can choose to send an old-style message instead.
       </p>
       <p>How would you like to send this message?</p>

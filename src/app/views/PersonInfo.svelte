@@ -2,14 +2,15 @@
   import {nip19} from "nostr-tools"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {displayHandle, derivePerson} from "src/engine"
+  import {displayHandle, derivePerson, deriveProfile} from "src/engine"
 
   export let pubkey
   export let nprofile
 
   const person = derivePerson(pubkey)
+  const profile = deriveProfile(pubkey)
 
-  $: lightningAddress = $person.profile?.lud16 || $person.profile?.lud06
+  $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>

@@ -1,5 +1,5 @@
 import {debounce} from "throttle-debounce"
-import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
+import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -9,7 +9,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, nthEq, nth, fromPairs, now, writable, max} from "@welshman/lib"
+import {Worker, cached, nthEq, nth, fromPairs, now, writable, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -24,7 +24,7 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
-import {updateIn} from "src/util/misc"
+import {updateIn, createBatcher} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, whereEq, without} from "ramda"
 import {repository} from "src/engine/repository"
@@ -61,6 +61,7 @@ import {
   subscribePersistent,
   user,
   withFallbacks,
+  dufflepud,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 
@@ -72,6 +73,25 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
   return {...filter, since}
 }
+
+export const fetchHandle = createBatcher(500, async (handles: string[]) => {
+  const data =
+    (await tryFunc(async () => {
+      const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
+
+      return res?.data
+    })) || []
+
+  const infoByHandle = createMapOf("handle", "info", data)
+
+  return handles.map(h => infoByHandle[h])
+})
+
+export const getHandle = cached({
+  maxSize: 100,
+  getKey: ([handle]) => handle,
+  getValue: ([handle]) => fetchHandle(handle),
+})
 
 export const getStaleAddrs = (addrs: string[]) => {
   const stale = new Set<string>()

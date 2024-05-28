@@ -2,7 +2,6 @@
   import {identity} from "ramda"
   import {stripProtocol} from "@welshman/lib"
   import {feedFromFilter} from "@welshman/feeds"
-  import {info} from "src/util/logger"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -21,8 +20,8 @@
   import {makeFeed} from "src/domain"
   import {
     mutes,
-    derivePerson,
-    displayPerson,
+    deriveProfile,
+    displayProfileByPubkey,
     loadPubkeys,
     imgproxy,
     getPubkeyRelays,
@@ -32,7 +31,7 @@
   export let pubkey
   export let relays = []
 
-  const person = derivePerson(pubkey)
+  const profile = deriveProfile(pubkey)
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [7], authors: [pubkey]})})
@@ -40,14 +39,12 @@
   let activeTab = "notes"
 
   $: ownRelays = getPubkeyRelays(pubkey)
-  $: banner = imgproxy($person.profile?.banner, {w: window.innerWidth})
+  $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
   $: ({rgb, rgba} = $themeBackgroundGradient)
-
-  info("Person", npub, pubkey, $person)
 
   loadPubkeys([pubkey], {force: true, relays})
 
-  document.title = displayPerson($person)
+  document.title = displayProfileByPubkey(pubkey)
 
   const setActiveTab = tab => {
     activeTab = tab
@@ -72,13 +69,10 @@
       </div>
       <PersonHandle {pubkey} />
     </div>
-    {#if $person.profile?.website}
-      <Anchor
-        external
-        class="flex items-center gap-2 text-sm"
-        href={ensureProto($person.profile.website)}>
+    {#if $profile?.website}
+      <Anchor external class="flex items-center gap-2 text-sm" href={ensureProto($profile.website)}>
         <i class="fa fa-link text-accent" />
-        {stripProtocol($person.profile.website)}
+        {stripProtocol($profile.website)}
       </Anchor>
     {/if}
     <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
