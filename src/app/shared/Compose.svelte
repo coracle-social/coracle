@@ -6,13 +6,13 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
+  import {displayProfile} from "src/domain"
   import {
     hints,
     follows,
-    derivePerson,
-    displayPerson,
-    searchPeople,
+    profileSearch,
     createPeopleLoader,
+    getProfileByPubkey,
   } from "src/engine"
 
   export let onSubmit
@@ -45,8 +45,8 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        p => $follows.has(p.pubkey),
-        $searchPeople(word.slice(1)),
+        profile => $follows.has(profile.event.pubkey),
+        $profileSearch.searchOptions(word.slice(1)),
       )
 
       results = followed.concat(notFollowed)
@@ -64,7 +64,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({person = null, force = false} = {}) => {
+  const autocomplete = ({profile = null, force = false} = {}) => {
     let completed = false
 
     const {selection, node, offset, word} = getInfo()
@@ -98,8 +98,8 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && person) {
-      annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
+    if ((force || word.length > 1) && word.startsWith("@") && profile) {
+      annotate("@", displayProfile(profile).trim(), pubkeyEncoder.encode(profile.event.pubkey))
     }
 
     // Topics
@@ -130,7 +130,7 @@
 
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
-      autocomplete({person: suggestions.get()})
+      autocomplete({profile: suggestions.get()})
     }
 
     // Only autocomplete topics on space
@@ -149,7 +149,7 @@
     applySearch(word)
 
     if (["Tab"].includes(e.code)) {
-      autocomplete({person: suggestions.get()})
+      autocomplete({profile: suggestions.get()})
     }
 
     if (["Escape", "Space"].includes(e.code)) {
@@ -179,7 +179,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({person: derivePerson(pubkey).get(), force: true})
+    autocomplete({profile: getProfileByPubkey(pubkey), force: true})
   }
 
   const createNewLines = (n = 1) => {
@@ -269,7 +269,7 @@
 
 <Suggestions
   bind:this={suggestions}
-  select={person => autocomplete({person})}
+  select={profile => autocomplete({profile})}
   loading={$loadingPeople}>
   <div slot="item" let:item>
     <PersonBadge inert pubkey={item.pubkey} />

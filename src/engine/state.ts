@@ -56,6 +56,7 @@ import {
   inc,
   sort,
   groupBy,
+  indexBy,
 } from "@welshman/lib"
 import {
   READ_RECEIPT,
@@ -95,7 +96,17 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
-import {fuzzy, synced, withGetter, createBatcher, pushToKey, tryJson, fromCsv} from "src/util/misc"
+import {
+  fuzzy,
+  synced,
+  withGetter,
+  getter,
+  createBatcher,
+  pushToKey,
+  tryJson,
+  fromCsv,
+  SearchHelper,
+} from "src/util/misc"
 import {parseContent} from "src/util/notes"
 import {
   appDataKeys,
@@ -109,11 +120,18 @@ import {
   reactionKinds,
 } from "src/util/nostr"
 import logger from "src/util/logger"
-import type {PublishedFeed, PublishedListFeed, Collection, PublishedList, Profile} from "src/domain"
+import type {
+  PublishedFeed,
+  PublishedProfile,
+  PublishedListFeed,
+  Collection,
+  PublishedList,
+} from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
   ListSearch,
   FeedSearch,
+  profileHasName,
   readFeed,
   readList,
   readProfile,
@@ -123,6 +141,7 @@ import {
   readHandlers,
   mapListToFeed,
   getHandlerAddress,
+  displayProfile,
 } from "src/domain"
 import type {
   Channel,
@@ -254,11 +273,72 @@ export const settings = user.derived(getSettings)
 
 // Profiles
 
-export const profiles = deriveEventsMapped<Profile>({
+export const profiles = deriveEventsMapped<PublishedProfile>({
   filters: [{kinds: [PROFILE]}],
   eventToItem: readProfile,
   itemToEvent: prop("event"),
 })
+
+export const profilesByPubkey = derived(profiles, $profiles =>
+  indexBy(p => p.event.pubkey, $profiles),
+)
+
+export const getProfilesByPubkey = getter(profilesByPubkey)
+
+export const getProfileByPubkey = (pubkey: string) => getProfilesByPubkey().get(pubkey)
+
+export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
+
+export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
+  config = {
+    keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
+    threshold: 0.3,
+    shouldSort: false,
+    includeScore: true,
+  }
+
+  getValue = (option: PublishedProfile) => option.event.pubkey
+
+  display = (address: string) =>
+    displayProfile(this.options.find(profile => this.getValue(profile) === address))
+
+  getSearch = () => {
+    const $pubkey = pubkey.get()
+
+    primeWotCaches($pubkey)
+
+    const options = this.options.map(profile => ({
+      profile,
+      score: getWotScore($pubkey, profile.event.pubkey),
+    }))
+
+    const fuse = new Fuse(options, {
+      keys: [
+        "profile.name",
+        "profile.display_name",
+        {name: "profile.nip05", weight: 0.5},
+        {name: "profile.about", weight: 0.1},
+      ],
+      threshold: 0.3,
+      shouldSort: false,
+      includeScore: true,
+    })
+
+    return (term: string) => {
+      if (!term) {
+        return sortBy(item => -item.score, options).map(item => item.profile)
+      }
+
+      return doPipe(fuse.search(term), [
+        results =>
+          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), results),
+        results => results.map((r: any) => r.item.profile),
+      ])
+    }
+  }
+}
+
+export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))
 
 // People
 
@@ -280,8 +360,6 @@ export const getHandle = cached({
   getKey: ([handle]) => handle,
   getValue: ([handle]) => fetchHandle(handle),
 })
-
-export const personHasName = ({profile: p}: Person) => Boolean(p?.name || p?.display_name)
 
 export const getPersonWithDefault = pubkey => ({pubkey, ...people.key(pubkey).get()})
 
@@ -451,8 +529,6 @@ export const decodePerson = entity => {
   })
 }
 
-export const peopleWithName = people.derived(filter(personHasName))
-
 export const derivePerson = pubkey => people.key(pubkey).derived(defaultTo({pubkey}))
 
 export const mutes = user.derived(getMutes)
@@ -464,41 +540,6 @@ export const network = user.derived(getNetwork)
 export const deriveMuted = (value: string) => mutes.derived(s => s.has(value))
 
 export const deriveFollowing = (pubkey: string) => follows.derived(s => s.has(pubkey))
-
-export const searchPeople = new Derived(
-  [pubkey, peopleWithName.throttle(300)],
-  ([$pubkey, $peopleWithName]: [string, Person[]]): ((term: string) => Person[]) => {
-    primeWotCaches($pubkey)
-
-    const options = $peopleWithName.map(p => ({person: p, score: getWotScore($pubkey, p.pubkey)}))
-
-    const fuse = new Fuse(options, {
-      keys: [
-        "person.profile.name",
-        "person.profile.display_name",
-        {name: "person.profile.nip05", weight: 0.5},
-        {name: "person.profile.about", weight: 0.1},
-      ],
-      threshold: 0.3,
-      shouldSort: false,
-      includeScore: true,
-    })
-
-    return (term: string) => {
-      if (!term) {
-        return sortBy(item => -item.score, options).map(item => item.person)
-      }
-
-      return doPipe(fuse.search(term), [
-        results =>
-          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), results),
-        results => results.map((r: any) => r.item.person),
-      ])
-    }
-  },
-)
-
-export const searchPubkeys = searchPeople.derived(search => term => pluck("pubkey", search(term)))
 
 // Events
 

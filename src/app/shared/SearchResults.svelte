@@ -5,7 +5,7 @@
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
   import type {Person, Topic} from "src/engine"
-  import {topics, searchPeople, createPeopleLoader} from "src/engine"
+  import {topics, profileSearch, createPeopleLoader} from "src/engine"
 
   export let term
   export let replace = false
@@ -13,7 +13,7 @@
 
   const openTopic = topic => router.at("topics").of(topic).open({replace})
 
-  const openPerson = pubkey => router.at("people").of(pubkey).open({replace})
+  const openProfile = pubkey => router.at("people").of(pubkey).open({replace})
 
   const onClick = result => {
     if (result.type === "topic") {
@@ -21,7 +21,7 @@
     }
 
     if (result.type === "profile") {
-      openPerson(result.id)
+      openProfile(result.event.pubkey)
     }
   }
 
@@ -52,8 +52,8 @@
     .derived($topics => fuzzy($topics, {keys: ["name"], threshold: 0.5, shouldSort: true}))
 
   const results = derived<{type: string; id: string; person?: Person; topic?: Topic}[]>(
-    [term, searchTopics, searchPeople],
-    ([$term, $searchTopics, $searchPeople]) => {
+    [term, searchTopics, profileSearch],
+    ([$term, $searchTopics, $profileSearch]) => {
       $term = $term || ""
 
       if ($term.length > 30) {
@@ -62,7 +62,9 @@
 
       return $term.startsWith("#")
         ? $searchTopics($term.slice(1)).map(topic => ({type: "topic", id: topic.name, topic}))
-        : $searchPeople($term).map(person => ({type: "profile", id: person.pubkey, person}))
+        : $profileSearch
+            .searchOptions($term)
+            .map(profile => ({type: "profile", id: profile.event.pubkey, profile}))
     },
   )
 

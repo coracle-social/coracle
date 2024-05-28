@@ -345,7 +345,7 @@ export const getStringWidth = (text: string) => {
 
 export class SearchHelper<T, V> {
   config: any
-  fuzzy?: (term: string) => T[]
+  _search?: (term: string) => T[]
 
   constructor(readonly options: T[]) {}
 
@@ -353,17 +353,19 @@ export class SearchHelper<T, V> {
 
   getValue = (option: T): V => option as unknown as V
 
-  getFuzzy = () => fuzzy(this.options, this.config)
+  getSearch = () => fuzzy(this.options, this.config)
 
   display = (value: V) => String(value)
 
-  search = (term: string) => {
-    if (!this.fuzzy) {
-      this.fuzzy = this.getFuzzy()
+  searchOptions = (term: string) => {
+    if (!this._search) {
+      this._search = this.getSearch()
     }
 
-    return this.fuzzy(term).map(this.getValue)
+    return this._search(term)
   }
+
+  search = (term: string) => this.searchOptions(term).map(this.getValue)
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)

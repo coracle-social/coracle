@@ -5,7 +5,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {router} from "src/app/util/router"
-  import {searchPubkeys, createPeopleLoader, displayPersonByPubkey} from "src/engine"
+  import {profileSearch, createPeopleLoader, displayPersonByPubkey} from "src/engine"
 
   export let value
   export let multiple = false
@@ -33,7 +33,7 @@
       }
     })
 
-    return $searchPubkeys(term)
+    return $profileSearch.search(term)
   }
 </script>
 

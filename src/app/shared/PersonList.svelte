@@ -4,7 +4,8 @@
   import {createScroller} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {loadPubkeys, derivePerson, personHasName} from "src/engine"
+  import {profileHasName} from "src/domain"
+  import {loadPubkeys, getProfileByPubkey} from "src/engine"
 
   export let pubkeys
 
@@ -15,7 +16,7 @@
     limit += 10
   }
 
-  const hasName = pubkey => personHasName(derivePerson(pubkey).get())
+  const hasName = pubkey => profileHasName(getProfileByPubkey(pubkey))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {

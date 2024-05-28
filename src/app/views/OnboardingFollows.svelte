@@ -12,7 +12,7 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import type {Relay} from "src/engine"
-  import {urlToRelay, createPeopleLoader, searchPeople, searchRelays} from "src/engine"
+  import {urlToRelay, createPeopleLoader, profileSearch, searchRelays} from "src/engine"
 
   export let relays
   export let follows
@@ -245,14 +245,11 @@
     <Input bind:value={term}>
       <i slot="before" class="fa fa-search" />
     </Input>
-    {#each $searchPeople(term).slice(0, 30) as person (person.pubkey)}
-      <PersonSummary pubkey={person.pubkey}>
+    {#each $profileSearch.search(term).slice(0, 30) as pubkey (pubkey)}
+      <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
-          {#if follows.includes(person.pubkey)}
-            <Anchor
-              button
-              class="flex items-center gap-2"
-              on:click={() => removeFollow(person.pubkey)}>
+          {#if follows.includes(pubkey)}
+            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
             </Anchor>
           {:else}
@@ -260,7 +257,7 @@
               button
               accent
               class="flex items-center gap-2"
-              on:click={() => addFollow(person.pubkey)}>
+              on:click={() => addFollow(pubkey)}>
               <i class="fa fa-user-plus" /> Follow
             </Anchor>
           {/if}

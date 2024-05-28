@@ -14,6 +14,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import {profileHasName} from "src/domain"
   import type {Relay} from "src/engine"
   import {
     load,
@@ -22,8 +23,7 @@
     pubkey,
     follows,
     deriveRelay,
-    derivePerson,
-    personHasName,
+    getProfileByPubkey,
     displayPersonByPubkey,
     relayPolicies,
     relayPolicyUrls,
@@ -41,7 +41,7 @@
     const m = new Map<string, string[]>()
 
     for (const pk of $follows) {
-      if (!personHasName(derivePerson(pk).get())) {
+      if (!profileHasName(getProfileByPubkey(pk))) {
         continue
       }
 

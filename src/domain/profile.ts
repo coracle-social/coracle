@@ -1,8 +1,7 @@
-import {nip19} from 'nostr-tools'
-import {ellipsize} from 'hurdak'
+import {nip19} from "nostr-tools"
+import {ellipsize} from "hurdak"
 import {PROFILE} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {SearchHelper} from "src/util/misc"
 import {tryJson} from "src/util/misc"
 
 export type Profile = {
@@ -41,11 +40,16 @@ export const readProfile = (event: TrustedEvent) => {
   return {...profile, event} as PublishedProfile
 }
 
-export const createProfile = ({event, ...profile}: Profile) =>
-  ({kind: PROFILE, content: JSON.stringify(profile)})
+export const createProfile = ({event, ...profile}: Profile) => ({
+  kind: PROFILE,
+  content: JSON.stringify(profile),
+})
 
-export const editProfile = ({event, ...profile}: PublishedProfile) =>
-  ({kind: PROFILE, content: JSON.stringify(profile), tags: event.tags})
+export const editProfile = ({event, ...profile}: PublishedProfile) => ({
+  kind: PROFILE,
+  content: JSON.stringify(profile),
+  tags: event.tags,
+})
 
 export const displayPubkey = pubkey => {
   const d = nip19.npubEncode(pubkey)
@@ -63,16 +67,4 @@ export const displayProfile = (profile?: Profile) => {
   return "[no name]"
 }
 
-export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
-  config = {
-    keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
-    threshold: 0.3,
-    shouldSort: false,
-    includeScore: true,
-  }
-
-  getValue = (option: PublishedProfile) => option.event.pubkey
-
-  display = (address: string) =>
-    displayProfile(this.options.find(profile => this.getValue(profile) === address))
-}
+export const profileHasName = (profile?: Profile) => Boolean(profile?.name || profile?.display_name)

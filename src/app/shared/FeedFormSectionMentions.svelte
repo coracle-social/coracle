@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {searchPubkeys, displayPersonByPubkey} from "src/engine"
+  import {profileSearch, displayPersonByPubkey} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let feed
@@ -14,7 +14,7 @@
 <SearchSelect
   multiple
   value={feed.slice(2)}
-  search={$searchPubkeys}
+  search={$profileSearch.search}
   onChange={pubkeys => onChange([FeedType.Tag, "#p", ...pubkeys])}>
   <span slot="item" let:item let:context>
     {#if context === "value"}
