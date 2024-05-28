@@ -14,15 +14,19 @@
     const event = repository.getEvent(address)
 
     return event
-      ? `${$listSearch.display(address)} by ${displayPersonByPubkey(event.pubkey)}`
-      : $listSearch.display(address)
+      ? `${$listSearch.displayValue(address)} by ${displayPersonByPubkey(event.pubkey)}`
+      : $listSearch.displayValue(address)
   }
 
   $: addresses = feed.slice(1).flatMap(it => it.addresses)
 </script>
 
 <span>Which lists would you like to use?</span>
-<SearchSelect multiple value={addresses} search={$listSearch.search} onChange={onAddressesChange}>
+<SearchSelect
+  multiple
+  value={addresses}
+  search={$listSearch.searchValues}
+  onChange={onAddressesChange}>
   <span slot="item" let:item let:context>
     {#if context === "option"}
       {displayAddress(item)}

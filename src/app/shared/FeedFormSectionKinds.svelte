@@ -61,6 +61,6 @@
 </script>
 
 <span class="staatliches text-lg">What kind of content do you want to see?</span>
-<SearchSelect multiple search={helper.search} value={feed.slice(1)} onChange={onKindsChange}>
-  <div slot="item" let:item>{helper.display(item)}</div>
+<SearchSelect multiple search={helper.searchValues} value={feed.slice(1)} onChange={onKindsChange}>
+  <div slot="item" let:item>{helper.displayValue(item)}</div>
 </SearchSelect>

@@ -61,7 +61,7 @@
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each $listSearch
-    .search(q)
+    .searchValues(q)
     .filter(address => !address.includes($pubkey))
     .slice(0, limit) as address (address)}
     <ListCard {address} />

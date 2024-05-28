@@ -4,15 +4,15 @@ import type {TrustedEvent} from "@welshman/util"
 import {SearchHelper, tryJson} from "src/util/misc"
 
 export type Handler = {
-  kind: number,
-  name: string,
-  about: string,
-  image: string,
-  identifier: string,
+  kind: number
+  name: string
+  about: string
+  image: string
+  identifier: string
   event: TrustedEvent
-  website?: string,
-  lud16?: string,
-  nip05?: string,
+  website?: string
+  lud16?: string
+  nip05?: string
 }
 
 export const readHandlers = (event: TrustedEvent) => {
@@ -32,7 +32,10 @@ export const readHandlers = (event: TrustedEvent) => {
     return []
   }
 
-  return Tags.fromEvent(event).whereKey("k").values().valueOf()
+  return Tags.fromEvent(event)
+    .whereKey("k")
+    .values()
+    .valueOf()
     .map(kind => ({...normalizedMeta, kind: parseInt(kind), identifier, event})) as Handler[]
 }
 
@@ -43,8 +46,7 @@ export const displayHandler = (handler?: Handler) => handler?.name || "[no name]
 export class HandlerSearch extends SearchHelper<Handler, string> {
   config = {keys: ["name", "about"]}
   getValue = (option: Handler) => getAddress(option.event)
-  display = (address: string) =>
-    displayHandler(this.options.find(handler => this.getValue(handler) === address))
+  displayValue = (address: string) => displayHandler(this.getOption(address))
 }
 
 export const getHandlerAddress = (event: TrustedEvent) => {

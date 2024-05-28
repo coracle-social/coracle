@@ -5,7 +5,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {router} from "src/app/util/router"
-  import {profileSearch, createPeopleLoader, displayPersonByPubkey} from "src/engine"
+  import {profileSearch, createPeopleLoader} from "src/engine"
 
   export let value
   export let multiple = false
@@ -33,7 +33,7 @@
       }
     })
 
-    return $profileSearch.search(term)
+    return $profileSearch.searchValues(term)
   }
 </script>
 
@@ -49,7 +49,7 @@
     <div class="-my-1">
       {#if context === "value"}
         <Anchor modal href={router.at("people").of(item).toString()}>
-          {displayPersonByPubkey(item)}
+          {$profileSearch.displayValue(item)}
         </Anchor>
       {:else}
         <PersonBadge inert pubkey={item} />

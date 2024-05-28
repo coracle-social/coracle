@@ -289,6 +289,8 @@ export const getProfileByPubkey = (pubkey: string) => getProfilesByPubkey().get(
 
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
 
+export const displayProfileByPubkey = (pk: string) => displayProfile(getProfileByPubkey(pk))
+
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   config = {
     keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
@@ -296,11 +298,6 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
     shouldSort: false,
     includeScore: true,
   }
-
-  getValue = (option: PublishedProfile) => option.event.pubkey
-
-  display = (address: string) =>
-    displayProfile(this.options.find(profile => this.getValue(profile) === address))
 
   getSearch = () => {
     const $pubkey = pubkey.get()
@@ -336,6 +333,10 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
       ])
     }
   }
+
+  getValue = (option: PublishedProfile) => option.event.pubkey
+
+  displayValue = (pk: string) => displayProfileByPubkey(pk)
 }
 
 export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))

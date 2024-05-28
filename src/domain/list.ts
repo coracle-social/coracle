@@ -137,6 +137,5 @@ export const displayList = (list?: List) => {
 export class ListSearch extends SearchHelper<List, string> {
   config = {keys: ["title", "description", "identifier"]}
   getValue = (option: List) => getAddress(option.event)
-  display = (address: string) =>
-    displayList(this.options.find(list => this.getValue(list) === address))
+  displayValue = (address: string) => displayList(this.getOption(address))
 }

@@ -345,17 +345,24 @@ export const getStringWidth = (text: string) => {
 
 export class SearchHelper<T, V> {
   config: any
+  _optionsByValue = new Map<V, T>()
   _search?: (term: string) => T[]
 
-  constructor(readonly options: T[]) {}
-
-  getOption = (value: V): T => this.options.find(o => this.getValue(o) === value)
-
-  getValue = (option: T): V => option as unknown as V
+  constructor(readonly options: T[]) {
+    for (const option of options) {
+      this._optionsByValue.set(this.getValue(option), option)
+    }
+  }
 
   getSearch = () => fuzzy(this.options, this.config)
 
-  display = (value: V) => String(value)
+  getOption = (value: V): T => this._optionsByValue.get(value)
+
+  getValue = (option: T): V => option as unknown as V
+
+  displayValue = (value: V) => String(value)
+
+  displayOption = (option: T) => this.displayValue(this.getValue(option))
 
   searchOptions = (term: string) => {
     if (!this._search) {
@@ -365,7 +372,7 @@ export class SearchHelper<T, V> {
     return this._search(term)
   }
 
-  search = (term: string) => this.searchOptions(term).map(this.getValue)
+  searchValues = (term: string) => this.searchOptions(term).map(this.getValue)
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)
@@ -404,21 +411,25 @@ type Start<T> = (set: Setter<T>) => Stop
 export const custom = <T>(start: Start<T>) => {
   const subs: Sub<T>[] = []
 
+  let value: T
   let stop: () => void
 
   return {
     subscribe: (sub: Sub<T>) => {
-      subs.push(sub)
-
-      if (subs.length === 1) {
-        stop = start((value: T) => {
+      if (subs.length === 0) {
+        stop = start((newValue: T) => {
           for (const sub of subs) {
-            sub(value)
+            sub(newValue)
           }
 
-          return value
+          value = newValue
+
+          return newValue
         })
       }
+
+      subs.push(sub)
+      sub(value)
 
       return () => {
         subs.splice(

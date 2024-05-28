@@ -14,14 +14,12 @@
   import {router} from "src/app/util/router"
   import {
     env,
-    user,
     pubkey,
     canSign,
     hasNewMessages,
     hasNewNotifications,
     sessions,
-    displayPerson,
-    displayPersonByPubkey,
+    displayProfileByPubkey,
     publishes,
   } from "src/engine"
 
@@ -184,7 +182,7 @@
                 <PersonCircle
                   class="h-8 w-8 border border-solid border-tinted-200"
                   pubkey={s.pubkey} />
-                {displayPersonByPubkey(s.pubkey)}
+                {displayProfileByPubkey(s.pubkey)}
               </div>
             </MenuItem>
           {/if}
@@ -222,7 +220,7 @@
           <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
             <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
             <div class="flex min-w-0 flex-col">
-              <span>@{displayPerson($user)}</span>
+              <span>@{displayProfileByPubkey($pubkey)}</span>
               <PersonHandle class="text-sm" pubkey={$pubkey} />
             </div>
           </Anchor>

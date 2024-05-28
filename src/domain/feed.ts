@@ -84,8 +84,7 @@ export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {
   config = {keys: ["title", "description"]}
   getValue = (option: PublishedFeed) => getAddress(option.event)
-  display = (address: string) =>
-    displayFeed(this.options.find(feed => this.getValue(feed) === address))
+  displayValue = (address: string) => displayFeed(this.getOption(address))
 }
 
 export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"

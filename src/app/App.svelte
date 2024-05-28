@@ -5,6 +5,7 @@
   import {nip19} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
+  import * as store from 'svelte/store'
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
@@ -336,6 +337,7 @@
     ...domain,
     ...engine,
     nip19,
+    store,
     logger,
     router,
     nostr,

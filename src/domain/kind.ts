@@ -1,4 +1,4 @@
-import {SearchHelper} from 'src/util/misc'
+import {SearchHelper} from "src/util/misc"
 
 export type KindOption = {
   label: string
@@ -8,8 +8,8 @@ export type KindOption = {
 export class KindSearch extends SearchHelper<KindOption, number> {
   config = {keys: ["kind", "label"]}
   getValue = (option: KindOption) => option.kind
-  display = (kind: number) => {
-    const option = this.options.find(k => k.kind === kind)
+  displayValuer = (kind: number) => {
+    const option = this.getOption(kind)
 
     return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
   }

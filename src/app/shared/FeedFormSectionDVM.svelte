@@ -63,10 +63,14 @@
 </script>
 
 <span class="staatliches text-lg">Which DVMs would you like to request notes from?</span>
-<SearchSelect multiple value={addresses} search={handlerSearch.search} onChange={onAddressesChange}>
+<SearchSelect
+  multiple
+  value={addresses}
+  search={handlerSearch.searchValues}
+  onChange={onAddressesChange}>
   <span slot="item" let:item let:context>
     {#if context === "value"}
-      {handlerSearch.display(item)}
+      {handlerSearch.displayValue(item)}
     {:else}
       <HandlerSummary handler={handlerSearch.getOption(item)} />
     {/if}

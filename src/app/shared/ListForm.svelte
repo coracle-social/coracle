@@ -86,8 +86,8 @@
     </Field>
     {#if !hide.includes("type")}
       <Field label="List type">
-        <SearchSelect search={kindsHelper.search} value={list.kind} onChange={onKindChange}>
-          <div slot="item" let:item>{kindsHelper.display(item)}</div>
+        <SearchSelect search={kindsHelper.searchValues} value={list.kind} onChange={onKindChange}>
+          <div slot="item" let:item>{kindsHelper.displayValue(item)}</div>
         </SearchSelect>
       </Field>
     {/if}

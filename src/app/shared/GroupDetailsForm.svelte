@@ -152,7 +152,7 @@
         <Field label="Custom Feeds">
           {#each values.feeds as [_, address, hint, label], i (address)}
             <ListItem on:remove={() => removeFeed(i)}>
-              <span slot="label">{$feedSearch.display(address)}</span>
+              <span slot="label">{$feedSearch.displayValue(address)}</span>
               <span slot="data">
                 <Input bind:value={label} />
               </span>
@@ -160,12 +160,12 @@
           {/each}
           <SearchSelect
             onChange={addFeed}
-            search={$feedSearch.search}
+            search={$feedSearch.searchValues}
             bind:this={feedsInput}
-            displayItem={$feedSearch.display}>
+            displayItem={$feedSearch.displayValue}>
             <i slot="before" class="fa fa-rss" />
             <span slot="item" let:item>
-              {$feedSearch.display(item)}
+              {$feedSearch.displayValue(item)}
             </span>
           </SearchSelect>
           <div slot="info">

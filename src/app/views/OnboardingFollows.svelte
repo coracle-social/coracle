@@ -245,7 +245,7 @@
     <Input bind:value={term}>
       <i slot="before" class="fa fa-search" />
     </Input>
-    {#each $profileSearch.search(term).slice(0, 30) as pubkey (pubkey)}
+    {#each $profileSearch.searchValues(term).slice(0, 30) as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if follows.includes(pubkey)}

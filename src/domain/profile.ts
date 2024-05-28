@@ -60,9 +60,9 @@ export const displayPubkey = pubkey => {
 export const displayProfile = (profile?: Profile) => {
   const {display_name, name, event} = profile || {}
 
-  if (name) ellipsize(name, 60)
-  if (display_name) ellipsize(display_name, 60)
-  if (event) displayPubkey(event.pubkey)
+  if (name) return ellipsize(name, 60)
+  if (display_name) return ellipsize(display_name, 60)
+  if (event) return displayPubkey(event.pubkey)
 
   return "[no name]"
 }

@@ -62,7 +62,7 @@
       value={names}
       {options}
       onChange={onNamesChange}
-      displayOption={$collectionSearch.display} />
+      displayOption={$collectionSearch.displayValue} />
     <div class="flex w-full flex-col gap-8">
       <Field label="Collections">
         <SearchSelect

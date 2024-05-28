@@ -3,10 +3,10 @@ import type {TrustedEvent} from "@welshman/util"
 import {SearchHelper} from "src/util/misc"
 
 export type Collection = {
-  name: string,
-  pubkey: string,
-  created_at: number,
-  updated_at: number,
+  name: string
+  pubkey: string
+  created_at: number
+  updated_at: number
 }
 
 export const readCollections = (events: TrustedEvent[]) => {
@@ -38,5 +38,5 @@ export const displayCollection = (collection?: {name: string}) => collection?.na
 export class CollectionSearch extends SearchHelper<Collection, string> {
   config = {keys: ["name"]}
   getValue = ({pubkey, name}: Collection) => `${pubkey}:${name}`
-  display = (name: string) => displayCollection({name})
+  displayValue = (name: string) => displayCollection({name})
 }
