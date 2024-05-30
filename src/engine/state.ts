@@ -30,6 +30,7 @@ import {
   prop,
   whereEq,
   without,
+  fromPairs,
 } from "ramda"
 import {
   Collection as CollectionStore,
@@ -1941,61 +1942,56 @@ class IndexedDB {
   }
 }
 
+type IndexedDBAdapterOpts = {
+  limit?: number
+  set?: (xs: any[]) => void
+  subscribe?: (f: (xs: any[]) => void) => () => void
+  sort?: (xs: any[]) => any[]
+  filter?: (x: any) => boolean
+  migrate?: (xs: any[]) => any[]
+}
+
 class IndexedDBAdapter {
   constructor(
-    readonly key: string,
-    readonly keyPath: string,
-    readonly store: any,
-    readonly max: number,
-    readonly sort?: (xs: any[]) => any[],
-    readonly filter?: (x: any) => boolean,
-    readonly migrate?: (xs: any[]) => any[],
+    readonly name,
+    readonly key,
+    readonly opts: IndexedDBAdapterOpts,
   ) {}
 
-  getIndexedDBConfig() {
-    return {
-      name: this.key,
-      opts: {
-        keyPath: this.keyPath,
-      },
-    }
-  }
-
   async initialize(storage: Storage) {
-    const {key, keyPath, store, max, sort} = this
-    const data = await storage.db.getAll(key)
-    const filter = this.filter || identity
-    const migrate = this.migrate || identity
+    const {name, key, opts} = this
+    const {set, subscribe, sort, limit = 100, filter = identity, migrate = identity} = opts
+    const data = await storage.db.getAll(name)
 
     let prev: any[] = migrate(data.filter(filter))
 
-    await store.set(prev)
+    await set(prev)
 
-    store.subscribe(
+    subscribe(
       throttle(randomInt(3000, 5000), async current => {
         if (storage.dead.get()) {
           return
         }
 
-        current = current.filter(prop(keyPath))
+        current = current.filter(prop(key))
 
-        const prevIds = new Set(prev.map(prop(keyPath)))
-        const currentIds = new Set(current.map(prop(keyPath)))
-        const newRecords = current.filter(r => !prevIds.has(r[keyPath]))
-        const removedRecords = prev.filter(r => !currentIds.has(r[keyPath]))
+        const prevIds = new Set(prev.map(prop(key)))
+        const currentIds = new Set(current.map(prop(key)))
+        const newRecords = current.filter(r => !prevIds.has(r[key]))
+        const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
         if (newRecords.length > 0) {
-          await storage.db.bulkPut(key, newRecords)
+          await storage.db.bulkPut(name, newRecords)
         }
 
         if (removedRecords.length > 0) {
-          await storage.db.bulkDelete(key, removedRecords.map(prop(keyPath)))
+          await storage.db.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
-        // If we have much more than our max, prune our store. This will get persisted
+        // If we have much more than our limit, prune our store. This will get persisted
         // the next time around.
-        if (current.length > max * 1.5) {
-          store.set((sort ? sort(current) : current).slice(0, max))
+        if (current.length > limit * 1.5) {
+          set((sort ? sort(current) : current).slice(0, limit))
         }
 
         prev = current
@@ -2036,7 +2032,12 @@ class Storage {
     ) as IndexedDBAdapter[]
 
     if (window.indexedDB) {
-      const dbConfig = indexedDBAdapters.map(adapter => adapter.getIndexedDBConfig())
+      const dbConfig = indexedDBAdapters.map(adapter => ({
+        name: adapter.name,
+        opts: {
+          keyPath: adapter.key,
+        },
+      }))
 
       this.db = new IndexedDB("nostr-engine/Storage", this.version, dbConfig)
 
@@ -2080,34 +2081,63 @@ const scoreEvent = e => {
   return -e.created_at
 }
 
-export const storage = new Storage(12, [
-  new IndexedDBAdapter(
-    "publishes",
-    "id",
-    publishes,
-    100,
-    sortByPubkeyWhitelist(prop("created_at")),
-  ),
-  new IndexedDBAdapter("topics", "name", topics, 1000, sortBy(prop("last_seen"))),
-  new IndexedDBAdapter(
-    "people",
-    "pubkey",
-    people,
-    100000,
-    sortByPubkeyWhitelist(prop("last_fetched")),
-  ),
-  new IndexedDBAdapter("relays", "url", relays, 1000, sortBy(prop("count"))),
-  new IndexedDBAdapter("channels", "id", channels, 1000, sortBy(prop("last_checked"))),
-  new IndexedDBAdapter("groups", "address", groups, 1000, sortBy(prop("count"))),
-  new IndexedDBAdapter("groupAlerts", "id", groupAlerts, 30, sortBy(prop("created_at"))),
-  new IndexedDBAdapter("groupRequests", "id", groupRequests, 100, sortBy(prop("created_at"))),
-  new IndexedDBAdapter(
-    "groupSharedKeys",
-    "pubkey",
-    groupSharedKeys,
-    1000,
-    sortBy(prop("created_at")),
-  ),
-  new IndexedDBAdapter("groupAdminKeys", "pubkey", groupAdminKeys, 1000),
-  new IndexedDBAdapter("repository", "id", events, 100000, sortBy(scoreEvent)),
+const objectAdapter = (name, key, store, opts = {}) =>
+  new IndexedDBAdapter(name, key, {
+    set: xs => store.set(fromPairs(xs.map(({key, value}) => [key, value]))),
+    subscribe: f =>
+      store.subscribe(m => f(Object.entries(m).map(([key, value]) => ({key, value})))),
+    ...opts,
+  })
+
+const collectionAdapter = (name, key, store, opts = {}) =>
+  new IndexedDBAdapter(name, key, {
+    set: xs => store.set(xs),
+    subscribe: f => store.subscribe(f),
+    ...opts,
+  })
+
+export const storage = new Storage(14, [
+  objectAdapter("freshness", "key", freshness, {sort: sortBy(prop("value"))}),
+  objectAdapter("handles", "key", handles, {limit: 10000}),
+  objectAdapter("zappers", "key", zappers, {limit: 10000}),
+  collectionAdapter("publishes", "id", publishes, {
+    sort: sortByPubkeyWhitelist(prop("created_at")),
+  }),
+  collectionAdapter("topics", "name", topics, {
+    limit: 1000,
+    sort: sortBy(prop("last_seen")),
+  }),
+  collectionAdapter("people", "pubkey", people, {
+    limit: 100000,
+    sort: sortByPubkeyWhitelist(prop("last_fetched")),
+  }),
+  collectionAdapter("relays", "url", relays, {
+    limit: 1000,
+    sort: sortBy(prop("count")),
+  }),
+  collectionAdapter("channels", "id", channels, {
+    limit: 1000,
+    sort: sortBy(prop("last_checked")),
+  }),
+  collectionAdapter("groups", "address", groups, {
+    limit: 1000,
+    sort: sortBy(prop("count")),
+  }),
+  collectionAdapter("groupAlerts", "id", groupAlerts, {
+    sort: sortBy(prop("created_at")),
+  }),
+  collectionAdapter("groupRequests", "id", groupRequests, {
+    sort: sortBy(prop("created_at")),
+  }),
+  collectionAdapter("groupSharedKeys", "pubkey", groupSharedKeys, {
+    limit: 1000,
+    sort: sortBy(prop("created_at")),
+  }),
+  collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {
+    limit: 1000,
+  }),
+  collectionAdapter("repository", "id", events, {
+    limit: 100000,
+    sort: sortBy(scoreEvent),
+  }),
 ])

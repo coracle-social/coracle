@@ -54,8 +54,8 @@
     if (!handler.pubkey) {
       const handle = await loadHandle(`_@${handler.domain}`)
 
-      handler.pubkey = handle.pubkey
-      handler.relays = handle.info.nip46 || handle.info.relays
+      handler.pubkey = handle?.pubkey
+      handler.relays = handle?.nip46 || handle?.relays || []
     }
 
     if (!handler.relays) {
@@ -109,8 +109,8 @@
         }
 
         const domain = last(content.nip05.split("@"))
-        const {pubkey, info} = (await loadHandle(`_@${domain}`)) || {}
-        const relays = info.nip46 || info.relays
+        const {pubkey, ...handle} = (await loadHandle(`_@${domain}`)) || {}
+        const relays = handle.nip46 || handle.relays || []
 
         if (handlers.some(h => h.domain === domain)) {
           return
