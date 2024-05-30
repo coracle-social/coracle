@@ -1,6 +1,6 @@
 import {
   fromNostrURI,
-  APPLICATION,
+  APP_DATA,
   AUDIO,
   CLASSIFIED,
   EVENT_TIME,
@@ -61,7 +61,7 @@ export const personKinds = [
   FEED,
   PROFILE,
 ] as number[]
-export const userKinds = [...personKinds, APPLICATION] as number[]
+export const userKinds = [...personKinds, APP_DATA] as number[]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",

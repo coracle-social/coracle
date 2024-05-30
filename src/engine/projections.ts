@@ -354,12 +354,6 @@ projections.addHandler(0, e => {
 })
 
 projections.addHandler(3, e => {
-  const session = getSession(e.pubkey)
-
-  if (session) {
-    updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind3: e}))
-  }
-
   updateStore(people.key(e.pubkey), e.created_at, {
     petnames: uniqBy(nth(1), Tags.fromEvent(e).whereKey("p").unwrap()),
   })
@@ -371,14 +365,6 @@ projections.addHandler(10000, e => {
       .filter(t => ["e", "p"].includes(t.key()))
       .unwrap(),
   })
-})
-
-projections.addHandler(10002, e => {
-  const session = getSession(e.pubkey)
-
-  if (session) {
-    updateSession(e.pubkey, $session => updateRecord($session, e.created_at, {kind10002: e}))
-  }
 })
 
 projections.addHandler(10004, e => {

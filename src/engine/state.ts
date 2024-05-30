@@ -183,6 +183,7 @@ export const env = new Writable({
 
 export const pubkey = withGetter(synced<string | null>("pubkey", null))
 export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
+export const freshness = withGetter(synced<Record<string, number>>("freshness", {}))
 
 export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
@@ -1042,7 +1043,6 @@ export const hints = new Router({
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: getPubkeyRelayUrls,
   getFallbackRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
-  getIndexerRelays: () => env.get().INDEXER_RELAYS,
   getSearchRelays: () => env.get().SEARCH_RELAYS,
   getLimit: () => parseInt(getSetting("relay_limit")),
   getRedundancy: () => parseInt(getSetting("relay_redundancy")),

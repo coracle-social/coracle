@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {Address} from "@welshman/util"
   import Content from "src/partials/Content.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -27,9 +26,9 @@
 {:else if type === "nrelay"}
   <RelayDetail url={data} />
 {:else if type === "nprofile"}
-  <PersonDetail npub={nip19.npubEncode(data.pubkey)} pubkey={data.pubkey} {relays} />
+  <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
-  <PersonDetail npub={nip19.npubEncode(data)} pubkey={data} />
+  <PersonDetail pubkey={data} />
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>

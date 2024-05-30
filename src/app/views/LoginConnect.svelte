@@ -1,7 +1,13 @@
 <script lang="ts">
   import {sleep} from "hurdak"
-  import {LOCAL_RELAY_URL, normalizeRelayUrl, isShareableRelayUrl} from "@welshman/util"
-  import {userKinds} from "src/util/nostr"
+  import {
+    RELAYS,
+    FOLLOWS,
+    PROFILE,
+    LOCAL_RELAY_URL,
+    normalizeRelayUrl,
+    isShareableRelayUrl,
+  } from "@welshman/util"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -12,16 +18,20 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
   import {loadUserData} from "src/app/state"
-  import {env, loadPubkeys, session} from "src/engine"
+  import {env, loadPubkeyUserData, deriveEvents, session} from "src/engine"
 
   const t = Date.now()
+
+  const events = deriveEvents({
+    filters: [{kinds: [RELAYS, FOLLOWS, PROFILE], authors: [$session.pubkey]}],
+  })
 
   const skip = () => router.at("notes").push()
 
   const searchRelays = async relays => {
     failed = false
 
-    await loadPubkeys([$session.pubkey], {force: true, kinds: userKinds})
+    await loadPubkeyUserData([$session.pubkey], {relays})
 
     if (!found) {
       failed = true
@@ -59,11 +69,10 @@
   tryDefaultRelays()
 
   $: {
-    if (!found && $session.kind0 && ($session.kind3 || $session.kind10002)) {
+    if (!found && $events.length === 3) {
       found = true
 
-      // Reload everything, it's possible we didn't get their petnames if we got a match
-      // from something like purplepag.es. This helps us avoid nuking follow lists later
+      // Reload user data and pull in messages, notifications, etc
       loadUserData()
 
       // Show a success message once they've had time to read the intro message
@@ -117,7 +126,7 @@
       <Field label="Relay">
         <Input bind:value={customRelay} />
       </Field>
-      <div class="flex justify-center gap-2">
+      <div class="flex justify-between gap-2">
         <Anchor button on:click={closeModal}>Cancel</Anchor>
         <Anchor button accent on:click={confirmCustomRelay}>Search relay</Anchor>
       </div>

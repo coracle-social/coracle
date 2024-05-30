@@ -1,7 +1,6 @@
 import Bugsnag from "@bugsnag/js"
 import {writable} from "@welshman/lib"
 import {Scope, makeScopeFeed} from "@welshman/feeds"
-import {userKinds} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import type {Feed} from "src/domain"
 import {makeFeed} from "src/domain"
@@ -14,7 +13,7 @@ import {
   loadLabels,
   loadDeletes,
   loadHandlers,
-  loadPubkeys,
+  loadPubkeyUserData,
   loadGiftWrap,
   loadAllMessages,
   loadGroupMessages,
@@ -44,7 +43,7 @@ const redactErrorInfo = (info: any) =>
   JSON.parse(
     JSON.stringify(info || null)
       .replace(/\d+:{60}\w+:\w+/g, "[REDACTED]")
-      .replace(/\w{60}\w+/g, "[REDACTED]")
+      .replace(/\w{60}\w+/g, "[REDACTED]"),
   )
 
 // Wait for bugsnag to be started in main
@@ -93,10 +92,7 @@ export const loadAppData = () => {
 
 export const loadUserData = async () => {
   // Make sure the user and their follows are loaded
-  await loadPubkeys([pubkey.get()], {
-    force: true,
-    kinds: userKinds,
-  })
+  await loadPubkeyUserData([pubkey.get()])
 
   loadSeen()
   loadLabels()

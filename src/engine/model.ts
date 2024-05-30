@@ -1,5 +1,5 @@
 import type {Publish} from "@welshman/net"
-import type {SignedEvent, TrustedEvent, Zapper} from "@welshman/util"
+import type {TrustedEvent, Zapper} from "@welshman/util"
 
 export type RelayInfo = {
   contact?: string
@@ -155,12 +155,6 @@ export type Session = {
   connectKey?: string
   connectToken?: string
   connectHandler?: NostrConnectHandler
-  kind0?: SignedEvent
-  kind0_updated?: string
-  kind3?: SignedEvent
-  kind3_updated?: string
-  kind10002?: SignedEvent
-  kind10002_updated?: string
   settings?: Record<string, any>
   settings_updated_at?: number
   groups_last_synced?: number

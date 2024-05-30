@@ -9,8 +9,11 @@ import {
   Address,
   getIdAndAddress,
   isShareableRelayUrl,
+  isSignedEvent,
   normalizeRelayUrl,
   FOLLOWS,
+  RELAYS,
+  PROFILE,
 } from "@welshman/util"
 import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {
@@ -270,9 +273,7 @@ export const joinRelay = async (url: string, claim?: string) => {
   }
 
   // Re-publish user meta to the new relay
-  if (canSign.get() && session.get().kind3) {
-    publish({event: session.get().kind3, relays: [url]})
-  }
+  broadcastUserData([url])
 
   return publishRelays([
     ...reject(whereEq({url}), relayPolicies.get()),
@@ -998,17 +999,13 @@ export const updateCurrentSession = f => {
 }
 
 export const broadcastUserData = (relays: string[]) => {
-  const {kind0, kind3, kind10002} = session.get() || {}
+  const authors = [pubkey.get()]
+  const kinds = [RELAYS, FOLLOWS, PROFILE]
+  const events = repository.query([{kinds, authors}])
 
-  if (kind0) {
-    publish({event: kind0, relays})
-  }
-
-  if (kind3) {
-    publish({event: kind3, relays})
-  }
-
-  if (kind10002) {
-    publish({event: kind10002, relays})
+  for (const event of events) {
+    if (isSignedEvent(event)) {
+      publish({event, relays})
+    }
   }
 }
