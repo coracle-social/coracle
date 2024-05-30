@@ -32,9 +32,8 @@
     load,
     nip59,
     hints,
-    people,
     loadOne,
-    getZapper,
+    loadZapper,
     isEventMuted,
     getSetting,
     getRecipientKey,
@@ -42,6 +41,7 @@
     sortEventsDesc,
     forcePlatformRelays,
     withFallbacks,
+    deriveZapper,
   } from "src/engine"
 
   export let note
@@ -180,10 +180,10 @@
     const zapAddress = tags.get("zap")?.value()
 
     if (zapAddress && getLnUrl(zapAddress)) {
-      zapper = await getZapper(getLnUrl(zapAddress))
+      zapper = await loadZapper(getLnUrl(zapAddress))
     } else {
-      unsubZapper = people.key(event.pubkey).subscribe($p => {
-        zapper = $p?.zapper
+      unsubZapper = deriveZapper(event.pubkey).subscribe($zapper => {
+        zapper = $zapper
       })
     }
 

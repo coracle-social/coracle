@@ -1,5 +1,5 @@
 import type {Publish} from "@welshman/net"
-import type {TrustedEvent, Zapper} from "@welshman/util"
+import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
 
 export type RelayInfo = {
   contact?: string
@@ -89,10 +89,16 @@ export type DisplayEvent = TrustedEvent & {
   reposts?: TrustedEvent[]
 }
 
-export type Handle = {
-  profile: Record<string, any>
+export type Zapper = WelshmanZapper & {
+  lnurl: string
   pubkey: string
-  address: string
+}
+
+export type Handle = {
+  nip05: string
+  pubkey: string
+  nip46: string[]
+  relays: string[]
 }
 
 export type Person = {
@@ -106,10 +112,6 @@ export type Person = {
   relays?: RelayPolicy[]
   communities_updated_at?: number
   communities?: string[][]
-  handle_updated_at?: number
-  handle?: Handle
-  zapper_updated_at?: number
-  zapper?: Zapper
 }
 
 export type PublishInfo = Omit<Publish, "emitter" | "result">

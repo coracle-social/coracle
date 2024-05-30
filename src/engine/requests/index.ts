@@ -9,7 +9,18 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, cached, nthEq, nth, fromPairs, now, writable, max} from "@welshman/lib"
+import {
+  Worker,
+  bech32ToHex,
+  pick,
+  cached,
+  nthEq,
+  nth,
+  fromPairs,
+  now,
+  writable,
+  max,
+} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -27,6 +38,7 @@ import {
 import {updateIn, createBatcher} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, whereEq, without} from "ramda"
+import type {Zapper} from "src/engine/model"
 import {repository} from "src/engine/repository"
 import {
   deriveUserCircles,
@@ -62,9 +74,9 @@ import {
   dufflepud,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
-import {loadPubkeyRelays, loadPubkeys} from 'src/engine/requests/pubkeys'
+import {loadPubkeyRelays, loadPubkeys} from "src/engine/requests/pubkeys"
 
-export * from 'src/engine/requests/pubkeys'
+export * from "src/engine/requests/pubkeys"
 
 export const attemptedAddrs = new Map()
 
@@ -75,9 +87,9 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
   return {...filter, since}
 }
 
-// Handles
+// Handles/Zappers
 
-export const fetchHandle = createBatcher(500, async (handles: string[]) => {
+const fetchHandle = createBatcher(500, async (handles: string[]) => {
   const data =
     (await tryFunc(async () => {
       const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
@@ -90,10 +102,43 @@ export const fetchHandle = createBatcher(500, async (handles: string[]) => {
   return handles.map(h => infoByHandle[h])
 })
 
-export const getHandle = cached({
+export const loadHandle = cached({
   maxSize: 100,
   getKey: ([handle]) => handle,
   getValue: ([handle]) => fetchHandle(handle),
+})
+
+const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
+  const data =
+    (await tryFunc(async () => {
+      // Dufflepud expects plaintext but we store lnurls encoded
+      const res = await Fetch.postJson(dufflepud("zapper/info"), {
+        lnurls: uniq(lnurls).map(bech32ToHex),
+      })
+
+      return res?.data
+    })) || []
+
+  const infoByLnurl = createMapOf("lnurl", "info", data)
+
+  return lnurls.map(lnurl => {
+    const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
+
+    if (!zapper) {
+      return null
+    }
+
+    return {
+      ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
+      lnurl,
+    } as Zapper
+  })
+})
+
+export const loadZapper = cached({
+  maxSize: 100,
+  getKey: ([handle]) => handle,
+  getValue: ([handle]) => fetchZapper(handle),
 })
 
 export const getStaleAddrs = (addrs: string[]) => {

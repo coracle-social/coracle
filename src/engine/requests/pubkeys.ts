@@ -2,17 +2,9 @@ import {seconds} from "hurdak"
 import {assoc, remove, now, inc} from "@welshman/lib"
 import {RELAYS, APP_DATA} from "@welshman/util"
 import {appDataKeys, personKinds, userKinds} from "src/util/nostr"
-import {freshness, withIndexers, load, hints} from "src/engine/state"
+import {getFreshness, setFreshness, withIndexers, load, hints} from "src/engine/state"
 
 const attempts = new Map<string, number>()
-
-const getFreshnessKey = (key: string, pubkey: string) => `loadPubkeys:${key}:${pubkey}`
-
-const getFreshness = (key: string, pubkey: string) =>
-  freshness.get()[getFreshnessKey(key, pubkey)] || 0
-
-const setFreshness = (key: string, pubkey: string, ts: number) =>
-  freshness.update(assoc(getFreshnessKey(key, pubkey), ts))
 
 const getStalePubkeys = (pubkeys: string[], key: string, delta: number) => {
   const result = new Set<string>()
@@ -75,10 +67,10 @@ const loadPubkeyData = (
 }
 
 export const loadPubkeyRelays = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("relay", [RELAYS], pubkeys, opts)
+  loadPubkeyData("pubkey/relay", [RELAYS], pubkeys, opts)
 
 export const loadPubkeyProfiles = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("profile", remove(RELAYS, personKinds), pubkeys, opts)
+  loadPubkeyData("pubkey/profile", remove(RELAYS, personKinds), pubkeys, opts)
 
 export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   // Load relays, then load profiles so we have a better chance of finding them. But also
@@ -90,4 +82,4 @@ export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) 
   ])
 
 export const loadPubkeyUserData = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("user", userKinds, pubkeys, {force: true, ...opts})
+  loadPubkeyData("pubkey/user", userKinds, pubkeys, {force: true, ...opts})

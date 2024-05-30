@@ -14,7 +14,7 @@
   import {
     load,
     hints,
-    getHandle,
+    loadHandle,
     getExtension,
     withExtension,
     loginWithExtension,
@@ -52,10 +52,10 @@
 
     // Fill in pubkey and relays if they entered a custom doain
     if (!handler.pubkey) {
-      const info = await getHandle(`_@${handler.domain}`)
+      const handle = await loadHandle(`_@${handler.domain}`)
 
-      handler.pubkey = info.pubkey
-      handler.relays = info.nip46 || info.relays
+      handler.pubkey = handle.pubkey
+      handler.relays = handle.info.nip46 || handle.info.relays
     }
 
     if (!handler.relays) {
@@ -109,7 +109,8 @@
         }
 
         const domain = last(content.nip05.split("@"))
-        const {pubkey, nip46: relays} = (await getHandle(`_@${domain}`)) || {}
+        const {pubkey, info} = (await loadHandle(`_@${domain}`)) || {}
+        const relays = info.nip46 || info.relays
 
         if (handlers.some(h => h.domain === domain)) {
           return

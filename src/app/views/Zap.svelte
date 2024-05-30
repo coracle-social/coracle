@@ -11,7 +11,7 @@
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import {router} from "src/app/util/router"
-  import {env, load, hints, signer, getSetting, derivePerson} from "src/engine"
+  import {env, load, hints, signer, getSetting, getZapper} from "src/engine"
 
   export let splits
   export let eid = null
@@ -60,7 +60,7 @@
         // Add our zapper and relay hints
         return zaps.map((zap, i) => {
           const content = i === 0 ? message : ""
-          const {zapper} = derivePerson(zap.pubkey).get()
+          const zapper = getZapper(zap.pubkey)
           const relays = hints
             .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
             .getUrls()
@@ -94,7 +94,7 @@
           : await signer.get().signAsUser(template)
         const zapString = encodeURI(JSON.stringify(signedTemplate))
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
+        const res = await tryCatch(() => Fetch.fetchJson(zapper.info.callback + qs))
 
         return {...zap, invoice: res?.pr}
       }),
@@ -128,7 +128,7 @@
       load({
         relays,
         onEvent: callback,
-        filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since}],
+        filters: [{kinds: [9735], authors: [zapper.info.nostrPubkey], "#p": [pubkey], since}],
       })
     }
   }

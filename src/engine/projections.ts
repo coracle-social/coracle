@@ -7,7 +7,6 @@ import {
   Address,
   getAddress,
   getIdFilters,
-  getLnUrl,
   isShareableRelayUrl,
   normalizeRelayUrl,
 } from "@welshman/util"
@@ -26,7 +25,6 @@ import {
   getChannelId,
   getRecipientKey,
   getSession,
-  getZapper,
   groupAdminKeys,
   groupAlerts,
   groupRequests,
@@ -41,7 +39,6 @@ import {
   tracker,
   withFallbacks,
 } from "src/engine/state"
-import {getHandle} from "src/engine/requests"
 import {
   addTopic,
   modifyGroupStatus,
@@ -51,6 +48,8 @@ import {
   updateStore,
   updateSession,
   setSession,
+  updateZapper,
+  updateHandle,
 } from "src/engine/commands"
 
 // Synchronize repository with projections. All events should be published to the
@@ -295,54 +294,6 @@ const handleGroupRequest = access => (e: TrustedEvent) => {
 projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
-
-const updateHandle = async (e, {nip05}) => {
-  if (!nip05) {
-    return
-  }
-
-  const person = people.key(e.pubkey)
-
-  if (person.get()?.handle_updated_at > e.created_at) {
-    return
-  }
-
-  const profile = await getHandle(nip05)
-
-  if (profile?.pubkey === e.pubkey) {
-    updateStore(person, e.created_at, {
-      handle: {address: nip05, profile},
-    })
-  }
-}
-
-const updateZapper = async (e, {lud16, lud06}) => {
-  const address = (lud16 || lud06 || "").toLowerCase()
-
-  if (!address) {
-    return
-  }
-
-  const lnurl = getLnUrl(address)
-
-  if (!lnurl) {
-    return
-  }
-
-  const person = people.key(e.pubkey)
-
-  if (person.get()?.zapper_updated_at > e.created_at) {
-    return
-  }
-
-  const zapper = await getZapper(lnurl)
-
-  if (!zapper?.allowsNostr || !zapper?.nostrPubkey) {
-    return
-  }
-
-  updateStore(person, e.created_at, {zapper})
-}
 
 projections.addHandler(0, e => {
   tryJson(async () => {

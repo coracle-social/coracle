@@ -1,10 +1,8 @@
 import Fuse from "fuse.js"
 import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
-import {derived} from "svelte/store"
+import {derived, writable} from "svelte/store"
 import {
-  Fetch,
-  createMapOf,
   defer,
   displayList,
   doPipe,
@@ -14,7 +12,6 @@ import {
   sleep,
   switcher,
   switcherFn,
-  tryFunc,
 } from "hurdak"
 import {
   any,
@@ -32,14 +29,12 @@ import {
   partition,
   prop,
   whereEq,
-  pick,
   without,
 } from "ramda"
 import {
   Collection as CollectionStore,
   Worker,
   Writable,
-  bech32ToHex,
   cached,
   clamp,
   Derived,
@@ -50,7 +45,6 @@ import {
   splitAt,
   uniq,
   uniqBy,
-  writable,
   now,
   sort,
   groupBy,
@@ -80,7 +74,7 @@ import {
   LOCAL_RELAY_URL,
   getFilterResultCardinality,
 } from "@welshman/util"
-import type {Filter, RouterScenario, TrustedEvent, SignedEvent, Zapper} from "@welshman/util"
+import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   ConnectionStatus,
   Executor,
@@ -99,7 +93,6 @@ import {
   synced,
   withGetter,
   getter,
-  createBatcher,
   pushToKey,
   tryJson,
   fromCsv,
@@ -153,6 +146,7 @@ import type {
   RelayPolicy,
   Session,
   Topic,
+  Zapper,
 } from "src/engine/model"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
 import {getNip04, getNip44, getNip59, getSigner, getConnect, unwrapRepost} from "src/engine/utils"
@@ -183,7 +177,9 @@ export const env = new Writable({
 
 export const pubkey = withGetter(synced<string | null>("pubkey", null))
 export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
-export const freshness = withGetter(synced<Record<string, number>>("freshness", {}))
+export const freshness = withGetter(writable<Record<string, number>>({}))
+export const handles = withGetter(writable<Record<string, Handle>>({}))
+export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 
 export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
@@ -199,6 +195,16 @@ export const channels = new CollectionStore<Channel>("id")
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
+
+// Freshness
+
+export const getFreshnessKey = (key: string, value: any) => `${key}:${value}`
+
+export const getFreshness = (key: string, value: any) =>
+  freshness.get()[getFreshnessKey(key, value)] || 0
+
+export const setFreshness = (key: string, value: any, ts: number) =>
+  freshness.update(assoc(getFreshnessKey(key, value), ts))
 
 // Session and settings
 
@@ -339,10 +345,20 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
 
 export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))
 
+// Handle
+
+export const getHandle = (pubkey: string) => handles.get()[pubkey]
+
+export const deriveHandle = (pubkey: string) => derived(handles, $handles => $handles[pubkey])
+
+export const getZapper = (pubkey: string) => zappers.get()[pubkey]
+
+export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $zappers[pubkey])
+
 // People
 
 export const displayHandle = (handle: Handle) =>
-  handle.address.startsWith("_@") ? last(handle.address.split("@")) : handle.address
+  handle.nip05.startsWith("_@") ? last(handle.nip05.split("@")) : handle.nip05
 
 export const getMutedPubkeys = $person =>
   ($person?.mutes || []).map(nth(1)).filter(pk => pk?.length === 64) as string[]
@@ -432,7 +448,7 @@ export const primeWotCaches = throttle(3000, pk => {
   }
 })
 
-export const maxWot = writable(10)
+export const maxWot = withGetter(writable(10))
 
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
 
@@ -1204,41 +1220,6 @@ export const collectionSearch = derived(
   $collections => new CollectionSearch($collections),
 )
 
-// Zaps
-
-export const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      // Dufflepud expects plaintext but we store lnurls encoded
-      const res = await Fetch.postJson(dufflepud("zapper/info"), {
-        lnurls: uniq(lnurls).map(bech32ToHex),
-      })
-
-      return res?.data
-    })) || []
-
-  const infoByLnurl = createMapOf("lnurl", "info", data)
-
-  return lnurls.map(lnurl => {
-    const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
-
-    if (!zapper) {
-      return null
-    }
-
-    return {
-      ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
-      lnurl,
-    } as Zapper
-  })
-})
-
-export const getZapper = cached({
-  maxSize: 100,
-  getKey: ([lnurl]) => lnurl,
-  getValue: ([lnurl]) => fetchZapper(lnurl),
-})
-
 // Network
 
 export const addRepostFilters = (filters: Filter[]) =>
@@ -1763,9 +1744,9 @@ const getAncestorIds = e => {
 
 export class ThreadLoader {
   stopped = false
-  parent = writable<DisplayEvent>(null)
-  ancestors = writable<DisplayEvent[]>([])
-  root = writable<DisplayEvent>(null)
+  parent = withGetter(writable<DisplayEvent>(null))
+  ancestors = withGetter(writable<DisplayEvent[]>([]))
+  root = withGetter(writable<DisplayEvent>(null))
 
   constructor(
     readonly note: TrustedEvent,
@@ -2026,7 +2007,7 @@ class IndexedDBAdapter {
 class Storage {
   db: IndexedDB
   ready = defer()
-  dead = writable(false)
+  dead = withGetter(writable(false))
 
   constructor(
     readonly version,

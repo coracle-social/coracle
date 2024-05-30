@@ -6,6 +6,7 @@ import {
   Tag,
   Tags,
   createEvent,
+  getLnUrl,
   Address,
   getIdAndAddress,
   isShareableRelayUrl,
@@ -77,8 +78,12 @@ import {
   withIndexers,
   optimisticReadReceipts,
   unpublishedReadReceipts,
+  setFreshness,
+  getFreshness,
+  handles,
+  zappers,
 } from "src/engine/state"
-import {getHandle} from "src/engine/requests"
+import {loadHandle, loadZapper} from "src/engine/requests"
 
 // Helpers
 
@@ -202,6 +207,44 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
   const nip94Events = await uploadFilesToHosts(urls, compressedFiles)
 
   return eventsToMeta(nip94Events)
+}
+
+// Handles/Zappers
+
+export const updateHandle = async ({pubkey, created_at}, {nip05}) => {
+  if (!nip05 || getFreshness("handle", pubkey) >= created_at) {
+    return
+  }
+
+  setFreshness("handle", pubkey, created_at)
+
+  const handle = await loadHandle(nip05)
+
+  if (handle?.pubkey === pubkey) {
+    handles.update(assoc(pubkey, {...handle, nip05}))
+  }
+}
+
+export const updateZapper = async ({pubkey, created_at}, {lud16, lud06}) => {
+  const address = (lud16 || lud06 || "").toLowerCase()
+
+  if (!address) {
+    return
+  }
+
+  const lnurl = getLnUrl(address)
+
+  if (!lnurl || getFreshness("zapper", pubkey) >= created_at) {
+    return
+  }
+
+  setFreshness("zapper", pubkey, created_at)
+
+  const zapper = await loadZapper(lnurl)
+
+  if (zapper?.allowsNostr && zapper?.nostrPubkey) {
+    zappers.update(assoc(pubkey, {...zapper, pubkey, lnurl}))
+  }
 }
 
 // Relays
@@ -917,7 +960,7 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
 
 export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
   const connectKey = generatePrivateKey()
-  const {pubkey} = (await getHandle(`${username}@${connectHandler.domain}`)) || {}
+  const {pubkey} = (await loadHandle(`${username}@${connectHandler.domain}`)) || {}
 
   let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
 

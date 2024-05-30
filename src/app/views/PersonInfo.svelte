@@ -2,12 +2,12 @@
   import {nip19} from "nostr-tools"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {displayHandle, derivePerson, deriveProfile} from "src/engine"
+  import {displayHandle, deriveHandle, deriveProfile} from "src/engine"
 
   export let pubkey
   export let nprofile
 
-  const person = derivePerson(pubkey)
+  const handle = deriveHandle(pubkey)
   const profile = deriveProfile(pubkey)
 
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
@@ -16,11 +16,11 @@
 <h1 class="staatliches text-2xl">Details</h1>
 <CopyValue label="Link" value={nprofile} />
 <CopyValue label="Public Key" encode={nip19.npubEncode} value={pubkey} />
-{#if $person?.handle}
-  {@const display = displayHandle($person.handle)}
+{#if $handle}
+  {@const display = displayHandle($handle)}
   <CopyValue label="Nostr Address" value={display} />
   <strong>Nostr Address Relays</strong>
-  {#each $person.handle.profile.relays || [] as url}
+  {#each $handle.relays || [] as url}
     <RelayCard relay={{url}} />
   {:else}
     <p class="flex gap-2 items-center">

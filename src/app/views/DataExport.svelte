@@ -4,18 +4,17 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {repository, user} from "src/engine"
+  import {repository, getHandle, pubkey} from "src/engine"
 
   const submit = async () => {
-    const events = Array.from(repository.query([userOnly ? {authors: [$user.pubkey]} : {}]))
+    const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))
     const jsonl = events
       .filter(e => includeEncrypted || (!e.wrap && e.kind !== 4))
       // Important: re-wrap encrypted messages
       .map(e => JSON.stringify(e.wrap || e))
       .join("\n")
 
-    const {pubkey, handle} = $user
-    const filename = handle?.address || pubkey.slice(0, 16)
+    const filename = getHandle($pubkey)?.nip05 || $pubkey.slice(0, 16)
     const data = new TextEncoder().encode(jsonl)
     const blob = new Blob([data], {type: "application/octet-stream"})
     const url = URL.createObjectURL(blob)
