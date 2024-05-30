@@ -27,7 +27,6 @@
     getPubkeyRelays,
   } from "src/engine"
 
-  export let npub
   export let pubkey
   export let relays = []
 

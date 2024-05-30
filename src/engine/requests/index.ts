@@ -45,8 +45,6 @@ import {
   isEventMuted,
   load,
   loadOne,
-  loadPubkeys,
-  loadPubkeyRelays,
   maxWot,
   network,
   nip04,
@@ -64,6 +62,9 @@ import {
   dufflepud,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
+import {loadPubkeyRelays, loadPubkeys} from 'src/engine/requests/pubkeys'
+
+export * from 'src/engine/requests/pubkeys'
 
 export const attemptedAddrs = new Map()
 
@@ -73,6 +74,8 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
   return {...filter, since}
 }
+
+// Handles
 
 export const fetchHandle = createBatcher(500, async (handles: string[]) => {
   const data =
