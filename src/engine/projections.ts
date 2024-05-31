@@ -9,6 +9,8 @@ import {
   getIdFilters,
   isShareableRelayUrl,
   normalizeRelayUrl,
+  MUTES,
+  FOLLOWS,
 } from "@welshman/util"
 import {warn} from "src/util/logger"
 import {tryJson} from "src/util/misc"
@@ -38,6 +40,8 @@ import {
   sessions,
   tracker,
   withFallbacks,
+  ensureMessagePlaintext,
+  ensurePlaintext,
 } from "src/engine/state"
 import {
   addTopic,
@@ -343,6 +347,8 @@ projections.addHandler(1985, (e: TrustedEvent) => {
   }
 })
 
+// Update channel metadata
+
 projections.addHandler(30078, async e => {
   const d = Tags.fromEvent(e).get("d")?.value()
   const session = getSession(e.pubkey)
@@ -381,7 +387,7 @@ projections.addHandler(30078, async e => {
   }
 })
 
-const handleMessage = async e => {
+const handleChannelMessage = async e => {
   const tags = Tags.fromEvent(e)
   const pubkeys = uniq(tags.values("p").valueOf().concat(e.pubkey)) as string[]
   const channelId = getChannelId(pubkeys)
@@ -392,29 +398,7 @@ const handleMessage = async e => {
     }
 
     const $channel = channels.key(channelId).get()
-
     const relays = $channel?.relays || []
-
-    // Handle nip04
-    if (e.kind === 4) {
-      const recipient = tags.get("p")?.value()
-      const session = getSession(e.pubkey) || getSession(recipient)
-
-      if (!session) {
-        return
-      }
-
-      const nip04 = getNip04(session)
-
-      if (!nip04.isEnabled()) {
-        return
-      }
-
-      const other = e.pubkey === session.pubkey ? recipient : e.pubkey
-
-      e = {...e, content: await nip04.decryptAsUser(e.content, other)}
-    }
-
     const updates: Channel = {
       ...$channel,
       id: channelId,
@@ -432,8 +416,16 @@ const handleMessage = async e => {
   }
 }
 
-projections.addHandler(4, handleMessage)
-projections.addHandler(14, handleMessage)
+projections.addHandler(4, handleChannelMessage)
+projections.addHandler(14, handleChannelMessage)
+
+// Decrypt encrypted events eagerly
+
+projections.addHandler(4, ensureMessagePlaintext)
+projections.addHandler(FOLLOWS, ensurePlaintext)
+projections.addHandler(MUTES, ensurePlaintext)
+
+// Sync client settings
 
 projections.addHandler(30078, async e => {
   if (Tags.fromEvent(e).get("d")?.value() === appDataKeys.USER_SETTINGS) {

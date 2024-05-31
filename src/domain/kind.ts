@@ -7,8 +7,12 @@ export type KindOption = {
 
 export class KindSearch extends SearchHelper<KindOption, number> {
   config = {keys: ["kind", "label"]}
-  getValue = (option: KindOption) => option.kind
-  displayValuer = (kind: number) => {
+
+  getValue(option: KindOption) {
+    return option.kind
+  }
+
+  displayValue(kind: number) {
     const option = this.getOption(kind)
 
     return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`

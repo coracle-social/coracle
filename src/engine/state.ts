@@ -56,6 +56,8 @@ import {
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
+  FOLLOWS,
+  MUTES,
   LABEL,
   PROFILE,
   FEED,
@@ -114,8 +116,10 @@ import type {
   PublishedFeed,
   PublishedProfile,
   PublishedListFeed,
+  PublishedSingleton,
   Collection,
   PublishedList,
+  Handle,
 } from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
@@ -131,6 +135,8 @@ import {
   mapListToFeed,
   getHandlerAddress,
   displayProfile,
+  readSingleton,
+  asDecryptedEvent,
 } from "src/domain"
 import type {
   Channel,
@@ -140,7 +146,6 @@ import type {
   GroupKey,
   GroupRequest,
   GroupStatus,
-  Handle,
   Person,
   PublishInfo,
   Relay,
@@ -181,6 +186,7 @@ export const sessions = withGetter(synced<Record<string, Session>>("sessions", {
 export const freshness = withGetter(writable<Record<string, number>>({}))
 export const handles = withGetter(writable<Record<string, Handle>>({}))
 export const zappers = withGetter(writable<Record<string, Zapper>>({}))
+export const plaintext = withGetter(writable<Record<string, string>>({}))
 
 export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
@@ -274,6 +280,39 @@ export const nip59 = session.derived(getNip59)
 export const canSign = signer.derived($signer => $signer.isEnabled())
 export const settings = user.derived(getSettings)
 
+// Plaintext
+
+export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
+
+export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
+
+export const ensurePlaintext = async (e: TrustedEvent) => {
+  if (!getPlaintext(e)) {
+    const session = getSession(e.pubkey)
+
+    if (getSigner(session).isEnabled()) {
+      setPlaintext(e, await getNip59(session).decrypt(e))
+    }
+  }
+
+  return getPlaintext(e)
+}
+
+export const ensureMessagePlaintext = async (e: TrustedEvent) => {
+  if (!getPlaintext(e)) {
+    const recipient = Tags.fromEvent(e).get("p")?.value()
+    const session = getSession(e.pubkey) || getSession(recipient)
+    const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
+    const nip04 = getNip04(session)
+
+    if (nip04.isEnabled()) {
+      plaintext.update(assoc(e.id, await nip04.decryptAsUser(e.content, other)))
+    }
+  }
+
+  return getPlaintext(e)
+}
+
 // Profiles
 
 export const profiles = deriveEventsMapped<PublishedProfile>({
@@ -346,7 +385,7 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
 
 export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))
 
-// Handle
+// Handles/Zappers
 
 export const getHandle = (pubkey: string) => handles.get()[pubkey]
 
@@ -356,10 +395,43 @@ export const getZapper = (pubkey: string) => zappers.get()[pubkey]
 
 export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $zappers[pubkey])
 
-// People
+// Follows/mutes
 
-export const displayHandle = (handle: Handle) =>
-  handle.nip05.startsWith("_@") ? last(handle.nip05.split("@")) : handle.nip05
+export const followLists = deriveEventsMapped<PublishedSingleton>({
+  filters: [{kinds: [FOLLOWS]}],
+  itemToEvent: prop("event"),
+  eventToItem: event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: getPlaintext(event),
+      }),
+    ),
+})
+
+export const userFollowList = derived(
+  [followLists, pubkey],
+  ([$followLists, $pubkey]: [PublishedSingleton[], string]) =>
+    $followLists.find(followList => followList.event.pubkey === $pubkey),
+)
+
+export const muteLists = deriveEventsMapped<PublishedSingleton>({
+  filters: [{kinds: [MUTES]}],
+  itemToEvent: prop("event"),
+  eventToItem: event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: getPlaintext(event),
+      }),
+    ),
+})
+
+export const userMuteList = derived(
+  [muteLists, pubkey],
+  ([$muteLists, $pubkey]: [PublishedSingleton[], string]) =>
+    $muteLists.find(muteList => muteList.event.pubkey === $pubkey),
+)
+
+// People
 
 export const getMutedPubkeys = $person =>
   ($person?.mutes || []).map(nth(1)).filter(pk => pk?.length === 64) as string[]
@@ -2096,10 +2168,11 @@ const collectionAdapter = (name, key, store, opts = {}) =>
     ...opts,
   })
 
-export const storage = new Storage(14, [
+export const storage = new Storage(15, [
   objectAdapter("freshness", "key", freshness, {sort: sortBy(prop("value"))}),
   objectAdapter("handles", "key", handles, {limit: 10000}),
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
+  objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
   collectionAdapter("publishes", "id", publishes, {
     sort: sortByPubkeyWhitelist(prop("created_at")),
   }),

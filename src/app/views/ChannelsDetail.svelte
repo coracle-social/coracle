@@ -2,8 +2,8 @@
   import cx from "classnames"
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
-  import {DIRECT_MESSAGE, Tags} from "@welshman/util"
-  import {formatTimestamp, synced} from "src/util/misc"
+  import {DIRECT_MESSAGE} from "@welshman/util"
+  import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Content from "src/partials/Content.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -24,14 +24,12 @@
     getChannelIdFromEvent,
     listenForMessages,
     sortEventsDesc,
-    nip04,
+    getPlaintext,
   } from "src/engine"
 
   export let pubkeys
   export let channelId
   export let initialMessage = null
-
-  const contentCache = synced("ChannelsDetail/contentCache", {})
 
   const messages = derived(
     deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]}),
@@ -40,18 +38,7 @@
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const decryptContent = async e => {
-    if (e.kind !== 4) return e
-
-    if (!$contentCache[e.id]) {
-      const recipient = Tags.fromEvent(e).get("p")?.value()
-      const other = e.pubkey === $session.pubkey ? recipient : e.pubkey
-
-      $contentCache[e.id] = await nip04.get().decryptAsUser(e.content, other)
-    }
-
-    return {...e, content: $contentCache[e.id]}
-  }
+  const getContent = e => (e.kind === 4 ? getPlaintext(e) : e.content) || ""
 
   const send = async (content, useNip44) => {
     // If we don't have nip44 support, just send a legacy message
@@ -135,12 +122,10 @@
       </Anchor>
     {/if}
     <div class="break-words">
-      {#await decryptContent(message)}
+      {#await getContent(message)}
         <!-- pass -->
-      {:then note}
-        {#if note.content}
-          <NoteContent showEntire {note} />
-        {/if}
+      {:then content}
+        <NoteContent showEntire note={{...message, content}} />
       {/await}
     </div>
     <small

@@ -94,13 +94,6 @@ export type Zapper = WelshmanZapper & {
   pubkey: string
 }
 
-export type Handle = {
-  nip05: string
-  pubkey: string
-  nip46: string[]
-  relays: string[]
-}
-
 export type Person = {
   pubkey: string
   petnames_updated_at?: number

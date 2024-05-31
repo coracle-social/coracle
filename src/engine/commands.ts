@@ -36,7 +36,13 @@ import {
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath} from "src/util/misc"
 import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
-import {makeFollowList, editFollowList, createFollowList, readFollowList} from "src/domain"
+import {
+  asDecryptedEvent,
+  makeSingleton,
+  editSingleton,
+  createSingleton,
+  readSingleton,
+} from "src/domain"
 import type {RelayPolicy, Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {NostrConnectBroker} from "src/engine/utils"
@@ -82,6 +88,7 @@ import {
   getFreshness,
   handles,
   zappers,
+  getPlaintext,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -778,13 +785,25 @@ export const updateFollows = async ({add = [], remove = []}) => {
       }
     }
 
-    const followList = event ? readFollowList(event) : makeFollowList()
-    const publicTags = updateTags(followList.publicTags)
-    const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
+    // Preserve content instead of use encrypted tags because kind 3 content is used for
+    // relay selections in many places
     const content = event?.content || ""
-    const template = event
-      ? editFollowList({...followList, publicTags})
-      : createFollowList({...followList, publicTags})
+    const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
+    const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())
+
+    let encryptable
+    if (event) {
+      const singleton = readSingleton(asDecryptedEvent(event, {content: getPlaintext(event)}))
+      const publicTags = updateTags(singleton.publicTags)
+
+      encryptable = editSingleton({...singleton, publicTags})
+    } else {
+      const singleton = makeSingleton({kind: FOLLOWS})
+      const publicTags = updateTags(singleton.publicTags)
+      encryptable = createSingleton({...singleton, publicTags})
+    }
+
+    const template = await encryptable.reconcile(encrypt)
 
     await createAndPublish({...template, content, relays})
   }
@@ -867,6 +886,8 @@ export const addTopic = (e, name) => {
     })
   }
 }
+
+// Messages
 
 export const sendLegacyMessage = async (channelId: string, content: string) => {
   const $pubkey = user.get().pubkey

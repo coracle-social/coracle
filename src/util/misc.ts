@@ -354,17 +354,27 @@ export class SearchHelper<T, V> {
     }
   }
 
-  getSearch = () => fuzzy(this.options, this.config)
+  getSearch() {
+    return fuzzy(this.options, this.config)
+  }
 
-  getOption = (value: V): T => this._optionsByValue.get(value)
+  getOption(value: V): T {
+    return this._optionsByValue.get(value)
+  }
 
-  getValue = (option: T): V => option as unknown as V
+  getValue(option: T): V {
+    return option as unknown as V
+  }
 
-  displayValue = (value: V) => String(value)
+  displayValue(value: V) {
+    return String(value)
+  }
 
-  displayOption = (option: T) => this.displayValue(this.getValue(option))
+  displayOption(option: T) {
+    return this.displayValue(this.getValue(option))
+  }
 
-  searchOptions = (term: string) => {
+  searchOptions(term: string) {
     if (!this._search) {
       this._search = this.getSearch()
     }
@@ -372,7 +382,9 @@ export class SearchHelper<T, V> {
     return this._search(term)
   }
 
-  searchValues = (term: string) => this.searchOptions(term).map(this.getValue)
+  searchValues(term: string) {
+    return this.searchOptions(term).map(this.getValue)
+  }
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)

@@ -2,7 +2,8 @@
   import {nip19} from "nostr-tools"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {displayHandle, deriveHandle, deriveProfile} from "src/engine"
+  import {displayHandle} from "src/domain"
+  import {deriveHandle, deriveProfile} from "src/engine"
 
   export let pubkey
   export let nprofile

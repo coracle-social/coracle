@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {deriveHandle, displayHandle} from "src/engine"
+  import {displayHandle} from "src/domain"
+  import {deriveHandle} from "src/engine"
 
   export let pubkey
 
