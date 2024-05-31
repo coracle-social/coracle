@@ -11,7 +11,7 @@
   export let modal = false
 
   const group = deriveGroup(address)
-  const members = getWotGroupMembers(address)
+  const members = $getWotGroupMembers(address)
 
   const enter = () => {
     const route = router.at("groups").of(address).at("notes")

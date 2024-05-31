@@ -1,13 +1,13 @@
 <script lang="ts">
+  import type {Writable} from "svelte/store"
   import {throttle} from "throttle-debounce"
-  import {derived} from "@welshman/lib"
+  import {derived} from "svelte/store"
   import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
-  import type {Person, Topic} from "src/engine"
   import {topics, profileSearch, createPeopleLoader} from "src/engine"
 
-  export let term
+  export let term: Writable<string>
   export let replace = false
   export let searching = null
 
@@ -17,11 +17,11 @@
 
   const onClick = result => {
     if (result.type === "topic") {
-      openTopic(result.topic.name)
+      openTopic(result.id)
     }
 
     if (result.type === "profile") {
-      openProfile(result.event.pubkey)
+      openProfile(result.id)
     }
   }
 
@@ -51,7 +51,7 @@
     .throttle(1000)
     .derived($topics => fuzzy($topics, {keys: ["name"], threshold: 0.5, shouldSort: true}))
 
-  const results = derived<{type: string; id: string; person?: Person; topic?: Topic}[]>(
+  const results = derived(
     [term, searchTopics, profileSearch],
     ([$term, $searchTopics, $profileSearch]) => {
       $term = $term || ""

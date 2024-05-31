@@ -14,16 +14,17 @@
 
 <script lang="ts">
   import cx from "classnames"
+  import {derived} from "svelte/store"
   import {themeColors} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {displayPubkey, displayProfile} from "src/domain"
-  import {deriveFollowing, deriveProfile, session, maxWot, getWotScore} from "src/engine"
+  import {userFollows, deriveProfile, session, maxWot, getWotScore} from "src/engine"
 
   export let pubkey
 
   const profile = deriveProfile(pubkey)
-  const following = deriveFollowing(pubkey)
+  const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getWotScore($session?.pubkey, pubkey)
   const npubDisplay = displayPubkey(pubkey)
 

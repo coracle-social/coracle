@@ -47,7 +47,7 @@ import {
   groups,
   dvmRequest,
   env,
-  follows,
+  getFollows,
   forcePlatformRelays,
   getFilterSelections,
   getFollowers,
@@ -58,7 +58,7 @@ import {
   load,
   loadOne,
   maxWot,
-  network,
+  getNetwork,
   nip04,
   nip44,
   people,
@@ -355,9 +355,9 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
 
     const pubkeys = switcherFn(scope, {
       [Scope.Self]: () => ($user ? [$user.pubkey] : []),
-      [Scope.Follows]: () => Array.from(follows.get()),
-      [Scope.Network]: () => Array.from(network.get()),
-      [Scope.Followers]: () => Array.from(getFollowers($user.pubkey).map(p => p.pubkey)),
+      [Scope.Follows]: () => Array.from(getFollows($user.pubkey)),
+      [Scope.Network]: () => Array.from(getNetwork($user.pubkey)),
+      [Scope.Followers]: () => Array.from(getFollowers($user.pubkey)),
     })
 
     return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
@@ -552,7 +552,10 @@ export const loadHandlers = () =>
     skipCache: true,
     relays: hints.ReadRelays().getUrls(),
     filters: [
-      addSinceToFilter({kinds: [HANDLER_RECOMMENDATION], authors: Array.from(follows.get())}),
+      addSinceToFilter({
+        kinds: [HANDLER_RECOMMENDATION],
+        authors: Array.from(getFollows(pubkey.get())),
+      }),
       addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],
   })

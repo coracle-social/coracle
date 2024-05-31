@@ -410,7 +410,7 @@ type Setter<T> = (x: T) => T
 type Sub<T> = (x: T) => void
 type Start<T> = (set: Setter<T>) => Stop
 
-export const custom = <T>(start: Start<T>) => {
+export const custom = <T>(start: Start<T>, opts: {throttle?: number} = {}) => {
   const subs: Sub<T>[] = []
 
   let value: T
@@ -418,6 +418,10 @@ export const custom = <T>(start: Start<T>) => {
 
   return {
     subscribe: (sub: Sub<T>) => {
+      if (opts.throttle) {
+        sub = throttle(opts.throttle, sub)
+      }
+
       if (subs.length === 0) {
         stop = start((newValue: T) => {
           for (const sub of subs) {
@@ -447,7 +451,11 @@ export const custom = <T>(start: Start<T>) => {
   }
 }
 
-export const withGetter = <T>(store: Writable<T>) => ({...store, get: getter<T>(store)})
+export function withGetter<T>(store: Writable<T>): Writable<T> & {get: () => T}
+export function withGetter<T>(store: Readable<T>): Readable<T> & {get: () => T}
+export function withGetter<T>(store: Readable<T> | Writable<T>) {
+  return {...store, get: getter<T>(store)}
+}
 
 export const throttled = <T>(delay: number, store: Readable<T>) =>
   custom(set => store.subscribe(throttle(delay, set)))

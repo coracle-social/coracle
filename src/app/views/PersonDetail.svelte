@@ -19,7 +19,7 @@
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
   import {
-    mutes,
+    userMutes,
     deriveProfile,
     displayProfileByPubkey,
     loadPubkeys,
@@ -88,7 +88,7 @@
 
 <Tabs {tabs} {activeTab} {setActiveTab} />
 
-{#if $mutes.has(pubkey)}
+{#if $userMutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
   <Feed showGroup skipPlatform feed={notesFeed} />

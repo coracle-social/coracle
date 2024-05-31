@@ -48,45 +48,50 @@ export const deriveEventsMapped = <T>({
   itemToEvent: (item: T) => TrustedEvent
   includeDeleted?: boolean
 }) =>
-  custom<T[]>(setter => {
-    let data = setter(repository.query(filters, {includeDeleted}).map(eventToItem).filter(identity))
-
-    const onEvent = (event: TrustedEvent) => {
-      if (matchFilters(filters, event)) {
-        const item = eventToItem(event)
-
-        if (item) {
-          data = setter([...data, item])
-        }
-      }
-    }
-
-    const onDelete = (event: TrustedEvent) => {
-      const ids = new Set(event.tags.map(nth(1)))
-      const [deleted, ok] = partition(
-        (item: T) => getIdAndAddress(itemToEvent(item)).some(id => ids.has(id)),
-        data,
+  custom<T[]>(
+    setter => {
+      let data = setter(
+        repository.query(filters, {includeDeleted}).map(eventToItem).filter(identity),
       )
 
-      if (deleted.length > 0) {
-        data = setter(ok)
+      const onEvent = (event: TrustedEvent) => {
+        if (matchFilters(filters, event)) {
+          const item = eventToItem(event)
+
+          if (item) {
+            data = setter([...data, item])
+          }
+        }
       }
-    }
 
-    repository.on("event", onEvent)
+      const onDelete = (event: TrustedEvent) => {
+        const ids = new Set(event.tags.map(nth(1)))
+        const [deleted, ok] = partition(
+          (item: T) => getIdAndAddress(itemToEvent(item)).some(id => ids.has(id)),
+          data,
+        )
 
-    if (!includeDeleted) {
-      repository.on("delete", onDelete)
-    }
+        if (deleted.length > 0) {
+          data = setter(ok)
+        }
+      }
 
-    return () => {
-      repository.off("event", onEvent)
+      repository.on("event", onEvent)
 
       if (!includeDeleted) {
-        repository.off("delete", onDelete)
+        repository.on("delete", onDelete)
       }
-    }
-  })
+
+      return () => {
+        repository.off("event", onEvent)
+
+        if (!includeDeleted) {
+          repository.off("delete", onDelete)
+        }
+      }
+    },
+    {throttle: 300},
+  )
 
 export const deriveEvents = (opts: {filters: Filter[]; includeDeleted?: boolean}) =>
   deriveEventsMapped<TrustedEvent>({...opts, eventToItem: identity, itemToEvent: identity})

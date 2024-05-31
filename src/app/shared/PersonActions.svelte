@@ -1,18 +1,18 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {toNostrURI} from '@welshman/util'
+  import {derived} from "svelte/store"
+  import {FOLLOWS, MUTES, toNostrURI} from "@welshman/util"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
     loginWithPublicKey,
     session,
-    mute,
     hints,
-    unmute,
     canSign,
-    updateFollows,
-    deriveMuted,
-    deriveFollowing,
+    updateSingleton,
+    userMutes,
+    userFollows,
+    mention,
   } from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
@@ -20,8 +20,8 @@
   export let pubkey
 
   const isSelf = $session?.pubkey === pubkey
-  const following = deriveFollowing(pubkey)
-  const muted = deriveMuted(pubkey)
+  const following = derived(userFollows, $m => $m.has(pubkey))
+  const muted = derived(userMutes, $m => $m.has(pubkey))
 
   let actions = []
 
@@ -81,13 +81,13 @@
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
-  const unfollowPerson = () => updateFollows({remove: [pubkey]})
+  const unfollowPerson = () => updateSingleton(FOLLOWS, {remove: [mention(pubkey)]})
 
-  const followPerson = () => updateFollows({add: [pubkey]})
+  const followPerson = () => updateSingleton(FOLLOWS, {add: [mention(pubkey)]})
 
-  const unmutePerson = () => unmute(pubkey)
+  const unmutePerson = () => updateSingleton(MUTES, {remove: [mention(pubkey)]})
 
-  const mutePerson = () => mute("p", pubkey)
+  const mutePerson = () => updateSingleton(MUTES, {add: [mention(pubkey)]})
 
   const share = () =>
     router

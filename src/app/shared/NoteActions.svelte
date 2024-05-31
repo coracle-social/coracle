@@ -2,8 +2,10 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
+  import {derived} from "svelte/store"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
+    MUTES,
     LOCAL_RELAY_URL,
     toNostrURI,
     asHashedEvent,
@@ -33,8 +35,6 @@
   import {router} from "src/app/util/router"
   import {
     env,
-    mute,
-    unmute,
     groups,
     canSign,
     session,
@@ -43,6 +43,7 @@
     tracker,
     hints,
     repository,
+    updateSingleton,
     deriveHandlersForKind,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
@@ -69,7 +70,7 @@
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
-  const muted = isEventMuted.derived($isEventMuted => $isEventMuted(note, true))
+  const muted = derived(isEventMuted, $isEventMuted => $isEventMuted(note, true))
   const kindHandlers = deriveHandlersForKind(note.kind)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
@@ -98,9 +99,9 @@
 
   const quote = () => router.at("notes/create").cx({quote: note}).open()
 
-  const unmuteNote = () => unmute(note.id)
+  const unmuteNote = () => updateSingleton(MUTES, {remove: [["e", note.id]]})
 
-  const muteNote = () => mute("e", note.id)
+  const muteNote = () => updateSingleton(MUTES, {add: [["e", note.id]]})
 
   const react = async content => {
     if (isSignedEvent(note)) {

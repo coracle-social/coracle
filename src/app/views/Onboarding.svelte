@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {uniq, concat, nth} from "@welshman/lib"
-  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
+  import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -14,9 +14,10 @@
     user,
     hints,
     session,
+    mention,
     loadPubkeys,
     publishNote,
-    updateFollows,
+    updateSingleton,
     publishProfile,
     publishRelays,
     urlToRelayPolicy,
@@ -76,7 +77,7 @@
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    updateFollows({add: follows})
+    updateSingleton(FOLLOWS, {add: follows.map(mention)})
 
     // Publish our welcome note
     if (noteContent) {

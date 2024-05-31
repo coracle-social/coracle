@@ -1,9 +1,10 @@
 import {last, identity} from "ramda"
-import {Address, fromNostrURI} from "@welshman/util"
+import {Address} from "@welshman/util"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
-import {decodePerson, decodeRelay, decodeEvent, getChannelId, hints} from "src/engine"
+import {parseAnythingSync} from "src/util/nostr"
+import {decodeRelay, decodeEvent, getChannelId, hints} from "src/engine"
 
 // Decoders
 
@@ -14,25 +15,6 @@ export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
 export const encodeNaddr = a => Address.from(a).toNaddr()
-
-export const decodeEntity = entity => {
-  entity = fromNostrURI(entity)
-
-  // Interpret addresses as naddrs
-  if (entity.match(/^\d+:\w+:.*$/)) {
-    entity = encodeNaddr(entity)
-  }
-
-  let type, data
-
-  try {
-    ;({type, data} = nip19.decode(entity) as {type: string; data: any})
-  } catch (e) {
-    // pass
-  }
-
-  return {type, data, relays: hints.fromRelays(data?.relays || []).getUrls()}
-}
 
 // Serializers
 
@@ -58,7 +40,7 @@ export const asUrlComponent = name => ({
 
 export const asEntity = {
   encode: identity,
-  decode: decodeEntity,
+  decode: parseAnythingSync,
 }
 
 export const asNote = {
@@ -68,7 +50,32 @@ export const asNote = {
 
 export const asPerson = {
   encode: nip19.npubEncode,
-  decode: decodePerson,
+  decode: entity => {
+    const parsed = parseAnythingSync(entity)
+
+    if (parsed?.type === "npub") {
+      const {data: pubkey} = parsed
+
+      return {
+        pubkey,
+        relays: hints.FromPubkeys([pubkey]).getUrls(),
+      }
+    }
+
+    if (parsed?.type === "nprofile") {
+      const {pubkey, relays = []} = parsed.data
+
+      return {
+        pubkey,
+        relays: hints.merge([hints.fromRelays(relays), hints.FromPubkeys([pubkey])]).getUrls(),
+      }
+    }
+
+    return {
+      pubkey: entity,
+      relays: [],
+    }
+  },
 }
 
 export const asRelay = {

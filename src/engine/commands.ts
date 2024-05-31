@@ -761,74 +761,49 @@ export const publishProfile = profile =>
     relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
   })
 
-export const updateFollows = async ({add = [], remove = []}) => {
-  const updateTags = tags =>
-    uniqBy(nth(1), [...tags.filter(t => !remove.includes(t[1])), ...add.map(mention)])
+export const updateSingleton = async (
+  kind,
+  {add = [], remove = []}: {add?: string[][]; remove?: string[][]},
+) => {
+  const updateTags = (tags: string[][]) =>
+    uniqBy(nth(1), tags.filter(t => !remove.find(rm => rm[1] === t[1])).concat(add))
 
-  // Eagerly update so we can support anonymous users
-  const person = people.key(stateKey.get())
+  const filters = [{kinds: [kind], authors: [pubkey.get()]}]
 
-  updateStore(person, now(), {petnames: updateTags(person.get()?.petnames || [])})
+  let [event] = repository.query(filters)
 
-  if (canSign.get()) {
-    const filters = [{kinds: [FOLLOWS], authors: [pubkey.get()]}]
+  // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
+  // dropping follow updates
+  if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
+    const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
 
-    let [event] = repository.query(filters)
-
-    // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
-    // dropping follow updates
-    if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
-      const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
-
-      if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
-        event = loadedEvent
-      }
+    if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
+      event = loadedEvent
     }
-
-    // Preserve content instead of use encrypted tags because kind 3 content is used for
-    // relay selections in many places
-    const content = event?.content || ""
-    const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
-    const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())
-
-    let encryptable
-    if (event) {
-      const singleton = readSingleton(asDecryptedEvent(event, {content: getPlaintext(event)}))
-      const publicTags = updateTags(singleton.publicTags)
-
-      encryptable = editSingleton({...singleton, publicTags})
-    } else {
-      const singleton = makeSingleton({kind: FOLLOWS})
-      const publicTags = updateTags(singleton.publicTags)
-      encryptable = createSingleton({...singleton, publicTags})
-    }
-
-    const template = await encryptable.reconcile(encrypt)
-
-    await createAndPublish({...template, content, relays})
   }
-}
 
-export const publishMutes = ($mutes: string[][]) => {
-  updateStore(people.key(stateKey.get()), now(), {mutes: $mutes})
+  // Preserve content instead of use encrypted tags because kind 3 content is used for
+  // relay selections in many places
+  const content = event?.content || ""
+  const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
+  const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())
 
-  if (canSign.get()) {
-    return createAndPublish({
-      kind: 10000,
-      tags: [...$mutes.map(t => t.slice(0, 2)), ...getClientTags()],
-      relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
-    })
+  let encryptable
+  if (event) {
+    const singleton = readSingleton(asDecryptedEvent(event, {content: getPlaintext(event)}))
+    const publicTags = updateTags(singleton.publicTags)
+
+    encryptable = editSingleton({...singleton, publicTags})
+  } else {
+    const singleton = makeSingleton({kind})
+    const publicTags = updateTags(singleton.publicTags)
+    encryptable = createSingleton({...singleton, publicTags})
   }
+
+  const template = await encryptable.reconcile(encrypt)
+
+  await createAndPublish({...template, content, relays})
 }
-
-export const mute = (type: string, pubkey: string) =>
-  publishMutes([
-    ...reject((t: string[]) => t[1] === pubkey, user.get()?.mutes || []),
-    [type, pubkey],
-  ])
-
-export const unmute = (value: string) =>
-  publishMutes(reject((t: string[]) => t[1] === value, user.get()?.mutes || []))
 
 export const markAsSeen = async (events: TrustedEvent[]) => {
   if (!signer.get().isEnabled() || events.length === 0) {

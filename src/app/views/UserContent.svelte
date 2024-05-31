@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {pluck, identity} from "ramda"
-  import {Tags} from "@welshman/util"
+  import {MUTES} from "@welshman/util"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -14,36 +14,35 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
-    user,
+    mention,
     getSettings,
     publishSettings,
     searchTopics,
-    mutes,
+    userMutes,
     loadPubkeys,
-    publishMutes,
+    updateSingleton,
   } from "src/engine"
-
-  const muteTags = Tags.wrap($user.mutes || [])
 
   const settings = getSettings()
 
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
-    const pubkeyMutes = mutedPubkeys.map(pubkey => ["p", pubkey])
-    const otherMutes = muteTags.reject(t => t.key() === "p").unwrap()
-    const allMutes = [...pubkeyMutes, ...otherMutes]
-
     publishSettings(settings)
-    publishMutes(allMutes)
+    updateSingleton(MUTES, {
+      add: mutedPubkeys.filter(pk => !$userMutes.has(pk)).map(mention),
+      remove: Array.from($userMutes)
+        .filter(pk => !mutedPubkeys.includes(pk))
+        .map(mention),
+    })
 
     showInfo("Your preferences have been saved!")
   }
 
-  let mutedPubkeys = muteTags.values("p").uniq().valueOf()
+  let mutedPubkeys = Array.from($userMutes)
 
   onMount(() => {
-    loadPubkeys(Array.from($mutes))
+    loadPubkeys(mutedPubkeys)
   })
 
   document.title = "Content Preferences"

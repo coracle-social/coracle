@@ -21,7 +21,7 @@
     hints,
     relays,
     pubkey,
-    follows,
+    userFollows,
     deriveRelay,
     getProfile,
     displayProfileByPubkey,
@@ -40,7 +40,7 @@
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
 
-    for (const pk of $follows) {
+    for (const pk of $userFollows) {
       if (!profileHasName(getProfile(pk))) {
         continue
       }

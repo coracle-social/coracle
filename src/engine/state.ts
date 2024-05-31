@@ -2,17 +2,7 @@ import Fuse from "fuse.js"
 import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {derived, writable} from "svelte/store"
-import {
-  defer,
-  displayList,
-  doPipe,
-  batch,
-  randomInt,
-  seconds,
-  sleep,
-  switcher,
-  switcherFn,
-} from "hurdak"
+import {defer, displayList, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
   any,
   pluck,
@@ -20,11 +10,9 @@ import {
   defaultTo,
   equals,
   filter,
-  join,
   assoc,
   sortBy,
   max,
-  none,
   omit,
   partition,
   prop,
@@ -36,7 +24,7 @@ import {
   Collection as CollectionStore,
   Worker,
   Writable,
-  cached,
+  simpleCache,
   clamp,
   Derived,
   identity,
@@ -123,6 +111,7 @@ import type {
 } from "src/domain"
 import {
   EDITABLE_LIST_KINDS,
+  getSingletonValues,
   ListSearch,
   FeedSearch,
   profileHasName,
@@ -336,13 +325,6 @@ export const displayProfileByPubkey = (pk: string) => displayProfile(getProfile(
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
 
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
-  config = {
-    keys: ["name", "display_name", {name: "nip05", weight: 0.5}, {name: "about", weight: 0.1}],
-    threshold: 0.3,
-    shouldSort: false,
-    includeScore: true,
-  }
-
   getSearch = () => {
     const $pubkey = pubkey.get()
 
@@ -353,7 +335,17 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
       score: getWotScore($pubkey, profile.event.pubkey),
     }))
 
-    const fuse = new Fuse(options, this.config)
+    const fuse = new Fuse(options, {
+      keys: [
+        "profile.name",
+        "profile.display_name",
+        {name: "profile.nip05", weight: 0.5},
+        {name: "profile.about", weight: 0.1},
+      ],
+      threshold: 0.3,
+      shouldSort: false,
+      includeScore: true,
+    })
 
     return (term: string) => {
       if (!term) {
@@ -385,70 +377,81 @@ export const getZapper = (pubkey: string) => zappers.get()[pubkey]
 
 export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $zappers[pubkey])
 
-// Follows/mutes
+// Follows
 
-export const followLists = deriveEventsMapped<PublishedSingleton>({
-  filters: [{kinds: [FOLLOWS]}],
-  itemToEvent: prop("event"),
-  eventToItem: event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: getPlaintext(event),
-      }),
-    ),
-})
-
-export const userFollowList = derived(
-  [followLists, pubkey],
-  ([$followLists, $pubkey]: [PublishedSingleton[], string]) =>
-    $followLists.find(followList => followList.event.pubkey === $pubkey),
+export const followLists = withGetter(
+  deriveEventsMapped<PublishedSingleton>({
+    filters: [{kinds: [FOLLOWS]}],
+    itemToEvent: prop("event"),
+    eventToItem: event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: getPlaintext(event),
+        }),
+      ),
+  }),
 )
 
-export const muteLists = deriveEventsMapped<PublishedSingleton>({
-  filters: [{kinds: [MUTES]}],
-  itemToEvent: prop("event"),
-  eventToItem: event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: getPlaintext(event),
-      }),
-    ),
-})
-
-export const userMuteList = derived(
-  [muteLists, pubkey],
-  ([$muteLists, $pubkey]: [PublishedSingleton[], string]) =>
-    $muteLists.find(muteList => muteList.event.pubkey === $pubkey),
+export const followListsByPubkey = withGetter(
+  derived(
+    followLists,
+    $ls => indexBy($l => $l.event.pubkey, $ls) as Map<string, PublishedSingleton>,
+  ),
 )
 
-// People
+export const getFollowList = (pk: string) =>
+  followListsByPubkey.get().get(pk) as PublishedSingleton | undefined
 
-export const getMutedPubkeys = $person =>
-  ($person?.mutes || []).map(nth(1)).filter(pk => pk?.length === 64) as string[]
+export const deriveFollowList = (pk: string) =>
+  derived(followListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getMutes = $person => new Set(getMutedPubkeys($person))
+export const getFollows = (pk: string) => getSingletonValues("p", getFollowList(pk))
 
-export const isMuting = ($person, pubkey) => getMutedPubkeys($person).includes(pubkey)
+export const deriveFollows = (pk: string) =>
+  derived(followListsByPubkey, m => getSingletonValues("p", m.get(pk)))
 
-export const getFollowedPubkeys = $person =>
-  ($person?.petnames || []).map(nth(1)).filter(pk => pk?.length === 64) as string[]
+export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
-export const getFollows = $person => new Set(getFollowedPubkeys($person))
+// Mutes
 
-export const isFollowing = ($person, pubkey) => getFollowedPubkeys($person).includes(pubkey)
+export const muteLists = withGetter(
+  deriveEventsMapped<PublishedSingleton>({
+    filters: [{kinds: [MUTES]}],
+    itemToEvent: prop("event"),
+    eventToItem: event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: getPlaintext(event),
+        }),
+      ),
+  }),
+)
 
-export const getFollowers = cached({
-  maxSize: Infinity,
-  getKey: join(":"),
-  getValue: ([pk]) => people.get().filter($p => isFollowing($p, pk)),
-})
+export const muteListsByPubkey = withGetter(
+  derived(muteLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
+)
 
-export const getNetwork = $person => {
-  const pubkeys = getFollows($person)
+export const getMuteList = (pk: string) =>
+  muteListsByPubkey.get().get(pk) as PublishedSingleton | undefined
+
+export const deriveMuteList = (pk: string) =>
+  derived(muteListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
+
+export const getMutes = (pk: string) => getSingletonValues("p", getMuteList(pk))
+
+export const deriveMutes = (pk: string) =>
+  derived(muteListsByPubkey, m => getSingletonValues("p", m.get(pk)))
+
+export const isMuting = (pk, tpk) => getMutes(pk).has(tpk)
+
+// Network, followers, wot
+
+export const getNetwork = simpleCache(([pk]) => {
+  const pubkeys = getFollows(pk)
   const network = new Set<string>()
 
   for (const follow of pubkeys) {
-    for (const pubkey of getFollowedPubkeys(people.key(follow).get())) {
+    for (const pubkey of getFollows(follow)) {
       if (!pubkeys.has(pubkey)) {
         network.add(pubkey)
       }
@@ -456,58 +459,49 @@ export const getNetwork = $person => {
   }
 
   return network
-}
-
-export const getFollowsWhoFollow = cached({
-  maxSize: Infinity,
-  getKey: join(":"),
-  getValue: ([pk, tpk]) =>
-    getFollowedPubkeys(people.key(pk).get()).filter(pk => isFollowing(people.key(pk).get(), tpk)),
 })
 
-export const getFollowsWhoMute = cached({
-  maxSize: Infinity,
-  getKey: join(":"),
-  getValue: ([pk, tpk]) =>
-    getFollowedPubkeys(people.key(pk).get()).filter(pk => isMuting(people.key(pk).get(), tpk)),
-})
+export const getFollowers = simpleCache(
+  ([pk]) =>
+    new Set(
+      followLists
+        .get()
+        .filter(l => l.valuesByKey.p?.has(pk))
+        .map(l => l.event.pubkey),
+    ),
+)
+
+export const getFollowsWhoFollow = simpleCache(
+  ([pk, tpk]) => new Set(Array.from(getFollows(pk)).filter(other => isFollowing(other, tpk))),
+)
+
+export const getFollowsWhoMute = simpleCache(
+  ([pk, tpk]) => new Set(Array.from(getFollows(pk)).filter(other => isMuting(other, tpk))),
+)
 
 export const primeWotCaches = throttle(3000, pk => {
   const mutes: Record<string, string[]> = {}
   const follows: Record<string, string[]> = {}
 
-  // Get follows mutes from the current user's follows list
-  for (const followPk of Array.from(getFollows(people.key(pk).get()))) {
-    const follow = people.key(followPk).get()
-
-    for (const mutedPk of Array.from(getMutes(follow))) {
+  // Get follows and mutes from the current user's follows list
+  for (const followPk of getFollows(pk)) {
+    for (const mutedPk of getMutes(followPk)) {
       pushToKey(mutes, mutedPk, followPk)
     }
 
-    for (const followedPk of Array.from(getFollows(follow))) {
+    for (const followedPk of getFollows(followPk)) {
       pushToKey(follows, followedPk, followPk)
     }
   }
 
   // Populate mutes cache
   for (const [k, pubkeys] of Object.entries(mutes)) {
-    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, k]), pubkeys)
+    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, k]), new Set(pubkeys))
   }
 
   // Populate follows cache
   for (const [k, pubkeys] of Object.entries(follows)) {
-    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, k]), pubkeys)
-  }
-
-  // For everyone else in our database, populate an empty list
-  for (const person of people.get()) {
-    if (!mutes[person.pubkey]) {
-      getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, person.pubkey]), [])
-    }
-
-    if (!follows[person.pubkey]) {
-      getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, person.pubkey]), [])
-    }
+    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, k]), new Set(pubkeys))
   }
 })
 
@@ -516,117 +510,86 @@ export const maxWot = withGetter(writable(10))
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
 
 export const getWotScore = (pk, tpk) => {
-  if (!people.key(pk).exists()) {
-    return getFollowers(tpk).length
-  }
+  if (!pk) return getFollowers(tpk).size
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
-  const score = follows.length - Math.floor(Math.pow(2, Math.log(mutes.length)))
+  const score = follows.size - Math.floor(Math.pow(2, Math.log(mutes.size)))
 
   maxWot.update(maxScore => Math.max(maxScore, score))
 
   return score
 }
 
-const annotatePerson = pubkey => {
-  const relays = hints.FromPubkeys([pubkey]).getUrls()
+// User follows/mutes/network
 
-  return {
-    pubkey,
-    npub: nip19.npubEncode(pubkey),
-    nprofile: nip19.nprofileEncode({pubkey, relays}),
-    relays,
-  }
-}
+export const userFollowList = derived([followListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const decodePerson = entity => {
-  entity = fromNostrURI(entity)
+export const userFollows = derived(userFollowList, l => getSingletonValues("p", l))
 
-  let type, data
-  try {
-    ;({type, data} = nip19.decode(entity))
-  } catch (e) {
-    return annotatePerson(entity)
-  }
+export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
-  return switcherFn(type, {
-    nprofile: () => ({
-      pubkey: data.pubkey,
-      relays: data.relays,
-      npub: nip19.npubEncode(data.pubkey),
-      nprofile: nip19.nprofileEncode(data),
-    }),
-    npub: () => annotatePerson(data),
-    default: () => annotatePerson(entity),
-  })
-}
+export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const derivePerson = pubkey => people.key(pubkey).derived(defaultTo({pubkey}))
-
-export const mutes = user.derived(getMutes)
-
-export const follows = user.derived(getFollows)
-
-export const network = user.derived(getNetwork)
-
-export const deriveMuted = (value: string) => mutes.derived(s => s.has(value))
-
-export const deriveFollowing = (pubkey: string) => follows.derived(s => s.has(pubkey))
+export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
 
 // Events
 
-export const isEventMuted = new Derived(
-  [mutes, settings, pubkey],
-  ([$mutes, $settings, $pubkey]) => {
-    const words = $settings.muted_words
-    const minWot = $settings.min_wot_score
-    const $follows = follows.get()
-    const regex =
-      words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
+export const isEventMuted = withGetter(
+  derived(
+    [userMutes, userFollows, settings, pubkey],
+    ([$userMutes, $userFollows, $settings, $pubkey]) => {
+      const words = $settings.muted_words
+      const minWot = $settings.min_wot_score
+      const regex =
+        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
-    return (e: Partial<TrustedEvent>, strict = false) => {
-      if (!$pubkey || e.pubkey === $pubkey) {
+      return (e: Partial<TrustedEvent>, strict = false) => {
+        if (!$pubkey || e.pubkey === $pubkey) {
+          return false
+        }
+
+        const tags = Tags.wrap(e.tags || [])
+        const {roots, replies} = tags.ancestors()
+
+        if (
+          find(
+            t => $userMutes.has(t),
+            [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
+          )
+        ) {
+          return true
+        }
+
+        if (regex && e.content?.toLowerCase().match(regex)) {
+          return true
+        }
+
+        if (!strict) {
+          return false
+        }
+
+        const isGroupMember = tags
+          .groups()
+          .values()
+          .some(a => deriveIsGroupMember(a).get())
+        const isCommunityMember = tags
+          .communities()
+          .values()
+          .some(a => false)
+        const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
+
+        if (
+          !$userFollows.has(e.pubkey) &&
+          getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment
+        ) {
+          return true
+        }
+
         return false
       }
-
-      const tags = Tags.wrap(e.tags || [])
-      const {roots, replies} = tags.ancestors()
-
-      if (
-        find(
-          t => $mutes.has(t),
-          [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
-        )
-      ) {
-        return true
-      }
-
-      if (regex && e.content?.toLowerCase().match(regex)) {
-        return true
-      }
-
-      if (!strict) {
-        return false
-      }
-
-      const isGroupMember = tags
-        .groups()
-        .values()
-        .some(a => deriveIsGroupMember(a).get())
-      const isCommunityMember = tags
-        .communities()
-        .values()
-        .some(a => false)
-      const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
-
-      if (!$follows.has(e.pubkey) && getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment) {
-        return true
-      }
-
-      return false
-    }
-  },
+    },
+  ),
 )
 
 // Channels
@@ -642,23 +605,6 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
 
-export const userChannels = new Derived(
-  [channels.throttle(300), mutes, pubkey],
-  ([$channels, $mutes, $pk]): Channel[] => {
-    if (!$pk) {
-      return []
-    }
-
-    return $channels.filter($channel => {
-      if (!$channel.messages) {
-        return false
-      }
-
-      return $channel.members?.includes($pk) && none(pk => $mutes.has(pk), $channel.members || [])
-    })
-  },
-)
-
 export const unreadChannels = channels.derived(filter(channelHasNewMessages))
 
 export const hasNewMessages = unreadChannels.derived(any((c: Channel) => Boolean(c.last_sent)))
@@ -671,18 +617,21 @@ export const deriveGroup = address => {
   return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
 
-export const getWotGroupMembers = address =>
-  Array.from(follows.get()).filter(pk =>
-    people
-      .key(pk)
-      .get()
-      ?.communities?.some(t => t[1] === address),
-  )
+export const getWotGroupMembers = withGetter(
+  derived(
+    [userFollows, people.mapStore],
+    ([$userFollows, $people]) =>
+      address =>
+        Array.from($userFollows).filter(pk =>
+          $people.get(pk)?.communities?.some(t => t[1] === address),
+        ),
+  ),
+)
 
 export const searchGroups = groups.throttle(300).derived($groups => {
   const options = $groups
     .filter(group => !repository.deletes.has(group.address))
-    .map(group => ({group, score: getWotGroupMembers(group.address).length}))
+    .map(group => ({group, score: getWotGroupMembers.get()(group.address).length}))
 
   const fuse = new Fuse(options, {
     keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
@@ -1255,12 +1204,9 @@ export const recommendationsByHandlerAddress = derived(recommendations, $events 
   groupBy(getHandlerAddress, $events),
 )
 
-export const deriveHandlersForKind = cached({
-  maxSize: 100,
-  getKey: ([kind]: [number]) => kind,
-  getValue: ([kind]: [number]) =>
-    derived(handlers, $handlers => $handlers.filter(h => h.kind === kind)),
-})
+export const deriveHandlersForKind = simpleCache(([kind]: [number]) =>
+  derived(handlers, $handlers => $handlers.filter(h => h.kind === kind)),
+)
 
 // Collections
 
@@ -2114,27 +2060,6 @@ class Storage {
   }
 }
 
-const sortByPubkeyWhitelist = (fallback: (x: any) => number) => (rows: Record<string, any>[]) => {
-  const pubkeys = new Set(Object.values(sessions.get()).map(prop("pubkey")))
-  const follows = new Set(
-    Array.from(pubkeys)
-      .flatMap((pk: string) => people.key(pk).get()?.petnames || [])
-      .map(nth(1)),
-  )
-
-  return sortBy(x => {
-    if (pubkeys.has(x.pubkey)) {
-      return Number.MAX_SAFE_INTEGER
-    }
-
-    if (follows.has(x.pubkey)) {
-      return Number.MAX_SAFE_INTEGER - 1
-    }
-
-    return fallback(x)
-  }, rows)
-}
-
 const scoreEvent = e => {
   if (getSession(e.pubkey)) return -Infinity
   if (giftWrapKinds.includes(e.kind)) return -Infinity
@@ -2163,44 +2088,21 @@ export const storage = new Storage(15, [
   objectAdapter("handles", "key", handles, {limit: 10000}),
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
-  collectionAdapter("publishes", "id", publishes, {
-    sort: sortByPubkeyWhitelist(prop("created_at")),
-  }),
-  collectionAdapter("topics", "name", topics, {
-    limit: 1000,
-    sort: sortBy(prop("last_seen")),
-  }),
+  collectionAdapter("publishes", "id", publishes, {sort: sortBy(prop("created_at"))}),
+  collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
   collectionAdapter("people", "pubkey", people, {
     limit: 100000,
-    sort: sortByPubkeyWhitelist(prop("last_fetched")),
+    sort: sortBy(prop("last_fetched")),
   }),
-  collectionAdapter("relays", "url", relays, {
-    limit: 1000,
-    sort: sortBy(prop("count")),
-  }),
-  collectionAdapter("channels", "id", channels, {
-    limit: 1000,
-    sort: sortBy(prop("last_checked")),
-  }),
-  collectionAdapter("groups", "address", groups, {
-    limit: 1000,
-    sort: sortBy(prop("count")),
-  }),
-  collectionAdapter("groupAlerts", "id", groupAlerts, {
-    sort: sortBy(prop("created_at")),
-  }),
-  collectionAdapter("groupRequests", "id", groupRequests, {
-    sort: sortBy(prop("created_at")),
-  }),
+  collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
+  collectionAdapter("channels", "id", channels, {limit: 1000, sort: sortBy(prop("last_checked"))}),
+  collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
+  collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
+  collectionAdapter("groupRequests", "id", groupRequests, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("groupSharedKeys", "pubkey", groupSharedKeys, {
     limit: 1000,
     sort: sortBy(prop("created_at")),
   }),
-  collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {
-    limit: 1000,
-  }),
-  collectionAdapter("repository", "id", events, {
-    limit: 100000,
-    sort: sortBy(scoreEvent),
-  }),
+  collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {limit: 1000}),
+  collectionAdapter("repository", "id", events, {limit: 100000, sort: sortBy(scoreEvent)}),
 ])

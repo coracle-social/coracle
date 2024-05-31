@@ -33,6 +33,8 @@
       }
     })
 
+    console.log($profileSearch, $profileSearch.searchValues(term))
+
     return $profileSearch.searchValues(term)
   }
 </script>

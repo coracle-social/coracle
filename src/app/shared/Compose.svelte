@@ -7,7 +7,7 @@
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
   import {displayProfile} from "src/domain"
-  import {hints, follows, profileSearch, createPeopleLoader, getProfile} from "src/engine"
+  import {hints, userFollows, profileSearch, createPeopleLoader, getProfile} from "src/engine"
 
   export let onSubmit
   export let autofocus = false
@@ -39,7 +39,7 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        profile => $follows.has(profile.event.pubkey),
+        profile => $userFollows.has(profile.event.pubkey),
         $profileSearch.searchOptions(word.slice(1)),
       )
 

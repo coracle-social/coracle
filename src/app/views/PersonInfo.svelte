@@ -3,19 +3,19 @@
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {displayHandle} from "src/domain"
-  import {deriveHandle, deriveProfile} from "src/engine"
+  import {hints, deriveHandle, deriveProfile} from "src/engine"
 
   export let pubkey
-  export let nprofile
 
   const handle = deriveHandle(pubkey)
   const profile = deriveProfile(pubkey)
+  const relays = hints.FromPubkeys([pubkey]).getUrls()
 
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>
-<CopyValue label="Link" value={nprofile} />
+<CopyValue label="Link" value={nip19.nprofileEncode({pubkey, relays})} />
 <CopyValue label="Public Key" encode={nip19.npubEncode} value={pubkey} />
 {#if $handle}
   {@const display = displayHandle($handle)}

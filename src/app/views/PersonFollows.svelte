@@ -1,15 +1,15 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
-  import {derivePerson, loadPubkeys, getFollowedPubkeys} from "src/engine"
+  import {loadPubkeys, deriveFollows} from "src/engine"
 
   export let pubkey
 
-  const pubkeys = derivePerson(pubkey).derived(getFollowedPubkeys)
+  const pubkeys = deriveFollows(pubkey)
 
   onMount(() => {
-    loadPubkeys($pubkeys)
+    loadPubkeys(Array.from($pubkeys))
   })
 </script>
 
-<PersonList pubkeys={$pubkeys} />
+<PersonList pubkeys={Array.from($pubkeys)} />

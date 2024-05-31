@@ -96,10 +96,6 @@ export type Zapper = WelshmanZapper & {
 
 export type Person = {
   pubkey: string
-  petnames_updated_at?: number
-  petnames?: string[][]
-  mutes_updated_at?: number
-  mutes?: string[][]
   relays_fetched_at?: number
   relays_updated_at?: number
   relays?: RelayPolicy[]
