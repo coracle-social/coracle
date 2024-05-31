@@ -58,6 +58,8 @@
     {label: "Image", kind: FILE_METADATA},
     {label: "Relay selections", kind: RELAYS},
   ])
+
+  console.log(helper)
 </script>
 
 <span class="staatliches text-lg">What kind of content do you want to see?</span>

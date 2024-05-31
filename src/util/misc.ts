@@ -344,47 +344,37 @@ export const getStringWidth = (text: string) => {
 }
 
 export class SearchHelper<T, V> {
-  config: any
+  config: Record<string, any> = {}
   _optionsByValue = new Map<V, T>()
   _search?: (term: string) => T[]
 
-  constructor(readonly options: T[]) {
-    for (const option of options) {
-      this._optionsByValue.set(this.getValue(option), option)
-    }
-  }
+  constructor(readonly options: T[]) {}
 
-  getSearch() {
-    return fuzzy(this.options, this.config)
-  }
-
-  getOption(value: V): T {
-    return this._optionsByValue.get(value)
-  }
-
-  getValue(option: T): V {
-    return option as unknown as V
-  }
-
-  displayValue(value: V) {
-    return String(value)
-  }
-
-  displayOption(option: T) {
-    return this.displayValue(this.getValue(option))
-  }
-
-  searchOptions(term: string) {
+  _setup() {
     if (!this._search) {
+      for (const option of this.options) {
+        this._optionsByValue.set(this.getValue(option), option)
+      }
+
       this._search = this.getSearch()
     }
 
-    return this._search(term)
+    return this
   }
 
-  searchValues(term: string) {
-    return this.searchOptions(term).map(this.getValue)
-  }
+  getSearch = () => fuzzy(this.options, this.config)
+
+  getOption = (value: V) => this._optionsByValue.get(value)
+
+  getValue = (option: T) => option as unknown as V
+
+  displayValue = (value: V) => String(value)
+
+  displayOption = (option: T) => this.displayValue(this.getValue(option))
+
+  searchOptions = (term: string) => this._setup()._search(term)
+
+  searchValues = (term: string) => this.searchOptions(term).map(this.getValue)
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)

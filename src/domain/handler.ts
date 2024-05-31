@@ -45,14 +45,8 @@ export const displayHandler = (handler?: Handler) => handler?.name || "[no name]
 
 export class HandlerSearch extends SearchHelper<Handler, string> {
   config = {keys: ["name", "about"]}
-
-  getValue(option: Handler) {
-    return getAddress(option.event)
-  }
-
-  displayValue(address: string) {
-    return displayHandler(this.getOption(address))
-  }
+  getValue = (option: Handler) => getAddress(option.event)
+  displayValue = (address: string) => displayHandler(this.getOption(address))
 }
 
 export const getHandlerAddress = (event: TrustedEvent) => {

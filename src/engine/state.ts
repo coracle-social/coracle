@@ -353,17 +353,7 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
       score: getWotScore($pubkey, profile.event.pubkey),
     }))
 
-    const fuse = new Fuse(options, {
-      keys: [
-        "profile.name",
-        "profile.display_name",
-        {name: "profile.nip05", weight: 0.5},
-        {name: "profile.about", weight: 0.1},
-      ],
-      threshold: 0.3,
-      shouldSort: false,
-      includeScore: true,
-    })
+    const fuse = new Fuse(options, this.config)
 
     return (term: string) => {
       if (!term) {
