@@ -968,16 +968,6 @@ export const urlToRelay = url => ({url: normalizeRelayUrl(url)}) as Relay
 export const urlToRelayPolicy = url =>
   ({...urlToRelay(url), read: true, write: true}) as RelayPolicy
 
-export const decodeRelay = entity => {
-  entity = fromNostrURI(entity)
-
-  try {
-    return {url: nip19.decode(entity).data}
-  } catch (e) {
-    return {url: entity}
-  }
-}
-
 export const displayRelayUrl = (url: string) => last(url.split("://")).replace(/\/$/, "")
 
 export const displayRelay = ({url}: Relay) => displayRelayUrl(url)

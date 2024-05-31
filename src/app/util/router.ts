@@ -4,7 +4,7 @@ import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {tryJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"
-import {decodeRelay, decodeEvent, getChannelId, hints} from "src/engine"
+import {decodeEvent, getChannelId, hints} from "src/engine"
 
 // Decoders
 
@@ -80,7 +80,15 @@ export const asPerson = {
 
 export const asRelay = {
   encode: nip19.nrelayEncode,
-  decode: decodeRelay,
+  decode: entity => {
+    entity = fromNostrURI(entity)
+
+    try {
+      return {url: nip19.decode(entity).data}
+    } catch (e) {
+      return {url: entity}
+    }
+  },
 }
 
 export const asChannelId = {
