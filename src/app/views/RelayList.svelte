@@ -58,7 +58,7 @@
       const pubkeys = pubkeysByUrl.get(r.url) || []
       const description =
         pubkeys.length > 0
-          ? "Used by " + displayList(pubkeys.map(pubkey => displayProfileByPubkey(pubkey)))
+          ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
           : r.info?.description
 
       return {...r, info: {...r.info, description}}

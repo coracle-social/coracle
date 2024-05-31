@@ -3,8 +3,7 @@
   import {parseContent} from "src/util/notes"
   import {displayUrl} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
-  import {displayProfile} from "src/domain"
-  import {getProfile, deriveProfile} from "src/engine"
+  import {deriveProfile, displayProfileByPubkey} from "src/engine"
 
   export let pubkey
   export let truncate = false
@@ -28,7 +27,7 @@
     {:else if type.startsWith("nostr:")}
       <Anchor modal class="underline" href={value.entity}>
         {#if value.pubkey}
-          {displayProfile(getProfile(value.pubkey))}
+          {displayProfileByPubkey(value.pubkey)}
         {:else if value.id}
           event {value.id}
         {:else}

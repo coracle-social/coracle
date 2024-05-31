@@ -18,27 +18,26 @@
   import {themeColors} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {displayPubkey, displayProfile} from "src/domain"
-  import {userFollows, deriveProfile, session, maxWot, getWotScore} from "src/engine"
+  import {displayPubkey} from "src/domain"
+  import {userFollows, deriveProfileDisplay, session, maxWot, getWotScore} from "src/engine"
 
   export let pubkey
 
-  const profile = deriveProfile(pubkey)
   const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getWotScore($session?.pubkey, pubkey)
   const npubDisplay = displayPubkey(pubkey)
+  const profileDisplay = deriveProfileDisplay(pubkey)
 
   $: superMaxWot = $maxWot * 1.5
   $: dashOffset = 100 - (Math.max(superMaxWot / 20, wotScore) / superMaxWot) * 100
   $: style = `transform: rotate(${dashOffset * 1.8 - 50}deg)`
   $: stroke = $themeColors[$following || pubkey === $session?.pubkey ? "accent" : "neutral-200"]
-  $: personDisplay = displayProfile($profile)
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
   <div class="flex flex-col overflow-hidden text-ellipsis">
-    <span class="cy-person-name">{personDisplay}</span>
-    {#if personDisplay != npubDisplay}
+    <span class="cy-person-name">{$profileDisplay}</span>
+    {#if $profileDisplay != npubDisplay}
       <small class="text-xs">{npubDisplay}</small>
     {/if}
   </div>

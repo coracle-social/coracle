@@ -6,8 +6,14 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {displayProfile} from "src/domain"
-  import {hints, userFollows, profileSearch, createPeopleLoader, getProfile} from "src/engine"
+  import {
+    hints,
+    userFollows,
+    displayProfileByPubkey,
+    profileSearch,
+    createPeopleLoader,
+    getProfile,
+  } from "src/engine"
 
   export let onSubmit
   export let autofocus = false
@@ -39,8 +45,8 @@
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
-        profile => $userFollows.has(profile.event.pubkey),
-        $profileSearch.searchOptions(word.slice(1)),
+        pubkey => $userFollows.has(pubkey),
+        $profileSearch.searchValues(word.slice(1)),
       )
 
       results = followed.concat(notFollowed)
@@ -58,7 +64,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({profile = null, force = false} = {}) => {
+  const autocomplete = ({pubkey = null, force = false} = {}) => {
     let completed = false
 
     const {selection, node, offset, word} = getInfo()
@@ -92,8 +98,8 @@
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && profile) {
-      annotate("@", displayProfile(profile).trim(), pubkeyEncoder.encode(profile.event.pubkey))
+    if ((force || word.length > 1) && word.startsWith("@") && pubkey) {
+      annotate("@", displayProfileByPubkey(pubkey).trim(), pubkeyEncoder.encode(pubkey))
     }
 
     // Topics
@@ -124,7 +130,7 @@
 
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
-      autocomplete({profile: suggestions.get()})
+      autocomplete({pubkey: suggestions.get()})
     }
 
     // Only autocomplete topics on space
@@ -143,7 +149,7 @@
     applySearch(word)
 
     if (["Tab"].includes(e.code)) {
-      autocomplete({profile: suggestions.get()})
+      autocomplete({pubkey: suggestions.get()})
     }
 
     if (["Escape", "Space"].includes(e.code)) {
@@ -173,7 +179,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({profile: getProfile(pubkey), force: true})
+    autocomplete({pubkey, force: true})
   }
 
   const createNewLines = (n = 1) => {
@@ -263,7 +269,7 @@
 
 <Suggestions
   bind:this={suggestions}
-  select={profile => autocomplete({profile})}
+  select={pubkey => autocomplete({pubkey})}
   loading={$loadingPeople}>
   <div slot="item" let:item>
     <PersonBadge inert pubkey={item.event.pubkey} />

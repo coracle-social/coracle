@@ -1,17 +1,17 @@
 <script lang="ts">
+  import {derived} from "svelte/store"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
-  import {displayProfile} from "src/domain"
-  import {deriveProfile, loadPubkeys} from "src/engine"
+  import {deriveProfileDisplay, loadPubkeys} from "src/engine"
 
   export let pubkey
 
-  const profile = deriveProfile(pubkey)
   const path = router.at("people").of(pubkey).toString()
+  const display = deriveProfileDisplay(pubkey)
 
   loadPubkeys([pubkey])
 </script>
 
 <Anchor modal class={$$props.class} href={path}>
-  @<span class="underline">{displayProfile($profile)}</span>
+  @<span class="underline">{$display}</span>
 </Anchor>

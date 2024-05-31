@@ -124,6 +124,7 @@ import {
   mapListToFeed,
   getHandlerAddress,
   displayProfile,
+  displayPubkey,
   readSingleton,
   asDecryptedEvent,
 } from "src/domain"
@@ -310,17 +311,22 @@ export const profiles = deriveEventsMapped<PublishedProfile>({
   itemToEvent: prop("event"),
 })
 
-export const profilesByPubkey = derived(profiles, $profiles =>
-  indexBy(p => p.event.pubkey, $profiles),
+export const profilesByPubkey = withGetter(
+  derived(profiles, $profiles => indexBy(p => p.event.pubkey, $profiles)),
 )
 
-export const getProfilesByPubkey = getter(profilesByPubkey)
-
-export const getProfile = (pk: string) => getProfilesByPubkey().get(pk)
+export const getProfile = (pk: string) => profilesByPubkey.get().get(pk)
 
 export const deriveProfile = pk => derived(profilesByPubkey, $m => $m.get(pk))
 
-export const displayProfileByPubkey = (pk: string) => displayProfile(getProfile(pk))
+export const displayProfileByPubkey = (pk: string) => {
+  const profile = getProfile(pk)
+
+  return profile ? displayProfile(profile) : displayPubkey(pk)
+}
+
+export const deriveProfileDisplay = (pk: string) =>
+  derived(deriveProfile(pk), () => displayProfileByPubkey(pk))
 
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
 
@@ -532,6 +538,10 @@ export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubke
 export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
 export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
+
+// Anonymous user state
+
+export const anonymous = writable({relays: [], petnames: []})
 
 // Events
 
@@ -1336,7 +1346,7 @@ export const getExecutor = (urls: string[]) => {
   // AUTH with a single relay.
   let target
 
-  if (muxUrl && (remoteUrls.length > 1 || NetworkContext.pool.has(muxUrl))) {
+  if (muxUrl) {
     const connection = NetworkContext.pool.get(muxUrl)
 
     if (connection.socket.isOpen()) {
