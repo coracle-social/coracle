@@ -10,7 +10,7 @@
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
-  const lud16Url = "https://blog.getalby.com/create-your-neutral-300ning-address/"
+  const lud16Url = "https://github.com/lnurl/luds/blob/luds/16.md"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
