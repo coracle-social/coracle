@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
   import {Address} from "@welshman/util"
-  import {urlIsMedia} from "src/util/notes"
+  import {urlIsMedia} from "@welshman/content"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"

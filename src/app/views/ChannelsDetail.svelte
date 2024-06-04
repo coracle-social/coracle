@@ -24,7 +24,7 @@
     getChannelIdFromEvent,
     listenForMessages,
     sortEventsDesc,
-    getPlaintext,
+    ensureMessagePlaintext,
   } from "src/engine"
 
   export let pubkeys
@@ -38,7 +38,7 @@
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const getContent = e => (e.kind === 4 ? getPlaintext(e) : e.content) || ""
+  const getContent = e => (e.kind === 4 ? ensureMessagePlaintext(e) : e.content) || ""
 
   const send = async (content, useNip44) => {
     // If we don't have nip44 support, just send a legacy message
@@ -88,7 +88,7 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel {pubkeys} bind:this={ctrl} messages={$messages} sendMessage={send} {initialMessage}>
+<Channel {channelId} {pubkeys} bind:this={ctrl} messages={$messages} sendMessage={send} {initialMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
       <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />

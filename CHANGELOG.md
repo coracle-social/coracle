@@ -7,6 +7,9 @@
 - [x] Improve DM loading and deliverability
 - [x] Add ability to search other people's lists and feeds
 - [x] Limit recursive quotes
+- [x] Derive profiles, relay selections, follows, and mutes from event repository
+- [x] Use new welshman content parser
+- [x] Remember nip04/44 preference per conversation
 
 # 0.4.5
 

@@ -81,6 +81,7 @@ import {
   subscribe as baseSubscribe,
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
+import * as Content from "@welshman/content"
 import {
   fuzzy,
   synced,
@@ -91,7 +92,6 @@ import {
   fromCsv,
   SearchHelper,
 } from "src/util/misc"
-import {parseContent} from "src/util/notes"
 import {
   generatePrivateKey,
   isLike,
@@ -1635,17 +1635,17 @@ export const mention = (pubkey: string) =>
 export const tagsFromContent = (content: string) => {
   const tags = []
 
-  for (const {type, value} of parseContent({content, tags: []})) {
-    if (type === "topic") {
-      tags.push(["t", value])
+  for (const parsed of Content.parse({content, tags: []})) {
+    if (Content.isTopic(parsed)) {
+      tags.push(["t", parsed.value])
     }
 
-    if (type.match(/nostr:(note|nevent)/)) {
-      tags.push(["q", value.id, value.relays?.[0] || ""])
+    if (Content.isEvent(parsed)) {
+      tags.push(["q", parsed.value.id, parsed.value.relays?.[0] || ""])
     }
 
-    if (type.match(/nostr:(nprofile|npub)/)) {
-      tags.push(mention(value.pubkey))
+    if (Content.isProfile(parsed)) {
+      tags.push(mention(parsed.value.pubkey))
     }
   }
 

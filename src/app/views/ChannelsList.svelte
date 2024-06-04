@@ -98,7 +98,7 @@
   <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
     <div slot="tab" let:tab class="flex gap-2">
       <div>{toTitle(tab)}</div>
-      <div class="h-6 rounded-full bg-neutral-600 px-2">
+      <div class="h-6 rounded-full bg-neutral-700 px-2">
         {(tab === "conversations" ? $accepted : $requests).length}
       </div>
     </div>

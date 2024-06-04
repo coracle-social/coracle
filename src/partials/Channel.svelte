@@ -4,7 +4,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
-  import {createScroller} from "src/util/misc"
+  import {createScroller, synced} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -14,11 +14,14 @@
   import {nip44} from "src/engine"
 
   export let pubkeys
+  export let channelId
   export let messages: TrustedEvent[]
   export let sendMessage
   export let initialMessage = ""
 
   const loading = sleep(30_000)
+
+  const useNip44 = synced(`useNip44/${channelId}`, true)
 
   const startScroller = () => {
     scroller?.stop()
@@ -31,7 +34,6 @@
 
   let textarea, element, scroller
   let limit = 10
-  let useNip44 = true
   let showNewMessages = false
   let groupedMessages = []
 
@@ -74,7 +76,7 @@
     if (content) {
       textarea.value = ""
 
-      await sendMessage(content, useNip44)
+      await sendMessage(content, $useNip44)
 
       stickToBottom()
     }
@@ -157,7 +159,7 @@
       </div>
       {#if $nip44.isEnabled()}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          <Toggle scale={0.7} bind:value={useNip44} />
+          <Toggle scale={0.7} bind:value={$useNip44} />
           <small>
             Send messages using
             <Popover class="inline">

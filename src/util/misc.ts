@@ -388,7 +388,8 @@ export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ..
 // Local storage
 
 export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
-  const store = writable<T>(Storage.getJson(key) || defaultValue)
+  const init = Storage.getJson(key)
+  const store = writable<T>(init === null ? defaultValue : init)
 
   store.subscribe(throttle(delay, ($value: T) => Storage.setJson(key, $value)))
 

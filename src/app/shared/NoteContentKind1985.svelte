@@ -6,7 +6,7 @@
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {deriveRelay} from "src/engine"
 
-  export let note, maxLength, showEntire
+  export let note, showEntire
 
   const tags = Tags.fromEvent(note)
   const isRelayReview = tags.get("l")?.value() === "review/relay"
@@ -17,7 +17,7 @@
   {#if !isRelayReview}
     <NoteContentLabel {note} />
   {/if}
-  <NoteContentKind1 {note} {maxLength} {showEntire} />
+  <NoteContentKind1 {note} {showEntire} />
   {#if isRelayReview && $relay}
     <RelayCard hideRatingsCount relay={$relay} ratings={[note]} />
   {/if}

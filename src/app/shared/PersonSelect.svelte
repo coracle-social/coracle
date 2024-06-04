@@ -17,9 +17,7 @@
   const {loading, load} = createPeopleLoader()
 
   const search = term => {
-    if (term.length > 2) {
-      load(term)
-    }
+    load(term)
 
     parseAnything(term).then(result => {
       if (result?.type === "npub") {
@@ -32,8 +30,6 @@
         input.clearTerm()
       }
     })
-
-    console.log($profileSearch, $profileSearch.searchValues(term))
 
     return $profileSearch.searchValues(term)
   }

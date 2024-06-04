@@ -27,7 +27,6 @@
 
   export let note
   export let depth = 0
-  export let maxLength = 700
   export let showEntire = false
   export let expandable = true
   export let showMedia = getSetting("show_media")
@@ -54,13 +53,13 @@
 {:else if [40, 41].includes(note.kind)}
   <NoteContentKind40 {note} />
 {:else if note.kind === 1808}
-  <NoteContentKind1808 {note} {maxLength} {showEntire} />
+  <NoteContentKind1808 {note} {showEntire} />
 {:else if note.kind === 1985}
-  <NoteContentKind1985 {note} {maxLength} {showEntire} />
+  <NoteContentKind1985 {note} {showEntire} />
 {:else if note.kind === 1986}
-  <NoteContentKind1986 {note} {maxLength} {showEntire} />
+  <NoteContentKind1986 {note} {showEntire} />
 {:else if note.kind === 9802}
-  <NoteContentKind9802 {note} {maxLength} {showEntire} {showMedia} />
+  <NoteContentKind9802 {note} {showEntire} {showMedia} />
 {:else if note.kind === 1063}
   <NoteContentKind1063 {note} {showMedia} />
 {:else if note.kind === 10002}
@@ -88,9 +87,9 @@
 {:else if LIST_KINDS.includes(note.kind)}
   <NoteContentKindList {note} />
 {:else}
-  <NoteContentKind1 {note} {maxLength} {showEntire} {showMedia} {expandable} {depth}>
+  <NoteContentKind1 {note} {showEntire} {showMedia} {expandable} {depth}>
     <div slot="note-content" let:quote>
-      <svelte:self depth={depth + 1} note={quote} {maxLength} />
+      <svelte:self depth={depth + 1} note={quote} />
     </div>
   </NoteContentKind1>
 {/if}

@@ -1,18 +1,21 @@
 <script lang="ts">
   import {without} from "ramda"
   import {
-    parseContent,
-    getLinks,
-    truncateContent,
-    LINK,
-    CASHU,
-    INVOICE,
-    NEWLINE,
-    ELLIPSIS,
-    TOPIC,
-    CODE,
-    TEXT,
-  } from "src/util/notes"
+    parse,
+    truncate,
+    render as renderParsed,
+    isText,
+    isTopic,
+    isCode,
+    isCashu,
+    isInvoice,
+    isLink,
+    isProfile,
+    isEvent,
+    isEllipsis,
+    isAddress,
+    isNewline,
+  } from "@welshman/content"
   import MediaSet from "src/partials/MediaSet.svelte"
   import QRCode from "src/partials/QRCode.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
@@ -22,9 +25,9 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
-  import NoteContentEntity from "src/app/shared/NoteContentEntity.svelte"
 
   export let note
+  export let minLength = 500
   export let maxLength = 700
   export let showEntire = false
   export let showMedia = false
@@ -32,58 +35,73 @@
   export let expandable = true
   export let depth = 0
 
-  const fullContent = parseContent(note)
+  const fullContent = parse(note)
 
   const expand = () => {
     showEntire = true
   }
 
-  export const isNewline = i =>
-    !shortContent[i] ||
-    shortContent[i].type === NEWLINE ||
-    (shortContent[i].type === TEXT && shortContent[i].value.match(/^\s+$/))
+  const isBoundary = i => {
+    const parsed = shortContent[i]
 
-  export const isStartOrEnd = i => isNewline(i - 1) || isNewline(i + 1)
+    if (!parsed || isBoundary(parsed)) return true
+    if (isText(parsed)) return parsed.value.match(/^\s+$/)
 
-  $: shortContent = truncateContent(fullContent, {maxLength, showEntire, showMedia, skipMedia})
+    return false
+  }
+
+  const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
+
+  const getLinks = content =>
+    content.filter(x => isLink(x) && x.value.isMedia).map(x => x.value.url.toString())
+
+  $: shortContent = showEntire
+    ? fullContent
+    : truncate(
+        fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
+        {
+          minLength,
+          maxLength,
+          mediaLength: showMedia ? 200 : 50,
+        },
+      )
+
   $: links = getLinks(shortContent)
   $: extraLinks = without(links, getLinks(fullContent))
-  $: ellipsize = expandable && shortContent.find(p => p.type === ELLIPSIS)
+  $: ellipsize = expandable && shortContent.find(isEllipsis)
 </script>
 
 <div
   class="flex flex-col gap-2 overflow-hidden text-ellipsis"
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   <div>
-    {#each shortContent as { type, value }, i}
-      {#if type === NEWLINE}
-        <NoteContentNewline {value} />
-      {:else if type === TOPIC}
-        <NoteContentTopic {value} />
-      {:else if type === CODE}
-        <NoteContentCode {value} />
-      {:else if type === CASHU}
+    {#each shortContent as parsed, i}
+      {#if isNewline(parsed)}
+        <NoteContentNewline value={parsed.value} />
+      {:else if isTopic(parsed)}
+        <NoteContentTopic value={parsed.value} />
+      {:else if isCode(parsed)}
+        <NoteContentCode value={parsed.value} />
+      {:else if isCashu(parsed)}
         <div on:click|stopPropagation>
-          <QRCode copyOnClick code={value} />
+          <QRCode copyOnClick code={parsed.value} />
         </div>
-      {:else if type === INVOICE}
+      {:else if isInvoice(parsed)}
         <div on:click|stopPropagation>
-          <QRCode copyOnClick code={value} />
+          <QRCode copyOnClick code={parsed.value} />
         </div>
-      {:else if type === LINK}
-        <NoteContentLink {value} showMedia={showMedia && isStartOrEnd(i)} />
-      {:else if type.match(/^nostr:np(rofile|ub)$/)}
-        <PersonLink pubkey={value.pubkey} />
-      {:else if type.startsWith("nostr:") && isStartOrEnd(i) && depth < 2}
-        <NoteContentQuote {depth} {note} {value}>
+      {:else if isLink(parsed)}
+        <NoteContentLink value={parsed.value} showMedia={showMedia && isStartOrEnd(i)} />
+      {:else if isProfile(parsed)}
+        <PersonLink pubkey={parsed.value.pubkey} />
+      {:else if (isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 2}
+        <NoteContentQuote {depth} {note} value={parsed.value}>
           <div slot="note-content" let:quote>
             <slot name="note-content" {quote} />
           </div>
         </NoteContentQuote>
-      {:else if type.startsWith("nostr:")}
-        <NoteContentEntity {value} />
-      {:else if type !== ELLIPSIS}
-        {value}
+      {:else if !isEllipsis(parsed)}
+        {renderParsed(parsed)}
       {/if}
       {" "}
     {/each}

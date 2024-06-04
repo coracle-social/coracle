@@ -8,18 +8,10 @@
   export let value
   export let showMedia = false
 
+  const url = value.url.toString()
+
   const close = () => {
     hidden = true
-  }
-
-  const getUrlWithHash = () => {
-    let url = value.url
-
-    if (value.hash) {
-      url += `#${value.hash}`
-    }
-
-    return url
   }
 
   let hidden = false
@@ -27,31 +19,31 @@
 
 {#if showMedia && value.isMedia && !hidden}
   <div class="py-2">
-    <Media url={value.url} onClose={close} />
+    <Media url={url} onClose={close} />
   </div>
 {:else if value.isMedia}
   <Anchor
     modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    externalHref={value.url}
-    href={router.at("media").of(value.url).toString()}>
-    {displayUrl(value.url)}
+    externalHref={url}
+    href={router.at("media").of(url).toString()}>
+    {displayUrl(url)}
   </Anchor>
-{:else if isShareableRelayUrl(value.url)}
+{:else if isShareableRelayUrl(url)}
   <Anchor
     modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={router.at("relays").of(getUrlWithHash()).toString()}>
-    {displayUrl(value.url)}
+    href={router.at("relays").of(url).toString()}>
+    {displayUrl(url)}
   </Anchor>
 {:else}
   <Anchor
     external
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={getUrlWithHash()}>
-    {displayUrl(value.url)}
+    href={url}>
+    {displayUrl(url)}
   </Anchor>
 {/if}

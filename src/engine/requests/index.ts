@@ -81,8 +81,15 @@ export * from "src/engine/requests/pubkeys"
 export const attemptedAddrs = new Map()
 
 export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
-  const events = repository.query([{...filter, limit: 1}])
-  const since = max(events.map(e => e.created_at).concat(EPOCH)) - overlap
+  const limit = 50
+  const events = repository.query([{...filter, limit}])
+
+  // If we only have a few events, it won't hurt to re-fetch everything. This can happen when
+  // we fetch notifications with a limit of 1, giving us just a handful of events without pulling
+  // the full dataset.
+  const since = events.length < limit
+    ? EPOCH
+    : max(events.map(e => e.created_at).concat(EPOCH)) - overlap
 
   return {...filter, since}
 }
