@@ -175,7 +175,6 @@ export const env = new Writable({
 
 export const pubkey = withGetter(synced<string | null>("pubkey", null))
 export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
-export const freshness = withGetter(writable<Record<string, number>>({}))
 export const handles = withGetter(writable<Record<string, Handle>>({}))
 export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
@@ -197,13 +196,15 @@ export const projections = new Worker<TrustedEvent>({
 
 // Freshness
 
+export const freshness = new Map<string, number>()
+
 export const getFreshnessKey = (key: string, value: any) => `${key}:${value}`
 
 export const getFreshness = (key: string, value: any) =>
-  freshness.get()[getFreshnessKey(key, value)] || 0
+  freshness.get(getFreshnessKey(key, value)) || 0
 
 export const setFreshness = (key: string, value: any, ts: number) =>
-  freshness.update(assoc(getFreshnessKey(key, value), ts))
+  freshness.set(getFreshnessKey(key, value), ts)
 
 // Session and settings
 
@@ -1280,14 +1281,13 @@ export const collections = derived(
   readCollections,
 )
 
-export const userCollections = derived(
-  [collections, pubkey],
-  ([$collections, $pubkey]: [Collection[], string]) =>
+export const deriveCollections = pubkey =>
+  derived(collections, $collections =>
     sortBy(
       f => f.name.toLowerCase(),
-      $collections.filter(collection => collection.pubkey === $pubkey),
+      $collections.filter(collection => collection.pubkey === pubkey),
     ),
-)
+  )
 
 export const collectionSearch = derived(
   collections,
@@ -2149,7 +2149,6 @@ const collectionAdapter = (name, key, store, opts = {}) =>
   })
 
 export const storage = new Storage(15, [
-  objectAdapter("freshness", "key", freshness, {sort: sortBy(prop("value"))}),
   objectAdapter("handles", "key", handles, {limit: 10000}),
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),

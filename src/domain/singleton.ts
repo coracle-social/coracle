@@ -3,6 +3,7 @@ import {Address, isShareableRelayUrl} from "@welshman/util"
 import {Encryptable} from "src/domain/util"
 import type {DecryptedEvent} from "src/domain/util"
 import {tryJson} from "src/util/misc"
+import {isHex} from "src/util/nostr"
 
 export type SingletonParams = {
   kind: number
@@ -38,8 +39,8 @@ export const makeSingleton = (singleton: SingletonParams): Singleton =>
   indexSingleton({publicTags: [], privateTags: [], ...singleton})
 
 const isValidTag = (tag: string[]) => {
-  if (tag[0] === "p") return tag[1]?.length === 64
-  if (tag[0] === "e") return tag[1]?.length === 64
+  if (tag[0] === "p") return isHex(tag[1])
+  if (tag[0] === "e") return isHex(tag[1])
   if (tag[0] === "a") return Address.isAddress(tag[1] || "")
   if (tag[0] === "t") return tag[1]?.length > 0
   if (tag[0] === "r") return isShareableRelayUrl(tag[1])

@@ -54,14 +54,6 @@ export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
-export const personKinds = [
-  ...LIST_KINDS,
-  HANDLER_INFORMATION,
-  NAMED_BOOKMARKS,
-  FEED,
-  PROFILE,
-] as number[]
-export const userKinds = [...personKinds, APP_DATA] as number[]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",

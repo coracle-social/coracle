@@ -9,15 +9,19 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
   import {
-    createAndPublish,
     hints,
+    loadLabels,
     getClientTags,
     searchTopicNames,
-    userCollections,
+    deriveCollections,
     collectionSearch,
+    createAndPublish,
+    pubkey,
   } from "src/engine"
 
   export let eid
+
+  const collections = deriveCollections($pubkey)
 
   const onTopicChange = name => {
     if (name) {
@@ -48,7 +52,10 @@
 
   let topicInput
   let names = []
-  let options = $userCollections.map(c => c.name)
+
+  $: options = $collections.map(c => c.name)
+
+  loadLabels([$pubkey])
 </script>
 
 <form on:submit|preventDefault={submit}>

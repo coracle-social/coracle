@@ -1,7 +1,7 @@
 import {always, uniqBy, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn, tryFunc} from "hurdak"
-import {nth} from "@welshman/lib"
-import type {TrustedEvent} from "@welshman/util"
+import {nth, batch} from "@welshman/lib"
+import type {TrustedEvent, ValueRelays} from "@welshman/util"
 import {
   Tags,
   Address,
@@ -14,8 +14,7 @@ import {
 } from "@welshman/util"
 import {warn} from "src/util/logger"
 import {tryJson} from "src/util/misc"
-import {isGiftWrap, giftWrapKinds, getPublicKey} from "src/util/nostr"
-import {appDataKeys} from "src/util/nostr"
+import {isGiftWrap, isHex, appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import type {Channel} from "src/engine/model"
 import {GroupAccess, RelayMode} from "src/engine/model"
 import {getNip04, getNip44, getNip59} from "src/engine/utils"
@@ -35,6 +34,7 @@ import {
   load,
   nip04,
   nip59,
+  hints,
   people,
   projections,
   sessions,
@@ -43,6 +43,7 @@ import {
   ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
+import {loadPubkeys} from "src/engine/requests"
 import {
   addTopic,
   modifyGroupStatus,

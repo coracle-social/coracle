@@ -10,7 +10,6 @@ import {
   session,
   loadSeen,
   loadGroups,
-  loadLabels,
   loadDeletes,
   loadHandlers,
   loadPubkeyUserData,
@@ -19,6 +18,7 @@ import {
   loadGroupMessages,
   loadNotifications,
   listenForNotifications,
+  getFollows,
   getSetting,
 } from "src/engine"
 
@@ -91,18 +91,23 @@ export const loadAppData = () => {
 }
 
 export const loadUserData = async () => {
-  // Make sure the user and their follows are loaded
+  // Refresh our user's data
   await loadPubkeyUserData([pubkey.get()])
 
-  loadSeen()
-  loadLabels()
-  loadDeletes()
-  loadHandlers()
-  loadGiftWrap()
-  loadAllMessages()
-  loadGroupMessages()
-  loadNotifications()
+  // Load anything they might need to be notified about, in serial to avoid
+  // clogging up higher priority requests
+  await loadSeen()
+  await loadGiftWrap()
+  await loadAllMessages()
+  await loadGroupMessages()
+  await loadNotifications()
+
+  // Start listening for notifications
   listenForNotifications()
+
+  // Less important stuff
+  await loadHandlers()
+  await loadDeletes()
 }
 
 export const boot = () => router.at("login/connect").open({noEscape: true})

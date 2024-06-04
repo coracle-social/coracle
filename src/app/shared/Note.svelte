@@ -201,9 +201,8 @@
       event = await nip59.get().unwrap(event, getRecipientKey(event))
     }
 
-    ready = true
-
     if (event.pubkey) {
+      ready = true
       loadPubkeys([event.pubkey])
 
       const kinds = [1]

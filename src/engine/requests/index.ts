@@ -74,7 +74,7 @@ import {
   dufflepud,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
-import {loadPubkeyRelays, loadPubkeys} from "src/engine/requests/pubkeys"
+import {loadPubkeyRelays} from "src/engine/requests/pubkeys"
 
 export * from "src/engine/requests/pubkeys"
 
@@ -87,9 +87,8 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
   // If we only have a few events, it won't hurt to re-fetch everything. This can happen when
   // we fetch notifications with a limit of 1, giving us just a handful of events without pulling
   // the full dataset.
-  const since = events.length < limit
-    ? EPOCH
-    : max(events.map(e => e.created_at).concat(EPOCH)) - overlap
+  const since =
+    events.length < limit ? EPOCH : max(events.map(e => e.created_at).concat(EPOCH)) - overlap
 
   return {...filter, since}
 }
@@ -286,47 +285,6 @@ export const createPeopleLoader = ({
   }
 }
 
-export const loadLabels = () =>
-  load({
-    skipCache: true,
-    relays: hints.User().getUrls(),
-    filters: [addSinceToFilter({kinds: [LABEL], authors: [pubkey.get()], "#L": ["#t"]})],
-  })
-
-export const loadDeletes = () =>
-  load({
-    skipCache: true,
-    relays: hints.User().getUrls(),
-    filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
-  })
-
-export const loadSeen = () =>
-  load({
-    skipCache: true,
-    relays: hints.WriteRelays().getUrls(),
-    filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
-  })
-
-export const loadGiftWrap = () => {
-  const kinds = []
-
-  if (nip44.get().isEnabled()) {
-    kinds.push(1059)
-  }
-
-  if (nip04.get().isEnabled()) {
-    kinds.push(1060)
-  }
-
-  if (kinds.length > 0) {
-    return load({
-      skipCache: true,
-      relays: hints.User().getUrls(),
-      filters: [addSinceToFilter({kinds, authors: [pubkey.get()]})],
-    })
-  }
-}
-
 export const feedLoader = new FeedLoader<TrustedEvent>({
   request: async ({relays, filters, onEvent}) => {
     if (relays.length > 0) {
@@ -450,8 +408,6 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
     )
   }
 
-  loadPubkeys(pubkeys)
-
   if (eventsWithParent.length > 0) {
     const relays = hints.merge(eventsWithParent.map(hints.EventParents)).getUrls()
     const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
@@ -489,7 +445,7 @@ export const loadNotifications = () => {
   })
 }
 
-export const listenForNotifications = async () => {
+export const listenForNotifications = () => {
   const since = now() - 30
   const $session = session.get()
   const addrs = getUserCommunities($session)
@@ -515,6 +471,47 @@ export const listenForNotifications = async () => {
     relays: hints.ReadRelays().getUrls(),
     onEvent: onNotificationEvent,
   })
+}
+
+export const loadLabels = (authors: string[]) =>
+  load({
+    skipCache: true,
+    relays: hints.FromPubkeys(authors).getUrls(),
+    filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
+  })
+
+export const loadDeletes = () =>
+  load({
+    skipCache: true,
+    relays: hints.User().getUrls(),
+    filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
+  })
+
+export const loadSeen = () =>
+  load({
+    skipCache: true,
+    relays: hints.WriteRelays().getUrls(),
+    filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
+  })
+
+export const loadGiftWrap = () => {
+  const kinds = []
+
+  if (nip44.get().isEnabled()) {
+    kinds.push(1059)
+  }
+
+  if (nip04.get().isEnabled()) {
+    kinds.push(1060)
+  }
+
+  if (kinds.length > 0) {
+    return load({
+      skipCache: true,
+      relays: hints.User().getUrls(),
+      filters: [addSinceToFilter({kinds, authors: [pubkey.get()]})],
+    })
+  }
 }
 
 export const loadAllMessages = ({reload = false} = {}) => {

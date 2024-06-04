@@ -1,7 +1,16 @@
 import {seconds} from "hurdak"
 import {assoc, remove, now, inc} from "@welshman/lib"
-import {RELAYS, APP_DATA} from "@welshman/util"
-import {appDataKeys, personKinds, userKinds} from "src/util/nostr"
+import {
+  RELAYS,
+  PROFILE,
+  HANDLER_INFORMATION,
+  NAMED_BOOKMARKS,
+  FEED,
+  FOLLOWS,
+  APP_DATA,
+} from "@welshman/util"
+import {appDataKeys} from "src/util/nostr"
+import {LIST_KINDS} from "src/domain"
 import {getFreshness, setFreshness, withIndexers, load, hints} from "src/engine/state"
 
 const attempts = new Map<string, number>()
@@ -19,6 +28,7 @@ const getStalePubkeys = (pubkeys: string[], key: string, delta: number) => {
     const thisDelta = delta * thisAttempts
 
     if (getFreshness(key, pubkey) < now() - thisDelta) {
+      setFreshness(key, pubkey, now())
       attempts.set(pubkey, thisAttempts)
       result.add(pubkey)
     }
@@ -38,7 +48,7 @@ const loadPubkeyData = (
   rawPubkeys: string[],
   {force = false, relays = []}: LoadPubkeyOpts = {},
 ) => {
-  const delta = force ? 5 : seconds(5, "minute")
+  const delta = force ? 5 : seconds(15, "minute")
   const pubkeys = getStalePubkeys(rawPubkeys, key, delta)
 
   if (pubkeys.length === 0) {
@@ -60,17 +70,22 @@ const loadPubkeyData = (
           skipCache: true,
           relays: withIndexers([relay]),
           filters: filters.map(assoc("authors", values)),
-          onEvent: e => setFreshness(key, e.pubkey, now()),
         }),
       ),
   )
 }
 
+export const loadPubkeyLists = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
+  loadPubkeyData("pubkey/lists", LIST_KINDS, pubkeys, opts)
+
+export const loadPubkeyFeeds = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
+  loadPubkeyData("pubkey/feeds", [NAMED_BOOKMARKS, FEED], pubkeys, opts)
+
 export const loadPubkeyRelays = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("pubkey/relay", [RELAYS], pubkeys, opts)
+  loadPubkeyData("pubkey/relays", [RELAYS], pubkeys, opts)
 
 export const loadPubkeyProfiles = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("pubkey/profile", remove(RELAYS, personKinds), pubkeys, opts)
+  loadPubkeyData("pubkey/profile", [PROFILE, FOLLOWS, HANDLER_INFORMATION], pubkeys, opts)
 
 export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   // Load relays, then load profiles so we have a better chance of finding them. But also
@@ -82,4 +97,7 @@ export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) 
   ])
 
 export const loadPubkeyUserData = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
-  loadPubkeyData("pubkey/user", userKinds, pubkeys, {force: true, ...opts})
+  loadPubkeyData("pubkey/user", [PROFILE, RELAYS, FOLLOWS, APP_DATA], pubkeys, {
+    force: true,
+    ...opts,
+  })
