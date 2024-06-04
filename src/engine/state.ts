@@ -44,6 +44,7 @@ import {
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
+  RELAYS,
   FOLLOWS,
   MUTES,
   LABEL,
@@ -64,6 +65,7 @@ import {
   hasValidSignature,
   LOCAL_RELAY_URL,
   getFilterResultCardinality,
+  isShareableRelayUrl,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
@@ -144,7 +146,7 @@ import type {
   Topic,
   Zapper,
 } from "src/engine/model"
-import {GroupAccess, OnboardingTask} from "src/engine/model"
+import {RelayMode, GroupAccess, OnboardingTask} from "src/engine/model"
 import {getNip04, getNip44, getNip59, getSigner, getConnect, unwrapRepost} from "src/engine/utils"
 import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
 
@@ -949,6 +951,87 @@ export const createNotificationGroups = ($notifications, kinds) => {
   )
 }
 
+// Relay policy settings
+
+export const relayLists = withGetter(
+  deriveEventsMapped<PublishedSingleton>({
+    filters: [{kinds: [RELAYS]}],
+    itemToEvent: prop("event"),
+    eventToItem: event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: getPlaintext(event),
+        }),
+      ),
+  }),
+)
+
+export const legacyRelayLists = withGetter(
+  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>({
+    filters: [{kinds: [FOLLOWS]}],
+    itemToEvent: prop("event"),
+    eventToItem: event => {
+      try {
+        const policy = Object.entries(
+          JSON.parse(event.content) as Record<string, {write: boolean; read: boolean}>,
+        )
+          .filter(([url]) => isShareableRelayUrl(url))
+          .map(([url, {write = true, read = true}]) => ({
+            url: normalizeRelayUrl(url),
+            write,
+            read,
+          }))
+
+        return {event, policy}
+      } catch (e) {
+        // pass
+      }
+    },
+  }),
+)
+
+export const relayPoliciesByPubkey = withGetter(
+  derived([relayLists, legacyRelayLists], ([$relayLists, $legacyRelayLists]) => {
+    const policies = new Map<string, RelayPolicy[]>()
+
+    for (const {event, publicTags} of $relayLists) {
+      const policy = publicTags
+        .filter(([_, url]) => isShareableRelayUrl(url))
+        .map(([_, url, mode]) => {
+          const write = !mode || mode === RelayMode.Write
+          const read = !mode || mode === RelayMode.Read
+
+          if (!write && !read) {
+            logger.warn(`Encountered unknown relay mode: ${mode}`)
+          }
+
+          return {url: normalizeRelayUrl(url), write, read}
+        })
+
+      policies.set(event.pubkey, policy)
+    }
+
+    for (const {event, policy} of $legacyRelayLists) {
+      if (!policies.has(event.pubkey)) {
+        policies.set(event.pubkey, policy)
+      }
+    }
+
+    return policies
+  }),
+)
+
+export const getPubkeyRelayPolicies = (pubkey: string, mode: string = null) => {
+  const relays = relayPoliciesByPubkey.get().get(pubkey) || []
+
+  return mode ? relays.filter(prop(mode)) : relays
+}
+
+export const userRelayPolicies = derived(
+  [relayPoliciesByPubkey, pubkey],
+  ([$relayPoliciesByPubkey, $pubkey]) => $relayPoliciesByPubkey.get($pubkey),
+)
+
 // Relays
 
 export function normalizeRelayUrl(url: string, opts = {}) {
@@ -995,19 +1078,6 @@ export const getSearchableRelays = ($relays: Relay[]) => {
 
   return uniq(env.get().SEARCH_RELAYS.concat(urls)).slice(0, 8) as string[]
 }
-
-export const getPubkeyRelays = (pubkey: string, mode: string = null) => {
-  const relays = people.key(pubkey).get()?.relays || []
-
-  return mode ? relays.filter(prop(mode)) : relays
-}
-
-export const getPubkeyRelayUrls = (pubkey: string, mode: string = null) =>
-  pluck("url", getPubkeyRelays(pubkey, mode))
-
-export const getUserRelays = (mode: string = null) => getPubkeyRelays(stateKey.get(), mode)
-
-export const getUserRelayUrls = (mode: string = null) => pluck("url", getUserRelays(mode))
 
 export const getGroupRelayUrls = address => {
   const group = groups.key(address).get()
@@ -1069,7 +1139,8 @@ export const hints = new Router({
   getUserPubkey: () => stateKey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
-  getPubkeyRelays: getPubkeyRelayUrls,
+  getPubkeyRelays: (pubkey: string, mode: string) =>
+    getPubkeyRelayPolicies(pubkey, mode).map(r => r.url),
   getFallbackRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
   getSearchRelays: () => env.get().SEARCH_RELAYS,
   getLimit: () => parseInt(getSetting("relay_limit")),
@@ -1121,13 +1192,7 @@ export const searchRelayUrls = searchRelays.derived(search => term => pluck("url
 
 export const searchableRelays = relays.derived(getSearchableRelays)
 
-export const relayPolicies = user.derived($user => $user?.relays || [])
-
-export const relayPolicyUrls = relayPolicies.derived(pluck("url"))
-
 export const deriveRelay = url => relays.key(url).derived(defaultTo({url}))
-
-export const deriveHasRelay = url => relayPolicyUrls.derived(urls => urls.includes(url))
 
 // Topics
 

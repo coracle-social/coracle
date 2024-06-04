@@ -30,6 +30,7 @@ export type RelayPolicy = {
   read: boolean
   write: boolean
 }
+
 export type NostrConnectHandler = {
   pubkey?: string
   domain?: string
@@ -96,9 +97,6 @@ export type Zapper = WelshmanZapper & {
 
 export type Person = {
   pubkey: string
-  relays_fetched_at?: number
-  relays_updated_at?: number
-  relays?: RelayPolicy[]
   communities_updated_at?: number
   communities?: string[][]
 }

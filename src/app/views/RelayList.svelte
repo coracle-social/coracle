@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {derived} from "svelte/store"
   import {mergeLeft, groupBy, sortBy, uniqBy, prop, drop} from "ramda"
   import {displayList} from "hurdak"
-  import {derived} from "@welshman/lib"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {pushToKey, createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -24,11 +24,11 @@
     userFollows,
     deriveRelay,
     getProfile,
+    RelayMode,
     displayProfileByPubkey,
-    relayPolicies,
-    relayPolicyUrls,
+    userRelayPolicies,
     getRelaySearch,
-    getPubkeyRelayUrls,
+    getPubkeyRelayPolicies,
     sortEventsDesc,
     joinRelay,
     broadcastUserData,
@@ -45,15 +45,15 @@
         continue
       }
 
-      for (const url of getPubkeyRelayUrls(pk, "write")) {
-        pushToKey(m, url, pk)
+      for (const r of getPubkeyRelayPolicies(pk, RelayMode.Write)) {
+        pushToKey(m, r.url, pk)
       }
     }
 
     return m
   })()
 
-  const searchRelays = derived([relays, relayPolicyUrls], ([$relays, $relayPolicyUrls]) => {
+  const searchRelays = derived([relays, userRelayPolicies], ([$relays, $userRelayPolicies]) => {
     const annotate = (r: Relay): Relay => {
       const pubkeys = pubkeysByUrl.get(r.url) || []
       const description =
@@ -66,7 +66,7 @@
 
     const allRelays = sortBy(
       (r: Relay) => -r.count,
-      $relays.filter((r: Relay) => !$relayPolicyUrls.includes(r.url)).map(annotate),
+      $relays.filter((r: Relay) => !$userRelayPolicies.find(p => p.url === r.url)).map(annotate),
     )
 
     const search = getRelaySearch(allRelays)
@@ -125,13 +125,13 @@
   let reviews = []
   let activeTab = "search"
   let customRelay = ""
-  let currentRelayPolicies = $relayPolicies
+  let currentRelayPolicies = $userRelayPolicies
 
   $: currentRelayPolicies = sortBy(
     prop("url"),
     uniqBy(
       prop("url"),
-      $relayPolicies.concat(currentRelayPolicies.map(mergeLeft({read: false, write: false}))),
+      $userRelayPolicies.concat(currentRelayPolicies.map(mergeLeft({read: false, write: false}))),
     ),
   )
 

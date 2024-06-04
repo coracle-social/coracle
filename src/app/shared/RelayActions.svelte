@@ -1,14 +1,14 @@
 <script lang="ts">
   import {last} from "ramda"
+  import {derived} from "svelte/store"
   import {normalizeRelayUrl} from "@welshman/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
     canSign,
     relays,
-    relayPolicyUrls,
+    userRelayPolicies,
     joinRelay,
     leaveRelay,
-    deriveHasRelay,
     broadcastUserData,
   } from "src/engine"
   import {router} from "src/app/util/router"
@@ -17,7 +17,9 @@
 
   const url = normalizeRelayUrl(relay.url)
   const info = relays.key(url).derived(r => r?.info)
-  const joined = deriveHasRelay(url)
+  const joined = derived(userRelayPolicies, $policies =>
+    Boolean($policies.find(p => p.url === url)),
+  )
 
   let actions = []
 
@@ -33,7 +35,7 @@
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if ($relayPolicyUrls.length > 1) {
+    } else if ($userRelayPolicies.length > 1) {
       actions.push({
         onClick: () => leaveRelay(url),
         label: "Leave",

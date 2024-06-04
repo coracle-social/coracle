@@ -72,7 +72,7 @@ import {
   people,
   pubkey,
   publish,
-  relayPolicies,
+  userRelayPolicies,
   relays,
   session,
   sessions,
@@ -326,18 +326,17 @@ export const joinRelay = async (url: string, claim?: string) => {
   broadcastUserData([url])
 
   return publishRelays([
-    ...reject(whereEq({url}), relayPolicies.get()),
+    ...reject(whereEq({url}), get(userRelayPolicies)),
     {url, read: true, write: true} as RelayPolicy,
   ])
 }
 
 export const leaveRelay = (url: string) =>
-  publishRelays(reject(whereEq({url}), relayPolicies.get()))
+  publishRelays(reject(whereEq({url}), get(userRelayPolicies)))
 
 export const setRelayPolicy = (url: string, policy: Partial<RelayPolicy>) =>
   publishRelays(
-    relayPolicies
-      .get()
+    get(userRelayPolicies)
       .filter(p => p.url !== url)
       .concat({url, read: false, write: false, ...policy}),
   )

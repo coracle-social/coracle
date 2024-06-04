@@ -98,28 +98,6 @@ projections.addGlobalHandler((event: TrustedEvent) => {
   }
 })
 
-// Relay selections
-
-projections.addHandler(10002, e => {
-  saveRelayPolicy(
-    e,
-    Tags.fromEvent(e)
-      .filter(t => ["r", "relay"].includes(t.key()) && isShareableRelayUrl(t.value()))
-      .mapTo(t => {
-        const [url, mode] = t.drop(1).valueOf()
-        const write = !mode || mode === RelayMode.Write
-        const read = !mode || mode === RelayMode.Read
-
-        if (!write && !read) {
-          warn(`Encountered unknown relay mode: ${mode}`)
-        }
-
-        return {url: normalizeRelayUrl(url), write, read}
-      })
-      .valueOf(),
-  )
-})
-
 // Key sharing
 
 projections.addHandler(24, (e: TrustedEvent) => {
@@ -305,20 +283,6 @@ projections.addHandler(0, e => {
 
     updateHandle(e, content)
     updateZapper(e, content)
-  })
-})
-
-projections.addHandler(3, e => {
-  updateStore(people.key(e.pubkey), e.created_at, {
-    petnames: uniqBy(nth(1), Tags.fromEvent(e).whereKey("p").unwrap()),
-  })
-})
-
-projections.addHandler(10000, e => {
-  updateStore(people.key(e.pubkey), e.created_at, {
-    mutes: Tags.fromEvent(e)
-      .filter(t => ["e", "p"].includes(t.key()))
-      .unwrap(),
   })
 })
 

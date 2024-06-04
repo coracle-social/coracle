@@ -272,6 +272,6 @@
   select={pubkey => autocomplete({pubkey})}
   loading={$loadingPeople}>
   <div slot="item" let:item>
-    <PersonBadge inert pubkey={item.event.pubkey} />
+    <PersonBadge inert pubkey={item} />
   </div>
 </Suggestions>

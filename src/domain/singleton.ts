@@ -1,5 +1,5 @@
 import {addToKey} from "@welshman/lib"
-import {Address} from "@welshman/util"
+import {Address, isShareableRelayUrl} from "@welshman/util"
 import {Encryptable} from "src/domain/util"
 import type {DecryptedEvent} from "src/domain/util"
 import {tryJson} from "src/util/misc"
@@ -42,6 +42,8 @@ const isValidTag = (tag: string[]) => {
   if (tag[0] === "e") return tag[1]?.length === 64
   if (tag[0] === "a") return Address.isAddress(tag[1] || "")
   if (tag[0] === "t") return tag[1]?.length > 0
+  if (tag[0] === "r") return isShareableRelayUrl(tag[1])
+  if (tag[0] === "relay") return isShareableRelayUrl(tag[1])
 
   return true
 }

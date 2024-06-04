@@ -5,7 +5,7 @@
   import {nip19} from "nostr-tools"
   import {pluck} from "ramda"
   import {seconds, Fetch} from "hurdak"
-  import * as store from 'svelte/store'
+  import * as store from "svelte/store"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
@@ -433,7 +433,9 @@
 
     const interval1 = setInterval(() => {
       slowConnections.set(
-        engine.getUserRelayUrls().filter(url => engine.hints.options.getRelayQuality(url) < 0.5),
+        engine
+          .getPubkeyRelayPolicies(engine.pubkey.get())
+          .filter(r => engine.hints.options.getRelayQuality(r.url) < 0.5),
       )
 
       // Prune connections we haven't used in a while. Clear errors periodically

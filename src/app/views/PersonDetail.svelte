@@ -24,7 +24,7 @@
     displayProfileByPubkey,
     loadPubkeys,
     imgproxy,
-    getPubkeyRelays,
+    getPubkeyRelayPolicies,
   } from "src/engine"
 
   export let pubkey
@@ -37,7 +37,7 @@
 
   let activeTab = "notes"
 
-  $: ownRelays = getPubkeyRelays(pubkey)
+  $: relayPolicies = getPubkeyRelayPolicies(pubkey)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
   $: ({rgb, rgba} = $themeBackgroundGradient)
 
@@ -97,8 +97,8 @@
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
-  {#if ownRelays.length > 0}
-    <PersonRelays relays={ownRelays} />
+  {#if relayPolicies.length > 0}
+    <PersonRelays relays={relayPolicies} />
   {:else}
     <Spinner />
   {/if}

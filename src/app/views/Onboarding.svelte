@@ -21,6 +21,7 @@
     publishProfile,
     publishRelays,
     urlToRelayPolicy,
+    userRelayPolicies,
     tagsFromContent,
     requestRelayAccess,
     loginWithPrivateKey,
@@ -47,7 +48,7 @@
     follows = concat(follows, invite.people)
   }
 
-  let relays = user.get()?.relays || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
+  let relays = $userRelayPolicies || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
 
   if (invite?.relays) {
     relays = concat(relays, invite.relays.map(urlToRelayPolicy))
