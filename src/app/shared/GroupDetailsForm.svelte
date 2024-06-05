@@ -16,7 +16,7 @@
 </script>
 
 <script lang="ts">
-  import {pluck, join, uniqBy} from "ramda"
+  import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
   import {Address} from "@welshman/util"
   import {toSpliced} from "src/util/misc"
@@ -35,15 +35,14 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {env, hints, searchRelays, feedSearch, normalizeRelayUrl} from "src/engine"
+  import {normalizeRelayUrl} from "src/domain"
+  import {env, hints, relaySearch, feedSearch} from "src/engine"
 
   export let onSubmit
   export let values: Values
   export let mode = "create"
   export let showMembers = false
   export let buttonText = "Save"
-
-  const searchRelayUrls = q => pluck("url", $searchRelays(q))
 
   const toggleAdvanced = () => {
     showAdvanced = !showAdvanced
@@ -127,7 +126,7 @@
         <Field label="Relays">
           <SearchSelect
             multiple
-            search={searchRelayUrls}
+            search={$relaySearch.searchValues}
             bind:value={values.relays}
             termToItem={normalizeRelayUrl}>
             <i slot="before" class="fa fa-clipboard" />

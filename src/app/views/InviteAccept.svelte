@@ -76,7 +76,7 @@
         <p>Below are a few relays that might help you connect to the people you want to reach.</p>
         <div class="grid grid-cols-1 gap-4">
           {#each parsedRelays as relay (relay.url)}
-            <RelayCard {relay} claim={relay.claim} />
+            <RelayCard url={relay.url} claim={relay.claim} />
           {/each}
         </div>
       </FlexColumn>

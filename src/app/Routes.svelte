@@ -5,7 +5,7 @@
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {session, signer, stateKey} from "src/engine"
+  import {signer, pubkey} from "src/engine"
 
   const {current, page, modal, modals} = router
 
@@ -30,7 +30,7 @@
 
   // Redirect if we have no user
   $: {
-    if (!$session && $page && router.getMatch($page.path).route.requireUser) {
+    if (!$pubkey && $page && router.getMatch($page.path).route.requireUser) {
       router.go({path: "/", replace: true})
     }
   }
@@ -55,7 +55,7 @@
   }
 </script>
 
-{#key $stateKey}
+{#key $pubkey}
   <div
     id="page"
     class={cx("relative pb-32 text-neutral-100 lg:ml-72 lg:pt-16", {
@@ -79,7 +79,7 @@
 {#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const promise = router.getMatch(m.path).route.component}
   <Modal virtual={false} canClose={!m.noEscape}>
-    {#key $stateKey}
+    {#key $pubkey}
       {#await promise}
         <!-- pass -->
       {:then component}

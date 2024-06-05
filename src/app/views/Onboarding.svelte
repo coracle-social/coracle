@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {uniq, concat, nth} from "@welshman/lib"
+  import {uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {generatePrivateKey} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,21 +11,20 @@
   import {
     env,
     load,
-    user,
+    anonymous,
     hints,
     session,
     mention,
     loadPubkeys,
-    publishNote,
+    createAndPublish,
     updateSingleton,
     publishProfile,
-    publishRelays,
-    urlToRelayPolicy,
-    userRelayPolicies,
+    setRelayPolicies,
     tagsFromContent,
     requestRelayAccess,
     loginWithPrivateKey,
     listenForNotifications,
+    forcePlatformRelays,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -42,16 +41,20 @@
 
   let onboardingLists = []
 
-  let follows = $session ? [] : user.get()?.petnames?.map(nth(1)) || []
+  let follows = $session ? [] : $anonymous.follows.map(nth(1))
 
   if (invite?.people) {
     follows = concat(follows, invite.people)
   }
 
-  let relays = $userRelayPolicies || $env.DEFAULT_RELAYS.map(urlToRelayPolicy)
+  let relays =
+    $anonymous.relays.length === 0 ? $env.DEFAULT_RELAYS.map(url => ["r", url]) : $anonymous.relays
 
   if (invite?.relays) {
-    relays = concat(relays, invite.relays.map(urlToRelayPolicy))
+    relays = concat(
+      relays,
+      invite.relays.map(url => ["r", url]),
+    )
   }
 
   const signup = async noteContent => {
@@ -74,15 +77,20 @@
     }
 
     // Do this first so we know where to publish everything else
-    publishRelays(relays)
+    setRelayPolicies(() => relays)
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    updateSingleton(FOLLOWS, {add: follows.map(mention)})
+    updateSingleton(FOLLOWS, () => follows.map(mention))
 
     // Publish our welcome note
     if (noteContent) {
-      publishNote(noteContent, tagsFromContent(noteContent))
+      createAndPublish({
+        kind: 1,
+        content: noteContent,
+        tags: tagsFromContent(noteContent),
+        relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+      })
     }
 
     // Start our notifications listener

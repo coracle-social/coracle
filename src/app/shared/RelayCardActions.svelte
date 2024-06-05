@@ -1,17 +1,17 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {leaveRelay, joinRelay, userRelayPolicies, broadcastUserData} from "src/engine"
+  import {leaveRelay, joinRelay, userRelayPolicies} from "src/engine"
 
-  export let relay
+  export let url
   export let claim = null
 
   const joined = derived(userRelayPolicies, $policies =>
-    Boolean($policies.find(p => p.url === relay.url)),
+    Boolean($policies.find(p => p.url === url)),
   )
 
-  const join = () => joinRelay(relay.url, claim)
+  const join = () => joinRelay(url, claim)
 
-  const leave = () => leaveRelay(relay.url)
+  const leave = () => leaveRelay(url)
 </script>
 
 {#if !$joined}

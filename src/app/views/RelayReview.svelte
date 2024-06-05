@@ -5,7 +5,7 @@
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
-  import {publishReview} from "src/engine"
+  import {hints, createAndPublish, getClientTags, tagsFromContent} from "src/engine"
 
   export let url
 
@@ -13,12 +13,21 @@
   let rating
 
   const onSubmit = () => {
-    publishReview(compose.parse(), [
-      ["L", "review"],
-      ["l", "review/relay", "review"],
-      ["rating", rating],
-      ["r", url],
-    ])
+    const content = compose.parse()
+
+    createAndPublish({
+      relays: hints.WriteRelays().getUrls(),
+      kind: 1986,
+      content,
+      tags: [
+        ...getClientTags(),
+        ...tagsFromContent(content),
+        ["L", "review"],
+        ["l", "review/relay", "review"],
+        ["rating", rating],
+        ["r", url],
+      ],
+    })
 
     router.pop()
   }

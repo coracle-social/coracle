@@ -5,7 +5,6 @@
   import {derived} from "svelte/store"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
-    MUTES,
     LOCAL_RELAY_URL,
     toNostrURI,
     asHashedEvent,
@@ -22,7 +21,6 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -44,7 +42,8 @@
     tracker,
     hints,
     repository,
-    updateSingleton,
+    unmuteNote,
+    muteNote,
     deriveHandlersForKind,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
@@ -99,10 +98,6 @@
   const createLabel = () => router.at("notes").of(note.id).at("label").open()
 
   const quote = () => router.at("notes/create").cx({quote: note}).open()
-
-  const unmuteNote = () => updateSingleton(MUTES, {remove: [["e", note.id]]})
-
-  const muteNote = () => updateSingleton(MUTES, {add: [["e", note.id]]})
 
   const react = async content => {
     if (isSignedEvent(note)) {
@@ -278,8 +273,8 @@
   <div class="flex scale-90 items-center gap-2">
     {#if note.wrap}
       <div
-        class="staatliches rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500 flex gap-1 items-center h-6">
-        <i class="fa fa-lock sm:text-accent text-xs" />
+        class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
+        <i class="fa fa-lock text-xs sm:text-accent" />
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
@@ -323,7 +318,7 @@
         <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">
           {#each $seenOn as url}
-            <RelayCard relay={{url}} />
+            <RelayCard {url} />
           {/each}
         </div>
       {/if}

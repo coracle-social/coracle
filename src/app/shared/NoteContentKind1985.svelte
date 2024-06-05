@@ -4,13 +4,12 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {deriveRelay} from "src/engine"
 
   export let note, showEntire
 
   const tags = Tags.fromEvent(note)
   const isRelayReview = tags.get("l")?.value() === "review/relay"
-  const relay = deriveRelay(tags.get("r")?.value())
+  const url = tags.get("r")?.value()
 </script>
 
 <FlexColumn>
@@ -18,7 +17,7 @@
     <NoteContentLabel {note} />
   {/if}
   <NoteContentKind1 {note} {showEntire} />
-  {#if isRelayReview && $relay}
-    <RelayCard hideRatingsCount relay={$relay} ratings={[note]} />
+  {#if isRelayReview && url}
+    <RelayCard hideRatingsCount {url} ratings={[note]} />
   {/if}
 </FlexColumn>

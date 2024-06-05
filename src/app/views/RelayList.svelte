@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {mergeLeft, groupBy, sortBy, uniqBy, prop, drop} from "ramda"
+  import {groupBy, sortBy, uniqBy, prop} from "ramda"
   import {displayList} from "hurdak"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {pushToKey, createScroller} from "src/util/misc"
@@ -14,20 +14,18 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {profileHasName} from "src/domain"
-  import type {Relay} from "src/engine"
+  import {profileHasName, RelayMode} from "src/domain"
+  import type {RelayInfo} from "src/engine"
   import {
     load,
     hints,
     relays,
     pubkey,
     userFollows,
-    deriveRelay,
     getProfile,
-    RelayMode,
     displayProfileByPubkey,
     userRelayPolicies,
-    getRelaySearch,
+    relaySearch,
     getPubkeyRelayPolicies,
     sortEventsDesc,
     joinRelay,
@@ -53,41 +51,23 @@
     return m
   })()
 
-  const searchRelays = derived([relays, userRelayPolicies], ([$relays, $userRelayPolicies]) => {
-    const annotate = (r: Relay): Relay => {
-      const pubkeys = pubkeysByUrl.get(r.url) || []
-      const description =
-        pubkeys.length > 0
-          ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
-          : r.info?.description
+  const searchRelays = derived(
+    [relays, userRelayPolicies],
+    ([$relays, $userRelayPolicies]) =>
+      (term: string) =>
+        (term
+          ? $relaySearch.searchOptions(term)
+          : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
+        ).map((profile: RelayInfo) => {
+          const pubkeys = pubkeysByUrl.get(profile.url) || []
+          const description =
+            pubkeys.length > 0
+              ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
+              : profile.description
 
-      return {...r, info: {...r.info, description}}
-    }
-
-    const allRelays = sortBy(
-      (r: Relay) => -r.count,
-      $relays.filter((r: Relay) => !$userRelayPolicies.find(p => p.url === r.url)).map(annotate),
-    )
-
-    const search = getRelaySearch(allRelays)
-
-    return (term: string): Relay[] => {
-      if (!term) {
-        const result = sortBy(
-          (r: Relay) => -(pubkeysByUrl.get(r.url)?.length || 0),
-          Array.from(pubkeysByUrl.keys()).map(url => annotate(deriveRelay(url).get())),
-        )
-
-        // Drop the top 10 most popular relays to avoid network centralization
-        return uniqBy(
-          prop("url"),
-          drop(Math.min(10, Math.max(0, result.length - 10)), result).concat(allRelays),
-        )
-      }
-
-      return search(term)
-    }
-  })
+          return {...profile, description}
+        }),
+  )
 
   const setActiveTab = tab => {
     activeTab = tab
@@ -129,10 +109,7 @@
 
   $: currentRelayPolicies = sortBy(
     prop("url"),
-    uniqBy(
-      prop("url"),
-      $userRelayPolicies.concat(currentRelayPolicies.map(mergeLeft({read: false, write: false}))),
-    ),
+    uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)),
   )
 
   $: ratings = groupBy(e => {
@@ -189,7 +166,7 @@
   {/if}
   <div class="grid grid-cols-1 gap-4">
     {#each currentRelayPolicies as policy (policy.url)}
-      <RelayCard showStatus showControls relay={policy} ratings={ratings[policy.url]} />
+      <RelayCard showStatus showControls url={policy.url} ratings={ratings[policy.url]} />
     {/each}
   </div>
   <div class="flex items-center gap-2">
@@ -213,8 +190,10 @@
       placeholder="Search relays or add a custom url">
       <i slot="before" class="fa-solid fa-search" />
     </Input>
-    {#each $searchRelays(q).slice(0, limit) as relay (relay.url)}
-      <RelayCard {relay} ratings={ratings[relay.url]} />
+    {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
+      <RelayCard {url} ratings={ratings[url]}>
+        <p slot="description">{description}</p>
+      </RelayCard>
     {/each}
   {/if}
 </FlexColumn>

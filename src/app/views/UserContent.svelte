@@ -29,12 +29,7 @@
 
   const submit = () => {
     publishSettings(settings)
-    updateSingleton(MUTES, {
-      add: mutedPubkeys.filter(pk => !$userMutes.has(pk)).map(mention),
-      remove: Array.from($userMutes)
-        .filter(pk => !mutedPubkeys.includes(pk))
-        .map(mention),
-    })
+    updateSingleton(MUTES, () => mutedPubkeys.map(mention))
 
     showInfo("Your preferences have been saved!")
   }

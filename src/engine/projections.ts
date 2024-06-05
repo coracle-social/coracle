@@ -1,30 +1,30 @@
-import {always, uniqBy, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
+import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn, tryFunc} from "hurdak"
-import {nth, batch} from "@welshman/lib"
-import type {TrustedEvent, ValueRelays} from "@welshman/util"
+import {nth, inc} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
+  isShareableRelayUrl,
   Address,
   getAddress,
   getIdFilters,
-  isShareableRelayUrl,
-  normalizeRelayUrl,
   MUTES,
   FOLLOWS,
+  RELAYS,
 } from "@welshman/util"
-import {warn} from "src/util/logger"
 import {tryJson} from "src/util/misc"
-import {isGiftWrap, isHex, appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
+import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
+import {normalizeRelayUrl} from "src/domain"
 import type {Channel} from "src/engine/model"
-import {GroupAccess, RelayMode} from "src/engine/model"
-import {getNip04, getNip44, getNip59} from "src/engine/utils"
-import {relay} from "src/engine/repository"
+import {GroupAccess} from "src/engine/model"
+import {getNip04} from "src/engine/utils"
 import {
   channels,
+  topics,
+  relays,
   deriveAdminKeyForGroup,
   deriveGroupStatus,
   getChannelId,
-  getRecipientKey,
   getSession,
   groupAdminKeys,
   groupAlerts,
@@ -33,22 +33,16 @@ import {
   groups,
   load,
   nip04,
-  nip59,
-  hints,
   people,
   projections,
   sessions,
-  tracker,
   withFallbacks,
   ensureUnwrapped,
   ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
-import {loadPubkeys} from "src/engine/requests"
 import {
-  addTopic,
   modifyGroupStatus,
-  saveRelayPolicy,
   setGroupStatus,
   updateRecord,
   updateStore,
@@ -267,6 +261,36 @@ projections.addHandler(10004, e => {
     communities: Tags.fromEvent(e).whereKey("a").unwrap(),
   })
 })
+
+// Relays
+
+projections.addHandler(RELAYS, (e: TrustedEvent) => {
+  for (const [key, value] of e.tags) {
+    if (["r", "relay"].includes(key) && isShareableRelayUrl(value)) {
+      relays.key(normalizeRelayUrl(value)).update($relay => ({
+        url: value,
+        count: inc($relay?.count || 0),
+        first_seen: $relay?.first_seen || e.created_at,
+        info: {
+          last_checked: 0,
+        },
+      }))
+    }
+  }
+})
+
+// Topics
+
+const addTopic = (e, name) => {
+  if (name) {
+    const topic = topics.key(name.toLowerCase())
+
+    topic.merge({
+      count: inc(topic.get()?.count || 0),
+      last_seen: e.created_at,
+    })
+  }
+}
 
 projections.addHandler(1, (e: TrustedEvent) => {
   const tagTopics = Tags.fromEvent(e).topics().valueOf()

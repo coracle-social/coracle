@@ -1,17 +1,12 @@
 import {
   fromNostrURI,
-  APP_DATA,
   AUDIO,
   CLASSIFIED,
   EVENT_TIME,
-  FEED,
   GENERIC_REPOST,
-  NAMED_BOOKMARKS,
-  HANDLER_INFORMATION,
   HIGHLIGHT,
   LONG_FORM,
   NOTE,
-  PROFILE,
   REACTION,
   REMIX,
   REPOST,
@@ -29,7 +24,6 @@ import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} fr
 import {identity} from "ramda"
 import {avg} from "hurdak"
 import {tryJson} from "src/util/misc"
-import {LIST_KINDS} from "src/domain"
 
 export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
 export const getPublicKey = (sk: string) => getPk(fromHex(sk))

@@ -11,9 +11,10 @@
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
-  import {canSign, getSetting, displayRelay, setRelayPolicy} from "src/engine"
+  import {displayRelayUrl, RelayMode} from "src/domain"
+  import {relays, canSign, getSetting, setRelayPolicy, deriveUserRelayPolicy} from "src/engine"
 
-  export let relay
+  export let url
   export let claim = null
   export let ratings = null
   export let showStatus = false
@@ -22,31 +23,31 @@
   export let showControls = false
   export let inert = false
 
-  const policySetter = mode => () => {
-    relay = {...relay, [mode]: !relay[mode]}
-    setRelayPolicy(relay.url, relay)
-  }
+  const relay = relays.key(url)
+  const policy = deriveUserRelayPolicy(url)
+
+  const policySetter = mode => () => setRelayPolicy({...$policy, [mode]: !$policy[mode]})
 </script>
 
 <div
   class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-neutral-600 bg-neutral-800 px-6 py-3 shadow"
-  style={`border-left-color: ${hsl(stringToHue(relay.url))}`}>
+  style={`border-left-color: ${hsl(stringToHue(url))}`}>
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 items-center gap-2 text-xl">
       {#if inert}
         <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {displayRelay(relay)}
+          {displayRelayUrl(url)}
         </div>
       {:else}
         <Anchor
           modal
-          href={router.at("relays").of(relay.url).toString()}
+          href={router.at("relays").of(url).toString()}
           class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {displayRelay(relay)}
+          {displayRelayUrl(url)}
         </Anchor>
       {/if}
       {#if showStatus && !getSetting("multiplextr_url")}
-        <RelayStatus {relay} />
+        <RelayStatus {url} />
       {/if}
       {#if !showStatus && ratings?.length > 0}
         <div class="flex items-center gap-1 px-4 text-sm">
@@ -59,33 +60,33 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
-        <RelayCardActions {relay} {claim} />
+        <RelayCardActions {url} {claim} />
       </slot>
     {/if}
   </div>
   <slot name="description">
-    {#if relay.info?.description}
-      <p>{relay.info.description}</p>
+    {#if $relay.description}
+      <p>{$relay.description}</p>
     {/if}
   </slot>
-  {#if !isNil(relay.count)}
+  {#if !isNil($relay.count)}
     <span class="flex items-center gap-1 text-sm text-neutral-400">
-      {#if relay.contact}
-        <Anchor external underline href={relay.contact}>{displayUrl(relay.contact)}</Anchor>
+      {#if $relay.contact}
+        <Anchor external underline href={$relay.contact}>{displayUrl($relay.contact)}</Anchor>
         &bull;
       {/if}
-      {#if relay.supported_nips}
+      {#if $relay.supported_nips}
         <Popover>
           <span slot="trigger" class="cursor-pointer underline">
-            {relay.supported_nips.length} NIPs
+            {$relay.supported_nips.length} NIPs
           </span>
           <span slot="tooltip">
-            NIPs supported: {relay.supported_nips.join(", ")}
+            NIPs supported: {$relay.supported_nips.join(", ")}
           </span>
         </Popover>
         &bull;
       {/if}
-      Seen {quantify(relay.count || 0, "time")}
+      Seen {quantify($relay.count || 0, "time")}
     </span>
   {/if}
   {#if showControls && $canSign}
@@ -93,14 +94,14 @@
     <div>
       <Chip
         pad
-        class={cx("cursor-pointer transition-opacity", {"opacity-50": !relay.read})}
-        on:click={policySetter("read")}>
+        class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.read})}
+        on:click={policySetter(RelayMode.Read)}>
         <i class="fa fa-book-open text-neutral-300" /> Read
       </Chip>
       <Chip
         pad
-        class={cx("cursor-pointer transition-opacity", {"opacity-50": !relay.write})}
-        on:click={policySetter("write")}>
+        class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.write})}
+        on:click={policySetter(RelayMode.Write)}>
         <i class="fa fa-feather text-neutral-300" /> Write
       </Chip>
     </div>

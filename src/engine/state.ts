@@ -1,8 +1,7 @@
 import Fuse from "fuse.js"
-import {nip19} from "nostr-tools"
 import {throttle} from "throttle-debounce"
 import {derived, writable} from "svelte/store"
-import {defer, displayList, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
+import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
   any,
   pluck,
@@ -54,10 +53,8 @@ import {
   Router,
   Tags,
   createEvent,
-  fromNostrURI,
   getFilterId,
   isContextAddress,
-  normalizeRelayUrl as _normalizeRelayUrl,
   unionFilters,
   getIdAndAddress,
   getIdOrAddress,
@@ -82,16 +79,7 @@ import {
 } from "@welshman/net"
 import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {
-  fuzzy,
-  synced,
-  withGetter,
-  getter,
-  pushToKey,
-  tryJson,
-  fromCsv,
-  SearchHelper,
-} from "src/util/misc"
+import {fuzzy, synced, withGetter, pushToKey, tryJson, fromCsv, SearchHelper} from "src/util/misc"
 import {
   generatePrivateKey,
   isLike,
@@ -107,8 +95,8 @@ import type {
   PublishedProfile,
   PublishedListFeed,
   PublishedSingleton,
-  Collection,
   PublishedList,
+  RelayPolicy,
   Handle,
 } from "src/domain"
 import {
@@ -129,6 +117,11 @@ import {
   displayPubkey,
   readSingleton,
   asDecryptedEvent,
+  RelayMode,
+  normalizeRelayUrl,
+  makeRelayPolicy,
+  filterRelaysByNip,
+  displayRelayUrl,
 } from "src/domain"
 import type {
   Channel,
@@ -140,13 +133,13 @@ import type {
   GroupStatus,
   Person,
   PublishInfo,
-  Relay,
-  RelayPolicy,
   Session,
   Topic,
   Zapper,
+  AnonymousUserState,
+  RelayInfo,
 } from "src/engine/model"
-import {RelayMode, GroupAccess, OnboardingTask} from "src/engine/model"
+import {GroupAccess, OnboardingTask} from "src/engine/model"
 import {getNip04, getNip44, getNip59, getSigner, getConnect, unwrapRepost} from "src/engine/utils"
 import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
 
@@ -178,9 +171,10 @@ export const sessions = withGetter(synced<Record<string, Session>>("sessions", {
 export const handles = withGetter(writable<Record<string, Handle>>({}))
 export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
+export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 
-export const relays = new CollectionStore<Relay>("url")
 export const groups = new CollectionStore<Group>("address")
+export const relays = new CollectionStore<RelayInfo>("url")
 export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
@@ -253,16 +247,9 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 
 export const dufflepud = (path: string) => `${getSetting("dufflepud_url")}/${path}`
 
-export const stateKey = new Derived(pubkey, $pk => $pk || "anonymous")
-
 export const session = new Derived(
   [pubkey, sessions],
   ([$pk, $sessions]: [string, Record<string, Session>]) => ($pk ? $sessions[$pk] : null),
-)
-
-export const user = new Derived(
-  [stateKey, people.mapStore],
-  ([$k, $p]: [string, Map<string, Person>]) => $p.get($k) || {pubkey: $k},
 )
 
 export const connect = session.derived(getConnect)
@@ -271,7 +258,7 @@ export const nip04 = session.derived(getNip04)
 export const nip44 = session.derived(getNip44)
 export const nip59 = session.derived(getNip59)
 export const canSign = signer.derived($signer => $signer.isEnabled())
-export const settings = user.derived(getSettings)
+export const settings = derived(pubkey, getSettings)
 
 // Plaintext
 
@@ -589,10 +576,6 @@ export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubke
 export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
 export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
-
-// Anonymous user state
-
-export const anonymous = writable({relays: [], petnames: []})
 
 // Events
 
@@ -1000,7 +983,32 @@ export const createNotificationGroups = ($notifications, kinds) => {
   )
 }
 
-// Relay policy settings
+// Relays
+
+export const getRelay = url => defaultTo({url}, relays.key(url).get())
+
+export const deriveRelay = url => derived(relays.key(url), defaultTo({url}))
+
+export const getNip50Relays = () =>
+  uniq([...env.get().SEARCH_RELAYS, ...filterRelaysByNip(50, relays.get()).map(r => r.url)])
+
+export class RelaySearch extends SearchHelper<RelayInfo, string> {
+  config = {keys: ["url", "name", "description"]}
+
+  getSearch = () => {
+    const search = fuzzy(this.options, this.config)
+
+    return term => (term ? search(term) : sortBy(r => -r.count || 0, this.options))
+  }
+
+  getValue = (option: RelayInfo) => option.url
+
+  displayValue = displayRelayUrl
+}
+
+export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
+
+// Relay policies
 
 export const relayLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
@@ -1071,9 +1079,9 @@ export const relayPoliciesByPubkey = withGetter(
 )
 
 export const getPubkeyRelayPolicies = (pubkey: string, mode: string = null) => {
-  const relays = relayPoliciesByPubkey.get().get(pubkey) || []
+  const policies = relayPoliciesByPubkey.get().get(pubkey) || []
 
-  return mode ? relays.filter(prop(mode)) : relays
+  return mode ? policies.filter(prop(mode)) : policies
 }
 
 export const userRelayPolicies = derived(
@@ -1081,52 +1089,13 @@ export const userRelayPolicies = derived(
   ([$relayPoliciesByPubkey, $pubkey]) => $relayPoliciesByPubkey.get($pubkey),
 )
 
-// Relays
-
-export function normalizeRelayUrl(url: string, opts = {}) {
-  if (url === LOCAL_RELAY_URL) {
-    return url
-  }
-
-  try {
-    return _normalizeRelayUrl(url, opts)
-  } catch (e) {
-    return url
-  }
-}
-
-export const urlToRelay = url => ({url: normalizeRelayUrl(url)}) as Relay
-
-export const urlToRelayPolicy = url =>
-  ({...urlToRelay(url), read: true, write: true}) as RelayPolicy
-
-export const displayRelayUrl = (url: string) => last(url.split("://")).replace(/\/$/, "")
-
-export const displayRelay = ({url}: Relay) => displayRelayUrl(url)
-
-export const displayRelays = (relays: Relay[], max = 3) =>
-  displayList(relays.map(displayRelay), "and", max)
-
-export const getRelaySearch = ($relays: Relay[]): ((term: string) => Relay[]) => {
-  const search = fuzzy($relays, {keys: ["url", "name", "description"]})
-
-  return term => {
-    if (!term) {
-      return sortBy(r => -r.count || 0, $relays)
-    }
-
-    return search(term)
-  }
-}
-
-export const getSearchableRelays = ($relays: Relay[]) => {
-  const urls = pluck(
-    "url",
-    $relays.filter(r => (r.info?.supported_nips || []).includes(50)),
+export const deriveUserRelayPolicy = url =>
+  derived(
+    userRelayPolicies,
+    $policies => $policies.find(p => p.url === url) || makeRelayPolicy({url}),
   )
 
-  return uniq(env.get().SEARCH_RELAYS.concat(urls)).slice(0, 8) as string[]
-}
+// Relay selection
 
 export const getGroupRelayUrls = address => {
   const group = groups.key(address).get()
@@ -1185,7 +1154,7 @@ export const withFallbacks = (relays: string[]) =>
 export const withIndexers = (relays: string[]) => uniq(relays.concat(env.get().INDEXER_RELAYS))
 
 export const hints = new Router({
-  getUserPubkey: () => stateKey.get(),
+  getUserPubkey: () => pubkey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: (pubkey: string, mode: string) =>
@@ -1234,14 +1203,6 @@ export const hints = new Router({
     })
   },
 })
-
-export const searchRelays = relays.derived(getRelaySearch)
-
-export const searchRelayUrls = searchRelays.derived(search => term => pluck("url", search(term)))
-
-export const searchableRelays = relays.derived(getSearchableRelays)
-
-export const deriveRelay = url => relays.key(url).derived(defaultTo({url}))
 
 // Topics
 
@@ -1677,7 +1638,7 @@ Object.assign(NetworkContext, {
 export const uniqTags = tags =>
   uniqBy((t: string[]) => (t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")), tags)
 
-export const mention = (pubkey: string) =>
+export const mention = (pubkey: string, ...args: unknown[]) =>
   hints.tagPubkey(pubkey).append(displayProfileByPubkey(pubkey)).valueOf()
 
 export const tagsFromContent = (content: string) => {

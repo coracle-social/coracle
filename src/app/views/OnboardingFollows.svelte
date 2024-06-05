@@ -1,7 +1,7 @@
 <script lang="ts">
   import {reject, without, uniq, remove} from "ramda"
   import {quantify} from "hurdak"
-  import {fromPairs} from "@welshman/lib"
+  import {fromPairs, nth, nthEq} from "@welshman/lib"
   import {Tags, getAddress} from "@welshman/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
@@ -11,8 +11,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import type {Relay} from "src/engine"
-  import {urlToRelay, createPeopleLoader, profileSearch, searchRelays} from "src/engine"
+  import {createPeopleLoader, profileSearch, relaySearch} from "src/engine"
 
   export let relays
   export let follows
@@ -65,11 +64,11 @@
   }
 
   const removeRelay = url => {
-    relays = reject((r: Relay) => r.url === url, relays)
+    relays = reject(nthEq(1, url), relays)
   }
 
   const addRelay = url => {
-    relays = [...relays, urlToRelay(url)]
+    relays = [...relays, ["r", url]]
   }
 
   const openPersonSearch = () => {
@@ -90,7 +89,7 @@
     showRelaySearch = false
   }
 
-  $: urls = relays.map(r => r.url)
+  $: urls = relays.map(nth(1))
 
   $: {
     if (showPersonSearch) {
@@ -219,13 +218,10 @@
       </div>
     {:else}
       <FlexColumn small>
-        {#each relays as relay (relay.url)}
-          <RelayCard inert {relay}>
+        {#each relays as [_, url] (url)}
+          <RelayCard inert {url}>
             <div slot="actions">
-              <Anchor
-                button
-                class="flex items-center gap-2"
-                on:click={() => removeRelay(relay.url)}>
+              <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
                 <i class="fa fa-right-from-bracket" /> Leave
               </Anchor>
             </div>
@@ -273,18 +269,15 @@
       <i slot="before" class="fa fa-search" />
     </Input>
     <FlexColumn small>
-      {#each $searchRelays(term).slice(0, 30) as relay (relay.url)}
-        <RelayCard inert {relay}>
+      {#each $relaySearch.searchValues(term).slice(0, 30) as url (url)}
+        <RelayCard inert {url}>
           <div slot="actions">
-            {#if urls.includes(relay.url)}
-              <Anchor
-                button
-                class="flex items-center gap-2"
-                on:click={() => removeRelay(relay.url)}>
+            {#if urls.includes(url)}
+              <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
                 <i class="fa fa-right-from-bracket" /> Leave
               </Anchor>
             {:else}
-              <Anchor button class="flex items-center gap-2" on:click={() => addRelay(relay.url)}>
+              <Anchor button class="flex items-center gap-2" on:click={() => addRelay(url)}>
                 <i class="fa fa-right-to-bracket" /> Join
               </Anchor>
             {/if}

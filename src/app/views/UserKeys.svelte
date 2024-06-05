@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniqBy, pluck, uniq, sortBy, prop} from "ramda"
+  import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
   import {getAddress} from "@welshman/util"
@@ -20,12 +20,11 @@
     session,
     hints,
     groupSharedKeys,
-    searchRelays,
+    relaySearch,
     deriveIsGroupMember,
     groupAdminKeys,
     subscribe,
     LOAD_OPTS,
-    displayRelay,
   } from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -61,7 +60,7 @@
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
       ...LOAD_OPTS,
-      relays: hints.User().getUrls().concat(pluck("url", relays)),
+      relays: hints.User().getUrls().concat(relays),
       filters: [
         {kinds: [35834], authors: [pubkey], limit: 1},
         {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
@@ -158,8 +157,8 @@
       </Anchor>
     </div>
     <p>
-      These keys are used for accessing or managing closed groups. Save these to make sure you
-      don't lose access to your groups.
+      These keys are used for accessing or managing closed groups. Save these to make sure you don't
+      lose access to your groups.
     </p>
     {#each addresses as address (address)}
       {@const sharedKey = sharedKeys[address]}
@@ -197,8 +196,8 @@
     <Field label="Relays to search">
       <SearchSelect
         multiple
-        getKey={displayRelay}
-        search={$searchRelays}
+        getKey={$relaySearch.displayValue}
+        search={$relaySearch.searchValues}
         bind:value={relays}
         placeholder="wss://..." />
     </Field>

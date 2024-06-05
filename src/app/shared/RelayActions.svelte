@@ -1,7 +1,6 @@
 <script lang="ts">
   import {last} from "ramda"
   import {derived} from "svelte/store"
-  import {normalizeRelayUrl} from "@welshman/util"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
     canSign,
@@ -13,10 +12,9 @@
   } from "src/engine"
   import {router} from "src/app/util/router"
 
-  export let relay
+  export let url
 
-  const url = normalizeRelayUrl(relay.url)
-  const info = relays.key(url).derived(r => r?.info)
+  const relay = relays.key(url)
   const joined = derived(userRelayPolicies, $policies =>
     Boolean($policies.find(p => p.url === url)),
   )
@@ -57,9 +55,9 @@
       })
     }
 
-    if ($info?.contact) {
+    if ($relay?.contact) {
       actions.push({
-        onClick: () => window.open("mailto:" + last($info.contact.split(":"))),
+        onClick: () => window.open("mailto:" + last($relay.contact.split(":"))),
         label: "Contact",
         icon: "envelope",
       })

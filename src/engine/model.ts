@@ -1,34 +1,12 @@
 import type {Publish} from "@welshman/net"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
+import type {RelayProfile} from "src/domain"
 
-export type RelayInfo = {
-  contact?: string
-  description?: string
-  last_checked?: number
-  supported_nips?: number[]
-  limitation?: {
-    payment_required?: boolean
-    auth_required?: boolean
-  }
-}
-
-export type Relay = {
-  url: string
+export type RelayInfo = RelayProfile & {
   count?: number
   faults?: number[]
   first_seen?: number
-  info?: RelayInfo
-}
-
-export enum RelayMode {
-  Read = "read",
-  Write = "write",
-}
-
-export type RelayPolicy = {
-  url: string
-  read: boolean
-  write: boolean
+  last_checked?: number
 }
 
 export type NostrConnectHandler = {
@@ -150,4 +128,9 @@ export type Session = {
   notifications_last_synced?: number
   groups?: Record<string, GroupStatus>
   onboarding_tasks_completed?: string[]
+}
+
+export type AnonymousUserState = {
+  follows: string[][]
+  relays: string[][]
 }

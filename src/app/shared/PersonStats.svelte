@@ -2,7 +2,7 @@
   import {tweened} from "svelte/motion"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/util/router"
-  import {people, getFollows, getFollowers} from "src/engine"
+  import {getFollows, getFollowers} from "src/engine"
 
   export let pubkey
 

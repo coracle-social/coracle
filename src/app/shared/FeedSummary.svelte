@@ -17,7 +17,8 @@
   } from "@welshman/feeds"
   import {formatTimestampAsDate} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
-  import {displayRelayUrl, displayProfileByPubkey} from "src/engine"
+  import {displayRelayUrl} from "src/domain"
+  import {displayProfileByPubkey} from "src/engine"
 
   export let feed
   export let shallow = false

@@ -6,7 +6,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile} from "src/util/html"
-  import {uploadFiles, settings} from "src/engine"
+  import {uploadFiles, getSetting} from "src/engine"
 
   export let icon = null
   export let value = null
@@ -15,7 +15,7 @@
   export let maxHeight = null
   export let hostLimit = 1
 
-  const urls = $settings.nip96_urls.slice(0, hostLimit)
+  const urls = getSetting("nip96_urls").slice(0, hostLimit)
   const dispatch = createEventDispatcher()
 
   let input, loading

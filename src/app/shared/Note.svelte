@@ -12,9 +12,9 @@
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
-  import {nth} from '@welshman/lib'
+  import {nth} from "@welshman/lib"
   import {fly, slide} from "src/util/transition"
-  import {replyKinds, isHex, isLike, isGiftWrap} from "src/util/nostr"
+  import {replyKinds, isHex, isLike} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -31,14 +31,12 @@
   import {
     env,
     load,
-    nip59,
     hints,
     loadOne,
     ensureUnwrapped,
     loadZapper,
     isEventMuted,
     getSetting,
-    getRecipientKey,
     loadPubkeys,
     sortEventsDesc,
     forcePlatformRelays,
@@ -203,7 +201,10 @@
 
     if (event.pubkey) {
       ready = true
-      loadPubkeys([event.pubkey, ...event.tags.filter(t => t[0] === "p" && isHex(t[1])).map(nth(1))])
+      loadPubkeys([
+        event.pubkey,
+        ...event.tags.filter(t => t[0] === "p" && isHex(t[1])).map(nth(1)),
+      ])
 
       const kinds = [1]
 
@@ -270,7 +271,7 @@
               <Anchor type="unstyled" class="mr-4 min-w-0" on:click={showPerson}>
                 <PersonName pubkey={event.pubkey} />
               </Anchor>
-              <div class="flex gap-3 items-center">
+              <div class="flex items-center gap-3">
                 <Anchor
                   on:click={goToDetail}
                   class="whitespace-nowrap text-end text-sm text-neutral-100"

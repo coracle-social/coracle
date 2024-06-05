@@ -2,7 +2,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
 
-  export let relays
+  export let urls
 </script>
 
 <FlexColumn>
@@ -10,12 +10,12 @@
     Below are the relays this user publishes to. Join one or more to make sure you never miss their
     updates.
   </p>
-  {#if relays.length === 0}
+  {#if urls.length === 0}
     <div class="pt-8 text-center">No relays found</div>
   {:else}
     <FlexColumn small>
-      {#each relays as relay (relay.url)}
-        <RelayCard {relay} />
+      {#each urls as url (url)}
+        <RelayCard {url} />
       {/each}
     </FlexColumn>
   {/if}

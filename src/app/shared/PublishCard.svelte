@@ -100,7 +100,7 @@
                 <p class="mt-4 text-lg">The following relays are still pending:</p>
                 <div class="grid gap-2 sm:grid-cols-2">
                   {#each pending as url}
-                    <RelayCard hideActions relay={{url}} />
+                    <RelayCard hideActions {url} />
                   {/each}
                 </div>
               {/if}
@@ -108,14 +108,14 @@
                 <p class="mt-4 text-lg">The following relays accepted your note:</p>
                 <div class="grid gap-2 sm:grid-cols-2">
                   {#each success as url}
-                    <RelayCard hideActions relay={{url}} />
+                    <RelayCard hideActions {url} />
                   {/each}
                 </div>
               {/if}
               {#if failure.length > 0}
                 <p class="mt-4 text-lg">The following relays rejected your note:</p>
                 {#each failure as url}
-                  <RelayCard relay={{url}}>
+                  <RelayCard {url}>
                     <div slot="actions">
                       <Anchor
                         on:click={() => retry(url, event)}
@@ -129,7 +129,7 @@
               {#if timeout.length > 0}
                 <p class="mt-4 text-lg">The following relays did not respond:</p>
                 {#each timeout as url}
-                  <RelayCard relay={{url}}>
+                  <RelayCard {url}>
                     <div slot="actions">
                       <Anchor
                         on:click={() => retry(url, event)}

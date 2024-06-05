@@ -7,8 +7,8 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {deriveRelay, normalizeRelayUrl, displayRelay} from "src/engine"
-  import {makeFeed} from "src/domain"
+  import {deriveRelay} from "src/engine"
+  import {makeFeed, normalizeRelayUrl, displayRelayUrl} from "src/domain"
 
   export let url
 
@@ -41,20 +41,20 @@
   $: url = normalizeRelayUrl(url)
   $: rating = getAvgRating(reviews)
 
-  document.title = displayRelay($relay)
+  document.title = displayRelayUrl(url)
 </script>
 
 <div class="flex items-center justify-between gap-2">
-  <RelayTitle relay={$relay} />
-  <RelayActions relay={$relay} />
+  <RelayTitle {url} />
+  <RelayActions {url} />
 </div>
 {#if rating}
   <div class="text-sm">
     <Rating inert value={rating} />
   </div>
 {/if}
-{#if $relay.info?.description}
-  <p>{$relay.info.description}</p>
+{#if $relay.description}
+  <p>{$relay.description}</p>
 {/if}
 <Tabs {tabs} {activeTab} {setActiveTab} />
 {#if activeTab === "reviews"}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
-  import {FOLLOWS, MUTES, toNostrURI} from "@welshman/util"
+  import {toNostrURI} from "@welshman/util"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
@@ -9,10 +9,12 @@
     session,
     hints,
     canSign,
-    updateSingleton,
+    unfollowPerson,
+    followPerson,
+    unmutePerson,
+    mutePerson,
     userMutes,
     userFollows,
-    mention,
   } from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
@@ -23,6 +25,28 @@
   const following = derived(userFollows, $m => $m.has(pubkey))
   const muted = derived(userMutes, $m => $m.has(pubkey))
 
+  const loginAsUser = () => {
+    router.clearModals()
+    loginWithPublicKey(pubkey)
+    boot()
+  }
+
+  const unfollow = () => unfollowPerson(pubkey)
+
+  const follow = () => followPerson(pubkey)
+
+  const unmute = () => unmutePerson(pubkey)
+
+  const mute = () => mutePerson(pubkey)
+
+  const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
+
+  const share = () =>
+    router
+      .at("qrcode")
+      .of(toNostrURI(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()})))
+      .open()
+
   let actions = []
 
   $: {
@@ -30,7 +54,7 @@
 
     if (!isSelf && $canSign) {
       actions.push({
-        onClick: $muted ? unmutePerson : mutePerson,
+        onClick: $muted ? unmute : mute,
         label: $muted ? "Unmute" : "Mute",
         icon: $muted ? "microphone-slash" : "microphone",
       })
@@ -72,38 +96,16 @@
       })
     }
   }
-
-  const loginAsUser = () => {
-    router.clearModals()
-    loginWithPublicKey(pubkey)
-    boot()
-  }
-
-  const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
-
-  const unfollowPerson = () => updateSingleton(FOLLOWS, {remove: [mention(pubkey)]})
-
-  const followPerson = () => updateSingleton(FOLLOWS, {add: [mention(pubkey)]})
-
-  const unmutePerson = () => updateSingleton(MUTES, {remove: [mention(pubkey)]})
-
-  const mutePerson = () => updateSingleton(MUTES, {add: [mention(pubkey)]})
-
-  const share = () =>
-    router
-      .at("qrcode")
-      .of(toNostrURI(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()})))
-      .open()
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if !isSelf}
+  {#if !isSelf && ($canSign || !$session.pubkey)}
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 cursor-pointer text-center">
         {#if $following}
-          <i class="fa fa-user-minus" on:click={unfollowPerson} />
+          <i class="fa fa-user-minus" on:click={unfollow} />
         {:else}
-          <i class="fa fa-user-plus" on:click={followPerson} />
+          <i class="fa fa-user-plus" on:click={follow} />
         {/if}
       </div>
       <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>

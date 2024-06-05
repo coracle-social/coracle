@@ -65,11 +65,10 @@ import {
   primeWotCaches,
   pubkey,
   publish,
-  searchableRelays,
+  getNip50Relays,
   session,
   subscribe,
   subscribePersistent,
-  user,
   withFallbacks,
   dufflepud,
 } from "src/engine/state"
@@ -272,7 +271,7 @@ export const createPeopleLoader = ({
         load({
           onEvent,
           skipCache: true,
-          relays: searchableRelays.get(),
+          relays: getNip50Relays().slice(0, 8),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
             await sleep(Math.min(1000, Date.now() - now))
@@ -316,27 +315,27 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
     }
   },
   getPubkeysForScope: (scope: string) => {
-    const $user = user.get()
+    const $pubkey = pubkey.get()
 
     const pubkeys = switcherFn(scope, {
-      [Scope.Self]: () => ($user ? [$user.pubkey] : []),
-      [Scope.Follows]: () => Array.from(getFollows($user.pubkey)),
-      [Scope.Network]: () => Array.from(getNetwork($user.pubkey)),
-      [Scope.Followers]: () => Array.from(getFollowers($user.pubkey)),
+      [Scope.Self]: () => ($pubkey ? [$pubkey] : []),
+      [Scope.Follows]: () => Array.from(getFollows($pubkey)),
+      [Scope.Network]: () => Array.from(getNetwork($pubkey)),
+      [Scope.Followers]: () => Array.from(getFollowers($pubkey)),
     })
 
     return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
   },
   getPubkeysForWOTRange: (min, max) => {
     const pubkeys = []
-    const $user = user.get()
+    const $pubkey = pubkey.get()
     const thresholdMin = maxWot.get() * min
     const thresholdMax = maxWot.get() * max
 
-    primeWotCaches($user.pubkey)
+    primeWotCaches($pubkey)
 
     for (const person of people.get()) {
-      const score = getWotScore($user.pubkey, person.pubkey)
+      const score = getWotScore($pubkey, person.pubkey)
 
       if (score >= thresholdMin && score <= thresholdMax) {
         pubkeys.push(person.pubkey)

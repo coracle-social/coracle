@@ -12,7 +12,7 @@
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage, session, stateKey, relays, getSetting, dufflepud} from "src/engine"
+  import {storage, session, pubkey, relays, getSetting, dufflepud} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -465,7 +465,7 @@
       // few so we're not asking for too much data at once
       const staleRelays = relays
         .get()
-        .filter(r => (r.info?.last_checked || 0) < lib.now() - seconds(7, "day"))
+        .filter(r => (r.last_checked || 0) < lib.now() - seconds(7, "day"))
         .slice(0, 20)
 
       misc.tryFetch(async () => {
@@ -497,7 +497,7 @@
 {:then}
   <div class="text-tinted-200">
     <Routes />
-    {#key $stateKey}
+    {#key $pubkey}
       <ForegroundButtons />
       <Nav />
       <Menu />

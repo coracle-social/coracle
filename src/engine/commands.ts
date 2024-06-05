@@ -1,27 +1,25 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
-import {cached, nth, groupBy, now} from "@welshman/lib"
+import {cached, append, nthEq, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
-  Tag,
   Tags,
   createEvent,
   getLnUrl,
   Address,
   getIdAndAddress,
-  isShareableRelayUrl,
   isSignedEvent,
   normalizeRelayUrl,
   FOLLOWS,
   RELAYS,
   PROFILE,
+  MUTES,
 } from "@welshman/util"
 import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {
   assoc,
   flatten,
   identity,
-  inc,
   map,
   omit,
   partition,
@@ -29,8 +27,6 @@ import {
   prop,
   reject,
   uniq,
-  uniqBy,
-  whereEq,
   without,
 } from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
@@ -43,7 +39,8 @@ import {
   createSingleton,
   readSingleton,
 } from "src/domain"
-import type {RelayPolicy, Session, NostrConnectHandler} from "src/engine/model"
+import type {RelayPolicy} from "src/domain"
+import type {Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {NostrConnectBroker} from "src/engine/utils"
 import {repository} from "src/engine/repository"
@@ -51,13 +48,13 @@ import {
   canSign,
   channels,
   loadOne,
-  tagsFromContent,
   createAndPublish,
   deriveAdminKeyForGroup,
   deriveGroup,
   deriveIsGroupMember,
   deriveSharedKeyForGroup,
   displayProfileByPubkey,
+  getSettings,
   env,
   forcePlatformRelays,
   getClientTags,
@@ -72,15 +69,10 @@ import {
   people,
   pubkey,
   publish,
-  userRelayPolicies,
-  relays,
   session,
   sessions,
   sign,
   signer,
-  stateKey,
-  topics,
-  user,
   withIndexers,
   optimisticReadReceipts,
   unpublishedReadReceipts,
@@ -89,6 +81,7 @@ import {
   handles,
   zappers,
   getPlaintext,
+  anonymous,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -253,101 +246,6 @@ export const updateZapper = async ({pubkey, created_at}, {lud16, lud06}) => {
     zappers.update(assoc(pubkey, {...zapper, pubkey, lnurl}))
   }
 }
-
-// Relays
-
-export const saveRelay = (url: string) => {
-  url = normalizeRelayUrl(url)
-
-  if (isShareableRelayUrl(url)) {
-    const relay = relays.key(url).get()
-
-    relays.key(url).merge({
-      count: inc(relay?.count || 0),
-      first_seen: relay?.first_seen || now(),
-      info: {
-        last_checked: 0,
-      },
-    })
-  }
-}
-
-export const saveRelayPolicy = (e, relays: RelayPolicy[]) => {
-  if (relays?.length > 0) {
-    updateStore(people.key(e.pubkey), e.created_at, {
-      relays: uniqBy(prop("url"), relays).map((relay: RelayPolicy) => {
-        saveRelay(relay.url)
-
-        return {read: true, write: true, ...relay}
-      }),
-    })
-  }
-}
-
-export const publishRelays = async ($relays: RelayPolicy[]) => {
-  updateStore(people.key(stateKey.get()), now(), {relays: $relays})
-
-  if (canSign.get()) {
-    createAndPublish({
-      kind: 10002,
-      tags: $relays
-        .filter(r => isShareableRelayUrl(r.url))
-        .flatMap(r => {
-          const tag = Tag.from(["r", normalizeRelayUrl(r.url)])
-
-          if (r.read && r.write) return [tag.valueOf()]
-          if (r.write) return [tag.append("write").valueOf()]
-          if (r.read) return [tag.append("read").valueOf()]
-
-          return []
-        })
-        .concat(getClientTags()),
-      relays: withIndexers(forcePlatformRelays(hints.WriteRelays().getUrls())),
-    })
-  }
-}
-
-export const requestRelayAccess = async (url: string, claim: string, sk?: string) =>
-  createAndPublish({
-    kind: 28934,
-    tags: [["claim", claim]],
-    relays: [url],
-    sk,
-  })
-
-export const joinRelay = async (url: string, claim?: string) => {
-  url = normalizeRelayUrl(url)
-
-  if (claim && canSign.get()) {
-    await requestRelayAccess(url, claim)
-  }
-
-  // Re-publish user meta to the new relay
-  broadcastUserData([url])
-
-  return publishRelays([
-    ...reject(whereEq({url}), get(userRelayPolicies)),
-    {url, read: true, write: true} as RelayPolicy,
-  ])
-}
-
-export const leaveRelay = (url: string) =>
-  publishRelays(reject(whereEq({url}), get(userRelayPolicies)))
-
-export const setRelayPolicy = (url: string, policy: Partial<RelayPolicy>) =>
-  publishRelays(
-    get(userRelayPolicies)
-      .filter(p => p.url !== url)
-      .concat({url, read: false, write: false, ...policy}),
-  )
-
-export const publishReview = (content, tags, relays = null) =>
-  createAndPublish({
-    kind: 1986,
-    tags: [...tags, ...getClientTags(), ...tagsFromContent(content)],
-    content,
-    relays,
-  })
 
 // Groups
 
@@ -733,15 +631,7 @@ export const publishCommunitiesList = addresses =>
     relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
   })
 
-// Miscellaneous commands
-
-export const publishNote = (content, tags = []) =>
-  createAndPublish({
-    kind: 1,
-    content,
-    tags,
-    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
-  })
+// Deletes
 
 export const publishDeletion = ids =>
   createAndPublish({
@@ -752,6 +642,8 @@ export const publishDeletion = ids =>
 
 export const publishDeletionForEvent = event => publishDeletion(getIdAndAddress(event))
 
+// Profile
+
 export const publishProfile = profile =>
   createAndPublish({
     kind: 0,
@@ -760,19 +652,16 @@ export const publishProfile = profile =>
     relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
   })
 
-export const updateSingleton = async (
-  kind,
-  {add = [], remove = []}: {add?: string[][]; remove?: string[][]},
-) => {
-  const updateTags = (tags: string[][]) =>
-    uniqBy(nth(1), tags.filter(t => !remove.find(rm => rm[1] === t[1])).concat(add))
+// Singletons
 
+export type ModifyTags = (tags: string[][]) => string[][]
+
+export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   const filters = [{kinds: [kind], authors: [pubkey.get()]}]
 
   let [event] = repository.query(filters)
 
-  // If we don't have a recent version of the user's petnames loaded, re-fetch to avoid
-  // dropping follow updates
+  // If we don't have a recent version loaded, re-fetch to avoid dropping updates
   if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
     const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
 
@@ -790,12 +679,12 @@ export const updateSingleton = async (
   let encryptable
   if (event) {
     const singleton = readSingleton(asDecryptedEvent(event, {content: getPlaintext(event)}))
-    const publicTags = updateTags(singleton.publicTags)
+    const publicTags = modifyTags(singleton.publicTags)
 
     encryptable = editSingleton({...singleton, publicTags})
   } else {
     const singleton = makeSingleton({kind})
-    const publicTags = updateTags(singleton.publicTags)
+    const publicTags = modifyTags(singleton.publicTags)
     encryptable = createSingleton({...singleton, publicTags})
   }
 
@@ -803,6 +692,86 @@ export const updateSingleton = async (
 
   await createAndPublish({...template, content, relays})
 }
+
+// Follows/mutes
+
+export const unfollowPerson = (pubkey: string) => {
+  if (canSign.get()) {
+    updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)))
+  } else {
+    anonymous.update($a => ({...$a, follows: append($a.follows, mention(pubkey))}))
+  }
+}
+
+export const followPerson = (pubkey: string) => {
+  if (canSign.get()) {
+    updateSingleton(FOLLOWS, tags => append(tags, mention(pubkey)))
+  } else {
+    anonymous.update($a => ({...$a, follows: append($a.follows, mention(pubkey))}))
+  }
+}
+
+export const unmutePerson = (pubkey: string) =>
+  updateSingleton(MUTES, tags => reject(nthEq(1, pubkey), tags))
+
+export const mutePerson = (pubkey: string) =>
+  updateSingleton(MUTES, tags => append(tags, mention(pubkey)))
+
+export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
+
+export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(tags, ["e", id]))
+
+// Relays
+
+export const requestRelayAccess = async (url: string, claim: string, sk?: string) =>
+  createAndPublish({
+    kind: 28934,
+    tags: [["claim", claim]],
+    relays: [url],
+    sk,
+  })
+
+export const setRelayPolicies = async (modifyTags: ModifyTags) => {
+  anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
+
+  if (canSign.get()) {
+    updateSingleton(RELAYS, modifyTags)
+  }
+}
+
+export const setRelayPolicy = ({url, read, write}: RelayPolicy) =>
+  setRelayPolicies($tags => {
+    $tags = $tags.filter(t => t[1] !== url)
+
+    if (read && write) {
+      $tags.push(["r", url])
+    } else if (read) {
+      $tags.push(["r", url, "read"])
+    } else if (write) {
+      $tags.push(["r", url, "write"])
+    }
+
+    return $tags
+  })
+
+export const leaveRelay = (url: string) => setRelayPolicy({url, read: false, write: false})
+
+export const joinRelay = async (url: string, claim?: string) => {
+  url = normalizeRelayUrl(url)
+
+  if (claim && canSign.get()) {
+    await requestRelayAccess(url, claim)
+  }
+
+  await setRelayPolicy({url, read: true, write: true})
+
+  // Re-publish user meta to the new relay
+  if (pubkey.get()) {
+    broadcastUserData([url])
+  }
+}
+
+// Read receipts
 
 export const markAsSeen = async (events: TrustedEvent[]) => {
   if (!signer.get().isEnabled() || events.length === 0) {
@@ -850,34 +819,23 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
   }
 }
 
-export const addTopic = (e, name) => {
-  if (name) {
-    const topic = topics.key(name.toLowerCase())
-
-    topic.merge({
-      count: inc(topic.get()?.count || 0),
-      last_seen: e.created_at,
-    })
-  }
-}
-
 // Messages
 
 export const sendLegacyMessage = async (channelId: string, content: string) => {
-  const $pubkey = user.get().pubkey
+  const $pubkey = pubkey.get()
   const recipients = without([$pubkey], channelId.split(","))
 
   if (recipients.length > 1) {
     throw new Error("Attempted to send legacy message to more than 1 recipient")
   }
 
-  const pubkey = recipients[0] || $pubkey
+  const recipient = recipients[0] || $pubkey
 
   return createAndPublish({
     kind: 4,
-    tags: [mention(pubkey), ...getClientTags()],
-    content: await nip04.get().encryptAsUser(content, pubkey),
-    relays: hints.PublishMessage(pubkey).getUrls(),
+    tags: [mention(recipient), ...getClientTags()],
+    content: await nip04.get().encryptAsUser(content, recipient),
+    relays: hints.PublishMessage(recipient).getUrls(),
   })
 }
 
@@ -890,11 +848,11 @@ export const sendMessage = async (channelId: string, content: string) => {
     tags: [...recipients.map(mention), ...getClientTags()],
   }
 
-  for (const pubkey of uniq(recipients.concat(user.get().pubkey))) {
+  for (const recipient of uniq(recipients.concat(pubkey.get()))) {
     const rumor = await nip59.get().wrap(template, {
       wrap: {
         author: generatePrivateKey(),
-        recipient: pubkey,
+        recipient,
       },
     })
 
@@ -1009,12 +967,8 @@ export const setAppData = async (d: string, data: any) => {
   }
 }
 
-export const publishSettings = async (updates: Record<string, any>) => {
-  setAppData(appDataKeys.USER_SETTINGS, {
-    ...session.get().settings,
-    ...updates,
-  })
-}
+export const publishSettings = (updates: Record<string, any>) =>
+  setAppData(appDataKeys.USER_SETTINGS, {...getSettings(), ...updates})
 
 export const setSession = (k, data) => sessions.update($s => ($s[k] ? {...$s, [k]: data} : $s))
 

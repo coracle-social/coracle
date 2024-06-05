@@ -4,7 +4,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelay, displayProfileByPubkey, hints} from "src/engine"
+  import {displayRelayUrl} from "src/domain"
+  import {displayProfileByPubkey, hints} from "src/engine"
 
   export let note, rating
 
@@ -25,7 +26,7 @@
     })
 
     display = switcherFn(type, {
-      r: () => displayRelay({url: value}),
+      r: () => displayRelayUrl(value),
       p: () => displayProfileByPubkey(value),
       e: () => "a note",
       default: () => null,

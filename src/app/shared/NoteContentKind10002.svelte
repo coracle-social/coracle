@@ -11,6 +11,6 @@
 <FlexColumn small>
   <p>New relay selections:</p>
   {#each urls as url}
-    <RelayCard relay={{url}} />
+    <RelayCard {url} />
   {/each}
 </FlexColumn>

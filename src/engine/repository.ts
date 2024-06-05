@@ -1,6 +1,6 @@
-import {throttle} from 'throttle-debounce'
+import {throttle} from "throttle-debounce"
 import {derived} from "svelte/store"
-import {nth, uniqBy, identity, partition, first} from "@welshman/lib"
+import {identity, partition, first} from "@welshman/lib"
 import {Repository, Relay, matchFilters, getIdAndAddress, getIdFilters} from "@welshman/util"
 import type {Filter, TrustedEvent} from "@welshman/util"
 import {custom} from "src/util/misc"

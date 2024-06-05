@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {NetworkContext} from "@welshman/net"
 
-  export let relay
+  export let url
 
   let statusHover = false
   let description = "Not connected"
@@ -11,7 +11,7 @@
 
   onMount(() => {
     return poll(3000, () => {
-      const cxn = NetworkContext.pool.get(relay.url, {autoConnect: false})
+      const cxn = NetworkContext.pool.get(url, {autoConnect: false})
 
       if (cxn) {
         description = cxn.meta.getDescription()

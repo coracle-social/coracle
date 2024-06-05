@@ -12,7 +12,6 @@
     displayProfileByPubkey,
     profileSearch,
     createPeopleLoader,
-    getProfile,
   } from "src/engine"
 
   export let onSubmit

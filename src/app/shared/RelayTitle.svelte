@@ -4,23 +4,24 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import {router} from "src/app/util/router"
-  import {getSetting, displayRelay} from "src/engine"
+  import {displayRelayUrl} from "src/domain"
+  import {getSetting} from "src/engine"
 
-  export let relay
+  export let url
   export let rating = null
 </script>
 
 <div class="flex items-center gap-2 text-xl">
-  <i class={relay.url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
+  <i class={url.startsWith("wss") ? "fa fa-lock" : "fa fa-unlock"} />
   <Anchor
     type="unstyled"
-    href={router.at("relays").of(relay.url).toString()}
+    href={router.at("relays").of(url).toString()}
     class="border-b border-solid"
-    style={`border-color: ${hsl(stringToHue(relay.url))}`}>
-    {displayRelay(relay)}
+    style={`border-color: ${hsl(stringToHue(url))}`}>
+    {displayRelayUrl(url)}
   </Anchor>
   {#if !getSetting("multiplextr_url")}
-    <RelayStatus {relay} />
+    <RelayStatus {url} />
   {/if}
   {#if rating}
     <div class="px-4 text-sm">

@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {derived} from "svelte/store"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"

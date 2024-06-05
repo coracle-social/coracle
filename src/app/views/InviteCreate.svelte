@@ -15,15 +15,8 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {
-    hints,
-    displayRelay,
-    displayRelayUrl,
-    searchRelayUrls,
-    searchGroups,
-    displayGroup,
-    deriveGroup,
-  } from "src/engine"
+  import {displayRelayUrl} from "src/domain"
+  import {hints, relaySearch, searchGroups, displayGroup, deriveGroup} from "src/engine"
 
   export let initialPubkey = null
   export let initialGroupAddress = null
@@ -160,7 +153,7 @@
         </p>
         {#each relays as relay, i (relay.url + i)}
           <ListItem on:remove={() => removeRelay(i)}>
-            <span slot="label">{displayRelay(relay)}</span>
+            <span slot="label">{displayRelayUrl(relay.url)}</span>
             <span slot="data">
               <Input bind:value={relay.claim} placeholder="Claim (optional)" />
             </span>
@@ -169,7 +162,7 @@
         <SearchSelect
           value={null}
           bind:this={relayInput}
-          search={$searchRelayUrls}
+          search={$relaySearch.searchValues}
           termToItem={identity}
           onChange={url => addRelay(url)}>
           <i slot="before" class="fa fa-search" />

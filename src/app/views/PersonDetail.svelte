@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {stripProtocol} from "@welshman/lib"
+  import {REACTION} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -33,7 +34,7 @@
   const profile = deriveProfile(pubkey)
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
-  const likesFeed = makeFeed({definition: feedFromFilter({kinds: [7], authors: [pubkey]})})
+  const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
 
   let activeTab = "notes"
 
@@ -98,7 +99,7 @@
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
   {#if relayPolicies.length > 0}
-    <PersonRelays relays={relayPolicies} />
+    <PersonRelays urls={relayPolicies.map(p => p.url)} />
   {:else}
     <Spinner />
   {/if}

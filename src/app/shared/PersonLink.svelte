@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {derived} from "svelte/store"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
   import {deriveProfileDisplay, loadPubkeys} from "src/engine"

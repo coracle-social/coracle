@@ -18,7 +18,6 @@ import {
   loadGroupMessages,
   loadNotifications,
   listenForNotifications,
-  getFollows,
   getSetting,
 } from "src/engine"
 

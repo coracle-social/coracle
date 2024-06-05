@@ -22,7 +22,7 @@
   <CopyValue label="Nostr Address" value={display} />
   <strong>Nostr Address Relays</strong>
   {#each $handle.relays || [] as url}
-    <RelayCard relay={{url}} />
+    <RelayCard {url} />
   {:else}
     <p class="flex gap-2 items-center">
       <i class="fa fa-info-circle" />

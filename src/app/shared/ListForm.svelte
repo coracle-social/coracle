@@ -13,13 +13,12 @@
   import {
     hints,
     mention,
-    displayRelayUrl,
-    searchRelayUrls,
+    relaySearch,
     searchTopicNames,
     createAndPublish,
     publishDeletionForEvent,
   } from "src/engine"
-  import {KindSearch, createList, displayList, editList} from "src/domain"
+  import {KindSearch, normalizeRelayUrl, createList, displayList, editList} from "src/domain"
 
   export let list
   export let exit
@@ -102,10 +101,10 @@
           <SearchSelect
             multiple
             value={Tags.wrap(list.tags).whereKey("r").values().valueOf()}
-            search={$searchRelayUrls}
-            termToItem={identity}
+            search={$relaySearch.searchValues}
+            termToItem={normalizeRelayUrl}
             onChange={onRelaysChange}>
-            <span slot="item" let:item>{displayRelayUrl(item)}</span>
+            <span slot="item" let:item>{$relaySearch.displayValue(item)}</span>
           </SearchSelect>
         {:else if list.kind === NAMED_TOPICS}
           <SearchSelect
