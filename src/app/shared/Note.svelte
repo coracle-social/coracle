@@ -12,8 +12,9 @@
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
+  import {nth} from '@welshman/lib'
   import {fly, slide} from "src/util/transition"
-  import {replyKinds, isLike, isGiftWrap} from "src/util/nostr"
+  import {replyKinds, isHex, isLike, isGiftWrap} from "src/util/nostr"
   import {formatTimestamp} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -33,6 +34,7 @@
     nip59,
     hints,
     loadOne,
+    ensureUnwrapped,
     loadZapper,
     isEventMuted,
     getSetting,
@@ -197,13 +199,11 @@
       })
     }
 
-    if (isGiftWrap(event)) {
-      event = await nip59.get().unwrap(event, getRecipientKey(event))
-    }
+    event = await ensureUnwrapped(event)
 
     if (event.pubkey) {
       ready = true
-      loadPubkeys([event.pubkey])
+      loadPubkeys([event.pubkey, ...event.tags.filter(t => t[0] === "p" && isHex(t[1])).map(nth(1))])
 
       const kinds = [1]
 
@@ -270,12 +270,14 @@
               <Anchor type="unstyled" class="mr-4 min-w-0" on:click={showPerson}>
                 <PersonName pubkey={event.pubkey} />
               </Anchor>
-              <Anchor
-                on:click={goToDetail}
-                class="whitespace-nowrap text-end text-sm text-neutral-100"
-                type="unstyled">
-                {formatTimestamp(event.created_at)}
-              </Anchor>
+              <div class="flex gap-3 items-center">
+                <Anchor
+                  on:click={goToDetail}
+                  class="whitespace-nowrap text-end text-sm text-neutral-100"
+                  type="unstyled">
+                  {formatTimestamp(event.created_at)}
+                </Anchor>
+              </div>
             </div>
             <div class="flex flex-col gap-2">
               <div class="flex gap-2">

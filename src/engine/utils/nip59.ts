@@ -131,6 +131,11 @@ export class Nip59 {
   }
 
   async unwrap(wrap, sk) {
+    // Avoid decrypting the same event multiple times
+    if (seen.has(wrap.id)) {
+      return seen.get(wrap.id)
+    }
+
     try {
       const seal = await this.decrypt(wrap, sk)
 
@@ -141,31 +146,15 @@ export class Nip59 {
       if (!rumor) throw new Error("Failed to decrypt seal")
 
       if (seal.pubkey === rumor.pubkey) {
-        return Object.assign(rumor, {wrap})
+        Object.assign(rumor, {wrap})
+        seen.set(wrap.id, rumor)
+
+        return rumor
       }
     } catch (e) {
       if (!e.toString().match(/version 1|Invalid nip44|Malformed/)) {
         logger.warn(e)
       }
-    }
-
-    return null
-  }
-
-  async withUnwrappedEvent(wrap, sk, cb) {
-    let rumor = null
-
-    // Avoid decrypting the same event multiple times
-    if (seen.has(wrap.id)) {
-      rumor = seen.get(wrap.id)
-    } else {
-      rumor = await this.unwrap(wrap, sk)
-    }
-
-    seen.set(wrap.id, rumor)
-
-    if (rumor) {
-      cb(rumor)
     }
   }
 }

@@ -40,6 +40,7 @@ import {
   sessions,
   tracker,
   withFallbacks,
+  ensureUnwrapped,
   ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
@@ -71,33 +72,7 @@ import {
 // Unwrap gift wraps and send them back to our local relay. They'll then get pushed
 // back onto projections if they haven't been seen before
 
-projections.addGlobalHandler((event: TrustedEvent) => {
-  if (isGiftWrap(event)) {
-    const session = getSession(Tags.fromEvent(event).get("p")?.value())
-
-    if (session) {
-      const canDecrypt =
-        (event.kind === 1059 && getNip44(session).isEnabled()) ||
-        (event.kind === 1060 && getNip04(session).isEnabled())
-
-      if (canDecrypt) {
-        getNip59(session).withUnwrappedEvent(event, session.privkey, rumor => {
-          tracker.copy(event.id, rumor.id)
-          relay.send("EVENT", rumor)
-        })
-      }
-    }
-
-    const sk = getRecipientKey(event)
-
-    if (sk) {
-      nip59.get().withUnwrappedEvent(event, sk, rumor => {
-        tracker.copy(event.id, rumor.id)
-        relay.send("EVENT", rumor)
-      })
-    }
-  }
-})
+projections.addGlobalHandler((e: TrustedEvent) => ensureUnwrapped(e))
 
 // Key sharing
 

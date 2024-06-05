@@ -22,6 +22,7 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -275,6 +276,13 @@
     {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
+    {#if note.wrap}
+      <div
+        class="staatliches rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500 flex gap-1 items-center h-6">
+        <i class="fa fa-lock sm:text-accent text-xs" />
+        <span class="hidden sm:inline">Encrypted</span>
+      </div>
+    {/if}
     {#if $seenOn}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"

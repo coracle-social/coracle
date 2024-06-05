@@ -2,6 +2,7 @@ import {join} from "ramda"
 import {nip44} from "nostr-tools"
 import {cached} from "@welshman/lib"
 import {switcherFn, tryFunc} from "hurdak"
+import {fromHex} from "src/util/nostr"
 import type {Session} from "src/engine/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
@@ -10,7 +11,7 @@ import {withExtension} from "./nip07"
 export const getSharedSecret = cached({
   maxSize: 100,
   getKey: join(":"),
-  getValue: ([sk, pk]: string[]) => nip44.v2.utils.getConversationKey(sk, pk),
+  getValue: ([sk, pk]: string[]) => nip44.v2.utils.getConversationKey(fromHex(sk), pk),
 })
 
 export class Nip44 {

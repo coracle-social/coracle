@@ -1,6 +1,7 @@
 <script lang="ts">
   import {pluralize, seconds} from "hurdak"
-  import {now, sortBy} from "@welshman/lib"
+  import {now, remove, sortBy} from "@welshman/lib"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import Tile from "src/partials/Tile.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -12,7 +13,12 @@
     Array.from(pub.status.values()).some(s => statuses.includes(s))
 
   $: recent = $publishes.filter(p => p.created_at > now() - seconds(24, "hour"))
-  $: relays = new Set(recent.flatMap(({request}) => request.relays))
+  $: relays = new Set(
+    remove(
+      LOCAL_RELAY_URL,
+      recent.flatMap(({request}) => request.relays),
+    ),
+  )
   $: success = recent.filter(p => hasStatus(p, [PublishStatus.Success]))
   $: pending = recent.filter(
     p => hasStatus(p, [PublishStatus.Pending]) && !hasStatus(p, [PublishStatus.Success]),

@@ -306,6 +306,50 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
+export const ensureUnwrapped = async (event: TrustedEvent) => {
+  if (!isGiftWrap(event)) {
+    return event
+  }
+
+  const rumor = repository.eventsByWrap.get(event.id)
+
+  if (rumor) {
+    return rumor
+  }
+
+  const session = getSession(Tags.fromEvent(event).get("p")?.value())
+
+  if (session) {
+    const canDecrypt =
+      (event.kind === 1059 && getNip44(session).isEnabled()) ||
+      (event.kind === 1060 && getNip04(session).isEnabled())
+
+    if (canDecrypt) {
+      const rumor = await getNip59(session).unwrap(event, session.privkey)
+
+      if (rumor) {
+        tracker.copy(event.id, rumor.id)
+        relay.send("EVENT", rumor)
+
+        return rumor
+      }
+    }
+  }
+
+  const sk = getRecipientKey(event)
+
+  if (sk) {
+    const rumor = await nip59.get().unwrap(event, sk)
+
+    if (rumor) {
+      tracker.copy(event.id, rumor.id)
+      relay.send("EVENT", rumor)
+
+      return rumor
+    }
+  }
+}
+
 // Profiles
 
 export const profiles = deriveEventsMapped<PublishedProfile>({
@@ -331,9 +375,8 @@ export const displayProfileByPubkey = (pk: string) => {
 export const deriveProfileDisplay = (pk: string) =>
   derived(deriveProfile(pk), () => displayProfileByPubkey(pk))
 
-export const userDisplay = derived(
-  [pubkey, profilesByPubkey],
-  ([$pk, $p]) => $pk ? displayProfileByPubkey($pk) : ""
+export const userDisplay = derived([pubkey, profilesByPubkey], ([$pk, $p]) =>
+  $pk ? displayProfileByPubkey($pk) : "",
 )
 
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))

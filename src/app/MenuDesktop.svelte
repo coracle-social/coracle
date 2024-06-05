@@ -18,6 +18,7 @@
     canSign,
     hasNewMessages,
     hasNewNotifications,
+    displayProfileByPubkey,
     sessions,
     userDisplay,
     publishes,
