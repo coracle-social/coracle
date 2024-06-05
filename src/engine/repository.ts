@@ -1,5 +1,5 @@
 import {derived} from "svelte/store"
-import {nth, identity, partition, first} from "@welshman/lib"
+import {nth, uniqBy, identity, partition, first} from "@welshman/lib"
 import {Repository, Relay, matchFilters, getIdAndAddress, getIdFilters} from "@welshman/util"
 import type {Filter, TrustedEvent} from "@welshman/util"
 import {custom} from "src/util/misc"
@@ -64,10 +64,9 @@ export const deriveEventsMapped = <T>({
         }
       }
 
-      const onDelete = (event: TrustedEvent) => {
-        const ids = new Set(event.tags.map(nth(1)))
+      const onDelete = (values: Set<string>) => {
         const [deleted, ok] = partition(
-          (item: T) => getIdAndAddress(itemToEvent(item)).some(id => ids.has(id)),
+          (item: T) => getIdAndAddress(itemToEvent(item)).some(id => values.has(id)),
           data,
         )
 
