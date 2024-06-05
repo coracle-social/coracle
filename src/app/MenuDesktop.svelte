@@ -19,7 +19,7 @@
     hasNewMessages,
     hasNewNotifications,
     sessions,
-    displayProfileByPubkey,
+    userDisplay,
     publishes,
   } from "src/engine"
 
@@ -220,7 +220,7 @@
           <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
             <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
             <div class="flex min-w-0 flex-col">
-              <span>@{displayProfileByPubkey($pubkey)}</span>
+              <span>@{$userDisplay}</span>
               <PersonHandle class="text-sm" pubkey={$pubkey} />
             </div>
           </Anchor>

@@ -103,7 +103,6 @@
       {:else if !isEllipsis(parsed)}
         {renderParsed(parsed)}
       {/if}
-      {" "}
     {/each}
   </div>
   {#if showMedia && extraLinks.length > 0}

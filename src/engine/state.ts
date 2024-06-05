@@ -331,6 +331,11 @@ export const displayProfileByPubkey = (pk: string) => {
 export const deriveProfileDisplay = (pk: string) =>
   derived(deriveProfile(pk), () => displayProfileByPubkey(pk))
 
+export const userDisplay = derived(
+  [pubkey, profilesByPubkey],
+  ([$pk, $p]) => $pk ? displayProfileByPubkey($pk) : ""
+)
+
 export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
 
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
