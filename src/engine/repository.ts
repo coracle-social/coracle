@@ -1,37 +1,38 @@
+import {throttle} from 'throttle-debounce'
 import {derived} from "svelte/store"
 import {nth, uniqBy, identity, partition, first} from "@welshman/lib"
 import {Repository, Relay, matchFilters, getIdAndAddress, getIdFilters} from "@welshman/util"
 import type {Filter, TrustedEvent} from "@welshman/util"
 import {custom} from "src/util/misc"
 
-export const repository = new Repository({throttle: 300})
+export const repository = new Repository()
 
 export const relay = new Relay(repository)
 
 // Sync to/from repository via a custom store
 export const events = {
   _subs: [],
-  _onUpdate: () => {
+  _onUpdate: throttle(300, () => {
     const $events = repository.dump()
 
     for (const sub of events._subs) {
       sub($events)
     }
-  },
+  }),
   get: () => repository.dump(),
   set: (events: TrustedEvent[]) => repository.load(events),
   subscribe: f => {
     events._subs.push(f)
 
     if (events._subs.length === 1) {
-      repository.on("update", events._onUpdate)
+      repository.on("event", events._onUpdate)
     }
 
     return () => {
       events._subs = events._subs.filter(x => x !== f)
 
       if (events._subs.length === 0) {
-        repository.off("update", events._onUpdate)
+        repository.off("event", events._onUpdate)
       }
     }
   },
