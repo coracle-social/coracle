@@ -371,8 +371,6 @@ export const userDisplay = derived([pubkey, profilesByPubkey], ([$pk, $p]) =>
   $pk ? displayProfileByPubkey($pk) : "",
 )
 
-export const profilesWithName = derived(profiles, $profiles => $profiles.filter(profileHasName))
-
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   getSearch = () => {
     const $pubkey = pubkey.get()
@@ -414,7 +412,15 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   displayValue = (pk: string) => displayProfileByPubkey(pk)
 }
 
-export const profileSearch = derived(profilesWithName, $profiles => new ProfileSearch($profiles))
+export const profileSearch = derived(
+  [profiles, handles],
+  ([$profiles, $handles]) =>
+    new ProfileSearch(
+      $profiles
+        .filter(profileHasName)
+        .map($p => ({...$p, nip05: $handles[$p.event.pubkey]?.nip05})),
+    ),
+)
 
 // Handles/Zappers
 

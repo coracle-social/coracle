@@ -1,5 +1,6 @@
 import {seconds} from "hurdak"
 import {batch, addToMapKey, now, inc} from "@welshman/lib"
+import type {TrustedEvent} from "@welshman/util"
 import {
   RELAYS,
   PROFILE,
