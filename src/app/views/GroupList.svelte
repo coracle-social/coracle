@@ -3,7 +3,6 @@
   import {filter, assoc} from "ramda"
   import {now} from "@welshman/lib"
   import {createScroller} from "src/util/misc"
-  import {giftWrapKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Input from "src/partials/Input.svelte"
@@ -48,10 +47,7 @@
 
     updateCurrentSession(assoc("groups_last_synced", now()))
 
-    const loaders = [
-      loadGiftWraps(),
-      loadGroupMessages(),
-    ]
+    const loaders = [loadGiftWraps(), loadGroupMessages()]
 
     load({
       skipCache: true,

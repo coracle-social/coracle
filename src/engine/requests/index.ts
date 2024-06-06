@@ -61,8 +61,6 @@ import {
   loadOne,
   maxWot,
   getNetwork,
-  nip04,
-  nip44,
   people,
   primeWotCaches,
   pubkey,

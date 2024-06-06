@@ -2,14 +2,7 @@
   import {last} from "ramda"
   import {derived} from "svelte/store"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {
-    canSign,
-    relays,
-    userRelayPolicies,
-    joinRelay,
-    leaveRelay,
-    broadcastUserData,
-  } from "src/engine"
+  import {canSign, relays, userRelayPolicies, joinRelay, leaveRelay} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let url

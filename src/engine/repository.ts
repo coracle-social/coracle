@@ -55,8 +55,8 @@ export const deriveEventsMapped = <T>({
     setter(data)
 
     const onUpdate = batch(300, (updates: {added: TrustedEvent[]; removed: Set<string>}[]) => {
+      const removed = new Set(updates.flatMap(r => Array.from(r.removed)))
       const added = updates.flatMap(r => r.added)
-      const removed = updates.reduce((r, {removed}) => r.union(removed), new Set<string>())
 
       let dirty = false
       for (const event of added) {

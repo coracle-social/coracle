@@ -101,7 +101,7 @@
           </div>
         </NoteContentQuote>
       {:else if !isEllipsis(parsed)}
-        {renderParsed(parsed)}
+        {@html renderParsed(parsed)}
       {/if}
     {/each}
   </div>

@@ -64,7 +64,7 @@
     </div>
   {/each}
   {#if $userFeeds.length === 0 && $userListFeeds.length === 0}
-    <p class="py-12 text-center">You don't have any lists yet.</p>
+    <p class="py-12 text-center">You don't have any feeds yet.</p>
   {/if}
   <div class="flex items-center gap-2">
     <i class="fa fa-circle-nodes fa-lg" />
