@@ -107,10 +107,8 @@
   let customRelay = ""
   let currentRelayPolicies = $userRelayPolicies
 
-  $: currentRelayPolicies = sortBy(
-    prop("url"),
-    uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)),
-  )
+  $: currentRelayPolicies =
+    sortBy(prop("url"), uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)))
 
   $: ratings = groupBy(e => {
     try {

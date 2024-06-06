@@ -21,15 +21,6 @@
   <div class="py-2">
     <Media url={url} onClose={close} />
   </div>
-{:else if value.isMedia}
-  <Anchor
-    modal
-    stopPropagation
-    class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    externalHref={url}
-    href={router.at("media").of(url).toString()}>
-    {displayUrl(url)}
-  </Anchor>
 {:else if isShareableRelayUrl(url)}
   <Anchor
     modal
@@ -40,10 +31,11 @@
   </Anchor>
 {:else}
   <Anchor
-    external
+    modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={url}>
+    externalHref={url}
+    href={router.at("media").of(url).toString()}>
     {displayUrl(url)}
   </Anchor>
 {/if}

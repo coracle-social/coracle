@@ -4,6 +4,7 @@
     isScopeFeed,
     isRelayFeed,
     isListFeed,
+    isLabelFeed,
     isAddressFeed,
     isDVMFeed,
     isKindFeed,
@@ -48,6 +49,8 @@
         On {args.length === 1 ? displayRelayUrl(args[0]) : `${args.length} relays`}
       {:else if isListFeed(feed)}
         From {quantify(getFeedArgs(feed).length, "list")}
+      {:else if isLabelFeed(feed)}
+        From {quantify(getFeedArgs(feed).length, "collection")}
       {:else if isAddressFeed(feed) || isIDFeed(feed)}
         {quantify(getFeedArgs(feed).length, "event")}
       {:else if isDVMFeed(feed)}

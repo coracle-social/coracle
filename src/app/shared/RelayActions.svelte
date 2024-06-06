@@ -26,10 +26,7 @@
 
     if (!$joined) {
       actions.push({
-        onClick: () => {
-          joinRelay(url)
-          broadcastUserData([url])
-        },
+        onClick: () => joinRelay(url),
         label: "Join",
         icon: "right-to-bracket",
       })

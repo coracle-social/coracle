@@ -407,9 +407,8 @@ export const getter = <T>(store: Readable<T>) => {
 }
 
 type Stop = () => void
-type Setter<T> = (x: T) => T
 type Sub<T> = (x: T) => void
-type Start<T> = (set: Setter<T>) => Stop
+type Start<T> = (set: Sub<T>) => Stop
 
 export const custom = <T>(start: Start<T>, opts: {throttle?: number} = {}) => {
   const subs: Sub<T>[] = []
@@ -430,8 +429,6 @@ export const custom = <T>(start: Start<T>, opts: {throttle?: number} = {}) => {
           }
 
           value = newValue
-
-          return newValue
         })
       }
 

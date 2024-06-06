@@ -671,7 +671,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   }
 
   // Preserve content instead of use encrypted tags because kind 3 content is used for
-  // relay selections in many places
+  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
   const content = event?.content || ""
   const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
   const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())

@@ -1,6 +1,6 @@
 import {throttle} from "throttle-debounce"
 import {derived} from "svelte/store"
-import {identity, partition, first} from "@welshman/lib"
+import {identity, batch, partition, first} from "@welshman/lib"
 import {Repository, Relay, matchFilters, getIdAndAddress, getIdFilters} from "@welshman/util"
 import type {Filter, TrustedEvent} from "@welshman/util"
 import {custom} from "src/util/misc"
@@ -25,14 +25,14 @@ export const events = {
     events._subs.push(f)
 
     if (events._subs.length === 1) {
-      repository.on("event", events._onUpdate)
+      repository.on("update", events._onUpdate)
     }
 
     return () => {
       events._subs = events._subs.filter(x => x !== f)
 
       if (events._subs.length === 0) {
-        repository.off("event", events._onUpdate)
+        repository.off("update", events._onUpdate)
       }
     }
   },
@@ -49,49 +49,48 @@ export const deriveEventsMapped = <T>({
   itemToEvent: (item: T) => TrustedEvent
   includeDeleted?: boolean
 }) =>
-  custom<T[]>(
-    setter => {
-      let data = setter(
-        repository.query(filters, {includeDeleted}).map(eventToItem).filter(identity),
-      )
+  custom<T[]>(setter => {
+    let data = repository.query(filters, {includeDeleted}).map(eventToItem).filter(identity)
 
-      const onEvent = (event: TrustedEvent) => {
+    setter(data)
+
+    const onUpdate = batch(300, (updates: {added: TrustedEvent[]; removed: Set<string>}[]) => {
+      const added = updates.flatMap(r => r.added)
+      const removed = updates.reduce((r, {removed}) => r.union(removed), new Set<string>())
+
+      let dirty = false
+      for (const event of added) {
         if (matchFilters(filters, event)) {
           const item = eventToItem(event)
 
           if (item) {
-            data = setter([...data, item])
+            dirty = true
+            data.push(item)
           }
         }
       }
 
-      const onDelete = (values: Set<string>) => {
+      if (!includeDeleted && removed.size > 0) {
         const [deleted, ok] = partition(
-          (item: T) => getIdAndAddress(itemToEvent(item)).some(id => values.has(id)),
+          (item: T) => getIdAndAddress(itemToEvent(item)).some(id => removed.has(id)),
           data,
         )
 
         if (deleted.length > 0) {
-          data = setter(ok)
+          dirty = true
+          data = ok
         }
       }
 
-      repository.on("event", onEvent)
-
-      if (!includeDeleted) {
-        repository.on("delete", onDelete)
+      if (dirty) {
+        setter(data)
       }
+    })
 
-      return () => {
-        repository.off("event", onEvent)
+    repository.on("update", onUpdate)
 
-        if (!includeDeleted) {
-          repository.off("delete", onDelete)
-        }
-      }
-    },
-    {throttle: 300},
-  )
+    return () => repository.off("update", onUpdate)
+  })
 
 export const deriveEvents = (opts: {filters: Filter[]; includeDeleted?: boolean}) =>
   deriveEventsMapped<TrustedEvent>({...opts, eventToItem: identity, itemToEvent: identity})
