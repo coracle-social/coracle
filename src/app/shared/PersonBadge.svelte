@@ -5,9 +5,12 @@
   import PersonName from "src/app/shared/PersonName.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import {router} from "src/app/util/router"
+  import {loadPubkeys} from 'src/engine'
 
   export let pubkey
   export let inert = false
+
+  loadPubkeys([pubkey])
 </script>
 
 {#if inert}

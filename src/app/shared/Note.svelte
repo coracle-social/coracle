@@ -37,7 +37,7 @@
     loadZapper,
     isEventMuted,
     getSetting,
-    loadPubkeys,
+    loadPubkeysFromEvent,
     sortEventsDesc,
     forcePlatformRelays,
     withFallbacks,
@@ -201,10 +201,7 @@
 
     if (event.pubkey) {
       ready = true
-      loadPubkeys([
-        event.pubkey,
-        ...event.tags.filter(t => t[0] === "p" && isHex(t[1])).map(nth(1)),
-      ])
+      loadPubkeysFromEvent(event)
 
       const kinds = [1]
 

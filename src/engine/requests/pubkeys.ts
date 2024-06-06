@@ -9,7 +9,7 @@ import {
   FOLLOWS,
   APP_DATA,
 } from "@welshman/util"
-import {isHex, appDataKeys} from "src/util/nostr"
+import {isHex, getPubkeyTagValues, appDataKeys} from "src/util/nostr"
 import {LIST_KINDS} from "src/domain"
 import {getFreshness, setFreshness, withIndexers, load, hints} from "src/engine/state"
 
@@ -124,7 +124,7 @@ export const loadPubkeyProfiles = (pubkeys: string[], opts: LoadPubkeyOpts = {})
 export const loadPubkeyUserData = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   loadPubkeyData("pubkey/user", pubkeys, {force: true, ...opts})
 
-export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
+export const loadPubkeys = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   // Load relays, then load profiles so we have a better chance of finding them. But also
   // load profiles concurrently so that if we do find them it takes as little time as possible.
   // Requests will be deduplicated by tracking freshness and within welshman
@@ -132,3 +132,6 @@ export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) 
     loadPubkeyRelays(pubkeys, opts).then(() => loadPubkeyProfiles(pubkeys, opts)),
     loadPubkeyProfiles(pubkeys, opts),
   ])
+
+export const loadPubkeysFromEvent = (event: TrustedEvent, opts: LoadPubkeyOpts = {}) =>
+  loadPubkeys([event.pubkey, ...getPubkeyTagValues(event.tags)])
