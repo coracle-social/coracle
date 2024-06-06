@@ -468,21 +468,23 @@
         .filter(r => (r.last_checked || 0) < lib.now() - seconds(7, "day"))
         .slice(0, 20)
 
-      misc.tryFetch(async () => {
-        const result = await Fetch.fetchJson(dufflepud("relay/info"), {
-          method: "POST",
-          body: JSON.stringify({urls: pluck("url", staleRelays)}),
-          headers: {
-            "Content-Type": "application/json",
-          },
+      if (staleRelays.length > 0) {
+        misc.tryFetch(async () => {
+          const result = await Fetch.fetchJson(dufflepud("relay/info"), {
+            method: "POST",
+            body: JSON.stringify({urls: pluck("url", staleRelays)}),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+
+          for (const {url: rawUrl, info} of result.data) {
+            const url = util.normalizeRelayUrl(rawUrl)
+
+            relays.key(url).merge({...info, url, last_checked: lib.now()})
+          }
         })
-
-        for (const {url: rawUrl, info} of result.data) {
-          const url = util.normalizeRelayUrl(rawUrl)
-
-          relays.key(url).merge({...info, url, last_checked: lib.now()})
-        }
-      })
+      }
     }, 30_000)
 
     return () => {

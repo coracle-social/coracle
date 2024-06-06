@@ -263,11 +263,9 @@ projections.addHandler(RELAYS, (e: TrustedEvent) => {
     if (["r", "relay"].includes(key) && isShareableRelayUrl(value)) {
       relays.key(normalizeRelayUrl(value)).update($relay => ({
         url: value,
+        last_checked: 0,
         count: inc($relay?.count || 0),
         first_seen: $relay?.first_seen || e.created_at,
-        info: {
-          last_checked: 0,
-        },
       }))
     }
   }
