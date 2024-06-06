@@ -44,10 +44,10 @@
   onMount(() => {
     const {admins} = getGroupReqInfo()
     const scroller = createScroller(loadMore, {element})
+    const loader = loadGiftWraps()
 
     updateCurrentSession(assoc("groups_last_synced", now()))
-
-    const loaders = [loadGiftWraps(), loadGroupMessages()]
+    loadGroupMessages()
 
     load({
       skipCache: true,
@@ -59,8 +59,8 @@
     })
 
     return () => {
+      loader.stop()
       scroller.stop()
-      loaders.forEach(loader => loader.stop())
     }
   })
 </script>

@@ -99,7 +99,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if !isSelf && ($canSign || !$session.pubkey)}
+  {#if !isSelf && ($canSign || !$session)}
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 cursor-pointer text-center">
         {#if $following}

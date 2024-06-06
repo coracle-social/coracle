@@ -104,6 +104,8 @@ import type {
 import {
   EDITABLE_LIST_KINDS,
   getSingletonValues,
+  makeSingleton,
+  makeRelayPoliciesFromTags,
   ListSearch,
   FeedSearch,
   profileHasName,
@@ -119,7 +121,6 @@ import {
   displayPubkey,
   readSingleton,
   asDecryptedEvent,
-  RelayMode,
   normalizeRelayUrl,
   makeRelayPolicy,
   filterRelaysByNip,
@@ -571,7 +572,12 @@ export const getWotScore = (pk, tpk) => {
 
 // User follows/mutes/network
 
-export const userFollowList = derived([followListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
+export const userFollowList = derived(
+  [followListsByPubkey, pubkey, anonymous],
+  ([$m, $pk, $anon]) => {
+    return $pk ? $m.get($pk) : makeSingleton({kind: FOLLOWS, publicTags: $anon.follows})
+  },
+)
 
 export const userFollows = derived(userFollowList, l => getSingletonValues("p", l))
 
@@ -1056,20 +1062,7 @@ export const relayPoliciesByPubkey = withGetter(
     const policies = new Map<string, RelayPolicy[]>()
 
     for (const {event, publicTags} of $relayLists) {
-      const policy = publicTags
-        .filter(([_, url]) => isShareableRelayUrl(url))
-        .map(([_, url, mode]) => {
-          const write = !mode || mode === RelayMode.Write
-          const read = !mode || mode === RelayMode.Read
-
-          if (!write && !read) {
-            logger.warn(`Encountered unknown relay mode: ${mode}`)
-          }
-
-          return {url: normalizeRelayUrl(url), write, read}
-        })
-
-      policies.set(event.pubkey, policy)
+      policies.set(event.pubkey, makeRelayPoliciesFromTags(publicTags))
     }
 
     for (const {event, policy} of $legacyRelayLists) {
@@ -1089,8 +1082,10 @@ export const getPubkeyRelayPolicies = (pubkey: string, mode: string = null) => {
 }
 
 export const userRelayPolicies = derived(
-  [relayPoliciesByPubkey, pubkey],
-  ([$relayPoliciesByPubkey, $pubkey]) => $relayPoliciesByPubkey.get($pubkey),
+  [relayPoliciesByPubkey, pubkey, anonymous],
+  ([$m, $pk, $anon]) => {
+    return $pk ? $m.get($pk) : makeRelayPoliciesFromTags($anon.relays)
+  },
 )
 
 export const deriveUserRelayPolicy = url =>

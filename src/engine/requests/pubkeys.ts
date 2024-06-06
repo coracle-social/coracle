@@ -58,25 +58,34 @@ const getFiltersForKey = (key: string, authors: string[]) => {
   }
 }
 
-const loadPubkeysThrottled = batch(300, (requests: {key: string; pubkeys: string[]}[]) => {
-  const pubkeysByKey = new Map<string, Set<string>>()
+const loadPubkeysThrottled = batch(
+  300,
+  async (requests: {key: string; pubkeys: string[]; resolve: () => void}[]) => {
+    const pubkeysByKey = new Map<string, Set<string>>()
 
-  for (const {key, pubkeys} of requests) {
-    for (const pubkey of pubkeys) {
-      addToMapKey(pubkeysByKey, key, pubkey)
+    for (const {key, pubkeys} of requests) {
+      for (const pubkey of pubkeys) {
+        addToMapKey(pubkeysByKey, key, pubkey)
+      }
     }
-  }
 
-  for (const [key, pubkeys] of pubkeysByKey.entries()) {
-    const authors = Array.from(pubkeys)
+    await Promise.all([
+      Array.from(pubkeysByKey.entries()).map(([key, pubkeys]) => {
+        const authors = Array.from(pubkeys)
 
-    load({
-      skipCache: true,
-      filters: getFiltersForKey(key, authors),
-      relays: withIndexers(hints.FromPubkeys(authors).getUrls()),
-    })
-  }
-})
+        return load({
+          skipCache: true,
+          filters: getFiltersForKey(key, authors),
+          relays: withIndexers(hints.FromPubkeys(authors).getUrls()),
+        })
+      }),
+    ])
+
+    for (const {resolve} of requests) {
+      resolve()
+    }
+  },
+)
 
 type LoadPubkeyOpts = {
   force?: boolean
@@ -91,9 +100,13 @@ const loadPubkeyData = (
   const delta = force ? 5 : seconds(15, "minute")
   const pubkeys = getStalePubkeys(rawPubkeys, key, delta)
 
-  if (pubkeys.length > 0) {
-    loadPubkeysThrottled({key, pubkeys})
-  }
+  return new Promise<void>(resolve => {
+    if (pubkeys.length > 0) {
+      loadPubkeysThrottled({key, pubkeys, resolve})
+    } else {
+      resolve()
+    }
+  })
 }
 
 export const loadPubkeyLists = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
@@ -108,10 +121,14 @@ export const loadPubkeyRelays = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =
 export const loadPubkeyProfiles = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   loadPubkeyData("pubkey/profile", pubkeys, opts)
 
-export const loadPubkeys = (pubkeys: string[], opts: LoadPubkeyOpts = {}) => {
-  loadPubkeyRelays(pubkeys, opts)
-  loadPubkeyProfiles(pubkeys, opts)
-}
-
 export const loadPubkeyUserData = (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
   loadPubkeyData("pubkey/user", pubkeys, {force: true, ...opts})
+
+export const loadPubkeys = async (pubkeys: string[], opts: LoadPubkeyOpts = {}) =>
+  // Load relays, then load profiles so we have a better chance of finding them. But also
+  // load profiles concurrently so that if we do find them it takes as little time as possible.
+  // Requests will be deduplicated by tracking freshness and within welshman
+  Promise.all([
+    loadPubkeyRelays(pubkeys, opts).then(() => loadPubkeyProfiles(pubkeys, opts)),
+    loadPubkeyProfiles(pubkeys, opts),
+  ])

@@ -31,7 +31,9 @@
   const searchRelays = async relays => {
     failed = false
 
-    await loadPubkeyUserData([$session.pubkey], {relays})
+    loadPubkeyUserData([$session.pubkey], {relays})
+
+    await sleep(3000)
 
     if (!found) {
       failed = true

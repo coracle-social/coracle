@@ -700,7 +700,7 @@ export const unfollowPerson = (pubkey: string) => {
   if (canSign.get()) {
     updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)))
   } else {
-    anonymous.update($a => ({...$a, follows: append($a.follows, mention(pubkey))}))
+    anonymous.update($a => ({...$a, follows: reject(nthEq(1, pubkey), $a.follows)}))
   }
 }
 
@@ -733,10 +733,10 @@ export const requestRelayAccess = async (url: string, claim: string, sk?: string
   })
 
 export const setRelayPolicies = async (modifyTags: ModifyTags) => {
-  anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
-
   if (canSign.get()) {
     updateSingleton(RELAYS, modifyTags)
+  } else {
+    anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
   }
 }
 

@@ -35,7 +35,7 @@ export const indexSingleton = (singleton: IndexableSingleton): Singleton => {
   return {...singleton, valuesByKey}
 }
 
-export const makeSingleton = (singleton: SingletonParams): Singleton =>
+export const makeSingleton = (singleton: SingletonParams & Partial<Singleton>): Singleton =>
   indexSingleton({publicTags: [], privateTags: [], ...singleton})
 
 const isValidTag = (tag: string[]) => {

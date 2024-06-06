@@ -1,5 +1,6 @@
-import {last} from '@welshman/lib'
-import {LOCAL_RELAY_URL, normalizeRelayUrl as _normalizeRelayUrl} from '@welshman/util'
+import {last} from "@welshman/lib"
+import {LOCAL_RELAY_URL, normalizeRelayUrl as _normalizeRelayUrl} from "@welshman/util"
+import {getRelayTags} from "src/util/nostr"
 
 // Utils related to bare urls
 
@@ -20,10 +21,10 @@ export const displayRelayUrl = (url: string) => last(url.split("://")).replace(/
 // Relay profiles
 
 export type RelayProfile = {
-  url: string,
-  name?: string,
+  url: string
+  name?: string
   contact?: string
-  description?: string,
+  description?: string
   supported_nips?: number[]
   limitation?: {
     payment_required?: boolean
@@ -49,9 +50,17 @@ export type RelayPolicy = {
   write: boolean
 }
 
-export const makeRelayPolicy = (relayPolicy: Partial<RelayPolicy> & {url: string}): RelayPolicy => ({
+export const makeRelayPolicy = (
+  relayPolicy: Partial<RelayPolicy> & {url: string},
+): RelayPolicy => ({
   read: false,
   write: false,
   ...relayPolicy,
 })
 
+export const makeRelayPoliciesFromTags = (tags: string[][]) =>
+  getRelayTags(tags).map(([_, url, mode]) => ({
+    url: normalizeRelayUrl(url),
+    write: !mode || mode === RelayMode.Write,
+    read: !mode || mode === RelayMode.Read,
+  }))
