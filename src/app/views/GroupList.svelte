@@ -14,6 +14,8 @@
     groups,
     repository,
     getGroupReqInfo,
+    loadGiftWraps,
+    loadGroupMessages,
     deriveIsGroupMember,
     updateCurrentSession,
     forcePlatformRelays,
@@ -46,7 +48,10 @@
 
     updateCurrentSession(assoc("groups_last_synced", now()))
 
-    loadGroupMessages()
+    const loaders = [
+      loadGiftWraps(),
+      loadGroupMessages(),
+    ]
 
     load({
       skipCache: true,
@@ -57,7 +62,10 @@
       ],
     })
 
-    return () => scroller.stop()
+    return () => {
+      scroller.stop()
+      loaders.forEach(loader => loader.stop())
+    }
   })
 </script>
 

@@ -12,8 +12,9 @@ import {
   loadGroups,
   loadDeletes,
   loadHandlers,
+  loadGiftWraps,
   loadPubkeyUserData,
-  loadAllMessages,
+  loadLegacyMessages,
   loadGroupMessages,
   loadNotifications,
   listenForNotifications,
@@ -95,7 +96,8 @@ export const loadUserData = async () => {
   // Load anything they might need to be notified about, in serial to avoid
   // clogging up higher priority requests
   await loadSeen()
-  await loadAllMessages()
+  await loadGiftWraps()
+  await loadLegacyMessages()
   await loadGroupMessages()
   await loadNotifications()
 

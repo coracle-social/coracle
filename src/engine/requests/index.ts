@@ -194,7 +194,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
 
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
-    const pubkeys = uniq([pubkey.get(), ...admins, ...recipients])
+    const pubkeys = uniq([...admins, ...recipients])
     const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
 
     if (pubkeys.length > 0) {
@@ -288,7 +288,7 @@ export const createPeopleLoader = ({
 
 export const feedLoader = new FeedLoader<TrustedEvent>({
   request: async ({relays, filters, onEvent}) => {
-    if (relays.length > 0) {
+    if (relays?.length > 0) {
       await load({filters, relays, onEvent, skipCache: true})
     } else {
       await Promise.all(
@@ -495,27 +495,27 @@ export const loadSeen = () =>
     filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
   })
 
-export const loadAllMessages = ({reload = false} = {}) => {
+export const loadGiftWraps = ({reload = false} = {}) => {
+  let filter = {kinds: [WRAP, WRAP_NIP04], "#p": [pubkey.get()]}
+
+  if (!reload) {
+    filter = addSinceToFilter(filter, seconds(7, "day"))
+  }
+
+  return loadAll(makeUnionFeed(feedFromFilter(filter)))
+}
+
+export const loadLegacyMessages = ({reload = false} = {}) => {
   let filters = [
-    {kinds: [WRAP, WRAP_NIP04], "#p": [pubkey.get()]},
     {kinds: [4], authors: [pubkey.get()]},
     {kinds: [4], "#p": [pubkey.get()]},
   ]
 
   if (!reload) {
-    filters = [
-      addSinceToFilter(filters[0], seconds(7, "day")),
-      addSinceToFilter(filters[1]),
-      addSinceToFilter(filters[2]),
-    ]
+    filters = filters.map(addSinceToFilter)
   }
 
-  return loadAll(
-    makeIntersectionFeed(
-      makeRelayFeed(...hints.User().getUrls()),
-      makeUnionFeed(...filters.map(feedFromFilter)),
-    ),
-  )
+  return loadAll(makeUnionFeed(...filters.map(feedFromFilter)))
 }
 
 export const listenForMessages = (pubkeys: string[]) => {

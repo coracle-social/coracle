@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
-  import {readable} from "@welshman/lib"
+  import {derived, readable} from "svelte/store"
   import {slide} from "src/util/transition"
   import Tabs from "src/partials/Tabs.svelte"
   import Card from "src/partials/Card.svelte"
@@ -21,7 +21,8 @@
     hasNewMessages,
     sortChannels,
     markAllChannelsRead,
-    loadAllMessages,
+    loadLegacyMessages,
+    loadGiftWraps,
   } from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
@@ -36,7 +37,7 @@
 
   $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
 
-  let loader
+  let loaders = []
   let loading = readable(false)
   let hideNip04Alert = Storage.getJson("hide_nip04_alert")
 
@@ -46,9 +47,13 @@
   }
 
   const loadMessages = ({reload = false} = {}) => {
-    loader?.stop()
-    loader = loadAllMessages({reload})
-    loading = loader.loading
+    loaders.map(loader => loader.stop())
+    loaders = [loadGiftWraps({reload}), loadLegacyMessages({reload})]
+
+    loading = derived(
+      loaders.map(l => l.loading),
+      loading => loading.every(v => v === true),
+    )
   }
 
   onMount(() => {
@@ -58,7 +63,7 @@
     }
 
     return () => {
-      loader?.stop()
+      loaders.map(loader => loader.stop())
     }
   })
 

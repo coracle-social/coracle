@@ -14,6 +14,7 @@ import {
   RELAYS,
   PROFILE,
   MUTES,
+  WRAP_NIP04,
 } from "@welshman/util"
 import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {

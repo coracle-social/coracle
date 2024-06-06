@@ -1,5 +1,5 @@
 import type {UnsignedEvent} from "nostr-tools"
-import {WRAP, WRAP_NIP04} from '@welshman/util'
+import {WRAP} from '@welshman/util'
 import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import logger from "src/util/logger"
@@ -32,7 +32,7 @@ export type WrapperParams = {
   wrap?: {
     author: string
     recipient: string
-    kind?: WRAP | WRAP_NIP04
+    kind?: 1059 | 1060
     algo?: "nip04" | "nip44"
     tags?: string[][]
   }

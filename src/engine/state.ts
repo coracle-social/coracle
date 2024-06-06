@@ -306,6 +306,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
     return rumor
   }
 
+  // Decrypt by session
   const session = getSession(Tags.fromEvent(event).get("p")?.value())
 
   if (session) {
@@ -325,6 +326,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
     }
   }
 
+  // Decrypt by group key
   const sk = getRecipientKey(event)
 
   if (sk) {
@@ -1498,10 +1500,11 @@ export const subscribe = (request: MySubscribeRequest) => {
 
   const sub = baseSubscribe(request)
 
-  sub.emitter.on("event", (url: string, event: TrustedEvent) => {
+  sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
     repository.publish(event)
-    projections.push(event)
     request.onEvent?.(event)
+
+    projections.push(await ensureUnwrapped(event))
   })
 
   if (request.onComplete) {
@@ -1568,7 +1571,7 @@ export const publish = (request: PublishRequest) => {
   const pub = basePublish(request)
 
   // Add the event to projections
-  projections.push(request.event)
+  ensureUnwrapped(request.event).then(projections.push)
 
   // Listen to updates and update our publish queue
   if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {

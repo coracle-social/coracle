@@ -37,7 +37,6 @@ import {
   projections,
   sessions,
   withFallbacks,
-  ensureUnwrapped,
   ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
@@ -62,11 +61,6 @@ import {
 // storage.ready.then(() => {
 //   repository.on("event", (event: TrustedEvent) => projections.push(event))
 // })
-
-// Unwrap gift wraps and send them back to our local relay. They'll then get pushed
-// back onto projections if they haven't been seen before
-
-projections.addGlobalHandler((e: TrustedEvent) => ensureUnwrapped(e))
 
 // Key sharing
 
