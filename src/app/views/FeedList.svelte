@@ -8,7 +8,14 @@
   import Input from "src/partials/Input.svelte"
   import FeedCard from "src/app/shared/FeedCard.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, userFeeds, feedSearch, userListFeeds} from "src/engine"
+  import {
+    pubkey,
+    userFeeds,
+    feedSearch,
+    userListFeeds,
+    loadPubkeyFeeds,
+    userFollows,
+  } from "src/engine"
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -21,6 +28,8 @@
   let q = ""
   let limit = 20
   let element
+
+  loadPubkeyFeeds(Array.from($userFollows))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

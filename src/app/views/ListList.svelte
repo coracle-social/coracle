@@ -8,7 +8,7 @@
   import Input from "src/partials/Input.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, userLists, listSearch} from "src/engine"
+  import {pubkey, userLists, userFollows, listSearch, loadPubkeyLists} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
 
@@ -19,6 +19,8 @@
   let q = ""
   let limit = 20
   let element
+
+  loadPubkeyLists(Array.from($userFollows))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

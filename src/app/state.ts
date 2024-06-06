@@ -17,6 +17,7 @@ import {
   loadLegacyMessages,
   loadGroupMessages,
   loadNotifications,
+  loadFeedsAndLists,
   listenForNotifications,
   getSetting,
 } from "src/engine"
@@ -93,20 +94,18 @@ export const loadUserData = async () => {
   // Refresh our user's data
   await loadPubkeyUserData([pubkey.get()])
 
-  // Load anything they might need to be notified about, in serial to avoid
-  // clogging up higher priority requests
-  await loadSeen()
-  await loadGiftWraps()
-  await loadLegacyMessages()
-  await loadGroupMessages()
-  await loadNotifications()
+  // Load anything they might need to be notified about
+  loadSeen()
+  loadGiftWraps()
+  loadLegacyMessages()
+  loadGroupMessages()
+  loadNotifications()
+  loadFeedsAndLists()
+  loadHandlers()
+  loadDeletes()
 
   // Start listening for notifications
   listenForNotifications()
-
-  // Less important stuff
-  await loadHandlers()
-  await loadDeletes()
 }
 
 export const boot = () => router.at("login/connect").open({noEscape: true})

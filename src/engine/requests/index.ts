@@ -33,13 +33,16 @@ import {
   EPOCH,
   LABEL,
   DELETE,
+  FEED,
   READ_RECEIPT,
+  NAMED_BOOKMARKS,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
 import {updateIn, createBatcher} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, whereEq, without} from "ramda"
+import {LIST_KINDS} from "src/domain"
 import type {Zapper} from "src/engine/model"
 import {repository} from "src/engine/repository"
 import {
@@ -491,6 +494,15 @@ export const loadSeen = () =>
     skipCache: true,
     relays: hints.WriteRelays().getUrls(),
     filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
+  })
+
+export const loadFeedsAndLists = () =>
+  load({
+    skipCache: true,
+    relays: hints.WriteRelays().getUrls(),
+    filters: [
+      addSinceToFilter({kinds: [FEED, NAMED_BOOKMARKS, ...LIST_KINDS], authors: [pubkey.get()]}),
+    ],
   })
 
 export const loadGiftWraps = ({reload = false} = {}) => {
