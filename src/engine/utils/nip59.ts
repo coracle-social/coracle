@@ -1,4 +1,5 @@
 import type {UnsignedEvent} from "nostr-tools"
+import {WRAP, WRAP_NIP04} from '@welshman/util'
 import {getPublicKey} from "src/util/nostr"
 import {tryJson} from "src/util/misc"
 import logger from "src/util/logger"
@@ -18,7 +19,7 @@ export const seal = (content, pubkey) => ({
   pubkey,
 })
 
-export const wrap = (content, pubkey, recipient, kind = 1059, tags = []) => ({
+export const wrap = (content, pubkey, recipient, kind = WRAP, tags = []) => ({
   kind,
   created_at: now(5),
   tags: tags.concat([["p", recipient]]),
@@ -31,7 +32,7 @@ export type WrapperParams = {
   wrap?: {
     author: string
     recipient: string
-    kind?: 1059 | 1060
+    kind?: WRAP | WRAP_NIP04
     algo?: "nip04" | "nip44"
     tags?: string[][]
   }

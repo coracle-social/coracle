@@ -302,7 +302,7 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
         author,
         wrap: {
           ...wrap,
-          kind: 1060,
+          kind: WRAP_NIP04,
           algo: "nip04",
         },
       }),

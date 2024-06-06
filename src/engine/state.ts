@@ -39,6 +39,8 @@ import {
   indexBy,
 } from "@welshman/lib"
 import {
+  WRAP,
+  WRAP_NIP04,
   READ_RECEIPT,
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
@@ -308,8 +310,8 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   if (session) {
     const canDecrypt =
-      (event.kind === 1059 && getNip44(session).isEnabled()) ||
-      (event.kind === 1060 && getNip04(session).isEnabled())
+      (event.kind === WRAP && getNip44(session).isEnabled()) ||
+      (event.kind === WRAP_NIP04 && getNip04(session).isEnabled())
 
     if (canDecrypt) {
       const rumor = await getNip59(session).unwrap(event, session.privkey)

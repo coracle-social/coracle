@@ -28,6 +28,8 @@ import {
   getIdFilters,
   isGroupAddress,
   isSignedEvent,
+  WRAP,
+  WRAP_NIP04,
   EPOCH,
   LABEL,
   DELETE,
@@ -493,29 +495,9 @@ export const loadSeen = () =>
     filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
   })
 
-export const loadGiftWrap = () => {
-  const kinds = []
-
-  if (nip44.get().isEnabled()) {
-    kinds.push(1059)
-  }
-
-  if (nip04.get().isEnabled()) {
-    kinds.push(1060)
-  }
-
-  if (kinds.length > 0) {
-    return load({
-      skipCache: true,
-      relays: hints.User().getUrls(),
-      filters: [addSinceToFilter({kinds, authors: [pubkey.get()]})],
-    })
-  }
-}
-
 export const loadAllMessages = ({reload = false} = {}) => {
   let filters = [
-    {kinds: [1059], "#p": [pubkey.get()]},
+    {kinds: [WRAP, WRAP_NIP04], "#p": [pubkey.get()]},
     {kinds: [4], authors: [pubkey.get()]},
     {kinds: [4], "#p": [pubkey.get()]},
   ]
@@ -543,7 +525,7 @@ export const listenForMessages = (pubkeys: string[]) => {
     skipCache: true,
     relays: hints.Messages(pubkeys).getUrls(),
     filters: [
-      addSinceToFilter({kinds: [1059], "#p": [pubkey.get()]}, seconds(7, "day")),
+      addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(7, "day")),
       addSinceToFilter({kinds: [4], authors: allPubkeys}),
       addSinceToFilter({kinds: [4], "#p": allPubkeys}),
     ],

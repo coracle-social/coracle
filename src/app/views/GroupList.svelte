@@ -41,16 +41,12 @@
   document.title = "Groups"
 
   onMount(() => {
-    const {admins, recipients, relays, since} = getGroupReqInfo()
+    const {admins} = getGroupReqInfo()
     const scroller = createScroller(loadMore, {element})
 
     updateCurrentSession(assoc("groups_last_synced", now()))
 
-    load({
-      relays,
-      skipCache: true,
-      filters: [{kinds: giftWrapKinds, "#p": recipients, since}],
-    })
+    loadGroupMessages()
 
     load({
       skipCache: true,
