@@ -1,6 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
-import {batch, seconds} from "hurdak"
-import {writable, inc, sortBy, now} from "@welshman/lib"
+import {batch, tryFunc, seconds} from "hurdak"
+import {writable, derived} from "svelte/store"
+import {inc, pushToMapKey, sortBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -14,9 +15,10 @@ import {
   REACTION,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
-import type {Feed, Loader, RequestItem} from "@welshman/feeds"
+import type {Feed} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
+import {withGetter} from "src/util/misc"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
@@ -47,227 +49,110 @@ export type FeedOpts = {
   onEvent?: (e: TrustedEvent) => void
 }
 
-export class FeedLoader {
-  done = writable(false)
-  loader: Promise<Loader>
-  delta = seconds(24, "hour")
-  buffer: TrustedEvent[] = []
-  compiled?: Promise<RequestItem[]>
-  feedLoader: CoreFeedLoader<TrustedEvent>
-  controller = new AbortController()
-  notes = writable<DisplayEvent[]>([])
-  parents = new Map<string, DisplayEvent>()
-  reposts = new Map<string, TrustedEvent[]>()
-  isEventMuted = isEventMuted.get()
+function* getRequestItems({relays, filters}, opts: FeedOpts) {
+  // Default to note kinds
+  filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
-  constructor(readonly opts: FeedOpts) {
-    function* getRequestItems({relays, filters}) {
-      // Default to note kinds
-      filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
+  // Add reposts if we don't have any authors specified
+  if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
+    filters = addRepostFilters(filters)
+  }
 
-      // Add reposts if we don't have any authors specified
-      if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
-        filters = addRepostFilters(filters)
+  // Use relays specified in feeds
+  if (relays?.length > 0) {
+    yield {filters, relays}
+  } else {
+    // Even though this is handled by subscribe we need to include it so there's something to send
+    if (!opts.skipCache) {
+      yield {filters, relays: [LOCAL_RELAY_URL]}
+    }
+
+    if (!opts.skipNetwork) {
+      const selections = getFilterSelections(filters)
+
+      for (const {relay, filters} of selections) {
+        yield {filters, relays: [relay]}
       }
+    }
+  }
+}
 
-      // Use relays specified in feeds
-      if (relays?.length > 0) {
-        yield {filters, relays}
-      } else {
-        if (!opts.skipCache) {
-          yield {filters, relays: [LOCAL_RELAY_URL]}
+// Use a custom feed loader so we can intercept the filters and infer relays
+const createFeedLoader = (opts: FeedOpts, signal) =>
+  new CoreFeedLoader({
+    ...baseFeedLoader.options,
+    request: async ({relays, filters, onEvent}) => {
+      const tracker = new Tracker()
+      const skipCache = Boolean(relays)
+      const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
+
+      await Promise.all(
+        Array.from(getRequestItems({relays, filters}, opts)).map(opts =>
+          load({...opts, onEvent, tracker, signal, skipCache, forcePlatform}),
+        ),
+      )
+    },
+  })
+
+export const createFeed = (opts: FeedOpts) => {
+  const done = writable(false)
+  const notes = withGetter(writable<DisplayEvent[]>([]))
+  const store = derived([done, notes], ([$done, $notes]) => ({done: $done, notes: $notes}))
+
+  const buffer: TrustedEvent[] = []
+  const parents = new Map<string, DisplayEvent>()
+  const reposts = new Map<string, TrustedEvent[]>()
+  const $isEventMuted = isEventMuted.get()
+  const controller = new AbortController()
+  const welshman = createFeedLoader(opts, controller.signal)
+  const appendEvent = onEvent(appendToFeed)
+  const prependEvent = onEvent(prependToFeed)
+
+  let filters, delta, loader
+  Promise.resolve(tryFunc(() => welshman.compiler.compile(opts.feed))).then(async reqs => {
+    filters = reqs?.flatMap(r => r.filters || [])
+    delta = filters ? guessFilterDelta(filters) : seconds(24, "hour")
+
+    loader = await (
+      reqs
+        ? welshman.getRequestsLoader(reqs, {onEvent: appendEvent, onExhausted})
+        : welshman.getLoader(opts.feed, {onEvent: appendEvent, onExhausted})
+    )
+
+    if (reqs && opts.shouldListen) {
+      const tracker = new Tracker()
+
+      for (const {relays, filters} of reqs) {
+        for (const request of Array.from(getRequestItems({relays, filters}, opts))) {
+          subscribe({
+            ...request,
+            tracker,
+            onEvent: prependEvent,
+            signal: controller.signal,
+            skipCache: opts.skipCache,
+            forcePlatform: opts.forcePlatform && (relays?.length || 0) === 0,
+          })
         }
-
-        if (!opts.skipNetwork) {
-          const selections = getFilterSelections(filters)
-
-          for (const {relay, filters} of selections) {
-            yield {filters, relays: [relay]}
-          }
-        }
       }
     }
+  })
 
-    // Use a custom feed loader so we can intercept the filters and infer relays
-    this.feedLoader = new CoreFeedLoader({
-      ...baseFeedLoader.options,
-      request: async ({relays, filters, onEvent}) => {
-        const tracker = new Tracker()
-        const signal = this.controller.signal
-        const skipCache = Boolean(relays)
-        const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
-
-        await Promise.all(
-          Array.from(getRequestItems({relays, filters})).map(opts =>
-            load({...opts, onEvent, tracker, signal, skipCache, forcePlatform}),
-          ),
-        )
-      },
-    })
-
-    if (this.feedLoader.compiler.canCompile(opts.feed)) {
-      this.compiled = this.feedLoader.compiler.compile(opts.feed)
-      this.compiled.then(requests => {
-        this.delta = guessFilterDelta(requests.flatMap(r => r.filters || []))
-
-        if (opts.shouldListen) {
-          const tracker = new Tracker()
-          const signal = this.controller.signal
-          const onEvent = this.onEvent(this.prependToFeed)
-
-          for (const {relays, filters} of requests) {
-            const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
-
-            for (const request of Array.from(getRequestItems({relays, filters}))) {
-              subscribe({
-                ...request,
-                onEvent,
-                tracker,
-                signal,
-                skipCache: opts.skipCache,
-                forcePlatform,
-              })
-            }
-          }
-        }
-      })
-    }
-  }
-
-  // Public api
-
-  start = () => {
-    const loadOpts = {
-      onEvent: this.onEvent(this.appendToFeed),
-      onExhausted: () => {
-        this.appendToFeed(this.buffer.splice(0))
-        this.done.set(true)
-      },
-    }
-
-    this.loader = this.compiled
-      ? this.compiled.then(requests => this.feedLoader.getRequestsLoader(requests, loadOpts))
-      : this.feedLoader.getLoader(this.opts.feed, loadOpts)
-  }
-
-  stop = () => {
-    this.controller.abort()
-  }
-
-  subscribe = f => this.notes.subscribe(f)
-
-  load = (limit: number) => this.loader.then(loader => loader(limit))
-
-  // Event selection, deferral, and parent loading
-
-  onEvent = cb =>
-    batch(300, async events => {
-      if (this.controller.signal.aborted) {
-        return
-      }
-
-      const keep = this.discardEvents(events)
-
-      if (this.opts.shouldLoadParents) {
-        this.loadParents(keep)
-      }
-
-      const withoutOrphans = this.deferOrphans(keep)
-      const withoutAncient = this.deferAncient(withoutOrphans)
-
-      cb(withoutAncient)
-    })
-
-  discardEvents = events => {
-    let strict = true
-
-    // Be more tolerant when looking at communities
-    walkFeed(this.opts.feed, feed => {
-      if (isAddressFeed(feed)) {
-        strict = strict && !(feed.slice(2) as string[]).some(isContextAddress)
-      }
-    })
-
-    return events.filter(e => {
-      if (repository.isDeleted(e)) return false
-      if (e.kind === REACTION && !isLike(e)) return false
-      if ([4, DIRECT_MESSAGE].includes(e.kind)) return false
-      if (this.isEventMuted(e, strict)) return false
-      if (this.opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
-      if (getIdOrAddress(e) === this.opts.anchor) return false
-
-      return true
-    })
-  }
-
-  loadParents = notes => {
-    // Add notes to parents too since they might match
-    for (const e of notes) {
-      for (const k of getIdAndAddress(e)) {
-        this.parents.set(k, e)
-      }
-    }
-
-    const notesWithParent = notes.filter(e => {
-      if (repostKinds.includes(e.kind)) {
-        return false
-      }
-
-      if (this.isEventMuted(e)) {
-        return false
-      }
-
-      const ids = Tags.fromEvent(e).parents().values().valueOf()
-
-      if (ids.length === 0 || ids.some(k => this.parents.has(k))) {
-        return false
-      }
-
-      return true
-    })
-
-    const {signal} = this.controller
-
-    for (const {relay, values} of hints
-      .merge(notesWithParent.map(hints.EventParents))
-      .getSelections()) {
-      load({
-        signal,
-        relays: [relay],
-        filters: getIdFilters(values),
-        onEvent: batch(100, async events => {
-          if (signal.aborted) {
-            return
-          }
-
-          for (const e of this.discardEvents(events)) {
-            for (const k of getIdAndAddress(e)) {
-              this.parents.set(k, e)
-            }
-          }
-        }),
-      })
-    }
-  }
-
-  deferOrphans = (notes: TrustedEvent[]) => {
-    if (!this.opts.shouldLoadParents || this.opts.shouldDefer === false) {
-      return notes
+  function deferOrphans(events: TrustedEvent[]) {
+    if (!opts.shouldLoadParents || opts.shouldDefer === false) {
+      return events
     }
 
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [ok, defer] = partition(e => {
-      const parents = Tags.fromEvent(e).parents().values().valueOf()
+      const parentIds = Tags.fromEvent(e).parents().values().valueOf()
 
-      return parents.length === 0 || parents.some(k => this.parents.has(k))
-    }, notes)
+      return parentIds.length === 0 || parentIds.some(k => parents.has(k))
+    }, events)
 
     if (defer.length > 0) {
-      const {signal} = this.controller
-
       setTimeout(() => {
-        if (!signal.aborted) {
-          this.appendToFeed(defer)
+        if (!controller.signal.aborted) {
+          appendToFeed(defer)
         }
       }, 3000)
     }
@@ -275,30 +160,29 @@ export class FeedLoader {
     return ok
   }
 
-  deferAncient = (notes: TrustedEvent[]) => {
-    if (this.opts.shouldDefer === false) {
-      return notes
+  function deferAncient(events: TrustedEvent[]) {
+    if (opts.shouldDefer === false) {
+      return events
     }
 
     // Defer any really old notes until we're done loading from the network
-    const feed = this.notes.get()
-    const {signal} = this.controller
-    const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - this.delta
-    const [ok, defer] = partition(e => e.created_at > cutoff, notes.concat(this.buffer.splice(0)))
+    const feed = notes.get()
+    const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - delta
+    const [ok, defer] = partition(e => e.created_at > cutoff, events.concat(buffer.splice(0)))
 
     // Add our deferred notes back to the buffer for next time
-    this.buffer = defer
+    buffer.splice(0, Infinity, ...defer)
 
     // If nothing else has loaded after a delay, trickle a few new notes so the user has something to look at
     if (defer.length > 0) {
       for (let i = 0; i < defer.length; i++) {
         setTimeout(
           () => {
-            if (!signal.aborted && this.notes.get().length === feed.length + i) {
-              const [event, ...events] = sortBy(e => -e.created_at, this.buffer)
+            if (!controller.signal.aborted && notes.get().length === feed.length + i) {
+              const [event, ...events] = sortBy(e => -e.created_at, buffer)
 
-              this.buffer = events
-              this.appendToFeed([event])
+              buffer.splice(0, Infinity, ...events)
+              appendToFeed([event])
             }
           },
           inc(i) * 400,
@@ -311,34 +195,31 @@ export class FeedLoader {
 
   // Feed building
 
-  appendToFeed = (notes: TrustedEvent[]) => {
-    this.notes.update($notes => uniqBy(prop("id"), [...$notes, ...this.buildFeedChunk(notes)]))
+  function appendToFeed(events: TrustedEvent[]) {
+    notes.update($events => uniqBy(prop("id"), [...$events, ...buildFeedChunk(events)]))
   }
 
-  prependToFeed = (notes: TrustedEvent[]) => {
-    this.notes.update($notes => uniqBy(prop("id"), [...this.buildFeedChunk(notes), ...$notes]))
+  function prependToFeed(events: TrustedEvent[]) {
+    notes.update($events => uniqBy(prop("id"), [...buildFeedChunk(events), ...$events]))
   }
 
-  buildFeedChunk = (notes: TrustedEvent[]) => {
-    const seen = new Set(this.notes.get().map(getIdOrAddress))
-    const parents = []
+  function buildFeedChunk(events: TrustedEvent[]) {
+    const seen = new Set(notes.get().map(getIdOrAddress))
+    const chunkParents = []
 
     // Sort first to make sure we get the latest version of replaceable events, then
     // after to make sure notes replaced by their parents are in order.
     return sortEventsDesc(
       uniqBy(
         prop("id"),
-        sortEventsDesc(notes)
+        sortEventsDesc(events)
           .map((e: TrustedEvent) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
               const wrappedEvent = unwrapRepost(e)
 
               if (wrappedEvent) {
-                const reposts = this.reposts.get(wrappedEvent.id) || []
-
-                this.reposts.set(wrappedEvent.id, [...reposts, e])
-
+                pushToMapKey(reposts, wrappedEvent.id, e)
                 tracker.copy(e.id, wrappedEvent.id)
 
                 e = wrappedEvent
@@ -353,18 +234,18 @@ export class FeedLoader {
                 break
               }
 
-              const parentId = parentIds.find(id => this.parents.get(id))
+              const parentId = parentIds.find(id => parents.get(id))
 
               if (!parentId) {
                 break
               }
 
-              e = this.parents.get(parentId)
+              e = parents.get(parentId)
             }
 
             return e
           })
-          .concat(parents)
+          .concat(chunkParents)
           // If we've seen this note or its parent, don't add it again
           .filter(e => {
             if (seen.has(getIdOrAddress(e))) return false
@@ -376,11 +257,111 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
-            e.reposts = getIdAndAddress(e).flatMap(k => this.reposts.get(k) || [])
+            e.reposts = getIdAndAddress(e).flatMap(k => reposts.get(k) || [])
 
             return e
           }),
       ),
     )
+  }
+
+  function loadParents(events) {
+    // Add notes to parents too since they might match
+    for (const e of events) {
+      for (const k of getIdAndAddress(e)) {
+        parents.set(k, e)
+      }
+    }
+
+    const notesWithParent = events.filter(e => {
+      if (repostKinds.includes(e.kind)) {
+        return false
+      }
+
+      if ($isEventMuted(e)) {
+        return false
+      }
+
+      const ids = Tags.fromEvent(e).parents().values().valueOf()
+
+      if (ids.length === 0 || ids.some(k => parents.has(k))) {
+        return false
+      }
+
+      return true
+    })
+
+    const selections = hints.merge(notesWithParent.map(hints.EventParents)).getSelections()
+
+    for (const {relay, values} of selections) {
+      load({
+        relays: [relay],
+        filters: getIdFilters(values),
+        signal: controller.signal,
+        onEvent: batch(100, async events => {
+          if (controller.signal.aborted) {
+            return
+          }
+
+          for (const e of discardEvents(events)) {
+            for (const k of getIdAndAddress(e)) {
+              parents.set(k, e)
+            }
+          }
+        }),
+      })
+    }
+  }
+
+  function discardEvents(events) {
+    let strict = true
+
+    // Be more tolerant when looking at communities
+    walkFeed(opts.feed, feed => {
+      if (isAddressFeed(feed)) {
+        strict = strict && !(feed.slice(2) as string[]).some(isContextAddress)
+      }
+    })
+
+    return events.filter(e => {
+      if (repository.isDeleted(e)) return false
+      if (e.kind === REACTION && !isLike(e)) return false
+      if ([4, DIRECT_MESSAGE].includes(e.kind)) return false
+      if (opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
+      if (getIdOrAddress(e) === opts.anchor) return false
+      if ($isEventMuted(e, strict)) return false
+
+      return true
+    })
+  }
+
+  function onEvent(callback) {
+    return batch(300, async events => {
+      if (controller.signal.aborted) {
+        return
+      }
+
+      const keep = discardEvents(events)
+
+      if (opts.shouldLoadParents) {
+        loadParents(keep)
+      }
+
+      const withoutOrphans = deferOrphans(keep)
+      const withoutAncient = deferAncient(withoutOrphans)
+
+      callback(withoutAncient)
+    })
+  }
+
+  function onExhausted() {
+    done.set(true)
+  }
+
+  return {
+    getFilters: () => filters,
+    stop: () => controller.abort(),
+    subscribe: f => store.subscribe(f),
+    loadMore: (limit: number) => loader?.(limit),
   }
 }

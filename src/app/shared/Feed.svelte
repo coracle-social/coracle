@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {writable} from "@welshman/lib"
-  import type {Filter} from "@welshman/util"
   import {createScroller, synced} from "src/util/misc"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
@@ -9,7 +8,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
-  import {FeedLoader} from "src/app/util"
+  import {createFeed} from "src/app/util"
   import type {Feed} from "src/domain"
 
   export let feed: Feed
@@ -29,8 +28,9 @@
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
   const reload = async () => {
+    limit = 0
     loader?.stop()
-    loader = new FeedLoader({
+    loader = createFeed({
       anchor,
       onEvent,
       skipCache,
@@ -42,16 +42,6 @@
       shouldLoadParents: true,
       shouldHideReplies: $shouldHideReplies,
       feed: feed.definition,
-    })
-
-    limit = 0
-    done = loader.done
-    notes = loader.notes
-    filters = [{ids: []}]
-
-    loader.start()
-    loader.compiled.then(requests => {
-      filters = requests.flatMap(r => r.filters || [])
     })
   }
 
@@ -66,15 +56,14 @@
   }
 
   const loadMore = async () => {
-    limit += 5
+    limit += 10
 
-    if ($notes.length < limit) {
-      await loader.load(20)
+    if ($loader.notes.length < limit) {
+      await loader.loadMore(20)
     }
   }
 
-  let element, loader, notes, done
-  let filters: Filter[] = [{ids: []}]
+  let element, loader
   let limit = 0
 
   reload()
@@ -102,13 +91,13 @@
 {/if}
 
 <FlexColumn xl bind:element>
-  {#each $notes.slice(0, limit) as note, i (note.id)}
+  {#each $loader.notes.slice(0, limit) as note, i (note.id)}
     <div in:fly={{y: 20}}>
       <Note
+        filters={loader.getFilters() || [{ids: []}]}
         depth={$shouldHideReplies ? 0 : 2}
         {contextAddress}
         {showGroup}
-        {filters}
         {anchor}
         {note} />
     </div>
@@ -116,7 +105,7 @@
 </FlexColumn>
 
 {#if !hideSpinner}
-  {#if $done}
+  {#if $loader.done}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
       <img class="h-20 w-20" src="/images/pumpkin.png" />
       That's all!
