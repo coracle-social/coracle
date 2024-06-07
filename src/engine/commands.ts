@@ -783,7 +783,7 @@ export const markAsSeen = async (events: TrustedEvent[]) => {
 
   // If we have fewer than a hefty chunk, optimistically update instead so we're
   // not creating tons of unnecessary events
-  if (allIds.length > 100) {
+  if (false && allIds.length > 100) {
     const expirationTag = ["expiration", String(now() + seconds(90, "day"))]
 
     if (optimisticReadReceipts.get().length > 0) {
