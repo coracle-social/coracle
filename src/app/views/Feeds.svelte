@@ -1,11 +1,19 @@
 <script lang="ts">
+  import {makeRelayFeed} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
   import {globalFeed} from "src/app/state"
-  import {session} from "src/engine"
+  import {makeFeed} from "src/domain"
+  import {session, env} from "src/engine"
+
+  const isPlatformFeed = $env.PLATFORM_RELAYS.length > 0
 
   const showLogin = () => router.at("login").open()
+
+  if (isPlatformFeed) {
+    globalFeed.set(makeFeed({definition: makeRelayFeed(...$env.PLATFORM_RELAYS)}))
+  }
 
   document.title = "Feeds"
 </script>
@@ -19,4 +27,4 @@
   </div>
 {/if}
 
-<Feed skipCache showControls showGroup bind:feed={$globalFeed} />
+<Feed skipCache showGroup showControls={!isPlatformFeed} bind:feed={$globalFeed} />

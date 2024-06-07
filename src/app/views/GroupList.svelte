@@ -46,15 +46,20 @@
     const loader = loadGiftWraps()
 
     updateCurrentSession(assoc("groups_last_synced", now()))
+
     loadGroupMessages()
 
     load({
       skipCache: true,
+      forcePlatform: false,
       relays: hints.User().getUrls(),
-      filters: [
-        {kinds: [35834, 34550], authors: admins},
-        {kinds: [35834, 34550], limit: 500},
-      ],
+      filters: [{kinds: [35834, 34550], authors: admins}],
+    })
+
+    load({
+      skipCache: true,
+      relays: hints.User().getUrls(),
+      filters: [{kinds: [35834, 34550], limit: 500}],
     })
 
     return () => {

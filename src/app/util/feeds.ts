@@ -1,6 +1,6 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, seconds} from "hurdak"
-import {writable, inc, sortBy, avg, now} from "@welshman/lib"
+import {writable, inc, sortBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -108,7 +108,7 @@ export class FeedLoader {
     if (this.feedLoader.compiler.canCompile(opts.feed)) {
       this.compiled = this.feedLoader.compiler.compile(opts.feed)
       this.compiled.then(requests => {
-        this.delta = avg(requests.map(r => guessFilterDelta(r.filters)))
+        this.delta = guessFilterDelta(requests.flatMap(r => r.filters || []))
 
         if (opts.shouldListen) {
           const tracker = new Tracker()
@@ -116,7 +116,7 @@ export class FeedLoader {
           const onEvent = this.onEvent(this.prependToFeed)
 
           for (const {relays, filters} of requests) {
-            const forcePlatform = opts.forcePlatform && relays.length === 0
+            const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
 
             for (const request of Array.from(getRequestItems({relays, filters}))) {
               subscribe({

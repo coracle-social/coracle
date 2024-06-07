@@ -9,17 +9,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {
-  Worker,
-  bech32ToHex,
-  pick,
-  cached,
-  nthEq,
-  nth,
-  now,
-  writable,
-  max,
-} from "@welshman/lib"
+import {Worker, bech32ToHex, pick, cached, nthEq, nth, now, writable, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -179,7 +169,7 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
       .merge([hints.product(addrs, explicitRelays), hints.WithinMultipleContexts(addrs)])
       .getUrls()
 
-    return load({relays, filters, skipCache: true})
+    return load({relays, filters, skipCache: true, forcePlatform: false})
   }
 }
 
@@ -194,7 +184,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
     const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
 
     if (pubkeys.length > 0) {
-      promises.push(load({relays, filters, skipCache: true}))
+      promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
     }
   }
 
@@ -204,7 +194,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
     const since = Math.max(now() - seconds(7, "day"), info.since)
     const filters = [{kinds, "#a": [address], since}]
 
-    promises.push(load({relays, filters, skipCache: true}))
+    promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
   }
 
   updateCurrentSession($session => {

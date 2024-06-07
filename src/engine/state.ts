@@ -1427,6 +1427,7 @@ export const onAuth = async (url, challenge) => {
 
   seenChallenges.add(challenge)
 
+  console.log(url, challenge)
   const event = await signer.get().signAsUser(
     createEvent(22242, {
       tags: [

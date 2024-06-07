@@ -277,7 +277,7 @@
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
-    {#if $seenOn?.length > 0}
+    {#if $seenOn?.length > 0 && ($env.PLATFORM_RELAYS.length === 0 || $env.PLATFORM_RELAYS.length > 1)}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
