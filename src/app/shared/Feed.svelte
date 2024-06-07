@@ -106,7 +106,6 @@
     <div in:fly={{y: 20}}>
       <Note
         depth={$shouldHideReplies ? 0 : 2}
-        context={note.replies || []}
         {contextAddress}
         {showGroup}
         {filters}

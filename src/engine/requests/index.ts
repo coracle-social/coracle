@@ -16,7 +16,6 @@ import {
   cached,
   nthEq,
   nth,
-  fromPairs,
   now,
   writable,
   max,
@@ -41,7 +40,7 @@ import {
 } from "@welshman/util"
 import {updateIn, createBatcher} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import {always, partition, pluck, uniq, whereEq, without} from "ramda"
+import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import type {Zapper} from "src/engine/model"
 import {repository} from "src/engine/repository"
@@ -227,25 +226,17 @@ export const dereferenceNote = async ({
   pubkey = null,
   identifier = "",
   relays = [],
-  context = [],
 }) => {
   relays = hints.fromRelays(relays).getUrls()
 
   if (eid) {
-    return (
-      context.find(whereEq({id: eid})) ||
-      loadOne({relays, filters: getIdFilters([eid]), forcePlatform: false})
-    )
+    return loadOne({relays, filters: getIdFilters([eid]), forcePlatform: false})
   }
 
   if (kind && pubkey) {
     const address = new Address(kind, pubkey, identifier).toString()
-    const addrData = {kind, pubkey, identifier}
 
-    return (
-      context.find(e => whereEq(addrData, {...e, identifier: fromPairs(e.tags).d || ""})) ||
-      loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
-    )
+    return loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
   }
 
   return null

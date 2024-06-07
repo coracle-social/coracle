@@ -23,12 +23,7 @@
   const getUrls = (status: PublishStatus) =>
     remove(LOCAL_RELAY_URL, Array.from(pub.status).filter(nthEq(1, status)).map(first))
 
-  const open = (event: TrustedEvent) =>
-    router
-      .at("notes")
-      .of(event.id)
-      .cx({context: [event]})
-      .open()
+  const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 
   const expand = () => {
     expanded = true

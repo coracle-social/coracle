@@ -15,9 +15,4 @@
   <small>{formatTimestamp(timestamp)}</small>
 </div>
 
-<Note
-  topLevel
-  depth={1}
-  note={event}
-  context={interactions}
-  filters={[{ids: pluck("id", interactions)}]} />
+<Note topLevel depth={1} note={event} filters={[{ids: pluck("id", interactions)}]} />

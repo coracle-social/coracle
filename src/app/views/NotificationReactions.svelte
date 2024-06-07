@@ -14,13 +14,11 @@
   const {event: note, interactions, timestamp} = notification
   const likes = interactions.filter(e => e.kind === 7)
   const zaps = interactions.filter(e => e.kind === 9734)
-  const context = interactions.concat(note)
 
   const goToNote = () =>
     router
       .at("notes")
       .of(note.id, {relays: tracker.getRelays(note.id)})
-      .cx({context})
       .open()
 
   const actionText = closure(() => {

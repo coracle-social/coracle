@@ -10,7 +10,6 @@
   import {dereferenceNote} from "src/engine"
 
   export let relays = []
-  export let context = []
   export let depth = isMobile ? 2 : 5
 
   let promise: Promise<TrustedEvent> = defer()
@@ -25,7 +24,7 @@
 {:then note}
   {#if note}
     <div in:fly={{y: 20}}>
-      <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} {context} />
+      <Note showGroup showLoading anchor={getIdOrAddress(note)} {note} {depth} {relays} />
     </div>
   {:else}
     <p class="text-center">Failed to load note.</p>

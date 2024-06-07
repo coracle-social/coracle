@@ -32,12 +32,6 @@
   {#await promise}
     <Spinner />
   {:then note}
-    <Note
-      showLoading
-      topLevel
-      depth={1}
-      {note}
-      context={interactions}
-      filters={[{ids: pluck("id", interactions)}]} />
+    <Note {note} topLevel showLoading depth={1} filters={[{ids: pluck("id", interactions)}]} />
   {/await}
 </div>

@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {getAddress, getIdFilters} from "@welshman/util"
   import {filterVals} from "hurdak"
-  import {asArray} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -39,11 +38,7 @@
     if (isGroup) {
       router.at("groups").of(address, {relays}).at("notes").open()
     } else if (noteId) {
-      router
-        .at("notes")
-        .of(noteId, {relays})
-        .cx({context: asArray(quote)})
-        .open()
+      router.at("notes").of(noteId, {relays}).open()
     }
   }
 

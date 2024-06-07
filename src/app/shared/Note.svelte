@@ -39,11 +39,11 @@
     loadPubkeysFromEvent,
     sortEventsDesc,
     deriveZapper,
+    repository,
   } from "src/engine"
 
   export let note
   export let relays = []
-  export let context = []
   export let filters = null
   export let depth = 0
   export let anchor = null
@@ -63,7 +63,7 @@
   let showMutedReplies = false
   let actions = null
   let collapsed = depth === 0
-  let ctx = uniqBy(prop("id"), context)
+  let context = repository.query([{'#e': [event.id]}]).filter(e => isChildOf(e, event))
   let showHiddenReplies = anchor === getIdOrAddress(event)
 
   const showEntire = showHiddenReplies
@@ -76,7 +76,6 @@
       router
         .at("notes")
         .of(getIdOrAddress(event), {relays: hints.Event(event).getUrls()})
-        .cx({context: ctx.concat(event)})
         .open()
     }
   }
@@ -87,14 +86,12 @@
     router
       .at("notes")
       .of(getIdOrAddress(event), {relays: hints.Event(event).getUrls()})
-      .cx({context: ctx.concat(event)})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
       .of(reply.value(), {relays: hints.EventParents(event).getUrls()})
-      .cx({context: ctx.concat(event)})
       .open()
 
   const goToThread = () =>
@@ -102,15 +99,14 @@
       .at("notes")
       .of(getIdOrAddress(event), {relays: hints.EventRoots(event).getUrls()})
       .at("thread")
-      .cx({context: ctx.concat(event)})
       .open()
 
   const removeFromContext = e => {
-    ctx = reject(whereEq({id: e.id}), ctx)
+    context = reject(whereEq({id: e.id}), context)
   }
 
   const addToContext = events => {
-    ctx = ctx.concat(events)
+    context = context.concat(events)
   }
 
   $: tags = Tags.fromEvent(event)
@@ -120,7 +116,7 @@
   $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
-  $: children = ctx.filter(e => isChildOf(e, event))
+  $: children = context.filter(e => isChildOf(e, event))
 
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
@@ -215,7 +211,7 @@
         relays: hints.EventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
-          ctx = uniqBy(prop("id"), ctx.concat(events))
+          context = uniqBy(prop("id"), context.concat(events))
         }),
       })
     }
@@ -358,7 +354,7 @@
           replyIsActive = false
         }}
         on:event={e => {
-          ctx = [e.detail, ...ctx]
+          context = [e.detail, ...context]
         }} />
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
@@ -391,7 +387,6 @@
                     showMuted
                     note={r}
                     depth={depth - 1}
-                    context={ctx}
                     {filters}
                     {anchor} />
                 {/each}

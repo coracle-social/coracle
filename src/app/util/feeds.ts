@@ -1,6 +1,6 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, seconds} from "hurdak"
-import {writable, inc, sortBy, remove, avg, now} from "@welshman/lib"
+import {writable, inc, sortBy, avg, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -58,7 +58,6 @@ export class FeedLoader {
   notes = writable<DisplayEvent[]>([])
   parents = new Map<string, DisplayEvent>()
   reposts = new Map<string, TrustedEvent[]>()
-  replies = new Map<string, TrustedEvent[]>()
   isEventMuted = isEventMuted.get()
 
   constructor(readonly opts: FeedOpts) {
@@ -283,7 +282,6 @@ export class FeedLoader {
 
     // Defer any really old notes until we're done loading from the network
     const feed = this.notes.get()
-    const {signal} = this.controller
     const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - this.delta
     const [ok, defer] = partition(e => e.created_at > cutoff, notes.concat(this.buffer.splice(0)))
 
@@ -293,14 +291,17 @@ export class FeedLoader {
     // If nothing else has loaded after a delay, trickle a few new notes so the user has something to look at
     if (defer.length > 0) {
       for (let i = 0; i < defer.length; i++) {
-        setTimeout(() => {
-          if (this.notes.get().length === feed.length + i) {
-            const [event, ...events] = sortBy(e => -e.created_at, this.buffer)
+        setTimeout(
+          () => {
+            if (this.notes.get().length === feed.length + i) {
+              const [event, ...events] = sortBy(e => -e.created_at, this.buffer)
 
-            this.buffer = events
-            this.appendToFeed([event])
-          }
-        }, inc(i) * 400)
+              this.buffer = events
+              this.appendToFeed([event])
+            }
+          },
+          inc(i) * 400,
+        )
       }
     }
 
@@ -351,14 +352,6 @@ export class FeedLoader {
                 break
               }
 
-              // Keep track of replies
-              for (const parentId of parentIds) {
-                const replies = this.replies.get(parentId) || []
-                if (!replies.some(r => r.id === e.id)) {
-                  this.replies.set(parentId, [...replies, e])
-                }
-              }
-
               const parentId = parentIds.find(id => this.parents.get(id))
 
               if (!parentId) {
@@ -382,7 +375,6 @@ export class FeedLoader {
             return true
           })
           .map((e: DisplayEvent) => {
-            e.replies = getIdAndAddress(e).flatMap(k => this.replies.get(k) || [])
             e.reposts = getIdAndAddress(e).flatMap(k => this.reposts.get(k) || [])
 
             return e
