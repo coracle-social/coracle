@@ -1,9 +1,10 @@
 import {partition, prop, uniqBy} from "ramda"
-import {batch} from "hurdak"
-import {writable} from "@welshman/lib"
+import {batch, seconds} from "hurdak"
+import {writable, inc, sortBy, remove, avg, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
+  guessFilterDelta,
   getIdOrAddress,
   getIdAndAddress,
   getIdFilters,
@@ -49,6 +50,8 @@ export type FeedOpts = {
 export class FeedLoader {
   done = writable(false)
   loader: Promise<Loader>
+  delta = seconds(24, "hour")
+  buffer: TrustedEvent[] = []
   compiled?: Promise<RequestItem[]>
   feedLoader: CoreFeedLoader<TrustedEvent>
   controller = new AbortController()
@@ -103,28 +106,29 @@ export class FeedLoader {
       },
     })
 
-    this.compiled = this.feedLoader.compiler.canCompile(opts.feed)
-      ? this.feedLoader.compiler.compile(opts.feed)
-      : null
-
-    if (opts.shouldListen && this.compiled) {
+    if (this.feedLoader.compiler.canCompile(opts.feed)) {
+      this.compiled = this.feedLoader.compiler.compile(opts.feed)
       this.compiled.then(requests => {
-        const tracker = new Tracker()
-        const signal = this.controller.signal
-        const onEvent = this.onEvent(this.prependToFeed)
+        this.delta = avg(requests.map(r => guessFilterDelta(r.filters)))
 
-        for (const {relays, filters} of requests) {
-          const forcePlatform = opts.forcePlatform && relays.length === 0
+        if (opts.shouldListen) {
+          const tracker = new Tracker()
+          const signal = this.controller.signal
+          const onEvent = this.onEvent(this.prependToFeed)
 
-          for (const request of Array.from(getRequestItems({relays, filters}))) {
-            subscribe({
-              ...request,
-              onEvent,
-              tracker,
-              signal,
-              skipCache: opts.skipCache,
-              forcePlatform,
-            })
+          for (const {relays, filters} of requests) {
+            const forcePlatform = opts.forcePlatform && relays.length === 0
+
+            for (const request of Array.from(getRequestItems({relays, filters}))) {
+              subscribe({
+                ...request,
+                onEvent,
+                tracker,
+                signal,
+                skipCache: opts.skipCache,
+                forcePlatform,
+              })
+            }
           }
         }
       })
@@ -136,7 +140,10 @@ export class FeedLoader {
   start = () => {
     const loadOpts = {
       onEvent: this.onEvent(this.appendToFeed),
-      onExhausted: () => this.done.set(true),
+      onExhausted: () => {
+        this.appendToFeed(this.buffer.splice(0))
+        this.done.set(true)
+      },
     }
 
     this.loader = this.compiled
@@ -166,9 +173,10 @@ export class FeedLoader {
         this.loadParents(keep)
       }
 
-      const ok = this.deferOrphans(keep)
+      const withoutOrphans = this.deferOrphans(keep)
+      const withoutAncient = this.deferAncient(withoutOrphans)
 
-      cb(ok)
+      cb(withoutAncient)
     })
 
   discardEvents = events => {
@@ -255,13 +263,46 @@ export class FeedLoader {
       return parents.length === 0 || parents.some(k => this.parents.has(k))
     }, notes)
 
-    const {signal} = this.controller
+    if (defer.length > 0) {
+      const {signal} = this.controller
 
-    setTimeout(() => {
-      if (!signal.aborted) {
-        this.appendToFeed(defer)
+      setTimeout(() => {
+        if (!signal.aborted) {
+          this.appendToFeed(defer)
+        }
+      }, 3000)
+    }
+
+    return ok
+  }
+
+  deferAncient = (notes: TrustedEvent[]) => {
+    if (this.opts.shouldDefer === false) {
+      return notes
+    }
+
+    // Defer any really old notes until we're done loading from the network
+    const feed = this.notes.get()
+    const {signal} = this.controller
+    const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - this.delta
+    const [ok, defer] = partition(e => e.created_at > cutoff, notes.concat(this.buffer.splice(0)))
+
+    // Add our deferred notes back to the buffer for next time
+    this.buffer = defer
+
+    // If nothing else has loaded after a delay, trickle a few new notes so the user has something to look at
+    if (defer.length > 0) {
+      for (let i = 0; i < defer.length; i++) {
+        setTimeout(() => {
+          if (this.notes.get().length === feed.length + i) {
+            const [event, ...events] = sortBy(e => -e.created_at, this.buffer)
+
+            this.buffer = events
+            this.appendToFeed([event])
+          }
+        }, inc(i) * 400)
       }
-    }, 3000)
+    }
 
     return ok
   }

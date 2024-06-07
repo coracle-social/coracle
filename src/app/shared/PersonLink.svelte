@@ -11,6 +11,6 @@
   loadPubkeys([pubkey])
 </script>
 
-<Anchor modal class={$$props.class} href={path}>
+<Anchor modal stopPropagation class={$$props.class} href={path}>
   @<span class="underline">{$display}</span>
 </Anchor>
