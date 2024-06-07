@@ -282,6 +282,7 @@ export class FeedLoader {
 
     // Defer any really old notes until we're done loading from the network
     const feed = this.notes.get()
+    const {signal} = this.controller
     const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - this.delta
     const [ok, defer] = partition(e => e.created_at > cutoff, notes.concat(this.buffer.splice(0)))
 
@@ -293,7 +294,7 @@ export class FeedLoader {
       for (let i = 0; i < defer.length; i++) {
         setTimeout(
           () => {
-            if (this.notes.get().length === feed.length + i) {
+            if (!signal.aborted && this.notes.get().length === feed.length + i) {
               const [event, ...events] = sortBy(e => -e.created_at, this.buffer)
 
               this.buffer = events
