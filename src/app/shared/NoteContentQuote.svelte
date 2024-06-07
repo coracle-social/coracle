@@ -56,7 +56,8 @@
 
   onMount(async () => {
     quote = await loadOne({
-      relays: relays,
+      relays,
+      forcePlatform: false,
       filters: id
         ? getIdFilters([id])
         : [

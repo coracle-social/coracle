@@ -24,7 +24,6 @@
     requestRelayAccess,
     loginWithPrivateKey,
     listenForNotifications,
-    forcePlatformRelays,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -89,7 +88,7 @@
         kind: 1,
         content: noteContent,
         tags: tagsFromContent(noteContent),
-        relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+        relays: hints.WriteRelays().getUrls(),
       })
     }
 

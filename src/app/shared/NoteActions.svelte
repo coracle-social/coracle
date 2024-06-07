@@ -48,7 +48,6 @@
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
     publishDeletionForEvent,
-    forcePlatformRelays,
     getSetting,
     loadPubkeys,
     isEventMuted,
@@ -101,7 +100,7 @@
 
   const react = async content => {
     if (isSignedEvent(note)) {
-      publish({event: note, relays: forcePlatformRelays(hints.PublishEvent(note).getUrls())})
+      publish({event: note, relays: hints.PublishEvent(note).getUrls()})
     }
 
     const tags = [...getReactionTags(note), ...getClientTags()]
@@ -155,7 +154,7 @@
   const broadcast = () => {
     publish({
       event: asSignedEvent(note as SignedEvent),
-      relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+      relays: hints.WriteRelays().getUrls(),
     })
 
     showInfo("Note has been re-published!")
@@ -278,7 +277,7 @@
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
-    {#if $seenOn}
+    {#if $seenOn?.length > 0}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
@@ -313,7 +312,7 @@
           {/each}
         </div>
       {/if}
-      {#if $seenOn && $env.PLATFORM_RELAYS.length < 2}
+      {#if $seenOn?.length > 0 && ($env.PLATFORM_RELAYS.length === 0 || $env.PLATFORM_RELAYS.length > 1)}
         <h1 class="staatliches text-2xl">Relays</h1>
         <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">

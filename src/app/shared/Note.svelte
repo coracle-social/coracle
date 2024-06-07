@@ -38,8 +38,6 @@
     getSetting,
     loadPubkeysFromEvent,
     sortEventsDesc,
-    forcePlatformRelays,
-    withFallbacks,
     deriveZapper,
   } from "src/engine"
 
@@ -188,7 +186,8 @@
 
     if (!event.pubkey) {
       await loadOne({
-        relays: withFallbacks(relays),
+        forcePlatform: false,
+        relays: hints.fromRelays(relays).getUrls(),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e
@@ -213,7 +212,7 @@
       }
 
       load({
-        relays: forcePlatformRelays(hints.EventChildren(event).getUrls()),
+        relays: hints.EventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           ctx = uniqBy(prop("id"), ctx.concat(events))

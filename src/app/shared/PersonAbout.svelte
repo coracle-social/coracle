@@ -10,6 +10,7 @@
 
 <NoteContentKind1
   note={{content: $profile?.about || ""}}
-  minLength={100}
-  maxLength={140}
+  minLength={200}
+  maxLength={300}
+  expandable={false}
   showEntire={!truncate} />

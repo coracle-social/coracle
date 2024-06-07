@@ -18,7 +18,7 @@
   export let contextAddress = null
   export let skipCache = false
   export let skipNetwork = false
-  export let skipPlatform = false
+  export let forcePlatform = true
   export let shouldListen = false
   export let showControls = false
   export let hideSpinner = false
@@ -35,7 +35,7 @@
       onEvent,
       skipCache,
       skipNetwork,
-      skipPlatform,
+      forcePlatform,
       shouldListen,
       includeReposts,
       shouldDefer: !eager,

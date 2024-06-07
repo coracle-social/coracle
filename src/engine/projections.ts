@@ -36,7 +36,7 @@ import {
   people,
   projections,
   sessions,
-  withFallbacks,
+  hints,
   ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
@@ -99,7 +99,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
     // Load the group's metadata and posts
     load({
       skipCache: true,
-      relays: withFallbacks(relays),
+      relays: hints.fromRelays(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
         {kinds: giftWrapKinds, "#p": [pubkey]},

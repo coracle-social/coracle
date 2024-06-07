@@ -29,7 +29,6 @@ import {
   identity,
   last,
   nth,
-  pushToMapKey,
   splitAt,
   uniq,
   uniqBy,
@@ -756,7 +755,7 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = forcePlatformRelays(hints.WithinMultipleContexts(addresses).getUrls())
+  const relays = hints.WithinMultipleContexts(addresses).getUrls()
 
   return {admins, recipients, relays, since}
 }
@@ -767,7 +766,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: forcePlatformRelays(hints.WithinContext(address).getUrls()),
+    relays: hints.WithinContext(address).getUrls(),
   }
 }
 
@@ -1122,41 +1121,16 @@ export const getGroupRelayUrls = address => {
 export const forceRelays = (relays: string[], forceRelays: string[]) =>
   forceRelays.length > 0 ? forceRelays : relays
 
+export const withRelays = (relays: string[], otherRelays: string[]) =>
+  uniq([...relays, ...otherRelays])
+
 export const forcePlatformRelays = (relays: string[]) =>
   forceRelays(relays, Array.from(env.get().PLATFORM_RELAYS))
 
-export const forceRelaySelections = (selections: RelayFilters[], forceRelays: string[]) => {
-  if (forceRelays.length === 0) {
-    return selections
-  }
+export const withPlatformRelays = (relays: string[]) =>
+  withRelays(relays, env.get().PLATFORM_RELAYS)
 
-  const filtersById = new Map<string, Filter>()
-  const newSelections = new Map<string, string[]>()
-
-  for (const {filters} of selections) {
-    for (const forceRelay of forceRelays) {
-      for (const filter of filters) {
-        const id = getFilterId(filter)
-
-        filtersById.set(id, filter)
-        pushToMapKey(newSelections, forceRelay, id)
-      }
-    }
-  }
-
-  return hints.relaySelectionsFromMap(newSelections).map(({values, relay}) => ({
-    relay,
-    filters: unionFilters(values.map(id => filtersById.get(id))),
-  }))
-}
-
-export const forcePlatformRelaySelections = (selections: RelayFilters[]) =>
-  forceRelaySelections(selections, Array.from(env.get().PLATFORM_RELAYS))
-
-export const withFallbacks = (relays: string[]) =>
-  relays.length > 0 ? relays : env.get().DEFAULT_RELAYS
-
-export const withIndexers = (relays: string[]) => uniq(relays.concat(env.get().INDEXER_RELAYS))
+export const withIndexers = (relays: string[]) => withRelays(relays, env.get().INDEXER_RELAYS)
 
 export const hints = new Router({
   getUserPubkey: () => pubkey.get(),
@@ -1471,9 +1445,10 @@ export type MySubscribeRequest = SubscribeRequest & {
   onEvent?: (event: TrustedEvent) => void
   onComplete?: () => void
   skipCache?: boolean
+  forcePlatform?: boolean
 }
 
-export const subscribe = (request: MySubscribeRequest) => {
+export const subscribe = ({forcePlatform = true, ...request}: MySubscribeRequest) => {
   const events = []
 
   // If we already have all results for any filter, don't send the filter to the network
@@ -1495,6 +1470,10 @@ export const subscribe = (request: MySubscribeRequest) => {
     request.filters.push(filter)
   }
 
+  request.relays = forcePlatform
+    ? forcePlatformRelays(request.relays)
+    : withPlatformRelays(request.relays)
+
   if (!request.skipCache) {
     request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
   }
@@ -1512,7 +1491,7 @@ export const subscribe = (request: MySubscribeRequest) => {
     sub.emitter.on("complete", request.onComplete)
   }
 
-  // Keep it async so the caller can set up handlers
+  // Keep cached results async so the caller can set up handlers
   setTimeout(() => {
     for (const event of events) {
       sub.emitter.emit("event", LOCAL_RELAY_URL, event)
@@ -1562,7 +1541,15 @@ export const loadOne = (request: MySubscribeRequest) =>
     })
   })
 
-export const publish = (request: PublishRequest) => {
+export type MyPublishRequest = PublishRequest & {
+  forcePlatform?: boolean
+}
+
+export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
+  request.relays = forcePlatform
+    ? forcePlatformRelays(request.relays)
+    : withPlatformRelays(request.relays)
+
   // Make sure it gets published to our repository as well. We do it via our local
   // relay rather than directly so that listening subscriptions get notified.
   request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
@@ -1605,6 +1592,7 @@ export type CreateAndPublishOpts = {
   sk?: string
   timeout?: number
   verb?: "EVENT" | "AUTH"
+  forcePlatform?: boolean
 }
 
 export const createAndPublish = async ({
@@ -1616,11 +1604,12 @@ export const createAndPublish = async ({
   sk,
   timeout,
   verb,
+  forcePlatform = true,
 }: CreateAndPublishOpts) => {
   const template = createEvent(kind, {content, tags})
   const event = await sign(template, {anonymous, sk})
 
-  return publish({event, relays, verb, timeout})
+  return publish({event, relays, verb, timeout, forcePlatform})
 }
 
 export const tracker = new Tracker()
@@ -1787,7 +1776,7 @@ export const dvmRequest = async ({
 
   tags = tags.concat([["expiration", String(now() + seconds(1, "hour"))]])
 
-  const pub = await createAndPublish({kind, relays, sk, tags})
+  const pub = await createAndPublish({kind, relays, sk, tags, forcePlatform: false})
 
   onPublish?.(pub)
 
@@ -1858,8 +1847,8 @@ export class ThreadLoader {
 
     if (filteredIds.length > 0) {
       load({
-        relays: withFallbacks(this.relays),
         filters: getIdFilters(filteredIds),
+        relays: hints.fromRelays(this.relays).getUrls(),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(getAncestorIds))

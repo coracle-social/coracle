@@ -20,7 +20,6 @@
     subscribe,
     feedLoader,
     getFilterSelections,
-    forcePlatformRelaySelections,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -72,9 +71,8 @@
 
   onMount(async () => {
     const [{filters}] = await feedLoader.compiler.compile(feed)
-    const selections = getFilterSelections(filters)
 
-    subs = forcePlatformRelaySelections(selections).map(({relay, filters}) =>
+    subs = getFilterSelections(filters).map(({relay, filters}) =>
       subscribe({relays: [relay], filters, onEvent}),
     )
   })

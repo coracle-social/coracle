@@ -100,7 +100,9 @@
             <slot name="note-content" {quote} />
           </div>
         </NoteContentQuote>
-      {:else if !isEllipsis(parsed)}
+      {:else if !expandable && isEllipsis(parsed)}
+        {@html renderParsed(parsed)}
+      {:else}
         {@html renderParsed(parsed)}
       {/if}
     {/each}

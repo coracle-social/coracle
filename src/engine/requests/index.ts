@@ -53,7 +53,6 @@ import {
   dvmRequest,
   env,
   getFollows,
-  forcePlatformRelays,
   getFilterSelections,
   getFollowers,
   getUserCommunities,
@@ -72,7 +71,6 @@ import {
   session,
   subscribe,
   subscribePersistent,
-  withFallbacks,
   dufflepud,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
@@ -178,11 +176,9 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
   if (addrs.length > 0) {
     const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
-    const relays = forcePlatformRelays(
-      hints
-        .merge([hints.product(addrs, explicitRelays), hints.WithinMultipleContexts(addrs)])
-        .getUrls(),
-    )
+    const relays = hints
+      .merge([hints.product(addrs, explicitRelays), hints.WithinMultipleContexts(addrs)])
+      .getUrls()
 
     return load({relays, filters, skipCache: true})
   }
@@ -233,10 +229,13 @@ export const dereferenceNote = async ({
   relays = [],
   context = [],
 }) => {
-  relays = withFallbacks(relays)
+  relays = hints.fromRelays(relays).getUrls()
 
   if (eid) {
-    return context.find(whereEq({id: eid})) || loadOne({relays, filters: getIdFilters([eid])})
+    return (
+      context.find(whereEq({id: eid})) ||
+      loadOne({relays, filters: getIdFilters([eid]), forcePlatform: false})
+    )
   }
 
   if (kind && pubkey) {
@@ -245,7 +244,7 @@ export const dereferenceNote = async ({
 
     return (
       context.find(e => whereEq(addrData, {...e, identifier: fromPairs(e.tags).d || ""})) ||
-      loadOne({relays, filters: getIdFilters([address])})
+      loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
     )
   }
 
@@ -274,6 +273,7 @@ export const createPeopleLoader = ({
         load({
           onEvent,
           skipCache: true,
+          forcePlatform: false,
           relays: getNip50Relays().slice(0, 8),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
@@ -290,7 +290,7 @@ export const createPeopleLoader = ({
 export const feedLoader = new FeedLoader<TrustedEvent>({
   request: async ({relays, filters, onEvent}) => {
     if (relays?.length > 0) {
-      await load({filters, relays, onEvent, skipCache: true})
+      await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
     } else {
       await Promise.all(
         getFilterSelections(filters).map(({relay, filters}) =>
@@ -376,7 +376,7 @@ export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
 export const sync = (fromUrl, toUrl, filters) => {
   const worker = new Worker<SignedEvent>()
 
-  worker.addGlobalHandler(event => publish({event, relays: [toUrl]}))
+  worker.addGlobalHandler(event => publish({event, relays: [toUrl], forcePlatform: false}))
 
   const feed = makeIntersectionFeed(
     makeRelayFeed(fromUrl),
@@ -478,6 +478,7 @@ export const listenForNotifications = () => {
 export const loadLabels = (authors: string[]) =>
   load({
     skipCache: true,
+    forcePlatform: false,
     relays: hints.FromPubkeys(authors).getUrls(),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
@@ -485,6 +486,7 @@ export const loadLabels = (authors: string[]) =>
 export const loadDeletes = () =>
   load({
     skipCache: true,
+    forcePlatform: false,
     relays: hints.User().getUrls(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
@@ -499,6 +501,7 @@ export const loadSeen = () =>
 export const loadFeedsAndLists = () =>
   load({
     skipCache: true,
+    forcePlatform: false,
     relays: hints.WriteRelays().getUrls(),
     filters: [
       addSinceToFilter({kinds: [FEED, NAMED_BOOKMARKS, ...LIST_KINDS], authors: [pubkey.get()]}),
@@ -512,7 +515,9 @@ export const loadGiftWraps = ({reload = false} = {}) => {
     filter = addSinceToFilter(filter, seconds(7, "day"))
   }
 
-  return loadAll(makeUnionFeed(feedFromFilter(filter)))
+  return loadAll(
+    makeIntersectionFeed(makeRelayFeed(...hints.User().getUrls()), feedFromFilter(filter)),
+  )
 }
 
 export const loadLegacyMessages = ({reload = false} = {}) => {
@@ -525,7 +530,12 @@ export const loadLegacyMessages = ({reload = false} = {}) => {
     filters = filters.map(addSinceToFilter)
   }
 
-  return loadAll(makeUnionFeed(...filters.map(feedFromFilter)))
+  return loadAll(
+    makeIntersectionFeed(
+      makeRelayFeed(...hints.User().getUrls()),
+      makeUnionFeed(...filters.map(feedFromFilter)),
+    ),
+  )
 }
 
 export const listenForMessages = (pubkeys: string[]) => {
@@ -533,6 +543,7 @@ export const listenForMessages = (pubkeys: string[]) => {
 
   return subscribePersistent({
     skipCache: true,
+    forcePlatform: false,
     relays: hints.Messages(pubkeys).getUrls(),
     filters: [
       addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(7, "day")),
@@ -545,6 +556,7 @@ export const listenForMessages = (pubkeys: string[]) => {
 export const loadHandlers = () =>
   load({
     skipCache: true,
+    forcePlatform: false,
     relays: hints.ReadRelays().getUrls(),
     filters: [
       addSinceToFilter({

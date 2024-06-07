@@ -20,7 +20,6 @@
     publish,
     getClientTags,
     tagsFromContent,
-    forcePlatformRelays,
     publishToZeroOrMoreGroups,
     getReplyTags,
   } from "src/engine"
@@ -82,10 +81,7 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      publish({
-        event: parent,
-        relays: forcePlatformRelays(hints.PublishEvent(parent).getUrls()),
-      })
+      publish({event: parent, relays: hints.PublishEvent(parent).getUrls()})
     }
 
     const template = createEvent(1, {content, tags})

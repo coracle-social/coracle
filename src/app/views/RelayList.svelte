@@ -29,7 +29,6 @@
     getPubkeyRelayPolicies,
     sortEventsDesc,
     joinRelay,
-    broadcastUserData,
     loadPubkeyRelays,
   } from "src/engine"
 
@@ -88,7 +87,6 @@
       showWarning("Please provide a valid relay url")
     } else {
       joinRelay(url)
-      broadcastUserData([url])
       closeModal()
     }
   }
@@ -107,8 +105,10 @@
   let customRelay = ""
   let currentRelayPolicies = $userRelayPolicies
 
-  $: currentRelayPolicies =
-    sortBy(prop("url"), uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)))
+  $: currentRelayPolicies = sortBy(
+    prop("url"),
+    uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)),
+  )
 
   $: ratings = groupBy(e => {
     try {

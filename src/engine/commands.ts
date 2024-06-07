@@ -57,7 +57,6 @@ import {
   displayProfileByPubkey,
   getSettings,
   env,
-  forcePlatformRelays,
   getClientTags,
   groupAdminKeys,
   groupSharedKeys,
@@ -318,10 +317,12 @@ const addATags = (template, addresses) => ({
   tags: [...template.tags, ...addresses.map(a => ["a", a])],
 })
 
-// Utils for publishing
+// Utils for publishing group-related messages
+// Relay selections for groups should ignore platform relays, since groups provide their own
+// relays, and can straddle public/private contexts.
 
 export const publishToGroupAdmin = async (address, template) => {
-  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
+  const relays = hints.WithinContext(address).getUrls()
   const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
 
   for (const pubkey of pubkeys) {
@@ -334,21 +335,21 @@ export const publishToGroupAdmin = async (address, template) => {
     })
 
     for (const rumor of rumors) {
-      publish({event: rumor.wrap, relays})
+      publish({event: rumor.wrap, relays, forcePlatform: false})
     }
   }
 }
 
 export const publishAsGroupAdminPublicly = async (address, template) => {
-  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const event = await sign(template, {sk: adminKey.privkey})
 
-  return publish({event, relays})
+  return publish({event, relays, forcePlatform: false})
 }
 
 export const publishAsGroupAdminPrivately = async (address, template) => {
-  const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -363,7 +364,7 @@ export const publishAsGroupAdminPrivately = async (address, template) => {
   const pubs = []
 
   for (const rumor of rumors) {
-    pubs.push(publish({event: rumor.wrap, relays}))
+    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
   }
 
   return pubs
@@ -377,16 +378,16 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
   }
 
   const event = await sign(addATags(template, addresses), {anonymous})
-  const relays = forcePlatformRelays(hints.PublishEvent(event).getUrls())
+  const relays = hints.PublishEvent(event).getUrls()
 
-  return publish({event, relays})
+  return publish({event, relays, forcePlatform: false})
 }
 
 export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
   const events = []
   const pubs = []
   for (const address of addresses) {
-    const relays = forcePlatformRelays(hints.WithinContext(address).getUrls())
+    const relays = hints.WithinContext(address).getUrls()
     const thisTemplate = addATags(template, [address])
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -408,7 +409,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
 
     for (const rumor of rumors) {
       events.push(rumor)
-      pubs.push(publish({event: rumor.wrap, relays}))
+      pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
     }
   }
 
@@ -421,7 +422,7 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
 
   if (addresses.length === 0) {
     const event = await sign(template, {anonymous})
-    const relays = forcePlatformRelays(hints.PublishEvent(event).getUrls())
+    const relays = hints.PublishEvent(event).getUrls()
 
     events.push(event)
     pubs.push(publish({event, relays}))
@@ -477,7 +478,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
     })
 
     for (const rumor of rumors) {
-      pubs.push(publish({event: rumor.wrap, relays}))
+      pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
     }
   }
 
@@ -629,7 +630,7 @@ export const publishCommunitiesList = addresses =>
   createAndPublish({
     kind: 10004,
     tags: [...addresses.map(a => ["a", a]), ...getClientTags()],
-    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+    relays: hints.WriteRelays().getUrls(),
   })
 
 // Deletes
@@ -638,7 +639,8 @@ export const publishDeletion = ids =>
   createAndPublish({
     kind: 5,
     tags: ids.map(id => [id.includes(":") ? "a" : "e", id]),
-    relays: forcePlatformRelays(hints.WriteRelays().getUrls()),
+    relays: hints.WriteRelays().getUrls(),
+    forcePlatform: false,
   })
 
 export const publishDeletionForEvent = event => publishDeletion(getIdAndAddress(event))
@@ -650,7 +652,8 @@ export const publishProfile = profile =>
     kind: 0,
     tags: getClientTags(),
     content: JSON.stringify(profile),
-    relays: forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls())),
+    relays: withIndexers(hints.WriteRelays().getUrls()),
+    forcePlatform: false,
   })
 
 // Singletons
@@ -674,7 +677,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   // Preserve content instead of use encrypted tags because kind 3 content is used for
   // relay selections in many places. Content isn't supported for mutes or relays so this is ok
   const content = event?.content || ""
-  const relays = forcePlatformRelays(withIndexers(hints.WriteRelays().getUrls()))
+  const relays = withIndexers(hints.WriteRelays().getUrls())
   const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())
 
   let encryptable
@@ -727,6 +730,7 @@ export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(ta
 export const requestRelayAccess = async (url: string, claim: string, sk?: string) =>
   createAndPublish({
     kind: 28934,
+    forcePlatform: false,
     tags: [["claim", claim]],
     relays: [url],
     sk,
@@ -755,7 +759,14 @@ export const setRelayPolicy = ({url, read, write}: RelayPolicy) =>
     return $tags
   })
 
-export const leaveRelay = (url: string) => setRelayPolicy({url, read: false, write: false})
+export const leaveRelay = async (url: string) => {
+  await setRelayPolicy({url, read: false, write: false})
+
+  // Make sure the new relay selections get to the old relay
+  if (pubkey.get()) {
+    broadcastUserData([url])
+  }
+}
 
 export const joinRelay = async (url: string, claim?: string) => {
   url = normalizeRelayUrl(url)
@@ -837,6 +848,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
     tags: [mention(recipient), ...getClientTags()],
     content: await nip04.get().encryptAsUser(content, recipient),
     relays: hints.PublishMessage(recipient).getUrls(),
+    forcePlatform: false,
   })
 }
 
@@ -860,6 +872,7 @@ export const sendMessage = async (channelId: string, content: string) => {
     publish({
       event: rumor.wrap,
       relays: hints.merge(recipients.map(hints.PublishMessage)).getUrls(),
+      forcePlatform: false,
     })
   }
 }
@@ -964,6 +977,7 @@ export const setAppData = async (d: string, data: any) => {
       tags: [["d", d]],
       content: await nip04.get().encryptAsUser(JSON.stringify(data), pubkey),
       relays: hints.WriteRelays().getUrls(),
+      forcePlatform: false,
     })
   }
 }
@@ -998,7 +1012,7 @@ export const broadcastUserData = (relays: string[]) => {
 
   for (const event of events) {
     if (isSignedEvent(event)) {
-      publish({event, relays})
+      publish({event, relays, forcePlatform: false})
     }
   }
 }

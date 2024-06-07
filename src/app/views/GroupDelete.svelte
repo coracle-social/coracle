@@ -18,6 +18,7 @@
       tags: [["a", address]],
       relays: hints.WithinContext(address).getUrls(),
       sk: $adminKey.privkey,
+      forcePlatform: false,
     })
 
     showInfo("Group deleted!")

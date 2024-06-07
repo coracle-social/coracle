@@ -111,7 +111,7 @@
     </p>
   {/if}
   {#if failed}
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-between gap-2">
       <Anchor button on:click={tryDefaultRelays}>Try again</Anchor>
       <Anchor button accent on:click={() => openModal("custom_relay")}
         >Select relays manually</Anchor>

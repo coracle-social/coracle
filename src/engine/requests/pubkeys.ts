@@ -76,6 +76,7 @@ const loadPubkeysThrottled = batch(
 
         return load({
           skipCache: true,
+          forcePlatform: false,
           filters: getFiltersForKey(key, authors),
           relays: withIndexers(hints.FromPubkeys(authors).getUrls()),
         })

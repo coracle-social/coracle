@@ -12,7 +12,7 @@
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
   import {displayRelayUrl, RelayMode} from "src/domain"
-  import {relays, canSign, getSetting, setRelayPolicy, deriveUserRelayPolicy} from "src/engine"
+  import {deriveRelay, canSign, getSetting, setRelayPolicy, deriveUserRelayPolicy} from "src/engine"
 
   export let url
   export let claim = null
@@ -23,7 +23,7 @@
   export let showControls = false
   export let inert = false
 
-  const relay = relays.key(url)
+  const relay = deriveRelay(url)
   const policy = deriveUserRelayPolicy(url)
 
   const policySetter = mode => () => setRelayPolicy({...$policy, [mode]: !$policy[mode]})

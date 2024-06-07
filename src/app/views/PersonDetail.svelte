@@ -92,9 +92,9 @@
 {#if $userMutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
-  <Feed showGroup skipPlatform feed={notesFeed} />
+  <Feed showGroup forcePlatform={false} feed={notesFeed} />
 {:else if activeTab === "likes"}
-  <Feed showGroup feed={likesFeed} />
+  <Feed showGroup forcePlatform={false} feed={likesFeed} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

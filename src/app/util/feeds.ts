@@ -25,8 +25,6 @@ import {
   isEventMuted,
   repository,
   hints,
-  forcePlatformRelays,
-  forcePlatformRelaySelections,
   addRepostFilters,
   getFilterSelections,
   subscribe,
@@ -39,7 +37,7 @@ export type FeedOpts = {
   anchor?: string
   skipCache?: boolean
   skipNetwork?: boolean
-  skipPlatform?: boolean
+  forcePlatform?: boolean
   shouldDefer?: boolean
   shouldListen?: boolean
   shouldHideReplies?: boolean
@@ -79,11 +77,7 @@ export class FeedLoader {
         }
 
         if (!opts.skipNetwork) {
-          let selections = getFilterSelections(filters)
-
-          if (!opts.skipPlatform) {
-            selections = forcePlatformRelaySelections(selections)
-          }
+          const selections = getFilterSelections(filters)
 
           for (const {relay, filters} of selections) {
             yield {filters, relays: [relay]}
@@ -98,10 +92,12 @@ export class FeedLoader {
       request: async ({relays, filters, onEvent}) => {
         const tracker = new Tracker()
         const signal = this.controller.signal
+        const skipCache = Boolean(relays)
+        const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
 
         await Promise.all(
           Array.from(getRequestItems({relays, filters})).map(opts =>
-            load({...opts, onEvent, tracker, signal, skipCache: Boolean(relays)}),
+            load({...opts, onEvent, tracker, signal, skipCache, forcePlatform}),
           ),
         )
       },
@@ -118,8 +114,17 @@ export class FeedLoader {
         const onEvent = this.onEvent(this.prependToFeed)
 
         for (const {relays, filters} of requests) {
+          const forcePlatform = opts.forcePlatform && relays.length === 0
+
           for (const request of Array.from(getRequestItems({relays, filters}))) {
-            subscribe({...request, onEvent, tracker, signal, skipCache: opts.skipCache})
+            subscribe({
+              ...request,
+              onEvent,
+              tracker,
+              signal,
+              skipCache: opts.skipCache,
+              forcePlatform,
+            })
           }
         }
       })
@@ -131,9 +136,7 @@ export class FeedLoader {
   start = () => {
     const loadOpts = {
       onEvent: this.onEvent(this.appendToFeed),
-      onExhausted: () => {
-        this.done.set(true)
-      },
+      onExhausted: () => this.done.set(true),
     }
 
     this.loader = this.compiled
@@ -217,13 +220,14 @@ export class FeedLoader {
     })
 
     const {signal} = this.controller
-    const selections = hints.merge(notesWithParent.map(hints.EventParents)).getSelections()
 
-    for (const {relay, values} of selections) {
+    for (const {relay, values} of hints
+      .merge(notesWithParent.map(hints.EventParents))
+      .getSelections()) {
       load({
+        signal,
+        relays: [relay],
         filters: getIdFilters(values),
-        signal: this.controller.signal,
-        relays: this.opts.skipPlatform ? [relay] : forcePlatformRelays([relay]),
         onEvent: batch(100, async events => {
           if (signal.aborted) {
             return
