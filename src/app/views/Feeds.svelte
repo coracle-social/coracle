@@ -27,4 +27,4 @@
   </div>
 {/if}
 
-<Feed skipCache showGroup showControls={!isPlatformFeed} bind:feed={$globalFeed} />
+<Feed showGroup showControls={!isPlatformFeed} bind:feed={$globalFeed} />

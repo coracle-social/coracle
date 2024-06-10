@@ -60,5 +60,5 @@
 {#if activeTab === "reviews"}
   <Feed onEvent={onReview} feed={reviewsFeed} />
 {:else}
-  <Feed skipCache feed={notesFeed} />
+  <Feed feed={notesFeed} />
 {/if}

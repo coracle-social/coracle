@@ -10,7 +10,6 @@ import {
   getIdAndAddress,
   getIdFilters,
   isContextAddress,
-  LOCAL_RELAY_URL,
   DIRECT_MESSAGE,
   REACTION,
 } from "@welshman/util"
@@ -38,7 +37,6 @@ import {
 export type FeedOpts = {
   feed?: Feed
   anchor?: string
-  skipCache?: boolean
   skipNetwork?: boolean
   forcePlatform?: boolean
   shouldDefer?: boolean
@@ -61,18 +59,11 @@ function* getRequestItems({relays, filters}, opts: FeedOpts) {
   // Use relays specified in feeds
   if (relays?.length > 0) {
     yield {filters, relays}
-  } else {
-    // Even though this is handled by subscribe we need to include it so there's something to send
-    if (!opts.skipCache) {
-      yield {filters, relays: [LOCAL_RELAY_URL]}
-    }
+  } else if (!opts.skipNetwork) {
+    const selections = getFilterSelections(filters)
 
-    if (!opts.skipNetwork) {
-      const selections = getFilterSelections(filters)
-
-      for (const {relay, filters} of selections) {
-        yield {filters, relays: [relay]}
-      }
+    for (const {relay, filters} of selections) {
+      yield {filters, relays: [relay]}
     }
   }
 }
@@ -83,14 +74,23 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
     ...baseFeedLoader.options,
     request: async ({relays, filters, onEvent}) => {
       const tracker = new Tracker()
-      const skipCache = Boolean(relays)
-      const forcePlatform = opts.forcePlatform && (relays?.length || 0) === 0
+      const forceRelays = relays?.length > 0
+      const forcePlatform = opts.forcePlatform && !forceRelays
 
       await Promise.all(
         Array.from(getRequestItems({relays, filters}, opts)).map(opts =>
-          load({...opts, onEvent, tracker, signal, skipCache, forcePlatform}),
+          load({...opts, onEvent, tracker, signal, skipCache: true, forcePlatform}),
         ),
       )
+
+      // Wait until after we've queried the network to access our local cache. This results in less
+      // snappy response times, but is necessary to prevent stale stuff that the user has already seen
+      // from showing up at the top of the feed
+      if (!forceRelays) {
+        for (const event of repository.query(filters)) {
+          onEvent(event)
+        }
+      }
     },
   })
 
@@ -113,11 +113,9 @@ export const createFeed = (opts: FeedOpts) => {
     filters = reqs?.flatMap(r => r.filters || [])
     delta = filters ? guessFilterDelta(filters) : seconds(24, "hour")
 
-    loader = await (
-      reqs
-        ? welshman.getRequestsLoader(reqs, {onEvent: appendEvent, onExhausted})
-        : welshman.getLoader(opts.feed, {onEvent: appendEvent, onExhausted})
-    )
+    loader = await (reqs
+      ? welshman.getRequestsLoader(reqs, {onEvent: appendEvent, onExhausted})
+      : welshman.getLoader(opts.feed, {onEvent: appendEvent, onExhausted}))
 
     if (reqs && opts.shouldListen) {
       const tracker = new Tracker()
@@ -127,9 +125,9 @@ export const createFeed = (opts: FeedOpts) => {
           subscribe({
             ...request,
             tracker,
+            skipCache: true,
             onEvent: prependEvent,
             signal: controller.signal,
-            skipCache: opts.skipCache,
             forcePlatform: opts.forcePlatform && (relays?.length || 0) === 0,
           })
         }

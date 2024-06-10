@@ -15,7 +15,6 @@
   export let anchor = null
   export let eager = false
   export let contextAddress = null
-  export let skipCache = false
   export let skipNetwork = false
   export let forcePlatform = true
   export let shouldListen = false
@@ -33,7 +32,6 @@
     loader = createFeed({
       anchor,
       onEvent,
-      skipCache,
       skipNetwork,
       forcePlatform,
       shouldListen,
