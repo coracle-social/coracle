@@ -94,7 +94,7 @@
           : await signer.get().signAsUser(template)
         const zapString = encodeURI(JSON.stringify(signedTemplate))
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCatch(() => Fetch.fetchJson(zapper.info.callback + qs))
+        const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
 
         return {...zap, invoice: res?.pr}
       }),
@@ -128,7 +128,7 @@
       load({
         relays,
         onEvent: callback,
-        filters: [{kinds: [9735], authors: [zapper.info.nostrPubkey], "#p": [pubkey], since}],
+        filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since}],
       })
     }
   }
