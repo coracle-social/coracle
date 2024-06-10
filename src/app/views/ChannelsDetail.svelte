@@ -147,11 +147,7 @@
           <div slot="tooltip" class="flex flex-col gap-2">
             <p>
               This message was sent using nostr's new group chat specification, which solves several
-              problems with legacy DMs. Read more <Anchor
-                underline
-                external
-                href="https://habla.news/u/hodlbod@welshman/0gmn3DDizCIesG-PCD-JK">here</Anchor
-              >.
+              problems with legacy DMs. Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
             </p>
             <p>
               Note that these messages are not yet universally supported. Make sure the person

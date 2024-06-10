@@ -8,7 +8,7 @@
 
   const topics = ["web-of-trust", "nip-44-dms"]
   const nip44Url = "https://github.com/nostr-protocol/nips/blob/master/44.md"
-  const nip17Url = "https://github.com/nostr-protocol/nips/pull/686"
+  const nip17Url = "https://github.com/nostr-protocol/nips/blob/master/17.md"
 </script>
 
 {#if topics.includes(topic)}
