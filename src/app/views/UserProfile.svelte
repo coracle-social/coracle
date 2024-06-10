@@ -10,7 +10,7 @@
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
-  const lud16Url = "https://blog.getalby.com/create-your-neutral-300ning-address/"
+  const lud16Url = "https://lightningaddress.com/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
@@ -54,8 +54,8 @@
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
-        Enter a <Anchor class="underline" external href={lud16Url}>LUD-16</Anchor> address to enable
-        sending and receiving lightning tips (LUD-06 will also work).
+        Enter a <Anchor class="underline" external href={lud16Url}>lightning address</Anchor> to enable
+        sending and receiving bitcoin tips.
       </div>
     </Field>
     <Field label="Website">
