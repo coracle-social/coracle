@@ -51,7 +51,7 @@
       results = followed.concat(notFollowed)
     }
 
-    suggestions.setData(results.slice(0, 5))
+    suggestions.setData(results)
   })
 
   const getInfo = () => {

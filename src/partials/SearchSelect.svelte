@@ -25,7 +25,7 @@
   let input, suggestions
   let focused = autofocus
 
-  $: suggestions?.setData?.(term ? search(String(term)).slice(0, 10) : defaultOptions)
+  $: suggestions?.setData?.(term ? search(String(term)) : defaultOptions)
 
   export const clear = () => {
     clearValue()

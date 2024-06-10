@@ -54,7 +54,7 @@
         <i class="fa fa-plus" />Use "{term}"
       </button>
     {/if}
-    {#each data as item, i (getKey(item))}
+    {#each data.slice(0, 30) as item, i (getKey(item))}
       <button
         class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"
         class:bg-neutral-800={index !== i}
