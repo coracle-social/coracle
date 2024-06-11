@@ -5,6 +5,7 @@
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
+  import RelayCard from "src/app/shared/RelayCard.svelte"
   import {groups, deriveAdminKeyForGroup, getGroupNaddr} from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -44,4 +45,13 @@
       </Popover>
     </div>
   </CopyValue>
+{/if}
+{#if $group.relays?.length > 0}
+  <h1 class="staatliches text-2xl">Relays</h1>
+  <p>This group uses the following relays:</p>
+  <div class="flex flex-col gap-2">
+    {#each $group.relays as url}
+      <RelayCard {url} />
+    {/each}
+  </div>
 {/if}

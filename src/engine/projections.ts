@@ -208,7 +208,7 @@ projections.addHandler(10004, (e: TrustedEvent) => {
 
   const addresses = Tags.fromEvent(e).communities().values().valueOf()
 
-  for (const address of uniq(Object.keys(session.groups?.values || {}).concat(addresses))) {
+  for (const address of uniq(Object.keys(session.groups || {}).concat(addresses))) {
     session = modifyGroupStatus(session, address, e.created_at, {
       joined: addresses.includes(address),
     })
