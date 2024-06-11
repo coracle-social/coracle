@@ -55,15 +55,18 @@ export const deriveEventsMapped = <T>({
     setter(data)
 
     const onUpdate = batch(300, (updates: {added: TrustedEvent[]; removed: Set<string>}[]) => {
+      const debug = import.meta.env.VITE_DEBUG === "true"
+      const currentEventIds = new Set(data.map(item => itemToEvent(item).id))
       const removed = new Set(updates.flatMap(r => Array.from(r.removed)))
       const added = updates.flatMap(r => r.added)
+      const copy = debug ? {...data} : data
 
       let dirty = false
       for (const event of added) {
         if (matchFilters(filters, event)) {
           const item = eventToItem(event)
 
-          if (item) {
+          if (item && (debug || !currentEventIds.has(event.id))) {
             dirty = true
             data.push(item)
           }
@@ -83,8 +86,10 @@ export const deriveEventsMapped = <T>({
       }
 
       if (dirty) {
-        if (new Set(data.map(item => itemToEvent(item).id)).size < data.length) {
-          console.error(`Duplicate records found:`, data, updates)
+        if (debug) {
+          if (new Set(data.map(item => itemToEvent(item).id)).size < data.length) {
+            console.error(`Duplicate records found:`, copy, data, updates)
+          }
         }
 
         setter(data)
