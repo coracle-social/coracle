@@ -59,7 +59,7 @@ export const deriveEventsMapped = <T>({
       const currentEventIds = new Set(data.map(item => itemToEvent(item).id))
       const removed = new Set(updates.flatMap(r => Array.from(r.removed)))
       const added = updates.flatMap(r => r.added)
-      const copy = debug ? {...data} : data
+      const copy = debug ? [...data] : data
 
       let dirty = false
       for (const event of added) {
