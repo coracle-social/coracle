@@ -47,7 +47,7 @@ export type FeedOpts = {
   onEvent?: (e: TrustedEvent) => void
 }
 
-function* getRequestItems({relays, filters}, opts: FeedOpts) {
+const prepFilters = (filters, opts: FeedOpts) => {
   // Default to note kinds
   filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
@@ -55,6 +55,12 @@ function* getRequestItems({relays, filters}, opts: FeedOpts) {
   if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
     filters = addRepostFilters(filters)
   }
+
+  return filters
+}
+
+function* getRequestItems({relays, filters}, opts: FeedOpts) {
+  filters = prepFilters(filters, opts)
 
   // Use relays specified in feeds
   if (relays?.length > 0) {
@@ -87,7 +93,7 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
       // snappy response times, but is necessary to prevent stale stuff that the user has already seen
       // from showing up at the top of the feed
       if (!forceRelays) {
-        for (const event of repository.query(filters)) {
+        for (const event of repository.query(prepFilters(filters, opts))) {
           onEvent(event)
         }
       }
@@ -107,6 +113,7 @@ export const createFeed = (opts: FeedOpts) => {
   const welshman = createFeedLoader(opts, controller.signal)
   const appendEvent = onEvent(appendToFeed)
   const prependEvent = onEvent(prependToFeed)
+  const loaderOpts = {useWindowing: true, onEvent: appendEvent, onExhausted}
 
   let filters, delta, loader
   Promise.resolve(tryFunc(() => welshman.compiler.compile(opts.feed))).then(async reqs => {
@@ -114,8 +121,8 @@ export const createFeed = (opts: FeedOpts) => {
     delta = filters ? guessFilterDelta(filters) : seconds(24, "hour")
 
     loader = await (reqs
-      ? welshman.getRequestsLoader(reqs, {onEvent: appendEvent, onExhausted})
-      : welshman.getLoader(opts.feed, {onEvent: appendEvent, onExhausted}))
+      ? welshman.getRequestsLoader(reqs, loaderOpts)
+      : welshman.getLoader(opts.feed, loaderOpts))
 
     if (reqs && opts.shouldListen) {
       const tracker = new Tracker()
