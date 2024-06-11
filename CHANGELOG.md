@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.7
+
+- [x] Show toast when offline
+
 # 0.4.6
 
 - [x] Improve search results loading indicator

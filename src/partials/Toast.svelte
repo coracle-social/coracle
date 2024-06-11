@@ -21,6 +21,16 @@
   export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
 
   export const showPublishInfo = (pub, opts = {}) => showToast({pub, type: "publish", ...opts})
+
+  window.addEventListener('online', () => {
+    if (toast.get()?.id === 'offline') {
+      toast.set(null)
+    }
+  })
+
+  window.addEventListener('offline', () => {
+    showInfo("You are currently offline.", {id: 'offline', timeout: null})
+  })
 </script>
 
 <script lang="ts">
