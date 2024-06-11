@@ -65,8 +65,8 @@
 
   let subMenu
 
-  $: isFeedPage = Boolean($page.path.match(/^\/(notes)?$/))
-  $: isListPage = Boolean($page.path.match(/^\/(lists)?$/))
+  $: isFeedPage = Boolean($page?.path.match(/^\/(notes)?$/))
+  $: isListPage = Boolean($page?.path.match(/^\/(lists)?$/))
 </script>
 
 <div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
