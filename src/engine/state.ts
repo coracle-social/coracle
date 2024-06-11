@@ -127,7 +127,6 @@ import {
 } from "src/domain"
 import type {
   Channel,
-  DisplayEvent,
   Group,
   GroupAlert,
   GroupKey,
@@ -1389,7 +1388,7 @@ export const getExecutor = (urls: string[]) => {
   // AUTH with a single relay.
   let target
 
-  if (muxUrl) {
+  if (muxUrl && remoteUrls.length > 0) {
     const connection = NetworkContext.pool.get(muxUrl)
 
     if (connection.socket.isOpen()) {
@@ -1823,9 +1822,9 @@ const getAncestorIds = e => {
 
 export class ThreadLoader {
   stopped = false
-  parent = withGetter(writable<DisplayEvent>(null))
-  ancestors = withGetter(writable<DisplayEvent[]>([]))
-  root = withGetter(writable<DisplayEvent>(null))
+  parent = withGetter(writable<TrustedEvent>(null))
+  ancestors = withGetter(writable<TrustedEvent[]>([]))
+  root = withGetter(writable<TrustedEvent>(null))
 
   constructor(
     readonly note: TrustedEvent,
