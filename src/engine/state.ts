@@ -1,4 +1,6 @@
 import Fuse from "fuse.js"
+import {openDB, deleteDB} from "idb"
+import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
 import {derived, writable} from "svelte/store"
 import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
@@ -1891,134 +1893,6 @@ export class ThreadLoader {
 
 // Storage
 
-type Store = {
-  name: string
-  opts: Record<string, any>
-}
-
-class IndexedDB {
-  db: any
-
-  constructor(
-    readonly dbName: string,
-    readonly dbVersion: number,
-    readonly stores: Store[],
-  ) {}
-
-  open() {
-    return new Promise<void>((resolve, reject) => {
-      if (!window.indexedDB) {
-        reject("Unsupported indexedDB")
-      }
-
-      const request = window.indexedDB.open(this.dbName, this.dbVersion)
-
-      request.onsuccess = e => {
-        this.db = request.result
-
-        resolve()
-      }
-
-      // @ts-ignore
-      request.onerror = e => reject(e.target.error)
-
-      request.onupgradeneeded = e => {
-        // @ts-ignore
-        this.db = e.target.result
-
-        const names = pluck("name", this.stores)
-
-        Array.from(this.db.objectStoreNames as string[]).forEach((name: string) => {
-          if (!names.includes(name)) {
-            this.db.deleteObjectStore(name)
-          }
-        })
-
-        this.stores.forEach(o => {
-          try {
-            this.db.createObjectStore(o.name, o.opts)
-          } catch (e) {
-            logger.warn(e)
-          }
-        })
-      }
-    })
-  }
-
-  close() {
-    return this.db?.close()
-  }
-
-  delete() {
-    return new Promise<void>((resolve, reject) => {
-      const request = window.indexedDB.deleteDatabase(this.dbName)
-
-      request.onerror = e => reject()
-      request.onsuccess = e => resolve()
-    })
-  }
-
-  getAll(storeName): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const store = this.db.transaction(storeName).objectStore(storeName)
-      const request = store.getAll()
-
-      request.onerror = e => reject(e.target.error)
-      request.onsuccess = e => resolve(e.target.result)
-    })
-  }
-
-  async bulkPut(storeName, data) {
-    const transaction = this.db.transaction(storeName, "readwrite")
-    const store = transaction.objectStore(storeName)
-
-    return Promise.all(
-      data.map(row => {
-        return new Promise((resolve, reject) => {
-          const request = store.put(row)
-
-          request.onerror = e => reject(e.target.error)
-          request.onsuccess = e => resolve(e.target.result)
-        })
-      }),
-    )
-  }
-
-  async bulkDelete(storeName, ids) {
-    const transaction = this.db.transaction(storeName, "readwrite")
-    const store = transaction.objectStore(storeName)
-
-    return Promise.all(
-      ids.map(id => {
-        return new Promise((resolve, reject) => {
-          const request = store.delete(id)
-
-          request.onerror = e => reject(e.target.error)
-          request.onsuccess = e => resolve(e.target.result)
-        })
-      }),
-    )
-  }
-
-  clear(storeName) {
-    return new Promise((resolve, reject) => {
-      const request = this.db.transaction(storeName, "readwrite").objectStore(storeName).clear()
-
-      request.onerror = e => reject(e.target.error)
-      request.onsuccess = e => resolve(e.target.result)
-    })
-  }
-
-  count(storeName) {
-    return new Promise((resolve, reject) => {
-      const request = this.db.transaction(storeName).objectStore(storeName).count()
-
-      request.onerror = e => reject(e.target.error)
-      request.onsuccess = e => resolve(e.target.result)
-    })
-  }
-}
-
 type IndexedDBAdapterOpts = {
   limit?: number
   set?: (xs: any[]) => void
@@ -2038,7 +1912,7 @@ class IndexedDBAdapter {
   async initialize(storage: Storage) {
     const {name, key, opts} = this
     const {set, subscribe, sort, limit = 100, filter = identity, migrate = identity} = opts
-    const data = await storage.db.getAll(name)
+    const data = await storage.getAll(name)
 
     let prev: any[] = migrate(data.filter(filter))
 
@@ -2058,11 +1932,11 @@ class IndexedDBAdapter {
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
         if (newRecords.length > 0) {
-          await storage.db.bulkPut(name, newRecords)
+          await storage.bulkPut(name, newRecords)
         }
 
         if (removedRecords.length > 0) {
-          await storage.db.bulkDelete(name, removedRecords.map(prop(key)))
+          await storage.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
         // If we have much more than our limit, prune our store. This will get persisted
@@ -2077,8 +1951,10 @@ class IndexedDBAdapter {
   }
 }
 
+const DB_NAME = "nostr-engine/Storage"
+
 class Storage {
-  db: IndexedDB
+  db: IDBPDatabase
   ready = defer()
   dead = withGetter(writable(false))
 
@@ -2089,18 +1965,17 @@ class Storage {
     this.initialize()
   }
 
-  close = () => {
+  close = async () => {
     this.dead.set(true)
 
-    return this.db?.close()
+    await this.db?.close()
   }
 
-  clear = () => {
-    this.close()
-
+  clear = async () => {
     localStorage.clear()
 
-    return this.db?.delete()
+    await this.close()
+    await deleteDB(DB_NAME)
   }
 
   async initialize() {
@@ -2109,23 +1984,62 @@ class Storage {
     ) as IndexedDBAdapter[]
 
     if (window.indexedDB) {
-      const dbConfig = indexedDBAdapters.map(adapter => ({
-        name: adapter.name,
-        opts: {
-          keyPath: adapter.key,
-        },
-      }))
-
-      this.db = new IndexedDB("nostr-engine/Storage", this.version, dbConfig)
-
       window.addEventListener("beforeunload", () => this.close())
 
-      await this.db.open()
+      this.db = await openDB(DB_NAME, this.version, {
+        upgrade(db, oldVersion, newVersion, transaction, event) {
+          const names = indexedDBAdapters.map(adapter => adapter.name)
+
+          for (const name of db.objectStoreNames) {
+            if (!names.includes(name)) {
+              db.deleteObjectStore(name)
+            }
+          }
+
+          for (const adapter of indexedDBAdapters) {
+            try {
+              db.createObjectStore(adapter.name, {
+                keyPath: adapter.key,
+              })
+            } catch (e) {
+              logger.warn(e)
+            }
+          }
+        },
+      })
+
+      await Promise.all(
+        this.adapters.map(adapter => adapter.initialize(this))
+      )
     }
 
-    await Promise.all(this.adapters.map(adapter => adapter.initialize(this)))
-
     this.ready.resolve()
+  }
+
+  getAll = async (name: string) => {
+    const tx = this.db.transaction(name, "readwrite")
+    const store = tx.objectStore(name)
+    const result = await store.getAll()
+
+    await tx.done
+
+    return result
+  }
+
+  bulkPut = async (name: string, data: any[]) => {
+    const tx = this.db.transaction(name, "readwrite")
+    const store = tx.objectStore(name)
+
+    await Promise.all(data.map(item => store.put(item)))
+    await tx.done
+  }
+
+  bulkDelete = async (name: string, ids: string[]) => {
+    const tx = this.db.transaction(name, "readwrite")
+    const store = tx.objectStore(name)
+
+    await Promise.all(ids.map(id => store.delete(id)))
+    await tx.done
   }
 }
 
