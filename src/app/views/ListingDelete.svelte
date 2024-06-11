@@ -2,14 +2,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import {router} from "src/app/util/router"
-  import {publishDeletion} from "src/engine"
+  import {deleteEventByAddress} from "src/engine"
 
   export let address
 
   const onCancel = () => router.pop()
 
   const onConfirm = () => {
-    publishDeletion([address])
+    deleteEventByAddress(address)
     router.pop()
   }
 </script>

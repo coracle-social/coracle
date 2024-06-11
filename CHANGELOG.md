@@ -3,6 +3,8 @@
 # 0.4.7
 
 - [x] Show toast when offline
+- [x] Use new indexeddb wrapper
+- [x] Add `k` tag to deletions
 
 # 0.4.6
 

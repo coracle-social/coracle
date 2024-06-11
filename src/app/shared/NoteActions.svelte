@@ -47,7 +47,7 @@
     deriveHandlersForKind,
     deriveIsGroupMember,
     publishToZeroOrMoreGroups,
-    publishDeletionForEvent,
+    deleteEvent,
     getSetting,
     loadPubkeys,
     isEventMuted,
@@ -113,7 +113,7 @@
   }
 
   const deleteReaction = e => {
-    publishDeletionForEvent(e)
+    deleteEvent(e)
     removeFromContext(e)
   }
 

@@ -16,7 +16,7 @@
     relaySearch,
     searchTopicNames,
     createAndPublish,
-    publishDeletionForEvent,
+    deleteEvent,
   } from "src/engine"
   import {KindSearch, normalizeRelayUrl, createList, displayList, editList} from "src/domain"
 
@@ -34,7 +34,7 @@
   }
 
   const confirmDelete = () => {
-    publishDeletionForEvent(list.event)
+    deleteEvent(list.event)
     exit()
   }
 

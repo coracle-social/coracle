@@ -3,11 +3,11 @@ import {get} from "svelte/store"
 import {cached, append, nthEq, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
+  getAddress,
   Tags,
   createEvent,
   getLnUrl,
   Address,
-  getIdAndAddress,
   isSignedEvent,
   normalizeRelayUrl,
   FOLLOWS,
@@ -635,15 +635,30 @@ export const publishCommunitiesList = addresses =>
 
 // Deletes
 
-export const publishDeletion = ids =>
-  createAndPublish({
+export const publishDeletion = ({kind, address = null, id = null}) => {
+  const tags = [["k", String(kind)]]
+
+  if (address) {
+    tags.push(["a", address])
+  }
+
+  if (id) {
+    tags.push(["e", id])
+  }
+
+  return createAndPublish({
+    tags,
     kind: 5,
-    tags: ids.map(id => [id.includes(":") ? "a" : "e", id]),
     relays: hints.WriteRelays().getUrls(),
     forcePlatform: false,
   })
+}
 
-export const publishDeletionForEvent = event => publishDeletion(getIdAndAddress(event))
+export const deleteEvent = event =>
+  publishDeletion({id: event.id, address: getAddress(event), kind: event.kind})
+
+export const deleteEventByAddress = address =>
+  publishDeletion({address, kind: Address.from(address).kind})
 
 // Profile
 

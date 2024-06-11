@@ -11,7 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {canSign, publishDeletionForEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
+  import {canSign, deleteEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -46,7 +46,7 @@
   }
 
   const confirmDelete = () => {
-    publishDeletionForEvent(feed.event || feed.list.event)
+    deleteEvent(feed.event || feed.list.event)
     exit()
   }
 

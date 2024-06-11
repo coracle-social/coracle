@@ -12,7 +12,7 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, displayList, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {userListFeeds, canSign, publishDeletion, userFeeds} from "src/engine"
+  import {userListFeeds, canSign, deleteEvent, userFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -64,7 +64,7 @@
   const exitForm = event => {
     if (event) {
       if (feed.list) {
-        publishDeletion([feed.list])
+        deleteEvent(feed.list.event)
       }
 
       setFeed(readFeed(event))
