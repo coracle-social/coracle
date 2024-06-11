@@ -83,6 +83,10 @@ export const deriveEventsMapped = <T>({
       }
 
       if (dirty) {
+        if (new Set(data.map(item => itemToEvent(item).id)).size < data.length) {
+          console.error(`Duplicate records found:`, data, updates)
+        }
+
         setter(data)
       }
     })

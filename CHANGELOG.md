@@ -10,6 +10,10 @@
 - [x] Derive profiles, relay selections, follows, and mutes from event repository
 - [x] Use new welshman content parser
 - [x] Remember nip04/44 preference per conversation
+- [x] Fix some help links
+- [x] Improve feed loading speed, avoid prioritizing cached results
+- [x] Include more results in suggestions
+- [x] Avoid requesting zaps a zillion times
 
 # 0.4.5
 

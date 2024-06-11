@@ -20,86 +20,82 @@
 
   let message = ""
   let loading = false
-  let zaps = []
   let totalWeight = 0
   let totalAmount = getSetting("default_zap")
 
-  $: {
-    totalWeight = 0
-    zaps = doPipe(splits, [
-      reject((s: string[]) => s.length < 4 || s[1].length !== 64 || !s[3].match(/\d+(\.\d+)?$/)),
-      map((s: string[]) => [...s.slice(1, 3), parseFloat(s[3])]),
-      filter((s: any[]) => s[2] && s[2] > 0),
-      uniqBy((s: any[]) => s[0]),
-      map((s: any[]) => {
-        totalWeight += s[2]
+  const zaps = doPipe(splits, [
+    reject((s: string[]) => s.length < 4 || s[1].length !== 64 || !s[3].match(/\d+(\.\d+)?$/)),
+    map((s: string[]) => [...s.slice(1, 3), parseFloat(s[3])]),
+    filter((s: any[]) => s[2] && s[2] > 0),
+    uniqBy((s: any[]) => s[0]),
+    map((s: any[]) => {
+      totalWeight += s[2]
 
-        return s
-      }),
-      map(([pubkey, relay, weight]: string[]) => ({
-        relay,
-        pubkey,
-        amount: Math.round(totalAmount * (parseFloat(weight) / totalWeight)),
-        status: "pending",
-      })),
-      sortBy((split: any) => -split.amount),
-      (zaps: any[]) => {
-        const percent = getSetting("platform_zap_split")
+      return s
+    }),
+    map(([pubkey, relay, weight]: string[]) => ({
+      relay,
+      pubkey,
+      amount: Math.round(totalAmount * (parseFloat(weight) / totalWeight)),
+      status: "pending",
+    })),
+    sortBy((split: any) => -split.amount),
+    (zaps: any[]) => {
+      const percent = getSetting("platform_zap_split")
 
-        // Add our platform split on top as a "tip"
-        if (percent > 0 && totalWeight > 0) {
-          zaps.push({
-            pubkey: $env.PLATFORM_PUBKEY,
-            relay: hints.FromPubkeys([$env.PLATFORM_PUBKEY]).getUrl(),
-            amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
-            status: "pending",
-            isTip: true,
-          })
-        }
-
-        // Add our zapper and relay hints
-        return zaps.map((zap, i) => {
-          const content = i === 0 ? message : ""
-          const zapper = getZapper(zap.pubkey)
-          const relays = hints
-            .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
-            .getUrls()
-
-          return {...zap, zapper, relays, content}
+      // Add our platform split on top as a "tip"
+      if (percent > 0 && totalWeight > 0) {
+        zaps.push({
+          pubkey: $env.PLATFORM_PUBKEY,
+          relay: hints.FromPubkeys([$env.PLATFORM_PUBKEY]).getUrl(),
+          amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
+          status: "pending",
+          isTip: true,
         })
-      },
-      filter((zap: any) => zap.zapper?.lnurl),
-      // Request our invoice
-      map(async (zap: any) => {
-        const {amount, zapper, relays, content, pubkey} = zap
-        const msats = amount * 1000
-        const tags = [
-          ["relays", ...relays],
-          ["amount", msats.toString()],
-          ["lnurl", zapper.lnurl],
-          ["p", pubkey],
-        ]
+      }
 
-        if (eid) {
-          tags.push(["e", eid])
-        }
+      // Add our zapper and relay hints
+      return zaps.map((zap, i) => {
+        const content = i === 0 ? message : ""
+        const zapper = getZapper(zap.pubkey)
+        const relays = hints
+          .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
+          .getUrls()
 
-        if (anonymous) {
-          tags.push(["anon"])
-        }
+        return {...zap, zapper, relays, content}
+      })
+    },
+    filter((zap: any) => zap.zapper?.lnurl),
+    // Request our invoice
+    map(async (zap: any) => {
+      const {amount, zapper, relays, content, pubkey} = zap
+      const msats = amount * 1000
+      const tags = [
+        ["relays", ...relays],
+        ["amount", msats.toString()],
+        ["lnurl", zapper.lnurl],
+        ["p", pubkey],
+      ]
 
-        const template = createEvent(9734, {content, tags})
-        const signedTemplate = anonymous
-          ? await signer.get().signWithKey(template, generatePrivateKey())
-          : await signer.get().signAsUser(template)
-        const zapString = encodeURI(JSON.stringify(signedTemplate))
-        const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
+      if (eid) {
+        tags.push(["e", eid])
+      }
 
-        return {...zap, invoice: res?.pr}
-      }),
-    ])
-  }
+      if (anonymous) {
+        tags.push(["anon"])
+      }
+
+      const template = createEvent(9734, {content, tags})
+      const signedTemplate = anonymous
+        ? await signer.get().signWithKey(template, generatePrivateKey())
+        : await signer.get().signAsUser(template)
+      const zapString = encodeURI(JSON.stringify(signedTemplate))
+      const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
+      const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
+
+      return {...zap, invoice: res?.pr}
+    }),
+  ])
 
   const confirmZap = async () => {
     // Show loading immediately
