@@ -1,8 +1,13 @@
+import Bowser from "bowser"
 import {fromPairs} from "ramda"
 import {derived} from "svelte/store"
 import {writable} from "@welshman/lib"
 import {parseHex} from "src/util/html"
 import {synced} from "src/util/misc"
+
+// Browser
+
+export const browser = Bowser.parse(window.navigator.userAgent)
 
 // Settings
 

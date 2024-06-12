@@ -537,7 +537,7 @@ export const loadHandlers = () =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.ReadRelays().getUrls(),
+    relays: hints.ReadRelays().getUrls().concat("wss://relay.nostr.band/"),
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],

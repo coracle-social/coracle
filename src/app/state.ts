@@ -22,8 +22,6 @@ import {
   getSetting,
 } from "src/engine"
 
-// Global state
-
 export const drafts = new Map<string, string>()
 
 export const menuIsOpen = writable(false)

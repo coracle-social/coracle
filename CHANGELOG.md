@@ -6,6 +6,7 @@
 - [x] Use new indexeddb wrapper
 - [x] Add `k` tag to deletions
 - [x] Allow users to choose where to publish their profile when using a white-labeled instance
+- [x] Add "open with" link populated by nip 89 handlers
 
 # 0.4.6
 

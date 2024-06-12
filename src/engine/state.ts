@@ -60,6 +60,7 @@ import {
   getFilterId,
   isContextAddress,
   unionFilters,
+  getAddress,
   getIdAndAddress,
   getIdOrAddress,
   getIdFilters,
@@ -1291,7 +1292,14 @@ export const recommendationsByHandlerAddress = derived(recommendations, $events 
 )
 
 export const deriveHandlersForKind = simpleCache(([kind]: [number]) =>
-  derived(handlers, $handlers => $handlers.filter(h => h.kind === kind)),
+  derived([handlers, recommendationsByHandlerAddress], ([$handlers, $recs]) =>
+    sortBy(
+      h => -h.recommendations.length,
+      $handlers
+        .filter(h => h.kind === kind)
+        .map(h => ({...h, recommendations: $recs.get(getAddress(h.event)) || []})),
+    ),
+  ),
 )
 
 // Collections

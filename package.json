@@ -60,6 +60,7 @@
     "@welshman/lib": "^0.0.9",
     "@welshman/net": "^0.0.13",
     "@welshman/util": "^0.0.14",
+    "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "compressorjs": "^1.2.1",
     "date-picker-svelte": "^2.12.0",

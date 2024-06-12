@@ -7,7 +7,8 @@
 
 <div class="text-sm">
   {#each items as item, i}
-    <Chip pad onRemove={() => remove?.(i)}>
+    {@const onRemove = remove ? () => remove(i) : null}
+    <Chip pad {onRemove}>
       <slot name="item" context="value" {item}>
         {item}
       </slot>

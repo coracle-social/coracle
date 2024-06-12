@@ -429,7 +429,11 @@
 
   // App data boostrap and relay meta fetching
 
-  storage.ready.then(() => {
+  storage.ready.then(async () => {
+    // Our stores are throttled by 300, so wait until they're populated
+    // before loading app data
+    await lib.sleep(350)
+
     loadAppData()
 
     if ($session) {

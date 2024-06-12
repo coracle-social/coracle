@@ -1,8 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
+  import {OS_MAP} from "bowser/src/constants"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import {nthEq, last, sortBy} from "@welshman/lib"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -18,9 +20,16 @@
   import {fly} from "src/util/transition"
   import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
+  import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import Popover2 from "src/partials/Popover2.svelte"
+  import WotScore from "src/partials/WotScore.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import ImageCircle from "src/partials/ImageCircle.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -70,12 +79,12 @@
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
   const muted = derived(isEventMuted, $isEventMuted => $isEventMuted(note, true))
-  const kindHandlers = deriveHandlersForKind(note.kind)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
+  const kindHandlers = deriveHandlersForKind(note.kind)
   const handlerId = tags.get("client")?.nth(2)
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const seenOn = tracker.data.derived(m =>
@@ -93,6 +102,16 @@
   const hideHandlers = () => {
     handlersShown = false
   }
+
+  const showHandlersPopover = () => {
+    handlersPopoverShown = true
+  }
+
+  const hideHandlersPopover = () => {
+    handlersPopoverShown = false
+  }
+
+  const os = browser.os.name.toLowerCase()
 
   const createLabel = () => router.at("notes").of(note.id).at("label").open()
 
@@ -162,6 +181,26 @@
     showInfo("Note has been re-published!")
   }
 
+  const openWithHandler = handler => {
+    const [templateTag] = sortBy((t: string[]) => {
+      if (t[0] === "web" && last(t) === "nevent") return -6
+      if (t[0] === "web" && last(t) === "note") return -5
+      if (t[0] === "web" && t.length === 2) return -4
+      if (t[0] === os && last(t) === "nevent") return -3
+      if (t[0] === os && last(t) === "note") return -2
+      if (t[0] === os && t.length === 2) return -1
+
+      return 0
+    }, handler.event.tags)
+
+    const entity =
+      last(templateTag) === "note"
+        ? nip19.noteEncode(note.id)
+        : nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
+
+    window.open(templateTag[1].replace("<bech32>", entity))
+  }
+
   const groupOptions = session.derived($session => {
     const options = []
 
@@ -180,6 +219,7 @@
   let view
   let actions = []
   let handlersShown = false
+  let handlersPopoverShown = false
 
   $: disableActions =
     !$canSign ||
@@ -192,6 +232,13 @@
   $: canZap = zapper && note.pubkey !== $session?.pubkey
   $: reply = replies.find(e => e.pubkey === $session?.pubkey)
   $: $repliesCount = replies.length
+  $: handlers = $kindHandlers.filter(
+    h =>
+      h.name.toLowerCase() !== "coracle" &&
+      h.event.tags.some(
+        t => ["web", os].includes(t[0]) && (t.length == 2 || ["note", "nevent"].includes(last(t))),
+      ),
+  )
 
   $: {
     actions = []
@@ -272,6 +319,34 @@
         {/if}
       </button>
     {/if}
+    {#if handlers.length > 0}
+      <Popover theme="transparent" opts={{hideOnClick: true}}>
+        <button
+          slot="trigger"
+          class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0"
+          on:click={showHandlersPopover}>
+          <i class="fa fa-up-right-from-square" />
+        </button>
+        <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
+          <Menu>
+            <MenuItem inert class="bg-neutral-900">Open with:</MenuItem>
+            {#each handlers as handler}
+              <MenuItem
+                class="flex h-12 items-center justify-between gap-2"
+                on:click={() => openWithHandler(handler)}>
+                <div class="flex gap-2">
+                  <ImageCircle class="h-5 w-5" src={handler.image} />
+                  {handler.name}
+                </div>
+                {#if handler.recommendations.length > 0}
+                  <WotScore accent score={handler.recommendations.length} />
+                {/if}
+              </MenuItem>
+            {/each}
+          </Menu>
+        </div>
+      </Popover>
+    {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
     {#if note.wrap}
@@ -334,7 +409,7 @@
           {/each}
         </div>
       {/if}
-      {#if $kindHandlers.length > 0 || handlerEvent}
+      {#if handlers.length > 0 || handlerEvent}
         <h1 class="staatliches text-2xl">Apps</h1>
         {#if handlerEvent}
           {@const [handler] = readHandlers(handlerEvent)}
@@ -343,13 +418,10 @@
             <HandlerCard {handler} />
           {/if}
         {/if}
-        {#if $kindHandlers.length > 0}
+        {#if handlers.length > 0}
           <div class="flex justify-between">
             <p>
-              This note can also be viewed using {quantify(
-                $kindHandlers.length,
-                "other nostr app",
-              )}.
+              This note can also be viewed using {quantify(handlers.length, "other nostr app")}.
             </p>
             {#if handlersShown}
               <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
@@ -360,7 +432,7 @@
           {#if handlersShown}
             <div in:fly={{y: 20}}>
               <FlexColumn>
-                {#each $kindHandlers as handler (getHandlerKey(handler))}
+                {#each handlers as handler (getHandlerKey(handler))}
                   <HandlerCard {handler} />
                 {/each}
               </FlexColumn>
