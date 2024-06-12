@@ -17,7 +17,15 @@
   let hidden = false
 </script>
 
-{#if showMedia && value.isMedia && !hidden}
+{#if url.includes('coracle.social/')}
+  <Anchor
+    modal
+    stopPropagation
+    class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+    href={url.replace(/(https?:\/\/)?(app\.)?coracle.social/, '')}>
+    {displayUrl(url)}
+  </Anchor>
+{:else if showMedia && value.isMedia && !hidden}
   <div class="py-2">
     <Media url={url} onClose={close} />
   </div>
