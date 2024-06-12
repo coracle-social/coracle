@@ -661,13 +661,13 @@ export const deleteEventByAddress = address =>
 
 // Profile
 
-export const publishProfile = profile =>
+export const publishProfile = (profile, {forcePlatform = false} = {}) =>
   createAndPublish({
     kind: 0,
     tags: getClientTags(),
     content: JSON.stringify(profile),
     relays: withIndexers(hints.WriteRelays().getUrls()),
-    forcePlatform: false,
+    forcePlatform,
   })
 
 // Singletons

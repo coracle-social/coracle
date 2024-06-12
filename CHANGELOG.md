@@ -5,6 +5,7 @@
 - [x] Show toast when offline
 - [x] Use new indexeddb wrapper
 - [x] Add `k` tag to deletions
+- [x] Allow users to choose where to publish their profile when using a white-labeled instance
 
 # 0.4.6
 

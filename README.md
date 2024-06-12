@@ -72,7 +72,7 @@ Coracle is intended to be fully white-labeled by groups of various kinds. The fo
 - `VITE_DUFFLEPUD_URL` is a [Dufflepud](https://github.com/coracle-social/dufflepud) instance url, which helps Coracle with things like link previews and image uploads.
 - `VITE_PLATFORM_ZAP_SPLIT` is a decimal between 0 and 1 defining the default zap split percent.
 - `VITE_PLATFORM_PUBKEY` is the pubkey of the platform owner. This gets zapped when using the platform zap split.
-- `VITE_FORCE_GROUP` is an optional `kind:34550` or `kind:35834` address. If provided, the home page of Coracle will be the home page for the group, and most views will be filtered down to the group's scope.
+- `VITE_FORCE_GROUP` is an optional `kind:34550` or `kind:35834` address. If provided, the home page of Coracle will be the home page for the group, and most views will be filtered down to the group's scope. For user privacy, `VITE_PLATFORM_RELAYS` should also be set when using `VITE_FORCE_GROUP`.
 - `VITE_PLATFORM_RELAYS` is an optional comma-separated list of relay urls to use for feeds. If provided, most UI components related to relay selection will be hidden from the user.
 - `VITE_ENABLE_ZAPS` can be set to `false` to disable zaps.
 - `VITE_APP_NAME` is the app's name.
