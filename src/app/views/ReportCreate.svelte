@@ -1,60 +1,67 @@
 <script lang="ts">
-  import {identity} from "ramda"
-  import {seconds} from "hurdak"
-  import {now} from "@welshman/lib"
-  import {fuzzy} from "src/util/misc"
+  import {asSignedEvent, createEvent} from "@welshman/util"
+  import type {SignedEvent} from "@welshman/util"
+  import {generatePrivateKey} from "src/util/nostr"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Field from "src/partials/Field.svelte"
-  import SearchSelect from "src/partials/SearchSelect.svelte"
+  import Textarea from "src/partials/Textarea.svelte"
+  import PersonLink from "src/app/shared/PersonLink.svelte"
+  import Note from "src/app/shared/Note.svelte"
   import {router} from "src/app/util/router"
-  import {createAndPublish, hints} from "src/engine"
+  import {repository, nip59, loadPubkeys, publish, hints} from "src/engine"
 
   export let eid
-  export let pubkey
 
-  const searchContentWarnings = fuzzy(["nudity", "profanity", "illegal", "spam", "impersonation"])
+  const event = repository.getEvent(eid)
 
-  const submit = () => {
-    const tags = [
-      ["p", pubkey],
-      ["expiration", String(now() + seconds(7, "day"))],
-    ]
+  const tagr = "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65"
 
-    if (flags.length > 0) {
-      for (const flag of flags) {
-        tags.push(["e", eid, flag])
-      }
-    }
+  const submit = async () => {
+    const content = JSON.stringify({
+      reporterText: message,
+      reportedEvent: asSignedEvent(event as SignedEvent),
+    })
 
-    createAndPublish({kind: 1984, tags, relays: hints.WriteRelays().getUrls()})
+    const template = createEvent(1, {content})
+    const rumor = await $nip59.wrap(template, {
+      author: generatePrivateKey(),
+      wrap: {
+        author: generatePrivateKey(),
+        recipient: tagr,
+      },
+    })
+
+    publish({
+      event: rumor.wrap,
+      relays: hints
+        .merge([hints.fromRelays(["wss://relay.nos.social"]), hints.PublishMessage(tagr)])
+        .getUrls(),
+      forcePlatform: false,
+    })
+
     showInfo("Your report has been sent!")
     router.pop()
   }
 
-  let flags = []
+  let message = ""
+
+  loadPubkeys([tagr])
 </script>
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
     <Heading class="text-center">File a Report</Heading>
-    <div class="flex w-full flex-col gap-8">
-      <Field label="Content Warnings">
-        <SearchSelect
-          multiple
-          autofocus
-          search={searchContentWarnings}
-          bind:value={flags}
-          termToItem={identity}>
-          <div slot="item" let:item>
-            <strong>{item}</strong>
-          </div>
-        </SearchSelect>
-        <div slot="info">Flag this content as sensitive so other people can avoid it.</div>
-      </Field>
-      <Anchor button tag="button" type="submit">Save</Anchor>
-    </div>
+    <Field label="Why are you reporting this content?">
+      <Textarea bind:value={message} />
+      <div slot="info">
+        Reports are sent to <PersonLink pubkey={tagr} /> for review. No identifying information is included
+        with the report.
+      </div>
+    </Field>
+    <Note note={event} showMedia={false} />
+    <Anchor button tag="button" type="submit">Save</Anchor>
   </FlexColumn>
 </form>

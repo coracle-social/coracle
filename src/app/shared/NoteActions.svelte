@@ -98,6 +98,8 @@
 
   const quote = () => router.at("notes/create").cx({quote: note}).open()
 
+  const report = () => router.at("notes").of(note.id).at("report").open()
+
   const react = async content => {
     if (isSignedEvent(note)) {
       publish({event: note, relays: hints.PublishEvent(note).getUrls()})
@@ -208,6 +210,8 @@
       } else {
         actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
       }
+
+      actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
     }
 
     if (!$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {

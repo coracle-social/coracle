@@ -295,6 +295,10 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
+export const canUnwrap = (event: TrustedEvent) =>
+  isGiftWrap(event) &&
+  (getSession(Tags.fromEvent(event).get("p")?.value()) || getRecipientKey(event))
+
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (!isGiftWrap(event)) {
     return event
@@ -1588,10 +1592,12 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
   const pub = basePublish(request)
 
   // Add the event to projections
-  ensureUnwrapped(request.event).then(projections.push)
+  if (canUnwrap(request.event)) {
+    ensureUnwrapped(request.event).then(projections.push)
+  }
 
   // Listen to updates and update our publish queue
-  if (isGiftWrap(request.event) || request.event.pubkey === pubkey.get()) {
+  if (canUnwrap(request.event) || request.event.pubkey === pubkey.get()) {
     const pubInfo = omit(["emitter", "result"], pub)
 
     pub.emitter.on("*", t => publishes.key(pubInfo.id).set(pubInfo))

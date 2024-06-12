@@ -221,6 +221,11 @@
       entity: asNote,
     },
   })
+  router.register("/notes/:entity/report", import("src/app/views/ReportCreate.svelte"), {
+    serializers: {
+      entity: asNote,
+    },
+  })
   router.register("/notes/:entity/thread", import("src/app/views/ThreadDetail.svelte"), {
     serializers: {
       entity: asNote,

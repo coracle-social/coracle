@@ -53,6 +53,7 @@
   export let showLoading = false
   export let showMuted = false
   export let showGroup = false
+  export let showMedia = getSetting("show_media")
   export let contextAddress = null
 
   let zapper, unsubZapper
@@ -63,7 +64,7 @@
   let showMutedReplies = false
   let actions = null
   let collapsed = depth === 0
-  let context = repository.query([{'#e': [event.id]}]).filter(e => isChildOf(e, event))
+  let context = repository.query([{"#e": [event.id]}]).filter(e => isChildOf(e, event))
   let showHiddenReplies = anchor === getIdOrAddress(event)
 
   const showEntire = showHiddenReplies
@@ -296,7 +297,7 @@
                     }}>Show</Anchor>
                 </p>
               {:else}
-                <NoteContent note={event} {showEntire} />
+                <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
               <NoteActions
