@@ -22,6 +22,8 @@ export const events = {
   get: () => repository.dump(),
   set: (events: TrustedEvent[]) => repository.load(events),
   subscribe: f => {
+    f(repository.dump())
+
     events._subs.push(f)
 
     if (events._subs.length === 1) {

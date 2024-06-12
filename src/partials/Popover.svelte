@@ -41,7 +41,7 @@
         const [tooltipContents] = tooltip?.children || []
 
         // If we've already triggered it, tooltipContents will be empty
-        if (tooltipContents) {
+        if (tooltipContents instanceof Node) {
           instance.popper.querySelector(".tippy-content").appendChild(tooltipContents)
 
           instance.popper.addEventListener("mouseleave", e => {

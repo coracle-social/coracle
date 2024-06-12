@@ -14,6 +14,7 @@
     groups,
     groupRequests,
     initSharedKey,
+    deriveSharedKeyForGroup,
     publishGroupInvites,
     publishGroupEvictions,
     publishGroupMembers,
@@ -26,12 +27,13 @@
   export let removeMembers = []
 
   const group = groups.key(address)
+  const sharedKey = deriveSharedKeyForGroup(address)
   const initialMembers = new Set(
     without(removeMembers, [...($group?.members || []), ...addMembers]),
   )
 
   const onSubmit = () => {
-    if (!soft) {
+    if (!soft || !$sharedKey) {
       initSharedKey(address)
     }
 

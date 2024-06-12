@@ -1089,9 +1089,7 @@ export const getPubkeyRelayPolicies = (pubkey: string, mode: string = null) => {
 
 export const userRelayPolicies = derived(
   [relayPoliciesByPubkey, pubkey, anonymous],
-  ([$m, $pk, $anon]) => {
-    return $pk ? $m.get($pk) : makeRelayPoliciesFromTags($anon.relays)
-  },
+  ([$m, $pk, $anon]) => $m.get($pk) || makeRelayPoliciesFromTags($anon.relays),
 )
 
 export const deriveUserRelayPolicy = url =>

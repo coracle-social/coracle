@@ -50,24 +50,31 @@
       return showWarning("Please select a login provider.")
     }
 
-    // Fill in pubkey and relays if they entered a custom doain
-    if (!handler.pubkey) {
-      const handle = await loadHandle(`_@${handler.domain}`)
+    loading = true
 
-      handler.pubkey = handle?.pubkey
-      handler.relays = handle?.nip46 || handle?.relays || []
-    }
+    try {
 
-    if (!handler.relays) {
-      return showWarning("Sorry, we weren't able to find that provider.")
-    }
+      // Fill in pubkey and relays if they entered a custom doain
+      if (!handler.pubkey) {
+        const handle = await loadHandle(`_@${handler.domain}`)
 
-    const success = await loginWithNostrConnect(username, handler)
+        handler.pubkey = handle?.pubkey
+        handler.relays = handle?.nip46 || handle?.relays || []
+      }
 
-    if (success) {
-      boot()
-    } else {
-      showWarning("Sorry, we weren't able to log you in with that provider.")
+      if (!handler.relays) {
+        return showWarning("Sorry, we weren't able to find that provider.")
+      }
+
+      const success = await loginWithNostrConnect(username, handler)
+
+      if (success) {
+        boot()
+      } else {
+        showWarning("Sorry, we weren't able to log you in with that provider.")
+      }
+    } finally {
+      loading = false
     }
   }
 
@@ -89,6 +96,7 @@
     },
   ]
 
+  let loading
   let handler = handlers[0]
   let username = ""
 
@@ -150,7 +158,7 @@
         <span slot="item" let:item>{item.domain}</span>
       </SearchSelect>
     </div>
-    <Anchor button accent on:click={onSubmit}>Log In</Anchor>
+    <Anchor button accent {loading} on:click={onSubmit}>Log In</Anchor>
     <div class="relative flex items-center gap-4">
       <div class="h-px flex-grow bg-neutral-600" />
       <div class="staatliches text-xl">Or</div>
