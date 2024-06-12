@@ -33,7 +33,6 @@ import {
   groups,
   load,
   nip04,
-  people,
   projections,
   sessions,
   hints,
@@ -247,12 +246,6 @@ projections.addHandler(0, e => {
 
     updateHandle(e, content)
     updateZapper(e, content)
-  })
-})
-
-projections.addHandler(10004, e => {
-  updateStore(people.key(e.pubkey), e.created_at, {
-    communities: Tags.fromEvent(e).whereKey("a").unwrap(),
   })
 })
 

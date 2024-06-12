@@ -52,7 +52,6 @@ import {
   loadOne,
   maxWot,
   getNetwork,
-  people,
   primeWotCaches,
   pubkey,
   publish,
@@ -318,11 +317,11 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
 
     primeWotCaches($pubkey)
 
-    for (const person of people.get()) {
-      const score = getWotScore($pubkey, person.pubkey)
+    for (const tpk of repository.eventsByAuthor.keys()) {
+      const score = getWotScore($pubkey, tpk)
 
       if (score >= thresholdMin && score <= thresholdMax) {
-        pubkeys.push(person.pubkey)
+        pubkeys.push(tpk)
       }
     }
 

@@ -5,13 +5,13 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
-  import {displayGroup, deriveGroup, getWotGroupMembers} from "src/engine"
+  import {displayGroup, deriveGroup, getWotCommunityMembers} from "src/engine"
 
   export let address
   export let modal = false
 
   const group = deriveGroup(address)
-  const members = $getWotGroupMembers(address)
+  const members = $getWotCommunityMembers(address)
 
   const enter = () => {
     const route = router.at("groups").of(address).at("notes")

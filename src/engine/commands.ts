@@ -66,7 +66,6 @@ import {
   nip04,
   nip44,
   nip59,
-  people,
   pubkey,
   publish,
   session,
@@ -910,7 +909,6 @@ export const markChannelRead = (pubkey: string) => {
 
 const addSession = (s: Session) => {
   sessions.update(assoc(s.pubkey, s))
-  people.key(s.pubkey).update($p => ({...$p, pubkey: s.pubkey}))
   pubkey.set(s.pubkey)
 }
 

@@ -73,12 +73,6 @@ export type Zapper = WelshmanZapper & {
   pubkey: string
 }
 
-export type Person = {
-  pubkey: string
-  communities_updated_at?: number
-  communities?: string[][]
-}
-
 export type PublishInfo = Omit<Publish, "emitter" | "result">
 
 export type Notification = {

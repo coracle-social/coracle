@@ -42,6 +42,7 @@ import {
 import {
   WRAP,
   WRAP_NIP04,
+  COMMUNITIES,
   READ_RECEIPT,
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
@@ -134,7 +135,6 @@ import type {
   GroupKey,
   GroupRequest,
   GroupStatus,
-  Person,
   PublishInfo,
   Session,
   Topic,
@@ -182,7 +182,6 @@ export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
-export const people = new CollectionStore<Person>("pubkey")
 export const publishes = new CollectionStore<PublishInfo>("id", 1000)
 export const topics = new CollectionStore<Topic>("name")
 export const channels = new CollectionStore<Channel>("id")
@@ -669,6 +668,47 @@ export const unreadChannels = channels.derived(filter(channelHasNewMessages))
 
 export const hasNewMessages = unreadChannels.derived(any((c: Channel) => Boolean(c.last_sent)))
 
+// Communities
+
+export const communityLists = withGetter(
+  deriveEventsMapped<PublishedSingleton>({
+    filters: [{kinds: [COMMUNITIES]}],
+    itemToEvent: prop("event"),
+    eventToItem: event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: getPlaintext(event),
+        }),
+      ),
+  }),
+)
+
+export const communityListsByPubkey = withGetter(
+  derived(muteLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
+)
+
+export const getCommunityList = (pk: string) =>
+  communityListsByPubkey.get().get(pk) as PublishedSingleton | undefined
+
+export const deriveCommunityList = (pk: string) =>
+  derived(communityListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
+
+export const getCommunities = (pk: string) => getSingletonValues("a", getCommunityList(pk))
+
+export const deriveCommunities = (pk: string) =>
+  derived(communityListsByPubkey, m => getSingletonValues("a", m.get(pk)))
+
+export const getWotCommunityMembers = withGetter(
+  derived(
+    [userFollows, communityListsByPubkey],
+    ([$userFollows, $communityListsByPubkey]) =>
+      address =>
+        Array.from($userFollows).filter(pk =>
+          getSingletonValues("a", $communityListsByPubkey.get(pk)),
+        ),
+  ),
+)
+
 // Groups
 
 export const deriveGroup = address => {
@@ -677,21 +717,10 @@ export const deriveGroup = address => {
   return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
 
-export const getWotGroupMembers = withGetter(
-  derived(
-    [userFollows, people.mapStore],
-    ([$userFollows, $people]) =>
-      address =>
-        Array.from($userFollows).filter(pk =>
-          $people.get(pk)?.communities?.some(t => t[1] === address),
-        ),
-  ),
-)
-
 export const searchGroups = groups.throttle(300).derived($groups => {
   const options = $groups
     .filter(group => !repository.deletes.has(group.address))
-    .map(group => ({group, score: getWotGroupMembers.get()(group.address).length}))
+    .map(group => ({group, score: getWotCommunityMembers.get()(group.address).length}))
 
   const fuse = new Fuse(options, {
     keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
@@ -2006,9 +2035,7 @@ class Storage {
         },
       })
 
-      await Promise.all(
-        this.adapters.map(adapter => adapter.initialize(this))
-      )
+      await Promise.all(this.adapters.map(adapter => adapter.initialize(this)))
     }
 
     this.ready.resolve()
@@ -2070,10 +2097,6 @@ export const storage = new Storage(15, [
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
   collectionAdapter("publishes", "id", publishes, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
-  collectionAdapter("people", "pubkey", people, {
-    limit: 100000,
-    sort: sortBy(prop("last_fetched")),
-  }),
   collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("channels", "id", channels, {limit: 1000, sort: sortBy(prop("last_checked"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
