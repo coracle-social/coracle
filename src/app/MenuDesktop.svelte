@@ -79,7 +79,7 @@
   </Anchor>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
   {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem path="/settings/relays" isActive={$page.path.startsWith("/settings/relays")}>
+    <MenuDesktopItem path="/settings/relays" isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
@@ -91,7 +91,7 @@
   <MenuDesktopItem
     path="/notifications"
     disabled={!$canSign}
-    isActive={$page.path.startsWith("/notifications")}>
+    isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
       Notifications
       {#if $hasNewNotifications}
@@ -102,7 +102,7 @@
   <MenuDesktopItem
     path="/channels"
     disabled={!$canSign}
-    isActive={$page.path.startsWith("/channels")}>
+    isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
       Messages
       {#if $hasNewMessages}
@@ -110,14 +110,14 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/events" isActive={$page.path.startsWith("/events")}
+  <MenuDesktopItem path="/events" isActive={$page?.path.startsWith("/events")}
     >Calendar</MenuDesktopItem>
   {#if $env.ENABLE_MARKET}
-    <MenuDesktopItem path="/listings" isActive={$page.path.startsWith("/listings")}
+    <MenuDesktopItem path="/listings" isActive={$page?.path.startsWith("/listings")}
       >Market</MenuDesktopItem>
   {/if}
   {#if !$env.FORCE_GROUP}
-    <MenuDesktopItem path="/groups" isActive={$page.path.startsWith("/groups")}
+    <MenuDesktopItem path="/groups" isActive={$page?.path.startsWith("/groups")}
       >Groups</MenuDesktopItem>
   {/if}
   <FlexColumn small class="absolute bottom-0 w-72">

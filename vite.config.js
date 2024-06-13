@@ -1,24 +1,24 @@
-import fs from 'fs'
-import dotenv from 'dotenv'
+import fs from "fs"
+import dotenv from "dotenv"
 import * as path from "path"
 import {defineConfig} from "vite"
 import {VitePWA} from "vite-plugin-pwa"
 import mkcert from "vite-plugin-mkcert"
-import {favicons} from 'favicons'
+import {favicons} from "favicons"
 import htmlPlugin from "vite-plugin-html-config"
 import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
 import {nodePolyfills} from "vite-plugin-node-polyfills"
 
-dotenv.config({path: '.env.local'})
-dotenv.config({path: '.env'})
+dotenv.config({path: ".env.local"})
+dotenv.config({path: ".env"})
 
 const accentColor = process.env.VITE_LIGHT_THEME.match(/accent:(#\w+)/)[1]
 
 export default defineConfig(async () => {
-  const icons = await favicons('public' + process.env.VITE_APP_LOGO)
+  const icons = await favicons("public" + process.env.VITE_APP_LOGO)
 
-  if (!fs.existsSync('public/icons')) fs.mkdirSync('public/icons')
+  if (!fs.existsSync("public/icons")) fs.mkdirSync("public/icons")
 
   for (const {name, contents} of icons.images) {
     fs.writeFileSync(`public/icons/${name}`, contents, "binary")
@@ -72,19 +72,49 @@ export default defineConfig(async () => {
           {rel: "apple-touch-icon", sizes: "144x144", href: "/icons/apple-touch-icon-144x144.png"},
           {rel: "apple-touch-icon", sizes: "152x152", href: "/icons/apple-touch-icon-152x152.png"},
           {rel: "apple-touch-icon", sizes: "180x180", href: "/icons/apple-touch-icon-180x180.png"},
-          {rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/android-icon-192x192.png"},
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "/icons/android-icon-192x192.png",
+          },
           {rel: "icon", type: "image/png", sizes: "32x32", href: "/icons/favicon-32x32.png"},
           {rel: "icon", type: "image/png", sizes: "96x96", href: "/icons/favicon-96x96.png"},
           {rel: "icon", type: "image/png", sizes: "16x16", href: "/icons/favicon-16x16.png"},
           {rel: "mask-icon", href: "/images/logo.svg", color: "#FFFFFF"},
 
-          {rel: "icon", type: "image/png", sizes: "144x144", href: "/icons/android-chrome-144x144.png"},
-          {rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/android-chrome-192x192.png"},
-          {rel: "icon", type: "image/png", sizes: "256x256", href: "/icons/android-chrome-256x256.png"},
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "144x144",
+            href: "/icons/android-chrome-144x144.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "/icons/android-chrome-192x192.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "256x256",
+            href: "/icons/android-chrome-256x256.png",
+          },
           {rel: "icon", type: "image/png", sizes: "36x36", href: "/icons/android-chrome-36x36.png"},
-          {rel: "icon", type: "image/png", sizes: "384x384", href: "/icons/android-chrome-384x384.png"},
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "384x384",
+            href: "/icons/android-chrome-384x384.png",
+          },
           {rel: "icon", type: "image/png", sizes: "48x48", href: "/icons/android-chrome-48x48.png"},
-          {rel: "icon", type: "image/png", sizes: "512x512", href: "/icons/android-chrome-512x512.png"},
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "/icons/android-chrome-512x512.png",
+          },
           {rel: "icon", type: "image/png", sizes: "72x72", href: "/icons/android-chrome-72x72.png"},
           {rel: "icon", type: "image/png", sizes: "96x96", href: "/icons/android-chrome-96x96.png"},
           {rel: "apple-touch-icon", sizes: "1024x1024", href: "apple-touch-icon-1024x1024.png"},
@@ -109,11 +139,17 @@ export default defineConfig(async () => {
           description: process.env.VITE_APP_DESCRIPTION,
           theme_color: accentColor,
           protocol_handlers: [{protocol: "web+nostr", url: "/%s"}],
+          permissions: ["clipboardRead", "clipboardWrite", "unlimitedStorage"],
           icons: [
             {src: "images/pwa-64x64.png", sizes: "64x64", type: "image/png"},
             {src: "images/pwa-192x192.png", sizes: "192x192", type: "image/png"},
             {src: "images/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any"},
-            {src: "images/maskable-icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable"},
+            {
+              src: "images/maskable-icon-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
           ],
         },
       }),

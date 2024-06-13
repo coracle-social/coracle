@@ -6,6 +6,7 @@ import {fromHex} from "src/util/nostr"
 import type {Session} from "src/engine/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
+import {Amber} from "./amber"
 
 // Deriving shared secret is an expensive computation, cache it
 export const getSharedSecret = cached({
@@ -21,7 +22,7 @@ export class Nip44 {
   ) {}
 
   isEnabled() {
-    if (["privkey", "connect"].includes(this.session?.method)) {
+    if (["amber", "privkey", "connect"].includes(this.session?.method)) {
       return true
     }
 
@@ -44,6 +45,7 @@ export class Nip44 {
     const {method, privkey} = this.session
 
     return switcherFn(method, {
+      amber: () => Amber.get().nip44Encrypt(pk, message),
       privkey: () => this.encrypt(message, pk, privkey),
       extension: () => withExtension(ext => ext.nip44.encrypt(pk, message)),
       connect: () => this.connect.broker.nip44Encrypt(pk, message),
@@ -54,6 +56,7 @@ export class Nip44 {
     const {method, privkey} = this.session
 
     return switcherFn(method, {
+      amber: () => Amber.get().nip44Decrypt(pk, message),
       privkey: () => this.decrypt(message, pk, privkey),
       extension: () => withExtension(ext => ext.nip44.decrypt(pk, message)),
       connect: () => this.connect.broker.nip44Decrypt(pk, message),

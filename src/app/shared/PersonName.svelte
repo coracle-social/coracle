@@ -15,7 +15,6 @@
 <script lang="ts">
   import cx from "classnames"
   import {derived} from "svelte/store"
-  import {themeColors} from "src/partials/state"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"

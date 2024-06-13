@@ -36,7 +36,6 @@ import {
   projections,
   sessions,
   hints,
-  ensureMessagePlaintext,
   ensurePlaintext,
 } from "src/engine/state"
 import {
@@ -370,7 +369,6 @@ projections.addHandler(14, handleChannelMessage)
 
 // Decrypt encrypted events eagerly
 
-projections.addHandler(4, ensureMessagePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
 

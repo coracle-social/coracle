@@ -1,10 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
-  import {OS_MAP} from "bowser/src/constants"
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {nthEq, last, sortBy} from "@welshman/lib"
+  import {last, sortBy} from "@welshman/lib"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -24,7 +23,6 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Popover2 from "src/partials/Popover2.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import Popover from "src/partials/Popover.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
@@ -101,14 +99,6 @@
 
   const hideHandlers = () => {
     handlersShown = false
-  }
-
-  const showHandlersPopover = () => {
-    handlersPopoverShown = true
-  }
-
-  const hideHandlersPopover = () => {
-    handlersPopoverShown = false
   }
 
   const os = browser.os.name.toLowerCase()
@@ -219,7 +209,6 @@
   let view
   let actions = []
   let handlersShown = false
-  let handlersPopoverShown = false
 
   $: disableActions =
     !$canSign ||
@@ -323,8 +312,7 @@
       <Popover theme="transparent" opts={{hideOnClick: true}}>
         <button
           slot="trigger"
-          class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 h-6"
-          on:click={showHandlersPopover}>
+          class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0">
           <i class="fa fa-up-right-from-square fa-sm" />
         </button>
         <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
