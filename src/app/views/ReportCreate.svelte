@@ -25,7 +25,7 @@
       reportedEvent: asSignedEvent(event as SignedEvent),
     })
 
-    const template = createEvent(1, {content})
+    const template = createEvent(14, {content})
     const rumor = await $nip59.wrap(template, {
       author: generatePrivateKey(),
       wrap: {

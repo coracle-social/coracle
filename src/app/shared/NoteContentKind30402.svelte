@@ -21,7 +21,7 @@
   const tags = Tags.fromEvent(note)
   const images = tags.values("image").valueOf()
   const {title, summary, location, status} = tags.asObject()
-  const [price = 0, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
+  const [price, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
   const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
@@ -58,7 +58,7 @@
         {/if}
       </div>
       <span class="whitespace-nowrap">
-        <CurrencySymbol {code} />{commaFormat(price)}
+        <CurrencySymbol {code} />{commaFormat(price || 0)}
         {code}
       </span>
     </div>

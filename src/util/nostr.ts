@@ -157,6 +157,13 @@ export const parseAnythingSync = entity => {
   }
 }
 
+export const parsePubkey = async entity => {
+  const result = await parseAnything(entity)
+
+  if (result.type === 'npub') return result.data
+  if (result.type === 'nprofile') return result.data.pubkey
+}
+
 export const getTags =
   (types: string[], testValue = null) =>
   (tags: string[][]) =>
