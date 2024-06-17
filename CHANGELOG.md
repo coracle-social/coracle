@@ -7,6 +7,9 @@
 - [x] Add `k` tag to deletions
 - [x] Allow users to choose where to publish their profile when using a white-labeled instance
 - [x] Add "open with" link populated by nip 89 handlers
+- [x] Fix several community and calendar related bugs
+- [x] Add reports using tagr-bot
+- [x] Open links to coracle in same tab
 
 # 0.4.6
 
