@@ -1,19 +1,25 @@
 <script>
   import {ellipsize} from "hurdak"
   import {derived} from "svelte/store"
-  import {remove} from "@welshman/lib"
+  import {remove, intersection} from "@welshman/lib"
   import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
-  import {displayGroup, deriveGroup, userFollowsByCommunity, pubkey} from "src/engine"
+  import {displayGroup, deriveGroup, userFollows, communityListsByAddress, pubkey} from "src/engine"
 
   export let address
   export let modal = false
 
   const group = deriveGroup(address)
-  const members = derived(userFollowsByCommunity, $m => remove($pubkey, $m.get(address) || []))
+  const members = derived(communityListsByAddress, $m => {
+    const allMembers = $m.get(address)?.map(l => l.event.pubkey) || []
+    const otherMembers = remove($pubkey, allMembers)
+    const followMembers = intersection(otherMembers, Array.from($userFollows))
+
+    return followMembers
+  })
 
   const enter = () => {
     const route = router.at("groups").of(address).at("notes")

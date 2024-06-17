@@ -1,21 +1,15 @@
 <script lang="ts">
-  import {
-    Scope,
-    feedFromFilter,
-    makeIntersectionFeed,
-    makeKindFeed,
-    makeScopeFeed,
-  } from "@welshman/feeds"
+  import {identity} from "ramda"
   import Calendar from "src/app/shared/Calendar.svelte"
-  import {env, loadGroupMessages} from "src/engine"
+  import {env, loadGroupMessages, pubkey, userFollows} from "src/engine"
 
-  const feed = $env.FORCE_GROUP
-    ? feedFromFilter({kinds: [31923], "#a": [$env.FORCE_GROUP]})
-    : makeIntersectionFeed(makeKindFeed(31923), makeScopeFeed(Scope.Self, Scope.Follows))
+  const filter = $env.FORCE_GROUP
+    ? {kinds: [31923], "#a": [$env.FORCE_GROUP]}
+    : {kinds: [31923], authors: [$pubkey, ...$userFollows].filter(identity)}
 
   if ($env.FORCE_GROUP) {
     loadGroupMessages([$env.FORCE_GROUP])
   }
 </script>
 
-<Calendar {feed} />
+<Calendar {filter} />

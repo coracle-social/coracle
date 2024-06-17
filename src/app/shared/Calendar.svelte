@@ -1,30 +1,40 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
   import {batch} from "hurdak"
-  import {onMount, onDestroy} from "svelte"
-  import {writable} from "@welshman/lib"
+  import {onMount} from "svelte"
+  import {fromPairs} from "@welshman/lib"
   import {getAddress, getReplyFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
+  import {feedFromFilter} from "@welshman/feeds"
   import Calendar from "@event-calendar/core"
   import DayGrid from "@event-calendar/day-grid"
   import Interaction from "@event-calendar/interaction"
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {
-    hints,
-    load,
-    pubkey,
-    canSign,
-    repository,
-    subscribe,
-    feedLoader,
-    getFilterSelections,
-  } from "src/engine"
+  import {hints, load, pubkey, canSign, loadAll, deriveEventsMapped} from "src/engine"
   import {router} from "src/app/util/router"
 
-  export let feed
+  export let filter
   export let group = null
+
+  const calendarEvents = deriveEventsMapped({
+    filters: [filter],
+    itemToEvent: (item: any) => item.event,
+    eventToItem: (event: TrustedEvent) => {
+      const meta = fromPairs(event.tags)
+      const isOwn = event.pubkey === $pubkey
+
+      return {
+        event,
+        editable: isOwn,
+        id: getAddress(event),
+        title: meta.title || meta.name, // Backwards compat with a bug
+        start: secondsToDate(meta.start),
+        end: secondsToDate(meta.end),
+        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-100"],
+      }
+    },
+  })
 
   const createEvent = () => router.at("notes/create").qp({type: "calendar_event", group}).open()
 
@@ -45,55 +55,17 @@
 
   const onEventClick = ({event: calendarEvent}) => router.at("events").of(calendarEvent.id).open()
 
-  const events = writable(new Map())
-
-  const onEvent = batch(300, (chunk: TrustedEvent[]) => {
-    events.update($events => {
-      for (const e of chunk) {
-        const addr = getAddress(e)
-        const dup = $events.get(addr)
-
-        // Make sure we have the latest version of every event
-        $events.set(addr, dup?.created_at > e.created_at ? dup : e)
-      }
-
-      return $events
-    })
-
-    // Load deletes for these events
-    load({
-      relays: hints.merge(chunk.map(e => hints.EventChildren(e))).getUrls(),
-      filters: getReplyFilters(chunk, {kinds: [5]}),
+  onMount(() => {
+    loadAll(feedFromFilter(filter), {
+      // Load deletes for these events
+      onEvent: batch(300, (chunk: TrustedEvent[]) => {
+        load({
+          relays: hints.merge(chunk.map(e => hints.EventChildren(e))).getUrls(),
+          filters: getReplyFilters(chunk, {kinds: [5]}),
+        })
+      }),
     })
   })
-
-  let subs = []
-
-  onMount(async () => {
-    const [{filters}] = await feedLoader.compiler.compile(feed)
-
-    subs = getFilterSelections(filters).map(({relay, filters}) =>
-      subscribe({relays: [relay], filters, onEvent}),
-    )
-  })
-
-  onDestroy(() => subs.map(sub => sub.close()))
-
-  $: calendarEvents = Array.from($events.values())
-    .filter(e => !repository.isDeleted(e))
-    .map(e => {
-      const meta = fromPairs(e.tags)
-      const isOwn = e.pubkey === $pubkey
-
-      return {
-        editable: isOwn,
-        id: getAddress(e),
-        title: meta.title || meta.name, // Backwards compat with a bug
-        start: secondsToDate(meta.start),
-        end: secondsToDate(meta.end),
-        backgroundColor: $themeColors[isOwn ? "accent" : "neutral-100"],
-      }
-    })
 </script>
 
 {#if $canSign}
@@ -110,7 +82,7 @@
   plugins={[Interaction, DayGrid]}
   options={{
     view: "dayGridMonth",
-    events: calendarEvents,
+    events: $calendarEvents,
     dateClick: onDateClick,
     eventClick: onEventClick,
     eventContent: getEventContent,

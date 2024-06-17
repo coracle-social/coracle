@@ -1,7 +1,8 @@
 <script>
   import {onMount} from "svelte"
   import {filter, assoc} from "ramda"
-  import {now} from "@welshman/lib"
+  import {now, shuffle} from "@welshman/lib"
+  import {GROUP, COMMUNITY, getIdFilters} from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,11 +13,11 @@
     hints,
     groups,
     repository,
-    getGroupReqInfo,
     loadGiftWraps,
     loadGroupMessages,
     deriveIsGroupMember,
     updateCurrentSession,
+    communityListsByAddress,
     searchGroups,
   } from "src/engine"
 
@@ -41,9 +42,10 @@
   document.title = "Groups"
 
   onMount(() => {
-    const {admins} = getGroupReqInfo()
-    const scroller = createScroller(loadMore, {element})
     const loader = loadGiftWraps()
+    const scroller = createScroller(loadMore, {element})
+    const communityAddrs = Array.from($communityListsByAddress.keys())
+      .filter(a => !groups.key(a).get()?.meta)
 
     updateCurrentSession(assoc("groups_last_synced", now()))
 
@@ -51,15 +53,15 @@
 
     load({
       skipCache: true,
-      forcePlatform: false,
       relays: hints.User().getUrls(),
-      filters: [{kinds: [35834, 34550], authors: admins}],
+      filters: [{kinds: [GROUP, COMMUNITY], limit: 1000 - communityAddrs.length}],
     })
 
     load({
       skipCache: true,
+      forcePlatform: false,
       relays: hints.User().getUrls(),
-      filters: [{kinds: [35834, 34550], limit: 500}],
+      filters: getIdFilters(shuffle(communityAddrs).slice(0, 1000)),
     })
 
     return () => {

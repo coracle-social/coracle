@@ -97,7 +97,7 @@
 <form on:submit|preventDefault={() => onSubmit()}>
   <AltColor background class="z-feature flex gap-4 overflow-hidden rounded p-3 text-neutral-100">
     <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
-    <div class="w-full">
+    <div class="w-full min-w-0">
       <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />
       <div class="p-2">
         <NoteImages bind:this={images} bind:compose includeInContent />

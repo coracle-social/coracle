@@ -6,7 +6,9 @@ import {
   PROFILE,
   HANDLER_INFORMATION,
   NAMED_BOOKMARKS,
+  COMMUNITIES,
   FEED,
+  MUTES,
   FOLLOWS,
   APP_DATA,
 } from "@welshman/util"
@@ -50,10 +52,10 @@ const getFiltersForKey = (key: string, authors: string[]) => {
     case "pubkey/relays":
       return [{authors, kinds: [RELAYS]}]
     case "pubkey/profile":
-      return [{authors, kinds: [PROFILE, FOLLOWS, HANDLER_INFORMATION]}]
+      return [{authors, kinds: [PROFILE, FOLLOWS, HANDLER_INFORMATION, COMMUNITIES]}]
     case "pubkey/user":
       return [
-        {authors, kinds: [PROFILE, RELAYS, FOLLOWS, APP_DATA]},
+        {authors, kinds: [PROFILE, RELAYS, MUTES, FOLLOWS, COMMUNITIES, APP_DATA]},
         {authors, kinds: [APP_DATA], "#d": Object.values(appDataKeys)},
       ]
   }

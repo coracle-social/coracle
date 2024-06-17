@@ -35,6 +35,7 @@ import {
   uniq,
   uniqBy,
   now,
+  intersection,
   sort,
   groupBy,
   indexBy,
@@ -693,6 +694,18 @@ export const communityListsByPubkey = withGetter(
   derived(communityLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
 )
 
+export const communityListsByAddress = derived(communityLists, $communityLists => {
+  const m = new Map<string, PublishedSingleton[]>()
+
+  for (const list of $communityLists) {
+    for (const a of getSingletonValues("a", list)) {
+      pushToMapKey(m, a, list)
+    }
+  }
+
+  return m
+})
+
 export const getCommunityList = (pk: string) =>
   communityListsByPubkey.get().get(pk) as PublishedSingleton | undefined
 
@@ -704,18 +717,6 @@ export const getCommunities = (pk: string) => getSingletonValues("a", getCommuni
 export const deriveCommunities = (pk: string) =>
   derived(communityListsByPubkey, m => getSingletonValues("a", m.get(pk)))
 
-export const userFollowsByCommunity = derived(communityLists, $communityLists => {
-  const m = new Map<string, string[]>()
-
-  for (const list of $communityLists) {
-    for (const a of getSingletonValues("a", list)) {
-      pushToMapKey(m, a, list.event.pubkey)
-    }
-  }
-
-  return m
-})
-
 // Groups
 
 export const deriveGroup = address => {
@@ -725,11 +726,17 @@ export const deriveGroup = address => {
 }
 
 export const searchGroups = derived(
-  [groups.throttle(300), userFollowsByCommunity],
-  ([$groups, $userFollowsByCommunity]) => {
+  [groups.throttle(300), communityListsByAddress, userFollows],
+  ([$groups, $communityListsByAddress, $userFollows]) => {
     const options = $groups
       .filter(group => !repository.deletes.has(group.address))
-      .map(group => ({group, score: $userFollowsByCommunity.get(group.address)?.length || 0}))
+      .map(group => {
+        const lists = $communityListsByAddress.get(group.address) || []
+        const members = lists.map(l => l.event.pubkey)
+        const followedMembers = intersection(members, $userFollows)
+
+        return {group, score: followedMembers.length}
+      })
 
     const fuse = new Fuse(options, {
       keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
@@ -1620,7 +1627,7 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
   return pub
 }
 
-export const sign = (template, opts: {anonymous?: boolean; sk?: string}) => {
+export const sign = (template, opts: {anonymous?: boolean; sk?: string} = {}) => {
   if (opts.anonymous) {
     return signer.get().signWithKey(template, generatePrivateKey())
   }

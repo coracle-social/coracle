@@ -71,7 +71,7 @@
       tabs.push("market")
     }
 
-    if ($sharedKey) {
+    if ($sharedKey || address.startsWith("34550")) {
       tabs.push("members")
     } else if (activeTab === "members") {
       activeTab = "notes"

@@ -90,7 +90,7 @@
   </div>
   <div
     style={$$props.style || "min-height: 6rem"}
-    class={cx($$props.class, "w-full min-w-0 outline-0")}
+    class={cx($$props.class, "w-full min-w-0 whitespace-pre-line outline-0")}
     {autofocus}
     contenteditable
     bind:this={input}

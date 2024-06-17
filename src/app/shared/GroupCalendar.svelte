@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {feedFromFilter} from "@welshman/feeds"
+  import {EVENT_TIME} from "@welshman/util"
   import Calendar from "src/app/shared/Calendar.svelte"
 
   export let address
 </script>
 
-<Calendar group={address} feed={feedFromFilter({kinds: [31923], "#a": [address]})} />
+<Calendar group={address} filter={{kinds: [EVENT_TIME], "#a": [address]}} />
