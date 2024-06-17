@@ -5,7 +5,6 @@ import {Nip59} from "./nip59"
 import {Signer} from "./signer"
 import {Connect} from "./connect"
 
-export * from "./amber"
 export * from "./nip04"
 export * from "./nip07"
 export * from "./nip44"

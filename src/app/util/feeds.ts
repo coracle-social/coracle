@@ -14,7 +14,7 @@ import {
   REACTION,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
-import type {Feed} from "@welshman/feeds"
+import type {Feed, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {withGetter} from "src/util/misc"
@@ -59,7 +59,7 @@ const prepFilters = (filters, opts: FeedOpts) => {
   return filters
 }
 
-function* getRequestItems({relays, filters}, opts: FeedOpts) {
+function* getRequestItems({relays, filters}: RequestItem, opts: FeedOpts) {
   filters = prepFilters(filters, opts)
 
   // Use relays specified in feeds
@@ -135,7 +135,7 @@ export const createFeed = (opts: FeedOpts) => {
             skipCache: true,
             onEvent: prependEvent,
             signal: controller.signal,
-            filters: filters.map(assoc('since', now())),
+            filters: filters.map(assoc("since", now())),
             forcePlatform: opts.forcePlatform && (relays?.length || 0) === 0,
           })
         }

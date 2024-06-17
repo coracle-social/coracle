@@ -2,7 +2,6 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
-  import {tryCatch} from "@welshman/lib"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
   import {tryJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -15,18 +14,14 @@
   import {
     load,
     hints,
-    Amber,
     loadHandle,
     getExtension,
     withExtension,
-    loginWithAmber,
     loginWithExtension,
     loginWithNostrConnect,
   } from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
-
-  const amber = Amber.get()
 
   const signUp = () => router.at("signup").replaceModal()
 
@@ -41,15 +36,6 @@
         boot()
       }
     })
-
-  const useAmber = async () => {
-    const pubkey = await tryCatch(amber.getPubkey, e => showWarning(e.toString()))
-
-    if (pubkey) {
-      loginWithAmber(pubkey)
-      boot()
-    }
-  }
 
   const usePrivateKey = () => router.at("login/privkey").replaceModal()
 
@@ -194,14 +180,6 @@
             <i class="fa fa-puzzle-piece fa-xl" />
           </div>
           <span>Extension</span>
-        </Tile>
-      {/if}
-      {#if amber.isEnabled()}
-        <Tile class="cursor-pointer bg-tinted-800" on:click={useAmber}>
-          <div>
-            <i class="fa fa-gem fa-xl" />
-          </div>
-          <span>Amber</span>
         </Tile>
       {/if}
       <Tile class="cursor-pointer bg-tinted-800" on:click={usePrivateKey}>

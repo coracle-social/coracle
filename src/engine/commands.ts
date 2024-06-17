@@ -919,8 +919,6 @@ export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey
 
 export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
-export const loginWithAmber = pubkey => addSession({method: "amber", pubkey})
-
 export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) => {
   const connectKey = generatePrivateKey()
   const connectHandler = {relays: [connectRelay]}

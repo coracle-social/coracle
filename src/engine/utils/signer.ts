@@ -5,7 +5,6 @@ import {getPublicKey, getSignature} from "src/util/nostr"
 import type {Session} from "src/engine/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
-import {Amber} from "./amber"
 
 export class Signer {
   constructor(
@@ -14,7 +13,7 @@ export class Signer {
   ) {}
 
   isEnabled() {
-    return ["amber", "connect", "privkey", "extension"].includes(this.session?.method)
+    return ["connect", "privkey", "extension"].includes(this.session?.method)
   }
 
   prepWithKey(event: EventTemplate, sk: string) {
@@ -48,7 +47,6 @@ export class Signer {
     const event = this.prepAsUser(template)
 
     return switcherFn(method, {
-      amber: () => Amber.get().signEvent(event),
       privkey: () => ({...event, sig: getSignature(event, privkey)}),
       extension: () => withExtension(ext => ext.signEvent(event)),
       connect: () => this.connect.broker.signEvent(template),

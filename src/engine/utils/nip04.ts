@@ -3,7 +3,6 @@ import {switcherFn, tryFunc} from "hurdak"
 import type {Session} from "src/engine/model"
 import type {Connect} from "./connect"
 import {withExtension} from "./nip07"
-import {Amber} from "./amber"
 
 export class Nip04 {
   constructor(
@@ -12,7 +11,7 @@ export class Nip04 {
   ) {}
 
   isEnabled() {
-    return ["amber", "privkey", "connect", "extension"].includes(this.session?.method)
+    return ["privkey", "connect", "extension"].includes(this.session?.method)
   }
 
   async encrypt(message: string, pk: string, sk: string) {
@@ -27,7 +26,6 @@ export class Nip04 {
     const {method, privkey} = this.session
 
     return switcherFn(method, {
-      amber: () => Amber.get().nip04Encrypt(pk, message),
       privkey: () => this.encrypt(message, pk, privkey),
       extension: () => withExtension(ext => ext.nip04.encrypt(pk, message)),
       connect: () => this.connect.broker.nip04Encrypt(pk, message),
@@ -38,7 +36,6 @@ export class Nip04 {
     const {method, privkey} = this.session
 
     return switcherFn(method, {
-      amber: () => Amber.get().nip04Decrypt(pk, message),
       privkey: () => this.decrypt(message, pk, privkey),
       extension: () => withExtension(ext => ext.nip04.decrypt(pk, message)),
       connect: () => this.connect.broker.nip04Decrypt(pk, message),
