@@ -1,17 +1,19 @@
 <script>
   import {ellipsize} from "hurdak"
+  import {derived} from "svelte/store"
+  import {remove} from "@welshman/lib"
   import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
-  import {displayGroup, deriveGroup, getWotCommunityMembers} from "src/engine"
+  import {displayGroup, deriveGroup, userFollowsByCommunity, pubkey} from "src/engine"
 
   export let address
   export let modal = false
 
   const group = deriveGroup(address)
-  const members = $getWotCommunityMembers(address)
+  const members = derived(userFollowsByCommunity, $m => remove($pubkey, $m.get(address) || []))
 
   const enter = () => {
     const route = router.at("groups").of(address).at("notes")
@@ -45,9 +47,10 @@
         {ellipsize($group.meta.about, 300)}
       </p>
     {/if}
-    {#if members.length > 0}
-      <p class="mt-4 text-lg text-neutral-300">Members:</p>
-      <PersonCircles pubkeys={members.slice(0, 20)} />
+    {#if $members.length > 0}
+      <div class="pt-1">
+        <PersonCircles class="h-6 w-6" pubkeys={$members.slice(0, 20)} />
+      </div>
     {/if}
   </div>
 </Card>

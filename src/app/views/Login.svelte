@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
+  import {tryCatch} from "@welshman/lib"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
   import {tryJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"

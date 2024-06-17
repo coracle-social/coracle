@@ -38,6 +38,7 @@ import {
   sort,
   groupBy,
   indexBy,
+  pushToMapKey,
 } from "@welshman/lib"
 import {
   WRAP,
@@ -689,7 +690,7 @@ export const communityLists = withGetter(
 )
 
 export const communityListsByPubkey = withGetter(
-  derived(muteLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
+  derived(communityLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
 )
 
 export const getCommunityList = (pk: string) =>
@@ -703,16 +704,17 @@ export const getCommunities = (pk: string) => getSingletonValues("a", getCommuni
 export const deriveCommunities = (pk: string) =>
   derived(communityListsByPubkey, m => getSingletonValues("a", m.get(pk)))
 
-export const getWotCommunityMembers = withGetter(
-  derived(
-    [userFollows, communityListsByPubkey],
-    ([$userFollows, $communityListsByPubkey]) =>
-      address =>
-        Array.from($userFollows).filter(pk =>
-          getSingletonValues("a", $communityListsByPubkey.get(pk)),
-        ),
-  ),
-)
+export const userFollowsByCommunity = derived(communityLists, $communityLists => {
+  const m = new Map<string, string[]>()
+
+  for (const list of $communityLists) {
+    for (const a of getSingletonValues("a", list)) {
+      pushToMapKey(m, a, list.event.pubkey)
+    }
+  }
+
+  return m
+})
 
 // Groups
 
@@ -722,30 +724,33 @@ export const deriveGroup = address => {
   return groups.key(address).derived(defaultTo({id, pubkey, address}))
 }
 
-export const searchGroups = groups.throttle(300).derived($groups => {
-  const options = $groups
-    .filter(group => !repository.deletes.has(group.address))
-    .map(group => ({group, score: getWotCommunityMembers.get()(group.address).length}))
+export const searchGroups = derived(
+  [groups.throttle(300), userFollowsByCommunity],
+  ([$groups, $userFollowsByCommunity]) => {
+    const options = $groups
+      .filter(group => !repository.deletes.has(group.address))
+      .map(group => ({group, score: $userFollowsByCommunity.get(group.address)?.length || 0}))
 
-  const fuse = new Fuse(options, {
-    keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
-    threshold: 0.3,
-    shouldSort: false,
-    includeScore: true,
-  })
+    const fuse = new Fuse(options, {
+      keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
+      threshold: 0.3,
+      shouldSort: false,
+      includeScore: true,
+    })
 
-  return (term: string) => {
-    if (!term) {
-      return sortBy(item => -item.score, options).map(item => item.group)
+    return (term: string) => {
+      if (!term) {
+        return sortBy(item => -item.score, options).map(item => item.group)
+      }
+
+      return doPipe(fuse.search(term), [
+        $results =>
+          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), $results),
+        $results => $results.map((r: any) => r.item.group),
+      ])
     }
-
-    return doPipe(fuse.search(term), [
-      $results =>
-        sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), $results),
-      $results => $results.map((r: any) => r.item.group),
-    ])
-  }
-})
+  },
+)
 
 export const getRecipientKey = wrap => {
   const pubkey = Tags.fromEvent(wrap).values("p").first()
@@ -1601,6 +1606,8 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
   // Add the event to projections
   if (canUnwrap(request.event)) {
     ensureUnwrapped(request.event).then(projections.push)
+  } else {
+    projections.push(request.event)
   }
 
   // Listen to updates and update our publish queue

@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
 import {writable, derived} from "svelte/store"
-import {inc, pushToMapKey, sortBy, now} from "@welshman/lib"
+import {inc, assoc, pushToMapKey, sortBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -127,14 +127,15 @@ export const createFeed = (opts: FeedOpts) => {
     if (reqs && opts.shouldListen) {
       const tracker = new Tracker()
 
-      for (const {relays, filters} of reqs) {
-        for (const request of Array.from(getRequestItems({relays, filters}, opts))) {
+      for (const request of reqs) {
+        for (const {relays, filters} of Array.from(getRequestItems(request, opts))) {
           subscribe({
-            ...request,
+            relays,
             tracker,
             skipCache: true,
             onEvent: prependEvent,
             signal: controller.signal,
+            filters: filters.map(assoc('since', now())),
             forcePlatform: opts.forcePlatform && (relays?.length || 0) === 0,
           })
         }

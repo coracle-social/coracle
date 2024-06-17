@@ -1,5 +1,6 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
+  import {equals} from "ramda"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
@@ -11,6 +12,7 @@
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
+  import {globalFeed} from "src/app/state"
   import {normalizeFeedDefinition, displayList, readFeed, makeFeed, displayFeed} from "src/domain"
   import {userListFeeds, canSign, deleteEvent, userFeeds} from "src/engine"
 
@@ -118,15 +120,27 @@
               <Anchor modal href="/feeds/create"><i class="fa fa-plus" /></Anchor>
             </MenuItem>
             <div class="max-h-80 overflow-auto">
-              <MenuItem on:click={() => setFeed(followsFeed)}>Follows</MenuItem>
-              <MenuItem on:click={() => setFeed(networkFeed)}>Network</MenuItem>
+              <MenuItem
+                active={equals(followsFeed.definition, $globalFeed.definition)}
+                on:click={() => setFeed(followsFeed)}>
+                Follows
+              </MenuItem>
+              <MenuItem
+                active={equals(networkFeed.definition, $globalFeed.definition)}
+                on:click={() => setFeed(networkFeed)}>
+                Network
+              </MenuItem>
               {#each $userFeeds as feed}
-                <MenuItem on:click={() => setFeed(feed)}>
+                <MenuItem
+                  active={equals(feed.definition, $globalFeed.definition)}
+                  on:click={() => setFeed(feed)}>
                   {displayFeed(feed)}
                 </MenuItem>
               {/each}
               {#each $userListFeeds as feed}
-                <MenuItem on:click={() => setFeed(feed)}>
+                <MenuItem
+                  active={equals(feed.definition, $globalFeed.definition)}
+                  on:click={() => setFeed(feed)}>
                   {displayList(feed.list)}
                 </MenuItem>
               {/each}

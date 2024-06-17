@@ -11,6 +11,7 @@ import {
   MUTES,
   FOLLOWS,
   RELAYS,
+  COMMUNITIES,
 } from "@welshman/util"
 import {tryJson} from "src/util/misc"
 import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
@@ -195,9 +196,9 @@ projections.addHandler(27, (e: TrustedEvent) => {
   }
 })
 
-// Membership access/exit requests
+// Membership
 
-projections.addHandler(10004, (e: TrustedEvent) => {
+projections.addHandler(COMMUNITIES, (e: TrustedEvent) => {
   let session = getSession(e.pubkey)
 
   if (!session) {
