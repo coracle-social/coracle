@@ -140,18 +140,13 @@ export const getStaleAddrs = (addrs: string[]) => {
 
   for (const addr of addrs) {
     const attempts = attemptedAddrs.get(addr) | 0
+    const group = groups.key(addr).get()
 
-    if (attempts > 1) {
-      continue
+    if (!group?.meta || attempts === 0) {
+      stale.add(addr)
     }
 
     attemptedAddrs.set(addr, attempts + 1)
-
-    const group = groups.key(addr).get()
-
-    if (!group?.meta) {
-      stale.add(addr)
-    }
   }
 
   return Array.from(stale)

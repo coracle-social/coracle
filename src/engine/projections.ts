@@ -160,7 +160,7 @@ projections.addHandler(34550, (e: TrustedEvent) => {
     meta: {
       name: meta.name,
       about: meta.description,
-      banner: meta.image,
+      banner: meta.banner,
       picture: meta.image,
     },
   })
