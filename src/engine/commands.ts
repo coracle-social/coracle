@@ -339,16 +339,16 @@ export const publishToGroupAdmin = async (address, template) => {
   }
 }
 
-export const publishAsGroupAdminPublicly = async (address, template) => {
-  const relays = hints.WithinContext(address).getUrls()
+export const publishAsGroupAdminPublicly = async (address, template, relays = []) => {
+  const _relays = hints.merge([hints.fromRelays(relays), hints.WithinContext(address)]).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const event = await sign(template, {sk: adminKey.privkey})
 
-  return publish({event, relays, forcePlatform: false})
+  return publish({event, relays: _relays, forcePlatform: false})
 }
 
-export const publishAsGroupAdminPrivately = async (address, template) => {
-  const relays = hints.WithinContext(address).getUrls()
+export const publishAsGroupAdminPrivately = async (address, template, relays = []) => {
+  const _relays = hints.merge([hints.fromRelays(relays), hints.WithinContext(address)]).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -363,7 +363,7 @@ export const publishAsGroupAdminPrivately = async (address, template) => {
   const pubs = []
 
   for (const rumor of rumors) {
-    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
+    pubs.push(publish({event: rumor.wrap, relays: _relays, forcePlatform: false}))
   }
 
   return pubs
@@ -549,7 +549,7 @@ export const publishCommunityMeta = (address, id, feeds, relays, meta) => {
     ],
   })
 
-  return publishAsGroupAdminPublicly(address, template)
+  return publishAsGroupAdminPublicly(address, template, relays)
 }
 
 export const publishGroupMeta = (address, id, feeds, relays, meta, listPublicly) => {
@@ -567,8 +567,8 @@ export const publishGroupMeta = (address, id, feeds, relays, meta, listPublicly)
   })
 
   return listPublicly
-    ? publishAsGroupAdminPublicly(address, template)
-    : publishAsGroupAdminPrivately(address, template)
+    ? publishAsGroupAdminPublicly(address, template, relays)
+    : publishAsGroupAdminPrivately(address, template, relays)
 }
 
 export const deleteGroupMeta = address =>
