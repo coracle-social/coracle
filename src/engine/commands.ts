@@ -51,7 +51,6 @@ import {
   loadOne,
   createAndPublish,
   deriveAdminKeyForGroup,
-  deriveGroup,
   deriveIsGroupMember,
   deriveSharedKeyForGroup,
   displayProfileByPubkey,
@@ -250,7 +249,7 @@ export const updateZapper = async ({pubkey, created_at}, {lud16, lud06}) => {
 
 // Key state management
 
-export const initSharedKey = address => {
+export const initSharedKey = (address: string, relays: string[]) => {
   const privkey = generatePrivateKey()
   const pubkey = getPublicKey(privkey)
   const key = {
@@ -258,6 +257,7 @@ export const initSharedKey = address => {
     pubkey: pubkey,
     privkey: privkey,
     created_at: now(),
+    hints: relays,
   }
 
   groupSharedKeys.key(pubkey).set(key)
@@ -266,24 +266,24 @@ export const initSharedKey = address => {
 }
 
 export const initGroup = (kind, relays) => {
-  const id = randomId()
+  const identifier = randomId()
   const privkey = generatePrivateKey()
   const pubkey = getPublicKey(privkey)
-  const address = `${kind}:${pubkey}:${id}`
-  const sharedKey = kind === 35834 ? initSharedKey(address) : null
+  const address = `${kind}:${pubkey}:${identifier}`
+  const sharedKey = kind === 35834 ? initSharedKey(address, relays) : null
   const adminKey = {
     group: address,
     pubkey: pubkey,
     privkey: privkey,
     created_at: now(),
-    relays,
+    hints: relays,
   }
 
   groupAdminKeys.key(pubkey).set(adminKey)
 
-  groups.key(address).set({id, pubkey, address, relays})
+  groups.key(address).set({id: identifier, pubkey, address})
 
-  return {id, address, adminKey, sharedKey}
+  return {identifier, address, adminKey, sharedKey}
 }
 
 // Most people don't have access to nip44 yet, send nip04-encrypted fallbacks for:
@@ -485,7 +485,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
 }
 
 export const publishAdminKeyShares = async (address, pubkeys) => {
-  const {relays} = deriveGroup(address).get()
+  const relays = hints.WithinContext(address).getUrls()
   const {privkey} = deriveAdminKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
@@ -501,7 +501,7 @@ export const publishAdminKeyShares = async (address, pubkeys) => {
 }
 
 export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => {
-  const {relays} = deriveGroup(address).get()
+  const relays = hints.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const {privkey} = deriveSharedKeyForGroup(address).get()
   const template = createEvent(24, {
@@ -535,40 +535,44 @@ export const publishGroupMembers = async (address, op, pubkeys) => {
   return publishAsGroupAdminPrivately(address, template)
 }
 
-export const publishCommunityMeta = (address, id, feeds, relays, meta) => {
+export const publishCommunityMeta = (address, identifier, meta) => {
   const template = createEvent(34550, {
     tags: [
-      ["d", id],
+      ["d", identifier],
       ["name", meta.name],
       ["description", meta.about],
       ["banner", meta.banner],
-      ["image", meta.picture],
+      ["picture", meta.image],
+      ["image", meta.image],
+      ...meta.feeds,
+      ...meta.relays,
+      ...meta.moderators,
       ...getClientTags(),
-      ...(feeds || []),
-      ...(relays || []).map(url => ["relay", url]),
     ],
   })
 
-  return publishAsGroupAdminPublicly(address, template, relays)
+  return publishAsGroupAdminPublicly(address, template, meta.relays)
 }
 
-export const publishGroupMeta = (address, id, feeds, relays, meta, listPublicly) => {
+export const publishGroupMeta = (address, identifier, meta, listPublicly) => {
   const template = createEvent(35834, {
     tags: [
-      ["d", id],
+      ["d", identifier],
       ["name", meta.name],
       ["about", meta.about],
       ["banner", meta.banner],
-      ["picture", meta.picture],
+      ["picture", meta.image],
+      ["image", meta.image],
+      ...meta.feeds,
+      ...meta.relays,
+      ...meta.moderators,
       ...getClientTags(),
-      ...(feeds || []),
-      ...(relays || []).map(url => ["relay", url]),
     ],
   })
 
   return listPublicly
-    ? publishAsGroupAdminPublicly(address, template, relays)
-    : publishAsGroupAdminPrivately(address, template, relays)
+    ? publishAsGroupAdminPublicly(address, template, meta.relays)
+    : publishAsGroupAdminPrivately(address, template, meta.relays)
 }
 
 export const deleteGroupMeta = address =>

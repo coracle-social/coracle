@@ -5,8 +5,6 @@ import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
   isShareableRelayUrl,
-  Address,
-  getAddress,
   getIdFilters,
   MUTES,
   FOLLOWS,
@@ -43,7 +41,6 @@ import {
   modifyGroupStatus,
   setGroupStatus,
   updateRecord,
-  updateStore,
   updateSession,
   setSession,
   updateZapper,
@@ -109,60 +106,8 @@ projections.addHandler(24, (e: TrustedEvent) => {
     groupAlerts.key(e.id).set({...e, group: address, type: "exit"})
   }
 
-  if (relays.length > 0) {
-    const {pubkey, identifier} = Address.from(address)
-
-    if (!groups.key(address).get()) {
-      groups.key(address).set({address, pubkey, id: identifier, relays})
-    }
-  }
-
   setGroupStatus(recipient, address, e.created_at, {
     access: privkey ? GroupAccess.Granted : GroupAccess.Revoked,
-  })
-})
-
-// Group metadata
-
-projections.addHandler(35834, (e: TrustedEvent) => {
-  const tags = Tags.fromEvent(e)
-  const meta = tags.asObject()
-  const address = getAddress(e)
-  const group = groups.key(address)
-
-  group.merge({address, id: meta.d, pubkey: e.pubkey})
-
-  updateStore(group, e.created_at, {
-    feeds: tags.whereKey("feed").unwrap(),
-    relays: tags.values("relay").valueOf(),
-    listing_is_public: !e.wrap,
-    meta: {
-      name: meta.name,
-      about: meta.about,
-      banner: meta.banner,
-      picture: meta.picture,
-    },
-  })
-})
-
-projections.addHandler(34550, (e: TrustedEvent) => {
-  const tags = Tags.fromEvent(e)
-  const meta = tags.asObject()
-  const address = getAddress(e)
-  const group = groups.key(address)
-
-  group.merge({address, id: meta.d, pubkey: e.pubkey})
-
-  updateStore(group, e.created_at, {
-    feeds: tags.whereKey("feed").unwrap(),
-    relays: tags.values("relay").valueOf(),
-    listing_is_public: true,
-    meta: {
-      name: meta.name,
-      about: meta.description,
-      banner: meta.banner,
-      picture: meta.image,
-    },
   })
 })
 

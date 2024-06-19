@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {without} from "@welshman/lib"
   import {difference} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -11,9 +11,11 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupRequest} from "src/engine"
   import {
+    hints,
     groups,
     groupRequests,
     initSharedKey,
+    deriveGroupMeta,
     deriveSharedKeyForGroup,
     publishGroupInvites,
     publishGroupEvictions,
@@ -27,6 +29,7 @@
   export let removeMembers = []
 
   const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const initialMembers = new Set(
     without(removeMembers, [...($group?.members || []), ...addMembers]),
@@ -34,7 +37,7 @@
 
   const onSubmit = () => {
     if (!soft || !$sharedKey) {
-      initSharedKey(address)
+      initSharedKey(address, hints.WithinContext(address).getUrls())
     }
 
     const allMembers = new Set(members)
@@ -81,8 +84,8 @@
     }
 
     // Re-publish group info
-    if (!soft && !$group.listing_is_public) {
-      publishGroupMeta(address, $group.id, $group.feeds, $group.relays, $group.meta, false)
+    if (!soft && !$meta.listing_is_public) {
+      publishGroupMeta(address, $meta.identifier, $meta, false)
     }
 
     // Re-send invites. This could be optimized further, but it's useful to re-send to different relays.

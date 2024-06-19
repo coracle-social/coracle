@@ -1,9 +1,10 @@
 <script lang="ts">
-  import {groups, displayGroup} from "src/engine"
+  import {displayGroupMeta} from "src/domain"
+  import {deriveGroupMeta} from "src/engine"
 
   export let address
 
-  const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
 </script>
 
-<span class={$$props.class}>{displayGroup($group)}</span>
+<span class={$$props.class}>{displayGroupMeta($meta)}</span>

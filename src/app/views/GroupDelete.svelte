@@ -2,12 +2,13 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import {groups, createAndPublish, hints, deriveAdminKeyForGroup, displayGroup} from "src/engine"
+  import {displayGroupMeta} from "src/domain"
+  import {deriveGroupMeta, createAndPublish, hints, deriveAdminKeyForGroup} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address
 
-  const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
   const adminKey = deriveAdminKeyForGroup(address)
 
   const abort = () => router.pop()
@@ -31,7 +32,7 @@
 </script>
 
 <Subheading>Delete Group</Subheading>
-<p>Are you sure you want to delete {displayGroup($group)}?</p>
+<p>Are you sure you want to delete {displayGroupMeta($meta)}?</p>
 <p>
   This will only hide this group from supporting clients. Messages sent to the group may not be
   deleted from relays.

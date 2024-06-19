@@ -1,46 +1,39 @@
 <script lang="ts">
   import {prop} from "ramda"
+  import {COMMUNITY} from "@welshman/util"
   import {showInfo} from "src/partials/Toast.svelte"
-  import type {Values} from "src/app/shared/GroupDetailsForm.svelte"
   import GroupDetailsForm from "src/app/shared/GroupDetailsForm.svelte"
+  import type {GroupMeta} from "src/domain"
   import {
+    deriveGroup,
     deleteGroupMeta,
     publishGroupMeta,
     publishCommunityMeta,
-    getGroupId,
-    getGroupName,
-    deriveGroup,
+    deriveGroupMeta,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address
 
   const group = deriveGroup(address)
+  const meta = deriveGroupMeta(address)
+  const initialValues = {...$meta, members: $group?.members || []}
 
-  const initialValues = {
-    id: getGroupId($group),
-    type: address.startsWith("34550:") ? "open" : "closed",
-    feeds: $group.feeds || [],
-    relays: $group.relays || [],
-    list_publicly: $group.listing_is_public,
-    meta: {
-      name: getGroupName($group),
-      about: $group.meta?.about || "",
-      picture: $group.meta?.picture || "",
-      banner: $group.meta?.banner || "",
-    },
-  }
-
-  const onSubmit = async ({id, type, list_publicly, feeds, relays, meta}: Values) => {
+  const onSubmit = async ({
+    kind,
+    identifier,
+    listing_is_public,
+    ...meta
+  }: GroupMeta & {members: string[]}) => {
     // If we're switching group listing visibility, delete the old listing
-    if ($group.listing_is_public && !list_publicly) {
-      await prop("result", await deleteGroupMeta($group.address))
+    if (listing_is_public && !initialValues.listing_is_public) {
+      await prop("result", await deleteGroupMeta(address))
     }
 
-    if (type === "open") {
-      await publishCommunityMeta(address, id, feeds, relays, meta)
+    if (kind === COMMUNITY) {
+      await publishCommunityMeta(address, identifier, meta)
     } else {
-      await publishGroupMeta(address, id, feeds, relays, meta, list_publicly)
+      await publishGroupMeta(address, identifier, meta, listing_is_public)
     }
 
     showInfo("Your group has been updated!")

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {prop} from "ramda"
   import {without, identity} from "@welshman/lib"
+  import {getAddress} from "@welshman/util"
   import {onMount} from "svelte"
   import {pickVals, toSpliced} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -15,8 +15,8 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelayUrl} from "src/domain"
-  import {hints, relaySearch, searchGroups, displayGroup, deriveGroup} from "src/engine"
+  import {displayRelayUrl, displayGroupMeta} from "src/domain"
+  import {hints, relaySearch, searchGroupMeta, groupMetaByAddress} from "src/engine"
 
   export let initialPubkey = null
   export let initialGroupAddress = null
@@ -70,7 +70,7 @@
     groups = toSpliced(groups, i, 1)
   }
 
-  const displayGroupFromAddress = a => displayGroup(deriveGroup(a).get())
+  const displayGroupFromAddress = a => displayGroupMeta($groupMetaByAddress.get(a))
 
   let relayInput, groupInput
   let sections = []
@@ -194,14 +194,14 @@
         <SearchSelect
           value={null}
           bind:this={groupInput}
-          search={$searchGroups}
-          getKey={prop("address")}
-          onChange={g => g && addGroup(g.address)}
-          displayItem={g => (g ? displayGroup(g) : "")}>
+          search={$searchGroupMeta}
+          displayItem={displayGroupMeta}
+          getKey={groupMeta => getAddress(groupMeta.event)}
+          onChange={groupMeta => groupMeta && addGroup(getAddress(groupMeta.event))}>
           <i slot="before" class="fa fa-search" />
           <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
-            <GroupCircle address={item.address} class="h-5 w-5" />
-            <GroupName address={item.address} />
+            <GroupCircle address={getAddress(item.event)} class="h-5 w-5" />
+            <GroupName address={getAddress(item.event)} />
           </div>
         </SearchSelect>
       </FlexColumn>

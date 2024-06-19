@@ -1,14 +1,15 @@
 <script lang="ts">
+  import {isCommunityAddress} from "@welshman/util"
   import Chip from "src/partials/Chip.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupAbout from "src/app/shared/GroupAbout.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {groups} from "src/engine"
+  import {deriveGroupMeta} from "src/engine"
 
   export let address
   export let hideAbout = false
 
-  const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
 </script>
 
 <div class="flex gap-4 text-neutral-100">
@@ -18,7 +19,7 @@
       <div class="flex items-center">
         <GroupName class="text-2xl" {address} />
         <Chip class="scale-75 border-neutral-200 text-neutral-200">
-          {#if address.startsWith("34550:")}
+          {#if isCommunityAddress(address)}
             <i class="fa fa-unlock" />
             Open
           {:else}
@@ -29,7 +30,7 @@
       </div>
       <slot name="actions" class="hidden xs:block" />
     </div>
-    {#if !hideAbout && $group?.meta?.about}
+    {#if !hideAbout && $meta?.about}
       <GroupAbout {address} />
     {/if}
   </div>

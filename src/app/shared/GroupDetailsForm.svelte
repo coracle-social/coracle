@@ -1,24 +1,7 @@
-<script context="module" lang="ts">
-  export type Values = {
-    id?: string
-    type: string
-    feeds: string[][]
-    relays: string[]
-    members?: string[]
-    list_publicly: boolean
-    meta: {
-      name: string
-      about: string
-      picture: string
-      banner: string
-    }
-  }
-</script>
-
 <script lang="ts">
   import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
-  import {Address} from "@welshman/util"
+  import {Address, GROUP, COMMUNITY} from "@welshman/util"
   import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
   import {formCtrl} from "src/partials/utils"
@@ -35,11 +18,12 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
+  import type {GroupMeta} from "src/domain"
   import {normalizeRelayUrl} from "src/domain"
   import {env, hints, relaySearch, feedSearch} from "src/engine"
 
   export let onSubmit
-  export let values: Values
+  export let values: GroupMeta & {members: string[]}
   export let mode = "create"
   export let showMembers = false
   export let buttonText = "Save"
@@ -83,7 +67,7 @@
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>{ucFirst(mode)} Group</Heading>
       <p>
-        {#if values.type === "open"}
+        {#if values.kind === COMMUNITY}
           An open forum where anyone can participate.
         {:else}
           A private place where members can talk.
@@ -92,30 +76,30 @@
     </div>
     <div class="flex w-full flex-col gap-8">
       <Field label="Name">
-        <Input bind:value={values.meta.name}>
+        <Input bind:value={values.name}>
           <i slot="before" class="fa fa-clipboard" />
         </Input>
         <div slot="info">The name of the group</div>
       </Field>
       <Field label="Picture">
         <ImageInput
-          bind:value={values.meta.picture}
+          bind:value={values.image}
           icon="image-portrait"
           maxWidth={480}
           maxHeight={480} />
         <div slot="info">A picture for the group</div>
       </Field>
       <Field label="Banner">
-        <ImageInput bind:value={values.meta.banner} icon="image" maxWidth={4000} maxHeight={4000} />
+        <ImageInput bind:value={values.banner} icon="image" maxWidth={4000} maxHeight={4000} />
         <div slot="info">A banner image for the group</div>
       </Field>
       <Field label="About">
-        <Textarea bind:value={values.meta.about} />
+        <Textarea bind:value={values.about} />
         <div slot="info">The group's decription</div>
       </Field>
-      {#if values.type === "closed"}
+      {#if values.kind === GROUP}
         <FieldInline label="List Publicly">
-          <Toggle bind:value={values.list_publicly} />
+          <Toggle bind:value={values.listing_is_public} />
           <div slot="info">
             If enabled, this will generate a public listing for the group. The member list and group
             messages will not be published.

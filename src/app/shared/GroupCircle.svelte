@@ -1,15 +1,15 @@
 <script lang="ts">
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PlaceholderCircle from "src/app/shared/PlaceholderCircle.svelte"
-  import {groups} from "src/engine"
+  import {deriveGroupMeta} from "src/engine"
 
   export let address
 
-  const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
 </script>
 
-{#if $group?.meta?.picture}
-  <ImageCircle src={$group.meta.picture} class={$$props.class} />
+{#if $meta?.image}
+  <ImageCircle src={$meta.image} class={$$props.class} />
 {:else}
   <PlaceholderCircle pubkey={address} class={$$props.class} />
 {/if}

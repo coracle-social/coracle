@@ -13,13 +13,14 @@
   import GroupMembers from "src/app/shared/GroupMembers.svelte"
   import GroupAdmin from "src/app/shared/GroupAdmin.svelte"
   import GroupRestrictAccess from "src/app/shared/GroupRestrictAccess.svelte"
+  import {displayGroupMeta} from "src/domain"
   import {
     env,
     GroupAccess,
-    displayGroup,
     loadPubkeys,
     groupRequests,
     deriveGroup,
+    deriveGroupMeta,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
     deriveIsGroupMember,
@@ -35,6 +36,7 @@
   export let claim = ""
 
   const group = deriveGroup(address)
+  const meta = deriveGroupMeta(address)
   const status = deriveGroupStatus(address)
   const isGroupMember = deriveIsGroupMember(address)
   const sharedKey = deriveSharedKeyForGroup(address)
@@ -86,21 +88,21 @@
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
 
-  document.title = $group?.meta?.name || "Group Detail"
+  document.title = $meta?.name || "Group Detail"
 </script>
 
 <div
   class="absolute left-0 top-0 h-64 w-full"
   style={`z-index: -1;
          background-size: cover;
-         background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$group?.meta?.banner}')`} />
+         background-image: linear-gradient(to bottom, ${rgba}, ${rgb}), url('${$meta?.banner}')`} />
 
 <div class="flex gap-4 text-neutral-100">
   <GroupCircle {address} class="mt-1 h-10 w-10 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex items-center justify-between gap-4">
       <Anchor on:click={() => setActiveTab("notes")} class="text-2xl"
-        >{displayGroup($group)}</Anchor>
+        >{displayGroupMeta($meta)}</Anchor>
       <GroupActions {address} {claim} />
     </div>
     <GroupAbout {address} />

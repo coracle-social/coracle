@@ -2,7 +2,7 @@ import Fuse from "fuse.js"
 import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
-import {derived, writable} from "svelte/store"
+import {get, derived, writable} from "svelte/store"
 import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
   any,
@@ -43,6 +43,8 @@ import {
 } from "@welshman/lib"
 import {
   WRAP,
+  COMMUNITY,
+  GROUP,
   WRAP_NIP04,
   COMMUNITIES,
   READ_RECEIPT,
@@ -103,6 +105,7 @@ import type {
   PublishedListFeed,
   PublishedSingleton,
   PublishedList,
+  PublishedGroupMeta,
   RelayPolicy,
   Handle,
 } from "src/domain"
@@ -130,6 +133,7 @@ import {
   makeRelayPolicy,
   filterRelaysByNip,
   displayRelayUrl,
+  readGroupMeta,
 } from "src/domain"
 import type {
   Channel,
@@ -178,6 +182,7 @@ export const handles = withGetter(writable<Record<string, Handle>>({}))
 export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
+export const groupHints = withGetter(writable<Record<string, string[]>>({}))
 
 export const groups = new CollectionStore<Group>("address")
 export const relays = new CollectionStore<RelayInfo>("url")
@@ -719,45 +724,52 @@ export const deriveCommunities = (pk: string) =>
 
 // Groups
 
-export const deriveGroup = address => {
-  const {pubkey, identifier: id} = Address.from(address)
+export const groupMeta = deriveEventsMapped<PublishedGroupMeta>({
+  filters: [{kinds: [GROUP, COMMUNITY]}],
+  itemToEvent: prop("event"),
+  eventToItem: readGroupMeta,
+})
 
-  return groups.key(address).derived(defaultTo({id, pubkey, address}))
-}
+export const groupMetaByAddress = withGetter(
+  derived(groupMeta, $metas => indexBy($meta => getAddress($meta.event), $metas)),
+)
 
-export const searchGroups = derived(
-  [groups.throttle(300), communityListsByAddress, userFollows],
-  ([$groups, $communityListsByAddress, $userFollows]) => {
-    const options = $groups
-      .filter(group => !repository.deletes.has(group.address))
-      .map(group => {
-        const lists = $communityListsByAddress.get(group.address) || []
-        const members = lists.map(l => l.event.pubkey)
-        const followedMembers = intersection(members, $userFollows)
+export const deriveGroupMeta = (address: string) =>
+  derived(groupMetaByAddress, $m => $m.get(address))
 
-        return {group, score: followedMembers.length}
-      })
+export const searchGroupMeta = derived(
+  [groupMeta, communityListsByAddress, userFollows],
+  ([$groupMeta, $communityListsByAddress, $userFollows]) => {
+    const options = $groupMeta.map(meta => {
+      const lists = $communityListsByAddress.get(getAddress(meta.event)) || []
+      const members = lists.map(l => l.event.pubkey)
+      const followedMembers = intersection(members, Array.from($userFollows))
+
+      return {...meta, score: followedMembers.length}
+    })
 
     const fuse = new Fuse(options, {
-      keys: [{name: "group.id", weight: 0.2}, "group.meta.name", "group.meta.about"],
+      keys: [{name: "identifier", weight: 0.2}, "name", {name: "about", weight: 0.5}],
       threshold: 0.3,
       shouldSort: false,
       includeScore: true,
     })
 
-    return (term: string) => {
-      if (!term) {
-        return sortBy(item => -item.score, options).map(item => item.group)
-      }
+    const sortFn = (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)
 
-      return doPipe(fuse.search(term), [
-        $results =>
-          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), $results),
-        $results => $results.map((r: any) => r.item.group),
-      ])
-    }
+    return (term: string) =>
+      term
+        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item.meta)
+        : sortBy(meta => -meta.score, options)
   },
 )
+
+// Legacy
+export const deriveGroup = address => {
+  const {pubkey, identifier: id} = Address.from(address)
+
+  return groups.key(address).derived(defaultTo({id, pubkey, address}))
+}
 
 export const getRecipientKey = wrap => {
   const pubkey = Tags.fromEvent(wrap).values("p").first()
@@ -1147,20 +1159,21 @@ export const deriveUserRelayPolicy = url =>
 // Relay selection
 
 export const getGroupRelayUrls = address => {
-  const group = groups.key(address).get()
-  const keys = groupSharedKeys.get()
+  const meta = groupMetaByAddress.get().get(address)
 
-  if (group?.relays) {
-    return group.relays
+  if (meta?.relays) {
+    return meta.relays.map(nth(1))
   }
 
-  const latestKey = last(sortBy(prop("created_at"), keys.filter(whereEq({group: address}))))
+  const latestKey = last(
+    sortBy(prop("created_at"), get(groupSharedKeys).filter(whereEq({group: address}))),
+  )
 
   if (latestKey?.hints) {
     return latestKey.hints
   }
 
-  return []
+  return get(groupHints)[address] || []
 }
 
 export const forceRelays = (relays: string[], forceRelays: string[]) =>

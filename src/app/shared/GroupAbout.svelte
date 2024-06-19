@@ -1,15 +1,15 @@
 <script lang="ts">
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {groups} from "src/engine"
+  import {deriveGroupMeta} from "src/engine"
 
   export let address
   export let truncate = true
 
-  const group = groups.key(address)
+  const meta = deriveGroupMeta(address)
 </script>
 
 <NoteContentKind1
-  note={{content: $group?.meta?.about || ""}}
+  note={{content: $meta?.about || ""}}
   minLength={100}
   maxLength={140}
   showEntire={!truncate} />

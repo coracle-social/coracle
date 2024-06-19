@@ -12,7 +12,6 @@ export * from "./nip59"
 export * from "./signer"
 export * from "./connect"
 export * from "./events"
-export * from "./groups"
 
 export const getConnect = memoize(session => new Connect(session))
 

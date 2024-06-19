@@ -9,12 +9,11 @@
   import Feed from "src/app/shared/Feed.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import {makeFeed, readFeed} from "src/domain"
-  import {hints, repository, canSign, deriveGroup, load} from "src/engine"
+  import {hints, repository, canSign, deriveGroupMeta, load} from "src/engine"
 
   export let address
 
-  const group = deriveGroup(address)
-
+  const meta = deriveGroupMeta(address)
   const mainFeed = feedFromFilter({kinds: remove(30402, noteKinds), "#a": [address]})
 
   const setActiveTab = tab => {
@@ -27,7 +26,7 @@
   let feeds = [{name: "feed", feed: makeFeed({definition: mainFeed})}]
   let feed = makeFeed({definition: mainFeed})
 
-  for (const feed of $group.feeds || []) {
+  for (const feed of $meta?.feeds || []) {
     const [address, relay = "", name = ""] = feed.slice(1)
 
     if (!Address.isAddress(address)) {

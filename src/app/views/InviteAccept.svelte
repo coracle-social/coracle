@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {zipObj, uniq, pluck} from "ramda"
-  import {normalizeRelayUrl, Address} from "@welshman/util"
+  import {zipObj, pluck} from "ramda"
+  import {normalizeRelayUrl} from "@welshman/util"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -12,7 +12,7 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {session, loadGroups, groups as allGroups} from "src/engine"
+  import {session, loadGroups, groupHints} from "src/engine"
 
   export let people = []
   export let relays = []
@@ -30,24 +30,9 @@
 
   loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups) as string[])
 
-  // Add relay hints to groups so we can use them deep in the call stack
   for (const {address, relay} of parsedGroups) {
-    const group = allGroups.key(address)
-
     if (relay) {
-      const {identifier, pubkey} = Address.from(address)
-
-      group.update($g => {
-        const {relays = []} = $g
-
-        return {
-          ...$g,
-          address,
-          id: identifier,
-          pubkey: pubkey,
-          relays: uniq([...relays, relay]),
-        }
-      })
+      groupHints.update($gh => ({...$gh, [address]: [...$gh[address], relay]}))
     }
   }
 </script>
