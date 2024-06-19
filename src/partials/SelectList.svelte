@@ -6,6 +6,7 @@
   export let onChange = null
   export let disabled = false
   export let multiple = false
+  export let optionClass = ""
 
   const onClick = option => {
     if (multiple) {
@@ -24,7 +25,7 @@
   class:opacity-75={disabled}
   class:cursor-pointer={!disabled}>
   {#each options as option, i}
-    <div on:click={() => onClick(option)}>
+    <div class={optionClass} on:click={() => onClick(option)}>
       <slot
         name="item"
         {i}

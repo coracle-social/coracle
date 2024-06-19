@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {without} from "ramda"
   import {
     parse,
     truncate,
@@ -51,9 +50,6 @@
 
   const isStartOrEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
 
-  const getLinks = content =>
-    content.filter(x => isLink(x) && x.value.isMedia).map(x => x.value.url.toString())
-
   $: shortContent = showEntire
     ? fullContent
     : truncate(
@@ -65,7 +61,6 @@
         },
       )
 
-  $: links = getLinks(shortContent)
   $: ellipsize = expandable && shortContent.find(isEllipsis)
 </script>
 

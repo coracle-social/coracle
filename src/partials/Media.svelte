@@ -7,7 +7,7 @@
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {getSetting, dufflepud, imgproxy} from "src/engine"
+  import {dufflepud, imgproxy} from "src/engine"
 
   export let url
   export let imeta = Tags.wrap([["url", url]])

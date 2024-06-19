@@ -89,6 +89,8 @@
   let search = getSearch(feed.definition)
 
   $: subFeeds = getFeedArgs(feed.definition as any)
+
+  $: console.log(feed)
 </script>
 
 <div class="flex flex-grow items-center justify-end gap-2">

@@ -10,6 +10,7 @@
 - [x] Fix several community and calendar related bugs
 - [x] Add reports using tagr-bot
 - [x] Open links to coracle in same tab
+- [x] Add global feeds
 
 # 0.4.6
 

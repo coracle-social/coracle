@@ -2,6 +2,7 @@
   import {toTitle} from "hurdak"
   import {
     getFeedArgs,
+    isGlobalFeed,
     isCreatedAtFeed,
     isAuthorFeed,
     isKindFeed,
@@ -68,41 +69,48 @@
   {#each subFeeds as subFeed, i}
     {@const idx = i + 1}
     {@const change = f => onSubFeedChange(idx, f)}
-    <Card class="relative">
-      <FlexColumn>
-        <FlexColumn small>
-          {#if isPeopleFeed(subFeed)}
-            <FeedFormSectionPeople feed={subFeed} onChange={change} />
-          {:else if isRelayFeed(subFeed)}
-            <FeedFormSectionRelays feed={subFeed} onChange={change} />
-          {:else if isTopicFeed(subFeed)}
-            <FeedFormSectionTopics feed={subFeed} onChange={change} />
-          {:else if isMentionFeed(subFeed)}
-            <FeedFormSectionMentions feed={subFeed} onChange={change} />
-          {:else if isKindFeed(subFeed)}
-            <FeedFormSectionKinds feed={subFeed} onChange={change} />
-          {:else if isCreatedAtFeed(subFeed)}
-            <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
-          {:else if isListFeed(subFeed)}
-            <FeedFormSectionList feed={subFeed} onChange={change} />
-          {:else if isDVMFeed(subFeed)}
-            <FeedFormSectionDVM feed={subFeed} onChange={change} />
-          {:else}
-            No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+    {@const canSave =
+      isAuthorFeed(subFeed) ||
+      isRelayFeed(subFeed) ||
+      isTopicFeed(subFeed) ||
+      isMentionFeed(subFeed)}
+    {#if canSave || !isGlobalFeed(subFeed)}
+      <Card class="relative">
+        <FlexColumn>
+          <FlexColumn small>
+            {#if isPeopleFeed(subFeed)}
+              <FeedFormSectionPeople feed={subFeed} onChange={change} />
+            {:else if isRelayFeed(subFeed)}
+              <FeedFormSectionRelays feed={subFeed} onChange={change} />
+            {:else if isTopicFeed(subFeed)}
+              <FeedFormSectionTopics feed={subFeed} onChange={change} />
+            {:else if isMentionFeed(subFeed)}
+              <FeedFormSectionMentions feed={subFeed} onChange={change} />
+            {:else if isKindFeed(subFeed)}
+              <FeedFormSectionKinds feed={subFeed} onChange={change} />
+            {:else if isCreatedAtFeed(subFeed)}
+              <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+            {:else if isListFeed(subFeed)}
+              <FeedFormSectionList feed={subFeed} onChange={change} />
+            {:else if isDVMFeed(subFeed)}
+              <FeedFormSectionDVM feed={subFeed} onChange={change} />
+            {:else}
+              No support for editing {toTitle(subFeed[0])} filters. Click "Advanced" to edit manually.
+            {/if}
+          </FlexColumn>
+          {#if canSave}
+            <FeedFormSaveAsList feed={subFeed} onChange={change} />
           {/if}
         </FlexColumn>
-        {#if isAuthorFeed(subFeed) || isRelayFeed(subFeed) || isTopicFeed(subFeed) || isMentionFeed(subFeed)}
-          <FeedFormSaveAsList feed={subFeed} onChange={change} />
+        {#if i > 0}
+          <div
+            class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
+            on:click={() => onSubFeedRemove(idx)}>
+            <i class="fa fa-times" />
+          </div>
         {/if}
-      </FlexColumn>
-      {#if i > 0}
-        <div
-          class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
-          on:click={() => onSubFeedRemove(idx)}>
-          <i class="fa fa-times" />
-        </div>
-      {/if}
-    </Card>
+      </Card>
+    {/if}
   {/each}
 {/key}
 

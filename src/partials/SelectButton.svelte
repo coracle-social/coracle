@@ -5,16 +5,18 @@
   export let displayOption = x => x
 
   const getClassName = active =>
-    cx("px-4 h-7 transition-all rounded-full mr-2 mb-2 inline-flex items-center", {
+    cx("px-4 h-6 transition-all rounded-full mr-2 mb-2 inline-block items-center", {
       "bg-neutral-900 dark:bg-tinted-100 text-accent": active,
       "bg-neutral-900 text-neutral-400": !active,
     })
 </script>
 
-<div class="-mb-2 inline-block">
-  <SelectList {...$$props} class="staatliches inline-flex">
+<div class={cx($$props.class, "-mb-2 inline-block")}>
+  <SelectList {...$$props} optionClass="staatliches inline-block">
     <div slot="item" let:i let:active let:option class={getClassName(active)}>
-      {displayOption(option)}
+      <slot name="item" {option} {active}>
+        {displayOption(option)}
+      </slot>
     </div>
   </SelectList>
 </div>

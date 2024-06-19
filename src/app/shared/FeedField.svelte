@@ -11,15 +11,18 @@
     isRelayFeed,
     isListFeed,
     isDVMFeed,
+    isGlobalFeed,
     makeListFeed,
     makeDVMFeed,
     makeScopeFeed,
     makeTagFeed,
     makeRelayFeed,
+    makeGlobalFeed,
     Scope,
   } from "@welshman/feeds"
   import {toSpliced} from "src/util/misc"
   import Icon from "src/partials/Icon.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
   import SelectTiles from "src/partials/SelectTiles.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -29,6 +32,7 @@
   export let feed
 
   enum FormType {
+    Global = "global",
     Advanced = "advanced",
     DVMs = "dvms",
     Lists = "lists",
@@ -60,25 +64,12 @@
 
   const inferFormType = feed => {
     for (const subFeed of getFeedArgs(normalize(feed))) {
-      if ([FeedType.Scope, FeedType.Author].includes(subFeed[0])) {
-        return FormType.People
-      }
-
-      if (subFeed[0] === FeedType.Tag && subFeed[1] === "#t") {
-        return FormType.Topics
-      }
-
-      if (subFeed[0] === FeedType.Relay) {
-        return FormType.Relays
-      }
-
-      if (subFeed[0] === FeedType.List) {
-        return FormType.Lists
-      }
-
-      if (subFeed[0] === FeedType.DVM) {
-        return FormType.DVMs
-      }
+      if (isGlobalFeed(subFeed)) return FormType.Global
+      if (isScopeFeed(subFeed) || isAuthorFeed(subFeed)) return FormType.People
+      if (isTagFeed(subFeed) && subFeed[1] === "#t") return FormType.Topics
+      if (isRelayFeed(subFeed)) return FormType.Relays
+      if (isListFeed(subFeed)) return FormType.Lists
+      if (isDVMFeed(subFeed)) return FormType.DVMs
     }
 
     return FormType.Advanced
@@ -96,7 +87,9 @@
 
     // Remove filters directly related to the previous type
     if (newFormType !== FormType.Advanced) {
-      if (formType === FormType.People) {
+      if (formType === FormType.Global) {
+        removeSubFeed(isGlobalFeed)
+      } else if (formType === FormType.People) {
         removeSubFeed(isPeopleFeed)
       } else if (formType === FormType.Topics) {
         removeSubFeed(isTopicsFeed)
@@ -112,7 +105,9 @@
     formType = newFormType
 
     // Add a default filter depending on the new form type
-    if (formType === FormType.People) {
+    if (formType === FormType.Global) {
+      prependDefaultSubFeed(isGlobalFeed, makeGlobalFeed())
+    } else if (formType === FormType.People) {
       prependDefaultSubFeed(isPeopleFeed, makeScopeFeed(Scope.Follows))
     } else if (formType === FormType.Topics) {
       prependDefaultSubFeed(isTopicsFeed, makeTagFeed("#t"))
@@ -132,25 +127,55 @@
   let formType = inferFormType(feed)
 
   $: formTypeOptions = [
+    FormType.Global,
     FormType.People,
     FormType.Topics,
     FormType.Relays,
     FormType.Lists,
     FormType.DVMs,
+    FormType.Advanced,
   ]
 </script>
 
 <FlexColumn>
-  <Card class="-mb-8">
+  <Card>
     <FlexColumn small>
       <span class="staatliches text-lg">Choose a feed type</span>
+      <SelectButton
+        class="sm:hidden"
+        options={formTypeOptions}
+        onChange={onFormTypeChange}
+        value={formType}>
+        <div slot="item" class="flex items-center gap-2" let:option let:active>
+          {#if option === FormType.Global}
+            <i class="fa fa-earth-europe" /> Global
+          {:else if option === FormType.People}
+            <i class="fa fa-person" /> People
+          {:else if option === FormType.Topics}
+            <i class="fa fa-tags" /> Topics
+          {:else if option === FormType.Relays}
+            <i class="fa fa-server" /> Relays
+          {:else if option === FormType.Lists}
+            <i class="fa fa-bars-staggered" /> Lists
+          {:else if option === FormType.DVMs}
+            <i class="fa fa-circle-nodes" /> DVMs
+          {:else if option === FormType.Advanced}
+            <i class="fa fa-cogs" /> Advanced
+          {/if}
+        </div>
+      </SelectButton>
       <SelectTiles
-        class="grid-cols-2 xs:grid-cols-3 md:grid-cols-5"
+        class="hidden grid-cols-4 sm:grid"
         options={formTypeOptions}
         onChange={onFormTypeChange}
         value={formType}>
         <div slot="item" class="flex flex-col items-center" let:option let:active>
-          {#if option === FormType.People}
+          {#if option === FormType.Global}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-earth-europe" />
+            </span>
+            <span class="staatliches text-2xl">Global</span>
+          {:else if option === FormType.People}
             <Icon icon="people-nearby" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">People</span>
           {:else if option === FormType.Topics}
@@ -169,17 +194,25 @@
           {:else if option === FormType.DVMs}
             <Icon icon="network" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">DVMs</span>
+          {:else if option === FormType.Advanced}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-cogs" />
+            </span>
+            <span class="staatliches text-2xl">Advanced</span>
           {/if}
         </div>
       </SelectTiles>
-      <div
-        class="flex cursor-pointer items-center justify-end gap-2 text-neutral-500"
-        on:click={() => onFormTypeChange(FormType.Advanced)}>
-        <span class="staatliches underline">Advanced Mode</span>
-      </div>
     </FlexColumn>
   </Card>
   <FlexColumn>
+    {#if formType === FormType.Global && feed.length === 2}
+      <Card class="flex gap-4 items-center">
+        <i class="fa fa-triangle-exclamation text-warning fa-xl" />
+        <p>
+          Be aware that feeds with no filters can result in obscene or otherwise objectionable content being displayed.
+        </p>
+      </Card>
+    {/if}
     {#if formType === FormType.Advanced}
       <FeedFormAdvanced {feed} onChange={onFeedChange} />
     {:else}

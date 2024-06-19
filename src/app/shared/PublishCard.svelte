@@ -96,7 +96,7 @@
                   <p class="mt-4 text-lg">The following relays are still pending:</p>
                   <div class="grid gap-2 sm:grid-cols-2">
                     {#each pending as url}
-                      <RelayCard hideActions {url} />
+                      <RelayCard hideDescription hideActions {url} />
                     {/each}
                   </div>
                 {/if}
@@ -104,7 +104,7 @@
                   <p class="mt-4 text-lg">The following relays accepted your note:</p>
                   <div class="grid gap-2 sm:grid-cols-2">
                     {#each success as url}
-                      <RelayCard hideActions {url} />
+                      <RelayCard hideDescription hideActions {url} />
                     {/each}
                   </div>
                 {/if}

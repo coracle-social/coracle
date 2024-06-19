@@ -18,6 +18,7 @@
   export let claim = null
   export let ratings = null
   export let showStatus = false
+  export let hideDescription = false
   export let hideRatingsCount = false
   export let hideActions = false
   export let showControls = false
@@ -64,30 +65,32 @@
       </slot>
     {/if}
   </div>
-  <slot name="description">
-    {#if $relay.description}
-      <p>{$relay.description}</p>
+  {#if !hideDescription}
+    <slot name="description">
+      {#if $relay.description}
+        <p>{$relay.description}</p>
+      {/if}
+    </slot>
+    {#if !isNil($relay.count)}
+      <span class="flex items-center gap-1 text-sm text-neutral-400">
+        {#if $relay.contact}
+          <Anchor external underline href={$relay.contact}>{displayUrl($relay.contact)}</Anchor>
+          &bull;
+        {/if}
+        {#if $relay.supported_nips}
+          <Popover>
+            <span slot="trigger" class="cursor-pointer underline">
+              {$relay.supported_nips.length} NIPs
+            </span>
+            <span slot="tooltip">
+              NIPs supported: {$relay.supported_nips.join(", ")}
+            </span>
+          </Popover>
+          &bull;
+        {/if}
+        Seen {quantify($relay.count || 0, "time")}
+      </span>
     {/if}
-  </slot>
-  {#if !isNil($relay.count)}
-    <span class="flex items-center gap-1 text-sm text-neutral-400">
-      {#if $relay.contact}
-        <Anchor external underline href={$relay.contact}>{displayUrl($relay.contact)}</Anchor>
-        &bull;
-      {/if}
-      {#if $relay.supported_nips}
-        <Popover>
-          <span slot="trigger" class="cursor-pointer underline">
-            {$relay.supported_nips.length} NIPs
-          </span>
-          <span slot="tooltip">
-            NIPs supported: {$relay.supported_nips.join(", ")}
-          </span>
-        </Popover>
-        &bull;
-      {/if}
-      Seen {quantify($relay.count || 0, "time")}
-    </span>
   {/if}
   {#if showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />

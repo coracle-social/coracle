@@ -23,7 +23,7 @@
   $: scopes = isScopeFeed(feed) ? feed.slice(1) : ["custom"]
 </script>
 
-<span>Which authors would you like to see?</span>
+<span class="staatliches text-lg">Which authors would you like to see?</span>
 <SelectButton
   multiple
   value={scopes}
