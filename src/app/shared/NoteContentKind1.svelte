@@ -16,7 +16,6 @@
     isAddress,
     isNewline,
   } from "@welshman/content"
-  import MediaSet from "src/partials/MediaSet.svelte"
   import QRCode from "src/partials/QRCode.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
@@ -44,13 +43,13 @@
   const isBoundary = i => {
     const parsed = shortContent[i]
 
-    if (!parsed || isBoundary(parsed)) return true
+    if (!parsed || isNewline(parsed)) return true
     if (isText(parsed)) return parsed.value.match(/^\s+$/)
 
     return false
   }
 
-  const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
+  const isStartOrEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
 
   const getLinks = content =>
     content.filter(x => isLink(x) && x.value.isMedia).map(x => x.value.url.toString())
@@ -67,7 +66,6 @@
       )
 
   $: links = getLinks(shortContent)
-  $: extraLinks = without(links, getLinks(fullContent))
   $: ellipsize = expandable && shortContent.find(isEllipsis)
 </script>
 
@@ -107,9 +105,6 @@
       {/if}
     {/each}
   </div>
-  {#if showMedia && extraLinks.length > 0}
-    <MediaSet links={extraLinks} />
-  {/if}
 </div>
 
 {#if ellipsize}

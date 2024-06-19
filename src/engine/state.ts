@@ -255,7 +255,15 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   }
 }
 
-export const dufflepud = (path: string) => `${getSetting("dufflepud_url")}/${path}`
+export const dufflepud = (path: string) => {
+  const base = getSetting("dufflepud_url")
+
+  if (!base) {
+    throw new Error("Dufflepud is not enabled")
+  }
+
+  return `${base}/${path}`
+}
 
 export const session = new Derived(
   [pubkey, sessions],
@@ -1999,16 +2007,19 @@ class IndexedDBAdapter {
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
         if (newRecords.length > 0) {
+          console.log('putting', name, newRecords.length, current.length)
           await storage.bulkPut(name, newRecords)
         }
 
         if (removedRecords.length > 0) {
+          console.log('deleting', name, removedRecords.length, current.length)
           await storage.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
         // If we have much more than our limit, prune our store. This will get persisted
         // the next time around.
         if (current.length > limit * 1.5) {
+          console.log('pruning', name, current.length)
           set((sort ? sort(current) : current).slice(0, limit))
         }
 

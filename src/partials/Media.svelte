@@ -7,7 +7,7 @@
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {dufflepud, imgproxy} from "src/engine"
+  import {getSetting, dufflepud, imgproxy} from "src/engine"
 
   export let url
   export let imeta = Tags.wrap([["url", url]])
@@ -18,8 +18,8 @@
   const loadPreview = async () => {
     const json = await Fetch.postJson(dufflepud("link/preview"), {url})
 
-    if (!json.title && !json.image) {
-      throw new Error("Unable to load preview")
+    if (!json?.title && !json?.image) {
+      throw new Error("Failed to load link preview")
     }
 
     return json
@@ -81,7 +81,7 @@
           </div>
         {/if}
       {:catch}
-        <p class="mb-1 px-12 py-24 text-center text-neutral-600">
+        <p class="mb-1 p-12 text-center text-neutral-600">
           Unable to load a preview for {url}
         </p>
       {/await}

@@ -10,6 +10,8 @@
 
   const url = value.url.toString()
 
+  const coracleRegexp = /^(https?:\/\/)?(app\.)?coracle.social/
+
   const close = () => {
     hidden = true
   }
@@ -17,18 +19,16 @@
   let hidden = false
 </script>
 
-{#if url.includes('coracle.social/')}
+{#if url.match(coracleRegexp)}
   <Anchor
     modal
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={url.replace(/(https?:\/\/)?(app\.)?coracle.social/, '')}>
+    href={url.replace(coracleRegexp, '')}>
     {displayUrl(url)}
   </Anchor>
-{:else if showMedia && value.isMedia && !hidden}
-  <div class="py-2">
-    <Media url={url} onClose={close} />
-  </div>
+{:else if showMedia && !hidden}
+  <Media url={url} onClose={close} />
 {:else if isShareableRelayUrl(url)}
   <Anchor
     modal
