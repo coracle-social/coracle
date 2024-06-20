@@ -1,27 +1,25 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep} from "hurdak"
+  import {sleep} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {INBOX_RELAYS} from "@welshman/util"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
-  import {createScroller, synced} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {nip44} from "src/engine"
+  import {nip44, repository} from "src/engine"
 
   export let pubkeys
-  export let channelId
-  export let messages: TrustedEvent[]
   export let sendMessage
   export let initialMessage = ""
+  export let messages: TrustedEvent[]
 
   const loading = sleep(30_000)
-
-  const useNip44 = synced(`useNip44/${channelId}`, true)
 
   const startScroller = () => {
     scroller?.stop()
@@ -36,6 +34,10 @@
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
+  let useNip44 =
+    pubkeys.length > 2 ||
+    ($nip44.isEnabled() &&
+      repository.query([{kinds: [INBOX_RELAYS], authors: pubkeys}]).length === pubkeys.length)
 
   onMount(() => {
     startScroller()
@@ -76,7 +78,7 @@
     if (content) {
       textarea.value = ""
 
-      await sendMessage(content, $useNip44)
+      await sendMessage(content, useNip44)
 
       stickToBottom()
     }
@@ -159,7 +161,7 @@
       </div>
       {#if $nip44.isEnabled()}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          <Toggle scale={0.7} bind:value={$useNip44} />
+          <Toggle scale={0.7} bind:value={useNip44} />
           <small>
             Send messages using
             <Popover class="inline">

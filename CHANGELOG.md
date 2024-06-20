@@ -3,6 +3,7 @@
 # 0.4.8
 
 - [x] Add support for kind 10050 relay lists
+- [x] Toggle nip44 messages based on 10050 signaling
 
 # 0.4.7
 

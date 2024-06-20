@@ -927,7 +927,7 @@ export const sendMessage = async (channelId: string, content: string) => {
 
     publish({
       event: rumor.wrap,
-      relays: hints.merge(recipients.map(hints.PublishMessage)).getUrls(),
+      relays: hints.PublishMessage(recipient).getUrls(),
       forcePlatform: false,
     })
   }

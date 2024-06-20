@@ -4,6 +4,7 @@ import type {TrustedEvent} from "@welshman/util"
 import {
   RELAYS,
   PROFILE,
+  INBOX_RELAYS,
   HANDLER_INFORMATION,
   NAMED_BOOKMARKS,
   COMMUNITIES,
@@ -51,7 +52,7 @@ const getFiltersForKey = (key: string, authors: string[]) => {
     case "pubkey/feeds":
       return [{authors, kinds: [NAMED_BOOKMARKS, FEED]}]
     case "pubkey/relays":
-      return [{authors, kinds: [RELAYS]}]
+      return [{authors, kinds: [RELAYS, INBOX_RELAYS]}]
     case "pubkey/profile":
       return [{authors, kinds: [PROFILE, FOLLOWS, HANDLER_INFORMATION, COMMUNITIES]}]
     case "pubkey/user":
