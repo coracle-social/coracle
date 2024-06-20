@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
@@ -9,8 +10,14 @@
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {readFeed, readList, displayFeed, mapListToFeed} from "src/domain"
-  import {repository} from "src/engine"
+  import {readFeed, readList, displayFeed, mapListToFeed, getSingletonValues} from "src/domain"
+  import {
+    repository,
+    pubkey,
+    addFeedFavorite,
+    removeFeedFavorite,
+    userFeedFavorites,
+  } from "src/engine"
   import {globalFeed} from "src/app/state"
   import {router} from "src/app/util"
 
@@ -23,10 +30,14 @@
     ? mapListToFeed(readList(event))
     : readFeed(event)
 
+  const toggleFavorite = () => (isFavorite ? removeFeedFavorite(address) : addFeedFavorite(address))
+
   const loadFeed = () => {
     globalFeed.set(feed)
     router.at("notes").push()
   }
+
+  $: isFavorite = getSingletonValues("a", $userFeedFavorites).has(address)
 </script>
 
 <Card class="flex gap-3">
@@ -68,6 +79,14 @@
           {:else}
             <i class="fa fa-angle-right" />
           {/if}
+        </div>
+        <div
+          class={cx("p-1 text-neutral-400 transition-colors hover:text-neutral-100", {
+            "cursor-pointer": feed.event.pubkey !== $pubkey,
+            "pointer-events-none opacity-25": feed.event.pubkey === $pubkey,
+          })}
+          on:click={toggleFavorite}>
+          <i class="fa fa-bookmark" class:text-accent={isFavorite} />
         </div>
         <CopyValueSimple label="Feed address" value={toNostrURI(Address.from(address).toNaddr())} />
       </div>

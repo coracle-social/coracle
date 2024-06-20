@@ -11,7 +11,15 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {canSign, deleteEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
+  import {
+    pubkey,
+    displayProfileByPubkey,
+    canSign,
+    deleteEvent,
+    createAndPublish,
+    loadPubkeys,
+    hints,
+  } from "src/engine"
 
   export let feed
   export let exit
@@ -98,9 +106,18 @@
       <Anchor underline on:click={openSave} class="text-neutral-400">Save this feed</Anchor>
     </Card>
   {:else if draft.event || draft.list}
+    {@const event = draft.event || draft.list.event}
     <Card class="flex flex-col justify-between sm:flex-row">
-      <p>You are currently editing your {displayFeed(draft)} feed.</p>
-      <Anchor underline on:click={startClone} class="text-neutral-400">
+      {#if event.pubkey === $pubkey}
+        <p>You are currently editing "{displayFeed(draft)}" feed.</p>
+      {:else}
+        <p>
+          You are currently cloning "{displayFeed(draft)}" by @{displayProfileByPubkey(
+            event.pubkey,
+          )}.
+        </p>
+      {/if}
+      <Anchor underline on:click={startClone} class="whitespace-nowrap text-neutral-400">
         Create a new feed instead
       </Anchor>
     </Card>
@@ -108,7 +125,7 @@
     <Card class="flex flex-col justify-between sm:flex-row">
       <p>You are currently creating a new feed.</p>
       <Anchor underline on:click={stopClone} class="text-neutral-400">
-        Edit your {displayFeed(feed)} feed instead
+        Edit "{displayFeed(feed)}" instead
       </Anchor>
     </Card>
   {/if}

@@ -236,3 +236,9 @@ body,
 .react-switch-bg {
   border: 1px solid var(--neutral-600);
 }
+
+/* note content */
+
+.note-content a {
+  text-decoration: underline;
+}

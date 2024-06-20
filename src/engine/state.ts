@@ -43,6 +43,7 @@ import {
 } from "@welshman/lib"
 import {
   WRAP,
+  FEEDS,
   COMMUNITY,
   GROUP,
   WRAP_NIP04,
@@ -963,8 +964,7 @@ export const groupNotifications = new Derived(
     const $isEventMuted = isEventMuted.get()
 
     const shouldSkip = e => {
-      const tags = Tags.fromEvent(e)
-      const context = tags.context().values().valueOf()
+      const context = e.tags.filter(t => t[0] === "a")
 
       return (
         !context.some(a => addresses.has(a)) ||
@@ -972,7 +972,7 @@ export const groupNotifications = new Derived(
         !noteKinds.includes(e.kind) ||
         e.pubkey === $session.pubkey ||
         // Skip mentions since they're covered in normal notifications
-        tags.values("p").has($session.pubkey) ||
+        e.tags.find(t => t[0] === "p" && t[1] === $session.pubkey) ||
         $isEventMuted(e)
       )
     }
@@ -1278,15 +1278,36 @@ export const listSearch = derived(lists, $lists => new ListSearch($lists))
 
 export const feeds = deriveEventsMapped<PublishedFeed>({
   filters: [{kinds: [FEED]}],
-  eventToItem: readFeed,
   itemToEvent: prop("event"),
+  eventToItem: readFeed,
 })
 
 export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [PublishedFeed[], string]) =>
-  sortBy(
-    f => f.title.toLowerCase(),
-    $feeds.filter(feed => feed.event.pubkey === $pubkey),
-  ),
+  $feeds.filter(feed => feed.event.pubkey === $pubkey),
+)
+
+export const feedFavorites = deriveEventsMapped<PublishedSingleton>({
+  filters: [{kinds: [FEEDS]}],
+  itemToEvent: prop("event"),
+  eventToItem: event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: getPlaintext(event),
+      }),
+    ),
+})
+
+export const userFeedFavorites = derived(
+  [feedFavorites, pubkey],
+  ([$singletons, $pubkey]: [PublishedSingleton[], string]) =>
+    $singletons.find(singleton => singleton.event.pubkey === $pubkey),
+)
+
+export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
+  Array.from(getSingletonValues("a", $singleton))
+    .map(repository.getEvent)
+    .filter(identity)
+    .map(readFeed),
 )
 
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
@@ -2007,19 +2028,19 @@ class IndexedDBAdapter {
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
         if (newRecords.length > 0) {
-          console.log('putting', name, newRecords.length, current.length)
+          console.log("putting", name, newRecords.length, current.length)
           await storage.bulkPut(name, newRecords)
         }
 
         if (removedRecords.length > 0) {
-          console.log('deleting', name, removedRecords.length, current.length)
+          console.trace("deleting", name, removedRecords.length, current.length)
           await storage.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
         // If we have much more than our limit, prune our store. This will get persisted
         // the next time around.
         if (current.length > limit * 1.5) {
-          console.log('pruning', name, current.length)
+          console.log("pruning", name, current.length)
           set((sort ? sort(current) : current).slice(0, limit))
         }
 

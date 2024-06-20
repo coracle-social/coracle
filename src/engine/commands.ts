@@ -10,6 +10,7 @@ import {
   Address,
   isSignedEvent,
   normalizeRelayUrl,
+  FEEDS,
   FOLLOWS,
   RELAYS,
   PROFILE,
@@ -742,6 +743,12 @@ export const mutePerson = (pubkey: string) =>
 export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
 
 export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(tags, ["e", id]))
+
+export const removeFeedFavorite = (address: string) =>
+  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags))
+
+export const addFeedFavorite = (address: string) =>
+  updateSingleton(FEEDS, tags => append(tags, ["a", address]))
 
 // Relays
 

@@ -5,7 +5,7 @@
   import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {now, writable} from "@welshman/lib"
-  import {createEvent, Tags} from "@welshman/util"
+  import {createEvent} from "@welshman/util"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -44,11 +44,7 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = $env.FORCE_GROUP
-    ? [$env.FORCE_GROUP]
-    : quote
-      ? Tags.fromEvent(quote).context().values().valueOf()
-      : [group].filter(identity)
+  const defaultGroups = $env.FORCE_GROUP ? [$env.FORCE_GROUP] : [group].filter(identity)
 
   let images, compose
   let charCount = 0

@@ -1,6 +1,8 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {equals} from "ramda"
+  import {sortBy, uniqBy} from "@welshman/lib"
+  import {getAddress} from "@welshman/util"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
@@ -13,8 +15,8 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {globalFeed} from "src/app/state"
-  import {normalizeFeedDefinition, displayList, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {userListFeeds, canSign, deleteEvent, userFeeds} from "src/engine"
+  import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
+  import {userListFeeds, canSign, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -25,6 +27,10 @@
   const listMenu = boolCtrl()
   const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
   const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
+  const allFeeds = uniqBy(
+    feed => getAddress(feed.event),
+    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
+  )
 
   const openForm = () => {
     savePoint = {...feed}
@@ -132,18 +138,11 @@
                 on:click={() => setFeed(networkFeed)}>
                 Network
               </MenuItem>
-              {#each $userFeeds as feed}
+              {#each allFeeds as feed}
                 <MenuItem
                   active={equals(feed.definition, $globalFeed.definition)}
                   on:click={() => setFeed(feed)}>
                   {displayFeed(feed)}
-                </MenuItem>
-              {/each}
-              {#each $userListFeeds as feed}
-                <MenuItem
-                  active={equals(feed.definition, $globalFeed.definition)}
-                  on:click={() => setFeed(feed)}>
-                  {displayList(feed.list)}
                 </MenuItem>
               {/each}
             </div>

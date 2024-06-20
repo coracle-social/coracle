@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {sortBy, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
@@ -8,14 +9,21 @@
   import Input from "src/partials/Input.svelte"
   import FeedCard from "src/app/shared/FeedCard.svelte"
   import {router} from "src/app/util/router"
+  import {displayFeed} from "src/domain"
   import {
     pubkey,
     userFeeds,
     feedSearch,
     userListFeeds,
     loadPubkeyFeeds,
+    userFavoritedFeeds,
     userFollows,
   } from "src/engine"
+
+  const feeds = uniqBy(
+    feed => getAddress(feed.event),
+    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
+  )
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -48,7 +56,7 @@
       <i class="fa fa-plus" /> Feed
     </Anchor>
   </div>
-  {#each $userFeeds as feed (getAddress(feed.event))}
+  {#each feeds as feed (getAddress(feed.event))}
     {@const address = getAddress(feed.event)}
     <div in:fly={{y: 20}}>
       <FeedCard {address}>

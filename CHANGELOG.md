@@ -11,6 +11,7 @@
 - [x] Add reports using tagr-bot
 - [x] Open links to coracle in same tab
 - [x] Add global feeds
+- [x] Add feed favorites
 
 # 0.4.6
 

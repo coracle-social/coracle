@@ -48,7 +48,9 @@
     return false
   }
 
-  const isStartOrEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
+  const isStartAndEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
+
+  const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
   $: shortContent = showEntire
     ? fullContent
@@ -65,7 +67,7 @@
 </script>
 
 <div
-  class="flex flex-col gap-2 overflow-hidden text-ellipsis"
+  class="note-content flex flex-col gap-2 overflow-hidden text-ellipsis"
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   <div>
     {#each shortContent as parsed, i}
@@ -84,7 +86,7 @@
           <QRCode copyOnClick code={parsed.value} />
         </div>
       {:else if isLink(parsed)}
-        <NoteContentLink value={parsed.value} showMedia={showMedia && isStartOrEnd(i)} />
+        <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
       {:else if isProfile(parsed)}
         <PersonLink pubkey={parsed.value.pubkey} />
       {:else if (isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 2}
@@ -93,8 +95,6 @@
             <slot name="note-content" {quote} />
           </div>
         </NoteContentQuote>
-      {:else if !expandable && isEllipsis(parsed)}
-        {@html renderParsed(parsed)}
       {:else}
         {@html renderParsed(parsed)}
       {/if}

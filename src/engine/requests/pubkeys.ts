@@ -8,6 +8,7 @@ import {
   NAMED_BOOKMARKS,
   COMMUNITIES,
   FEED,
+  FEEDS,
   MUTES,
   FOLLOWS,
   APP_DATA,
@@ -55,7 +56,7 @@ const getFiltersForKey = (key: string, authors: string[]) => {
       return [{authors, kinds: [PROFILE, FOLLOWS, HANDLER_INFORMATION, COMMUNITIES]}]
     case "pubkey/user":
       return [
-        {authors, kinds: [PROFILE, RELAYS, MUTES, FOLLOWS, COMMUNITIES, APP_DATA]},
+        {authors, kinds: [PROFILE, RELAYS, MUTES, FOLLOWS, COMMUNITIES, FEEDS]},
         {authors, kinds: [APP_DATA], "#d": Object.values(appDataKeys)},
       ]
   }
