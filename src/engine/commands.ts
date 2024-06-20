@@ -16,6 +16,7 @@ import {
   PROFILE,
   MUTES,
   WRAP_NIP04,
+  INBOX_RELAYS,
 } from "@welshman/util"
 import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {
@@ -40,6 +41,7 @@ import {
   editSingleton,
   createSingleton,
   readSingleton,
+  makeRelayPolicy,
 } from "src/domain"
 import type {RelayPolicy} from "src/domain"
 import type {Session, NostrConnectHandler} from "src/engine/model"
@@ -82,6 +84,7 @@ import {
   getPlaintext,
   anonymous,
   mentionGroup,
+  userRelayPolicies,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -687,7 +690,9 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   // If we don't have a recent version loaded, re-fetch to avoid dropping updates
   if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
+    console.log("loading")
     const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
+    console.log("loaded", loadedEvent)
 
     if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
       event = loadedEvent
@@ -712,7 +717,11 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
     encryptable = createSingleton({...singleton, publicTags})
   }
 
+  console.log(1)
+
   const template = await encryptable.reconcile(encrypt)
+
+  console.log(2, template)
 
   await createAndPublish({...template, content, relays})
 }
@@ -762,7 +771,7 @@ export const requestRelayAccess = async (url: string, claim: string, sk?: string
     sk,
   })
 
-export const setRelayPolicies = async (modifyTags: ModifyTags) => {
+export const setOutboxPolicies = async (modifyTags: ModifyTags) => {
   if (canSign.get()) {
     updateSingleton(RELAYS, modifyTags)
   } else {
@@ -770,8 +779,26 @@ export const setRelayPolicies = async (modifyTags: ModifyTags) => {
   }
 }
 
-export const setRelayPolicy = ({url, read, write}: RelayPolicy) =>
-  setRelayPolicies($tags => {
+export const setInboxPolicies = async (modifyTags: ModifyTags) =>
+  updateSingleton(INBOX_RELAYS, modifyTags)
+
+export const setInboxPolicy = ({url, inbox}: RelayPolicy) => {
+  // Only update inbox policies if they already exist or we're adding them
+  if (inbox || get(userRelayPolicies).find(p => p.url === url && p.inbox)) {
+    setInboxPolicies($tags => {
+      $tags = $tags.filter(t => t[1] !== url)
+
+      if (inbox) {
+        $tags.push(["relay", url])
+      }
+
+      return $tags
+    })
+  }
+}
+
+export const setOutboxPolicy = ({url, read, write}: RelayPolicy) =>
+  setOutboxPolicies($tags => {
     $tags = $tags.filter(t => t[1] !== url)
 
     if (read && write) {
@@ -786,7 +813,10 @@ export const setRelayPolicy = ({url, read, write}: RelayPolicy) =>
   })
 
 export const leaveRelay = async (url: string) => {
-  await setRelayPolicy({url, read: false, write: false})
+  await Promise.all([
+    setInboxPolicy(makeRelayPolicy({url})),
+    setOutboxPolicy(makeRelayPolicy({url})),
+  ])
 
   // Make sure the new relay selections get to the old relay
   if (pubkey.get()) {
@@ -801,7 +831,7 @@ export const joinRelay = async (url: string, claim?: string) => {
     await requestRelayAccess(url, claim)
   }
 
-  await setRelayPolicy({url, read: true, write: true})
+  await setOutboxPolicy(makeRelayPolicy({url, read: true, write: true}))
 
   // Re-publish user meta to the new relay
   if (pubkey.get()) {

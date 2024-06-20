@@ -19,7 +19,7 @@
     createAndPublish,
     updateSingleton,
     publishProfile,
-    setRelayPolicies,
+    setOutboxPolicies,
     tagsFromContent,
     requestRelayAccess,
     loginWithPrivateKey,
@@ -76,7 +76,7 @@
     }
 
     // Do this first so we know where to publish everything else
-    setRelayPolicies(() => relays)
+    setOutboxPolicies(() => relays)
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)

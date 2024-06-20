@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.8
+
+- [x] Add support for kind 10050 relay lists
+
 # 0.4.7
 
 - [x] Show toast when offline

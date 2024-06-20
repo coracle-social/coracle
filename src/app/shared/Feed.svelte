@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {randomInt} from "hurdak"
   import {writable, hash} from "@welshman/lib"
   import {createScroller, synced} from "src/util/misc"
   import {fly, fade} from "src/util/transition"
@@ -12,7 +11,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {createFeed, router} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {env} from 'src/engine'
+  import {env} from "src/engine"
 
   export let feed: Feed
   export let anchor = null

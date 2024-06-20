@@ -1,6 +1,5 @@
 import {last} from "@welshman/lib"
 import {LOCAL_RELAY_URL, normalizeRelayUrl as _normalizeRelayUrl} from "@welshman/util"
-import {getRelayTags} from "src/util/nostr"
 
 // Utils related to bare urls
 
@@ -42,25 +41,23 @@ export const filterRelaysByNip = (nip: number, relays) =>
 export enum RelayMode {
   Read = "read",
   Write = "write",
+  Inbox = "inbox",
 }
 
 export type RelayPolicy = {
   url: string
   read: boolean
   write: boolean
+  inbox: boolean
 }
 
-export const makeRelayPolicy = (
-  relayPolicy: Partial<RelayPolicy> & {url: string},
-): RelayPolicy => ({
+export const makeRelayPolicy = ({
+  url,
+  ...relayPolicy
+}: Partial<RelayPolicy> & {url: string}): RelayPolicy => ({
+  url: normalizeRelayUrl(url),
   read: false,
   write: false,
+  inbox: false,
   ...relayPolicy,
 })
-
-export const makeRelayPoliciesFromTags = (tags: string[][]) =>
-  getRelayTags(tags).map(([_, url, mode]) => ({
-    url: normalizeRelayUrl(url),
-    write: !mode || mode === RelayMode.Write,
-    read: !mode || mode === RelayMode.Read,
-  }))

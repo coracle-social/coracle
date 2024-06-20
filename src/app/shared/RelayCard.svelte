@@ -12,7 +12,14 @@
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
   import {displayRelayUrl, RelayMode} from "src/domain"
-  import {deriveRelay, canSign, getSetting, setRelayPolicy, deriveUserRelayPolicy} from "src/engine"
+  import {
+    deriveRelay,
+    canSign,
+    getSetting,
+    setInboxPolicy,
+    setOutboxPolicy,
+    deriveUserRelayPolicy,
+  } from "src/engine"
 
   export let url
   export let claim = null
@@ -27,7 +34,15 @@
   const relay = deriveRelay(url)
   const policy = deriveUserRelayPolicy(url)
 
-  const policySetter = mode => () => setRelayPolicy({...$policy, [mode]: !$policy[mode]})
+  const policySetter = mode => () => {
+    const newPolicy = {...$policy, [mode]: !$policy[mode]}
+
+    if (mode === RelayMode.Inbox) {
+      setInboxPolicy(newPolicy)
+    } else {
+      setOutboxPolicy(newPolicy)
+    }
+  }
 </script>
 
 <div
@@ -95,18 +110,47 @@
   {#if showControls && $canSign}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />
     <div>
-      <Chip
-        pad
-        class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.read})}
-        on:click={policySetter(RelayMode.Read)}>
-        <i class="fa fa-book-open text-neutral-300" /> Read
-      </Chip>
-      <Chip
-        pad
-        class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.write})}
-        on:click={policySetter(RelayMode.Write)}>
-        <i class="fa fa-feather text-neutral-300" /> Write
-      </Chip>
+      <Popover triggerType="mouseenter" class="inline-block">
+        <div slot="trigger">
+          <Chip
+            pad
+            class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.read})}
+            on:click={policySetter(RelayMode.Read)}>
+            <i class="fa fa-book-open text-neutral-300" /> Read
+          </Chip>
+        </div>
+        <div slot="tooltip">
+          Notes intended for you will {$policy.read ? "" : "not"} be delivered to this relay.
+        </div>
+      </Popover>
+      <Popover triggerType="mouseenter" class="inline-block">
+        <div slot="trigger">
+          <Chip
+            pad
+            class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.write})}
+            on:click={policySetter(RelayMode.Write)}>
+            <i class="fa fa-feather text-neutral-300" /> Write
+          </Chip>
+        </div>
+        <div slot="tooltip">
+          Notes you publish will {$policy.write ? "" : "not"} be sent to this relay.
+        </div>
+      </Popover>
+      {#if $canSign}
+        <Popover triggerType="mouseenter" class="inline-block">
+          <div slot="trigger">
+            <Chip
+              pad
+              class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.inbox})}
+              on:click={policySetter(RelayMode.Inbox)}>
+              <i class="fa fa-inbox text-neutral-300" /> Inbox
+            </Chip>
+          </div>
+          <div slot="tooltip">
+            Encrypted messages will {$policy.inbox ? "" : "not"} be delivered to this relay.
+          </div>
+        </Popover>
+      {/if}
     </div>
   {/if}
 </div>
