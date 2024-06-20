@@ -48,6 +48,7 @@
     mention,
     tracker,
     hints,
+    mentionEvent,
     repository,
     unmuteNote,
     muteNote,
@@ -130,7 +131,7 @@
 
   const crossPost = async (address = null) => {
     const content = JSON.stringify(note as SignedEvent)
-    const tags = [...hints.tagEvent(note).unwrap(), mention(note.pubkey), ...getClientTags()]
+    const tags = [...mentionEvent(note), mention(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {
@@ -148,7 +149,7 @@
 
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
-    const defaultSplit = hints.tagPubkey(note.pubkey).setKey("zap").append("1").valueOf()
+    const defaultSplit = ["zap", ...mention(note.pubkey).slice(1), "1"]
     const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
 
     router

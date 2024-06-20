@@ -17,13 +17,13 @@
   export let eid = null
   export let anonymous = false
   export let callback = null
+  export let amount = getSetting("default_zap")
 
   let zaps = []
   let message = ""
   let loading = false
-  let totalAmount = getSetting("default_zap")
 
-  const updateZaps = (message, totalAmount) => {
+  const updateZaps = (message, amount) => {
     let totalWeight = 0
 
     zaps = doPipe(splits, [
@@ -39,7 +39,7 @@
       map(([pubkey, relay, weight]: string[]) => ({
         relay,
         pubkey,
-        amount: Math.round(totalAmount * (parseFloat(weight) / totalWeight)),
+        amount: Math.round(amount * (parseFloat(weight) / totalWeight)),
         status: "pending",
       })),
       sortBy((split: any) => -split.amount),
@@ -137,7 +137,7 @@
   }
 
   // Watch inputs and update zaps
-  $: updateZaps(message, totalAmount)
+  $: updateZaps(message, amount)
 
   // Initialize bitcoin connect
   init({appName: import.meta.env.VITE_APP_NAME})
@@ -146,7 +146,7 @@
 {#if zaps.length > 0}
   <h1 class="staatliches text-2xl">Send a zap</h1>
   <Textarea bind:value={message} placeholder="Send a message with your zap (optional)" />
-  <Input bind:value={totalAmount}>
+  <Input bind:value={amount}>
     <i slot="before" class="fa fa-bolt" />
     <span slot="after" class="-mt-1">sats</span>
   </Input>

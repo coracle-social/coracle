@@ -73,6 +73,7 @@ import {
   LOCAL_RELAY_URL,
   getFilterResultCardinality,
   isShareableRelayUrl,
+  isReplaceable,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
@@ -1743,8 +1744,28 @@ Object.assign(NetworkContext, {
 export const uniqTags = tags =>
   uniqBy((t: string[]) => (t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")), tags)
 
-export const mention = (pubkey: string, ...args: unknown[]) =>
-  hints.tagPubkey(pubkey).append(displayProfileByPubkey(pubkey)).valueOf()
+export const mention = (pubkey: string, ...args: unknown[]) => [
+  "p",
+  pubkey,
+  hints.FromPubkeys([pubkey]).getUrl(),
+  displayProfileByPubkey(pubkey),
+]
+
+export const mentionGroup = (address: string, ...args: unknown[]) => [
+  "a",
+  hints.WithinContext(address).getUrl(),
+]
+
+export const mentionEvent = (event: TrustedEvent, mark = "") => {
+  const url = hints.Event(event).getUrl()
+  const tags = [["e", event.id, url, mark, event.pubkey]]
+
+  if (isReplaceable(event)) {
+    tags.push(["a", getAddress(event), url, mark, event.pubkey])
+  }
+
+  return tags
+}
 
 export const tagsFromContent = (content: string) => {
   const tags = []
@@ -1819,7 +1840,7 @@ export const getReplyTags = (parent: TrustedEvent) => {
 
   // Add a/e-tags for the parent event
   const mark = replies.exists() ? "reply" : "root"
-  for (const t of hints.tagEvent(parent, mark).valueOf()) {
+  for (const t of mentionEvent(parent, mark)) {
     replyTags.push(t.valueOf())
   }
 
@@ -1835,7 +1856,7 @@ export const getReactionTags = (parent: TrustedEvent) => {
   }
 
   // Add a/e-tags for the parent event
-  for (const t of hints.tagEvent(parent, "root").valueOf()) {
+  for (const t of mentionEvent(parent, "root")) {
     replyTags.push(t.valueOf())
   }
 

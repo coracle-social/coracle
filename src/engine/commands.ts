@@ -81,6 +81,7 @@ import {
   zappers,
   getPlaintext,
   anonymous,
+  mentionGroup,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -312,9 +313,9 @@ export const wrapWithFallback = async (template, {author = null, wrap}) => {
   return events
 }
 
-const addATags = (template, addresses) => ({
+const addGroupATags = (template, addresses) => ({
   ...template,
-  tags: [...template.tags, ...addresses.map(a => ["a", a])],
+  tags: [...template.tags, ...addresses.map(mentionGroup)],
 })
 
 // Utils for publishing group-related messages
@@ -377,7 +378,7 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
     }
   }
 
-  const event = await sign(addATags(template, addresses), {anonymous})
+  const event = await sign(addGroupATags(template, addresses), {anonymous})
   const relays = hints.PublishEvent(event).getUrls()
 
   return publish({event, relays, forcePlatform: false})
@@ -388,7 +389,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
   const pubs = []
   for (const address of addresses) {
     const relays = hints.WithinContext(address).getUrls()
-    const thisTemplate = addATags(template, [address])
+    const thisTemplate = addGroupATags(template, [address])
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
     if (!address.startsWith("35834:")) {
@@ -490,7 +491,7 @@ export const publishAdminKeyShares = async (address, pubkeys) => {
   const {privkey} = deriveAdminKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
-      ["a", address],
+      mentionGroup(address),
       ["role", "admin"],
       ["privkey", privkey],
       ...getClientTags(),
@@ -507,7 +508,7 @@ export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => 
   const {privkey} = deriveSharedKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
-      ["a", address],
+      mentionGroup(address),
       ["role", "member"],
       ["privkey", privkey],
       ["grace_period", String(gracePeriod)],
@@ -524,13 +525,13 @@ export const publishGroupEvictions = async (address, pubkeys) =>
     address,
     pubkeys,
     createEvent(24, {
-      tags: [["a", address], ...getClientTags()],
+      tags: [mentionGroup(address), ...getClientTags()],
     }),
   )
 
 export const publishGroupMembers = async (address, op, pubkeys) => {
   const template = createEvent(27, {
-    tags: [["op", op], ["a", address], ...getClientTags(), ...pubkeys.map(mention)],
+    tags: [["op", op], mentionGroup(address), ...getClientTags(), ...pubkeys.map(mention)],
   })
 
   return publishAsGroupAdminPrivately(address, template)
@@ -577,7 +578,7 @@ export const publishGroupMeta = (address, identifier, meta, listPublicly) => {
 }
 
 export const deleteGroupMeta = address =>
-  publishAsGroupAdminPublicly(address, createEvent(5, {tags: [["a", address]]}))
+  publishAsGroupAdminPublicly(address, createEvent(5, {tags: [mentionGroup(address)]}))
 
 // Member functions
 
@@ -600,7 +601,7 @@ export const publishGroupEntryRequest = (address, claim = null) => {
   } else {
     setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.Requested})
 
-    const tags = [...getClientTags(), ["a", address]]
+    const tags = [...getClientTags(), mentionGroup(address)]
 
     if (claim) {
       tags.push(["claim", claim])
@@ -624,7 +625,7 @@ export const publishGroupExitRequest = address => {
       address,
       createEvent(26, {
         content: `${displayProfileByPubkey(pubkey.get())} is leaving the group`,
-        tags: [...getClientTags(), ["a", address]],
+        tags: [...getClientTags(), mentionGroup(address)],
       }),
     )
   }
@@ -633,7 +634,7 @@ export const publishGroupExitRequest = address => {
 export const publishCommunitiesList = addresses =>
   createAndPublish({
     kind: 10004,
-    tags: [...addresses.map(a => ["a", a]), ...getClientTags()],
+    tags: [...addresses.map(mentionGroup), ...getClientTags()],
     relays: hints.WriteRelays().getUrls(),
   })
 

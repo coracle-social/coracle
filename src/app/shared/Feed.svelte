@@ -1,15 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {writable} from "@welshman/lib"
+  import {randomInt} from "hurdak"
+  import {writable, hash} from "@welshman/lib"
   import {createScroller, synced} from "src/util/misc"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
-  import {createFeed} from "src/app/util"
+  import {createFeed, router} from "src/app/util"
   import type {Feed} from "src/domain"
+  import {env} from 'src/engine'
 
   export let feed: Feed
   export let anchor = null
@@ -23,6 +26,8 @@
   export let includeReposts = false
   export let showGroup = false
   export let onEvent = null
+
+  const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
 
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
@@ -99,6 +104,14 @@
         {anchor}
         {note} />
     </div>
+    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0}
+      <Card class="flex items-center justify-between">
+        <p class="text-xl">Enjoying Coracle?</p>
+        <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
+          Zap the developer
+        </Anchor>
+      </Card>
+    {/if}
   {/each}
 </FlexColumn>
 

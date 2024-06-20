@@ -3,7 +3,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {displayGroupMeta} from "src/domain"
-  import {deriveGroupMeta, createAndPublish, hints, deriveAdminKeyForGroup} from "src/engine"
+  import {deriveGroupMeta, deleteGroupMeta, deriveAdminKeyForGroup} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address
@@ -14,14 +14,7 @@
   const abort = () => router.pop()
 
   const confirm = () => {
-    createAndPublish({
-      kind: 5,
-      tags: [["a", address]],
-      relays: hints.WithinContext(address).getUrls(),
-      sk: $adminKey.privkey,
-      forcePlatform: false,
-    })
-
+    deleteGroupMeta(address)
     showInfo("Group deleted!")
     router.pop()
   }

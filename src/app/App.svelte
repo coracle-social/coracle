@@ -319,6 +319,7 @@
     required: ["splits"],
     serializers: {
       eid: asNote,
+      amount: asJson("amount"),
       splits: asJson("splits"),
       anonymous: asJson("anonymous"),
     },
