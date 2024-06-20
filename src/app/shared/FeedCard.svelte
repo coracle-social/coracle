@@ -12,8 +12,9 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readFeed, readList, displayFeed, mapListToFeed, getSingletonValues} from "src/domain"
   import {
-    repository,
+    hints,
     pubkey,
+    repository,
     addFeedFavorite,
     removeFeedFavorite,
     userFeedFavorites,
@@ -26,6 +27,7 @@
   const expandDefinition = boolCtrl()
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
+  const naddr = Address.from(address, hints.Event(event).getUrls()).toNaddr()
   const feed = address.startsWith(NAMED_BOOKMARKS)
     ? mapListToFeed(readList(event))
     : readFeed(event)
@@ -88,7 +90,7 @@
           on:click={toggleFavorite}>
           <i class="fa fa-bookmark" class:text-accent={isFavorite} />
         </div>
-        <CopyValueSimple label="Feed address" value={toNostrURI(Address.from(address).toNaddr())} />
+        <CopyValueSimple label="Feed address" value={toNostrURI(naddr)} />
       </div>
     </div>
     {#if $expandDefinition.enabled}

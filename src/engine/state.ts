@@ -1537,6 +1537,7 @@ export const onAuth = async (url, challenge) => {
 
 export type MySubscribeRequest = SubscribeRequest & {
   onEvent?: (event: TrustedEvent) => void
+  onEose?: (url: string) => void
   onComplete?: () => void
   skipCache?: boolean
   forcePlatform?: boolean
@@ -1581,6 +1582,10 @@ export const subscribe = ({forcePlatform = true, ...request}: MySubscribeRequest
     projections.push(await ensureUnwrapped(event))
   })
 
+  if (request.onEose) {
+    sub.emitter.on("eose", request.onEose)
+  }
+
   if (request.onComplete) {
     sub.emitter.on("complete", request.onComplete)
   }
@@ -1619,7 +1624,14 @@ export const subscribePersistent = (request: MySubscribeRequest) => {
 
 export const LOAD_OPTS = {timeout: 3000, closeOnEose: true}
 
-export const load = (request: MySubscribeRequest) => subscribe({...request, ...LOAD_OPTS}).result
+export const load = (request: MySubscribeRequest) =>
+  new Promise(resolve => {
+    const events = []
+    const sub = subscribe({...request, ...LOAD_OPTS})
+
+    sub.emitter.on("event", (url: string, event: TrustedEvent) => events.push(event))
+    sub.emitter.on("complete", (url: string) => resolve(events))
+  })
 
 export const loadOne = (request: MySubscribeRequest) =>
   new Promise<TrustedEvent | null>(resolve => {

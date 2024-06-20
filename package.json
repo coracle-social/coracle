@@ -58,7 +58,7 @@
     "@welshman/content": "^0.0.5",
     "@welshman/feeds": "^0.0.12",
     "@welshman/lib": "^0.0.10",
-    "@welshman/net": "^0.0.13",
+    "@welshman/net": "^0.0.14",
     "@welshman/util": "^0.0.15",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
