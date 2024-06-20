@@ -11,7 +11,6 @@
   import {router} from "src/app/util/router"
   import {displayFeed} from "src/domain"
   import {
-    pubkey,
     userFeeds,
     feedSearch,
     userListFeeds,
@@ -20,10 +19,7 @@
     userFollows,
   } from "src/engine"
 
-  const feeds = uniqBy(
-    feed => getAddress(feed.event),
-    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
-  )
+  const favoritedFeeds = $userFavoritedFeeds
 
   const createFeed = () => router.at("feeds/create").open()
 
@@ -36,6 +32,13 @@
   let q = ""
   let limit = 20
   let element
+
+  $: allUserFeeds = [...$userFeeds, ...$userListFeeds]
+
+  $: feeds = uniqBy(
+    feed => getAddress(feed.event),
+    sortBy(displayFeed, [...allUserFeeds, ...favoritedFeeds]),
+  )
 
   loadPubkeyFeeds(Array.from($userFollows))
 
@@ -56,7 +59,7 @@
       <i class="fa fa-plus" /> Feed
     </Anchor>
   </div>
-  {#each feeds as feed (getAddress(feed.event))}
+  {#each feeds as feed (feed.event.id)}
     {@const address = getAddress(feed.event)}
     <div in:fly={{y: 20}}>
       <FeedCard {address}>
@@ -68,7 +71,7 @@
       </FeedCard>
     </div>
   {/each}
-  {#each $userListFeeds as feed (getAddress(feed.list.event))}
+  {#each $userListFeeds as feed (feed.list.event.id)}
     {@const address = getAddress(feed.list.event)}
     <div in:fly={{y: 20}}>
       <FeedCard {address}>
@@ -93,7 +96,7 @@
   </Input>
   {#each $feedSearch
     .searchValues(q)
-    .filter(address => !address.includes($pubkey))
+    .filter(address => !feeds.find(feed => getAddress(feed.event) === address))
     .slice(0, limit) as address (address)}
     <FeedCard {address} />
   {/each}

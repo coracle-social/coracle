@@ -1,11 +1,12 @@
 <script lang="ts">
+  import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
   import {parseAnything} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {router} from "src/app/util/router"
-  import {profileSearch, createPeopleLoader} from "src/engine"
+  import {profileSearch, loadPubkeyProfiles, createPeopleLoader} from "src/engine"
 
   export let value
   export let multiple = false
@@ -16,27 +17,33 @@
 
   const {loading, load} = createPeopleLoader()
 
-  const search = term => {
-    load(term)
+  const search = derived(profileSearch, $profileSearch => {
+    return term => {
+      load(term)
 
-    parseAnything(term).then(result => {
-      if (result?.type === "npub") {
-        value = uniq(value.concat(result.data))
-        input.clearTerm()
-      }
+      parseAnything(term).then(result => {
+        if (result?.type === "npub") {
+          loadPubkeyProfiles([result.data])
+          value = uniq(value.concat(result.data))
+          input.clearTerm()
+          onChange(value)
+        }
 
-      if (result?.type === "nprofile") {
-        value = uniq(value.concat(result.data.pubkey))
-        input.clearTerm()
-      }
-    })
+        if (result?.type === "nprofile") {
+          loadPubkeyProfiles([result.data.pubkey])
+          value = uniq(value.concat(result.data.pubkey))
+          input.clearTerm()
+          onChange(value)
+        }
+      })
 
-    return $profileSearch.searchValues(term)
-  }
+      return $profileSearch.searchValues(term)
+    }
+  })
 </script>
 
 <SearchSelect
-  {search}
+  search={$search}
   {onChange}
   {multiple}
   {autofocus}
