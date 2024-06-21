@@ -545,6 +545,7 @@ export const publishCommunityMeta = (address, identifier, meta) => {
     tags: [
       ["d", identifier],
       ["name", meta.name],
+      ["about", meta.about],
       ["description", meta.about],
       ["banner", meta.banner],
       ["picture", meta.image],
@@ -565,6 +566,7 @@ export const publishGroupMeta = (address, identifier, meta, listPublicly) => {
       ["d", identifier],
       ["name", meta.name],
       ["about", meta.about],
+      ["description", meta.description],
       ["banner", meta.banner],
       ["picture", meta.image],
       ["image", meta.image],

@@ -1848,6 +1848,7 @@ export const mention = (pubkey: string, ...args: unknown[]) => [
 
 export const mentionGroup = (address: string, ...args: unknown[]) => [
   "a",
+  address,
   hints.WithinContext(address).getUrl(),
 ]
 

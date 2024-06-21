@@ -30,10 +30,10 @@ export const readGroupMeta = (event: TrustedEvent) => {
     relays: event.tags.filter(nthEq(0, 'relay')),
     moderators: event.tags.filter(nthEq(0, 'p')),
     identifier: meta.d,
-    name: meta.name,
-    about: meta.about,
-    banner: meta.banner,
-    image: meta.image || meta.picture,
+    name: meta.name || "",
+    about: meta.about || "",
+    banner: meta.banner || "",
+    image: meta.image || meta.picture || "",
     listing_is_public: isSignedEvent(event),
   } as PublishedGroupMeta
 }

@@ -8,8 +8,10 @@
   const meta = deriveGroupMeta(address)
 </script>
 
-<NoteContentKind1
-  note={{content: $meta?.about || ""}}
-  minLength={100}
-  maxLength={140}
-  showEntire={!truncate} />
+{#key $meta?.about}
+  <NoteContentKind1
+    note={{content: $meta?.about || ""}}
+    minLength={100}
+    maxLength={140}
+    showEntire={!truncate} />
+{/key}
