@@ -1718,7 +1718,7 @@ export const subscribePersistent = (request: MySubscribeRequest) => {
   }
 }
 
-export const LOAD_OPTS = {timeout: 3000, closeOnEose: true}
+export const LOAD_OPTS = {timeout: 5000, closeOnEose: true}
 
 export const load = (request: MySubscribeRequest) =>
   new Promise(resolve => {
