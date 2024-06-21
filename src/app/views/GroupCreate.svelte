@@ -9,6 +9,7 @@
   import {
     env,
     pubkey,
+    session,
     initGroup,
     publishGroupMeta,
     publishGroupInvites,
@@ -16,7 +17,7 @@
     publishCommunityMeta,
     publishCommunitiesList,
     publishGroupMembers,
-    deriveUserCommunities,
+    getUserCommunities,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -50,7 +51,7 @@
 
     if (kind === COMMUNITY) {
       await publishCommunityMeta(address, identifier, meta)
-      await publishCommunitiesList(deriveUserCommunities().get().concat(address))
+      await publishCommunitiesList(getUserCommunities(session.get()).concat(address))
     } else {
       await publishGroupMeta(address, identifier, meta, listing_is_public)
       await publishGroupMembers(address, "set", members)

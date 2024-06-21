@@ -75,6 +75,8 @@ import {
   getFilterResultCardinality,
   isShareableRelayUrl,
   isReplaceable,
+  isGroupAddress,
+  isCommunityAddress,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
@@ -215,13 +217,22 @@ export const getFreshness = (key: string, value: any) =>
 export const setFreshness = (key: string, value: any, ts: number) =>
   freshness.set(getFreshnessKey(key, value), ts)
 
-// Session and settings
+// Session, signing, encryption
 
 export const getSession = pubkey => sessions.get()[pubkey]
 
-export const getCurrentSession = () => sessions.get()[pubkey.get()]
+export const session = withGetter(derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk]))
 
-export const getDefaultSettings = () => ({
+export const connect = withGetter(derived(session, getConnect))
+export const signer = withGetter(derived(session, getSigner))
+export const nip04 = withGetter(derived(session, getNip04))
+export const nip44 = withGetter(derived(session, getNip44))
+export const nip59 = withGetter(derived(session, getNip59))
+export const canSign = withGetter(derived(signer, $signer => $signer.isEnabled()))
+
+// Settings
+
+export const defaultSettings = {
   relay_limit: 10,
   relay_redundancy: 3,
   default_zap: 21,
@@ -238,11 +249,13 @@ export const getDefaultSettings = () => ({
   dufflepud_url: env.get().DUFFLEPUD_URL,
   multiplextr_url: env.get().MULTIPLEXTR_URL,
   platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
-})
+}
 
-export const getSettings = () => ({...getDefaultSettings(), ...getSession(pubkey.get())?.settings})
+export const settings = withGetter(
+  derived(session, $session => ({...defaultSettings, ...$session.settings})),
+)
 
-export const getSetting = k => prop(k, getSettings())
+export const getSetting = k => prop(k, settings.get())
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
@@ -269,19 +282,6 @@ export const dufflepud = (path: string) => {
 
   return `${base}/${path}`
 }
-
-export const session = new Derived(
-  [pubkey, sessions],
-  ([$pk, $sessions]: [string, Record<string, Session>]) => ($pk ? $sessions[$pk] : null),
-)
-
-export const connect = session.derived(getConnect)
-export const signer = session.derived(getSigner)
-export const nip04 = session.derived(getNip04)
-export const nip44 = session.derived(getNip44)
-export const nip59 = session.derived(getNip59)
-export const canSign = signer.derived($signer => $signer.isEnabled())
-export const settings = derived(pubkey, getSettings)
 
 // Plaintext
 
@@ -617,65 +617,6 @@ export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => 
 
 export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
 
-// Events
-
-export const isEventMuted = withGetter(
-  derived(
-    [userMutes, userFollows, settings, pubkey],
-    ([$userMutes, $userFollows, $settings, $pubkey]) => {
-      const words = $settings.muted_words
-      const minWot = $settings.min_wot_score
-      const regex =
-        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
-
-      return (e: Partial<TrustedEvent>, strict = false) => {
-        if (!$pubkey || e.pubkey === $pubkey) {
-          return false
-        }
-
-        const tags = Tags.wrap(e.tags || [])
-        const {roots, replies} = tags.ancestors()
-
-        if (
-          find(
-            t => $userMutes.has(t),
-            [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
-          )
-        ) {
-          return true
-        }
-
-        if (regex && e.content?.toLowerCase().match(regex)) {
-          return true
-        }
-
-        if (!strict) {
-          return false
-        }
-
-        const isGroupMember = tags
-          .groups()
-          .values()
-          .some(a => deriveIsGroupMember(a).get())
-        const isCommunityMember = tags
-          .communities()
-          .values()
-          .some(a => false)
-        const wotAdjustment = isCommunityMember || isGroupMember ? 1 : 0
-
-        if (
-          !$userFollows.has(e.pubkey) &&
-          getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment
-        ) {
-          return true
-        }
-
-        return false
-      }
-    },
-  ),
-)
-
 // Channels
 
 export const sortChannels = $channels =>
@@ -853,37 +794,36 @@ export const getGroupStatus = (session, address) =>
   (session?.groups?.[address] || {}) as GroupStatus
 
 export const deriveGroupStatus = address =>
-  session.derived($session => getGroupStatus($session, address))
+  derived(session, $session => getGroupStatus($session, address))
 
-export const getIsGroupMember = (session, address, includeRequests = false) => {
-  const status = getGroupStatus(session, address)
+export const userIsGroupMember = withGetter(
+  derived(session, $session => (address, includeRequests = false) => {
+    const status = getGroupStatus($session, address)
 
-  if (address.startsWith("34550:")) {
-    return status.joined
-  }
-
-  if (address.startsWith("35834:")) {
-    if (includeRequests && status.access === GroupAccess.Requested) {
-      return true
+    if (isCommunityAddress(address)) {
+      return status.joined
     }
 
-    return status.access === GroupAccess.Granted
-  }
+    if (isGroupAddress(address)) {
+      if (includeRequests && status.access === GroupAccess.Requested) {
+        return true
+      }
 
-  return false
-}
+      return status.access === GroupAccess.Granted
+    }
 
-export const deriveIsGroupMember = (address, includeRequests = false) =>
-  session.derived($session => getIsGroupMember($session, address, includeRequests))
+    return false
+  }),
+)
 
 export const deriveGroupOptions = (defaultGroups = []) =>
-  session.derived($session => {
+  derived([session, userIsGroupMember], ([$session, $userIsGroupMember]) => {
     const options = []
 
     for (const address of Object.keys($session?.groups || {})) {
       const group = groups.key(address).get()
 
-      if (group && deriveIsGroupMember(address).get()) {
+      if (group && $userIsGroupMember(address)) {
         options.push(group)
       }
     }
@@ -895,22 +835,73 @@ export const deriveGroupOptions = (defaultGroups = []) =>
     return uniqBy(prop("address"), options)
   })
 
-export const getUserCircles = (session: Session) =>
-  Object.entries(session?.groups || {})
-    .filter(([a, s]) => deriveIsGroupMember(a).get())
+export const getUserCircles = (session: Session) => {
+  const $userIsGroupMember = userIsGroupMember.get()
+
+  return Object.entries(session?.groups || {})
+    .filter(([a, s]) => $userIsGroupMember(a))
     .map(([a, s]) => a)
+}
 
-export const deriveUserCircles = () => session.derived(getUserCircles)
-
-export const getUserGroups = (session: Session) =>
-  getUserCircles(session).filter(a => a.startsWith("35834:"))
-
-export const deriveUserGroups = () => session.derived(getUserGroups)
+export const getUserGroups = (session: Session) => getUserCircles(session).filter(isGroupAddress)
 
 export const getUserCommunities = (session: Session) =>
-  getUserCircles(session).filter(a => a.startsWith("34550:"))
+  getUserCircles(session).filter(isCommunityAddress)
 
-export const deriveUserCommunities = () => session.derived(getUserCommunities)
+// Events
+
+export const isEventMuted = withGetter(
+  derived(
+    [userMutes, userFollows, settings, pubkey, userIsGroupMember],
+    ([$userMutes, $userFollows, $settings, $pubkey, $userIsGroupMember]) => {
+      const words = $settings.muted_words
+      const minWot = $settings.min_wot_score
+      const regex =
+        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
+
+      return (e: Partial<TrustedEvent>, strict = false) => {
+        if (!$pubkey || e.pubkey === $pubkey) {
+          return false
+        }
+
+        const tags = Tags.wrap(e.tags || [])
+        const {roots, replies} = tags.ancestors()
+
+        if (
+          find(
+            t => $userMutes.has(t),
+            [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
+          )
+        ) {
+          return true
+        }
+
+        if (regex && e.content?.toLowerCase().match(regex)) {
+          return true
+        }
+
+        if (!strict) {
+          return false
+        }
+        const isInGroup = tags.groups().values().some($userIsGroupMember)
+        const isInCommunity = tags
+          .communities()
+          .values()
+          .some(a => false)
+        const wotAdjustment = isInCommunity || isInGroup ? 1 : 0
+
+        if (
+          !$userFollows.has(e.pubkey) &&
+          getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment
+        ) {
+          return true
+        }
+
+        return false
+      }
+    },
+  ),
+)
 
 // Read receipts
 
@@ -935,19 +926,20 @@ export const isSeen = derived(allReadReceipts, $m => e => $m.has(e.id))
 
 // Notifications
 
-export const notifications = derived(events, $events => {
-  const $pubkey = pubkey.get()
-  const $isEventMuted = isEventMuted.get()
-  const kinds = [...noteKinds, ...reactionKinds]
+export const notifications = derived(
+  [pubkey, events, isEventMuted],
+  ([$pubkey, $events, $isEventMuted]) => {
+    const kinds = [...noteKinds, ...reactionKinds]
 
-  return Array.from(repository.query([{"#p": [$pubkey]}])).filter(
-    e =>
-      kinds.includes(e.kind) &&
-      e.pubkey !== $pubkey &&
-      !$isEventMuted(e) &&
-      (e.kind !== 7 || isLike(e)),
-  )
-})
+    return Array.from(repository.query([{"#p": [$pubkey]}])).filter(
+      e =>
+        kinds.includes(e.kind) &&
+        e.pubkey !== $pubkey &&
+        !$isEventMuted(e) &&
+        (e.kind !== 7 || isLike(e)),
+    )
+  },
+)
 
 export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $notifications]) => {
   const since = now() - seconds(30, "day")
@@ -958,14 +950,13 @@ export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $
 })
 
 export const groupNotifications = new Derived(
-  [session, events, groupRequests, groupAlerts, groupAdminKeys],
+  [session, events, groupRequests, groupAlerts, groupAdminKeys, isEventMuted],
   x => x,
 )
   .throttle(3000)
-  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses]) => {
+  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses, $isEventMuted]) => {
     const addresses = new Set(getUserCircles($session))
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
-    const $isEventMuted = isEventMuted.get()
 
     const shouldSkip = e => {
       const context = e.tags.filter(t => t[0] === "a")

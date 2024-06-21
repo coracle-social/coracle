@@ -53,7 +53,7 @@
     unmuteNote,
     muteNote,
     deriveHandlersForKind,
-    deriveIsGroupMember,
+    userIsGroupMember,
     publishToZeroOrMoreGroups,
     deleteEvent,
     getSetting,
@@ -192,12 +192,12 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const groupOptions = session.derived($session => {
+  const groupOptions = derived(session, $session => {
     const options = []
 
     for (const addr of Object.keys($session?.groups || {})) {
       const group = groups.key(addr).get()
-      const isMember = deriveIsGroupMember(addr).get()
+      const isMember = $userIsGroupMember(addr)
 
       if (group && isMember && addr !== address) {
         options.push(group)
@@ -212,9 +212,7 @@
   let handlersShown = false
 
   $: disableActions =
-    !$canSign ||
-    ($muted && !showMuted) ||
-    (note.wrap && address && !deriveIsGroupMember(address).get())
+    !$canSign || ($muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)

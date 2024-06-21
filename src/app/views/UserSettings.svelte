@@ -9,14 +9,14 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, getSettings, publishSettings} from "src/engine"
+  import {env, settings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
 
-  const settings = getSettings()
+  const values = {...$settings}
 
   const submit = () => {
-    publishSettings(settings)
+    publishSettings(values)
 
     showInfo("Your settings have been saved!")
   }
@@ -26,7 +26,7 @@
   const formatPercent = d => String(Math.round(d * 100))
   const parsePercent = p => parseInt(p) / 100
 
-  $: settings.relay_redundancy = Math.round(Math.log10(settings.relay_limit) * 4)
+  $: values.relay_redundancy = Math.round(Math.log10(values.relay_limit) * 4)
 
   document.title = "Settings"
 </script>
@@ -38,7 +38,7 @@
   </div>
   <div class="flex w-full flex-col gap-8">
     <Field label="Default zap amount">
-      <Input bind:value={settings.default_zap}>
+      <Input bind:value={values.default_zap}>
         <i slot="before" class="fa fa-bolt" />
       </Input>
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
@@ -46,7 +46,7 @@
     <Field label="Platform zap split">
       <Input
         type="number"
-        bind:value={settings.platform_zap_split}
+        bind:value={values.platform_zap_split}
         format={formatPercent}
         parse={parsePercent}>
         <i slot="before" class="fa fa-percent" />
@@ -58,9 +58,9 @@
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Max relays per request</strong>
-        <div>{settings.relay_limit} relays</div>
+        <div>{values.relay_limit} relays</div>
       </div>
-      <Input type="range" bind:value={settings.relay_limit} min={1} max={30} parse={parseInt} />
+      <Input type="range" bind:value={values.relay_limit} min={1} max={30} parse={parseInt} />
       <p slot="info">
         This controls how many relays to max out at when loading feeds and event context. More is
         faster, but will require more bandwidth and processing power.
@@ -68,7 +68,7 @@
     </Field>
     {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
       <FieldInline label="Authenticate with relays">
-        <Toggle bind:value={settings.auto_authenticate} />
+        <Toggle bind:value={values.auto_authenticate} />
         <p slot="info">
           Allows {appName} to authenticate with relays that have access controls automatically.
         </p>
@@ -84,7 +84,7 @@
       <SearchSelect
         multiple
         search={searchUploadProviders}
-        bind:value={settings.nip96_urls}
+        bind:value={values.nip96_urls}
         termToItem={identity}>
         <div slot="item" let:item>
           <strong>{item}</strong>
@@ -92,7 +92,7 @@
       </SearchSelect>
     </Field>
     <Field label="Dufflepud URL">
-      <Input bind:value={settings.dufflepud_url}>
+      <Input bind:value={values.dufflepud_url}>
         <i slot="before" class="fa-solid fa-server" />
       </Input>
       <p slot="info">
@@ -104,7 +104,7 @@
       </p>
     </Field>
     <Field label="Imgproxy URL">
-      <Input bind:value={settings.imgproxy_url}>
+      <Input bind:value={values.imgproxy_url}>
         <i slot="before" class="fa-solid fa-image" />
       </Input>
       <p slot="info">
@@ -115,7 +115,7 @@
       </p>
     </Field>
     <Field label="Multiplextr URL">
-      <Input bind:value={settings.multiplextr_url}>
+      <Input bind:value={values.multiplextr_url}>
         <i slot="before" class="fa-solid fa-code-merge" />
       </Input>
       <p slot="info">
@@ -128,14 +128,14 @@
       </p>
     </Field>
     <FieldInline label="Report errors and analytics">
-      <Toggle bind:value={settings.report_analytics} />
+      <Toggle bind:value={values.report_analytics} />
       <p slot="info">
         Keep this enabled if you would like developers to be able to know what features are used,
         and to diagnose and fix bugs.
       </p>
     </FieldInline>
     <FieldInline label="Enable client fingerprinting">
-      <Toggle bind:value={settings.enable_client_tag} />
+      <Toggle bind:value={values.enable_client_tag} />
       <p slot="info">
         If this is turned on, public notes you create will have a "client" tag added. This helps
         with troubleshooting, and allows other people to find out about {appName}.

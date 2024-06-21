@@ -21,7 +21,7 @@
     hints,
     groupSharedKeys,
     relaySearch,
-    deriveIsGroupMember,
+    userIsGroupMember,
     groupAdminKeys,
     subscribe,
     LOAD_OPTS,
@@ -104,7 +104,7 @@
       prop("group"),
       sortBy(
         k => -k.created_at,
-        $groupSharedKeys.filter(k => deriveIsGroupMember(k.group).get()),
+        $groupSharedKeys.filter(k => $userIsGroupMember(k.group)),
       ),
     ),
   )

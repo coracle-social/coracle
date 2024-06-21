@@ -15,7 +15,7 @@
     groups,
     loadGiftWraps,
     loadGroupMessages,
-    deriveIsGroupMember,
+    userIsGroupMember,
     updateCurrentSession,
     communityListsByAddress,
     searchGroupMeta,
@@ -26,7 +26,7 @@
     limit += 20
   }
 
-  const userIsMember = meta => deriveIsGroupMember(getAddress(meta.event), true).get()
+  const userIsMember = meta => $userIsGroupMember(getAddress(meta.event), true)
 
   const userGroupMeta = derived(groupMeta, filter(userIsMember))
 

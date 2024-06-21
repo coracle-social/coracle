@@ -22,7 +22,7 @@ import {
   topics,
   relays,
   deriveAdminKeyForGroup,
-  deriveGroupStatus,
+  getGroupStatus,
   getChannelId,
   getSession,
   groupAdminKeys,
@@ -71,7 +71,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
     return
   }
 
-  const status = deriveGroupStatus(address).get()
+  const status = getGroupStatus(getSession(recipient), address)
 
   if (privkey) {
     const pubkey = getPublicKey(privkey)

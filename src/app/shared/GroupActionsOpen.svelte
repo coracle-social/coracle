@@ -10,7 +10,7 @@
     deriveGroup,
     deriveGroupStatus,
     deriveAdminKeyForGroup,
-    deriveUserCommunities,
+    getUserCommunities,
   } from "src/engine"
 
   export let address
@@ -51,9 +51,9 @@
     })
   }
 
-  const join = () => publishCommunitiesList(deriveUserCommunities().get().concat(address))
+  const join = () => publishCommunitiesList(getUserCommunities(session.get()).concat(address))
 
-  const leave = () => publishCommunitiesList(without([address], deriveUserCommunities().get()))
+  const leave = () => publishCommunitiesList(without([address], getUserCommunities(session.get())))
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>

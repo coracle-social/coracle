@@ -23,7 +23,7 @@
     deriveGroupMeta,
     deriveAdminKeyForGroup,
     deriveSharedKeyForGroup,
-    deriveIsGroupMember,
+    userIsGroupMember,
     deriveGroupStatus,
     loadGroups,
     loadGroupMessages,
@@ -38,7 +38,6 @@
   const group = deriveGroup(address)
   const meta = deriveGroupMeta(address)
   const status = deriveGroupStatus(address)
-  const isGroupMember = deriveIsGroupMember(address)
   const sharedKey = deriveSharedKeyForGroup(address)
   const adminKey = deriveAdminKeyForGroup(address)
   const requests = groupRequests.derived(requests =>
@@ -56,7 +55,7 @@
 
   let tabs
 
-  $: key = $group && $isGroupMember
+  $: key = $group && $userIsGroupMember(address)
 
   $: {
     if (key) {

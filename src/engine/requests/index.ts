@@ -36,7 +36,7 @@ import {LIST_KINDS} from "src/domain"
 import type {Zapper} from "src/engine/model"
 import {repository} from "src/engine/repository"
 import {
-  deriveUserCircles,
+  getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
   dvmRequest,
@@ -175,7 +175,7 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
 export const loadGroupMessages = (addresses?: string[]) => {
   const promises = []
-  const addrs = addresses || deriveUserCircles().get()
+  const addrs = addresses || getUserCircles(session.get())
   const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
 
   for (const address of groupAddrs) {

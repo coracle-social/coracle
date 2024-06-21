@@ -15,7 +15,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
     mention,
-    getSettings,
+    settings,
     publishSettings,
     searchTopics,
     userMutes,
@@ -23,12 +23,12 @@
     updateSingleton,
   } from "src/engine"
 
-  const settings = getSettings()
+  const values = {...$settings}
 
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
-    publishSettings(settings)
+    publishSettings(values)
     updateSingleton(MUTES, () => mutedPubkeys.map(mention))
 
     showInfo("Your preferences have been saved!")
@@ -50,20 +50,20 @@
   </div>
   <div class="flex w-full flex-col gap-8">
     <FieldInline label="Show likes on notes">
-      <Toggle bind:value={settings.enable_reactions} />
+      <Toggle bind:value={values.enable_reactions} />
       <p slot="info">
         Show how many likes and reactions a note received. Disabling this can reduce how much data {appName}
         uses.
       </p>
     </FieldInline>
     <FieldInline label="Show images and link previews">
-      <Toggle bind:value={settings.show_media} />
+      <Toggle bind:value={values.show_media} />
       <p slot="info">
         If enabled, {appName} will automatically show images and previews for embedded links.
       </p>
     </FieldInline>
     <FieldInline label="Hide sensitive content">
-      <Toggle bind:value={settings.hide_sensitive} />
+      <Toggle bind:value={values.hide_sensitive} />
       <p slot="info">
         If enabled, content flagged by the author as potentially sensitive will be hidden.
       </p>
@@ -71,9 +71,9 @@
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Minimum WoT score</strong>
-        <div>{settings.min_wot_score}</div>
+        <div>{values.min_wot_score}</div>
       </div>
-      <Input type="range" bind:value={settings.min_wot_score} min={-10} max={10} />
+      <Input type="range" bind:value={values.min_wot_score} min={-10} max={10} />
       <p slot="info">
         Select a minimum <Anchor underline modal href="/help/web-of-trust">web-of-trust</Anchor>
         score. Notes from accounts with a lower score will be automatically hidden.
@@ -86,7 +86,7 @@
     <Field label="Muted words and topics">
       <SearchSelect
         multiple
-        bind:value={settings.muted_words}
+        bind:value={values.muted_words}
         search={searchWords}
         termToItem={identity} />
       <p slot="info">Notes containing these words will be hidden by default.</p>

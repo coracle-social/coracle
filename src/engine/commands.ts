@@ -54,10 +54,9 @@ import {
   loadOne,
   createAndPublish,
   deriveAdminKeyForGroup,
-  deriveIsGroupMember,
+  userIsGroupMember,
   deriveSharedKeyForGroup,
   displayProfileByPubkey,
-  getSettings,
   env,
   getClientTags,
   groupAdminKeys,
@@ -388,6 +387,8 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
 }
 
 export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
+  const $userIsGroupMember = userIsGroupMember.get()
+
   const events = []
   const pubs = []
   for (const address of addresses) {
@@ -399,7 +400,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
       throw new Error("Attempted to publish privately to an invalid address", address)
     }
 
-    if (!deriveIsGroupMember(address).get()) {
+    if (!$userIsGroupMember(address)) {
       throw new Error("Attempted to publish privately to a group the user is not a member of")
     }
 
@@ -1034,8 +1035,8 @@ export const setAppData = async (d: string, data: any) => {
   }
 }
 
-export const publishSettings = (updates: Record<string, any>) =>
-  setAppData(appDataKeys.USER_SETTINGS, {...getSettings(), ...updates})
+export const publishSettings = ($settings: Record<string, any>) =>
+  setAppData(appDataKeys.USER_SETTINGS, $settings)
 
 export const setSession = (k, data) => sessions.update($s => ($s[k] ? {...$s, [k]: data} : $s))
 
