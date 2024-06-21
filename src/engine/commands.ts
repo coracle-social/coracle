@@ -690,9 +690,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   // If we don't have a recent version loaded, re-fetch to avoid dropping updates
   if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
-    console.log("loading")
     const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
-    console.log("loaded", loadedEvent)
 
     if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
       event = loadedEvent
@@ -714,14 +712,11 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   } else {
     const singleton = makeSingleton({kind})
     const publicTags = modifyTags(singleton.publicTags)
+
     encryptable = createSingleton({...singleton, publicTags})
   }
 
-  console.log(1)
-
   const template = await encryptable.reconcile(encrypt)
-
-  console.log(2, template)
 
   await createAndPublish({...template, content, relays})
 }

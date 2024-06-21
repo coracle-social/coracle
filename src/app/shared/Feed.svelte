@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {writable, hash} from "@welshman/lib"
+  import {seconds} from "hurdak"
+  import {writable, now, hash} from "@welshman/lib"
   import {createScroller, synced} from "src/util/misc"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
@@ -27,6 +28,8 @@
   export let onEvent = null
 
   const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
+
+  const promptDismissed = synced("feed/promptDismissed", 0)
 
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
@@ -103,12 +106,19 @@
         {anchor}
         {note} />
     </div>
-    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0}
-      <Card class="flex items-center justify-between">
+    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < now() - seconds(7, "day")}
+      <Card class="group flex items-center justify-between">
         <p class="text-xl">Enjoying Coracle?</p>
-        <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
-          Zap the developer
-        </Anchor>
+        <div class="flex gap-2">
+          <Anchor
+            class="text-neutral-400 opacity-0 transition-all group-hover:opacity-100"
+            on:click={() => promptDismissed.set(now())}>
+            Dismiss
+          </Anchor>
+          <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
+            Zap the developer
+          </Anchor>
+        </div>
       </Card>
     {/if}
   {/each}

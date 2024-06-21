@@ -82,7 +82,7 @@
       {#if muted}
         <p class="mb-1 py-24 text-center text-neutral-600">
           You have hidden this note.
-          <Anchor class="underline" on:click={unmute}>Show</Anchor>
+          <Anchor class="underline" stopPropagation on:click={unmute}>Show</Anchor>
         </p>
       {:else}
         {#if !isGroup}
