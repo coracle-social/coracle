@@ -114,7 +114,7 @@
   $: reply = tags.parent()
   $: root = tags.root()
 
-  $: muted = !showMuted && $isEventMuted(event, true)
+  $: muted = !showMuted && $isEventMuted(event)
 
   // Find children in our context
   $: children = context.filter(e => isChildOf(e, event))
@@ -130,7 +130,7 @@
     visibleReplies = []
 
     for (const e of replies) {
-      if ($isEventMuted(e)) {
+      if ($isEventMuted(e, true)) {
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
