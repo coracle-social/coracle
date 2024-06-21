@@ -1,5 +1,5 @@
 import {fromPairs, randomId} from "@welshman/lib"
-import {FEED, Tags, getAddress} from "@welshman/util"
+import {FEED, Tags} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
   feedFromTags,
@@ -10,7 +10,6 @@ import {
   isScopeFeed,
 } from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
-import {SearchHelper} from "src/util/misc"
 import {tryJson} from "src/util/misc"
 import type {PublishedList} from "./list"
 
@@ -80,12 +79,6 @@ export const editFeed = (feed: PublishedFeed) => ({
 })
 
 export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"
-
-export class FeedSearch extends SearchHelper<PublishedFeed, string> {
-  config = {keys: ["title", "description"]}
-  getValue = (option: PublishedFeed) => getAddress(option.event)
-  displayValue = (address: string) => displayFeed(this.getOption(address))
-}
 
 export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
 

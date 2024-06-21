@@ -50,7 +50,7 @@ const getFiltersForKey = (key: string, authors: string[]) => {
     case "pubkey/lists":
       return [{authors, kinds: LIST_KINDS}]
     case "pubkey/feeds":
-      return [{authors, kinds: [NAMED_BOOKMARKS, FEED]}]
+      return [{authors, kinds: [NAMED_BOOKMARKS, FEED, FEEDS]}]
     case "pubkey/relays":
       return [{authors, kinds: [RELAYS, INBOX_RELAYS]}]
     case "pubkey/profile":

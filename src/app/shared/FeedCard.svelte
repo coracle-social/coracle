@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {remove} from "@welshman/lib"
   import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
@@ -8,6 +9,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
+  import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readFeed, readList, displayFeed, mapListToFeed, getSingletonValues} from "src/domain"
@@ -18,6 +20,7 @@
     addFeedFavorite,
     removeFeedFavorite,
     userFeedFavorites,
+    feedFavoritesByAddress,
   } from "src/engine"
   import {globalFeed} from "src/app/state"
   import {router} from "src/app/util"
@@ -40,6 +43,10 @@
   }
 
   $: isFavorite = getSingletonValues("a", $userFeedFavorites).has(address)
+  $: favoritedPubkeys = remove(
+    $pubkey,
+    ($feedFavoritesByAddress.get(address) || []).map(s => s.event.pubkey),
+  )
 </script>
 
 <Card class="flex gap-3">
@@ -69,6 +76,12 @@
     </div>
     {#if feed.description}
       <p>{feed.description}</p>
+    {/if}
+    {#if favoritedPubkeys.length > 0}
+      <div class="flex gap-2">
+        <span class="text-neutral-300">Bookmarked by</span>
+        <PersonCircles class="h-6 w-6" pubkeys={favoritedPubkeys.slice(0, 20)} />
+      </div>
     {/if}
     <div class="mt-2 flex items-start justify-between">
       <FeedSummary feed={feed.definition} />

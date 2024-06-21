@@ -1,8 +1,10 @@
 <script lang="ts">
-  import {sortBy, uniqBy} from "@welshman/lib"
-  import {getAddress} from "@welshman/util"
+  import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
+  import {FEEDS, getAddress, getIdFilters} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
+  import {getAddressTagValues} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,19 +13,36 @@
   import {router} from "src/app/util/router"
   import {displayFeed} from "src/domain"
   import {
+    load,
+    hints,
     userFeeds,
+    repository,
     feedSearch,
     userListFeeds,
     loadPubkeyFeeds,
+    feedFavorites,
     userFavoritedFeeds,
     userFollows,
   } from "src/engine"
 
-  const favoritedFeeds = $userFavoritedFeeds
-
   const createFeed = () => router.at("feeds/create").open()
 
   const editFeed = address => router.at("feeds").of(address).open()
+
+  const loadFeeds = batch(300, (addresseses: string[][]) => {
+    const addresses = flatten(addresseses).filter(a => !repository.getEvent(a))
+
+    if (addresses.length > 0) {
+      load({
+        relays: hints.User().getUrls(),
+        filters: getIdFilters(addresses),
+        skipCache: true,
+      })
+    }
+  })
+
+  const onRepositoryUpdate = ({added}: {added: TrustedEvent[]}) =>
+    loadFeeds(added.filter(e => e.kind === FEEDS).flatMap(e => getAddressTagValues(e.tags)))
 
   const loadMore = async () => {
     limit += 20
@@ -31,21 +50,27 @@
 
   let q = ""
   let limit = 20
+  let initialAddrs = new Set()
   let element
-
-  $: allUserFeeds = [...$userFeeds, ...$userListFeeds]
 
   $: feeds = uniqBy(
     feed => getAddress(feed.event),
-    sortBy(displayFeed, [...allUserFeeds, ...favoritedFeeds]),
+    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
   )
 
   loadPubkeyFeeds(Array.from($userFollows))
+  loadFeeds($feedFavorites.flatMap(s => getAddressTagValues(s.event.tags)))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
-    return () => scroller.stop()
+    initialAddrs = new Set(feeds.map(feed => getAddress(feed.event)))
+    repository.on("update", onRepositoryUpdate)
+
+    return () => {
+      scroller.stop()
+      repository.off("update", onRepositoryUpdate)
+    }
   })
 </script>
 
@@ -96,7 +121,7 @@
   </Input>
   {#each $feedSearch
     .searchValues(q)
-    .filter(address => !feeds.find(feed => getAddress(feed.event) === address))
+    .filter(address => !initialAddrs.has(address))
     .slice(0, limit) as address (address)}
     <FeedCard {address} />
   {/each}

@@ -116,11 +116,11 @@ import type {
 } from "src/domain"
 import {
   RelayMode,
+  displayFeed,
   EDITABLE_LIST_KINDS,
   getSingletonValues,
   makeSingleton,
   ListSearch,
-  FeedSearch,
   profileHasName,
   readFeed,
   readList,
@@ -1350,6 +1350,20 @@ export const feedFavorites = deriveEventsMapped<PublishedSingleton>({
     ),
 })
 
+export const feedFavoritesByAddress = withGetter(
+  derived(feedFavorites, $feedFavorites => {
+    const $feedFavoritesByAddress = new Map<string, PublishedSingleton[]>()
+
+    for (const singleton of $feedFavorites) {
+      for (const address of getSingletonValues("a", singleton)) {
+        pushToMapKey($feedFavoritesByAddress, address, singleton)
+      }
+    }
+
+    return $feedFavoritesByAddress
+  }),
+)
+
 export const userFeedFavorites = derived(
   [feedFavorites, pubkey],
   ([$singletons, $pubkey]: [PublishedSingleton[], string]) =>
@@ -1362,6 +1376,35 @@ export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
     .filter(identity)
     .map(readFeed),
 )
+
+export class FeedSearch extends SearchHelper<PublishedFeed, string> {
+  getSearch = () => {
+    const $feedFavoritesByAddress = feedFavoritesByAddress.get()
+    const getScore = feed => $feedFavoritesByAddress.get(getAddress(feed.event))?.length || 0
+    const options = this.options.map(feed => ({feed, score: getScore(feed)}))
+    const fuse = new Fuse(options, {
+      keys: ["feed.title", "feed.description"],
+      shouldSort: false,
+      includeScore: true,
+    })
+
+    return (term: string) => {
+      if (!term) {
+        return sortBy(item => -item.score, options).map(item => item.feed)
+      }
+
+      return doPipe(fuse.search(term), [
+        results =>
+          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), results),
+        results => results.map((r: any) => r.item.feed),
+      ])
+    }
+  }
+
+  getValue = (option: PublishedFeed) => getAddress(option.event)
+
+  displayValue = (address: string) => displayFeed(this.getOption(address))
+}
 
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
