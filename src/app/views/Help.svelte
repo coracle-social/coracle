@@ -6,8 +6,7 @@
 
   export let topic
 
-  const topics = ["web-of-trust", "nip-44-dms"]
-  const nip44Url = "https://github.com/nostr-protocol/nips/blob/master/44.md"
+  const topics = ["web-of-trust", "nip-17-dms"]
   const nip17Url = "https://github.com/nostr-protocol/nips/blob/master/17.md"
 </script>
 
@@ -29,11 +28,10 @@
       You can set a minimum web of trust score on your content settings page, which will
       automatically mute anyone with a lower score than your threshold.
     </p>
-  {:else if topic === "nip-44-dms"}
+  {:else if topic === "nip-17-dms"}
     <p>
-      <Anchor underline external href={nip44Url}>NIP 44</Anchor> is a new encryption standard for nostr,
-      which along with <Anchor underline external href={nip17Url}>NIP 17</Anchor> improves upon the old
-      NIP 04 direct messages standard by adding support for group chats and better metadata hiding.
+      <Anchor underline external href={nip17Url}>NIP 17</Anchor> improves upon the old NIP 04 direct
+      messages standard by adding support for group chats and better metadata hiding.
     </p>
     <p>
       In the past, a significant amount of information about private messages was public, event

@@ -34,7 +34,7 @@
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
-  let useNip44 =
+  let useNip17 =
     pubkeys.length > 2 ||
     ($nip44.isEnabled() &&
       repository.query([{kinds: [INBOX_RELAYS], authors: pubkeys}]).length === pubkeys.length)
@@ -78,7 +78,7 @@
     if (content) {
       textarea.value = ""
 
-      await sendMessage(content, useNip44)
+      await sendMessage(content, useNip17)
 
       stickToBottom()
     }
@@ -161,18 +161,18 @@
       </div>
       {#if $nip44.isEnabled()}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          <Toggle scale={0.7} bind:value={useNip44} />
+          <Toggle scale={0.7} bind:value={useNip17} />
           <small>
             Send messages using
             <Popover class="inline">
-              <span slot="trigger" class="cursor-pointer underline">NIP 44</span>
+              <span slot="trigger" class="cursor-pointer underline">NIP 17</span>
               <div slot="tooltip" class="flex flex-col gap-2">
                 <p>
                   When enabled, Coracle will use nostr's new group chat specification, which solves
                   several problems with legacy DMs. Read more <Anchor
                     underline
                     modal
-                    href="/help/nip-44-dms">here</Anchor
+                    href="/help/nip-17-dms">here</Anchor
                   >.
                 </p>
                 <p>

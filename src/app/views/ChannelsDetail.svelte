@@ -37,9 +37,9 @@
 
   const getContent = e => (e.kind === 4 ? ensureMessagePlaintext(e) : e.content) || ""
 
-  const send = async (content, useNip44) => {
+  const send = async (content, useNip17) => {
     // If we don't have nip44 support, just send a legacy message
-    if (!$nip44.isEnabled() || !useNip44) {
+    if (!$nip44.isEnabled() || !useNip17) {
       return sendLegacyMessage(channelId, content)
     }
 
