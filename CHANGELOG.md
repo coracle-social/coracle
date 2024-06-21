@@ -4,6 +4,12 @@
 
 - [x] Add support for kind 10050 relay lists
 - [x] Toggle nip44 messages based on 10050 signaling
+- [x] Fix settings being stale until reload
+- [x] Fix WoT not being applied to mute replies
+- [x] Add developer donation prompt
+- [x] Add WoT information to feed cards and search
+- [x] Fix group updates not getting saved
+- [x] Add relay hints to group/community tags
 
 # 0.4.7
 
