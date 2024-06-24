@@ -1022,6 +1022,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
     return e
   }
 
+  const $pubkey = pubkey.get()
   const groups = {}
 
   // Group notifications by event
@@ -1033,7 +1034,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
     const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
     const event = parentId ? repository.getEvent(parentId) : null
 
-    if (reactionKinds.includes(ix.kind) && !event) {
+    if (reactionKinds.includes(ix.kind) && event?.pubkey !== $pubkey) {
       continue
     }
 

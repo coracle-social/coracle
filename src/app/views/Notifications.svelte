@@ -16,6 +16,7 @@
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import {router} from "src/app/util/router"
   import {
+    pubkey,
     session,
     settings,
     markAsSeen,
@@ -146,7 +147,7 @@
           <div class="h-px w-full bg-neutral-600" />
         </div>
       {/if}
-      {#if !notification.event}
+      {#if notification.event?.pubkey !== $pubkey}
         <NotificationMention {notification} />
       {:else if activeTab === allTabs[0]}
         <NotificationReplies {notification} />

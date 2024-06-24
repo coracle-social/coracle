@@ -527,7 +527,7 @@ export const listenForMessages = (pubkeys: string[]) => {
     forcePlatform: false,
     relays: hints.Messages(pubkeys).getUrls(),
     filters: [
-      addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(7, "day")),
+      addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(14, "day")),
       addSinceToFilter({kinds: [4], authors: allPubkeys}),
       addSinceToFilter({kinds: [4], "#p": allPubkeys}),
     ],

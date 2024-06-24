@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {pluck, identity} from "ramda"
+  import {pluck, equals} from "ramda"
+  import {identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -28,8 +29,13 @@
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
-    publishSettings(values)
-    updateSingleton(MUTES, () => mutedPubkeys.map(mention))
+    if (!equals($settings, values)) {
+      publishSettings(values)
+    }
+
+    if (!equals(mutedPubkeys, Array.from($userMutes))) {
+      updateSingleton(MUTES, () => mutedPubkeys.map(mention))
+    }
 
     showInfo("Your preferences have been saved!")
   }
