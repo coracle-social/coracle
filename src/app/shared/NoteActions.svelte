@@ -149,7 +149,7 @@
 
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
-    const defaultSplit = ["zap", ...mention(note.pubkey).slice(1), "1"]
+    const defaultSplit = ["zap", ...mention(note.pubkey).slice(1, 3), "1"]
     const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
 
     router

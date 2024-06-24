@@ -721,6 +721,13 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   const template = await encryptable.reconcile(encrypt)
 
+  if (window.location.origin.includes('localhost')) {
+    if (kind === MUTES) {
+      alert("Publishing mutes")
+      console.trace(template)
+    }
+  }
+
   await createAndPublish({...template, content, relays})
 }
 
