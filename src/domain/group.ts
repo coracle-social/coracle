@@ -31,8 +31,8 @@ export const readGroupMeta = (event: TrustedEvent) => {
     moderators: event.tags.filter(nthEq(0, 'p')),
     identifier: meta.d,
     name: meta.name || "",
-    about: meta.about || "",
     banner: meta.banner || "",
+    about: meta.about || meta.description || "",
     image: meta.image || meta.picture || "",
     listing_is_public: isSignedEvent(event),
   } as PublishedGroupMeta
