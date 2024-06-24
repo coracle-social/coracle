@@ -252,7 +252,7 @@ export const defaultSettings = {
 }
 
 export const settings = withGetter(
-  derived(session, $session => ({...defaultSettings, ...$session.settings})),
+  derived(session, $session => ({...defaultSettings, ...$session?.settings})),
 )
 
 export const getSetting = k => prop(k, settings.get())

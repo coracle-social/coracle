@@ -1,5 +1,7 @@
 # Changelog
 
+# 0.4.9
+
 # 0.4.8
 
 - [x] Add support for kind 10050 relay lists
