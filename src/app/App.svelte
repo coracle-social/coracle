@@ -203,13 +203,8 @@
 
   router.register("/", import("src/app/views/Home.svelte"))
   router.register("/notes", import("src/app/views/Home.svelte"))
-  router.register("/notes/create", import("src/app/views/NoteCreate.svelte"), {
+  router.register("/notes/create", import("src/app/views/NoteCreate2.svelte"), {
     requireSigner: true,
-    serializers: {
-      pubkey: asPerson,
-      group: asNaddr("group"),
-      type: asString("type"),
-    },
   })
   router.register("/notes/:entity", import("src/app/views/NoteDetail.svelte"), {
     serializers: {

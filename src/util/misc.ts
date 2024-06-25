@@ -457,3 +457,26 @@ export function withGetter<T>(store: Readable<T> | Writable<T>) {
 
 export const throttled = <T>(delay: number, store: Readable<T>) =>
   custom(set => store.subscribe(throttle(delay, set)))
+
+export class SelfStore {
+  subs: Sub<typeof this>[] = []
+
+  notify = () => {
+    for (const sub of this.subs) {
+      sub(this)
+    }
+  }
+
+  subscribe = (sub: Sub<typeof this>) => {
+    this.subs.push(sub)
+
+    sub(this)
+
+    return () => {
+      this.subs.splice(
+        this.subs.findIndex(s => s === sub),
+        1,
+      )
+    }
+  }
+}

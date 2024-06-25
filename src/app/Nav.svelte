@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as Content from "@welshman/content"
   import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -6,7 +7,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
-  import {router} from "src/app/util/router"
+  import {router, makeDraftNote} from "src/app/util"
   import {env, pubkey, canSign, hasNewNotifications, hasNewMessages} from "src/engine"
 
   let innerWidth = 0
@@ -32,18 +33,18 @@
       return router.at("/login").open()
     }
 
-    const params = {} as any
+    const draft = makeDraftNote()
     const props = router.getProps($page) as any
 
     if ($page.path.startsWith("/people") && props.pubkey) {
-      params.pubkey = props.pubkey
+      draft.content = Content.parse(props.pubkey)
     }
 
     if ($env.FORCE_GROUP) {
-      params.group = $env.FORCE_GROUP
+      draft.groups = [$env.FORCE_GROUP]
     }
 
-    router.at("notes/create").qp(params).open()
+    router.at("notes/create").cx({draft}).open()
   }
 </script>
 
@@ -69,10 +70,13 @@
         <div
           on:mousedown|preventDefault
           out:fly|local={{y: 20, duration: 200}}
-          class="absolute right-0 top-10 w-96 rounded shadow-2xl opacity-100 transition-colors">
-          <div class="max-h-[70vh] overflow-auto bg-tinted-700 rounded">
+          class="absolute right-0 top-10 w-96 rounded opacity-100 shadow-2xl transition-colors">
+          <div class="max-h-[70vh] overflow-auto rounded bg-tinted-700">
             <SearchResults bind:searching term={searchTerm}>
-              <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800 cursor-pointer">
+              <div
+                slot="result"
+                let:result
+                class="cursor-pointer px-4 py-2 transition-colors hover:bg-neutral-800">
                 {#if result.type === "topic"}
                   #{result.topic.name}
                 {:else if result.type === "profile"}

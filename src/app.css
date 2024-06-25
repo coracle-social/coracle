@@ -242,3 +242,16 @@ body,
 .note-content a {
   text-decoration: underline;
 }
+
+/* ProseMirror */
+
+.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror pre code {
+  background-color: var(--neutral-800);
+  line-height: 1.5em;
+  box-decoration-break: clone;
+  padding: 1px 0.2em;
+}
