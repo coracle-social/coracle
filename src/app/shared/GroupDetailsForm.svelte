@@ -19,7 +19,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupMeta} from "src/domain"
-  import {normalizeRelayUrl} from "src/domain"
+  import {normalizeRelayUrl, displayRelayUrl} from "src/domain"
   import {env, hints, relaySearch, feedSearch} from "src/engine"
 
   export let onSubmit
@@ -45,6 +45,10 @@
   const removeFeed = i => {
     values.feeds = toSpliced(values.feeds, i, 1)
   }
+
+  const searchRelays = term => $relaySearch.searchValues(term).map(url => ["relay", url])
+
+  const urlToTag = url => ["relay", normalizeRelayUrl(url)]
 
   const ctrl = formCtrl({
     submit: async () => {
@@ -110,10 +114,13 @@
         <Field label="Relays">
           <SearchSelect
             multiple
-            search={$relaySearch.searchValues}
+            search={searchRelays}
             bind:value={values.relays}
-            termToItem={normalizeRelayUrl}>
+            termToItem={urlToTag}>
             <i slot="before" class="fa fa-clipboard" />
+            <span slot="item" let:item>
+              {displayRelayUrl(item[1])}
+            </span>
           </SearchSelect>
           <div slot="info">
             Which relays members should publish notes to. For additional privacy, select relays you

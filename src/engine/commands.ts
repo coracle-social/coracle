@@ -10,6 +10,8 @@ import {
   Address,
   isSignedEvent,
   normalizeRelayUrl,
+  GROUP,
+  COMMUNITY,
   FEEDS,
   FOLLOWS,
   RELAYS,
@@ -542,7 +544,7 @@ export const publishGroupMembers = async (address, op, pubkeys) => {
 }
 
 export const publishCommunityMeta = (address, identifier, meta) => {
-  const template = createEvent(34550, {
+  const template = createEvent(COMMUNITY, {
     tags: [
       ["d", identifier],
       ["name", meta.name],
@@ -562,12 +564,12 @@ export const publishCommunityMeta = (address, identifier, meta) => {
 }
 
 export const publishGroupMeta = (address, identifier, meta, listPublicly) => {
-  const template = createEvent(35834, {
+  const template = createEvent(GROUP, {
     tags: [
       ["d", identifier],
       ["name", meta.name],
       ["about", meta.about],
-      ["description", meta.description],
+      ["description", meta.about],
       ["banner", meta.banner],
       ["picture", meta.image],
       ["image", meta.image],
@@ -721,7 +723,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   const template = await encryptable.reconcile(encrypt)
 
-  if (window.location.origin.includes('localhost')) {
+  if (window.location.origin.includes("localhost")) {
     if (kind === MUTES) {
       alert("Publishing mutes")
       console.trace(template)
@@ -743,9 +745,9 @@ export const unfollowPerson = (pubkey: string) => {
 
 export const followPerson = (pubkey: string) => {
   if (canSign.get()) {
-    updateSingleton(FOLLOWS, tags => append(tags, mention(pubkey)))
+    updateSingleton(FOLLOWS, tags => append(mention(pubkey), tags))
   } else {
-    anonymous.update($a => ({...$a, follows: append($a.follows, mention(pubkey))}))
+    anonymous.update($a => ({...$a, follows: append(mention(pubkey), $a.follows)}))
   }
 }
 
@@ -753,17 +755,17 @@ export const unmutePerson = (pubkey: string) =>
   updateSingleton(MUTES, tags => reject(nthEq(1, pubkey), tags))
 
 export const mutePerson = (pubkey: string) =>
-  updateSingleton(MUTES, tags => append(tags, mention(pubkey)))
+  updateSingleton(MUTES, tags => append(mention(pubkey), tags))
 
 export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
 
-export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(tags, ["e", id]))
+export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(["e", id], tags))
 
 export const removeFeedFavorite = (address: string) =>
   updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags))
 
 export const addFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => append(tags, ["a", address]))
+  updateSingleton(FEEDS, tags => append(["a", address], tags))
 
 // Relays
 
