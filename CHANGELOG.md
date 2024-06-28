@@ -2,6 +2,8 @@
 
 # 0.4.9
 
+- [x] Add person zaps
+
 # 0.4.8
 
 - [x] Add support for kind 10050 relay lists

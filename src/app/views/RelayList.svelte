@@ -190,7 +190,7 @@
     </Input>
     {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
       <RelayCard {url} ratings={ratings[url]}>
-        <p slot="description">{description}</p>
+        <p slot="description">{description || ""}</p>
       </RelayCard>
     {/each}
   {/if}

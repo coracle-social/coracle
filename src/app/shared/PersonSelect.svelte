@@ -26,14 +26,14 @@
           loadPubkeyProfiles([result.data])
           value = uniq(value.concat(result.data))
           input.clearTerm()
-          onChange(value)
+          onChange?.(value)
         }
 
         if (result?.type === "nprofile") {
           loadPubkeyProfiles([result.data.pubkey])
           value = uniq(value.concat(result.data.pubkey))
           input.clearTerm()
-          onChange(value)
+          onChange?.(value)
         }
       })
 

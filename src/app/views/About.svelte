@@ -5,13 +5,13 @@
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {loadPubkeys, env} from "src/engine"
+  import {loadPubkeys, makeZapSplit, env} from "src/engine"
 
   const hash = import.meta.env.VITE_BUILD_HASH
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
-  const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
+  const splits = [makeZapSplit($env.PLATFORM_PUBKEY)]
 
   loadPubkeys([$env.PLATFORM_PUBKEY])
 

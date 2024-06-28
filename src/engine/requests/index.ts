@@ -1,6 +1,5 @@
 import {debounce} from "throttle-debounce"
 import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
-import {get} from "svelte/store"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -60,7 +59,6 @@ import {
   subscribe,
   subscribePersistent,
   dufflepud,
-  deriveGroupMeta,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 import {loadPubkeyRelays} from "src/engine/requests/pubkeys"

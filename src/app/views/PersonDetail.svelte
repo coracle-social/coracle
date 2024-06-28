@@ -20,17 +20,21 @@
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
   import {
+    makeZapSplit,
     userMutes,
     deriveProfile,
     displayProfileByPubkey,
     loadPubkeys,
     imgproxy,
+    deriveZapper,
     getPubkeyRelayPolicies,
   } from "src/engine"
+  import {router} from "src/app/util"
 
   export let pubkey
   export let relays = []
 
+  const zapper = deriveZapper(pubkey)
   const profile = deriveProfile(pubkey)
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
@@ -38,9 +42,14 @@
 
   let activeTab = "notes"
 
+  $: ({rgb, rgba} = $themeBackgroundGradient)
   $: relayPolicies = getPubkeyRelayPolicies(pubkey)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
-  $: ({rgb, rgba} = $themeBackgroundGradient)
+  $: zapDisplay = $profile?.lud16 || $profile?.lud06
+  $: zapLink = router
+    .at("zap")
+    .qp({splits: [makeZapSplit(pubkey)]})
+    .toString()
 
   loadPubkeys([pubkey], {force: true, relays})
 
@@ -73,6 +82,12 @@
       <Anchor external class="flex items-center gap-2 text-sm" href={ensureProto($profile.website)}>
         <i class="fa fa-link text-accent" />
         {stripProtocol($profile.website)}
+      </Anchor>
+    {/if}
+    {#if $zapper && zapDisplay}
+      <Anchor modal class="flex items-center gap-2 text-sm" href={zapLink}>
+        <i class="fa fa-bolt text-accent" />
+        {zapDisplay}
       </Anchor>
     {/if}
     <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">

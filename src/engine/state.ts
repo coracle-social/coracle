@@ -1831,6 +1831,13 @@ Object.assign(NetworkContext, {
 export const uniqTags = tags =>
   uniqBy((t: string[]) => (t[0] === "param" ? t.join(":") : t.slice(0, 2).join(":")), tags)
 
+export const makeZapSplit = (pubkey: string, split = 1) => [
+  "zap",
+  pubkey,
+  hints.FromPubkeys([pubkey]).getUrl(),
+  String(split),
+]
+
 export const mention = (pubkey: string, ...args: unknown[]) => [
   "p",
   pubkey,

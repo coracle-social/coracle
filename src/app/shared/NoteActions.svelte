@@ -48,6 +48,7 @@
     mention,
     tracker,
     hints,
+    makeZapSplit,
     mentionEvent,
     repository,
     unmuteNote,
@@ -149,7 +150,7 @@
 
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
-    const defaultSplit = ["zap", ...mention(note.pubkey).slice(1, 3), "1"]
+    const defaultSplit = makeZapSplit(note.pubkey)
     const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
 
     router
