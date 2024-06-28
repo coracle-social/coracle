@@ -52,6 +52,23 @@
         frameBorder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy" />
+    {:else if url.match(/tidal.com/)}
+      {@const {pathname} = new URL(url)}
+      {@const id = last(pathname.split('/'))}
+      {@const name = pathname.includes('album') ? 'albums' : 'tracks'}
+      {@const src = `https://embed.tidal.com/${name}/${id}`}
+      <iframe
+        {src}
+        allowfullscreen
+        style="border-radius:12px"
+        width="100%"
+        height="100%"
+        scrolling="no"
+        frameBorder="0"
+        allow="encrypted-media"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+        title="TIDAL Embed Player"
+        loading="lazy" />
     {:else if url.match(/\.(mov|webm|mp4)$/)}
       <video controls src={url} class="max-h-96 object-contain object-center" />
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
