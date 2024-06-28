@@ -53,7 +53,6 @@ import {repository} from "src/engine/repository"
 import {
   canSign,
   channels,
-  loadOne,
   createAndPublish,
   deriveAdminKeyForGroup,
   userIsGroupMember,
@@ -689,18 +688,7 @@ export const publishProfile = (profile, {forcePlatform = false} = {}) =>
 export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
-  const filters = [{kinds: [kind], authors: [pubkey.get()]}]
-
-  let [event] = repository.query(filters)
-
-  // If we don't have a recent version loaded, re-fetch to avoid dropping updates
-  if ((event?.created_at || 0) < now() - seconds(5, "minute")) {
-    const loadedEvent = await loadOne({relays: hints.User().getUrls(), filters})
-
-    if ((loadedEvent?.created_at || 0) > (event?.created_at || 0)) {
-      event = loadedEvent
-    }
-  }
+  const [event] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
 
   // Preserve content instead of use encrypted tags because kind 3 content is used for
   // relay selections in many places. Content isn't supported for mutes or relays so this is ok
