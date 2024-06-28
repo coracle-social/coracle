@@ -32,7 +32,7 @@
 
   for (const {address, relay} of parsedGroups) {
     if (relay) {
-      groupHints.update($gh => ({...$gh, [address]: [...$gh[address], relay]}))
+      groupHints.update($gh => ({...$gh, [address]: [...($gh[address] || []), relay]}))
     }
   }
 </script>

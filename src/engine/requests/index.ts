@@ -67,8 +67,6 @@ import {loadPubkeyRelays} from "src/engine/requests/pubkeys"
 
 export * from "src/engine/requests/pubkeys"
 
-export const attemptedAddrs = new Map()
-
 export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
   const limit = 50
   const events = repository.query([{...filter, limit}])
@@ -136,6 +134,8 @@ export const loadZapper = cached({
   getValue: ([handle]) => fetchZapper(handle),
 })
 
+export const attemptedAddrs = new Map()
+
 export const getStaleAddrs = (addrs: string[]) => {
   const stale = new Set<string>()
 
@@ -146,11 +146,7 @@ export const getStaleAddrs = (addrs: string[]) => {
       continue
     }
 
-    const meta = get(deriveGroupMeta(addr))
-
-    if (!meta) {
-      stale.add(addr)
-    }
+    stale.add(addr)
 
     attemptedAddrs.set(addr, attempts + 1)
   }
