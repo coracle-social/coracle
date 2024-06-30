@@ -111,6 +111,8 @@
 
   const report = () => router.at("notes").of(note.id).at("report").open()
 
+  const deleteNote = () => router.at("notes").of(note.id).at("delete").open()
+
   const react = async content => {
     if (isSignedEvent(note)) {
       publish({event: note, relays: hints.PublishEvent(note).getUrls()})
@@ -259,6 +261,14 @@
       icon: "info",
       onClick: () => setView("info"),
     })
+
+    if (note.pubkey === $session?.pubkey) {
+      actions.push({
+        label: "Delete",
+        icon: "trash",
+        onClick: deleteNote,
+      })
+    }
   }
 
   onMount(() => {

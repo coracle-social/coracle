@@ -231,6 +231,11 @@
       entity: asNote,
     },
   })
+  router.register("/notes/:entity/delete", import("src/app/views/NoteDelete.svelte"), {
+    serializers: {
+      entity: asNote,
+    },
+  })
 
   router.register("/notifications", import("src/app/views/Notifications.svelte"), {
     requireUser: true,
