@@ -1,6 +1,6 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
   import {deleteEventById} from "src/engine"
 
@@ -15,7 +15,7 @@
   }
 </script>
 
-<Content size="lg">
+<FlexColumn>
   <p class="flex items-center gap-4 text-xl">
     <i class="fa fa-triangle-exclamation" /> Are you sure you want to delete this event?
   </p>
@@ -27,4 +27,4 @@
     <Anchor button on:click={onCancel}>Cancel</Anchor>
     <Anchor button danger on:click={onConfirm}>Confirm</Anchor>
   </div>
-</Content>
+</FlexColumn>
