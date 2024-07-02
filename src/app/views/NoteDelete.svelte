@@ -4,10 +4,13 @@
   import {router} from "src/app/util/router"
   import {deleteEventById} from "src/engine"
 
+  export let eid
+  export let kind
+
   const onCancel = () => router.pop()
 
   const onConfirm = () => {
-    deleteEventById($$props.eid)
+    deleteEventById({kind, id: eid})
     router.pop()
   }
 </script>

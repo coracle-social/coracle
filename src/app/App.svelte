@@ -234,6 +234,7 @@
   router.register("/notes/:entity/delete", import("src/app/views/NoteDelete.svelte"), {
     serializers: {
       entity: asNote,
+      kind: asString("kind"),
     },
   })
 

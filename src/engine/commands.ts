@@ -647,12 +647,8 @@ export const publishCommunitiesList = addresses =>
 
 // Deletes
 
-export const publishDeletion = ({kind = null, address = null, id = null}) => {
-  const tags = []
-
-  if (kind) {
-    tags.push(["k", String(kind)])
-  }
+export const publishDeletion = ({kind, address = null, id = null}) => {
+  const tags = [["k", String(kind)]]
 
   if (address) {
     tags.push(["a", address])
@@ -673,7 +669,11 @@ export const publishDeletion = ({kind = null, address = null, id = null}) => {
 export const deleteEvent = event =>
   publishDeletion({id: event.id, address: getAddress(event), kind: event.kind})
 
-export const deleteEventById = (id: string) => publishDeletion({id})
+export const deleteEventById = ({kind, id}) =>
+  publishDeletion({
+    kind,
+    id,
+  })
 
 export const deleteEventByAddress = address =>
   publishDeletion({address, kind: Address.from(address).kind})

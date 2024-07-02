@@ -111,7 +111,7 @@
 
   const report = () => router.at("notes").of(note.id).at("report").open()
 
-  const deleteNote = () => router.at("notes").of(note.id).at("delete").open()
+  const deleteNote = () => router.at("notes").of(note.id).at("delete").qp({kind: note.kind}).open()
 
   const react = async content => {
     if (isSignedEvent(note)) {
