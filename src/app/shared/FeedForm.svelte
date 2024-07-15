@@ -33,19 +33,16 @@
 
   const closeSave = () => {
     draft = {...feed}
-    shouldClone = false
     saveIsOpen = false
   }
 
   const startClone = () => {
     draft = makeFeed({definition: feed.definition})
-    shouldClone = true
     saveIsOpen = true
   }
 
   const stopClone = () => {
     draft = {...feed}
-    shouldClone = false
   }
 
   const openDelete = () => {
@@ -84,7 +81,6 @@
     }
   }
 
-  let shouldClone = false
   let deleteIsOpen = false
   let saveIsOpen = showSave
   let listDeleteIsOpen = false
