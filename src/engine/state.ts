@@ -715,7 +715,7 @@ export const searchGroupMeta = derived(
 
     return (term: string) =>
       term
-        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item.meta)
+        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item)
         : sortBy(meta => -meta.score, options)
   },
 )
