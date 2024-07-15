@@ -669,12 +669,6 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
 export const deleteEvent = event =>
   publishDeletion({id: event.id, address: getAddress(event), kind: event.kind})
 
-export const deleteEventById = ({kind, id}) =>
-  publishDeletion({
-    kind,
-    id,
-  })
-
 export const deleteEventByAddress = address =>
   publishDeletion({address, kind: Address.from(address).kind})
 

@@ -3,6 +3,7 @@
 # 0.4.9
 
 - [x] Add person zaps
+- [x] Bring back delete
 
 # 0.4.8
 

@@ -172,6 +172,7 @@ export const env = new Writable({
   DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
   ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
   ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
+  BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
   FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
