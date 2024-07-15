@@ -718,7 +718,11 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
     }
   }
 
-  await createAndPublish({...template, content, relays})
+  try {
+    await createAndPublish({...template, content, relays})
+  } catch (error) {
+    console.error({...template, content, relays, error})
+  }
 }
 
 // Follows/mutes

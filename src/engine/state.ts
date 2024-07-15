@@ -77,6 +77,7 @@ import {
   isReplaceable,
   isGroupAddress,
   isCommunityAddress,
+  isHashedEvent,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
@@ -343,7 +344,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
     if (canDecrypt) {
       const rumor = await getNip59(session).unwrap(event, session.privkey)
 
-      if (rumor) {
+      if (rumor && isHashedEvent(rumor)) {
         tracker.copy(event.id, rumor.id)
         relay.send("EVENT", rumor)
 
@@ -358,7 +359,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (sk) {
     const rumor = await nip59.get().unwrap(event, sk)
 
-    if (rumor) {
+    if (rumor && isHashedEvent(rumor)) {
       tracker.copy(event.id, rumor.id)
       relay.send("EVENT", rumor)
 
@@ -1997,6 +1998,10 @@ export const dvmRequest = async ({
   onProgress = null,
   sk = null,
 }: DVMRequestOpts): Promise<TrustedEvent> => {
+  if (!sk && !signer.get().isEnabled()) {
+    sk = generatePrivateKey()
+  }
+
   if (relays.length === 0) {
     relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
   }
