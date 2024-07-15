@@ -297,9 +297,7 @@
                     }}>Show</Anchor>
                 </p>
               {:else}
-                <div class:blur-sm={$env.BLUR_CONTENT}>
-                  <NoteContent note={event} {showEntire} {showMedia} />
-                </div>
+                <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
               <NoteActions

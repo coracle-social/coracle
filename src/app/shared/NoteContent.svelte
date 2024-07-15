@@ -22,7 +22,7 @@
   import NoteContentKind34550 from "src/app/shared/NoteContentKind34550.svelte"
   import NoteContentKind35834 from "src/app/shared/NoteContentKind35834.svelte"
   import NoteContentKindList from "src/app/shared/NoteContentKindList.svelte"
-  import {getSetting} from "src/engine"
+  import {getSetting, env} from "src/engine"
   import {LIST_KINDS} from "src/domain"
 
   export let note
@@ -38,58 +38,60 @@
   }
 </script>
 
-{#if warning}
-  <div class="flex gap-2 text-neutral-300">
-    <i class="fa fa-warning m-1" />
-    <p>
-      This note has been flagged by the author as "{warning}".<br />
-      <Anchor underline on:click={ignoreWarning}>Show anyway</Anchor>
-    </p>
-  </div>
-{:else if note.kind === 0}
-  <NoteContentKind0 {note} />
-{:else if note.kind === 3}
-  <NoteContentKind3 {note} {showEntire} />
-{:else if [40, 41].includes(note.kind)}
-  <NoteContentKind40 {note} />
-{:else if note.kind === 1808}
-  <NoteContentKind1808 {note} {showEntire} />
-{:else if note.kind === 1985}
-  <NoteContentKind1985 {note} {showEntire} />
-{:else if note.kind === 1986}
-  <NoteContentKind1986 {note} {showEntire} />
-{:else if note.kind === 9802}
-  <NoteContentKind9802 {note} {showEntire} {showMedia} />
-{:else if note.kind === 1063}
-  <NoteContentKind1063 {note} {showMedia} />
-{:else if note.kind === 10002}
-  <NoteContentKind10002 {note} />
-{:else if note.kind === 30009}
-  <NoteContentKind30009 {note} {showMedia} />
-{:else if note.kind === 30023}
-  <NoteContentKind30023 {note} {showEntire} {showMedia} />
-{:else if note.kind === 30311}
-  <NoteContentKind30311 {note} {showMedia} />
-{:else if note.kind === 30402}
-  <NoteContentKind30402 {note} {showEntire} {showMedia} />
-{:else if note.kind === 31337}
-  <NoteContentKind31337 {note} {showMedia} />
-{:else if note.kind === 31890}
-  <NoteContentKind31890 {note} />
-{:else if note.kind === 31923}
-  <NoteContentKind31923 {note} />
-{:else if note.kind === 32123}
-  <NoteContentKind32123 {note} />
-{:else if note.kind === 34550}
-  <NoteContentKind34550 {note} />
-{:else if note.kind === 35834}
-  <NoteContentKind35834 {note} />
-{:else if LIST_KINDS.includes(note.kind)}
-  <NoteContentKindList {note} />
-{:else}
-  <NoteContentKind1 {note} {showEntire} {showMedia} {expandable} {depth}>
-    <div slot="note-content" let:quote>
-      <svelte:self depth={depth + 1} note={quote} />
+<div class:blur-sm={$env.BLUR_CONTENT}>
+  {#if warning}
+    <div class="flex gap-2 text-neutral-300">
+      <i class="fa fa-warning m-1" />
+      <p>
+        This note has been flagged by the author as "{warning}".<br />
+        <Anchor underline on:click={ignoreWarning}>Show anyway</Anchor>
+      </p>
     </div>
-  </NoteContentKind1>
-{/if}
+  {:else if note.kind === 0}
+    <NoteContentKind0 {note} />
+  {:else if note.kind === 3}
+    <NoteContentKind3 {note} {showEntire} />
+  {:else if [40, 41].includes(note.kind)}
+    <NoteContentKind40 {note} />
+  {:else if note.kind === 1808}
+    <NoteContentKind1808 {note} {showEntire} />
+  {:else if note.kind === 1985}
+    <NoteContentKind1985 {note} {showEntire} />
+  {:else if note.kind === 1986}
+    <NoteContentKind1986 {note} {showEntire} />
+  {:else if note.kind === 9802}
+    <NoteContentKind9802 {note} {showEntire} {showMedia} />
+  {:else if note.kind === 1063}
+    <NoteContentKind1063 {note} {showMedia} />
+  {:else if note.kind === 10002}
+    <NoteContentKind10002 {note} />
+  {:else if note.kind === 30009}
+    <NoteContentKind30009 {note} {showMedia} />
+  {:else if note.kind === 30023}
+    <NoteContentKind30023 {note} {showEntire} {showMedia} />
+  {:else if note.kind === 30311}
+    <NoteContentKind30311 {note} {showMedia} />
+  {:else if note.kind === 30402}
+    <NoteContentKind30402 {note} {showEntire} {showMedia} />
+  {:else if note.kind === 31337}
+    <NoteContentKind31337 {note} {showMedia} />
+  {:else if note.kind === 31890}
+    <NoteContentKind31890 {note} />
+  {:else if note.kind === 31923}
+    <NoteContentKind31923 {note} />
+  {:else if note.kind === 32123}
+    <NoteContentKind32123 {note} />
+  {:else if note.kind === 34550}
+    <NoteContentKind34550 {note} />
+  {:else if note.kind === 35834}
+    <NoteContentKind35834 {note} />
+  {:else if LIST_KINDS.includes(note.kind)}
+    <NoteContentKindList {note} />
+  {:else}
+    <NoteContentKind1 {note} {showEntire} {showMedia} {expandable} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind1>
+  {/if}
+</div>
