@@ -70,7 +70,7 @@
           event = await $nip59.unwrap(event, privkey)
         }
 
-        if (event.kind !== 35834 || event.pubkey !== pubkey) {
+        if (event?.kind !== 35834 || event?.pubkey !== pubkey) {
           return
         }
 
