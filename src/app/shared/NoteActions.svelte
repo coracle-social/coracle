@@ -256,12 +256,6 @@
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
-    actions.push({
-      label: "Details",
-      icon: "info",
-      onClick: () => setView("info"),
-    })
-
     if (note.pubkey === $session?.pubkey) {
       actions.push({
         label: "Delete",
@@ -269,6 +263,12 @@
         onClick: deleteNote,
       })
     }
+
+    actions.push({
+      label: "Details",
+      icon: "info",
+      onClick: () => setView("info"),
+    })
   }
 
   onMount(() => {
