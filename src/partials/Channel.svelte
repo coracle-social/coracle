@@ -34,8 +34,9 @@
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
+  const isGroupMessage = pubkeys.length > 2
   let useNip17 =
-    pubkeys.length > 2 ||
+    isGroupMessage ||
     ($nip44.isEnabled() &&
       repository.query([{kinds: [INBOX_RELAYS], authors: pubkeys}]).length === pubkeys.length)
 
@@ -132,7 +133,7 @@
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
   </ul>
-  {#if $nip44.isEnabled() || pubkeys.length < 3}
+  {#if $nip44.isEnabled() || !isGroupMessage}
     <div
       class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <textarea
@@ -159,7 +160,7 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $nip44.isEnabled()}
+      {#if $nip44.isEnabled() && !isGroupMessage}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
           <Toggle scale={0.7} bind:value={useNip17} />
           <small>
