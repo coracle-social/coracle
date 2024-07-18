@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {nip19} from 'nostr-tools'
+  import {fromNostrURI} from '@welshman/util'
   import {
     parse,
     truncate,
@@ -16,6 +18,7 @@
     isNewline,
   } from "@welshman/content"
   import QRCode from "src/partials/QRCode.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
@@ -23,6 +26,7 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
+  import {router} from 'src/app/util'
 
   export let note
   export let minLength = 500
@@ -89,12 +93,22 @@
         <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
       {:else if isProfile(parsed)}
         <PersonLink pubkey={parsed.value.pubkey} />
-      {:else if (isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 2}
-        <NoteContentQuote {depth} {note} value={parsed.value}>
-          <div slot="note-content" let:quote>
-            <slot name="note-content" {quote} />
-          </div>
-        </NoteContentQuote>
+      {:else if (isEvent(parsed) || isAddress(parsed))}
+        {#if isStartOrEnd(i) && depth < 2}
+          <NoteContentQuote {depth} {note} value={parsed.value}>
+            <div slot="note-content" let:quote>
+              <slot name="note-content" {quote} />
+            </div>
+          </NoteContentQuote>
+        {:else}
+          <Anchor
+            modal
+            stopPropagation
+            class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+            href={fromNostrURI(parsed.raw)}>
+            {nip19.neventEncode(parsed.value).slice(0, 16) + "…"}
+          </Anchor>
+        {/if}
       {:else}
         {@html renderParsed(parsed)}
       {/if}
