@@ -178,7 +178,9 @@
       </div>
       {#if $nip44.isEnabled() && $hasSingleRecipientWithInboxRelays}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          {#if !$currentUserHasInboxRelays && !isGroupMessage}
+          {#if $currentUserHasInboxRelays}
+            <Toggle scale={toggleScale} bind:value={useNip17} />
+          {:else}
             <Popover triggerType="mouseenter">
               <div slot="trigger">
                 <Toggle disabled scale={toggleScale} value={false} />
@@ -189,8 +191,6 @@
                 up your inbox relays.
               </Anchor>
             </Popover>
-          {:else}
-            <Toggle scale={toggleScale} bind:value={useNip17} />
           {/if}
           <small>
             Send messages using
