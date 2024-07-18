@@ -49,7 +49,7 @@
         end: date,
       }
 
-      router.at("notes/create").qp({type: "calendar_event"}).cx({initialValues}).open()
+      router.at("notes/create").qp({type: "calendar_event", group}).cx({initialValues}).open()
     }
   }
 

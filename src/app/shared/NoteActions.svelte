@@ -107,7 +107,7 @@
 
   const createLabel = () => router.at("notes").of(note.id).at("label").open()
 
-  const quote = () => router.at("notes/create").cx({quote: note}).open()
+  const quote = () => router.at("notes/create").cx({quote: note, group: address}).open()
 
   const report = () => router.at("notes").of(note.id).at("report").open()
 
