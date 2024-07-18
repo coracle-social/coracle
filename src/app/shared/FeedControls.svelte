@@ -27,10 +27,6 @@
   const listMenu = boolCtrl()
   const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
   const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
-  const allFeeds = uniqBy(
-    feed => getAddress(feed.event),
-    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
-  )
 
   const openForm = () => {
     savePoint = {...feed}
@@ -95,6 +91,10 @@
   let search = getSearch(feed.definition)
 
   $: subFeeds = getFeedArgs(feed.definition as any)
+  $: allFeeds = uniqBy(
+    feed => getAddress(feed.event),
+    sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
+  )
 </script>
 
 <div class="flex flex-grow items-center justify-end gap-2">

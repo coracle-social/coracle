@@ -86,6 +86,9 @@
   let listDeleteIsOpen = false
   let draft = {...feed}
 
+  // Sync definition in case they're editing it
+  $: draft.definition = feed.definition
+
   walkFeed(feed.definition, subFeed => {
     if (isAuthorFeed(subFeed)) {
       loadPubkeys(subFeed.slice(1))
