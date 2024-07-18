@@ -666,10 +666,10 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
   })
 }
 
-export const deleteEvent = event =>
+export const deleteEvent = (event: TrustedEvent) =>
   publishDeletion({id: event.id, address: getAddress(event), kind: event.kind})
 
-export const deleteEventByAddress = address =>
+export const deleteEventByAddress = (address: string) =>
   publishDeletion({address, kind: Address.from(address).kind})
 
 // Profile

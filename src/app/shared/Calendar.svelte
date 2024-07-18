@@ -78,19 +78,21 @@
   </div>
 {/if}
 
-<Calendar
-  plugins={[Interaction, DayGrid]}
-  options={{
-    view: "dayGridMonth",
-    events: $calendarEvents,
-    dateClick: onDateClick,
-    eventClick: onEventClick,
-    eventContent: getEventContent,
-    eventStartEditable: false,
-    eventDragMinDistance: 10000,
-    eventTextColor: $themeColors["neutral-900"],
-    longPressDelay: 10000,
-    buttonText: {
-      today: "Today",
-    },
-  }} />
+{#key $calendarEvents.length}
+  <Calendar
+    plugins={[Interaction, DayGrid]}
+    options={{
+      view: "dayGridMonth",
+      events: $calendarEvents,
+      dateClick: onDateClick,
+      eventClick: onEventClick,
+      eventContent: getEventContent,
+      eventStartEditable: false,
+      eventDragMinDistance: 10000,
+      eventTextColor: $themeColors["neutral-900"],
+      longPressDelay: 10000,
+      buttonText: {
+        today: "Today",
+      },
+    }} />
+{/key}

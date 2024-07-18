@@ -108,3 +108,14 @@ export const deriveEvents = (opts: {filters: Filter[]; includeDeleted?: boolean}
 
 export const deriveEvent = (idOrAddress: string) =>
   derived(deriveEvents({filters: getIdFilters([idOrAddress]), includeDeleted: true}), first)
+
+export const deriveIsDeleted = (event: TrustedEvent) =>
+  custom<boolean>(setter => {
+    setter(repository.isDeleted(event))
+
+    const onUpdate = batch(300, () => setter(repository.isDeleted(event)))
+
+    repository.on("update", onUpdate)
+
+    return () => repository.off("update", onUpdate)
+  })

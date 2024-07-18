@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {derived} from "svelte/store"
   import {Tags, Address} from "@welshman/util"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +11,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {hints, pubkey, repository, deriveEvent} from "src/engine"
+  import {hints, pubkey, deriveIsDeleted} from "src/engine"
 
   export let note
   export let showMedia = false
@@ -25,7 +24,7 @@
   const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
-  const deleted = derived(deriveEvent(note.id), repository.isDeleted)
+  const deleted = deriveIsDeleted(note)
 
   const sendMessage = () => {
     const naddr = address.toNaddr()

@@ -2,7 +2,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
-  import {deleteEvent} from "src/engine"
+  import {publishDeletion} from "src/engine"
 
   export let eid
   export let kind
@@ -10,7 +10,7 @@
   const onCancel = () => router.pop()
 
   const onConfirm = () => {
-    deleteEvent({kind, id: eid})
+    publishDeletion({kind, id: eid})
     router.pop()
   }
 </script>
