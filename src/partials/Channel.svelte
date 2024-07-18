@@ -47,6 +47,12 @@
     $events =>
       $events.filter(({pubkey, tags}) => pubkey === $session?.pubkey && tags.length > 0).length > 0,
   )
+  const hasSingleRecipientWithInboxRelays = derived(
+    inboxRelays,
+    $events =>
+      !isGroupMessage &&
+      $events.filter(({pubkey, tags}) => pubkey !== $session?.pubkey && tags.length > 0).length > 0,
+  )
 
   let useNip17 = isGroupMessage || ($nip44.isEnabled() && $everyUserHasInboxRelays)
 
@@ -170,7 +176,7 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $nip44.isEnabled() && !isGroupMessage}
+      {#if $nip44.isEnabled() && $hasSingleRecipientWithInboxRelays}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
           {#if !$currentUserHasInboxRelays && !isGroupMessage}
             <Popover triggerType="mouseenter">
