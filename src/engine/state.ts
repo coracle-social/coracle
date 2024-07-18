@@ -955,7 +955,7 @@ export const groupNotifications = new Derived(
   [session, events, groupRequests, groupAlerts, groupAdminKeys, isEventMuted],
   x => x,
 )
-  .throttle(3000)
+  .throttle(300)
   .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses, $isEventMuted]) => {
     const addresses = new Set(getUserCircles($session))
     const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
