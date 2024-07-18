@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {derived} from "svelte/store"
   import {sleep} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {INBOX_RELAYS} from "@welshman/util"
@@ -12,7 +13,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {nip44, repository} from "src/engine"
+  import {nip44, session, deriveEvents} from "src/engine"
 
   export let pubkeys
   export let sendMessage
@@ -20,6 +21,7 @@
   export let messages: TrustedEvent[]
 
   const loading = sleep(30_000)
+  const toggleScale = 0.7
 
   const startScroller = () => {
     scroller?.stop()
@@ -35,10 +37,18 @@
   let showNewMessages = false
   let groupedMessages = []
   const isGroupMessage = pubkeys.length > 2
-  let useNip17 =
-    isGroupMessage ||
-    ($nip44.isEnabled() &&
-      repository.query([{kinds: [INBOX_RELAYS], authors: pubkeys}]).length === pubkeys.length)
+  const inboxRelays = deriveEvents({filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
+  const everyUserHasInboxRelays = derived(
+    inboxRelays,
+    $events => $events.length === pubkeys.length && $events.every(({tags}) => tags.length > 0),
+  )
+  const currentUserHasInboxRelays = derived(
+    inboxRelays,
+    $events =>
+      $events.filter(({pubkey, tags}) => pubkey === $session?.pubkey && tags.length > 0).length > 0,
+  )
+
+  let useNip17 = isGroupMessage || ($nip44.isEnabled() && $everyUserHasInboxRelays)
 
   onMount(() => {
     startScroller()
@@ -162,7 +172,20 @@
       </div>
       {#if $nip44.isEnabled() && !isGroupMessage}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          <Toggle scale={0.7} bind:value={useNip17} />
+          {#if !$currentUserHasInboxRelays && !isGroupMessage}
+            <Popover triggerType="mouseenter">
+              <div slot="trigger">
+                <Toggle disabled scale={toggleScale} value={false} />
+              </div>
+              <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/settings/relays">
+                <i class="fa fa-info-circle" />
+                You must have at least one inbox relay to send messages using nip-17. Click here to set
+                up your inbox relays.
+              </Anchor>
+            </Popover>
+          {:else}
+            <Toggle scale={toggleScale} bind:value={useNip17} />
+          {/if}
           <small>
             Send messages using
             <Popover class="inline">
