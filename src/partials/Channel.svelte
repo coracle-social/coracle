@@ -2,17 +2,24 @@
   import {onMount} from "svelte"
   import {sleep} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {INBOX_RELAYS} from "@welshman/util"
-  import {prop, max, reverse, pluck, sortBy, last} from "ramda"
+  import {prop, max, reverse, pluck, sortBy, last, difference} from "ramda"
   import {fly} from "src/util/transition"
-  import {createScroller} from "src/util/misc"
+  import {createScroller, getLocale} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {nip44, repository} from "src/engine"
+  import {
+    nip44,
+    session,
+    deriveInboxRelays,
+    deriveEveryUserHasInboxRelays,
+    displayProfileByPubkey,
+  } from "src/engine"
+  import Modal from "src/partials/Modal.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
 
   export let pubkeys
   export let sendMessage
@@ -20,6 +27,7 @@
   export let messages: TrustedEvent[]
 
   const loading = sleep(30_000)
+  const toggleScale = 0.7
 
   const startScroller = () => {
     scroller?.stop()
@@ -30,14 +38,31 @@
     limit += 10
   }
 
+  let confirmIsOpen = false
+
+  const openConfirm = () => {
+    confirmIsOpen = true
+  }
+  const closeConfirm = () => {
+    confirmIsOpen = false
+  }
+
   let textarea, element, scroller
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
-  let useNip17 =
-    pubkeys.length > 2 ||
-    ($nip44.isEnabled() &&
-      repository.query([{kinds: [INBOX_RELAYS], authors: pubkeys}]).length === pubkeys.length)
+  const isGroupMessage = pubkeys.length > 2
+  const inboxRelays = deriveInboxRelays(pubkeys)
+  const everyUserHasInboxRelays = deriveEveryUserHasInboxRelays(pubkeys)
+
+  const getMissingRecipientsMessage = () => {
+    const formatter = new Intl.ListFormat(getLocale(), {style: "long", type: "conjunction"})
+    const isOrAre = namesOfRecipientMissingInboxRelays.length > 1 ? "are" : "is"
+
+    return `${formatter.format(namesOfRecipientMissingInboxRelays)} ${isOrAre} missing inbox relays which are required.`
+  }
+
+  let useNip17 = isGroupMessage || ($nip44.isEnabled() && $everyUserHasInboxRelays)
 
   onMount(() => {
     startScroller()
@@ -72,6 +97,19 @@
     textarea.value += "\n" + imeta.get("url").value()
   }
 
+  const sendAnyway = () => {
+    send()
+    closeConfirm()
+  }
+
+  const sendOrConfirm = () => {
+    if (isGroupMessage && !$everyUserHasInboxRelays) {
+      openConfirm()
+    } else {
+      send()
+    }
+  }
+
   const send = async () => {
     const content = textarea.value.trim()
 
@@ -87,9 +125,24 @@
   const onKeyDown = e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      send()
+      sendOrConfirm()
     }
   }
+
+  $: currentUserHasInboxRelays =
+    $inboxRelays.filter(({pubkey, tags}) => pubkey === $session?.pubkey && tags.length > 0).length >
+    0
+  $: hasSingleRecipientWithInboxRelays =
+    !isGroupMessage &&
+    $inboxRelays.filter(({pubkey, tags}) => pubkey !== $session?.pubkey && tags.length > 0).length >
+      0
+  $: recipientPubkeysWithInboxRelays = $inboxRelays
+    .filter(({pubkey, tags}) => pubkey !== $session?.pubkey && tags.length > 0)
+    .map(({pubkey}) => pubkey)
+  $: namesOfRecipientMissingInboxRelays = difference(pubkeys, [
+    $session?.pubkey,
+    ...recipientPubkeysWithInboxRelays,
+  ]).map(displayProfileByPubkey)
 
   // Group messages so we're only showing the person once per chunk
   $: {
@@ -132,7 +185,7 @@
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
   </ul>
-  {#if $nip44.isEnabled() || pubkeys.length < 3}
+  {#if $nip44.isEnabled() || !isGroupMessage}
     <div
       class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <textarea
@@ -153,15 +206,28 @@
           </button>
         </ImageInput>
         <button
-          on:click={send}
+          on:click={sendOrConfirm}
           class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
                py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $nip44.isEnabled()}
+      {#if $nip44.isEnabled() && hasSingleRecipientWithInboxRelays}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          <Toggle scale={0.7} bind:value={useNip17} />
+          {#if currentUserHasInboxRelays}
+            <Toggle scale={toggleScale} bind:value={useNip17} />
+          {:else}
+            <Popover triggerType="mouseenter">
+              <div slot="trigger">
+                <Toggle disabled scale={toggleScale} value={false} />
+              </div>
+              <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/settings/relays">
+                <i class="fa fa-info-circle" />
+                You must have at least one inbox relay to send messages using nip-17. Click here to set
+                up your inbox relays.
+              </Anchor>
+            </Popover>
+          {/if}
           <small>
             Send messages using
             <Popover class="inline">
@@ -203,3 +269,24 @@
     </div>
   {/if}
 </div>
+
+{#if confirmIsOpen}
+  <Modal onEscape={closeConfirm}>
+    <Subheading>Warning</Subheading>
+    {#if namesOfRecipientMissingInboxRelays.length > 0}
+      <p>
+        {getMissingRecipientsMessage()}
+      </p>
+    {/if}
+    {#if !currentUserHasInboxRelays}
+      <p>
+        You are missing inbox relays.
+        <Anchor href="/settings/relays">Click here to set up your inbox relays.</Anchor>
+      </p>
+    {/if}
+    <div class="flex justify-between">
+      <Anchor button on:click={closeConfirm}>Cancel</Anchor>
+      <Anchor button accent on:click={sendAnyway}>Send anyway</Anchor>
+    </div>
+  </Modal>
+{/if}
