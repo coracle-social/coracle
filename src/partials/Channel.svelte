@@ -277,7 +277,8 @@
       <p>
         {getMissingRecipientsMessage()}
       </p>
-    {:else if !currentUserHasInboxRelays}
+    {/if}
+    {#if !currentUserHasInboxRelays}
       <p>
         You are missing inbox relays.
         <Anchor href="/settings/relays">Click here to set up your inbox relays.</Anchor>
