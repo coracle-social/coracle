@@ -35,8 +35,8 @@
     {#if hasGroupMemberWithoutInboxRelaysError}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
-        One the group members does not have inbox relays setup. It is required for all members of a group
-        chat to have inbox relays setup.
+        At least one of the group members does not have inbox relays setup. It is required for all members
+        of a group chat to have inbox relays setup.
       </p>
     {/if}
   </FlexColumn>
