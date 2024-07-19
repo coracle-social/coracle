@@ -2114,8 +2114,9 @@ class IndexedDBAdapter {
         if (removedRecords.length > 0) {
           if (name === "repository") {
             console.trace("deleting", removedRecords.length, current.length)
+          } else {
+            await storage.bulkDelete(name, removedRecords.map(prop(key)))
           }
-          await storage.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
         // If we have much more than our limit, prune our store. This will get persisted
