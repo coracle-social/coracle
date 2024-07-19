@@ -1,23 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep} from "@welshman/lib"
+  import {displayList, pluralize} from "hurdak"
+  import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {prop, max, reverse, pluck, sortBy, last, difference} from "ramda"
+  import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
-  import {createScroller, getLocale} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {
-    nip44,
-    session,
-    deriveInboxRelays,
-    deriveEveryUserHasInboxRelays,
-    displayProfileByPubkey,
-  } from "src/engine"
+  import {nip44, session, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
 
@@ -51,18 +46,12 @@
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
+
   const isGroupMessage = pubkeys.length > 2
-  const inboxRelays = deriveInboxRelays(pubkeys)
-  const everyUserHasInboxRelays = deriveEveryUserHasInboxRelays(pubkeys)
+  const pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
+  const recipients = remove($session?.pubkey, pubkeys)
 
-  const getMissingRecipientsMessage = () => {
-    const formatter = new Intl.ListFormat(getLocale(), {style: "long", type: "conjunction"})
-    const isOrAre = namesOfRecipientMissingInboxRelays.length > 1 ? "are" : "is"
-
-    return `${formatter.format(namesOfRecipientMissingInboxRelays)} ${isOrAre} missing inbox relays which are required.`
-  }
-
-  let useNip17 = isGroupMessage || ($nip44.isEnabled() && $everyUserHasInboxRelays)
+  let useNip17 = isGroupMessage || ($nip44.isEnabled() && $pubkeysWithoutInbox.length === 0)
 
   onMount(() => {
     startScroller()
@@ -103,7 +92,7 @@
   }
 
   const sendOrConfirm = () => {
-    if (isGroupMessage && !$everyUserHasInboxRelays) {
+    if (isGroupMessage && $pubkeysWithoutInbox.length > 0) {
       openConfirm()
     } else {
       send()
@@ -129,20 +118,8 @@
     }
   }
 
-  $: currentUserHasInboxRelays =
-    $inboxRelays.filter(({pubkey, tags}) => pubkey === $session?.pubkey && tags.length > 0).length >
-    0
-  $: hasSingleRecipientWithInboxRelays =
-    !isGroupMessage &&
-    $inboxRelays.filter(({pubkey, tags}) => pubkey !== $session?.pubkey && tags.length > 0).length >
-      0
-  $: recipientPubkeysWithInboxRelays = $inboxRelays
-    .filter(({pubkey, tags}) => pubkey !== $session?.pubkey && tags.length > 0)
-    .map(({pubkey}) => pubkey)
-  $: namesOfRecipientMissingInboxRelays = difference(pubkeys, [
-    $session?.pubkey,
-    ...recipientPubkeysWithInboxRelays,
-  ]).map(displayProfileByPubkey)
+  $: userHasInbox = !$pubkeysWithoutInbox.includes($session?.pubkey)
+  $: hasSingleRecipientWithInbox = !isGroupMessage && !$pubkeysWithoutInbox.includes(recipients[0])
 
   // Group messages so we're only showing the person once per chunk
   $: {
@@ -212,9 +189,9 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $nip44.isEnabled() && hasSingleRecipientWithInboxRelays}
+      {#if $nip44.isEnabled() && hasSingleRecipientWithInbox}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          {#if currentUserHasInboxRelays}
+          {#if userHasInbox}
             <Toggle scale={toggleScale} bind:value={useNip17} />
           {:else}
             <Popover triggerType="mouseenter">
@@ -272,16 +249,19 @@
 
 {#if confirmIsOpen}
   <Modal onEscape={closeConfirm}>
-    <Subheading>Warning</Subheading>
-    {#if namesOfRecipientMissingInboxRelays.length > 0}
+    <Subheading>Missing Inbox Relays</Subheading>
+    {#if $pubkeysWithoutInbox.length > 0}
       <p>
-        {getMissingRecipientsMessage()}
+        {displayList($pubkeysWithoutInbox.map(displayProfileByPubkey))}
+        {pluralize($pubkeysWithoutInbox.length, "does not have", "do not have")}
+        inbox relays, which means they likely either don't want to receive DMs, or are using a client
+        that does not support nostr group chats.
       </p>
-    {/if}
-    {#if !currentUserHasInboxRelays}
+    {:else if !userHasInbox}
       <p>
-        You are missing inbox relays.
-        <Anchor href="/settings/relays">Click here to set up your inbox relays.</Anchor>
+        You don't have any inbox relays set up yet, which will make it difficult for you to receive
+        replies to this conversation. Click <Anchor underline href="/settings/relays">here</Anchor> to
+        set up your inbox relays.
       </p>
     {/if}
     <div class="flex justify-between">
