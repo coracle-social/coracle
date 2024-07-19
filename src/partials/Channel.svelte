@@ -3,7 +3,6 @@
   import {derived} from "svelte/store"
   import {sleep} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {INBOX_RELAYS} from "@welshman/util"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -13,7 +12,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {nip44, session, deriveEvents} from "src/engine"
+  import {nip44, session, deriveInboxRelays, deriveEveryUserHasInboxRelays} from "src/engine"
 
   export let pubkeys
   export let sendMessage
@@ -37,11 +36,8 @@
   let showNewMessages = false
   let groupedMessages = []
   const isGroupMessage = pubkeys.length > 2
-  const inboxRelays = deriveEvents({filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
-  const everyUserHasInboxRelays = derived(
-    inboxRelays,
-    $events => $events.length === pubkeys.length && $events.every(({tags}) => tags.length > 0),
-  )
+  const inboxRelays = deriveInboxRelays(pubkeys)
+  const everyUserHasInboxRelays = deriveEveryUserHasInboxRelays(pubkeys)
   const currentUserHasInboxRelays = derived(
     inboxRelays,
     $events =>

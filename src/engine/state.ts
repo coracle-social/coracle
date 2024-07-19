@@ -1116,6 +1116,15 @@ export const inboxRelayLists = withGetter(
   }),
 )
 
+export const deriveInboxRelays = (pubkeys: string[]) =>
+  deriveEvents({filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
+
+export const deriveEveryUserHasInboxRelays = (pubkeys: string[]) =>
+  derived(
+    deriveInboxRelays(pubkeys),
+    $events => $events.length === pubkeys.length && $events.every(({tags}) => tags.length > 0),
+  )
+
 export const legacyRelayLists = withGetter(
   deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>({
     filters: [{kinds: [FOLLOWS]}],
