@@ -59,12 +59,24 @@ export const deriveEventsMapped = <T>({
     const onUpdate = batch(300, (updates: {added: TrustedEvent[]; removed: Set<string>}[]) => {
       const debug = import.meta.env.VITE_DEBUG === "true"
       const currentEventIds = new Set(data.map(item => itemToEvent(item).id))
-      const removed = new Set(updates.flatMap(r => Array.from(r.removed)))
-      const added = updates.flatMap(r => r.added)
       const copy = debug ? [...data] : data
+      const removed = new Set()
+      const added = new Map()
+
+      // Apply updates in order
+      for (const update of updates) {
+        for (const event of update.added.values()) {
+          added.set(event.id, event)
+        }
+
+        for (const id of update.removed) {
+          removed.add(id)
+          added.delete(id)
+        }
+      }
 
       let dirty = false
-      for (const event of added) {
+      for (const event of added.values()) {
         if (matchFilters(filters, event)) {
           const item = eventToItem(event)
 
