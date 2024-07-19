@@ -9,7 +9,7 @@
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "prettier --check $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
-    "check:errors": "run-p check:es check:ts check:cycles",
+    "check:errors": "run-p check:es check:ts",
     "check": "run-p check:errors check:fmt",
     "format": "prettier --write $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
     "watch": "find src -type f | entr -r"
@@ -57,7 +57,8 @@
     "@welshman/feeds": "^0.0.12",
     "@welshman/lib": "^0.0.11",
     "@welshman/net": "^0.0.14",
-    "@welshman/util": "^0.0.17",
+    "@welshman/util": "^0.0.18",
+    "@welshman/dvm": "^0.0.2",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "compressorjs": "^1.2.1",

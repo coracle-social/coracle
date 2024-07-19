@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {append} from "ramda"
+  import {append} from "@welshman/lib"
   import {updateIn} from "src/util/misc"
   import {slide} from "src/util/transition"
   import Card from "src/partials/Card.svelte"
@@ -9,7 +9,9 @@
   export let task
 
   const hideTask = () =>
-    updateCurrentSession(updateIn("onboarding_tasks_completed", append(task)))
+    updateCurrentSession(
+      updateIn("onboarding_tasks_completed", (tasks: string[]) => append(task, tasks)),
+    )
 </script>
 
 {#if !$session.onboarding_tasks_completed.includes(task)}
@@ -19,9 +21,7 @@
         <FlexColumn>
           <slot />
         </FlexColumn>
-        <i
-          class="fa fa-times absolute right-0 top-0 cursor-pointer p-2"
-          on:click={hideTask} />
+        <i class="fa fa-times absolute right-0 top-0 cursor-pointer p-2" on:click={hideTask} />
       </Card>
     </div>
   </div>

@@ -17,6 +17,7 @@ import {
   getIdFilters,
   isGroupAddress,
   isSignedEvent,
+  createEvent,
   WRAP,
   WRAP_NIP04,
   EPOCH,
@@ -28,6 +29,7 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
+import {makeDvmRequest} from "@welshman/dvm"
 import {updateIn, createBatcher} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
@@ -38,7 +40,6 @@ import {
   getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  dvmRequest,
   env,
   getFollows,
   getFilterSelections,
@@ -59,9 +60,9 @@ import {
   subscribe,
   subscribePersistent,
   dufflepud,
+  signer,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
-import {loadPubkeyRelays} from "src/engine/requests/pubkeys"
 
 export * from "src/engine/requests/pubkeys"
 
@@ -275,22 +276,22 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
     }
   },
   requestDVM: async ({kind, onEvent, tags = [], ...request}) => {
-    let relays
-    if (request.relays?.length > 0) {
-      relays = hints.fromRelays(request.relays).getUrls()
-    } else {
-      const pubkeys = tags.filter(nthEq(0, "p")).map(nth(1))
+    tags = [...tags, ["expiration", String(now() + 5)]]
 
-      await loadPubkeyRelays(pubkeys)
+    const req = makeDvmRequest({
+      event: await signer.get().signAsUser(createEvent(kind, {tags})),
+      relays:
+        request.relays?.length > 0
+          ? hints.fromRelays(request.relays).getUrls()
+          : hints.Messages(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
+    })
 
-      relays = hints.Messages(pubkeys).getUrls()
-    }
-
-    const event = await dvmRequest({kind, tags, relays})
-
-    if (event) {
-      onEvent(event)
-    }
+    await new Promise<void>(resolve => {
+      req.emitter.on("result", (url, event) => {
+        onEvent(event)
+        resolve()
+      })
+    })
   },
   getPubkeysForScope: (scope: string) => {
     const $pubkey = pubkey.get()

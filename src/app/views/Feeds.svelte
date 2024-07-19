@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {makeRelayFeed} from "@welshman/feeds"
+  import {makeRelayFeed, makeScopeFeed, Scope} from "@welshman/feeds"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
@@ -13,6 +13,8 @@
 
   if (isPlatformFeed) {
     globalFeed.set(makeFeed({definition: makeRelayFeed(...$env.PLATFORM_RELAYS)}))
+  } else {
+    globalFeed.set(makeFeed({definition: makeScopeFeed(Scope.Follows)}))
   }
 
   document.title = "Feeds"

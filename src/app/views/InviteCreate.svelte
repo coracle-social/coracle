@@ -15,8 +15,8 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelayUrl, displayGroupMeta} from "src/domain"
-  import {hints, relaySearch, searchGroupMeta, groupMetaByAddress} from "src/engine"
+  import {displayRelayUrl} from "src/domain"
+  import {hints, relaySearch, groupMetaSearch, displayGroupByAddress} from "src/engine"
 
   export let initialPubkey = null
   export let initialGroupAddress = null
@@ -69,8 +69,6 @@
   const removeGroup = i => {
     groups = toSpliced(groups, i, 1)
   }
-
-  const displayGroupFromAddress = a => displayGroupMeta($groupMetaByAddress.get(a))
 
   let relayInput, groupInput
   let sections = []
@@ -185,7 +183,7 @@
         </p>
         {#each groups as group, i (group.address + i)}
           <ListItem on:remove={() => removeGroup(i)}>
-            <span slot="label">{displayGroupFromAddress(group.address)}</span>
+            <span slot="label">{displayGroupByAddress(group.address)}</span>
             <span slot="data">
               <Input bind:value={group.claim} placeholder="Invite code (optional)" />
             </span>
@@ -194,8 +192,8 @@
         <SearchSelect
           value={null}
           bind:this={groupInput}
-          search={$searchGroupMeta}
-          displayItem={displayGroupMeta}
+          search={$groupMetaSearch.searchOptions}
+          displayItem={$groupMetaSearch.displayOption}
           getKey={groupMeta => getAddress(groupMeta.event)}
           onChange={groupMeta => groupMeta && addGroup(getAddress(groupMeta.event))}>
           <i slot="before" class="fa fa-search" />

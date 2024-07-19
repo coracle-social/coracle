@@ -92,7 +92,7 @@ import {
   publish as basePublish,
   subscribe as baseSubscribe,
 } from "@welshman/net"
-import type {Publish, PublishRequest, SubscribeRequest} from "@welshman/net"
+import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {fuzzy, synced, withGetter, pushToKey, tryJson, fromCsv, SearchHelper} from "src/util/misc"
 import {
@@ -108,6 +108,7 @@ import {
 } from "src/util/nostr"
 import logger from "src/util/logger"
 import type {
+  GroupMeta,
   PublishedFeed,
   PublishedProfile,
   PublishedListFeed,
@@ -142,6 +143,7 @@ import {
   filterRelaysByNip,
   displayRelayUrl,
   readGroupMeta,
+  displayGroupMeta,
 } from "src/domain"
 import type {
   Channel,
@@ -693,7 +695,32 @@ export const groupMetaByAddress = withGetter(
 export const deriveGroupMeta = (address: string) =>
   derived(groupMetaByAddress, $m => $m.get(address))
 
-export const searchGroupMeta = derived(
+export const displayGroupByAddress = a => displayGroupMeta(groupMetaByAddress.get().get(a))
+
+export class GroupSearch extends SearchHelper<GroupMeta & {score: number}, string> {
+  config = {
+    keys: [{name: "identifier", weight: 0.2}, "name", {name: "about", weight: 0.5}],
+    threshold: 0.3,
+    shouldSort: false,
+    includeScore: true,
+  }
+
+  getSearch = () => {
+    const fuse = new Fuse(this.options, this.config)
+    const sortFn = (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)
+
+    return (term: string) =>
+      term
+        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item)
+        : sortBy(meta => -meta.score, this.options)
+  }
+
+  getValue = (option: GroupMeta) => getAddress(option.event)
+
+  displayValue = displayGroupByAddress
+}
+
+export const groupMetaSearch = derived(
   [groupMeta, communityListsByAddress, userFollows],
   ([$groupMeta, $communityListsByAddress, $userFollows]) => {
     const options = $groupMeta.map(meta => {
@@ -704,19 +731,7 @@ export const searchGroupMeta = derived(
       return {...meta, score: followedMembers.length}
     })
 
-    const fuse = new Fuse(options, {
-      keys: [{name: "identifier", weight: 0.2}, "name", {name: "about", weight: 0.5}],
-      threshold: 0.3,
-      shouldSort: false,
-      includeScore: true,
-    })
-
-    const sortFn = (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)
-
-    return (term: string) =>
-      term
-        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item)
-        : sortBy(meta => -meta.score, options)
+    return new GroupSearch(options)
   },
 )
 
@@ -1975,75 +1990,6 @@ export const getClientTags = () => {
   return [tag]
 }
 
-// DVMs
-
-export type DVMRequestOpts = {
-  kind: number
-  input?: any
-  inputOpts?: string[]
-  tags?: string[][]
-  relays?: string[]
-  timeout?: number
-  onPublish?: (pub: Publish) => void
-  onProgress?: (e: TrustedEvent) => void
-  sk?: string
-}
-
-export const dvmRequest = async ({
-  kind,
-  tags = [],
-  timeout = 30_000,
-  relays = [],
-  onPublish = null,
-  onProgress = null,
-  sk = null,
-}: DVMRequestOpts): Promise<TrustedEvent> => {
-  if (!sk && !signer.get().isEnabled()) {
-    sk = generatePrivateKey()
-  }
-
-  if (relays.length === 0) {
-    relays = hints.merge([hints.WriteRelays(), hints.fromRelays(env.get().DVM_RELAYS)]).getUrls()
-  }
-
-  tags = tags.concat([["expiration", String(now() + seconds(1, "hour"))]])
-
-  const pub = await createAndPublish({kind, relays, sk, tags, forcePlatform: false})
-
-  onPublish?.(pub)
-
-  return new Promise(resolve => {
-    const kinds = [kind + 1000]
-
-    if (onProgress) {
-      kinds.push(7000)
-    }
-
-    const sub = subscribe({
-      relays,
-      timeout,
-      filters: [
-        {
-          kinds,
-          since: now() - seconds(1, "minute"),
-          "#e": [pub.request.event.id],
-        },
-      ],
-      onEvent: (e: TrustedEvent) => {
-        if (e.kind === 7000) {
-          onProgress?.(e)
-        } else {
-          resolve(e)
-          sub.close()
-        }
-      },
-      onComplete: () => {
-        resolve(null)
-      },
-    })
-  })
-}
-
 // Thread
 
 const getAncestorIds = e => {
@@ -2162,19 +2108,19 @@ class IndexedDBAdapter {
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
         if (newRecords.length > 0) {
-          console.log("putting", name, newRecords.length, current.length)
           await storage.bulkPut(name, newRecords)
         }
 
         if (removedRecords.length > 0) {
-          console.trace("deleting", name, removedRecords.length, current.length)
+          if (name === "repository") {
+            console.trace("deleting", removedRecords.length, current.length)
+          }
           await storage.bulkDelete(name, removedRecords.map(prop(key)))
         }
 
         // If we have much more than our limit, prune our store. This will get persisted
         // the next time around.
         if (current.length > limit * 1.5) {
-          console.log("pruning", name, current.length)
           set((sort ? sort(current) : current).slice(0, limit))
         }
 

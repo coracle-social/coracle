@@ -18,7 +18,7 @@
     userIsGroupMember,
     updateCurrentSession,
     communityListsByAddress,
-    searchGroupMeta,
+    groupMetaSearch,
     groupMeta,
   } from "src/engine"
 
@@ -34,7 +34,7 @@
   let limit = 20
   let element = null
 
-  $: otherGroupMeta = reject(userIsMember, $searchGroupMeta(q)).slice(0, limit)
+  $: otherGroupMeta = reject(userIsMember, $groupMetaSearch.searchOptions(q)).slice(0, limit)
 
   document.title = "Groups"
 

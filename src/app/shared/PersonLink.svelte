@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
   import {deriveProfileDisplay, loadPubkeys} from "src/engine"
@@ -11,6 +12,6 @@
   loadPubkeys([pubkey])
 </script>
 
-<Anchor modal stopPropagation class={$$props.class} href={path}>
+<Anchor modal stopPropagation class={cx("!no-underline", $$props.class)} href={path}>
   @<span class="underline">{$display}</span>
 </Anchor>

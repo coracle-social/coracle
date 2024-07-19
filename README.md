@@ -19,7 +19,9 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] NIP 87 closed groups
 - [x] NIP 72 communities
 - [x] NIP 89 client tag support
+- [x] NIP 89 handler integration
 - [x] NIP 32 labeling and collections
+- [x] NIP 17 DMs
 - [x] Private group calendars and listings
 - [x] Cross-posting between communities and main feed
 - [x] Bech32 entity search and scan
@@ -46,6 +48,12 @@ If you like Coracle and want to support its development, you can donate sats via
 - [x] Onboarding workflow
 - [x] Multi-account support
 - [x] Notifications view
+- [x] Web of trust scores for less spam and better group/feed suggestions
+- [x] Customizable and shareable feeds and lists
+- [x] Customizable invite links
+- [x] Reporting via tagr-bot
+- [x] Nostr Wallet Connect support
+- [x] Date/time localization
 
 You can find a more complete changelog [here](./CHANGELOG.md).
 
@@ -53,9 +61,9 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 
 - Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
 - Navigate to the project directory: `cd coracle`
-- Install dependencies: `yarn`
+- Install dependencies: `npm i`
 - Customize configuration in `.env` (optional, see below)
-- Start the development server: `yarn dev`
+- Start the development server: `npm run dev`
 
 # Customization
 
