@@ -1,5 +1,6 @@
 import type {Publish} from "@welshman/net"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
+import {isTrustedEvent} from "@welshman/util"
 import type {RelayProfile} from "src/domain"
 
 export type RelayInfo = RelayProfile & {
@@ -43,10 +44,16 @@ export type GroupRequest = TrustedEvent & {
   resolved: boolean
 }
 
+export const isGroupRequest = (e: any): e is GroupRequest =>
+  typeof e.group === "string" && typeof e.resolved === "boolean" && isTrustedEvent(e)
+
 export type GroupAlert = TrustedEvent & {
   group: string
   type: "exit" | "invite"
 }
+
+export const isGroupAlert = (e: any): e is GroupAlert =>
+  typeof e.group === "string" && typeof e.type === "string" && isTrustedEvent(e)
 
 export type DisplayEvent = TrustedEvent & {
   replies?: DisplayEvent[]

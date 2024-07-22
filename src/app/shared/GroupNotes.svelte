@@ -75,6 +75,7 @@
       {feed}
       eager
       shouldListen
+      includeReposts
       contextAddress={address}
       skipNetwork={isGroupAddress(address)} />
   {/key}

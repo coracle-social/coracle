@@ -11,7 +11,7 @@
 {#key $meta?.about}
   <NoteContentKind1
     note={{content: $meta?.about || ""}}
-    minLength={100}
-    maxLength={140}
+    minLength={200}
+    maxLength={500}
     showEntire={!truncate} />
 {/key}

@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
 import {writable, derived} from "svelte/store"
-import {inc, assoc, pushToMapKey, sortBy, now} from "@welshman/lib"
+import {inc, assoc, pushToMapKey, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -184,7 +184,11 @@ export const createFeed = (opts: FeedOpts) => {
       for (let i = 0; i < defer.length; i++) {
         setTimeout(
           () => {
-            if (buffer.length > 0 && !controller.signal.aborted && notes.get().length === feed.length + i) {
+            if (
+              buffer.length > 0 &&
+              !controller.signal.aborted &&
+              notes.get().length === feed.length + i
+            ) {
               const [event, ...events] = sortEventsDesc(buffer)
 
               buffer.splice(0, Infinity, ...events)

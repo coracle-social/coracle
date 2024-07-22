@@ -27,7 +27,6 @@ import {
   Writable,
   simpleCache,
   clamp,
-  Derived,
   identity,
   last,
   nth,
@@ -160,7 +159,7 @@ import type {
   RelayInfo,
 } from "src/engine/model"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {getNip04, getNip44, getNip59, getSigner, getConnect, unwrapRepost} from "src/engine/utils"
+import {getNip04, getNip44, getNip59, getSigner, getConnect} from "src/engine/utils"
 import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
 
 // Base state
@@ -856,7 +855,7 @@ export const getUserCircles = (session: Session) => {
   const $userIsGroupMember = userIsGroupMember.get()
 
   return Object.entries(session?.groups || {})
-    .filter(([a, s]) => $userIsGroupMember(a))
+    .filter(([a, s]) => !repository.deletes.has(a) && $userIsGroupMember(a))
     .map(([a, s]) => a)
 }
 
@@ -965,54 +964,6 @@ export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $
     e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
   )
 })
-
-export const groupNotifications = new Derived(
-  [session, events, groupRequests, groupAlerts, groupAdminKeys, isEventMuted],
-  x => x,
-)
-  .throttle(300)
-  .derived(([$session, $events, $requests, $alerts, $adminKeys, $addresses, $isEventMuted]) => {
-    const addresses = new Set(getUserCircles($session))
-    const adminPubkeys = new Set($adminKeys.map(k => k.pubkey))
-
-    const shouldSkip = e => {
-      const context = e.tags.filter(t => t[0] === "a")
-
-      return (
-        !context.some(a => addresses.has(a)) ||
-        context.some(a => repository.deletes.has(a)) ||
-        !noteKinds.includes(e.kind) ||
-        e.pubkey === $session.pubkey ||
-        // Skip mentions since they're covered in normal notifications
-        e.tags.find(t => t[0] === "p" && t[1] === $session.pubkey) ||
-        $isEventMuted(e)
-      )
-    }
-
-    return sortBy(
-      x => -x.created_at,
-      [
-        ...$requests
-          .filter(r => !r.resolved && !repository.deletes.has(r.group))
-          .map(assoc("t", "request")),
-        ...$alerts
-          .filter(a => !adminPubkeys.has(a.pubkey) && !repository.deletes.has(a.group))
-          .map(assoc("t", "alert")),
-        ...$events
-          .map(e => (repostKinds.includes(e.kind) ? unwrapRepost(e) : e))
-          .filter(e => e && !shouldSkip(e)),
-      ],
-    )
-  })
-
-export const unreadGroupNotifications = derived(
-  [isSeen, groupNotifications],
-  ([$isSeen, $groupNotifications]) => {
-    const since = now() - seconds(30, "day")
-
-    return $groupNotifications.filter(e => e.created_at > since && !$isSeen(e))
-  },
-)
 
 export const hasNewNotifications = derived(
   [session, unreadNotifications],

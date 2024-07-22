@@ -1,9 +1,11 @@
 <script lang="ts">
-  import {find} from "ramda"
   import {onMount} from "svelte"
+  import {derived} from "svelte/store"
+  import {seconds} from "hurdak"
+  import {flatten, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
-  import {noteKinds, reactionKinds} from "src/util/nostr"
+  import {noteKinds, reactionKinds, repostKinds, getAddressTags} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -15,18 +17,29 @@
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
   import {router} from "src/app/util/router"
+  import type {GroupRequest as GroupRequestType, GroupAlert as GroupAlertType} from "src/engine"
   import {
     pubkey,
     session,
     settings,
     markAsSeen,
     notifications,
-    groupNotifications,
     createNotificationGroups,
     loadNotifications,
     loadGroupMessages,
     unreadNotifications,
-    unreadGroupNotifications,
+    events,
+    unwrapRepost,
+    groupRequests,
+    groupAlerts,
+    groupAdminKeys,
+    isEventMuted,
+    getUserCircles,
+    repository,
+    sortEventsDesc,
+    isSeen,
+    isGroupRequest,
+    isGroupAlert,
   } from "src/engine"
 
   const allTabs = ["Mentions & Replies", "Reactions", "Groups"]
@@ -48,6 +61,70 @@
 
   const getTabKinds = tab => (tab === allTabs[0] ? noteKinds : reactionKinds.concat(9734))
 
+  const groupRequestNotifications = derived(groupRequests, $groupRequests =>
+    $groupRequests.filter(r => !r.resolved && !repository.deletes.has(r.group)),
+  )
+
+  const groupAlertNotifications = derived(
+    [groupAlerts, groupAdminKeys],
+    ([$groupAlerts, $groupAdminKeys]) => {
+      const adminPubkeys = new Set($groupAdminKeys.map(k => k.pubkey))
+
+      return $groupAlerts.filter(
+        a => !adminPubkeys.has(a.pubkey) && !repository.deletes.has(a.group),
+      )
+    },
+  )
+
+  const groupEventNotifications = derived(
+    [session, events, isEventMuted],
+    ([$session, $events, $isEventMuted]) =>
+      repository
+        .query([{"#a": getUserCircles($session)}])
+        .map(e => {
+          // Unwrap reposts, add community tags so we know where stuff was posted to
+          if (repostKinds.includes(e.kind)) {
+            const contextTags = getAddressTags(e.tags)
+
+            e = unwrapRepost(e)
+
+            for (const tag of contextTags) {
+              e.tags.push(tag)
+            }
+          }
+
+          return e
+        })
+        .filter(
+          e =>
+            e &&
+            !(
+              !noteKinds.includes(e.kind) ||
+              e.pubkey === $session.pubkey ||
+              // Skip mentions since they're covered in normal notifications
+              e.tags.find(t => t[0] === "p" && t[1] === $session.pubkey) ||
+              $isEventMuted(e)
+            ),
+        ),
+  )
+
+  const groupNotifications = derived(
+    [groupRequestNotifications, groupAlertNotifications, groupEventNotifications],
+    ([$groupRequestNotifications, $groupAlertNotifications, $groupEventNotifications]) =>
+      sortEventsDesc(
+        flatten([$groupRequestNotifications, $groupAlertNotifications, $groupEventNotifications]),
+      ) as (TrustedEvent | GroupRequestType | GroupAlertType)[],
+  )
+
+  const unreadGroupNotifications = derived(
+    [isSeen, groupNotifications],
+    ([$isSeen, $groupNotifications]) => {
+      const since = now() - seconds(30, "day")
+
+      return $groupNotifications.filter(e => e.created_at > since && !$isSeen(e))
+    },
+  )
+
   export let activeTab = allTabs[0]
 
   let limit = 4
@@ -66,10 +143,10 @@
     tabNotifications =
       activeTab === allTabs[0]
         ? groupedNotifications.filter(
-            n => !n.event || find((e: TrustedEvent) => noteKinds.includes(e.kind), n.interactions),
+            n => !n.event || n.interactions.find((e: TrustedEvent) => noteKinds.includes(e.kind)),
           )
         : groupedNotifications.filter(n =>
-            find((e: TrustedEvent) => reactionKinds.includes(e.kind), n.interactions),
+            n.interactions.find((e: TrustedEvent) => reactionKinds.includes(e.kind)),
           )
 
     const unreadMainKinds = getTabKinds(allTabs[0])
@@ -159,9 +236,9 @@
     {/each}
   {:else}
     {#each $groupNotifications.slice(0, limit) as notification, i (notification.id)}
-      {#if notification.t === "alert"}
+      {#if isGroupAlert(notification)}
         <GroupAlert address={notification.group} alert={notification} />
-      {:else if notification.t === "request"}
+      {:else if isGroupRequest(notification)}
         <GroupRequest showGroup address={notification.group} request={notification} />
       {:else}
         <Note showGroup note={notification} />

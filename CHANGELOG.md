@@ -4,6 +4,7 @@
 
 - [x] Add person zaps
 - [x] Bring back delete
+- [x] Fix group notifications
 
 # 0.4.8
 
