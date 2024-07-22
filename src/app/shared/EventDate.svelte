@@ -4,9 +4,10 @@
 
   export let event
 
-  const date = secondsToDate(Tags.fromEvent(event).get("start")?.value())
   const monthFmt = new Intl.DateTimeFormat(getLocale(), {month: "short"})
   const dayFmt = new Intl.DateTimeFormat(getLocale(), {day: "numeric"})
+
+  $: date = secondsToDate(Tags.fromEvent(event).get("start")?.value())
 </script>
 
 <div class="flex flex-col gap-1 px-12">

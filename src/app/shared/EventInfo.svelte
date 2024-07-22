@@ -10,29 +10,30 @@
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {deriveIsDeleted, getSetting, pubkey} from "src/engine"
+  import {deriveIsDeletedByAddress, getSetting, pubkey} from "src/engine"
 
   export let event
   export let showDate = false
   export let actionsInline = false
 
+  const address = getAddress(event)
   const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
-  const tags = Tags.fromEvent(event)
-  const groupAddrs = tags.context().values().valueOf()
-  const {name, title, location} = fromPairs(event.tags)
-  const end = parseInt(tags.get("end")?.value())
-  const start = parseInt(tags.get("start")?.value())
-  const startDate = secondsToDate(start)
-  const endDate = secondsToDate(end)
-  const startDateDisplay = formatTimestampAsDate(start)
-  const endDateDisplay = formatTimestampAsDate(end)
-  const isSingleDay = startDateDisplay === endDateDisplay
-  const address = getAddress(event)
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()
-  const deleted = deriveIsDeleted(event)
+  const deleted = deriveIsDeletedByAddress(event)
+
+  $: tags = Tags.fromEvent(event)
+  $: groupAddrs = tags.context().values().valueOf()
+  $: ({name, title, location} = fromPairs(event.tags))
+  $: end = parseInt(tags.get("end")?.value())
+  $: start = parseInt(tags.get("start")?.value())
+  $: startDate = secondsToDate(start)
+  $: endDate = secondsToDate(end)
+  $: startDateDisplay = formatTimestampAsDate(start)
+  $: endDateDisplay = formatTimestampAsDate(end)
+  $: isSingleDay = startDateDisplay === endDateDisplay
 </script>
 
 <div class="flex flex-grow flex-col gap-2">

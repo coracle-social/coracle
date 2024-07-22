@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getIdOrAddress, Address} from "@welshman/util"
+  import {getIdOrAddress, getIdFilters, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -9,34 +9,36 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
+  import {loadOne, deriveEvent} from "src/engine"
   import {makeFeed} from "src/domain"
-  import {dereferenceNote} from "src/engine"
 
   export let address
   export let relays = []
-  export let event = null
+
+  const event = deriveEvent(address)
 
   const feed = makeFeed({definition: feedFromFilter({"#a": [address]})})
 
   let loading = true
 
   onMount(async () => {
-    event = event || (await dereferenceNote(Address.from(address, relays)))
+    await loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
+
     loading = false
   })
 </script>
 
 {#if loading}
   <Spinner />
-{:else if event}
+{:else if $event}
   <div in:fly={{y: 20}}>
     <FlexColumn>
       <div class="flex gap-4">
-        <EventDate {event} />
-        <EventInfo {event} />
+        <EventDate event={$event} />
+        <EventInfo event={$event} />
       </div>
-      <NoteCreateInline parent={event} />
-      <Feed {feed} hideSpinner shouldListen anchor={getIdOrAddress(event)} />
+      <NoteCreateInline parent={$event} />
+      <Feed {feed} hideSpinner shouldListen anchor={getIdOrAddress($event)} />
     </FlexColumn>
   </div>
 {:else}
