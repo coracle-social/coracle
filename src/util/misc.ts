@@ -364,7 +364,7 @@ export class SearchHelper<T, V> {
 
   getSearch = () => fuzzy(this.options, this.config)
 
-  getOption = (value: V) => this._optionsByValue.get(value)
+  getOption = (value: V) => this._setup()._optionsByValue.get(value)
 
   getValue = (option: T) => option as unknown as V
 

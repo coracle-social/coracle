@@ -5,6 +5,8 @@
 - [x] Add person zaps
 - [x] Bring back delete
 - [x] Fix group notifications
+- [x] Add group feeds
+- [x] Improve NIP 17 UX
 
 # 0.4.8
 
