@@ -10,6 +10,7 @@ import {
   NAMED_EMOJIS,
   NAMED_TOPICS,
   NAMED_ARTIFACTS,
+  NAMED_COMMUNITIES,
   MUTES,
   PINS,
   RELAYS,
@@ -35,6 +36,7 @@ export const LIST_KINDS = [
   NAMED_EMOJIS,
   NAMED_TOPICS,
   NAMED_ARTIFACTS,
+  NAMED_COMMUNITIES,
   MUTES,
   PINS,
   RELAYS,
@@ -119,6 +121,7 @@ export const displayList = (list?: List) => {
     if (list.kind === NAMED_EMOJIS) return "[named emojis list]"
     if (list.kind === NAMED_TOPICS) return "[named topics list]"
     if (list.kind === NAMED_ARTIFACTS) return "[named artifacts list]"
+    if (list.kind === NAMED_COMMUNITIES) return "[named communities list]"
     if (list.kind === MUTES) return "[mutes list]"
     if (list.kind === PINS) return "[pins list]"
     if (list.kind === RELAYS) return "[relays list]"

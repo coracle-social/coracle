@@ -27,13 +27,14 @@
   import FeedFormSectionPeople from "src/app/shared/FeedFormSectionPeople.svelte"
   import FeedFormSectionRelays from "src/app/shared/FeedFormSectionRelays.svelte"
   import FeedFormSectionTopics from "src/app/shared/FeedFormSectionTopics.svelte"
+  import FeedFormSectionContext from "src/app/shared/FeedFormSectionContext.svelte"
   import FeedFormSectionMentions from "src/app/shared/FeedFormSectionMentions.svelte"
   import FeedFormSectionKinds from "src/app/shared/FeedFormSectionKinds.svelte"
   import FeedFormSectionCreatedAt from "src/app/shared/FeedFormSectionCreatedAt.svelte"
   import FeedFormSectionList from "src/app/shared/FeedFormSectionList.svelte"
   import FeedFormSectionDVM from "src/app/shared/FeedFormSectionDVM.svelte"
   import FeedFormSaveAsList from "src/app/shared/FeedFormSaveAsList.svelte"
-  import {isTopicFeed, isPeopleFeed, isMentionFeed} from "src/domain"
+  import {isTopicFeed, isPeopleFeed, isMentionFeed, isContextFeed} from "src/domain"
 
   export let feed
   export let onChange
@@ -57,6 +58,7 @@
   $: subFeeds = getFeedArgs(feed)
   $: hasTopics = subFeeds.some(isTopicFeed)
   $: hasMentions = subFeeds.some(isMentionFeed)
+  $: hasContext = subFeeds.some(isContextFeed)
   $: hasPeople = subFeeds.some(isPeopleFeed)
   $: hasRelays = subFeeds.some(isRelayFeed)
   $: hasKinds = subFeeds.some(isKindFeed)
@@ -73,7 +75,8 @@
       isAuthorFeed(subFeed) ||
       isRelayFeed(subFeed) ||
       isTopicFeed(subFeed) ||
-      isMentionFeed(subFeed)}
+      isMentionFeed(subFeed) ||
+      isContextFeed(subFeed)}
     {#if canSave || !isGlobalFeed(subFeed)}
       <Card class="relative">
         <FlexColumn>
@@ -86,6 +89,8 @@
               <FeedFormSectionTopics feed={subFeed} onChange={change} />
             {:else if isMentionFeed(subFeed)}
               <FeedFormSectionMentions feed={subFeed} onChange={change} />
+            {:else if isContextFeed(subFeed)}
+              <FeedFormSectionContext feed={subFeed} onChange={change} />
             {:else if isKindFeed(subFeed)}
               <FeedFormSectionKinds feed={subFeed} onChange={change} />
             {:else if isCreatedAtFeed(subFeed)}
@@ -114,7 +119,7 @@
   {/each}
 {/key}
 
-{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
+{#if !hasTopics || !hasMentions || !hasContext || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
   <div class="relative">
     {#if menuIsOpen}
       <Popover2 hideOnClick onClose={closeMenu} position="top">
@@ -124,6 +129,9 @@
           {/if}
           {#if !hasMentions}
             <MenuItem on:click={() => addFeed(makeTagFeed("#p"))}>Mentions</MenuItem>
+          {/if}
+          {#if !hasContext}
+            <MenuItem on:click={() => addFeed(makeTagFeed("#a"))}>Groups</MenuItem>
           {/if}
           {#if !hasPeople}
             <MenuItem on:click={() => addFeed(makeAuthorFeed())}>Authors</MenuItem>

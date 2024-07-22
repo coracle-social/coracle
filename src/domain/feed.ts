@@ -1,5 +1,5 @@
 import {fromPairs, randomId} from "@welshman/lib"
-import {FEED, Tags} from "@welshman/util"
+import {FEED, Tags, Address} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
   feedFromTags,
@@ -85,5 +85,8 @@ export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
 export const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
 
 export const isAddressFeed = f => isTagFeed(f) && f[1] === "#a"
+
+export const isContextFeed = f =>
+  isTagFeed(f) && f[1] === "#a" && f.slice(2).every(Address.isAddress)
 
 export const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
