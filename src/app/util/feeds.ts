@@ -184,8 +184,8 @@ export const createFeed = (opts: FeedOpts) => {
       for (let i = 0; i < defer.length; i++) {
         setTimeout(
           () => {
-            if (!controller.signal.aborted && notes.get().length === feed.length + i) {
-              const [event, ...events] = sortBy(e => -e.created_at, buffer)
+            if (buffer.length > 0 && !controller.signal.aborted && notes.get().length === feed.length + i) {
+              const [event, ...events] = sortEventsDesc(buffer)
 
               buffer.splice(0, Infinity, ...events)
               appendToFeed([event])
