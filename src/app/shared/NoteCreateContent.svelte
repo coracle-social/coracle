@@ -3,27 +3,25 @@
 
   import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
-  import tippy from "tippy.js"
   import {throttle} from "throttle-debounce"
   import {Editor} from "@tiptap/core"
   import Document from "@tiptap/extension-document"
-  import History from '@tiptap/extension-history'
+  import History from "@tiptap/extension-history"
   import Paragraph from "@tiptap/extension-paragraph"
   import HardBreak from "@tiptap/extension-hard-break"
   import Dropcursor from "@tiptap/extension-dropcursor"
-  import Gapcursor from '@tiptap/extension-gapcursor'
+  import Gapcursor from "@tiptap/extension-gapcursor"
   import Text from "@tiptap/extension-text"
   import Image from "@tiptap/extension-image"
   import Code from "@tiptap/extension-code"
   import CodeBlock from "@tiptap/extension-code-block"
-  import Mention from "@tiptap/extension-mention"
   import Youtube from "@tiptap/extension-youtube"
+  import {Mention, Topic} from "src/util/tiptap"
   import Card from "src/partials/Card.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSuggestions from "src/app/shared/PersonSuggestions.svelte"
-  import {profileSearch, displayProfileByPubkey} from 'src/engine'
-  import {router} from 'src/app/util'
+  import TopicSuggestions from "src/app/shared/TopicSuggestions.svelte"
+  import {displayProfileByPubkey} from "src/engine"
 
   export let ctrl
 
@@ -48,72 +46,42 @@
     Dropcursor,
     Code,
     CodeBlock,
-    Youtube.configure({nocookie: true, width: '100%'}),
-    Mention.configure({
-      deleteTriggerWithBackspace: true,
-      suggestion: {
-        render: () => {
-          let popover, suggestions, target
+    Youtube.configure({nocookie: true, width: "100%" as unknown as number}),
+    Mention.configure(
+      (() => {
+        let suggestions
 
-          const mapProps = props => ({
-            term: props.query,
-            select: pubkey => props.command({id: pubkey, label: displayProfileByPubkey(pubkey)}),
-          })
+        const mapProps = props => ({term: props.query, select: id => props.command({id})})
 
-          return {
-            onStart: props => {
-              target = document.createElement("div")
+        return {
+          getLabel: displayProfileByPubkey,
+          tippyOptions: {arrow: false, theme: "transparent"},
+          onStart: ({target, props}) => {
+            suggestions = new PersonSuggestions({target, props: mapProps(props)})
+          },
+          onUpdate: ({props}) => suggestions.$set(mapProps(props)),
+          onKeyDown: ({event}) => suggestions.onKeyDown(event),
+          onExit: () => suggestions.$destroy(),
+        }
+      })(),
+    ),
+    Topic.configure(
+      (() => {
+        let suggestions
 
-              popover = tippy("body", {
-                arrow: false,
-                theme: "transparent",
-                getReferenceClientRect: props.clientRect,
-                appendTo: () => document.body,
-                content: target,
-                showOnCreate: true,
-                interactive: true,
-                trigger: "manual",
-                placement: "bottom-start",
-              })
+        const mapProps = props => ({term: props.query, select: id => props.command({id})})
 
-              suggestions = new PersonSuggestions({target, props: mapProps(props)})
-            },
-            onUpdate(props) {
-              suggestions.$set(mapProps(props))
-
-              if (props.clientRect) {
-                popover[0].setProps({
-                  getReferenceClientRect: props.clientRect,
-                })
-              }
-            },
-            onKeyDown(props) {
-              if (props.event.key === "Escape") {
-                popover[0].hide()
-
-                return true
-              }
-
-              if (props.event.key === "Enter") {
-                const pubkey = suggestions.get()
-
-                if (pubkey) {
-                  suggestions.select(pubkey)
-                }
-
-                return true
-              }
-
-              return suggestions.onKeyDown(props.event)
-            },
-            onExit() {
-              popover[0].destroy()
-              suggestions.$destroy()
-            },
-          }
-        },
-      },
-    }),
+        return {
+          tippyOptions: {arrow: false, theme: "transparent"},
+          onStart: ({target, props}) => {
+            suggestions = new TopicSuggestions({target, props: mapProps(props)})
+          },
+          onUpdate: ({props}) => suggestions.$set(mapProps(props)),
+          onKeyDown: ({event}) => suggestions.onKeyDown(event),
+          onExit: () => suggestions.$destroy(),
+        }
+      })(),
+    ),
   ]
 
   let element

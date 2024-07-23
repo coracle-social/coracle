@@ -1,11 +1,8 @@
-<svelte:options accessors />
-
 <script lang="ts">
-  import {throttle} from "throttle-debounce"
-  import {clamp} from "@welshman/lib"
+  import {throttle} from 'throttle-debounce'
+  import {clamp} from '@welshman/lib'
   import {slide} from "src/util/transition"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {profileSearch} from "src/engine"
+  import {topicSearch} from 'src/engine'
 
   export let term
   export let select
@@ -18,7 +15,7 @@
   $: populateItems(term)
 
   const populateItems = throttle(300, term => {
-    items = $profileSearch.searchValues(term).slice(0, 30)
+    items = $topicSearch.searchValues(term).slice(0, 30)
   })
 
   const setIndex = (newIndex, block) => {
@@ -38,25 +35,27 @@
     }
 
     if (e.code === "ArrowUp") {
-      setIndex(index - 1, "start")
+      setIndex(index - 1, 'start')
 
       return true
     }
 
     if (e.code === "ArrowDown") {
-      setIndex(index + 1, "start")
+      setIndex(index + 1, 'start')
 
       return true
     }
   }
 </script>
 
+<svelte:options accessors />
+
 {#if items.length > 0}
   <div
     bind:this={element}
     transition:slide|local={{duration: 100}}
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
-    {#each items as pubkey, i (pubkey)}
+    {#each items as topic, i (topic)}
       <button
         class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"
         class:bg-neutral-800={index !== i}
@@ -64,8 +63,8 @@
         class:border-transparent={index !== i}
         class:border-accent={index === i}
         on:mousedown|preventDefault
-        on:click|preventDefault={() => select(pubkey)}>
-        <PersonBadge inert {pubkey} />
+        on:click|preventDefault={() => select(topic)}>
+        {topic}
       </button>
     {/each}
   </div>

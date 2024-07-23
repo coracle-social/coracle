@@ -1355,6 +1355,13 @@ export const searchTopics = topics.derived(getTopicSearch)
 
 export const searchTopicNames = searchTopics.derived(search => term => pluck("name", search(term)))
 
+export class TopicSearch extends SearchHelper<Topic, string> {
+  config = {keys: ["name"]}
+  getValue = (option: Topic) => option.name
+}
+
+export const topicSearch = derived(topics, $topics => new TopicSearch($topics))
+
 // Lists
 
 export const lists = deriveEventsMapped<PublishedList>({
