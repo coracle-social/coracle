@@ -7,9 +7,11 @@
   export let path = null
   export let isActive = false
   export let small = false
+  export let short = innerHeight < 650
 
   $: className = cx("relative staatliches block transition-all", $$props.class, {
-    "h-12": !small,
+    "h-10": !small && short,
+    "h-12": !small && !short,
     "h-10 text-lg": small,
     "text-3xl": !small && isActive,
     "text-2xl": !small && !isActive,
