@@ -44,6 +44,7 @@ import {
   createSingleton,
   readSingleton,
   makeRelayPolicy,
+  editProfile,
 } from "src/domain"
 import type {RelayPolicy} from "src/domain"
 import type {Session, NostrConnectHandler} from "src/engine/model"
@@ -59,6 +60,7 @@ import {
   deriveSharedKeyForGroup,
   displayProfileByPubkey,
   env,
+  addClientTags,
   getClientTags,
   groupAdminKeys,
   groupSharedKeys,
@@ -676,9 +678,7 @@ export const deleteEventByAddress = (address: string) =>
 
 export const publishProfile = (profile, {forcePlatform = false} = {}) =>
   createAndPublish({
-    kind: 0,
-    tags: getClientTags(),
-    content: JSON.stringify(profile),
+    ...addClientTags(editProfile(profile)),
     relays: withIndexers(hints.WriteRelays().getUrls()),
     forcePlatform,
   })

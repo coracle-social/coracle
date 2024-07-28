@@ -78,7 +78,7 @@ import {
   isCommunityAddress,
   isHashedEvent,
 } from "@welshman/util"
-import type {Filter, RouterScenario, TrustedEvent, SignedEvent} from "@welshman/util"
+import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {
   ConnectionStatus,
   Executor,
@@ -1948,6 +1948,11 @@ export const getClientTags = () => {
 
   return [tag]
 }
+
+export const addClientTags = (event: EventTemplate) => ({
+  ...event,
+  tags: event.tags.filter(t => t[0] !== "client").concat(getClientTags()),
+})
 
 // Thread
 

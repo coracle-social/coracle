@@ -16,7 +16,6 @@
   $: pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
   $: nip44Disabled = pubkeys.length > 2 && !$nip44.isEnabled()
   $: missingInbox = pubkeys.length > 2 && $pubkeysWithoutInbox.length > 0
-  $: hasError = nip44Disabled || missingInbox
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
@@ -25,7 +24,7 @@
     <Field label="Who do you want to talk to?">
       <PersonSelect multiple autofocus bind:value />
     </Field>
-    <Anchor disabled={hasError} button tag="button" type="submit">Done</Anchor>
+    <Anchor disabled={nip44Disabled} button tag="button" type="submit">Start Chat</Anchor>
     {#if nip44Disabled}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
