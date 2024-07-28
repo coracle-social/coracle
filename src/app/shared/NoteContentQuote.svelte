@@ -48,6 +48,7 @@
 
   $: address = quote ? getAddress(quote) : ""
   $: isGroup = address.match(/^(34550|35834):/)
+  $: profileDisplay = quote ? displayProfileByPubkey(quote.pubkey) : ""
 
   onMount(async () => {
     quote = await loadOne({
@@ -92,9 +93,9 @@
               modal
               stopPropagation
               type="unstyled"
-              class="flex items-center gap-2"
+              class="flex items-center gap-2 !no-underline"
               href={router.at("people").of(quote.pubkey).toString()}>
-              <h2 class="text-lg">{displayProfileByPubkey(quote.pubkey)}</h2>
+              <h2 class="text-lg">{profileDisplay}</h2>
             </Anchor>
           </div>
         {/if}
