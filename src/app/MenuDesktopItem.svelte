@@ -21,7 +21,7 @@
 </script>
 
 <Anchor {...$$props} randomizeKey class={className} href={path} on:click>
-  <div class="absolute left-6 flex gap-5 whitespace-nowrap pt-2" class:-right-3={isActive}>
+  <div class="absolute left-8 flex gap-5 whitespace-nowrap pt-2" class:-right-3={isActive}>
     <slot />
     {#if isActive}
       <div
