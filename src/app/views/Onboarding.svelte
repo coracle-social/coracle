@@ -42,7 +42,7 @@
 
   let follows = $session ? [] : $anonymous.follows.map(nth(1))
 
-  if (invite?.people) {
+  if (Array.isArray(invite?.people)) {
     follows = concat(follows, invite.people)
   }
 

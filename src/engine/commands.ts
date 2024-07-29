@@ -44,9 +44,11 @@ import {
   createSingleton,
   readSingleton,
   makeRelayPolicy,
+  isPublishedProfile,
+  createProfile,
   editProfile,
 } from "src/domain"
-import type {RelayPolicy} from "src/domain"
+import type {RelayPolicy, Profile} from "src/domain"
 import type {Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {NostrConnectBroker} from "src/engine/utils"
@@ -676,12 +678,12 @@ export const deleteEventByAddress = (address: string) =>
 
 // Profile
 
-export const publishProfile = (profile, {forcePlatform = false} = {}) =>
-  createAndPublish({
-    ...addClientTags(editProfile(profile)),
-    relays: withIndexers(hints.WriteRelays().getUrls()),
-    forcePlatform,
-  })
+export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) => {
+  const relays = withIndexers(hints.WriteRelays().getUrls())
+  const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
+
+  return createAndPublish({...addClientTags(template), relays, forcePlatform})
+}
 
 // Singletons
 

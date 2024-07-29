@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {reject, without, uniq, remove} from "ramda"
+  import {reject} from "ramda"
   import {quantify} from "hurdak"
-  import {fromPairs, nth, nthEq} from "@welshman/lib"
+  import {fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
   import {Tags, getAddress} from "@welshman/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
@@ -48,7 +48,7 @@
   }
 
   const addFollow = pubkey => {
-    follows = [...follows, pubkey]
+    follows = append(pubkey, follows)
   }
 
   const removeFollow = pubkey => {

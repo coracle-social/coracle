@@ -21,6 +21,9 @@ export type PublishedProfile = Omit<Profile, "event"> & {
   event: TrustedEvent
 }
 
+export const isPublishedProfile = (profile: Profile): profile is PublishedProfile =>
+  Boolean(profile.event)
+
 export const makeProfile = (profile: Partial<Profile> = {}): Profile => ({
   name: "",
   nip05: "",

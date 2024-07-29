@@ -103,7 +103,7 @@
     handlersShown = false
   }
 
-  const os = browser.os.name.toLowerCase()
+  const os = browser.os?.name?.toLowerCase()
 
   const createLabel = () => router.at("notes").of(note.id).at("label").open()
 

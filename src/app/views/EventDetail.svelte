@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getIdOrAddress, getIdFilters, Address} from "@welshman/util"
+  import {getIdOrAddress, getIdFilters} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"

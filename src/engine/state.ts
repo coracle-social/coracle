@@ -1949,9 +1949,9 @@ export const getClientTags = () => {
   return [tag]
 }
 
-export const addClientTags = (event: EventTemplate) => ({
+export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...event}: T) => ({
   ...event,
-  tags: event.tags.filter(t => t[0] !== "client").concat(getClientTags()),
+  tags: tags.filter(t => t[0] !== "client").concat(getClientTags()),
 })
 
 // Thread
