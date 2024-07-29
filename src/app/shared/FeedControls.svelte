@@ -14,7 +14,6 @@
   import MenuItem from "src/partials/MenuItem.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {globalFeed} from "src/app/state"
   import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
   import {userListFeeds, canSign, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
@@ -127,20 +126,20 @@
             </MenuItem>
             <div class="max-h-80 overflow-auto">
               <MenuItem
-                active={equals(followsFeed.definition, $globalFeed.definition)}
+                active={equals(followsFeed.definition, feed.definition)}
                 on:click={() => setFeed(followsFeed)}>
                 Follows
               </MenuItem>
               <MenuItem
-                active={equals(networkFeed.definition, $globalFeed.definition)}
+                active={equals(networkFeed.definition, feed.definition)}
                 on:click={() => setFeed(networkFeed)}>
                 Network
               </MenuItem>
-              {#each allFeeds as feed}
+              {#each allFeeds as other}
                 <MenuItem
-                  active={equals(feed.definition, $globalFeed.definition)}
-                  on:click={() => setFeed(feed)}>
-                  {displayFeed(feed)}
+                  active={equals(other.definition, feed.definition)}
+                  on:click={() => setFeed(other)}>
+                  {displayFeed(other)}
                 </MenuItem>
               {/each}
             </div>

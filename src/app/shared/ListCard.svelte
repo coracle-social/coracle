@@ -13,7 +13,6 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readList, displayList, mapListToFeed} from "src/domain"
   import {repository} from "src/engine"
-  import {globalFeed} from "src/app/state"
   import {router} from "src/app/util"
 
   export let address
@@ -28,8 +27,7 @@
 
   const loadFeed = () => {
     if (!inert) {
-      globalFeed.set(mapListToFeed(list))
-      router.at("notes").push()
+      router.at("notes").cx({feed: mapListToFeed(list)}).push()
     }
   }
 </script>

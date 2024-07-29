@@ -7,7 +7,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
-  import {globalFeed, slowConnections, menuIsOpen} from "src/app/state"
+  import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
   import {makeFeed, normalizeFeedDefinition} from "src/domain"
   import {
@@ -46,8 +46,9 @@
   }
 
   const openFeeds = () => {
-    globalFeed.set(makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))}))
-    router.at("notes").push()
+    const feed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
+
+    router.at("notes").cx({feed}).push()
     closeMenu()
   }
 

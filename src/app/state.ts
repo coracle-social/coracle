@@ -28,12 +28,6 @@ export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
 
-export const globalFeed = writable<Feed>(
-  makeFeed({
-    definition: makeScopeFeed(Scope.Follows),
-  }),
-)
-
 // Redact long strings, especially hex and bech32 keys which are 64 and 63
 // characters long, respectively. Put the threshold a little lower in case
 // someone accidentally enters a key with the last few digits missing

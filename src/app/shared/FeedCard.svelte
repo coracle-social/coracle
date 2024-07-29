@@ -22,7 +22,6 @@
     userFeedFavorites,
     feedFavoritesByAddress,
   } from "src/engine"
-  import {globalFeed} from "src/app/state"
   import {router} from "src/app/util"
 
   export let address
@@ -37,10 +36,7 @@
 
   const toggleFavorite = () => (isFavorite ? removeFeedFavorite(address) : addFeedFavorite(address))
 
-  const loadFeed = () => {
-    globalFeed.set(feed)
-    router.at("notes").push()
-  }
+  const loadFeed = () => router.at("notes").cx({feed}).push()
 
   $: isFavorite = getSingletonValues("a", $userFeedFavorites).has(address)
   $: favoritedPubkeys = remove(
