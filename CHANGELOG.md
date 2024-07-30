@@ -7,6 +7,7 @@
 - [x] Fix group notifications
 - [x] Add group feeds
 - [x] Improve NIP 17 UX
+- [x] Include signature in event json
 
 # 0.4.8
 

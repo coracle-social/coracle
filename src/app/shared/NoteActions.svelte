@@ -8,7 +8,6 @@
   import {
     LOCAL_RELAY_URL,
     toNostrURI,
-    asHashedEvent,
     asSignedEvent,
     isSignedEvent,
     Tags,
@@ -75,6 +74,7 @@
   export let zapper
 
   const tags = Tags.fromEvent(note)
+  const signedEvent = asSignedEvent(note as any)
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
@@ -441,7 +441,7 @@
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-      <CopyValue label="Event JSON" value={JSON.stringify(asHashedEvent(note))} />
+      <CopyValue label="Event JSON" value={JSON.stringify(signedEvent)} />
     {:else if view === "cross-post"}
       <div class="mb-4 flex items-center justify-center">
         <Heading>Cross-post</Heading>
