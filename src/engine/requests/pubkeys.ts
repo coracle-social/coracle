@@ -13,6 +13,9 @@ import {
   MUTES,
   FOLLOWS,
   APP_DATA,
+  SEEN_GENERAL,
+  SEEN_CONTEXT,
+  SEEN_CONVERSATION,
 } from "@welshman/util"
 import {isHex, getPubkeyTagValues, appDataKeys} from "src/util/nostr"
 import {LIST_KINDS} from "src/domain"
@@ -57,7 +60,20 @@ const getFiltersForKey = (key: string, authors: string[]) => {
       return [{authors, kinds: [PROFILE, FOLLOWS, MUTES, HANDLER_INFORMATION, COMMUNITIES]}]
     case "pubkey/user":
       return [
-        {authors, kinds: [PROFILE, RELAYS, MUTES, FOLLOWS, COMMUNITIES, FEEDS]},
+        {
+          authors,
+          kinds: [
+            PROFILE,
+            RELAYS,
+            MUTES,
+            FOLLOWS,
+            COMMUNITIES,
+            FEEDS,
+            SEEN_GENERAL,
+            SEEN_CONTEXT,
+            SEEN_CONVERSATION,
+          ],
+        },
         {authors, kinds: [APP_DATA], "#d": Object.values(appDataKeys)},
       ]
   }

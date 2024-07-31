@@ -19,8 +19,10 @@ import {
   MUTES,
   WRAP_NIP04,
   INBOX_RELAYS,
+  DIRECT_MESSAGE,
+  SEEN_CONVERSATION,
 } from "@welshman/util"
-import {Fetch, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
+import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, identity, map, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, tryJson} from "src/util/misc"
@@ -44,6 +46,7 @@ import {repository} from "src/engine/repository"
 import {
   canSign,
   channels,
+  getChannelSeenKey,
   createAndPublish,
   ensurePlaintext,
   deriveAdminKeyForGroup,
@@ -77,6 +80,7 @@ import {
   mentionGroup,
   userRelayPolicies,
   userSeenStatusEvents,
+  getChannelIdFromEvent,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -915,8 +919,28 @@ export const sendMessage = async (channelId: string, content: string) => {
   }
 }
 
-export const publishChannelsRead = () =>
-  setAppData(appDataKeys.NIP24_LAST_CHECKED, createMapOf("id", "last_checked", channels.get()))
+export const publishChannelsRead = () => {
+  const $pubkey = pubkey.get()
+  const eventsByKey = {}
+
+  for (const channel of channels.get()) {
+    if (channel.last_sent > (channel.last_received || 0)) {
+      continue
+    }
+
+    const key = getChannelSeenKey(channel.id)
+    const filter = {kinds: [4, DIRECT_MESSAGE], authors: channel.members, "#p": channel.members}
+    const events = repository
+      .query([filter])
+      .filter(e => getChannelIdFromEvent(e) === channel.id && e.pubkey !== $pubkey)
+
+    if (events.length > 0) {
+      eventsByKey[key] = events
+    }
+  }
+
+  markAsSeen(SEEN_CONVERSATION, eventsByKey)
+}
 
 export const markAllChannelsRead = () => {
   // @ts-ignore

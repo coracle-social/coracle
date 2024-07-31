@@ -19,7 +19,6 @@ import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/domain"
 import type {Channel} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {getNip04} from "src/engine/utils"
 import {
   channels,
   topics,
@@ -27,6 +26,7 @@ import {
   deriveAdminKeyForGroup,
   getGroupStatus,
   getChannelId,
+  getChannelSeenKey,
   getSession,
   groupAdminKeys,
   groupAlerts,
@@ -246,42 +246,28 @@ projections.addHandler(1985, (e: TrustedEvent) => {
 
 // Update channel metadata
 
-projections.addHandler(30078, async e => {
-  const d = Tags.fromEvent(e).get("d")?.value()
-  const session = getSession(e.pubkey)
+projections.addHandler(SEEN_CONVERSATION, async e => {
+  const updates = {} as Record<string, number>
 
-  if (!session) {
-    return
-  }
+  for (const tag of await ensurePlaintext(e)) {
+    if (tag[0] === "seen") {
+      const [key, ts] = tag.slice(1)
 
-  const nip04 = getNip04(session)
-
-  if (!nip04.isEnabled()) {
-    return
-  }
-
-  if (d === appDataKeys.NIP24_LAST_CHECKED) {
-    const payload = await tryJson(async () =>
-      JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey)),
-    )
-
-    if (payload) {
-      channels.mapStore.update($channels => {
-        for (const [id, ts] of Object.entries(payload) as [string, number][]) {
-          const channel = $channels.get(id)
-
-          $channels.set(id, {
-            relays: [],
-            members: [],
-            ...channel,
-            last_checked: Math.max(ts, channel?.last_checked || 0),
-          })
-        }
-
-        return $channels
-      })
+      updates[key] = parseInt(ts)
     }
   }
+
+  channels.update($channels => {
+    for (const channel of $channels) {
+      const key = getChannelSeenKey(channel.id)
+
+      if (updates[key] > channel.last_checked) {
+        channel.last_checked = updates[key]
+      }
+    }
+
+    return $channels
+  })
 })
 
 const handleChannelMessage = async e => {
@@ -320,7 +306,6 @@ projections.addHandler(14, handleChannelMessage)
 
 projections.addHandler(SEEN_GENERAL, ensurePlaintext)
 projections.addHandler(SEEN_CONTEXT, ensurePlaintext)
-projections.addHandler(SEEN_CONVERSATION, ensurePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
 

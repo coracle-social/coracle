@@ -1,8 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {seconds} from "hurdak"
-  import {flatten, partition, now, pushToKey} from "@welshman/lib"
+  import {flatten, partition, pushToKey} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {SEEN_CONTEXT, SEEN_GENERAL, REACTION} from "@welshman/util"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"

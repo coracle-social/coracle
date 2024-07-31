@@ -1,4 +1,5 @@
 import Fuse from "fuse.js"
+import crypto from "crypto"
 import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
@@ -634,6 +635,9 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
+
+export const getChannelSeenKey = (id: string) =>
+  crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
 
 export const unreadChannels = channels.derived(filter(channelHasNewMessages))
 

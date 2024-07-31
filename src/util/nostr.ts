@@ -52,7 +52,6 @@ export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
-  NIP24_LAST_CHECKED: "nostr-engine/Nip24/last_checked/v1",
 }
 
 export const isLike = (e: TrustedEvent) =>
