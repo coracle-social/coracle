@@ -17,16 +17,12 @@ import {
 import {tryJson} from "src/util/misc"
 import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/domain"
-import type {Channel} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
 import {
-  channels,
   topics,
   relays,
   deriveAdminKeyForGroup,
   getGroupStatus,
-  getChannelId,
-  getChannelSeenKey,
   getSession,
   groupAdminKeys,
   groupAlerts,
@@ -36,7 +32,6 @@ import {
   load,
   nip04,
   projections,
-  sessions,
   hints,
   ensurePlaintext,
 } from "src/engine/state"
@@ -244,68 +239,11 @@ projections.addHandler(1985, (e: TrustedEvent) => {
   }
 })
 
-// Update channel metadata
-
-projections.addHandler(SEEN_CONVERSATION, async e => {
-  const updates = {} as Record<string, number>
-
-  for (const tag of await ensurePlaintext(e)) {
-    if (tag[0] === "seen") {
-      const [key, ts] = tag.slice(1)
-
-      updates[key] = parseInt(ts)
-    }
-  }
-
-  channels.update($channels => {
-    for (const channel of $channels) {
-      const key = getChannelSeenKey(channel.id)
-
-      if (updates[key] > channel.last_checked) {
-        channel.last_checked = updates[key]
-      }
-    }
-
-    return $channels
-  })
-})
-
-const handleChannelMessage = async e => {
-  const tags = Tags.fromEvent(e)
-  const pubkeys = uniq(tags.values("p").valueOf().concat(e.pubkey)) as string[]
-  const channelId = getChannelId(pubkeys)
-
-  for (const pubkey of Object.keys(sessions.get())) {
-    if (!pubkeys.includes(pubkey)) {
-      continue
-    }
-
-    const $channel = channels.key(channelId).get()
-    const relays = $channel?.relays || []
-    const updates: Channel = {
-      ...$channel,
-      id: channelId,
-      relays: uniq([...tags.relays().valueOf(), ...relays]),
-      members: pubkeys,
-    }
-
-    if (e.pubkey === pubkey) {
-      updates.last_sent = Math.max(updates.last_sent || 0, e.created_at)
-    } else {
-      updates.last_received = Math.max(updates.last_received || 0, e.created_at)
-    }
-
-    channels.key(channelId).set(updates)
-  }
-}
-
-projections.addHandler(4, handleChannelMessage)
-projections.addHandler(14, handleChannelMessage)
-
 // Decrypt encrypted events eagerly
 
 projections.addHandler(SEEN_GENERAL, ensurePlaintext)
 projections.addHandler(SEEN_CONTEXT, ensurePlaintext)
+projections.addHandler(SEEN_CONVERSATION, ensurePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
 

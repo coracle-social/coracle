@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
-import {cached, last, append, nthEq, groupBy, now} from "@welshman/lib"
+import {cached, splitAt, first, last, append, nthEq, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getAddress,
@@ -23,7 +23,7 @@ import {
   SEEN_CONVERSATION,
 } from "@welshman/util"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
-import {assoc, flatten, identity, map, omit, partition, prop, reject, uniq, without} from "ramda"
+import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, tryJson} from "src/util/misc"
 import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
@@ -41,7 +41,7 @@ import {
 import type {RelayPolicy, Profile} from "src/domain"
 import type {Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {NostrConnectBroker, sortEventsDesc} from "src/engine/utils"
+import {NostrConnectBroker} from "src/engine/utils"
 import {repository} from "src/engine/repository"
 import {
   canSign,
@@ -844,22 +844,10 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
 
   for (const [key, events] of Object.entries(eventsByKey)) {
-    const exceptions = []
-    const cutoff = now() - seconds(1, "day")
+    const [newer, older] = splitAt(10, events)
+    const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
 
-    for (const event of sortEventsDesc(events)) {
-      if (event.created_at < cutoff) break
-      if (exceptions.length > 10) break
-
-      exceptions.push(event)
-    }
-
-    tags.push([
-      "seen",
-      key,
-      String(last(exceptions)?.created_at || cutoff),
-      ...exceptions.map(e => e.id),
-    ])
+    tags.push(["seen", key, ts, ...newer.map(e => e.id)])
   }
 
   const json = JSON.stringify(tags)
@@ -919,17 +907,18 @@ export const sendMessage = async (channelId: string, content: string) => {
   }
 }
 
-export const publishChannelsRead = () => {
+export const markChannelsRead = (ids: Set<string>) => {
   const $pubkey = pubkey.get()
   const eventsByKey = {}
 
-  for (const channel of channels.get()) {
-    if (channel.last_sent > (channel.last_received || 0)) {
+  for (const channel of get(channels)) {
+    if (!ids.has(channel.id) || channel.last_sent > channel.last_received) {
       continue
     }
 
     const key = getChannelSeenKey(channel.id)
-    const filter = {kinds: [4, DIRECT_MESSAGE], authors: channel.members, "#p": channel.members}
+    const members = channel.id.split(",")
+    const filter = {kinds: [4, DIRECT_MESSAGE], authors: members, "#p": members}
     const events = repository
       .query([filter])
       .filter(e => getChannelIdFromEvent(e) === channel.id && e.pubkey !== $pubkey)
@@ -942,18 +931,11 @@ export const publishChannelsRead = () => {
   markAsSeen(SEEN_CONVERSATION, eventsByKey)
 }
 
-export const markAllChannelsRead = () => {
-  // @ts-ignore
-  channels.update(map(assoc("last_checked", now())))
+export const markAllChannelsRead = () => markChannelsRead(new Set(get(channels).map(c => c.id)))
 
-  publishChannelsRead()
-}
+export const markChannelRead = (id: string) => markChannelsRead(new Set([id]))
 
-export const markChannelRead = (pubkey: string) => {
-  channels.key(pubkey).update(assoc("last_checked", now()))
-
-  publishChannelsRead()
-}
+// Session/login
 
 const addSession = (s: Session) => {
   sessions.update(assoc(s.pubkey, s))

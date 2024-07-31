@@ -86,11 +86,10 @@ export type Topic = {
 
 export type Channel = {
   id: string
-  relays: string[]
-  members: string[]
   last_sent?: number
   last_received?: number
   last_checked?: number
+  messages: TrustedEvent[]
 }
 
 export type GroupStatus = {

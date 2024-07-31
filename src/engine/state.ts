@@ -6,12 +6,10 @@ import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
 import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
-  any,
   pluck,
   find,
   defaultTo,
   equals,
-  filter,
   assoc,
   sortBy,
   max,
@@ -52,6 +50,7 @@ import {
   SEEN_CONVERSATION,
   SEEN_GENERAL,
   SEEN_CONTEXT,
+  DIRECT_MESSAGE,
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
@@ -205,7 +204,6 @@ export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
 export const publishes = new CollectionStore<PublishInfo>("id", 1000)
 export const topics = new CollectionStore<Topic>("name")
-export const channels = new CollectionStore<Channel>("id")
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -622,26 +620,6 @@ export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubke
 export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
 export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
-
-// Channels
-
-export const sortChannels = $channels =>
-  sortBy((c: Channel) => -Math.max(c.last_sent || 0, c.last_received || 0), $channels)
-
-export const channelHasNewMessages = (c: Channel) =>
-  c.last_received > Math.max(c.last_sent || 0, c.last_checked || 0)
-
-export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
-
-export const getChannelIdFromEvent = (event: TrustedEvent) =>
-  getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
-
-export const getChannelSeenKey = (id: string) =>
-  crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
-
-export const unreadChannels = channels.derived(filter(channelHasNewMessages))
-
-export const hasNewMessages = unreadChannels.derived(any((c: Channel) => Boolean(c.last_sent)))
 
 // Communities
 
@@ -1066,6 +1044,67 @@ export const createNotificationGroups = ($notifications, kinds) => {
     }),
   )
 }
+
+// Channels
+
+export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+
+export const getChannelIdFromEvent = (event: TrustedEvent) =>
+  getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
+
+export const getChannelSeenKey = (id: string) =>
+  crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
+
+export const messages = deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE]}]})
+
+export const channels = derived(
+  [pubkey, messages, userSeenStatuses],
+  ([$pubkey, $messages, $userSeenStatuses]) => {
+    const channelsById: Record<string, Channel> = {}
+
+    for (const e of $messages) {
+      const id = getChannelIdFromEvent(e)
+
+      if (!id.includes($pubkey)) {
+        continue
+      }
+
+      const key = getChannelSeenKey(id)
+      const chan = channelsById[id] || {
+        id,
+        last_sent: 0,
+        last_received: 0,
+        last_checked: 0,
+        messages: [],
+      }
+
+      chan.messages.push(e)
+
+      const status = $userSeenStatuses[key]
+
+      if (status?.ids.has(e.id)) {
+        chan.last_checked = Math.max(chan.last_checked, e.created_at)
+      } else {
+        chan.last_checked = Math.max(chan.last_checked, status?.ts || 0)
+      }
+
+      if (e.pubkey === $pubkey) {
+        chan.last_sent = Math.max(chan.last_sent, e.created_at)
+      } else {
+        chan.last_received = Math.max(chan.last_received, e.created_at)
+      }
+
+      channelsById[id] = chan
+    }
+
+    return sortBy(c => -Math.max(c.last_sent, c.last_received), Object.values(channelsById))
+  },
+)
+
+export const channelHasNewMessages = (channel: Channel) =>
+  channel.last_received > Math.max(channel.last_sent, channel.last_checked)
+
+export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
 
 // Relays
 
@@ -2255,7 +2294,6 @@ export const storage = new Storage(15, [
   collectionAdapter("publishes", "id", publishes, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
   collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
-  collectionAdapter("channels", "id", channels, {limit: 1000, sort: sortBy(prop("last_checked"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("groupRequests", "id", groupRequests, {sort: sortBy(prop("created_at"))}),

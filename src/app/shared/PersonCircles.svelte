@@ -8,7 +8,7 @@
 </script>
 
 <div class="flex pr-3">
-  {#each pubkeys as pubkey (pubkey)}
+  {#each pubkeys.slice(0, 15) as pubkey (pubkey)}
     <div class="z-feature -mr-3 inline-block">
       <PersonCircle class={cx(klass, "border border-solid border-neutral-800")} {pubkey} />
     </div>
