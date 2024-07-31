@@ -7,6 +7,9 @@ import {
   isShareableRelayUrl,
   getIdFilters,
   MUTES,
+  SEEN_CONVERSATION,
+  SEEN_GENERAL,
+  SEEN_CONTEXT,
   FOLLOWS,
   RELAYS,
   COMMUNITIES,
@@ -315,6 +318,9 @@ projections.addHandler(14, handleChannelMessage)
 
 // Decrypt encrypted events eagerly
 
+projections.addHandler(SEEN_GENERAL, ensurePlaintext)
+projections.addHandler(SEEN_CONTEXT, ensurePlaintext)
+projections.addHandler(SEEN_CONVERSATION, ensurePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
 

@@ -1,9 +1,6 @@
 import Bugsnag from "@bugsnag/js"
 import {writable} from "@welshman/lib"
-import {Scope, makeScopeFeed} from "@welshman/feeds"
 import {router} from "src/app/util/router"
-import type {Feed} from "src/domain"
-import {makeFeed} from "src/domain"
 import {
   env,
   pubkey,

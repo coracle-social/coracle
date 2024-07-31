@@ -48,7 +48,9 @@ import {
   INBOX_RELAYS,
   WRAP_NIP04,
   COMMUNITIES,
-  READ_RECEIPT,
+  SEEN_CONVERSATION,
+  SEEN_GENERAL,
+  SEEN_CONTEXT,
   NAMED_BOOKMARKS,
   HANDLER_RECOMMENDATION,
   HANDLER_INFORMATION,
@@ -159,7 +161,7 @@ import type {
   RelayInfo,
 } from "src/engine/model"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {getNip04, getNip44, getNip59, getSigner, getConnect} from "src/engine/utils"
+import {getNip04, getNip44, getNip59, getSigner, getConnect, sortEventsAsc} from "src/engine/utils"
 import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
 
 // Base state
@@ -921,24 +923,47 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const optimisticReadReceipts = withGetter(synced("seen", []))
+export const seenStatusEvents = deriveEvents({
+  filters: [{kinds: [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION]}],
+})
 
-export const publishedReadReceipts = derived(
-  deriveEvents({filters: [{kinds: [READ_RECEIPT]}]}),
-  events => new Set(events.flatMap(e => e.tags.map(nth(1)))),
+export const userSeenStatusEvents = derived(
+  [pubkey, seenStatusEvents],
+  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey),
 )
 
-export const unpublishedReadReceipts = derived(
-  [publishedReadReceipts, optimisticReadReceipts],
-  ([published, optimistic]: [Set<string>, string[]]) => optimistic.filter(id => !published.has(id)),
+export const userSeenStatuses = derived(
+  [pubkey, plaintext, userSeenStatusEvents],
+  ([$pubkey, $plaintext, $userSeenStatusEvents]) => {
+    const data = {}
+
+    for (const event of sortEventsAsc($userSeenStatusEvents)) {
+      const tags = $plaintext[event.id]
+
+      if (!Array.isArray(tags)) {
+        continue
+      }
+
+      for (const tag of tags) {
+        if (tag[0] === "seen") {
+          data[tag[1]] = {
+            ts: parseInt(tag[2]),
+            ids: new Set(tag.slice(3)),
+          }
+        }
+      }
+    }
+
+    return data
+  },
 )
 
-export const allReadReceipts = derived(
-  [publishedReadReceipts, optimisticReadReceipts],
-  ([published, optimistic]: [Set<string>, string[]]) => new Set([...published, ...optimistic]),
+export const isSeen = derived(
+  [userSeenStatuses],
+  ([$userSeenStatuses]) =>
+    (key: string, event: TrustedEvent) =>
+      $userSeenStatuses[key]?.ts >= event.created_at || $userSeenStatuses[key]?.ids.has(event.id),
 )
-
-export const isSeen = derived(allReadReceipts, $m => e => $m.has(e.id))
 
 // Notifications
 
@@ -957,16 +982,25 @@ export const notifications = derived(
   },
 )
 
-export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $notifications]) => {
-  const since = now() - seconds(30, "day")
+export const mainNotifications = derived(notifications, events =>
+  events.filter(e => noteKinds.includes(e.kind)),
+)
 
-  return $notifications.filter(
-    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
-  )
-})
+export const reactionNotifications = derived(notifications, events =>
+  events.filter(e => reactionKinds.concat(9734).includes(e.kind)),
+)
+
+export const unreadMainNotifications = derived([isSeen, mainNotifications], ([$isSeen, events]) =>
+  events.filter(e => !$isSeen("replies", e) && !$isSeen("mentions", e)),
+)
+
+export const unreadReactionNotifications = derived(
+  [isSeen, reactionNotifications],
+  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
+)
 
 export const hasNewNotifications = derived(
-  [session, unreadNotifications],
+  [session, unreadMainNotifications],
   ([$session, $unread]) => {
     if ($unread.length > 0) {
       return true
@@ -1762,6 +1796,7 @@ export type CreateAndPublishOpts = {
   relays: string[]
   tags?: string[][]
   content?: string
+  created_at?: number
   anonymous?: boolean
   sk?: string
   timeout?: number
@@ -1774,13 +1809,14 @@ export const createAndPublish = async ({
   relays,
   tags = [],
   content = "",
+  created_at = now(),
   anonymous,
   sk,
   timeout,
   verb,
   forcePlatform = true,
 }: CreateAndPublishOpts) => {
-  const template = createEvent(kind, {content, tags})
+  const template = createEvent(kind, {content, tags, created_at})
   const event = await sign(template, {anonymous, sk})
 
   return publish({event, relays, verb, timeout, forcePlatform})

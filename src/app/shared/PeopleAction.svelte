@@ -13,7 +13,7 @@
     modal
     href={router.at("people").of(pubkeys[0]).toString()}
     class="flex cursor-pointer items-center gap-1">
-    <PersonBadgeSmall pubkey={pubkeys[0]} />
+    <PersonBadgeSmall inert pubkey={pubkeys[0]} />
     <span>{actionText}.</span>
   </Anchor>
 {:else}

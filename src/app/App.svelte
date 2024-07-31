@@ -416,6 +416,7 @@
       unsubModal()
       unsubRouter()
       unsubHistory()
+      storage.close()
     }
   })
 

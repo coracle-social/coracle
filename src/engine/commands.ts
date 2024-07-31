@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
-import {cached, append, nthEq, groupBy, now} from "@welshman/lib"
+import {cached, last, append, nthEq, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getAddress,
@@ -20,22 +20,10 @@ import {
   WRAP_NIP04,
   INBOX_RELAYS,
 } from "@welshman/util"
-import {Fetch, chunk, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
-import {
-  assoc,
-  flatten,
-  identity,
-  map,
-  omit,
-  partition,
-  pluck,
-  prop,
-  reject,
-  uniq,
-  without,
-} from "ramda"
+import {Fetch, createMapOf, randomId, seconds, sleep, tryFunc} from "hurdak"
+import {assoc, flatten, identity, map, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
-import {joinPath} from "src/util/misc"
+import {joinPath, tryJson} from "src/util/misc"
 import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
 import {
   asDecryptedEvent,
@@ -51,12 +39,13 @@ import {
 import type {RelayPolicy, Profile} from "src/domain"
 import type {Session, NostrConnectHandler} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {NostrConnectBroker} from "src/engine/utils"
+import {NostrConnectBroker, sortEventsDesc} from "src/engine/utils"
 import {repository} from "src/engine/repository"
 import {
   canSign,
   channels,
   createAndPublish,
+  ensurePlaintext,
   deriveAdminKeyForGroup,
   userIsGroupMember,
   deriveSharedKeyForGroup,
@@ -79,8 +68,6 @@ import {
   sign,
   signer,
   withIndexers,
-  optimisticReadReceipts,
-  unpublishedReadReceipts,
   setFreshness,
   getFreshness,
   handles,
@@ -89,6 +76,7 @@ import {
   anonymous,
   mentionGroup,
   userRelayPolicies,
+  userSeenStatusEvents,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -842,50 +830,43 @@ export const joinRelay = async (url: string, claim?: string) => {
 
 // Read receipts
 
-export const markAsSeen = async (events: TrustedEvent[]) => {
-  if (!signer.get().isEnabled() || events.length === 0) {
+export const markAsSeen = async (kind: number, eventsByKey: Record<string, TrustedEvent[]>) => {
+  if (!nip44.get().isEnabled() || Object.entries(eventsByKey).length === 0) {
     return
   }
 
-  const allIds = [...get(unpublishedReadReceipts), ...pluck("id", events)]
+  const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
+  const rawTags = await tryJson(async () => await ensurePlaintext(prev))
+  const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
 
-  // If we have fewer than a hefty chunk, optimistically update instead so we're
-  // not creating tons of unnecessary events
-  if (false && allIds.length > 100) {
-    const expirationTag = ["expiration", String(now() + seconds(90, "day"))]
+  for (const [key, events] of Object.entries(eventsByKey)) {
+    const exceptions = []
+    const cutoff = now() - seconds(1, "day")
 
-    if (optimisticReadReceipts.get().length > 0) {
-      optimisticReadReceipts.set([])
+    for (const event of sortEventsDesc(events)) {
+      if (event.created_at < cutoff) break
+      if (exceptions.length > 10) break
+
+      exceptions.push(event)
     }
 
-    for (const ids of chunk(500, allIds)) {
-      const template = createEvent(15, {
-        tags: [expirationTag, ...ids.map(id => ["e", id])],
-      })
-
-      if (nip44.get().isEnabled()) {
-        const rumor = await nip59.get().wrap(template, {
-          wrap: {
-            author: generatePrivateKey(),
-            recipient: pubkey.get(),
-            tags: [expirationTag],
-          },
-        })
-
-        publish({
-          event: rumor.wrap,
-          relays: hints.WriteRelays().getUrls(),
-        })
-      } else {
-        publish({
-          event: await signer.get().signAsUser(template),
-          relays: hints.WriteRelays().getUrls(),
-        })
-      }
-    }
-  } else {
-    optimisticReadReceipts.set(allIds)
+    tags.push([
+      "seen",
+      key,
+      String(last(exceptions)?.created_at || cutoff),
+      ...exceptions.map(e => e.id),
+    ])
   }
+
+  const json = JSON.stringify(tags)
+
+  console.log("========== publishing read status", tags)
+
+  createAndPublish({
+    kind,
+    content: await nip44.get().encryptAsUser(json, pubkey.get()),
+    relays: hints.WriteRelays().getUrls(),
+  })
 }
 
 // Messages

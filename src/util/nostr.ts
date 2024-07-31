@@ -16,6 +16,7 @@ import {
   Tags,
   Address,
   isShareableRelayUrl,
+  isContextAddress,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
@@ -160,8 +161,8 @@ export const parseAnythingSync = entity => {
 export const parsePubkey = async entity => {
   const result = await parseAnything(entity)
 
-  if (result.type === 'npub') return result.data
-  if (result.type === 'nprofile') return result.data.pubkey
+  if (result.type === "npub") return result.data
+  if (result.type === "nprofile") return result.data.pubkey
 }
 
 export const getTags =
@@ -175,9 +176,16 @@ export const getTagValues = (types: string[], testValue = null) => {
   return (tags: string[][]) => _getTags(tags).map(t => t[1] || "")
 }
 
+export const getEventTags = getTags(["e"], id => id.length === 64)
+
+export const getEventTagValues = getTagValues(["e"], id => id.length === 64)
+
 export const getAddressTags = getTags(["a"], Address.isAddress)
 
 export const getAddressTagValues = getTagValues(["a"], Address.isAddress)
+
+export const getContextTagValues = (tags: string[][]) =>
+  getAddressTagValues(tags).filter(isContextAddress)
 
 export const getPubkeyTags = getTags(["p"], pk => pk.length === 64)
 

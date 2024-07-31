@@ -5,6 +5,8 @@ import type {TrustedEvent} from "@welshman/util"
 import {fromNostrURI, hasValidSignature, Tags} from "@welshman/util"
 import {tryJson} from "src/util/misc"
 
+export const sortEventsAsc = events => sortBy((e: TrustedEvent) => e.created_at, events)
+
 export const sortEventsDesc = events => sortBy((e: TrustedEvent) => -e.created_at, events)
 
 export const decodeEvent = entity => {
