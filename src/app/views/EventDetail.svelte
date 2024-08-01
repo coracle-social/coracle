@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {deriveEvent} from "@welshman/store"
   import {getIdOrAddress, getIdFilters} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {fly} from "src/util/transition"
@@ -9,13 +10,13 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import {loadOne, deriveEvent} from "src/engine"
+  import {loadOne, repository} from "src/engine"
   import {makeFeed} from "src/domain"
 
   export let address
   export let relays = []
 
-  const event = deriveEvent(address)
+  const event = deriveEvent(repository, address)
 
   const feed = makeFeed({definition: feedFromFilter({"#a": [address]})})
 

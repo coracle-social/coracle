@@ -3,8 +3,9 @@
   import {derived} from "svelte/store"
   import {groupBy, sortBy, uniqBy, prop} from "ramda"
   import {displayList} from "hurdak"
+  import {pushToMapKey} from "@welshman/lib"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
-  import {pushToKey, createScroller} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -43,7 +44,7 @@
       }
 
       for (const r of getPubkeyRelayPolicies(pk, RelayMode.Write)) {
-        pushToKey(m, r.url, pk)
+        pushToMapKey(m, r.url, pk)
       }
     }
 

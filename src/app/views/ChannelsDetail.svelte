@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
+  import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
@@ -14,9 +15,9 @@
   import {
     nip44,
     session,
+    repository,
     displayProfileByPubkey,
     sendMessage,
-    deriveEvents,
     sendLegacyMessage,
     markChannelRead,
     getChannelIdFromEvent,
@@ -29,7 +30,9 @@
   export let initialMessage = null
 
   const messages = derived(
-    deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]}),
+    deriveEvents(repository, {
+      filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}],
+    }),
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 

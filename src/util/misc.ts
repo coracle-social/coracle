@@ -1,20 +1,10 @@
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
-import type {Readable, Writable} from "svelte/store"
 import {now, stripProtocol} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
 import {Storage, ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
-
-export const fuzzy = <T>(data: T[], opts = {}) => {
-  const fuse = new Fuse(data, opts) as any
-
-  // Slice pattern because the docs warn that it"ll crash if too long
-  return (q: string) => {
-    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
-  }
-}
 
 export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
 
@@ -159,20 +149,6 @@ export const formatSats = (sats: number) => {
   if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
-}
-
-export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: string, v: T) => {
-  if (m instanceof Map) {
-    const a = m.get(k) || []
-
-    a.push(v)
-    m.set(k, a)
-  } else {
-    m[k] = m[k] || []
-    m[k].push(v)
-  }
-
-  return m
 }
 
 export const race = (threshold, promises) => {
@@ -343,6 +319,15 @@ export const getStringWidth = (text: string) => {
   return width
 }
 
+export const fuzzy = <T>(data: T[], opts = {}) => {
+  const fuse = new Fuse(data, opts) as any
+
+  // Slice pattern because the docs warn that it"ll crash if too long
+  return (q: string) => {
+    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
+  }
+}
+
 export class SearchHelper<T, V> {
   config: Record<string, any> = {}
   _optionsByValue = new Map<V, T>()
@@ -395,65 +380,3 @@ export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
 
   return store
 }
-
-export const getter = <T>(store: Readable<T>) => {
-  let value: T
-
-  store.subscribe((newValue: T) => {
-    value = newValue
-  })
-
-  return () => value
-}
-
-type Stop = () => void
-type Sub<T> = (x: T) => void
-type Start<T> = (set: Sub<T>) => Stop
-
-export const custom = <T>(start: Start<T>, opts: {throttle?: number} = {}) => {
-  const subs: Sub<T>[] = []
-
-  let value: T
-  let stop: () => void
-
-  return {
-    subscribe: (sub: Sub<T>) => {
-      if (opts.throttle) {
-        sub = throttle(opts.throttle, sub)
-      }
-
-      if (subs.length === 0) {
-        stop = start((newValue: T) => {
-          for (const sub of subs) {
-            sub(newValue)
-          }
-
-          value = newValue
-        })
-      }
-
-      subs.push(sub)
-      sub(value)
-
-      return () => {
-        subs.splice(
-          subs.findIndex(s => s === sub),
-          1,
-        )
-
-        if (subs.length === 0) {
-          stop()
-        }
-      }
-    },
-  }
-}
-
-export function withGetter<T>(store: Writable<T>): Writable<T> & {get: () => T}
-export function withGetter<T>(store: Readable<T>): Readable<T> & {get: () => T}
-export function withGetter<T>(store: Readable<T> | Writable<T>) {
-  return {...store, get: getter<T>(store)}
-}
-
-export const throttled = <T>(delay: number, store: Readable<T>) =>
-  custom(set => store.subscribe(throttle(delay, set)))

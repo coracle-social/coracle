@@ -37,6 +37,7 @@ import {
   sort,
   groupBy,
   indexBy,
+  pushToKey,
   pushToMapKey,
 } from "@welshman/lib"
 import {
@@ -95,7 +96,8 @@ import {
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {fuzzy, synced, withGetter, pushToKey, tryJson, fromCsv, SearchHelper} from "src/util/misc"
+import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {fuzzy, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
 import {
   generatePrivateKey,
   isLike,
@@ -162,7 +164,7 @@ import type {
 } from "src/engine/model"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
 import {getNip04, getNip44, getNip59, getSigner, getConnect, sortEventsAsc} from "src/engine/utils"
-import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
+import {repository, events, relay} from "src/engine/repository"
 
 // Base state
 
@@ -373,6 +375,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 // Profiles
 
 export const profiles = deriveEventsMapped<PublishedProfile>({
+  repository,
   filters: [{kinds: [PROFILE]}],
   eventToItem: readProfile,
   itemToEvent: prop("event"),
@@ -464,6 +467,7 @@ export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $za
 
 export const followLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
+    repository,
     filters: [{kinds: [FOLLOWS]}],
     itemToEvent: prop("event"),
     eventToItem: event =>
@@ -499,6 +503,7 @@ export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
 export const muteLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
+    repository,
     filters: [{kinds: [MUTES]}],
     itemToEvent: prop("event"),
     eventToItem: event =>
@@ -625,6 +630,7 @@ export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
 
 export const communityLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
+    repository,
     filters: [{kinds: [COMMUNITIES]}],
     itemToEvent: prop("event"),
     eventToItem: event =>
@@ -666,6 +672,7 @@ export const deriveCommunities = (pk: string) =>
 // Groups
 
 export const groupMeta = deriveEventsMapped<PublishedGroupMeta>({
+  repository,
   filters: [{kinds: [GROUP, COMMUNITY]}],
   itemToEvent: prop("event"),
   eventToItem: readGroupMeta,
@@ -905,7 +912,7 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const seenStatusEvents = deriveEvents({
+export const seenStatusEvents = deriveEvents(repository, {
   filters: [{kinds: [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION]}],
 })
 
@@ -1055,7 +1062,7 @@ export const getChannelIdFromEvent = (event: TrustedEvent) =>
 export const getChannelSeenKey = (id: string) =>
   crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
 
-export const messages = deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE]}]})
+export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
 
 export const channels = derived(
   [pubkey, messages, userSeenStatuses],
@@ -1135,6 +1142,7 @@ export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
 
 export const relayLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
+    repository,
     filters: [{kinds: [RELAYS]}],
     itemToEvent: prop("event"),
     eventToItem: event =>
@@ -1148,6 +1156,7 @@ export const relayLists = withGetter(
 
 export const inboxRelayLists = withGetter(
   deriveEventsMapped<PublishedSingleton>({
+    repository,
     filters: [{kinds: [INBOX_RELAYS]}],
     itemToEvent: prop("event"),
     eventToItem: event =>
@@ -1160,7 +1169,7 @@ export const inboxRelayLists = withGetter(
 )
 
 export const deriveInboxRelays = (pubkeys: string[]) =>
-  deriveEvents({filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
+  deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
 
 export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
   derived(deriveInboxRelays(pubkeys), $events =>
@@ -1169,6 +1178,7 @@ export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
 
 export const legacyRelayLists = withGetter(
   deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>({
+    repository,
     filters: [{kinds: [FOLLOWS]}],
     itemToEvent: prop("event"),
     eventToItem: event => {
@@ -1358,6 +1368,7 @@ export const searchTopicNames = searchTopics.derived(search => term => pluck("na
 // Lists
 
 export const lists = deriveEventsMapped<PublishedList>({
+  repository,
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readList(event) : null),
   itemToEvent: prop("event"),
@@ -1375,6 +1386,7 @@ export const listSearch = derived(lists, $lists => new ListSearch($lists))
 // Feeds
 
 export const feeds = deriveEventsMapped<PublishedFeed>({
+  repository,
   filters: [{kinds: [FEED]}],
   itemToEvent: prop("event"),
   eventToItem: readFeed,
@@ -1385,6 +1397,7 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
 )
 
 export const feedFavorites = deriveEventsMapped<PublishedSingleton>({
+  repository,
   filters: [{kinds: [FEEDS]}],
   itemToEvent: prop("event"),
   eventToItem: event =>
@@ -1454,6 +1467,7 @@ export class FeedSearch extends SearchHelper<PublishedFeed, string> {
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
 export const listFeeds = deriveEventsMapped<PublishedListFeed>({
+  repository,
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readList(event)) : undefined,
@@ -1472,7 +1486,7 @@ export const userListFeeds = derived(
 // Handlers
 
 export const handlers = derived(
-  deriveEvents({filters: [{kinds: [HANDLER_INFORMATION]}]}),
+  deriveEvents(repository, {filters: [{kinds: [HANDLER_INFORMATION]}]}),
   $events => $events.flatMap(readHandlers),
 )
 
@@ -1480,7 +1494,9 @@ export const handlersByKind = derived(handlers, $handlers =>
   groupBy(handler => handler.kind, $handlers),
 )
 
-export const recommendations = deriveEvents({filters: [{kinds: [HANDLER_RECOMMENDATION]}]})
+export const recommendations = deriveEvents(repository, {
+  filters: [{kinds: [HANDLER_RECOMMENDATION]}],
+})
 
 export const recommendationsByHandlerAddress = derived(recommendations, $events =>
   groupBy(getHandlerAddress, $events),
@@ -1500,7 +1516,7 @@ export const deriveHandlersForKind = simpleCache(([kind]: [number]) =>
 // Collections
 
 export const collections = derived(
-  deriveEvents({filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
+  deriveEvents(repository, {filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
   readCollections,
 )
 

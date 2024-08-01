@@ -2,6 +2,7 @@
   import {batch} from "hurdak"
   import {onMount} from "svelte"
   import {fromPairs} from "@welshman/lib"
+  import {deriveEventsMapped} from "@welshman/store"
   import {getAddress, getReplyFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
@@ -11,13 +12,14 @@
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {hints, load, pubkey, canSign, loadAll, deriveEventsMapped} from "src/engine"
+  import {hints, load, pubkey, canSign, loadAll, repository} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let filter
   export let group = null
 
   const calendarEvents = deriveEventsMapped({
+    repository,
     filters: [filter],
     itemToEvent: (item: any) => item.event,
     eventToItem: (event: TrustedEvent) => {
