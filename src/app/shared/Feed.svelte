@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {seconds} from "hurdak"
-  import {writable, now, hash} from "@welshman/lib"
+  import {writable} from "svelte/store"
+  import {now, hash} from "@welshman/lib"
   import {createScroller, synced} from "src/util/misc"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"

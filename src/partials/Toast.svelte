@@ -1,15 +1,21 @@
 <script context="module" lang="ts">
   import {randomId} from "hurdak"
-  import {writable} from "@welshman/lib"
+  import {get, writable} from "svelte/store"
 
   export const toast = writable(null)
 
-  export const showToast = ({id = randomId(), type = "text", theme = "info", timeout = 5, ...opts}) => {
+  export const showToast = ({
+    id = randomId(),
+    type = "text",
+    theme = "info",
+    timeout = 5,
+    ...opts
+  }) => {
     toast.set({id, type, theme, ...opts})
 
     if (timeout) {
       setTimeout(() => {
-        if (toast.get()?.id === id) {
+        if (get(toast)?.id === id) {
           toast.set(null)
         }
       }, timeout * 1000)
@@ -22,21 +28,21 @@
 
   export const showPublishInfo = (pub, opts = {}) => showToast({pub, type: "publish", ...opts})
 
-  window.addEventListener('online', () => {
-    if (toast.get()?.id === 'offline') {
+  window.addEventListener("online", () => {
+    if (get(toast)?.id === "offline") {
       toast.set(null)
     }
   })
 
-  window.addEventListener('offline', () => {
-    showInfo("You are currently offline.", {id: 'offline', timeout: null})
+  window.addEventListener("offline", () => {
+    showInfo("You are currently offline.", {id: "offline", timeout: null})
   })
 </script>
 
 <script lang="ts">
   import cx from "classnames"
   import {fly} from "src/util/transition"
-  import Anchor from 'src/partials/Anchor.svelte'
+  import Anchor from "src/partials/Anchor.svelte"
 
   let touchStart = 0
   let startOffset = 0

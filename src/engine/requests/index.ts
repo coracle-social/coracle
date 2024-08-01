@@ -1,4 +1,5 @@
 import {debounce} from "throttle-debounce"
+import {get, writable} from "svelte/store"
 import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
@@ -9,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, bech32ToHex, pick, cached, nthEq, nth, now, writable, max} from "@welshman/lib"
+import {Worker, bech32ToHex, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -341,7 +342,7 @@ export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
       },
     })
 
-    while (loading.get()) {
+    while (get(loading)) {
       await load(100)
     }
 

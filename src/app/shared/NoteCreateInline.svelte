@@ -1,6 +1,6 @@
 <script lang="ts">
   import {join, identity} from "ramda"
-  import {writable} from "@welshman/lib"
+  import {writable} from "svelte/store"
   import {Tags, createEvent} from "@welshman/util"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"

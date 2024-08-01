@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {toTitle, Storage} from "hurdak"
-  import {derived, readable} from "svelte/store"
+  import {get, derived, readable} from "svelte/store"
   import {slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
@@ -64,7 +64,7 @@
     const scroller = createScroller(loadMore, {element, delay: 300})
 
     // Don't load if we just switched tabs
-    if (!router.history.get()[1]?.path.startsWith("/channels")) {
+    if (!get(router.history)[1]?.path.startsWith("/channels")) {
       loadMessages()
     }
 

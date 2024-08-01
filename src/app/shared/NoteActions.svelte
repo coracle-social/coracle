@@ -4,6 +4,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {last, sortBy} from "@welshman/lib"
+  import {custom} from "@welshman/store"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -87,9 +88,19 @@
   const kindHandlers = deriveHandlersForKind(note.kind)
   const handlerId = tags.get("client")?.nth(2)
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
-  const seenOn = tracker.data.derived(m =>
-    Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
-  )
+
+  const seenOn = custom<string[]>(set => {
+    const update = () =>
+      set(Array.from(tracker.getRelays(note.id)).filter(url => url !== LOCAL_RELAY_URL))
+
+    update()
+
+    tracker.on("update", update)
+
+    return () => {
+      tracker.off("update", update)
+    }
+  })
 
   const setView = v => {
     view = v

@@ -21,9 +21,7 @@ import {
   fromPairs,
 } from "ramda"
 import {
-  Collection as CollectionStore,
   Worker,
-  Writable,
   simpleCache,
   clamp,
   identity,
@@ -98,6 +96,7 @@ import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
 import {fuzzy, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
+import {Collection as CollectionStore} from "src/util/store"
 import {
   generatePrivateKey,
   isLike,
@@ -168,27 +167,31 @@ import {repository, events, relay} from "src/engine/repository"
 
 // Base state
 
-export const env = new Writable({
-  CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
-  CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
-  DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
-  DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
-  INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
-  DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
-  DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
-  ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
-  ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
-  BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
-  FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
-  IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
-  MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
-  NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
-  ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
-  PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
-  PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
-  PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
-  SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
-})
+export const env = withGetter(
+  writable({
+    CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
+    CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
+    DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
+    DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
+    INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
+    DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
+    DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
+    ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
+    ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
+    BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
+    FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
+    IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
+    MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
+    NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
+    ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
+    PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
+    PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(
+      normalizeRelayUrl,
+    ) as string[],
+    PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
+    SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
+  }),
+)
 
 export const pubkey = withGetter(synced<string | null>("pubkey", null))
 export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))

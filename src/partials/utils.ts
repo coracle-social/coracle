@@ -1,10 +1,11 @@
-import {writable, assoc} from '@welshman/lib'
+import {get, writable} from "svelte/store"
+import {assoc} from "@welshman/lib"
 
 export const formCtrl = ({submit}) => {
   const store = writable({
     loading: false,
     submit: async () => {
-      if (store.get().loading) {
+      if (get(store).loading) {
         return
       }
 
@@ -26,8 +27,8 @@ export const formCtrl = ({submit}) => {
 export const boolCtrl = ({defaultValue = false} = {}) => {
   const store = writable({
     enabled: defaultValue,
-    disable: () => store.update(assoc('enabled', false)),
-    enable: () => store.update(assoc('enabled', true)),
+    disable: () => store.update(assoc("enabled", false)),
+    enable: () => store.update(assoc("enabled", true)),
     toggle: () => store.update($s => ({...$s, enabled: !$s.enabled})),
   })
 
@@ -37,8 +38,8 @@ export const boolCtrl = ({defaultValue = false} = {}) => {
 export const valueCtrl = ({defaultValue = null} = {}) => {
   const store = writable({
     enabled: defaultValue,
-    clear: () => store.update(assoc('enabled', null)),
-    set: value => store.update(assoc('enabled', value)),
+    clear: () => store.update(assoc("enabled", null)),
+    set: value => store.update(assoc("enabled", value)),
   })
 
   return store

@@ -1,7 +1,6 @@
 import Bowser from "bowser"
 import {fromPairs} from "ramda"
-import {derived} from "svelte/store"
-import {writable} from "@welshman/lib"
+import {derived, writable, get} from "svelte/store"
 import {parseHex} from "src/util/html"
 import {synced} from "src/util/misc"
 
@@ -18,9 +17,9 @@ export const appName = import.meta.env.VITE_APP_NAME
 export const installPrompt = writable(null)
 
 export const installAsPWA = () => {
-  installPrompt.get().prompt()
+  get(installPrompt).prompt()
 
-  installPrompt.get().userChoice.then(result => {
+  get(installPrompt).userChoice.then(result => {
     installPrompt.set(null)
   })
 }

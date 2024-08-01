@@ -1,5 +1,5 @@
 import Bugsnag from "@bugsnag/js"
-import {writable} from "@welshman/lib"
+import {writable} from "svelte/store"
 import {router} from "src/app/util/router"
 import {
   env,

@@ -1,6 +1,6 @@
 import {takeWhile, find, filter, identity, mergeLeft, reject} from "ramda"
 import {first, randomId, filterVals} from "hurdak"
-import {writable} from "@welshman/lib"
+import {get, derived, writable} from "svelte/store"
 import logger from "src/util/logger"
 import {buildQueryString, parseQueryString, updateIn} from "src/util/misc"
 import {globalHistory} from "src/util/history"
@@ -249,12 +249,27 @@ export class Router {
   routes: Route[] = []
   extensions: Record<string, RouterExtension> = {}
   history = writable<HistoryItem[]>([])
-  nonVirtual = this.history.derived(reject((h: HistoryItem) => h.virtual))
-  pages = this.nonVirtual.derived(filter((h: HistoryItem) => !h.modal))
-  page = this.nonVirtual.derived(find((h: HistoryItem) => !h.modal))
-  modals = this.nonVirtual.derived(takeWhile((h: HistoryItem) => h.modal))
-  modal = this.nonVirtual.derived(find((h: HistoryItem) => h.modal))
-  current = this.nonVirtual.derived(history => history[0])
+  nonVirtual = derived(
+    this.history,
+    reject((h: HistoryItem) => h.virtual),
+  )
+  pages = derived(
+    this.nonVirtual,
+    filter((h: HistoryItem) => !h.modal),
+  )
+  page = derived(
+    this.nonVirtual,
+    find((h: HistoryItem) => !h.modal),
+  )
+  modals = derived(
+    this.nonVirtual,
+    takeWhile((h: HistoryItem) => h.modal),
+  )
+  modal = derived(
+    this.nonVirtual,
+    find((h: HistoryItem) => h.modal),
+  )
+  current = derived(this.nonVirtual, history => history[0])
 
   init() {
     this.at(window.location.pathname + window.location.search).push()
@@ -269,7 +284,7 @@ export class Router {
     return globalHistory.listen(({location, action}) => {
       const {state, pathname, search} = location
       const path = pathname + search
-      const [cur, prev] = this.history.get()
+      const [cur, prev] = get(this.history)
       const key = this.getKey({path: pathname, ...state})
 
       if (action === "POP") {
@@ -323,7 +338,7 @@ export class Router {
   }
 
   pop() {
-    const $history = this.history.get()
+    const $history = get(this.history)
 
     if ($history.length === 1) {
       return
@@ -371,7 +386,7 @@ export class Router {
   }
 
   fromCurrent() {
-    return this.from(this.current.get())
+    return this.from(get(this.current))
   }
 
   virtual() {
