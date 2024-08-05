@@ -15,7 +15,7 @@
       noBanner: true,
       title: 'Welcome to Flotilla!',
       description: 'Log in with your Nostr account or sign up to join.',
-      methods: "connect,extension,local",
+      methods: ['connect', 'extension', 'local'],
       onAuth(npub: string) {
         console.log(npub)
       }
@@ -24,7 +24,7 @@
     nl.launch()
   }
 
-  let modal
+  let modal: HTMLDialogElement
 
   $: {
     if ($page.state.modal) {
@@ -56,9 +56,11 @@
 </dialog>
 
 {#if $toast}
-  <div transition:fly class="toast">
-    <div class="alert">
-      <span>{$toast.message}</span>
+  {#key $toast.id}
+    <div transition:fly class="toast">
+      <div class="alert">
+        <span>{$toast.message}</span>
+      </div>
     </div>
-  </div>
+  {/key}
 {/if}
