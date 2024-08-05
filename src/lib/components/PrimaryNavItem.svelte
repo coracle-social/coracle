@@ -2,8 +2,10 @@
   export let title
 </script>
 
-<div class="relative z-nav-item flex justify-center items-center w-14 h-14">
-  <div class="avatar rounded-full p-1 bg-base-300 cursor-pointer tooltip tooltip-right" data-tip={title}>
+<div class="relative z-nav-item flex h-14 w-14 items-center justify-center">
+  <div
+    class="avatar tooltip tooltip-right cursor-pointer rounded-full bg-base-300 p-1"
+    data-tip={title}>
     <slot />
   </div>
 </div>

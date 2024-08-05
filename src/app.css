@@ -13,7 +13,8 @@
   transition-duration: 150ms;
 }
 
-.button:active:hover, .button:active:focus {
+.button:active:hover,
+.button:active:focus {
   animation: button-pop 0s ease-out;
   transform: scale(var(--btn-focus-scale, 0.97));
 }

@@ -1,24 +1,24 @@
 <script lang="ts">
   import "src/app.css"
-  import {onMount} from 'svelte'
-  import {page} from '$app/stores'
-  import {onNavigate} from '$app/navigation'
-  import Icon from 'lib/components/Icon.svelte'
-  import PrimaryNav from 'app/components/PrimaryNav.svelte'
-  import SecondaryNav from 'app/components/SecondaryNav.svelte'
-  import {fly, toast, modals, pushModal} from 'app/state'
+  import {onMount} from "svelte"
+  import {page} from "$app/stores"
+  import {onNavigate} from "$app/navigation"
+  import Icon from "lib/components/Icon.svelte"
+  import PrimaryNav from "app/components/PrimaryNav.svelte"
+  import SecondaryNav from "app/components/SecondaryNav.svelte"
+  import {fly, toast, modals, pushModal} from "app/state"
 
   const login = async () => {
-    const nl = await import('nostr-login')
+    const nl = await import("nostr-login")
 
     nl.init({
       noBanner: true,
-      title: 'Welcome to Flotilla!',
-      description: 'Log in with your Nostr account or sign up to join.',
-      methods: ['connect', 'extension', 'local'],
+      title: "Welcome to Flotilla!",
+      description: "Log in with your Nostr account or sign up to join.",
+      methods: ["connect", "extension", "local"],
       onAuth(npub: string) {
         console.log(npub)
-      }
+      },
     })
 
     nl.launch()
@@ -38,7 +38,7 @@
 <div class="flex h-screen" data-theme="dark">
   <PrimaryNav />
   <SecondaryNav />
-  <div class="bg-base-200 flex-grow">
+  <div class="flex-grow bg-base-200">
     <slot />
   </div>
 </div>
