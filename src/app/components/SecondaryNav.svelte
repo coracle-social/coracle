@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Icon from "lib/components/Icon.svelte"
-  import SecondaryNavItem from "lib/components/SecondaryNavItem.svelte"
+  import Icon from "@lib/components/Icon.svelte"
+  import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
 </script>
 
 <div class="flex w-60 flex-col gap-1 bg-base-300 px-2 py-4">

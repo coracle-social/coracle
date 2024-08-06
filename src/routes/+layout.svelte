@@ -1,12 +1,14 @@
 <script lang="ts">
-  import "src/app.css"
+  import "@src/app.css"
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {onNavigate} from "$app/navigation"
-  import Icon from "lib/components/Icon.svelte"
-  import PrimaryNav from "app/components/PrimaryNav.svelte"
-  import SecondaryNav from "app/components/SecondaryNav.svelte"
-  import {fly, toast, modals, pushModal} from "app/state"
+  import {fly} from '@lib/transition'
+  import Icon from "@lib/components/Icon.svelte"
+  import {toast} from '@app/toast'
+  import {modals, pushModal} from '@app/modal'
+  import PrimaryNav from "@app/components/PrimaryNav.svelte"
+  import SecondaryNav from "@app/components/SecondaryNav.svelte"
 
   const login = async () => {
     const nl = await import("nostr-login")

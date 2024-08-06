@@ -6,9 +6,9 @@
 </style>
 
 <script lang="ts">
-  import Icon from "lib/components/Icon.svelte"
-  import PrimaryNavItem from "lib/components/PrimaryNavItem.svelte"
-  import {spaces} from "app/state"
+  import Icon from "@lib/components/Icon.svelte"
+  import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
+  import {spaces} from "@app/state"
 </script>
 
 <div class="relative w-14 bg-base-100">
