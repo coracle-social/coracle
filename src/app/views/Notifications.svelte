@@ -169,9 +169,9 @@
 
     const unsubUnreadReactionNotifications = unreadReactionNotifications.subscribe(events => {
       if (activeTab === allTabs[1] && events.length > 0) {
-        const [reactions, replies] = partition(e => e.kind === REACTION, $reactionNotifications)
+        const [reactions, zaps] = partition(e => e.kind === REACTION, $reactionNotifications)
 
-        markAsSeen(SEEN_GENERAL, {reactions, replies})
+        markAsSeen(SEEN_GENERAL, {reactions, zaps})
       }
     })
 
