@@ -59,7 +59,7 @@
     "@welshman/dvm": "^0.0.3",
     "@welshman/content": "^0.0.6",
     "@welshman/util": "^0.0.23",
-    "@welshman/net": "^0.0.15",
+    "@welshman/net": "^0.0.16",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "compressorjs": "^1.2.1",
