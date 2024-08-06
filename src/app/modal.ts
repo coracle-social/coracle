@@ -1,5 +1,4 @@
 import type {ComponentType} from "svelte"
-import {readable, writable} from "svelte/store"
 import {randomId} from "@welshman/lib"
 import {pushState} from "$app/navigation"
 

@@ -4,7 +4,7 @@
 </script>
 
 <div class="flex w-60 flex-col gap-1 bg-base-300 px-2 py-4">
-  <SecondaryNavItem href="/">
+  <SecondaryNavItem href="/home">
     <Icon icon="home-smile" /> Home
   </SecondaryNavItem>
   <SecondaryNavItem href="/people">

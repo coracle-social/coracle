@@ -8,7 +8,8 @@
 <script lang="ts">
   import Icon from "@lib/components/Icon.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
-  import {spaces} from "@app/state"
+  import {getGroupName, getGroupPicture, makeGroupId} from "@app/domain"
+  import {userGroupRelaysByNom, groupsById} from "@app/state"
 </script>
 
 <div class="relative w-14 bg-base-100">
@@ -22,10 +23,12 @@
             src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
         </div>
       </PrimaryNavItem>
-      {#each $spaces as { id, name, picture } (id)}
+      {#each $userGroupRelaysByNom.entries() as [nom, relays] (nom)}
+        {@const event = $groupsById.get(makeGroupId(relays[0], nom))}
+        {@const name = getGroupName(event)}
         <PrimaryNavItem title={name}>
           <div class="w-10 rounded-full border border-solid border-base-300">
-            <img alt={name} src={picture} />
+            <img alt={name} src={getGroupPicture(event)} />
           </div>
         </PrimaryNavItem>
       {/each}

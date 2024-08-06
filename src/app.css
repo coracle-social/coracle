@@ -69,18 +69,22 @@
   --stark-content: #111;
 }
 
-.text-stark {
+.text-stark,
+.hover\:text-stark:hover {
   color: var(--stark);
 }
 
-.text-stark-content {
+.text-stark-content,
+.hover\:text-stark-content:hover {
   color: var(--stark-content);
 }
 
-.bg-stark {
+.bg-stark,
+.hover\:bg-stark:hover {
   background-color: var(--stark);
 }
 
-.bg-stark-content {
+.bg-stark-content,
+.hover\:bg-stark-content:hover {
   background-color: var(--stark-content);
 }

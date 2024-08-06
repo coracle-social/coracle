@@ -1,4 +1,3 @@
-import * as path from "path"
 import adapter from "@sveltejs/adapter-auto"
 import {vitePreprocess} from "@sveltejs/vite-plugin-svelte"
 
@@ -14,10 +13,10 @@ const config = {
     // See https://kit.svelte.dev/docs/adapters for more information about adapters.
     adapter: adapter(),
     alias: {
-      '@src': "src",
-      '@app': "src/app",
-      '@lib': "src/lib",
-      '@assets': "src/assets",
+      "@src": "src",
+      "@app": "src/app",
+      "@lib": "src/lib",
+      "@assets": "src/assets",
     },
   },
 }
