@@ -7,8 +7,8 @@
   <SecondaryNavItem href="/">
     <Icon icon="home-smile" /> Home
   </SecondaryNavItem>
-  <SecondaryNavItem href="/friends">
-    <Icon icon="user-heart" /> Friends
+  <SecondaryNavItem href="/people">
+    <Icon icon="user-heart" /> People
   </SecondaryNavItem>
   <SecondaryNavItem href="/notes">
     <Icon icon="clipboard-text" /> Saved Notes

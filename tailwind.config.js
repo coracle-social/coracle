@@ -9,7 +9,9 @@ export default {
       "nav-item": 2,
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+  ],
   daisyui: {
     themes: [
       "light",

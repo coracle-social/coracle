@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Satoshis";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local(""),
+    url("/fonts/Satoshi Symbol.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local(""),
+    url("/fonts/Lato-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: bold;
+  font-weight: 600;
+  src:
+    local(""),
+    url("/fonts/Lato-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: italic;
+  font-weight: 400;
+  src:
+    local(""),
+    url("/fonts/Italic.ttf") format("truetype");
+}
+
+:root {
+  font-family: Lato;
+}
+
 .button {
   padding: 12px 16px;
   display: flex;
