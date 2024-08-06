@@ -114,7 +114,7 @@
   $: reply = tags.parent()
   $: root = tags.root()
 
-  $: muted = !showMuted && $isEventMuted(event)
+  $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
   $: children = context.filter(e => isChildOf(e, event))
@@ -311,7 +311,8 @@
                 {replies}
                 {likes}
                 {zaps}
-                {zapper} />
+                {zapper}
+                {muted} />
             </div>
           </div>
         </Card>

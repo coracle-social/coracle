@@ -893,6 +893,7 @@ export const isEventMuted = withGetter(
         if (!strict) {
           return false
         }
+
         const isInGroup = tags.groups().values().some($userIsGroupMember)
         const isInCommunity = tags
           .communities()

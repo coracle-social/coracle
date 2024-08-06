@@ -59,13 +59,13 @@
     deleteEvent,
     getSetting,
     loadPubkeys,
-    isEventMuted,
     getReactionTags,
     getClientTags,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let note: TrustedEvent
+  export let muted
   export let replyCtrl
   export let showMuted
   export let addToContext
@@ -79,7 +79,6 @@
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
-  const muted = derived(isEventMuted, $isEventMuted => $isEventMuted(note, true))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
@@ -226,7 +225,7 @@
   let handlersShown = false
 
   $: disableActions =
-    !$canSign || ($muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
+    !$canSign || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
@@ -254,7 +253,7 @@
 
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
-      if ($muted) {
+      if (muted) {
         actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
       } else {
         actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
