@@ -94,7 +94,7 @@ import {
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {withGetter, throttled, deriveEvents, deriveEventsMapped} from "@welshman/store"
 import {fuzzy, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {
@@ -294,6 +294,8 @@ export const dufflepud = (path: string) => {
 
 // Plaintext
 
+export const throttledPlaintext = throttled(300, plaintext)
+
 export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
 
 export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
@@ -468,18 +470,18 @@ export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $za
 
 // Follows
 
+export const followListEvents = deriveEvents(repository, {filters: [{kinds: [FOLLOWS]}]})
+
 export const followLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    repository,
-    filters: [{kinds: [FOLLOWS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+  derived([throttledPlaintext, followListEvents], ([$throttledPlaintext, $followListEvents]) =>
+    $followListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: $throttledPlaintext[event.id],
         }),
       ),
-  }),
+    ),
+  ),
 )
 
 export const followListsByPubkey = withGetter(
@@ -504,18 +506,18 @@ export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
 // Mutes
 
-export const muteLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    repository,
-    filters: [{kinds: [MUTES]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const muteListEvents = deriveEvents(repository, {filters: [{kinds: [MUTES]}]})
+
+export const muteLists = derived(
+  [throttledPlaintext, muteListEvents],
+  ([$throttledPlaintext, $muteListEvents]) =>
+    $muteListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: $throttledPlaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
 export const muteListsByPubkey = withGetter(
@@ -926,12 +928,12 @@ export const userSeenStatusEvents = derived(
 )
 
 export const userSeenStatuses = derived(
-  [pubkey, plaintext, userSeenStatusEvents],
-  ([$pubkey, $plaintext, $userSeenStatusEvents]) => {
+  [pubkey, throttledPlaintext, userSeenStatusEvents],
+  ([$pubkey, $throttledPlaintext, $userSeenStatusEvents]) => {
     const data = {}
 
     for (const event of sortEventsAsc($userSeenStatusEvents)) {
-      const tags = $plaintext[event.id]
+      const tags = $throttledPlaintext[event.id]
 
       if (!Array.isArray(tags)) {
         continue
@@ -1144,32 +1146,32 @@ export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
 
 // Relay policies
 
-export const relayLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    repository,
-    filters: [{kinds: [RELAYS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const relayListEvents = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
+
+export const relayLists = derived(
+  [throttledPlaintext, relayListEvents],
+  ([$throttledPlaintext, $relayListEvents]) =>
+    $relayListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: throttledPlaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
-export const inboxRelayLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    repository,
-    filters: [{kinds: [INBOX_RELAYS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const inboxRelayListEvents = deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS]}]})
+
+export const inboxRelayLists = derived(
+  [throttledPlaintext, inboxRelayListEvents],
+  ([$throttledPlaintext, $inboxRelayListEvents]) =>
+    $inboxRelayListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: throttledPlaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
 export const deriveInboxRelays = (pubkeys: string[]) =>
@@ -1400,17 +1402,19 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
 )
 
-export const feedFavorites = deriveEventsMapped<PublishedSingleton>({
-  repository,
-  filters: [{kinds: [FEEDS]}],
-  itemToEvent: prop("event"),
-  eventToItem: event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: getPlaintext(event),
-      }),
+export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
+
+export const feedFavorites = derived(
+  [throttledPlaintext, feedFavoriteEvents],
+  ([$throttledPlaintext, $feedFavoriteEvents]) =>
+    $feedFavoriteEvents.map(event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: $throttledPlaintext[event.id],
+        }),
+      ),
     ),
-})
+)
 
 export const feedFavoritesByAddress = withGetter(
   derived(feedFavorites, $feedFavorites => {
