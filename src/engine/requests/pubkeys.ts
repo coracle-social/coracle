@@ -16,8 +16,9 @@ import {
   SEEN_GENERAL,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
+  getPubkeyTagValues,
 } from "@welshman/util"
-import {isHex, getPubkeyTagValues, appDataKeys} from "src/util/nostr"
+import {isHex, appDataKeys} from "src/util/nostr"
 import {LIST_KINDS} from "src/domain"
 import {getFreshness, setFreshness, withIndexers, load, hints} from "src/engine/state"
 

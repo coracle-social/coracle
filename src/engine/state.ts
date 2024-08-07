@@ -78,6 +78,8 @@ import {
   isGroupAddress,
   isCommunityAddress,
   isHashedEvent,
+  getRelayTags,
+  getRelayTagValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {
@@ -105,8 +107,6 @@ import {
   repostKinds,
   noteKinds,
   reactionKinds,
-  getRelayTags,
-  getRelayTagValues,
 } from "src/util/nostr"
 import logger from "src/util/logger"
 import type {

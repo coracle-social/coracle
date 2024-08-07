@@ -15,8 +15,6 @@ import {
   ZAP_RESPONSE,
   Tags,
   Address,
-  isShareableRelayUrl,
-  isContextAddress,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {schnorr} from "@noble/curves/secp256k1"
@@ -163,33 +161,3 @@ export const parsePubkey = async entity => {
   if (result.type === "npub") return result.data
   if (result.type === "nprofile") return result.data.pubkey
 }
-
-export const getTags =
-  (types: string[], testValue = null) =>
-  (tags: string[][]) =>
-    tags.filter(t => types.includes(t[0]) && (!testValue || testValue(t[1] || "")))
-
-export const getTagValues = (types: string[], testValue = null) => {
-  const _getTags = getTags(types, testValue)
-
-  return (tags: string[][]) => _getTags(tags).map(t => t[1] || "")
-}
-
-export const getEventTags = getTags(["e"], id => id.length === 64)
-
-export const getEventTagValues = getTagValues(["e"], id => id.length === 64)
-
-export const getAddressTags = getTags(["a"], Address.isAddress)
-
-export const getAddressTagValues = getTagValues(["a"], Address.isAddress)
-
-export const getContextTagValues = (tags: string[][]) =>
-  getAddressTagValues(tags).filter(isContextAddress)
-
-export const getPubkeyTags = getTags(["p"], pk => pk.length === 64)
-
-export const getPubkeyTagValues = getTagValues(["p"], pk => pk.length === 64)
-
-export const getRelayTags = getTags(["r", "relay"], isShareableRelayUrl)
-
-export const getRelayTagValues = getTagValues(["r", "relay"], isShareableRelayUrl)

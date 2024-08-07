@@ -1,10 +1,9 @@
 <script lang="ts">
   import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
-  import {FEEDS, getAddress, getIdFilters} from "@welshman/util"
+  import {FEEDS, getAddress, getAddressTagValues, getIdFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
-  import {getAddressTagValues} from "src/util/nostr"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
