@@ -9,7 +9,6 @@
   import {router} from "src/app/util/router"
   import {
     signer,
-    session,
     GroupAccess,
     deriveAdminKeyForGroup,
     publishGroupExitRequest,
@@ -84,7 +83,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if $session && $signer.isEnabled()}
+  {#if $signer}
     {#if !$status.access}
       <Popover triggerType="mouseenter">
         <div slot="trigger" class="w-6 text-center">

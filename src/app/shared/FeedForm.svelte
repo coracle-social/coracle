@@ -14,7 +14,7 @@
   import {
     pubkey,
     displayProfileByPubkey,
-    canSign,
+    signer,
     deleteEvent,
     createAndPublish,
     loadPubkeys,
@@ -100,7 +100,7 @@
 
 <FeedField bind:feed={feed.definition} />
 
-{#if $canSign}
+{#if $signer}
   {#if !saveIsOpen}
     <Card class="flex flex-col justify-between sm:flex-row">
       <p>Would you like to save this feed?</p>

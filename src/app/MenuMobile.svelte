@@ -12,7 +12,7 @@
   import {makeFeed, normalizeFeedDefinition} from "src/domain"
   import {
     env,
-    canSign,
+    signer,
     hasNewMessages,
     hasNewNotifications,
     pubkey,
@@ -115,7 +115,7 @@
           <i class="fa fa-people-pulling" /> Community
         </MenuMobileItem>
       {/if}
-      <MenuMobileItem disabled={!$canSign} href="/channels" on:click={closeMenu}>
+      <MenuMobileItem disabled={!$signer} href="/channels" on:click={closeMenu}>
         <i class="fa fa-message" />
         <div class="relative inline-block">
           Messages
@@ -173,10 +173,10 @@
       <MenuMobileItem disabled={!$pubkey} href="/settings/data" on:click={closeMenu}>
         <i class="fa fa-database" /> Database
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$canSign} href="/settings/content" on:click={closeMenu}>
+      <MenuMobileItem disabled={!$signer} href="/settings/content" on:click={closeMenu}>
         <i class="fa fa-volume-xmark" /> Content
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$canSign} href="/settings" on:click={closeMenu}>
+      <MenuMobileItem disabled={!$signer} href="/settings" on:click={closeMenu}>
         <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
     </div>

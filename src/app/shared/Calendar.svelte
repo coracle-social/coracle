@@ -12,7 +12,7 @@
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {hints, load, pubkey, canSign, loadAll, repository} from "src/engine"
+  import {hints, load, pubkey, signer, loadAll, repository} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let filter
@@ -43,7 +43,7 @@
   const getEventContent = ({event}) => event.title
 
   const onDateClick = ({date}) => {
-    if ($canSign) {
+    if ($signer) {
       date.setHours(new Date().getHours() + 1, 0, 0)
 
       const initialValues = {
@@ -70,7 +70,7 @@
   })
 </script>
 
-{#if $canSign}
+{#if $signer}
   <div class="relative h-0">
     <div class="absolute right-44 top-4">
       <Anchor button accent style="height: 38px; width: 38px;" on:click={createEvent}>

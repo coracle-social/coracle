@@ -15,7 +15,7 @@
   import {
     env,
     pubkey,
-    canSign,
+    signer,
     hasNewMessages,
     hasNewNotifications,
     displayProfileByPubkey,
@@ -90,7 +90,7 @@
   {/if}
   <MenuDesktopItem
     path="/notifications"
-    disabled={!$canSign}
+    disabled={!$signer}
     isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
       Notifications
@@ -101,7 +101,7 @@
   </MenuDesktopItem>
   <MenuDesktopItem
     path="/channels"
-    disabled={!$canSign}
+    disabled={!$signer}
     isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
       Messages
@@ -140,13 +140,13 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
-          disabled={!$canSign}>
+          disabled={!$signer}>
           <i class="fa fa-cog" /> App Settings
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/content"
-          disabled={!$canSign}>
+          disabled={!$signer}>
           <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
       </MenuDesktopSecondary>

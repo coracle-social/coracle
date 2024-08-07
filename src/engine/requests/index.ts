@@ -282,7 +282,7 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
     tags = [...tags, ["expiration", String(now() + 5)]]
 
     const req = makeDvmRequest({
-      event: await signer.get().signAsUser(createEvent(kind, {tags})),
+      event: await signer.get().sign(createEvent(kind, {tags})),
       relays:
         request.relays?.length > 0
           ? hints.fromRelays(request.relays).getUrls()

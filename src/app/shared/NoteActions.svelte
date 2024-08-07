@@ -42,7 +42,7 @@
   import {
     env,
     groups,
-    canSign,
+    signer,
     session,
     publish,
     mention,
@@ -225,7 +225,7 @@
   let handlersShown = false
 
   $: disableActions =
-    !$canSign || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
+    !$signer || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
@@ -244,7 +244,7 @@
   $: {
     actions = []
 
-    if ($canSign) {
+    if ($signer) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
       if (isSignedEvent(note) && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {

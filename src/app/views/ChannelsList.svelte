@@ -13,9 +13,9 @@
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
   import {
-    nip44,
-    canSign,
+    signer,
     channels,
+    hasNip44,
     hasNewMessages,
     markAllChannelsRead,
     loadLegacyMessages,
@@ -78,7 +78,7 @@
 </script>
 
 <FlexColumn bind:element>
-  {#if $nip44.isEnabled() && !hideNip04Alert}
+  {#if $hasNip44 && !hideNip04Alert}
     <div class="-my-2">
       <div out:slide|local class="py-4">
         <Card class="relative">
@@ -102,7 +102,7 @@
       <i class="fa fa-comments fa-lg" />
       <h2 class="staatliches text-2xl">Your conversations</h2>
     </div>
-    <Anchor modal button accent href="/channels/create" disabled={!$canSign}>
+    <Anchor modal button accent href="/channels/create" disabled={!$signer}>
       <i class="fa-solid fa-plus" /> Create
     </Anchor>
   </div>

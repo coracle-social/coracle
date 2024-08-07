@@ -1,5 +1,5 @@
 import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
-import {switcherFn, tryFunc} from "hurdak"
+import {switcherFn} from "hurdak"
 import {nth, inc} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -14,8 +14,9 @@ import {
   RELAYS,
   COMMUNITIES,
 } from "@welshman/util"
+import {getPubkey} from "@welshman/signer"
 import {tryJson} from "src/util/misc"
-import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
+import {appDataKeys, giftWrapKinds} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess} from "src/engine/model"
 import {
@@ -30,7 +31,6 @@ import {
   groupSharedKeys,
   groups,
   load,
-  nip04,
   projections,
   hints,
   ensurePlaintext,
@@ -72,7 +72,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
   const status = getGroupStatus(getSession(recipient), address)
 
   if (privkey) {
-    const pubkey = getPublicKey(privkey)
+    const pubkey = getPubkey(privkey)
     const role = tags.get("role")?.value()
     const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
@@ -254,12 +254,12 @@ projections.addHandler(30078, async e => {
     const session = getSession(e.pubkey)
 
     if (session) {
-      const settings = await tryFunc(async () =>
-        JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey)),
-      )
+      try {
+        const settings = JSON.parse(await ensurePlaintext(e))
 
-      if (settings) {
         setSession(e.pubkey, updateRecord(session, e.created_at, {settings}))
+      } catch (e) {
+        // pass
       }
     }
   }

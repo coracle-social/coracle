@@ -37,14 +37,13 @@ import {
   indexBy,
   pushToKey,
   pushToMapKey,
+  tryCatch,
 } from "@welshman/lib"
 import {
-  WRAP,
   FEEDS,
   COMMUNITY,
   GROUP,
   INBOX_RELAYS,
-  WRAP_NIP04,
   COMMUNITIES,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
@@ -82,6 +81,7 @@ import {
   getRelayTagValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
+import {Nip59, Nip07Signer, Nip01Signer, Nip46Signer, Nip46Broker, decrypt} from "@welshman/signer"
 import {
   ConnectionStatus,
   Executor,
@@ -97,10 +97,9 @@ import {
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {withGetter, throttled, deriveEvents, deriveEventsMapped} from "@welshman/store"
-import {fuzzy, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
+import {fuzzy, memoize, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {
-  generatePrivateKey,
   isLike,
   isGiftWrap,
   giftWrapKinds,
@@ -161,8 +160,8 @@ import type {
   AnonymousUserState,
   RelayInfo,
 } from "src/engine/model"
+import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {getNip04, getNip44, getNip59, getSigner, getConnect, sortEventsAsc} from "src/engine/utils"
 import {repository, events, relay} from "src/engine/repository"
 
 // Base state
@@ -232,12 +231,36 @@ export const getSession = pubkey => sessions.get()[pubkey]
 
 export const session = withGetter(derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk]))
 
-export const connect = withGetter(derived(session, getConnect))
-export const signer = withGetter(derived(session, getSigner))
-export const nip04 = withGetter(derived(session, getNip04))
-export const nip44 = withGetter(derived(session, getNip44))
-export const nip59 = withGetter(derived(session, getNip59))
-export const canSign = withGetter(derived(signer, $signer => $signer.isEnabled()))
+export const getSigner = memoize($s => {
+  switch ($s?.method) {
+    case "extension":
+      return new Nip07Signer()
+    case "privkey":
+      return new Nip01Signer($s.privkey)
+    case "connect":
+      return new Nip46Signer(Nip46Broker.get($s.pubkey, $s.connectKey, $s.connectHandler))
+    default:
+      return null
+  }
+})
+
+export const signer = withGetter(
+  derived(
+    session,
+    memoize($session => {
+      const $signer = getSigner($session)
+
+      $signer.nip44.encrypt($session.pubkey, "test").then(
+        () => hasNip44.set(true),
+        () => hasNip44.set(false),
+      )
+
+      return $signer
+    }),
+  ),
+)
+
+export const hasNip44 = writable(false)
 
 // Settings
 
@@ -303,9 +326,16 @@ export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc
 export const ensurePlaintext = async (e: TrustedEvent) => {
   if (!getPlaintext(e)) {
     const session = getSession(e.pubkey)
+    const signer = getSigner(session)
 
-    if (getSigner(session).isEnabled()) {
-      setPlaintext(e, await getNip59(session).decrypt(e))
+    if (signer) {
+      try {
+        setPlaintext(e, await decrypt(signer, e.pubkey, e.content))
+      } catch (e) {
+        if (!e.toString().match(/invalid payload length/)) {
+          throw e
+        }
+      }
     }
   }
 
@@ -317,10 +347,10 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
     const recipient = Tags.fromEvent(e).get("p")?.value()
     const session = getSession(e.pubkey) || getSession(recipient)
     const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
-    const nip04 = getNip04(session)
+    const signer = getSigner(session)
 
-    if (nip04.isEnabled()) {
-      plaintext.update(assoc(e.id, await nip04.decryptAsUser(e.content, other)))
+    if (signer) {
+      setPlaintext(e, await signer.nip04.decrypt(other, e.content))
     }
   }
 
@@ -344,21 +374,16 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   // Decrypt by session
   const session = getSession(Tags.fromEvent(event).get("p")?.value())
+  const signer = getSigner(session)
 
-  if (session) {
-    const canDecrypt =
-      (event.kind === WRAP && getNip44(session).isEnabled()) ||
-      (event.kind === WRAP_NIP04 && getNip04(session).isEnabled())
+  if (signer) {
+    const rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
 
-    if (canDecrypt) {
-      const rumor = await getNip59(session).unwrap(event, session.privkey)
+    if (rumor && isHashedEvent(rumor)) {
+      tracker.copy(event.id, rumor.id)
+      relay.send("EVENT", rumor)
 
-      if (rumor && isHashedEvent(rumor)) {
-        tracker.copy(event.id, rumor.id)
-        relay.send("EVENT", rumor)
-
-        return rumor
-      }
+      return rumor
     }
   }
 
@@ -366,7 +391,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   const sk = getRecipientKey(event)
 
   if (sk) {
-    const rumor = await nip59.get().unwrap(event, sk)
+    const rumor = await Nip59.fromSecret(sk).unwrap(event as SignedEvent)
 
     if (rumor && isHashedEvent(rumor)) {
       tracker.copy(event.id, rumor.id)
@@ -633,18 +658,18 @@ export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
 
 // Communities
 
-export const communityLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    repository,
-    filters: [{kinds: [COMMUNITIES]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const communityListEvents = deriveEvents(repository, {filters: [{kinds: [COMMUNITIES]}]})
+
+export const communityLists = derived(
+  [throttledPlaintext, communityListEvents],
+  ([$throttledPlaintext, $communityListEvents]) =>
+    $communityListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: $throttledPlaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
 export const communityListsByPubkey = withGetter(
@@ -924,7 +949,7 @@ export const seenStatusEvents = deriveEvents(repository, {
 
 export const userSeenStatusEvents = derived(
   [pubkey, seenStatusEvents],
-  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey),
+  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey && e.created_at > 1723073554),
 )
 
 export const userSeenStatuses = derived(
@@ -933,7 +958,7 @@ export const userSeenStatuses = derived(
     const data = {}
 
     for (const event of sortEventsAsc($userSeenStatusEvents)) {
-      const tags = $throttledPlaintext[event.id]
+      const tags = tryCatch(() => JSON.parse($throttledPlaintext[event.id]))
 
       if (!Array.isArray(tags)) {
         continue
@@ -1672,7 +1697,7 @@ const seenChallenges = new Set()
 export const onAuth = async (url, challenge) => {
   const {FORCE_GROUP, PLATFORM_RELAYS} = env.get()
 
-  if (!canSign.get()) {
+  if (!signer.get()) {
     return
   }
 
@@ -1686,7 +1711,7 @@ export const onAuth = async (url, challenge) => {
 
   seenChallenges.add(challenge)
 
-  const event = await signer.get().signAsUser(
+  const event = await signer.get().sign(
     createEvent(22242, {
       tags: [
         ["relay", url],
@@ -1848,14 +1873,14 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
 
 export const sign = (template, opts: {anonymous?: boolean; sk?: string} = {}) => {
   if (opts.anonymous) {
-    return signer.get().signWithKey(template, generatePrivateKey())
+    return Nip01Signer.ephemeral().sign(template)
   }
 
   if (opts.sk) {
-    return signer.get().signWithKey(template, opts.sk)
+    return Nip01Signer.fromSecret(opts.sk).sign(template)
   }
 
-  return signer.get().signAsUser(template)
+  return signer.get().sign(template)
 }
 
 export type CreateAndPublishOpts = {

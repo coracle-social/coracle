@@ -1,7 +1,7 @@
 <script lang="ts">
   import {asSignedEvent, createEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
-  import {generatePrivateKey} from "src/util/nostr"
+  import {Nip59, Nip01Signer} from "@welshman/signer"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,7 +11,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {router} from "src/app/util/router"
-  import {repository, nip59, loadPubkeys, publish, hints} from "src/engine"
+  import {repository, loadPubkeys, publish, hints} from "src/engine"
 
   export let eid
 
@@ -25,14 +25,10 @@
       reportedEvent: asSignedEvent(event as SignedEvent),
     })
 
+    // Don't use our session wrapper so that reports are anonymous
+    const helper = new Nip59(Nip01Signer.ephemeral())
     const template = createEvent(14, {content})
-    const rumor = await $nip59.wrap(template, {
-      author: generatePrivateKey(),
-      wrap: {
-        author: generatePrivateKey(),
-        recipient: tagr,
-      },
-    })
+    const rumor = await helper.wrap(tagr, template)
 
     publish({
       event: rumor.wrap,

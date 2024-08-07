@@ -37,7 +37,7 @@
 
   // Redirect if we need a signer
   $: {
-    if (!$signer.isEnabled() && $page && router.getMatch($page.path).route.requireSigner) {
+    if (!$signer && $page && router.getMatch($page.path).route.requireSigner) {
       router.go({path: "/", replace: true})
     }
   }

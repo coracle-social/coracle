@@ -15,7 +15,7 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {userListFeeds, canSign, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
+  import {userListFeeds, signer, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -143,7 +143,7 @@
                 </MenuItem>
               {/each}
             </div>
-            {#if $canSign}
+            {#if $signer}
               <div class="bg-neutral-900">
                 <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
                   <i class="fa fa-rss" /> Manage feeds

@@ -17,24 +17,20 @@ import {
   Address,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {schnorr} from "@noble/curves/secp256k1"
-import {bytesToHex} from "@noble/hashes/utils"
-import {nip05, nip19, generateSecretKey, getEventHash, getPublicKey as getPk} from "nostr-tools"
+import {getPubkey} from "@welshman/signer"
+import {hexToBytes} from "@noble/hashes/utils"
+import {nip05, nip19} from "nostr-tools"
 import {identity} from "ramda"
 import {avg} from "hurdak"
 import {tryJson} from "src/util/misc"
 
-export const fromHex = k => Uint8Array.from(Buffer.from(k, "hex"))
-export const getPublicKey = (sk: string) => getPk(fromHex(sk))
-export const generatePrivateKey = () => Buffer.from(generateSecretKey()).toString("hex")
-export const getSignature = (e, sk: string) => bytesToHex(schnorr.sign(getEventHash(e), sk))
-export const nsecEncode = (sk: string) => nip19.nsecEncode(Uint8Array.from(Buffer.from(sk, "hex")))
+export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
 export const isKeyValid = (key: string) => {
   // Validate the key before setting it to state by encoding it using bech32.
   // This will error if invalid (this works whether it's a public or a private key)
   try {
-    getPublicKey(key)
+    getPubkey(key)
   } catch (e) {
     return false
   }

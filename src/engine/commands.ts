@@ -17,16 +17,17 @@ import {
   RELAYS,
   PROFILE,
   MUTES,
-  WRAP_NIP04,
   INBOX_RELAYS,
   DIRECT_MESSAGE,
   SEEN_CONVERSATION,
 } from "@welshman/util"
+import type {Nip46Handler} from "@welshman/signer"
+import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, tryJson} from "src/util/misc"
-import {appDataKeys, generatePrivateKey, getPublicKey} from "src/util/nostr"
+import {appDataKeys} from "src/util/nostr"
 import {
   asDecryptedEvent,
   makeSingleton,
@@ -39,12 +40,10 @@ import {
   editProfile,
 } from "src/domain"
 import type {RelayPolicy, Profile} from "src/domain"
-import type {Session, NostrConnectHandler} from "src/engine/model"
+import type {Session} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {NostrConnectBroker} from "src/engine/utils"
 import {repository} from "src/engine/repository"
 import {
-  canSign,
   channels,
   getChannelSeenKey,
   createAndPublish,
@@ -61,15 +60,13 @@ import {
   groups,
   hints,
   mention,
-  nip04,
-  nip44,
-  nip59,
   pubkey,
   publish,
   session,
   sessions,
   sign,
   signer,
+  hasNip44,
   withIndexers,
   setFreshness,
   getFreshness,
@@ -119,13 +116,8 @@ export const nip98Fetch = async (url, method, body = null) => {
     tags.push(["payload", crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex")])
   }
 
-  const template = createEvent(27235, {tags})
-  const $signer = signer.get()
-
-  const event = $signer.isEnabled()
-    ? await $signer.signAsUser(template)
-    : await $signer.signWithKey(template, generatePrivateKey())
-
+  const $signer = signer.get() || Nip01Signer.ephemeral()
+  const event = await $signer.sign(createEvent(27235, {tags}))
   const auth = btoa(JSON.stringify(event))
   const headers = {Authorization: `Nostr ${auth}`}
 
@@ -251,8 +243,8 @@ export const updateZapper = async ({pubkey, created_at}, {lud16, lud06}) => {
 // Key state management
 
 export const initSharedKey = (address: string, relays: string[]) => {
-  const privkey = generatePrivateKey()
-  const pubkey = getPublicKey(privkey)
+  const privkey = makeSecret()
+  const pubkey = getPubkey(privkey)
   const key = {
     group: address,
     pubkey: pubkey,
@@ -268,8 +260,8 @@ export const initSharedKey = (address: string, relays: string[]) => {
 
 export const initGroup = (kind, relays) => {
   const identifier = randomId()
-  const privkey = generatePrivateKey()
-  const pubkey = getPublicKey(privkey)
+  const privkey = makeSecret()
+  const pubkey = getPubkey(privkey)
   const address = `${kind}:${pubkey}:${identifier}`
   const sharedKey = kind === 35834 ? initSharedKey(address, relays) : null
   const adminKey = {
@@ -287,31 +279,6 @@ export const initGroup = (kind, relays) => {
   return {identifier, address, adminKey, sharedKey}
 }
 
-// Most people don't have access to nip44 yet, send nip04-encrypted fallbacks for:
-// - Access requests
-// - Key shares
-
-export const wrapWithFallback = async (template, {author = null, wrap}) => {
-  const events = []
-
-  if (nip44.get().isEnabled()) {
-    events.push(await nip59.get().wrap(template, {author, wrap}))
-  } else {
-    events.push(
-      await nip59.get().wrap(template, {
-        author,
-        wrap: {
-          ...wrap,
-          kind: WRAP_NIP04,
-          algo: "nip04",
-        },
-      }),
-    )
-  }
-
-  return events
-}
-
 const addGroupATags = (template, addresses) => ({
   ...template,
   tags: [...template.tags, ...addresses.map(mentionGroup)],
@@ -324,19 +291,13 @@ const addGroupATags = (template, addresses) => ({
 export const publishToGroupAdmin = async (address, template) => {
   const relays = hints.WithinContext(address).getUrls()
   const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
+  const expireTag = [["expiration", String(now() + seconds(30, "day"))]]
+  const helper = Nip59.fromSigner(signer.get())
 
   for (const pubkey of pubkeys) {
-    const rumors = await wrapWithFallback(template, {
-      wrap: {
-        tags: [["expiration", String(now() + seconds(30, "day"))]],
-        author: generatePrivateKey(),
-        recipient: pubkey,
-      },
-    })
+    const rumor = await helper.wrap(pubkey, template, expireTag)
 
-    for (const rumor of rumors) {
-      publish({event: rumor.wrap, relays, forcePlatform: false})
-    }
+    publish({event: rumor.wrap, relays, forcePlatform: false})
   }
 }
 
@@ -352,22 +313,12 @@ export const publishAsGroupAdminPrivately = async (address, template, relays = [
   const _relays = hints.merge([hints.fromRelays(relays), hints.WithinContext(address)]).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
+  const adminSigner = new Nip01Signer(adminKey.privkey)
+  const sharedSigner = new Nip01Signer(sharedKey.privkey)
+  const helper = Nip59.fromSigner(adminSigner).withWrapper(sharedSigner)
+  const rumor = await helper.wrap(sharedKey.pubkey, template)
 
-  const rumors = await wrapWithFallback(template, {
-    author: adminKey.privkey,
-    wrap: {
-      author: sharedKey.privkey,
-      recipient: sharedKey.pubkey,
-    },
-  })
-
-  const pubs = []
-
-  for (const rumor of rumors) {
-    pubs.push(publish({event: rumor.wrap, relays: _relays, forcePlatform: false}))
-  }
-
-  return pubs
+  return publish({event: rumor.wrap, relays: _relays, forcePlatform: false})
 }
 
 export const publishToGroupsPublicly = async (addresses, template, {anonymous = false} = {}) => {
@@ -401,18 +352,13 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
       throw new Error("Attempted to publish privately to a group the user is not a member of")
     }
 
-    const rumors = await wrapWithFallback(thisTemplate, {
-      author: anonymous ? generatePrivateKey() : null,
-      wrap: {
-        author: sharedKey.privkey,
-        recipient: sharedKey.pubkey,
-      },
-    })
+    const userSigner = anonymous ? signer.get() : Nip01Signer.ephemeral()
+    const wrapSigner = new Nip01Signer(sharedKey.privkey)
+    const helper = Nip59.fromSigner(userSigner).withWrapper(wrapSigner)
+    const rumor = await helper.wrap(sharedKey.pubkey, thisTemplate)
 
-    for (const rumor of rumors) {
-      events.push(rumor)
-      pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
-    }
+    events.push(rumor)
+    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
   }
 
   return {events, pubs}
@@ -471,17 +417,11 @@ export const publishKeyShares = async (address, pubkeys, template) => {
       .policy(hints.addNoFallbacks)
       .getUrls()
 
-    const rumors = await wrapWithFallback(template, {
-      author: adminKey.privkey,
-      wrap: {
-        author: generatePrivateKey(),
-        recipient: pubkey,
-      },
-    })
+    const adminSigner = new Nip01Signer(adminKey.privkey)
+    const helper = Nip59.fromSigner(adminSigner)
+    const rumor = await helper.wrap(pubkey, template)
 
-    for (const rumor of rumors) {
-      pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
-    }
+    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
   }
 
   return pubs
@@ -688,7 +628,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   // relay selections in many places. Content isn't supported for mutes or relays so this is ok
   const content = event?.content || ""
   const relays = withIndexers(hints.WriteRelays().getUrls())
-  const encrypt = content => nip44.get().encryptAsUser(content, pubkey.get())
+  const encrypt = content => signer.get().nip44.encrypt(pubkey.get(), content)
 
   let encryptable
   if (event) {
@@ -722,7 +662,7 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 // Follows/mutes
 
 export const unfollowPerson = (pubkey: string) => {
-  if (canSign.get()) {
+  if (signer.get()) {
     updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)))
   } else {
     anonymous.update($a => ({...$a, follows: reject(nthEq(1, pubkey), $a.follows)}))
@@ -730,7 +670,7 @@ export const unfollowPerson = (pubkey: string) => {
 }
 
 export const followPerson = (pubkey: string) => {
-  if (canSign.get()) {
+  if (signer.get()) {
     updateSingleton(FOLLOWS, tags => append(mention(pubkey), tags))
   } else {
     anonymous.update($a => ({...$a, follows: append(mention(pubkey), $a.follows)}))
@@ -765,7 +705,7 @@ export const requestRelayAccess = async (url: string, claim: string, sk?: string
   })
 
 export const setOutboxPolicies = async (modifyTags: ModifyTags) => {
-  if (canSign.get()) {
+  if (signer.get()) {
     updateSingleton(RELAYS, modifyTags)
   } else {
     anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
@@ -820,7 +760,7 @@ export const leaveRelay = async (url: string) => {
 export const joinRelay = async (url: string, claim?: string) => {
   url = normalizeRelayUrl(url)
 
-  if (claim && canSign.get()) {
+  if (claim && signer.get()) {
     await requestRelayAccess(url, claim)
   }
 
@@ -835,12 +775,12 @@ export const joinRelay = async (url: string, claim?: string) => {
 // Read receipts
 
 export const markAsSeen = async (kind: number, eventsByKey: Record<string, TrustedEvent[]>) => {
-  if (!nip44.get().isEnabled() || Object.entries(eventsByKey).length === 0) {
+  if (!get(hasNip44) || Object.entries(eventsByKey).length === 0) {
     return
   }
 
   const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const rawTags = await tryJson(async () => await ensurePlaintext(prev))
+  const rawTags = await tryJson(async () => JSON.parse(await ensurePlaintext(prev)))
   const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
 
   for (const [key, events] of Object.entries(eventsByKey)) {
@@ -854,11 +794,13 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   console.log("========== publishing read status", tags)
 
-  createAndPublish({
-    kind,
-    content: await nip44.get().encryptAsUser(json, pubkey.get()),
-    relays: hints.WriteRelays().getUrls(),
-  })
+  console.log(
+    await createAndPublish({
+      kind,
+      content: await signer.get().nip44.encrypt(pubkey.get(), json),
+      relays: hints.WriteRelays().getUrls(),
+    }),
+  )
 }
 
 // Messages
@@ -876,7 +818,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
   return createAndPublish({
     kind: 4,
     tags: [mention(recipient), ...getClientTags()],
-    content: await nip04.get().encryptAsUser(content, recipient),
+    content: await signer.get().nip04.encrypt(recipient, content),
     relays: hints.PublishMessage(recipient).getUrls(),
     forcePlatform: false,
   })
@@ -892,12 +834,8 @@ export const sendMessage = async (channelId: string, content: string) => {
   }
 
   for (const recipient of uniq(recipients.concat(pubkey.get()))) {
-    const rumor = await nip59.get().wrap(template, {
-      wrap: {
-        author: generatePrivateKey(),
-        recipient,
-      },
-    })
+    const helper = Nip59.fromSigner(signer.get())
+    const rumor = await helper.wrap(recipient, template)
 
     publish({
       event: rumor.wrap,
@@ -943,16 +881,16 @@ const addSession = (s: Session) => {
 }
 
 export const loginWithPrivateKey = (privkey, extra = {}) =>
-  addSession({method: "privkey", pubkey: getPublicKey(privkey), privkey, ...extra})
+  addSession({method: "privkey", pubkey: getPubkey(privkey), privkey, ...extra})
 
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
 export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
 export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) => {
-  const connectKey = generatePrivateKey()
+  const connectKey = makeSecret()
   const connectHandler = {relays: [connectRelay]}
-  const broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+  const broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
   const result = await broker.connect(connectToken)
 
   if (result) {
@@ -968,11 +906,11 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
   return result
 }
 
-export const loginWithNostrConnect = async (username, connectHandler: NostrConnectHandler) => {
-  const connectKey = generatePrivateKey()
+export const loginWithNostrConnect = async (username, connectHandler: Nip46Handler) => {
+  const connectKey = makeSecret()
   const {pubkey} = (await loadHandle(`${username}@${connectHandler.domain}`)) || {}
 
-  let broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+  let broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
 
   if (!pubkey) {
     const pubkey = await broker.createAccount(username)
@@ -981,7 +919,7 @@ export const loginWithNostrConnect = async (username, connectHandler: NostrConne
       return null
     }
 
-    broker = NostrConnectBroker.get(pubkey, connectKey, connectHandler)
+    broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
   }
 
   const result = await broker.connect()
@@ -1012,13 +950,13 @@ export const logout = () => {
 }
 
 export const setAppData = async (d: string, data: any) => {
-  if (canSign.get()) {
+  if (signer.get()) {
     const {pubkey} = session.get()
 
     return createAndPublish({
       kind: 30078,
       tags: [["d", d]],
-      content: await nip04.get().encryptAsUser(JSON.stringify(data), pubkey),
+      content: await signer.get().nip04.encrypt(pubkey, JSON.stringify(data)),
       relays: hints.WriteRelays().getUrls(),
       forcePlatform: false,
     })

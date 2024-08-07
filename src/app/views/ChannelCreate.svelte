@@ -6,7 +6,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, nip44, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
+  import {pubkey, hasNip44, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
 
   let value = []
 
@@ -14,7 +14,7 @@
 
   $: pubkeys = uniq(value.concat($pubkey))
   $: pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
-  $: nip44Disabled = pubkeys.length > 2 && !$nip44.isEnabled()
+  $: nip44Disabled = pubkeys.length > 2 && !$hasNip44
   $: missingInbox = pubkeys.length > 2 && $pubkeysWithoutInbox.length > 0
 </script>
 

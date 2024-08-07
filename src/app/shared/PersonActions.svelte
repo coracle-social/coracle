@@ -8,7 +8,7 @@
     loginWithPublicKey,
     session,
     hints,
-    canSign,
+    signer,
     unfollowPerson,
     followPerson,
     unmutePerson,
@@ -52,7 +52,7 @@
   $: {
     actions = []
 
-    if (!isSelf && $canSign) {
+    if (!isSelf && $signer) {
       actions.push({
         onClick: $muted ? unmute : mute,
         label: $muted ? "Unmute" : "Mute",
@@ -60,7 +60,7 @@
       })
     }
 
-    if ($canSign) {
+    if ($signer) {
       actions.push({
         onClick: () => router.at("lists/select").qp({type: "p", value: pubkey}).open(),
         label: "Add to list",
@@ -68,7 +68,7 @@
       })
     }
 
-    if (!isSelf && $canSign) {
+    if (!isSelf && $signer) {
       actions.push({
         onClick: () => router.at("notes/create").qp({pubkey}).open(),
         label: "Mention",
@@ -88,7 +88,7 @@
 
     actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
 
-    if (isSelf && $canSign) {
+    if (isSelf && $signer) {
       actions.push({
         onClick: () => router.at("settings/profile").open(),
         label: "Edit",
@@ -99,7 +99,7 @@
 </script>
 
 <div class="flex items-center gap-3" on:click|stopPropagation>
-  {#if !isSelf && ($canSign || !$session)}
+  {#if !isSelf && ($signer || !$session)}
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 cursor-pointer text-center">
         {#if $following}

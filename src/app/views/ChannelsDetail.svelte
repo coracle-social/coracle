@@ -13,8 +13,8 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/util/router"
   import {
-    nip44,
     session,
+    hasNip44,
     repository,
     displayProfileByPubkey,
     sendMessage,
@@ -42,7 +42,7 @@
 
   const send = async (content, useNip17) => {
     // If we don't have nip44 support, just send a legacy message
-    if (!$nip44.isEnabled() || !useNip17) {
+    if (!$hasNip44 || !useNip17) {
       return sendLegacyMessage(channelId, content)
     }
 

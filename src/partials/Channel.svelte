@@ -12,7 +12,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {nip44, session, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
+  import {hasNip44, session, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
 
@@ -51,7 +51,7 @@
   const pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
   const recipients = remove($session?.pubkey, pubkeys)
 
-  let useNip17 = isGroupMessage || ($nip44.isEnabled() && $pubkeysWithoutInbox.length === 0)
+  let useNip17 = isGroupMessage || ($hasNip44 && $pubkeysWithoutInbox.length === 0)
 
   onMount(() => {
     startScroller()
@@ -162,7 +162,7 @@
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
   </ul>
-  {#if $nip44.isEnabled() || !isGroupMessage}
+  {#if $hasNip44 || !isGroupMessage}
     <div
       class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <textarea
@@ -189,7 +189,7 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $nip44.isEnabled() && hasSingleRecipientWithInbox}
+      {#if $hasNip44 && hasSingleRecipientWithInbox}
         <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
           {#if userHasInbox}
             <Toggle scale={toggleScale} bind:value={useNip17} />

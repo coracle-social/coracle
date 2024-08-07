@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
-  import {generatePrivateKey} from "src/util/nostr"
+  import {makeSecret} from "@welshman/signer"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -30,7 +30,7 @@
   export let stage = "intro"
   export let invite = null
 
-  const privkey = generatePrivateKey()
+  const privkey = makeSecret()
 
   const profile = {}
 

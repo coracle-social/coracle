@@ -10,7 +10,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {env, canSign, loadGroupMessages} from "src/engine"
+  import {env, signer, loadGroupMessages} from "src/engine"
   import {makeFeed} from "src/domain"
 
   const feed = makeFeed({
@@ -26,7 +26,7 @@
   }
 </script>
 
-{#if $canSign}
+{#if $signer}
   <Card class="flex justify-between">
     Have something you'd like to sell on nostr?
     <Anchor button accent on:click={createListing}>Create a listing</Anchor>
