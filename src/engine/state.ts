@@ -43,6 +43,7 @@ import {
   FEEDS,
   COMMUNITY,
   GROUP,
+  APP_DATA,
   INBOX_RELAYS,
   COMMUNITIES,
   SEEN_CONVERSATION,
@@ -66,6 +67,7 @@ import {
   isContextAddress,
   unionFilters,
   getAddress,
+  getIdentifier,
   getIdAndAddress,
   getIdOrAddress,
   getIdFilters,
@@ -96,8 +98,8 @@ import {
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {withGetter, throttled, deriveEvents, deriveEventsMapped} from "@welshman/store"
-import {fuzzy, memoize, synced, tryJson, fromCsv, SearchHelper} from "src/util/misc"
+import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {fuzzy, memoize, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {
   isLike,
@@ -106,6 +108,7 @@ import {
   repostKinds,
   noteKinds,
   reactionKinds,
+  appDataKeys,
 } from "src/util/nostr"
 import logger from "src/util/logger"
 import type {
@@ -262,62 +265,7 @@ export const signer = withGetter(
 
 export const hasNip44 = writable(false)
 
-// Settings
-
-export const defaultSettings = {
-  relay_limit: 10,
-  relay_redundancy: 3,
-  default_zap: 21,
-  show_media: true,
-  muted_words: [],
-  hide_sensitive: true,
-  report_analytics: true,
-  min_wot_score: 0,
-  enable_reactions: true,
-  enable_client_tag: false,
-  auto_authenticate: true,
-  nip96_urls: env.get().NIP96_URLS.slice(0, 1),
-  imgproxy_url: env.get().IMGPROXY_URL,
-  dufflepud_url: env.get().DUFFLEPUD_URL,
-  multiplextr_url: env.get().MULTIPLEXTR_URL,
-  platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
-}
-
-export const settings = withGetter(
-  derived(session, $session => ({...defaultSettings, ...$session?.settings})),
-)
-
-export const getSetting = k => prop(k, settings.get())
-
-export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
-  const base = getSetting("imgproxy_url")
-
-  if (!url || url.match("gif$")) {
-    return url
-  }
-
-  url = url.split("?")[0]
-
-  try {
-    return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
-  } catch (e) {
-    return url
-  }
-}
-
-export const dufflepud = (path: string) => {
-  const base = getSetting("dufflepud_url")
-
-  if (!base) {
-    throw new Error("Dufflepud is not enabled")
-  }
-
-  return `${base}/${path}`
-}
-
 // Plaintext
-
-export const throttledPlaintext = throttled(300, plaintext)
 
 export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
 
@@ -400,6 +348,76 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
       return rumor
     }
   }
+}
+
+// Settings
+
+export const defaultSettings = {
+  relay_limit: 10,
+  relay_redundancy: 3,
+  default_zap: 21,
+  show_media: true,
+  muted_words: [],
+  hide_sensitive: true,
+  report_analytics: true,
+  min_wot_score: 0,
+  enable_reactions: true,
+  enable_client_tag: false,
+  auto_authenticate: true,
+  nip96_urls: env.get().NIP96_URLS.slice(0, 1),
+  imgproxy_url: env.get().IMGPROXY_URL,
+  dufflepud_url: env.get().DUFFLEPUD_URL,
+  multiplextr_url: env.get().MULTIPLEXTR_URL,
+  platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
+}
+
+export const settingsEvents = deriveEvents(repository, {filters: [{kinds: [APP_DATA]}]})
+
+export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $settingsEvents]) =>
+  $settingsEvents.find(e => e.pubkey === $pubkey && getIdentifier(e) === appDataKeys.USER_SETTINGS),
+)
+
+plaintext.subscribe(() => console.log("plaintext"))
+
+export const userSettingsPlaintext = derived(
+  [plaintext, userSettingsEvent],
+  ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id]
+)
+
+export const userSettings = withGetter(
+  derived(userSettingsPlaintext, $userSettingsPlaintext => {
+    const overrides = parseJson($userSettingsPlaintext) || {}
+
+    return {...defaultSettings, ...overrides}
+  }),
+)
+
+export const getSetting = k => prop(k, userSettings.get())
+
+export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
+  const base = getSetting("imgproxy_url")
+
+  if (!url || url.match("gif$")) {
+    return url
+  }
+
+  url = url.split("?")[0]
+
+  try {
+    return base && url ? `${base}/x/s:${w}:${h}/${btoa(url)}` : url
+  } catch (e) {
+    return url
+  }
+}
+
+export const dufflepud = (path: string) => {
+  const base = getSetting("dufflepud_url")
+
+  if (!base) {
+    throw new Error("Dufflepud is not enabled")
+  }
+
+  return `${base}/${path}`
 }
 
 // Profiles
@@ -498,11 +516,11 @@ export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $za
 export const followListEvents = deriveEvents(repository, {filters: [{kinds: [FOLLOWS]}]})
 
 export const followLists = withGetter(
-  derived([throttledPlaintext, followListEvents], ([$throttledPlaintext, $followListEvents]) =>
+  derived([plaintext, followListEvents], ([$plaintext, $followListEvents]) =>
     $followListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: $throttledPlaintext[event.id],
+          content: $plaintext[event.id],
         }),
       ),
     ),
@@ -533,16 +551,14 @@ export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
 export const muteListEvents = deriveEvents(repository, {filters: [{kinds: [MUTES]}]})
 
-export const muteLists = derived(
-  [throttledPlaintext, muteListEvents],
-  ([$throttledPlaintext, $muteListEvents]) =>
-    $muteListEvents.map(event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: $throttledPlaintext[event.id],
-        }),
-      ),
+export const muteLists = derived([plaintext, muteListEvents], ([$plaintext, $muteListEvents]) =>
+  $muteListEvents.map(event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: $plaintext[event.id],
+      }),
     ),
+  ),
 )
 
 export const muteListsByPubkey = withGetter(
@@ -661,12 +677,12 @@ export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
 export const communityListEvents = deriveEvents(repository, {filters: [{kinds: [COMMUNITIES]}]})
 
 export const communityLists = derived(
-  [throttledPlaintext, communityListEvents],
-  ([$throttledPlaintext, $communityListEvents]) =>
+  [plaintext, communityListEvents],
+  ([$plaintext, $communityListEvents]) =>
     $communityListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: $throttledPlaintext[event.id],
+          content: $plaintext[event.id],
         }),
       ),
     ),
@@ -889,10 +905,10 @@ export const getUserCommunities = (session: Session) =>
 
 export const isEventMuted = withGetter(
   derived(
-    [userMutes, userFollows, settings, pubkey, userIsGroupMember],
-    ([$userMutes, $userFollows, $settings, $pubkey, $userIsGroupMember]) => {
-      const words = $settings.muted_words
-      const minWot = $settings.min_wot_score
+    [userMutes, userFollows, userSettings, pubkey, userIsGroupMember],
+    ([$userMutes, $userFollows, $userSettings, $pubkey, $userIsGroupMember]) => {
+      const words = $userSettings.muted_words
+      const minWot = $userSettings.min_wot_score
       const regex =
         words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
@@ -949,16 +965,16 @@ export const seenStatusEvents = deriveEvents(repository, {
 
 export const userSeenStatusEvents = derived(
   [pubkey, seenStatusEvents],
-  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey && e.created_at > 1723073554),
+  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey),
 )
 
 export const userSeenStatuses = derived(
-  [pubkey, throttledPlaintext, userSeenStatusEvents],
-  ([$pubkey, $throttledPlaintext, $userSeenStatusEvents]) => {
+  [pubkey, plaintext, userSeenStatusEvents],
+  ([$pubkey, $plaintext, $userSeenStatusEvents]) => {
     const data = {}
 
     for (const event of sortEventsAsc($userSeenStatusEvents)) {
-      const tags = tryCatch(() => JSON.parse($throttledPlaintext[event.id]))
+      const tags = tryCatch(() => JSON.parse($plaintext[event.id]))
 
       if (!Array.isArray(tags)) {
         continue
@@ -1038,7 +1054,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
   // Convert zaps to zap requests
   const convertZap = e => {
     if (e.kind === 9735) {
-      return tryJson(() => JSON.parse(Tags.fromEvent(e).get("description")?.value()))
+      return parseJson(e.tags.find(t => t[0] === "description")?.[1])
     }
 
     return e
@@ -1173,27 +1189,25 @@ export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
 
 export const relayListEvents = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
 
-export const relayLists = derived(
-  [throttledPlaintext, relayListEvents],
-  ([$throttledPlaintext, $relayListEvents]) =>
-    $relayListEvents.map(event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: throttledPlaintext[event.id],
-        }),
-      ),
+export const relayLists = derived([plaintext, relayListEvents], ([$plaintext, $relayListEvents]) =>
+  $relayListEvents.map(event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: plaintext[event.id],
+      }),
     ),
+  ),
 )
 
 export const inboxRelayListEvents = deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS]}]})
 
 export const inboxRelayLists = derived(
-  [throttledPlaintext, inboxRelayListEvents],
-  ([$throttledPlaintext, $inboxRelayListEvents]) =>
+  [plaintext, inboxRelayListEvents],
+  ([$plaintext, $inboxRelayListEvents]) =>
     $inboxRelayListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: throttledPlaintext[event.id],
+          content: plaintext[event.id],
         }),
       ),
     ),
@@ -1430,12 +1444,12 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
 export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
 
 export const feedFavorites = derived(
-  [throttledPlaintext, feedFavoriteEvents],
-  ([$throttledPlaintext, $feedFavoriteEvents]) =>
+  [plaintext, feedFavoriteEvents],
+  ([$plaintext, $feedFavoriteEvents]) =>
     $feedFavoriteEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: $throttledPlaintext[event.id],
+          content: $plaintext[event.id],
         }),
       ),
     ),
@@ -1841,7 +1855,7 @@ export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
 }
 
-export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
+export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
     : withPlatformRelays(request.relays)
@@ -1852,14 +1866,15 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
 
   logger.info(`Publishing event`, request)
 
-  const pub = basePublish(request)
-
-  // Add the event to projections
+  // Make sure the event is decrypted before updating stores
   if (canUnwrap(request.event)) {
-    ensureUnwrapped(request.event).then(projections.push)
-  } else {
-    projections.push(request.event)
+    await ensureUnwrapped(request.event)
+  } else if (projections.handlers.get(request.event.kind)?.includes(ensurePlaintext)) {
+    await ensurePlaintext(request.event)
   }
+
+  // Publish to local and remote relays
+  const pub = basePublish(request)
 
   // Listen to updates and update our publish queue
   if (canUnwrap(request.event) || request.event.pubkey === pubkey.get()) {
@@ -1915,6 +1930,8 @@ export const createAndPublish = async ({
 }
 
 export const tracker = new Tracker()
+
+tracker.setMaxListeners(100)
 
 Object.assign(NetworkContext, {
   onAuth,

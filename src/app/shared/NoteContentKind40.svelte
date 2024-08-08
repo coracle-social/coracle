@@ -1,14 +1,14 @@
 <script lang="ts">
   import {Tags} from "@welshman/util"
   import {nip19} from "nostr-tools"
-  import {tryJson} from "src/util/misc"
+  import {parseJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
 
   export let note
 
-  const {name, picture, about} = tryJson(() => JSON.parse(note.content))
+  const {name, picture, about} = parseJson(note.content)
   const noteId = nip19.noteEncode(
     note.kind === 40 ? note.id : Tags.fromEvent(note).get("e")?.value(),
   )

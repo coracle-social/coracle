@@ -9,11 +9,11 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, settings, publishSettings} from "src/engine"
+  import {env, userSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
 
-  const values = {...$settings}
+  const values = {...$userSettings}
 
   const submit = () => {
     publishSettings(values)

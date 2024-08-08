@@ -3,7 +3,7 @@ import {tryFunc, switcherFn} from "hurdak"
 import {sortBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {fromNostrURI, hasValidSignature, Tags} from "@welshman/util"
-import {tryJson} from "src/util/misc"
+import {parseJson} from "src/util/misc"
 
 export const sortEventsAsc = events => sortBy((e: TrustedEvent) => e.created_at, events)
 
@@ -45,7 +45,7 @@ export const decodeEvent = entity => {
 }
 
 export const unwrapRepost = repost => {
-  const event = tryJson(() => JSON.parse(repost.content))
+  const event = parseJson(repost.content)
 
   try {
     if (!event || !hasValidSignature(event)) {

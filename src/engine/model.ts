@@ -102,8 +102,6 @@ export type Session = {
   connectKey?: string
   connectToken?: string
   connectHandler?: Nip46Handler
-  settings?: Record<string, any>
-  settings_updated_at?: number
   groups_last_synced?: number
   notifications_last_synced?: number
   groups?: Record<string, GroupStatus>

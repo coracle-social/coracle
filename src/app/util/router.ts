@@ -2,15 +2,13 @@ import {last, identity} from "ramda"
 import {Address, fromNostrURI} from "@welshman/util"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
-import {tryJson} from "src/util/misc"
+import {parseJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"
 import {decodeEvent, getChannelId, hints} from "src/engine"
 
 // Decoders
 
 export const decodeAs = (name, decode) => v => ({[name]: decode(v)})
-export const encodeJson = value => JSON.stringify(value)
-export const decodeJson = json => tryJson(() => JSON.parse(json))
 export const encodeCsv = xs => xs.join(",")
 export const decodeCsv = x => x.split(",")
 export const encodeRelays = xs => xs.map(url => last(url.split("//"))).join(",")
@@ -24,8 +22,8 @@ export const asString = name => ({
 })
 
 export const asJson = name => ({
-  encode: encodeJson,
-  decode: decodeAs(name, decodeJson),
+  encode: JSON.stringify,
+  decode: decodeAs(name, parseJson),
 })
 
 export const asCsv = name => ({

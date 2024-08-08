@@ -10,7 +10,7 @@ import {
   isScopeFeed,
 } from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
-import {tryJson} from "src/util/misc"
+import {parseJson} from "src/util/misc"
 import type {PublishedList} from "./list"
 
 export type Feed = {
@@ -54,7 +54,7 @@ export const mapListToFeed = (list: PublishedList) =>
 
 export const readFeed = (event: TrustedEvent) => {
   const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)
-  const definition = tryJson(() => JSON.parse(feed)) || makeIntersectionFeed()
+  const definition = parseJson(feed) || makeIntersectionFeed()
 
   return {title, identifier, description, definition, event} as PublishedFeed
 }

@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
-import {cached, splitAt, first, last, append, nthEq, groupBy, now} from "@welshman/lib"
+import {cached, equals, splitAt, first, last, append, nthEq, groupBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getAddress,
@@ -26,7 +26,7 @@ import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
-import {joinPath, tryJson} from "src/util/misc"
+import {joinPath, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {
   asDecryptedEvent,
@@ -78,6 +78,7 @@ import {
   userRelayPolicies,
   userSeenStatusEvents,
   getChannelIdFromEvent,
+  getSession,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -297,7 +298,7 @@ export const publishToGroupAdmin = async (address, template) => {
   for (const pubkey of pubkeys) {
     const rumor = await helper.wrap(pubkey, template, expireTag)
 
-    publish({event: rumor.wrap, relays, forcePlatform: false})
+    await publish({event: rumor.wrap, relays, forcePlatform: false})
   }
 }
 
@@ -358,7 +359,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
     const rumor = await helper.wrap(sharedKey.pubkey, thisTemplate)
 
     events.push(rumor)
-    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
+    pubs.push(await publish({event: rumor.wrap, relays, forcePlatform: false}))
   }
 
   return {events, pubs}
@@ -373,7 +374,7 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
     const relays = hints.PublishEvent(event).getUrls()
 
     events.push(event)
-    pubs.push(publish({event, relays}))
+    pubs.push(await publish({event, relays}))
   } else {
     const [wrap, nowrap] = partition((address: string) => address.startsWith("35834:"), addresses)
 
@@ -421,7 +422,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
     const helper = Nip59.fromSigner(adminSigner)
     const rumor = await helper.wrap(pubkey, template)
 
-    pubs.push(publish({event: rumor.wrap, relays, forcePlatform: false}))
+    pubs.push(await publish({event: rumor.wrap, relays, forcePlatform: false}))
   }
 
   return pubs
@@ -526,8 +527,15 @@ export const deleteGroupMeta = address =>
 // Member functions
 
 export const modifyGroupStatus = (session, address, timestamp, updates) => {
-  session.groups = session.groups || {}
-  session.groups[address] = updateRecord(session.groups[address], timestamp, updates)
+  if (!session.groups) {
+    session.groups = {}
+  }
+
+  const newGroupStatus = updateRecord(session.groups[address], timestamp, updates)
+
+  if (!equals(session.groups[address], newGroupStatus)) {
+    session.groups[address] = newGroupStatus
+  }
 
   return session
 }
@@ -780,7 +788,9 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   }
 
   const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const rawTags = await tryJson(async () => JSON.parse(await ensurePlaintext(prev)))
+  console.log("========== publishing read status")
+  const rawTags = parseJson(await ensurePlaintext(prev))
+  console.log("========== got plaintext", rawTags)
   const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
 
   for (const [key, events] of Object.entries(eventsByKey)) {
@@ -792,9 +802,8 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   const json = JSON.stringify(tags)
 
-  console.log("========== publishing read status", tags)
-
   console.log(
+    "=========== finished publishing read status",
     await createAndPublish({
       kind,
       content: await signer.get().nip44.encrypt(pubkey.get(), json),
@@ -837,7 +846,7 @@ export const sendMessage = async (channelId: string, content: string) => {
     const helper = Nip59.fromSigner(signer.get())
     const rumor = await helper.wrap(recipient, template)
 
-    publish({
+    await publish({
       event: rumor.wrap,
       relays: hints.PublishMessage(recipient).getUrls(),
       forcePlatform: false,
@@ -966,34 +975,32 @@ export const setAppData = async (d: string, data: any) => {
 export const publishSettings = ($settings: Record<string, any>) =>
   setAppData(appDataKeys.USER_SETTINGS, $settings)
 
-export const setSession = (k, data) => sessions.update($s => ($s[k] ? {...$s, [k]: data} : $s))
-
-export const setCurrentSession = data => {
-  const $pubkey = pubkey.get()
-
-  if ($pubkey) {
-    setSession($pubkey, data)
+export const setSession = (pubkey, data) => {
+  if (!equals(getSession(pubkey), data)) {
+    sessions.update(assoc(pubkey, data))
   }
 }
 
-export const updateSession = (k, f) => sessions.update($s => ($s[k] ? {...$s, [k]: f($s[k])} : $s))
+export const updateSession = (pubkey, f) => {
+  const session = getSession(pubkey)
 
-export const updateCurrentSession = f => {
-  const $pubkey = pubkey.get()
-
-  if ($pubkey) {
-    updateSession($pubkey, f)
+  if (session) {
+    setSession(pubkey, f(session))
   }
 }
 
-export const broadcastUserData = (relays: string[]) => {
+export const setCurrentSession = data => setSession(pubkey.get(), data)
+
+export const updateCurrentSession = f => updateSession(pubkey.get(), f)
+
+export const broadcastUserData = async (relays: string[]) => {
   const authors = [pubkey.get()]
   const kinds = [RELAYS, FOLLOWS, PROFILE]
   const events = repository.query([{kinds, authors}])
 
   for (const event of events) {
     if (isSignedEvent(event)) {
-      publish({event, relays, forcePlatform: false})
+      await publish({event, relays, forcePlatform: false})
     }
   }
 }

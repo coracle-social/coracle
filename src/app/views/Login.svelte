@@ -4,7 +4,7 @@
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
   import {getNip07, Nip07Signer} from "@welshman/signer"
-  import {tryJson} from "src/util/misc"
+  import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Tile from "src/partials/Tile.svelte"
@@ -100,7 +100,7 @@
         },
       ],
       onEvent: async e => {
-        const content = tryJson(() => JSON.parse(e.content))
+        const content = parseJson(e.content)
 
         if (!content) {
           return

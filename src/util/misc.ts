@@ -128,12 +128,15 @@ export const stringToHue = (value: string) => {
 export const hsl = (hue: number, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-export const tryJson = <T>(f: () => T) =>
-  tryFunc(f, (e: Error) => {
-    if (!e.toString().includes("JSON")) {
-      logger.warn(e)
-    }
-  })
+export const parseJson = (json: string) => {
+  if (!json) return null
+
+  try {
+    return JSON.parse(json)
+  } catch (e) {
+    return null
+  }
+}
 
 export const tryFetch = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {

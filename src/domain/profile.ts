@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {ellipsize} from "hurdak"
 import {PROFILE} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {tryJson} from "src/util/misc"
+import {parseJson} from "src/util/misc"
 
 export type Profile = {
   name?: string
@@ -38,7 +38,7 @@ export const makeProfile = (profile: Partial<Profile> = {}): Profile => ({
 })
 
 export const readProfile = (event: TrustedEvent) => {
-  const profile = tryJson(() => JSON.parse(event.content)) || {}
+  const profile = parseJson(event.content) || {}
 
   return {...profile, event} as PublishedProfile
 }

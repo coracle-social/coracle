@@ -2,8 +2,7 @@ import {addToKey} from "@welshman/lib"
 import {Address, isShareableRelayUrl} from "@welshman/util"
 import {Encryptable} from "src/domain/util"
 import type {DecryptedEvent} from "src/domain/util"
-import {tryJson} from "src/util/misc"
-import {isHex} from "src/util/nostr"
+import {parseJson} from "src/util/misc"
 
 export type SingletonParams = {
   kind: number
@@ -51,7 +50,7 @@ const isValidTag = (tag: string[]) => {
 
 export const readSingleton = (event: DecryptedEvent) => {
   const getTags = tags => (Array.isArray(tags) ? tags.filter(isValidTag) : [])
-  const privateTags = getTags(tryJson(() => JSON.parse(event.plaintext?.content || "")))
+  const privateTags = getTags(parseJson(event.plaintext?.content))
   const publicTags = getTags(event.tags)
 
   return indexSingleton({event, kind: event.kind, publicTags, privateTags}) as PublishedSingleton

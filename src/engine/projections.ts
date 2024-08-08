@@ -7,6 +7,7 @@ import {
   isShareableRelayUrl,
   getIdFilters,
   MUTES,
+  APP_DATA,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
   SEEN_CONTEXT,
@@ -15,10 +16,11 @@ import {
   COMMUNITIES,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {tryJson} from "src/util/misc"
-import {appDataKeys, giftWrapKinds} from "src/util/nostr"
+import {parseJson} from "src/util/misc"
+import {giftWrapKinds} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess} from "src/engine/model"
+import {repository} from "src/engine/repository"
 import {
   topics,
   relays,
@@ -38,9 +40,7 @@ import {
 import {
   modifyGroupStatus,
   setGroupStatus,
-  updateRecord,
   updateSession,
-  setSession,
   updateZapper,
   updateHandle,
 } from "src/engine/commands"
@@ -49,12 +49,11 @@ import {
 // repository, and when accepted, be propagated to projections. This avoids processing
 // the same event multiple times, since repository deduplicates
 
-// Currently commented out because when storage gets pruned and profiles etc need to be re-loaded,
-// the event isn't recognized as new by repository and so it doesn't get pushed to projections. TODO
-
-// storage.ready.then(() => {
-//   repository.on("event", (event: TrustedEvent) => projections.push(event))
-// })
+repository.on("update", ({added}: {added: TrustedEvent[]}) => {
+  for (const event of added) {
+    projections.push(event)
+  }
+})
 
 // Key sharing
 
@@ -184,12 +183,10 @@ projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
 
 projections.addHandler(0, e => {
-  tryJson(async () => {
-    const content = JSON.parse(e.content)
+  const content = parseJson(e.content)
 
-    updateHandle(e, content)
-    updateZapper(e, content)
-  })
+  updateHandle(e, content)
+  updateZapper(e, content)
 })
 
 // Relays
@@ -244,23 +241,6 @@ projections.addHandler(1985, (e: TrustedEvent) => {
 projections.addHandler(SEEN_GENERAL, ensurePlaintext)
 projections.addHandler(SEEN_CONTEXT, ensurePlaintext)
 projections.addHandler(SEEN_CONVERSATION, ensurePlaintext)
+projections.addHandler(APP_DATA, ensurePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
-
-// Sync client settings
-
-projections.addHandler(30078, async e => {
-  if (Tags.fromEvent(e).get("d")?.value() === appDataKeys.USER_SETTINGS) {
-    const session = getSession(e.pubkey)
-
-    if (session) {
-      try {
-        const settings = JSON.parse(await ensurePlaintext(e))
-
-        setSession(e.pubkey, updateRecord(session, e.created_at, {settings}))
-      } catch (e) {
-        // pass
-      }
-    }
-  }
-})

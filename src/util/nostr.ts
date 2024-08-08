@@ -22,7 +22,7 @@ import {hexToBytes} from "@noble/hashes/utils"
 import {nip05, nip19} from "nostr-tools"
 import {identity} from "ramda"
 import {avg} from "hurdak"
-import {tryJson} from "src/util/misc"
+import {parseJson} from "src/util/misc"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
@@ -72,13 +72,11 @@ export const toHex = (data: string): string | null => {
 
 export const getRating = (event: TrustedEvent) => {
   if (event.kind === 1985) {
-    return tryJson(() => {
-      const json = JSON.parse(
-        Tags.fromEvent(event).whereKey("l").whereValue("review/relay").first()?.last(),
-      )
+    const json = parseJson(
+      Tags.fromEvent(event).whereKey("l").whereValue("review/relay").first()?.last(),
+    )
 
-      return json?.quality
-    })
+    return json?.quality
   } else {
     return parseInt(
       Tags.fromEvent(event)
