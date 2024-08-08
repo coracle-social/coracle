@@ -35,10 +35,11 @@
   "type": "module",
   "dependencies": {
     "@poppanator/sveltekit-svg": "^4.2.1",
-    "@welshman/lib": "^0.0.12",
-    "@welshman/net": "^0.0.16",
+    "@welshman/lib": "^0.0.13",
+    "@welshman/net": "^0.0.17",
+    "@welshman/signer": "^0.0.2",
     "@welshman/store": "^0.0.1",
-    "@welshman/util": "^0.0.23",
+    "@welshman/util": "^0.0.24",
     "daisyui": "^4.12.10",
     "nostr-login": "^1.5.2",
     "prettier-plugin-tailwindcss": "^0.6.5"

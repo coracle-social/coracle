@@ -1,6 +1,7 @@
 import {batch, postJson} from "@welshman/lib"
 import {normalizeRelayUrl} from "@welshman/util"
-import {relayInfo} from "app/state"
+import {DUFFLEPUD_URL} from "@app/base"
+import {relayInfo} from "@app/state"
 
 export const loadRelay = batch(1000, async (urls: string[]) => {
   const data = await postJson(`${DUFFLEPUD_URL}/relay/info`, {urls})

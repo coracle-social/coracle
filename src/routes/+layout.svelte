@@ -4,6 +4,7 @@
   import {fly} from "@lib/transition"
   import {toast} from "@app/toast"
   import {modals} from "@app/modal"
+  import ModalBox from "@lib/components/ModalBox.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
 
@@ -34,32 +35,31 @@
   }
 </script>
 
-<div class="flex h-screen" data-theme="dark">
-  <PrimaryNav />
-  <SecondaryNav />
-  <div class="flex-grow bg-base-200">
-    <slot />
-  </div>
-</div>
-
-<dialog bind:this={modal} class="modal modal-bottom sm:modal-middle">
-  <div class="modal-box">
-    {#if $page.state.modal}
-      {@const {component, props} = modals.get($page.state.modal)}
-      <svelte:component this={component} {...props} />
-    {/if}
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button />
-  </form>
-</dialog>
-
-{#if $toast}
-  {#key $toast.id}
-    <div transition:fly class="toast">
-      <div class="alert">
-        <span>{$toast.message}</span>
-      </div>
+<div data-theme="dark">
+  <div class="flex h-screen">
+    <PrimaryNav />
+    <SecondaryNav />
+    <div class="flex-grow bg-base-200">
+      <slot />
     </div>
-  {/key}
-{/if}
+  </div>
+  <dialog bind:this={modal} class="modal modal-bottom sm:modal-middle">
+    {#if $page.state.modal}
+      {#key $page.state.modal}
+        <ModalBox {...modals.get($page.state.modal)} />
+      {/key}
+    {/if}
+    <form method="dialog" class="modal-backdrop">
+      <button />
+    </form>
+  </dialog>
+  {#if $toast}
+    {#key $toast.id}
+      <div transition:fly class="toast">
+        <div class="alert">
+          <span>{$toast.message}</span>
+        </div>
+      </div>
+    {/key}
+  {/if}
+</div>

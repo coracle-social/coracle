@@ -42,23 +42,6 @@
   font-family: Lato;
 }
 
-.button {
-  padding: 12px 16px;
-  display: flex;
-  border-radius: var(--rounded-btn, 0.5rem);
-  cursor: pointer;
-  animation: button-pop 200ms ease-out;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.button:active:hover,
-.button:active:focus {
-  animation: button-pop 0s ease-out;
-  transform: scale(var(--btn-focus-scale, 0.97));
-}
-
 [data-theme="dark"] {
   --stark: #111;
   --stark-content: #eee;
@@ -87,4 +70,22 @@
 .bg-stark-content,
 .hover\:bg-stark-content:hover {
   background-color: var(--stark-content);
+}
+
+.card {
+  padding: 1rem;
+  background-color: oklch(var(--b2) / 1);
+  border-radius: var(--rounded-box, 1rem);
+}
+
+.column {
+  @apply flex flex-col;
+}
+
+.heading {
+  @apply text-2xl text-stark-content text-center;
+}
+
+.subheading {
+  @apply text-xl text-stark-content text-center;
 }

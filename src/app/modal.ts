@@ -4,7 +4,7 @@ import {pushState} from "$app/navigation"
 
 export const modals = new Map()
 
-export const pushModal = (component: ComponentType, props: Record<string, any>) => {
+export const pushModal = (component: ComponentType, props: Record<string, any> = {}) => {
   const id = randomId()
 
   // TODO: fix memory leak here by listening to history somehow

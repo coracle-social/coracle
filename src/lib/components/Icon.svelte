@@ -11,6 +11,7 @@
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
+  import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
   import ClipboardText from "@assets/icons/Clipboard Text.svg?dataurl"
   import Compass from "@assets/icons/Compass.svg?dataurl"
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
@@ -30,6 +31,7 @@
     "add-square": AddSquare,
     "add-circle": AddCircle,
     "alt-arrow-right": AltArrowRight,
+    "alt-arrow-left": AltArrowLeft,
     "clipboard-text": ClipboardText,
     compass: Compass,
     "compass-big": CompassBig,
