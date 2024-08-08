@@ -634,7 +634,6 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   // Preserve content instead of use encrypted tags because kind 3 content is used for
   // relay selections in many places. Content isn't supported for mutes or relays so this is ok
-  const content = event?.content || ""
   const relays = withIndexers(hints.WriteRelays().getUrls())
   const encrypt = content => signer.get().nip44.encrypt(pubkey.get(), content)
 
@@ -653,17 +652,10 @@ export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
 
   const template = await encryptable.reconcile(encrypt)
 
-  if (window.location.origin.includes("localhost")) {
-    if (kind === MUTES) {
-      alert("Publishing mutes")
-      console.trace(template)
-    }
-  }
-
   try {
-    await createAndPublish({...template, content, relays})
+    await createAndPublish({...template, relays})
   } catch (error) {
-    console.error({...template, content, relays, error})
+    console.error({...template, relays, error})
   }
 }
 
@@ -788,9 +780,7 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   }
 
   const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  console.log("========== publishing read status")
   const rawTags = parseJson(await ensurePlaintext(prev))
-  console.log("========== got plaintext", rawTags)
   const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
 
   for (const [key, events] of Object.entries(eventsByKey)) {
@@ -802,14 +792,11 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   const json = JSON.stringify(tags)
 
-  console.log(
-    "=========== finished publishing read status",
-    await createAndPublish({
-      kind,
-      content: await signer.get().nip44.encrypt(pubkey.get(), json),
-      relays: hints.WriteRelays().getUrls(),
-    }),
-  )
+  await createAndPublish({
+    kind,
+    content: await signer.get().nip44.encrypt(pubkey.get(), json),
+    relays: hints.WriteRelays().getUrls(),
+  })
 }
 
 // Messages

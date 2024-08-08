@@ -378,8 +378,6 @@ export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $s
   $settingsEvents.find(e => e.pubkey === $pubkey && getIdentifier(e) === appDataKeys.USER_SETTINGS),
 )
 
-plaintext.subscribe(() => console.log("plaintext"))
-
 export const userSettingsPlaintext = derived(
   [plaintext, userSettingsEvent],
   ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id],
