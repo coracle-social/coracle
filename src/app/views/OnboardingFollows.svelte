@@ -2,7 +2,7 @@
   import {reject} from "ramda"
   import {quantify} from "hurdak"
   import {fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
-  import {Tags, getAddress} from "@welshman/util"
+  import {getPubkeyTagValues, getAddress} from "@welshman/util"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -56,11 +56,11 @@
   }
 
   const followAll = listEvent => {
-    follows = uniq([...follows, ...Tags.fromEvent(listEvent).values("p").valueOf()])
+    follows = uniq([...follows, ...getPubkeyTagValues(listEvent.tags)])
   }
 
   const unfollowAll = listEvent => {
-    follows = without(Tags.fromEvent(listEvent).values("p").valueOf(), follows)
+    follows = without(getPubkeyTagValues(listEvent.tags), follows)
   }
 
   const removeRelay = url => {
@@ -119,7 +119,7 @@
       <p class="text-xl font-bold">{title}</p>
       <p class="pb-5">{description}</p>
       <div class="absolute bottom-4 text-neutral-200">
-        {Tags.fromEvent(event).values("p").count()} people
+        {getPubkeyTagValues(event.tags).length} people
       </div>
     </Card>
   {/each}
@@ -140,7 +140,7 @@
 
 {#if showList}
   {@const {title, description} = fromPairs(listEvent.tags)}
-  {@const listPubkeys = Tags.fromEvent(listEvent).values("p").valueOf()}
+  {@const listPubkeys = uniq(getPubkeyTagValues(listEvent.tags))}
   <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{title}</p>

@@ -253,7 +253,7 @@ export const signer = withGetter(
     memoize($session => {
       const $signer = getSigner($session)
 
-      $signer.nip44.encrypt($session.pubkey, "test").then(
+      $signer?.nip44.encrypt($session.pubkey, "test").then(
         () => hasNip44.set(true),
         () => hasNip44.set(false),
       )
@@ -314,7 +314,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
     return event
   }
 
-  const rumor = repository.eventsByWrap.get(event.id)
+  let rumor = repository.eventsByWrap.get(event.id)
 
   if (rumor) {
     return rumor
@@ -325,29 +325,30 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   const signer = getSigner(session)
 
   if (signer) {
-    const rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
-
-    if (rumor && isHashedEvent(rumor)) {
-      tracker.copy(event.id, rumor.id)
-      relay.send("EVENT", rumor)
-
-      return rumor
+    try {
+      rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
+    } catch (e) {
+      // pass
     }
   }
 
   // Decrypt by group key
-  const sk = getRecipientKey(event)
+  const secret = getRecipientKey(event)
 
-  if (sk) {
-    const rumor = await Nip59.fromSecret(sk).unwrap(event as SignedEvent)
-
-    if (rumor && isHashedEvent(rumor)) {
-      tracker.copy(event.id, rumor.id)
-      relay.send("EVENT", rumor)
-
-      return rumor
+  if (secret) {
+    try {
+      rumor = await Nip59.fromSecret(secret).unwrap(event as SignedEvent)
+    } catch (e) {
+      // pass
     }
   }
+
+  if (rumor && isHashedEvent(rumor)) {
+    tracker.copy(event.id, rumor.id)
+    relay.send("EVENT", rumor)
+  }
+
+  return rumor
 }
 
 // Settings
@@ -381,7 +382,7 @@ plaintext.subscribe(() => console.log("plaintext"))
 
 export const userSettingsPlaintext = derived(
   [plaintext, userSettingsEvent],
-  ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id]
+  ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id],
 )
 
 export const userSettings = withGetter(
