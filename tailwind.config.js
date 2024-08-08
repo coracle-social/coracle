@@ -9,6 +9,8 @@ export default {
       none: 0,
       "nav-active": 1,
       "nav-item": 2,
+      "modal": 3,
+      "toast": 4,
     },
   },
   plugins: [daisyui],

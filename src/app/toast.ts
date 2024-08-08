@@ -1,5 +1,6 @@
 import {writable} from "svelte/store"
 import {randomId} from "@welshman/lib"
+import {copyToClipboard} from '@lib/html'
 
 export type Toast = {
   id: string
@@ -15,7 +16,7 @@ export const toast = writable<Toast | null>(null)
 
 export const pushToast = (
   {message = "", id = randomId()}: Partial<Toast>,
-  options: ToastOptions,
+  options: ToastOptions = {},
 ) => {
   toast.set({id, message, options})
 
@@ -25,3 +26,8 @@ export const pushToast = (
 }
 
 export const popToast = (id: string) => toast.update($t => ($t?.id === id ? null : $t))
+
+export const clip = (value: string) => {
+  copyToClipboard(value)
+  pushToast({message: "Copied to clipboard!"})
+}

@@ -2,11 +2,11 @@
   import "@src/app.css"
   import {page} from "$app/stores"
   import {fly} from "@lib/transition"
-  import {toast} from "@app/toast"
-  import {modals} from "@app/modal"
   import ModalBox from "@lib/components/ModalBox.svelte"
+  import Toast from "@app/components/Toast.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
+  import {modals} from "@app/modal"
 
   const login = async () => {
     const nl = await import("nostr-login")
@@ -43,23 +43,16 @@
       <slot />
     </div>
   </div>
-  <dialog bind:this={modal} class="modal modal-bottom sm:modal-middle">
+  <dialog bind:this={modal} class="modal modal-bottom sm:modal-middle !z-modal">
     {#if $page.state.modal}
       {#key $page.state.modal}
         <ModalBox {...modals.get($page.state.modal)} />
       {/key}
+      <Toast />
     {/if}
     <form method="dialog" class="modal-backdrop">
       <button />
     </form>
   </dialog>
-  {#if $toast}
-    {#key $toast.id}
-      <div transition:fly class="toast">
-        <div class="alert">
-          <span>{$toast.message}</span>
-        </div>
-      </div>
-    {/key}
-  {/if}
+  <Toast />
 </div>
