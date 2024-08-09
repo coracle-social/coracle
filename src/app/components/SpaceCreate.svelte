@@ -3,11 +3,12 @@
   import Field from '@lib/components/Field.svelte'
   import Icon from '@lib/components/Icon.svelte'
   import InfoNip29 from '@app/components/InfoNip29.svelte'
+  import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
   import {pushModal} from '@app/modal'
 
   const back = () => history.back()
 
-  const next = () => pushModal()
+  const next = () => pushModal(SpaceCreateFinish)
 
   const showNip29Info = () => pushModal(InfoNip29)
 

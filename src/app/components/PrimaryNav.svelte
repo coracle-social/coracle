@@ -6,6 +6,7 @@
 </style>
 
 <script lang="ts">
+  import {goto} from '$app/navigation'
   import Icon from "@lib/components/Icon.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
@@ -14,6 +15,8 @@
   import {pushModal} from "@app/modal"
 
   export const addSpace = () => pushModal(SpaceAdd)
+
+  export const browseSpaces = () => goto("/browse")
 </script>
 
 <div class="relative w-14 bg-base-100">
@@ -41,7 +44,7 @@
           <Icon size={7} icon="add-circle" />
         </div>
       </PrimaryNavItem>
-      <PrimaryNavItem title="Browse Spaces">
+      <PrimaryNavItem title="Browse Spaces" on:click={browseSpaces}>
         <div class="!flex w-10 items-center justify-center">
           <Icon size={6} icon="compass-big" />
         </div>

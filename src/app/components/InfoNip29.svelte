@@ -18,8 +18,8 @@
     as a user.
   </p>
   <div class="card flex-row justify-between">
-    relay.whatever.com
-    <button on:click={() => clip('relay.whatever.com')}>
+    devrelay.highlighter.com
+    <button on:click={() => clip('devrelay.highlighter.com')}>
       <Icon icon="copy" />
     </button>
   </div>

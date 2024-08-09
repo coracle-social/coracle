@@ -22,6 +22,7 @@
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
+  import LinkRound from "@assets/icons/Link Round.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
@@ -49,6 +50,7 @@
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
+    "link-round": LinkRound,
     plain: Plain,
     'remote-controller-minimalistic': RemoteControllerMinimalistic,
     settings: Settings,

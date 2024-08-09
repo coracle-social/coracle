@@ -1,6 +1,6 @@
 import type {ComponentType} from "svelte"
 import {randomId} from "@welshman/lib"
-import {pushState} from "$app/navigation"
+import {goto} from "$app/navigation"
 
 export const modals = new Map()
 
@@ -9,12 +9,9 @@ export const pushModal = (component: ComponentType, props: Record<string, any> =
 
   // TODO: fix memory leak here by listening to history somehow
   modals.set(id, {component, props})
-  pushState("", {modal: id})
+  goto("#" + id)
 
   return id
 }
 
-export const popModal = (id: string) => {
-  modals.delete(id)
-  history.back()
-}
+export const clearModal = () => goto('#')

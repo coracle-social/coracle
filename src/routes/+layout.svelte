@@ -1,12 +1,13 @@
 <script lang="ts">
   import "@src/app.css"
+  import {onMount} from 'svelte'
   import {page} from "$app/stores"
   import {fly} from "@lib/transition"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
-  import {modals} from "@app/modal"
+  import {modals, clearModal} from "@app/modal"
 
   const login = async () => {
     const nl = await import("nostr-login")
@@ -24,15 +25,25 @@
     nl.launch()
   }
 
-  let modal: HTMLDialogElement
+  let dialog: HTMLDialogElement
+
+  $: modal = $page.url.hash.slice(1)
 
   $: {
-    if ($page.state.modal) {
-      modal?.showModal()
+    if (modal) {
+      dialog?.showModal()
     } else {
-      modal?.close()
+      dialog?.close()
     }
   }
+
+  onMount(() => {
+    dialog.addEventListener('close', () => {
+      if (modal) {
+        clearModal()
+      }
+    })
+  })
 </script>
 
 <div data-theme="dark">
@@ -43,10 +54,10 @@
       <slot />
     </div>
   </div>
-  <dialog bind:this={modal} class="modal modal-bottom sm:modal-middle !z-modal">
-    {#if $page.state.modal}
-      {#key $page.state.modal}
-        <ModalBox {...modals.get($page.state.modal)} />
+  <dialog bind:this={dialog} class="modal modal-bottom sm:modal-middle !z-modal">
+    {#if modal}
+      {#key modal}
+        <ModalBox {...modals.get(modal)} />
       {/key}
       <Toast />
     {/if}
