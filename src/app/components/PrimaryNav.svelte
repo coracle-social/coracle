@@ -10,32 +10,32 @@
   import Icon from "@lib/components/Icon.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
-  import {getGroupName, getGroupPicture, makeGroupId} from "@app/domain"
-  import {userGroupRelaysByNom, groupsById} from "@app/state"
+  import {makeGroupId} from "@app/domain"
+  import {session} from "@app/base"
+  import {userGroupRelaysByNom, groupsById, deriveProfile} from "@app/state"
   import {pushModal} from "@app/modal"
 
   export const addSpace = () => pushModal(SpaceAdd)
 
   export const browseSpaces = () => goto("/browse")
+
+  const profile = deriveProfile($session?.pubkey)
 </script>
 
 <div class="relative w-14 bg-base-100">
   <div class="absolute -top-[44px] z-nav-active ml-2 h-[144px] w-12 bg-base-300" />
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem title="Hodlbod">
+      <PrimaryNavItem title={$profile?.name}>
         <div class="w-10 rounded-full border border-solid border-base-300">
-          <img
-            alt=""
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+          <img alt="" src={$profile?.picture} />
         </div>
       </PrimaryNavItem>
       {#each $userGroupRelaysByNom.entries() as [nom, relays] (nom)}
-        {@const event = $groupsById.get(makeGroupId(relays[0], nom))}
-        {@const name = getGroupName(event)}
-        <PrimaryNavItem title={name}>
+        {@const group = $groupsById.get(makeGroupId(relays[0], nom))}
+        <PrimaryNavItem title={group.name}>
           <div class="w-10 rounded-full border border-solid border-base-300">
-            <img alt={name} src={getGroupPicture(event)} />
+            <img alt={group.name} src={group.picture} />
           </div>
         </PrimaryNavItem>
       {/each}

@@ -7,6 +7,12 @@ export const GROUP_DELIMITER = `'`
 export const makeGroupId = (url: string, nom: string) =>
   [stripProtocol(url), nom].join(GROUP_DELIMITER)
 
+export const splitGroupId = (groupId: string) => {
+  const [url, nom] = groupId.split(GROUP_DELIMITER)
+
+  return [normalizeRelayUrl(url), nom]
+}
+
 export const getGroupNom = (e: TrustedEvent) => getIdentifier(e)?.split(GROUP_DELIMITER)[1]
 
 export const getGroupUrl = (e: TrustedEvent) => {

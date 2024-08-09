@@ -23,11 +23,14 @@
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
+  import Login from "@assets/icons/Login.svg?dataurl"
+  import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
   import UFO3 from "@assets/icons/UFO 3.svg?dataurl"
   import UserHeart from "@assets/icons/User Heart.svg?dataurl"
+  import UserRounded from "@assets/icons/User Rounded.svg?dataurl"
   import WiFiRouterRound from "@assets/icons/Wi-Fi Router Round.svg?dataurl"
 
   export let icon
@@ -51,11 +54,14 @@
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
     "link-round": LinkRound,
+    "login": Login,
+    "login-2": Login2,
     plain: Plain,
     'remote-controller-minimalistic': RemoteControllerMinimalistic,
     settings: Settings,
     "ufo-3": UFO3,
     "user-heart": UserHeart,
+    "user-rounded": UserRounded,
     "wifi-router-round": WiFiRouterRound,
   })
 
@@ -65,5 +71,5 @@
 </script>
 
 <div
-  class={cx($$props.class, "bg-base-content")}
-  style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px;" />
+  class={$$props.class}
+  style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px; background-color: currentcolor;" />

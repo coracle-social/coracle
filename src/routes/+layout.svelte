@@ -5,31 +5,22 @@
   import {fly} from "@lib/transition"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
+  import Landing from "@app/components/Landing.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
-
-  const login = async () => {
-    const nl = await import("nostr-login")
-
-    nl.init({
-      noBanner: true,
-      title: "Welcome to Flotilla!",
-      description: "Log in with your Nostr account or sign up to join.",
-      methods: ["connect", "extension", "local"],
-      onAuth(npub: string) {
-        console.log(npub)
-      },
-    })
-
-    nl.launch()
-  }
+  import {session} from "@app/base"
 
   let dialog: HTMLDialogElement
 
-  $: modal = $page.url.hash.slice(1)
+  $: modalId = $page.url.hash.slice(1)
+  $: modal = modals.get(modalId)
 
   $: {
+    if (!modal && !$session) {
+      modal = {component: Landing}
+    }
+
     if (modal) {
       dialog?.showModal()
     } else {
@@ -57,13 +48,15 @@
   <dialog bind:this={dialog} class="modal modal-bottom sm:modal-middle !z-modal">
     {#if modal}
       {#key modal}
-        <ModalBox {...modals.get(modal)} />
+        <ModalBox {...modal} />
       {/key}
       <Toast />
     {/if}
-    <form method="dialog" class="modal-backdrop">
-      <button />
-    </form>
+    {#if $session}
+      <form method="dialog" class="modal-backdrop">
+        <button />
+      </form>
+    {/if}
   </dialog>
   <Toast />
 </div>

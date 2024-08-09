@@ -2,25 +2,24 @@ import {writable} from "svelte/store"
 import {randomId} from "@welshman/lib"
 import {copyToClipboard} from '@lib/html'
 
-export type Toast = {
-  id: string
+export type ToastParams = {
   message: string
-  options: ToastOptions
+  timeout?: number
+  theme?: "error"
 }
 
-export type ToastOptions = {
-  timeout?: number
+export type Toast = ToastParams & {
+  id: string
 }
 
 export const toast = writable<Toast | null>(null)
 
-export const pushToast = (
-  {message = "", id = randomId()}: Partial<Toast>,
-  options: ToastOptions = {},
-) => {
-  toast.set({id, message, options})
+export const pushToast = (params: ToastParams) => {
+  const id = randomId()
 
-  setTimeout(() => popToast(id), options.timeout || 5000)
+  toast.set({id, ...params})
+
+  setTimeout(() => popToast(id), params.timeout || 5000)
 
   return id
 }

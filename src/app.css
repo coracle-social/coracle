@@ -89,3 +89,11 @@
 .subheading {
   @apply text-xl text-stark-content text-center;
 }
+
+.link {
+  @apply text-primary underline cursor-pointer;
+}
+
+.input input::placeholder {
+  opacity: 0.5;
+}

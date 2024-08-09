@@ -1,8 +1,12 @@
 <script context="module" lang="ts">
+  import {emitter} from "@app/modal"
+
   const modalHeight = tweened(0, {
 		duration: 700,
 		easing: quintOut
 	})
+
+  emitter.on('close', () => modalHeight.set(0))
 </script>
 
 <script lang="ts">
@@ -13,7 +17,7 @@
   import {last} from '@welshman/lib'
 
 	export let component
-	export let props
+	export let props = {}
 
   let box: HTMLElement
   let content: HTMLElement
@@ -21,7 +25,7 @@
 
   onMount(() => {
     naturalHeight = content.clientHeight + 48
-    $modalHeight = naturalHeight
+    modalHeight.set(naturalHeight)
   })
 </script>
 

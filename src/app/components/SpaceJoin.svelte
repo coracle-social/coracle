@@ -1,45 +1,85 @@
 <script lang="ts">
   import {goto} from '$app/navigation'
   import CardButton from '@lib/components/CardButton.svelte'
+  import Button from "@lib/components/Button.svelte"
   import Field from '@lib/components/Field.svelte'
   import Icon from '@lib/components/Icon.svelte'
   import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
+  import {splitGroupId, GROUP_DELIMITER} from '@app/domain'
+  import {getRelayInfo, getGroup} from '@app/commands'
   import {pushModal} from '@app/modal'
+  import {pushToast} from '@app/toast'
+  import {relayInfo} from '@app/state'
 
   const back = () => history.back()
 
   const browse = () => goto("/browse", {state: {}})
 
-  const join = () => {}
+  const tryJoin = async () => {
+    const [url, nom] = splitGroupId(id)
 
-  let link = ""
+    const info = await getRelayInfo(url)
 
-  $: linkIsValid = Boolean(link.match(/.+\..+'.+/))
+    if (!info) {
+      return pushToast({
+        theme: "error",
+        message: "Sorry, we weren't able to find that relay."
+      })
+    }
+
+    if (!info.supported_nips?.includes(29)) {
+      return pushToast({
+        theme: "error",
+        message: "Sorry, it looks like that relay doesn't support nostr groups."
+      })
+    }
+
+    const group = await getGroup(id)
+    console.log(info, group)
+  }
+
+  const join = async () => {
+    loading = true
+
+    try {
+      await tryJoin()
+    } finally {
+      loading = false
+    }
+  }
+
+  let id = "wss://devrelay.highlighter.com'group628195"
+  let loading = false
+
+  $: linkIsValid = Boolean(id.match(/.+\..+'.+/))
 </script>
 
-<div class="column gap-4">
-  <h1 class="heading">Join a Space</h1>
-  <p class="text-center">
-    Enter an invite link below to join an existing space.
-  </p>
+<form class="column gap-4" on:submit|preventDefault={join}>
+  <div class="py-2">
+    <h1 class="heading">Join a Space</h1>
+    <p class="text-center">
+      Enter an invite link below to join an existing space.
+    </p>
+  </div>
   <Field>
     <p slot="label">Invite Link*</p>
     <label class="input input-bordered w-full flex items-center gap-2" slot="input">
       <Icon icon="link-round" />
-      <input bind:value={link} class="grow" type="text" />
+      <input bind:value={id} class="grow" type="text" />
     </label>
   </Field>
   <CardButton icon="compass" title="Don't have an invite?" on:click={browse}>
     Browse other spaces on the discover page.
   </CardButton>
   <div class="flex flex-row justify-between items-center gap-4">
-    <button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
-    </button>
-    <button class="btn btn-primary" on:click={join} disabled={!linkIsValid}>
+    </Button>
+    <Button type="submit" class="btn btn-primary" disabled={!linkIsValid || loading}>
+      <span class="loading loading-spinner opacity-0" class:opacity-100={loading} />
       Join Space
-      <Icon icon="alt-arrow-right" class="!bg-base-300" />
-    </button>
+      <Icon icon="alt-arrow-right" />
+    </Button>
   </div>
-</div>
+</form>

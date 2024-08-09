@@ -1,5 +1,6 @@
 <script lang="ts">
   import InputProfilePicture from '@lib/components/InputProfilePicture.svelte'
+  import Button from "@lib/components/Button.svelte"
   import Field from '@lib/components/Field.svelte'
   import Icon from '@lib/components/Icon.svelte'
   import InfoNip29 from '@app/components/InfoNip29.svelte'
@@ -10,18 +11,18 @@
 
   const next = () => pushModal(SpaceCreateFinish)
 
-  const showNip29Info = () => pushModal(InfoNip29)
-
   let file: File
   let name = ""
   let relay = ""
 </script>
 
-<div class="column gap-4">
-  <h1 class="heading">Customize your Space</h1>
-  <p class="text-center">
-    Give people a few details to go on. You can always change this later.
-  </p>
+<form class="column gap-4" on:submit|preventDefault={next}>
+  <div class="py-2">
+    <h1 class="heading">Customize your Space</h1>
+    <p class="text-center">
+      Give people a few details to go on. You can always change this later.
+    </p>
+  </div>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file />
   </div>
@@ -40,19 +41,19 @@
     </label>
     <p slot="info">
       This should be a NIP-29 compatible nostr relay where you'd like to host your space.
-      <button class="text-primary underline cursor-pointer" on:click={showNip29Info}>
+      <Button class="link" on:click={() => pushModal(InfoNip29)}>
         More information
-      </button>
+      </Button>
     </p>
   </Field>
   <div class="flex flex-row justify-between items-center gap-4">
-    <button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
-    </button>
-    <button class="btn btn-primary" on:click={next}>
+    </Button>
+    <Button type="submit" class="btn btn-primary">
       Next
       <Icon icon="alt-arrow-right" class="!bg-base-300" />
-    </button>
+    </Button>
   </div>
-</div>
+</form>
