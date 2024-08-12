@@ -38,6 +38,7 @@ import {
   pushToKey,
   pushToMapKey,
   tryCatch,
+  memoize,
 } from "@welshman/lib"
 import {
   FEEDS,
@@ -99,7 +100,7 @@ import {
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
-import {fuzzy, memoize, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
+import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {
   isLike,

@@ -24,7 +24,6 @@
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
   import {isNil} from "ramda"
   import {onMount} from "svelte"
-  import {memoize} from "src/util/misc"
   import {logUsage} from "src/app/state"
   import {
     router,
@@ -394,7 +393,7 @@
 
   onMount(() => {
     const unsubPage = router.page.subscribe(
-      memoize($page => {
+      lib.memoize($page => {
         if ($page) {
           logUsage($page.path)
         }

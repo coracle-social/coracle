@@ -184,20 +184,6 @@ export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
 }
 
-export const memoize = <T>(f: (...args: any[]) => T) => {
-  let prevArgs
-  let result: T
-
-  return (...args) => {
-    if (!equals(prevArgs, args)) {
-      prevArgs = args
-      result = f(...args)
-    }
-
-    return result
-  }
-}
-
 // https://stackoverflow.com/a/11900218/1467342
 export function roughSizeOfObject(o, max = Infinity) {
   const seen = new Set()
@@ -252,33 +238,6 @@ export function roughSizeOfObject(o, max = Infinity) {
 export const sumBy = (f, xs) => sum(xs.map(f))
 
 export const ensureProto = url => (url.includes("://") ? url : "https://" + url)
-
-export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<U[]>) => {
-  const queue = []
-
-  const _execute = async () => {
-    const items = queue.splice(0)
-    const results = await execute(pluck("request", items))
-
-    if (results.length !== items.length) {
-      logger.warn("Execute must return a promise for each request", results, items)
-    }
-
-    results.forEach(async (r, i) => items[i].deferred.resolve(await r))
-  }
-
-  return (request: T): Promise<U> => {
-    const deferred = defer<U>()
-
-    if (queue.length === 0) {
-      setTimeout(_execute, t)
-    }
-
-    queue.push({request, deferred})
-
-    return deferred
-  }
-}
 
 export const asArray = v => ensurePlural(v).filter(identity)
 

@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, bech32ToHex, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
+import {Worker, bech32ToHex, batcher, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -33,7 +33,7 @@ import {
   HANDLER_RECOMMENDATION,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {updateIn, createBatcher} from "src/util/misc"
+import {updateIn} from "src/util/misc"
 import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
@@ -84,7 +84,7 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
 // Handles/Zappers
 
-const fetchHandle = createBatcher(500, async (handles: string[]) => {
+const fetchHandle = batcher(500, async (handles: string[]) => {
   const data =
     (await tryFunc(async () => {
       const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
@@ -103,7 +103,7 @@ export const loadHandle = cached({
   getValue: ([handle]) => fetchHandle(handle),
 })
 
-const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
+const fetchZapper = batcher(3000, async (lnurls: string[]) => {
   const data =
     (await tryFunc(async () => {
       // Dufflepud expects plaintext but we store lnurls encoded
