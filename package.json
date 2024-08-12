@@ -38,8 +38,7 @@
     "typescript": "^5.4.5",
     "vite": "^5.2.8",
     "vite-plugin-html-config": "^1.0.11",
-    "vite-plugin-mkcert": "^1.17.5",
-    "vite-plugin-node-polyfills": "^0.17.0",
+    "vite-plugin-node-polyfills": "^0.2.0",
     "vite-plugin-pwa": "^0.17.5"
   },
   "dependencies": {
