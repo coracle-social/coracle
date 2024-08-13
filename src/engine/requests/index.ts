@@ -266,7 +266,7 @@ export const createPeopleLoader = ({
   }
 }
 
-export const feedLoader = new FeedLoader<TrustedEvent>({
+export const feedLoader = new FeedLoader({
   request: async ({relays, filters, onEvent}) => {
     if (relays?.length > 0) {
       await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
@@ -328,7 +328,7 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
   },
 })
 
-export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
+export const loadAll = (feed, opts: LoadOpts = {}) => {
   const loading = writable(true)
 
   const stop = () => loading.set(false)

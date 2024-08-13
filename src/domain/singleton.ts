@@ -1,7 +1,7 @@
 import {addToKey} from "@welshman/lib"
 import {Address, isShareableRelayUrl} from "@welshman/util"
-import {Encryptable} from "src/domain/util"
-import type {DecryptedEvent} from "src/domain/util"
+import {Encryptable} from "@welshman/domain"
+import type {DecryptedEvent} from "@welshman/domain"
 import {parseJson} from "src/util/misc"
 
 export type SingletonParams = {
