@@ -1,6 +1,6 @@
 import {derived} from "svelte/store"
-import {memoize} from '@welshman/lib'
-import type {SignedEvent} from "@welshman/util"
+import {memoize, assoc} from '@welshman/lib'
+import type {CustomEvent} from '@welshman/util'
 import {Repository, createEvent, Relay} from "@welshman/util"
 import {getter} from "@welshman/store"
 import {NetworkContext, Tracker} from "@welshman/net"
@@ -23,9 +23,16 @@ export const pk = synced<string | null>('pk', null)
 
 export const sessions = synced<Record<string, Session>>('sessions', {})
 
+export const getSessions = getter(sessions)
+
 export const session = derived([pk, sessions], ([$pk, $sessions]) => $pk ? $sessions[$pk] : null)
 
 export const getSession = getter(session)
+
+export const addSession = (session: Session) => {
+  sessions.update(assoc(session.pubkey, session))
+  pk.set(session.pubkey)
+}
 
 export const makeSigner = memoize((session: Session) => {
   switch (session?.method) {
@@ -33,7 +40,7 @@ export const makeSigner = memoize((session: Session) => {
       return new Nip07Signer()
     case "privkey":
       return new Nip01Signer(session.secret!)
-    case "connect":
+    case "nip46":
       return new Nip46Signer(Nip46Broker.get(session.pubkey, session.secret!, session.handler!))
     default:
       return null
@@ -47,8 +54,8 @@ export const getSigner = getter(signer)
 const seenChallenges = new Set()
 
 Object.assign(NetworkContext, {
-  onEvent: (url: string, event: SignedEvent) => tracker.track(event.id, url),
-  isDeleted: (url: string, event: SignedEvent) => repository.isDeleted(event),
+  onEvent: (url: string, event: CustomEvent) => tracker.track(event.id, url),
+  isDeleted: (url: string, event: CustomEvent) => repository.isDeleted(event),
   onAuth: async (url: string, challenge: string) => {
     if (seenChallenges.has(challenge)) {
       return

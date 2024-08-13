@@ -5,11 +5,9 @@
   import Field from '@lib/components/Field.svelte'
   import Icon from '@lib/components/Icon.svelte'
   import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
-  import {splitGroupId, GROUP_DELIMITER} from '@app/domain'
-  import {getRelayInfo, getGroup} from '@app/commands'
   import {pushModal} from '@app/modal'
   import {pushToast} from '@app/toast'
-  import {relayInfo} from '@app/state'
+  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup} from '@app/state'
 
   const back = () => history.back()
 
@@ -18,7 +16,7 @@
   const tryJoin = async () => {
     const [url, nom] = splitGroupId(id)
 
-    const info = await getRelayInfo(url)
+    const info = await loadRelay(url)
 
     if (!info) {
       return pushToast({
@@ -34,8 +32,7 @@
       })
     }
 
-    const group = await getGroup(id)
-    console.log(info, group)
+    const group = await loadGroup(id)
   }
 
   const join = async () => {

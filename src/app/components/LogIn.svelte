@@ -8,13 +8,14 @@
   import InfoNostr from '@app/components/LogIn.svelte'
   import {pushModal, clearModal} from '@app/modal'
   import {pushToast} from '@app/toast'
-  import {getProfile, getFollows, getMutes, getHandleInfo, addSession} from '@app/commands'
+  import {addSession} from '@app/base'
+  import {loadProfile, loadFollows, loadMutes, loadHandle} from '@app/state'
 
   const back = () => history.back()
 
   const tryLogin = async () => {
     const secret = makeSecret()
-    const handle = await getHandleInfo(`${username}@${handler.domain}`)
+    const handle = await loadHandle(`${username}@${handler.domain}`)
 
     if (!handle?.pubkey) {
       return pushToast({
@@ -26,9 +27,9 @@
     const {pubkey, relays = []} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
     const [profile, success] = await Promise.all([
-      getProfile(pubkey, relays),
-      getFollows(pubkey, relays),
-      getMutes(pubkey, relays),
+      loadProfile(pubkey, relays),
+      loadFollows(pubkey, relays),
+      loadMutes(pubkey, relays),
       broker.connect(),
     ])
 

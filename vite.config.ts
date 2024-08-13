@@ -3,6 +3,9 @@ import svg from "@poppanator/sveltekit-svg"
 import {defineConfig} from "vite"
 
 export default defineConfig({
+  server: {
+    port: 1847,
+  },
   plugins: [
     sveltekit(),
     svg({

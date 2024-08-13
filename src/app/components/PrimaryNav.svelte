@@ -10,16 +10,16 @@
   import Icon from "@lib/components/Icon.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
-  import {makeGroupId} from "@app/domain"
   import {session} from "@app/base"
-  import {userGroupRelaysByNom, groupsById, deriveProfile} from "@app/state"
+  import {deriveGroupMembership, makeGroupId, getGroup, deriveProfile} from "@app/state"
   import {pushModal} from "@app/modal"
 
   export const addSpace = () => pushModal(SpaceAdd)
 
   export const browseSpaces = () => goto("/browse")
 
-  const profile = deriveProfile($session?.pubkey)
+  $: profile = deriveProfile($session?.pubkey)
+  $: membership = deriveGroupMembership($session?.pubkey)
 </script>
 
 <div class="relative w-14 bg-base-100">
@@ -27,17 +27,24 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem title={$profile?.name}>
-        <div class="w-10 rounded-full border border-solid border-base-300">
-          <img alt="" src={$profile?.picture} />
+        <div class="!flex w-10 items-center justify-center rounded-full border border-solid border-base-300">
+          {#if $profile?.picture}
+            <img alt="" src={$profile.picture} />
+          {:else}
+            <Icon icon="user-rounded" size={7} />
+          {/if}
         </div>
       </PrimaryNavItem>
-      {#each $userGroupRelaysByNom.entries() as [nom, relays] (nom)}
-        {@const group = $groupsById.get(makeGroupId(relays[0], nom))}
-        <PrimaryNavItem title={group.name}>
-          <div class="w-10 rounded-full border border-solid border-base-300">
-            <img alt={group.name} src={group.picture} />
-          </div>
-        </PrimaryNavItem>
+      {#each Array.from($membership?.ids || []) as groupId (groupId)}
+        {#await getGroup(groupId)}
+          <!-- pass -->
+        {:then group}
+          <PrimaryNavItem title={group?.name}>
+            <div class="w-10 rounded-full border border-solid border-base-300">
+              <img alt={group?.name} src={group?.picture} />
+            </div>
+          </PrimaryNavItem>
+        {/await}
       {/each}
       <PrimaryNavItem title="Add Space" on:click={addSpace}>
         <div class="!flex w-10 items-center justify-center">
