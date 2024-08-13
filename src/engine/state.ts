@@ -82,6 +82,7 @@ import {
   isHashedEvent,
   getRelayTags,
   getRelayTagValues,
+  getPubkeyTagValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip07Signer, Nip01Signer, Nip46Signer, Nip46Broker, decrypt} from "@welshman/signer"
@@ -1104,7 +1105,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
 export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
-  getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
+  getChannelId([event.pubkey, ...getPubkeyTagValues(event.tags)])
 
 export const getChannelSeenKey = (id: string) =>
   crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
