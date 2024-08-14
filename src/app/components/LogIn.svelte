@@ -17,6 +17,7 @@
   const tryLogin = async () => {
     const secret = makeSecret()
     const handle = await loadHandle(`${username}@${handler.domain}`)
+    console.log(handle)
 
     if (!handle?.pubkey) {
       return pushToast({

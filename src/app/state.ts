@@ -8,36 +8,46 @@ import type {SubscribeRequest} from '@welshman/net'
 import {publish, subscribe} from '@welshman/net'
 import {decrypt} from '@welshman/signer'
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
-import {synced, parseJson} from '@lib/util'
+import {parseJson} from '@lib/util'
 import type {Session, Handle, Relay} from '@app/types'
 import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, signer} from "@app/base"
 
 // Utils
 
 export const createCollection = <T>({
+  name,
   store,
   getKey,
-  isStale,
   load,
 }: {
+  name: string,
   store: Readable<T[]>,
   getKey: (item: T) => string,
-  isStale: (item: T) => boolean,
   load: (key: string, ...args: any) => Promise<any>
 }) => {
   const indexStore = derived(store, $items => indexBy(getKey, $items))
   const getIndex = getter(indexStore)
-
   const getItem = (key: string) => getIndex().get(key)
+  const pending = new Map<string, Promise<Maybe<T>>>
 
   const loadItem = async (key: string, ...args: any[]) => {
-    const item = getIndex().get(key)
-
-    if (item && !isStale(item)) {
-      return item
+    if (getFreshness(name, key) > now() - 3600) {
+      return getIndex().get(key)
     }
 
-    await load(key, ...args)
+    if (pending.has(key)) {
+      await pending.get(key)
+    } else {
+      setFreshness(name, key, now())
+
+      const promise = load(key, ...args)
+
+      pending.set(key, promise)
+
+      await promise
+
+      pending.delete(key)
+    }
 
     return getIndex().get(key)
   }
@@ -61,9 +71,7 @@ export const load = (request: SubscribeRequest) =>
   new Promise<Maybe<CustomEvent>>(resolve => {
     const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
 
-    sub.emitter.on('event', (url: string, event: SignedEvent) => {
-      const e: CustomEvent = {...event, fetched_at: now()}
-
+    sub.emitter.on('event', (url: string, e: SignedEvent) => {
       repository.publish(e)
       sub.close()
       resolve(e)
@@ -104,6 +112,25 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
   await publish({event, relays})
 }
 
+// Freshness
+
+export const freshness = withGetter(writable<Record<string, number>>({}))
+
+export const getFreshnessKey = (ns: string, key: string) => `${ns}:${key}`
+
+export const getFreshness = (ns: string, key: string) => freshness.get()[getFreshnessKey(ns, key)] || 0
+
+export const setFreshness = (ns: string, key: string, ts: number) => freshness.update(assoc(getFreshnessKey(ns, key), ts))
+
+export const setFreshnessBulk = (ns: string, updates: Record<string, number>) =>
+  freshness.update($freshness => {
+    for (const [key, ts] of Object.entries(updates)) {
+      $freshness[key] = ts
+    }
+
+    return $freshness
+  })
+
 // Plaintext
 
 export const plaintext = withGetter(writable<Record<string, string>>({}))
@@ -138,23 +165,23 @@ export const {
   loadItem: loadRelay,
   // getItem: getRelay,
 } = createCollection({
-    store: relays,
-    getKey: (relay: Relay) => relay.url,
-    isStale: (relay: Relay) => relay.fetched_at < now() - 3600,
-    load: batcher(800, async (urls: string[]) => {
-      const urlSet = new Set(urls)
-      const res = await postJson(`${DUFFLEPUD_URL}/relay/info`, {urls: Array.from(urlSet)})
-      const index = indexBy((item: any) => item.url, res?.data || [])
-      const items: Relay[] = urls.map(url => {
-        const {info = {}} = index.get(url) || {}
+  name: 'relays',
+  store: relays,
+  getKey: (relay: Relay) => relay.url,
+  load: batcher(800, async (urls: string[]) => {
+    const urlSet = new Set(urls)
+    const res = await postJson(`${DUFFLEPUD_URL}/relay/info`, {urls: Array.from(urlSet)})
+    const index = indexBy((item: any) => item.url, res?.data || [])
+    const items: Relay[] = urls.map(url => {
+      const {info = {}} = index.get(url) || {}
 
-        return {...info, url, fetched_at: now()}
-      })
+      return {...info, url}
+    })
 
-      relays.update($relays => uniqBy($relay => $relay.url, [...$relays, ...items]))
+    relays.update($relays => uniqBy($relay => $relay.url, [...$relays, ...items]))
 
-      return items
-    }),
+    return items
+  }),
 })
 
 // Handles
@@ -162,29 +189,29 @@ export const {
 export const handles = writable<Handle[]>([])
 
 export const {
-  indexStore: handlesByPubkey,
-  getIndex: getHandlesByPubkey,
+  indexStore: handlesByNip05,
+  getIndex: getHandlesByNip05,
   deriveItem: deriveHandle,
   loadItem: loadHandle,
   // getItem: getHandle,
 } = createCollection({
-    store: handles,
-    getKey: (handle: Handle) => handle.pubkey,
-    isStale: (handle: Handle) => handle.fetched_at < now() - 3600,
-    load: batcher(800, async (nip05s: string[]) => {
-      const nip05Set = new Set(nip05s)
-      const res = await postJson(`${DUFFLEPUD_URL}/handle/info`, {handles: Array.from(nip05Set)})
-      const index = indexBy((item: any) => item.handle, res?.data || [])
-      const items: Handle[] = nip05s.map(nip05 => {
-        const {info = {}} = index.get(nip05) || {}
+  name: 'handles',
+  store: handles,
+  getKey: (handle: Handle) => handle.nip05,
+  load: batcher(800, async (nip05s: string[]) => {
+    const nip05Set = new Set(nip05s)
+    const res = await postJson(`${DUFFLEPUD_URL}/handle/info`, {handles: Array.from(nip05Set)})
+    const index = indexBy((item: any) => item.handle, res?.data || [])
+    const items: Handle[] = nip05s.map(nip05 => {
+      const {info = {}} = index.get(nip05) || {}
 
-        return {...info, nip05, fetched_at: now()}
-      })
+      return {...info, nip05}
+    })
 
-      handles.update($handles => uniqBy($handle => $handle.nip05, [...$handles, ...items]))
+    handles.update($handles => uniqBy($handle => $handle.nip05, [...$handles, ...items]))
 
-      return items
-    }),
+    return items
+  }),
 })
 
 // Profiles
@@ -203,15 +230,15 @@ export const {
   loadItem: loadProfile,
   // getItem: getProfile,
 } = createCollection({
-    store: profiles,
-    getKey: profile => profile.event.pubkey,
-    isStale: (profile: PublishedProfile) => profile.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-      load({
-        ...request,
-        relays: [...relays, ...INDEXER_RELAYS],
-        filters: [{kinds: [PROFILE], authors: [pubkey]}],
-      }),
+  name: 'profiles',
+  store: profiles,
+  getKey: profile => profile.event.pubkey,
+  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+    load({
+      ...request,
+      relays: [...relays, ...INDEXER_RELAYS],
+      filters: [{kinds: [PROFILE], authors: [pubkey]}],
+    }),
 })
 
 // Relay selections
@@ -231,15 +258,15 @@ export const {
   loadItem: loadRelaySelections,
   // getItem: getRelaySelections,
 } = createCollection({
-    store: relaySelections,
-    getKey: relaySelections => relaySelections.pubkey,
-    isStale: (relaySelections: CustomEvent) => relaySelections.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-      load({
-        ...request,
-        relays: [...relays, ...INDEXER_RELAYS],
-        filters: [{kinds: [RELAYS], authors: [pubkey]}],
-      })
+  name: 'relaySelections',
+  store: relaySelections,
+  getKey: relaySelections => relaySelections.pubkey,
+  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+    load({
+      ...request,
+      relays: [...relays, ...INDEXER_RELAYS],
+      filters: [{kinds: [RELAYS], authors: [pubkey]}],
+    })
 })
 
 // Follows
@@ -263,15 +290,15 @@ export const {
   loadItem: loadFollows,
   // getItem: getFollows,
 } = createCollection({
-    store: follows,
-    getKey: follows => follows.event.pubkey,
-    isStale: (follows: PublishedList) => follows.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-      load({
-        ...request,
-        relays: [...relays, ...INDEXER_RELAYS],
-        filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
-      })
+  name: 'follows',
+  store: follows,
+  getKey: follows => follows.event.pubkey,
+  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+    load({
+      ...request,
+      relays: [...relays, ...INDEXER_RELAYS],
+      filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
+    })
 })
 
 // Mutes
@@ -295,15 +322,15 @@ export const {
   loadItem: loadMutes,
   // getItem: getMutes,
 } = createCollection({
-    store: mutes,
-    getKey: mute => mute.event.pubkey,
-    isStale: (mutes: PublishedList) => mutes.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-      load({
-        ...request,
-        relays: [...relays, ...INDEXER_RELAYS],
-        filters: [{kinds: [MUTES], authors: [pubkey]}],
-      })
+  name: 'mutes',
+  store: mutes,
+  getKey: mute => mute.event.pubkey,
+  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+    load({
+      ...request,
+      relays: [...relays, ...INDEXER_RELAYS],
+      filters: [{kinds: [MUTES], authors: [pubkey]}],
+    })
 })
 
 // Groups
@@ -360,18 +387,18 @@ export const {
   loadItem: loadGroup,
   // getItem: getGroup,
 } = createCollection({
-    store: groups,
-    getKey: (group: PublishedGroup) => group.nom,
-    isStale: (group: PublishedGroup) => group.event.fetched_at < now() - 3600,
-    load: (nom: string, relays: string[] = [], request: Partial<SubscribeRequest> = {}) =>
-      Promise.all([
-        ...relays.map(loadRelay),
-        load({
-          ...request,
-          relays,
-          filters: [{kinds: [GROUP_META], '#d': [nom]}],
-        }),
-      ])
+  name: 'groups',
+  store: groups,
+  getKey: (group: PublishedGroup) => group.nom,
+  load: (nom: string, relays: string[] = [], request: Partial<SubscribeRequest> = {}) =>
+    Promise.all([
+      ...relays.map(loadRelay),
+      load({
+        ...request,
+        relays,
+        filters: [{kinds: [GROUP_META], '#d': [nom]}],
+      }),
+    ])
 })
 
 // Qualified groups
@@ -433,9 +460,9 @@ export const {
   loadItem: loadGroupMembership,
   // getItem: getGroupMembership,
 } = createCollection({
+    name: 'groupMemberships',
     store: groupMemberships,
     getKey: groupMembership => groupMembership.event.pubkey,
-    isStale: (groupMembership: PublishedGroupMembership) => groupMembership.event.fetched_at < now() - 3600,
     load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
         ...request,

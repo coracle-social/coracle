@@ -44,6 +44,7 @@
     "@welshman/store": "^0.0.2",
     "@welshman/util": "^0.0.25",
     "daisyui": "^4.12.10",
+    "idb": "^8.0.0",
     "nostr-tools": "^2.7.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "throttle-debounce": "^5.0.2"
