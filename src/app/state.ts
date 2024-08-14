@@ -1,4 +1,5 @@
 import type {Readable} from "svelte/store"
+import type {FuseResult} from 'fuse.js'
 import {writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
 import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
@@ -8,7 +9,7 @@ import type {SubscribeRequest} from '@welshman/net'
 import {publish, subscribe} from '@welshman/net'
 import {decrypt} from '@welshman/signer'
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
-import {parseJson} from '@lib/util'
+import {parseJson, createSearch} from '@lib/util'
 import type {Session, Handle, Relay} from '@app/types'
 import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, signer} from "@app/base"
 
@@ -357,6 +358,7 @@ export const getGroupPicture = (e?: CustomEvent) => e?.tags.find(nthEq(0, "pictu
 export type Group = {
   nom: string,
   name?: string,
+  about?: string,
   picture?: string,
   event?: CustomEvent
 }
@@ -367,10 +369,11 @@ export type PublishedGroup = Omit<Group, "event"> & {
 
 export const readGroup = (event: CustomEvent) => {
   const nom = getIdentifier(event)!
-  const name = event?.tags.find(nthEq(0, "name"))?.[1]
+  const name = event?.tags.find(nthEq(0, "name"))?.[1] || "[no name]"
+  const about = event?.tags.find(nthEq(0, "about"))?.[1] || ""
   const picture = event?.tags.find(nthEq(0, "picture"))?.[1]
 
-  return {nom, name, picture, event}
+  return {nom, name, about, picture, event}
 }
 
 export const groups = deriveEventsMapped<PublishedGroup>({
@@ -400,6 +403,22 @@ export const {
       }),
     ])
 })
+
+export const searchGroups = derived(
+  groups,
+  $groups =>
+    createSearch($groups, {
+      getValue: (group: PublishedGroup) => group.nom,
+      sortFn: (result: FuseResult<PublishedGroup>) => {
+        const scale = result.item.picture ? 0.5 : 1
+
+        return result.score! * scale
+      },
+      fuseOptions: {
+        keys: ["name", {name: "about", weight: 0.3}],
+      },
+    })
+)
 
 // Qualified groups
 

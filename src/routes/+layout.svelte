@@ -65,7 +65,7 @@
     <div class="flex h-screen">
       <PrimaryNav />
       <SecondaryNav />
-      <div class="flex-grow bg-base-200">
+      <div class="flex-grow bg-base-200 max-h-screen overflow-auto">
         <slot />
       </div>
     </div>

@@ -20,9 +20,9 @@
     If you do decide to join someone else's, make sure to follow their directions for registering
     as a user.
   </p>
-  <div class="card flex-row justify-between">
-    devrelay.highlighter.com
-    <Button on:click={() => clip('devrelay.highlighter.com')}>
+  <div class="card2 flex-row justify-between">
+    groups.fiatjaf.com
+    <Button on:click={() => clip('groups.fiatjaf.com')}>
       <Icon icon="copy" />
     </Button>
   </div>

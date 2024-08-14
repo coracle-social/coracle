@@ -18,7 +18,7 @@
   <CardButton icon="add-circle" title="Get started" on:click={startCreate}>
     Just a few questions and you'll be on your way.
   </CardButton>
-  <div class="card column gap-4">
+  <div class="card2 column gap-4">
     <h2 class="subheading">Have an invite?</h2>
     <Button class="btn btn-primary" on:click={startJoin}>
       Join a Space

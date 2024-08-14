@@ -19,12 +19,14 @@
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
   import FireMinimalistic from "@assets/icons/Fire Minimalistic.svg?dataurl"
   import GallerySend from "@assets/icons/Gallery Send.svg?dataurl"
+  import Ghost from "@assets/icons/Ghost.svg?dataurl"
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
+  import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
@@ -52,12 +54,14 @@
     "compass-big": CompassBig,
     "fire-minimalistic": FireMinimalistic,
     "gallery-send": GallerySend,
+    "ghost": Ghost,
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
     "link-round": LinkRound,
     "login": Login,
     "login-2": Login2,
+    'magnifer': Magnifer,
     'pallete-2': Pallete2,
     plain: Plain,
     'remote-controller-minimalistic': RemoteControllerMinimalistic,

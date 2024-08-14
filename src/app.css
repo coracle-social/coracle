@@ -72,7 +72,7 @@
   background-color: var(--stark-content);
 }
 
-.card {
+.card2 {
   padding: 1rem;
   background-color: oklch(var(--b2) / 1);
   border-radius: var(--rounded-box, 1rem);
@@ -82,12 +82,24 @@
   @apply flex flex-col;
 }
 
+.center {
+  @apply flex justify-center items-center;
+}
+
+.content {
+  @apply max-w-2xl w-full p-12 m-auto;
+}
+
 .heading {
   @apply text-2xl text-stark-content text-center;
 }
 
 .subheading {
   @apply text-xl text-stark-content text-center;
+}
+
+.superheading {
+  @apply text-4xl text-stark-content text-center;
 }
 
 .link {

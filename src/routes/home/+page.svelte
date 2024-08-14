@@ -8,7 +8,7 @@
 
 <div class="hero min-h-screen bg-base-200">
   <div class="hero-content">
-    <div class="flex max-w-2xl flex-col gap-4">
+    <div class="column content gap-4">
       <h1 class="text-stark-content text-center text-5xl">Welcome to</h1>
       <h1 class="text-stark-content mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
       <div class="grid lg:grid-cols-2 gap-3">
