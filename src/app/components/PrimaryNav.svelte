@@ -6,52 +6,56 @@
 </style>
 
 <script lang="ts">
+  import {page} from "$app/stores"
   import {goto} from '$app/navigation'
   import {derived} from 'svelte/store'
-  import {identity} from '@welshman/lib'
+	import {tweened} from 'svelte/motion'
+	import {quintOut} from 'svelte/easing'
+  import {identity, nth} from '@welshman/lib'
   import Icon from "@lib/components/Icon.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
   import {session} from "@app/base"
-  import {deriveGroupMembership, makeGroupId, loadGroup, deriveProfile, qualifiedGroupsById, splitGroupId} from "@app/state"
+  import {userProfile, userGroupsByNom, makeGroupId, loadGroup, deriveProfile, qualifiedGroupsById, splitGroupId} from "@app/state"
   import {pushModal} from "@app/modal"
+  import {getPrimaryNavItemIndex} from "@app/routes"
+
+  const activeOffset = tweened(-44, {
+		duration: 300,
+		easing: quintOut
+	})
 
   const addSpace = () => pushModal(SpaceAdd)
 
-  const browseSpaces = () => goto("/browse")
+  const gotoHome = () => goto("/home")
 
+  const gotoSpaces = () => goto("/spaces")
 
-  $: profile = deriveProfile($session?.pubkey)
-  $: membership = deriveGroupMembership($session?.pubkey)
-  $: userGroupsByNom = derived([membership, qualifiedGroupsById], ([$membership, $qualifiedGroupsById]) => {
-    const $userGroupsByNom = new Map()
+  const gotoSpace = (nom: string) => goto(`/spaces/${nom}`)
 
-    for (const id of $membership?.ids || []) {
-      const [url, nom] = splitGroupId(id)
-      const group = $qualifiedGroupsById.get(id)
-      const groups = $userGroupsByNom.get(nom) || []
+  const gotoSettings = () => goto("/settings")
 
-      loadGroup(nom, [url])
+  let element: HTMLElement
 
-      if (group) {
-        groups.push(group)
-      }
+  // Set the active highlight element to the offset of the nav item we're focused on
+  $: {
+    if (element) {
+      const index = getPrimaryNavItemIndex($page)
+      const navItems: any = Array.from(element.querySelectorAll('.z-nav-item') || [])
 
-      $userGroupsByNom.set(nom, groups)
+      activeOffset.set(navItems[index].offsetTop - 44)
     }
-
-    return $userGroupsByNom
-  })
+  }
 </script>
 
-<div class="relative w-14 bg-base-100">
-  <div class="absolute -top-[44px] z-nav-active ml-2 h-[144px] w-12 bg-base-300" />
+<div class="relative w-14 bg-base-100" bind:this={element}>
+  <div class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300" style={`top: ${$activeOffset}px`} />
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem title={$profile?.name}>
+      <PrimaryNavItem title={$userProfile?.name} on:click={gotoHome}>
         <div class="!flex w-10 items-center justify-center rounded-full border border-solid border-base-300">
-          {#if $profile?.picture}
-            <img alt="" src={$profile.picture} />
+          {#if $userProfile?.picture}
+            <img alt="" src={$userProfile.picture} />
           {:else}
             <Icon icon="user-rounded" size={7} />
           {/if}
@@ -59,7 +63,7 @@
       </PrimaryNavItem>
       {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
         {@const qualifiedGroup = qualifiedGroups[0]}
-        <PrimaryNavItem title={qualifiedGroup?.group.name}>
+        <PrimaryNavItem title={qualifiedGroup?.group.name} on:click={() => gotoSpace(nom)}>
           <div class="w-10 rounded-full border border-solid border-base-300">
             <img alt={qualifiedGroup?.group.name} src={qualifiedGroup?.group.picture} />
           </div>
@@ -70,14 +74,14 @@
           <Icon size={7} icon="add-circle" />
         </div>
       </PrimaryNavItem>
-      <PrimaryNavItem title="Browse Spaces" on:click={browseSpaces}>
+      <PrimaryNavItem title="Browse Spaces" on:click={gotoSpaces}>
         <div class="!flex w-10 items-center justify-center">
           <Icon size={6} icon="compass-big" />
         </div>
       </PrimaryNavItem>
     </div>
     <div>
-      <PrimaryNavItem title="Settings">
+      <PrimaryNavItem title="Settings" on:click={gotoSettings}>
         <div class="!flex w-10 items-center justify-center">
           <Icon size={7} icon="settings" />
         </div>

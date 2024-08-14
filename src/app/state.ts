@@ -454,8 +454,8 @@ export const groupMemberships = deriveEventsMapped<PublishedGroupMembership>({
 })
 
 export const {
-  indexStore: groupMembershipsByPubkey,
-  getIndex: getGroupMembersipsByPubkey,
+  indexStore: groupMembershipByPubkey,
+  getIndex: getGroupMembersipByPubkey,
   deriveItem: deriveGroupMembership,
   loadItem: loadGroupMembership,
   // getItem: getGroupMembership,
@@ -470,3 +470,41 @@ export const {
         filters: [{kinds: [GROUPS], authors: [pubkey]}],
       })
 })
+
+// User stuff
+
+export const userProfile = derived([pk, profilesByPubkey], ([$pk, $profilesByPubkey]) => {
+  if (!$pk) return null
+
+  loadProfile($pk)
+
+  return $profilesByPubkey.get($pk)
+})
+
+export const userMembership = derived([pk, groupMembershipByPubkey], ([$pk, $groupMembershipByPubkey]) => {
+  if (!$pk) return null
+
+  loadGroupMembership($pk)
+
+  return $groupMembershipByPubkey.get($pk)
+})
+
+export const userGroupsByNom = withGetter(derived([userMembership, qualifiedGroupsById], ([$userMembership, $qualifiedGroupsById]) => {
+  const $userGroupsByNom = new Map()
+
+  for (const id of $userMembership?.ids || []) {
+    const [url, nom] = splitGroupId(id)
+    const group = $qualifiedGroupsById.get(id)
+    const groups = $userGroupsByNom.get(nom) || []
+
+    loadGroup(nom, [url])
+
+    if (group) {
+      groups.push(group)
+    }
+
+    $userGroupsByNom.set(nom, groups)
+  }
+
+  return $userGroupsByNom
+}))
