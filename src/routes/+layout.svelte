@@ -9,9 +9,11 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
-  import {session} from "@app/base"
+  import {pk, session} from "@app/base"
+  import {loadUserData} from "@app/state"
 
   let dialog: HTMLDialogElement
+  let prev: any
 
   $: modalId = $page.url.hash.slice(1)
   $: modal = modals.get(modalId)
@@ -23,12 +25,17 @@
 
     if (modal) {
       dialog?.showModal()
+      prev = modal
     } else {
       dialog?.close()
     }
   }
 
   onMount(() => {
+    if ($pk) {
+      loadUserData($pk)
+    }
+
     dialog.addEventListener('close', () => {
       if (modal) {
         clearModal()
@@ -46,9 +53,9 @@
     </div>
   </div>
   <dialog bind:this={dialog} class="modal modal-bottom sm:modal-middle !z-modal">
-    {#if modal}
-      {#key modal}
-        <ModalBox {...modal} />
+    {#if prev}
+      {#key prev}
+        <ModalBox {...prev} />
       {/key}
       <Toast />
     {/if}

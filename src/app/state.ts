@@ -1,16 +1,15 @@
 import type {Readable} from "svelte/store"
 import {writable, readable, derived} from "svelte/store"
-import {uniq, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
-import {getIdentifier, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, FOLLOWS, MUTES, GROUPS, getGroupTagValues} from "@welshman/util"
-import type {Filter, SignedEvent, CustomEvent} from '@welshman/util'
-import {subscribe} from '@welshman/net'
-import {readProfile, readList, asDecryptedEvent} from '@welshman/domain'
-import type {PublishedProfile, PublishedList} from '@welshman/domain'
+import type {Maybe} from "@welshman/lib"
+import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
+import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList} from "@welshman/util"
+import type {Filter, SignedEvent, CustomEvent, PublishedProfile, PublishedList} from '@welshman/util'
+import {publish, subscribe} from '@welshman/net'
 import {decrypt} from '@welshman/signer'
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {synced, parseJson} from '@lib/util'
 import type {Session, Handle, Relay} from '@app/types'
-import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSessions, makeSigner} from "@app/base"
+import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getPk, getSessions, makeSigner, getSigner} from "@app/base"
 
 // Utils
 
@@ -18,36 +17,38 @@ export const createCollection = <T>({
   store,
   getKey,
   isStale,
-  loadItem,
+  load,
 }: {
   store: Readable<T[]>,
   getKey: (item: T) => string,
   isStale: (item: T) => boolean,
-  loadItem: (key: string, ...args: any) => Promise<any>
+  load: (key: string, ...args: any) => Promise<any>
 }) => {
   const indexStore = derived(store, $items => indexBy(getKey, $items))
   const getIndex = getter(indexStore)
 
-  const getItem = async (key: string, ...args: any[]) => {
+  const getItem = (key: string) => getIndex().get(key)
+
+  const loadItem = async (key: string, ...args: any[]) => {
     const item = getIndex().get(key)
 
-    if (item && isStale(item)) {
+    if (item && !isStale(item)) {
       return item
     }
 
-    await loadItem(key, ...args)
+    await load(key, ...args)
 
     return getIndex().get(key)
   }
 
-  const deriveItem = (key: string | undefined, ...args: any[]) => {
+  const deriveItem = (key: Maybe<string>, ...args: any[]) => {
     if (!key) {
       return readable(undefined)
     }
 
     // If we don't yet have the item, or it's stale, trigger a request for it. The derived
     // store will update when it arrives
-    loadItem(key, ...args)
+    load(key, ...args)
 
     return derived(indexStore, $index => $index.get(key))
   }
@@ -56,8 +57,8 @@ export const createCollection = <T>({
 }
 
 export const load = ({relays, filters}: {relays: string[], filters: Filter[]}) =>
-  new Promise<CustomEvent | undefined>(resolve => {
-    const sub = subscribe({relays, filters, closeOnEose: true})
+  new Promise<Maybe<CustomEvent>>(resolve => {
+    const sub = subscribe({relays, filters, closeOnEose: true, timeout: 3000})
 
     sub.emitter.on('event', (url: string, event: SignedEvent) => {
       const e: CustomEvent = {...event, fetched_at: now()}
@@ -66,8 +67,40 @@ export const load = ({relays, filters}: {relays: string[], filters: Filter[]}) =
       resolve(e)
     })
 
-    sub.emitter.on('close', () => resolve(undefined))
+    sub.emitter.on('complete', () => resolve(undefined))
   })
+
+export type ModifyTags = (tags: string[][]) => string[][]
+
+export const updateList = async (kind: number, modifyTags: ModifyTags) => {
+  const pk = getPk()!
+  const signer = getSigner()!
+  const [prev] = repository.query([{kinds: [kind], authors: [pk]}])
+
+  // Preserve content instead of use encrypted tags because kind 3 content is used for
+  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
+  const relays = [...INDEXER_RELAYS, ...getWriteRelayUrls(getRelaySelections(pk))]
+  const encrypt = (content: string) => signer.nip44.encrypt(pk, content)
+
+  let encryptable
+  if (prev) {
+    const content = await ensurePlaintext(prev)
+    const list = readList(asDecryptedEvent(prev, {content}))
+    const publicTags = modifyTags(list.publicTags)
+
+    encryptable = editList({...list, publicTags})
+  } else {
+    const list = makeList({kind})
+    const publicTags = modifyTags(list.publicTags)
+
+    encryptable = createList({...list, publicTags})
+  }
+
+  const template = await encryptable.reconcile(encrypt)
+  const event = await signer.sign({...template, created_at: now()})
+
+  await publish({event, relays})
+}
 
 // Plaintext
 
@@ -79,7 +112,7 @@ export const setPlaintext = (e: CustomEvent, content: string) =>
   plaintext.update(assoc(e.id, content))
 
 export const ensurePlaintext = async (e: CustomEvent) => {
-  if (!getPlaintext(e)) {
+  if (e.content && !getPlaintext(e)) {
     const sessions = getSessions()
     const session = sessions[e.pubkey]
     const signer = makeSigner(session)
@@ -96,6 +129,8 @@ export const ensurePlaintext = async (e: CustomEvent) => {
 
 export const relays = writable<Relay[]>([])
 
+export const relaysByPubkey = derived(relays, $relays => groupBy(($relay: Relay) => $relay.pubkey, $relays))
+
 export const {
   indexStore: relaysByUrl,
   getIndex: getRelaysByUrl,
@@ -106,15 +141,17 @@ export const {
     store: relays,
     getKey: (relay: Relay) => relay.url,
     isStale: (relay: Relay) => relay.fetched_at < now() - 3600,
-    loadItem: batcher(800, async (urls: string[]) => {
+    load: batcher(800, async (urls: string[]) => {
       const urlSet = new Set(urls)
       const res = await postJson(`${DUFFLEPUD_URL}/relay/info`, {urls: Array.from(urlSet)})
-      const items: Relay[] = (res?.data || []).map(({url, info}: any) => ({...info, url, fetched_at: now()}))
+      const index = indexBy((item: any) => item.url, res?.data || [])
+      const items: Relay[] = urls.map(url => {
+        const {info = {}} = index.get(url) || {}
 
-      relays.update($relays => [
-        ...$relays.filter($relay => !urlSet.has($relay.url)),
-        ...items,
-      ])
+        return {...info, url, fetched_at: now()}
+      })
+
+      relays.update($relays => uniqBy($relay => $relay.url, [...$relays, ...items]))
 
       return items
     }),
@@ -134,15 +171,17 @@ export const {
     store: handles,
     getKey: (handle: Handle) => handle.pubkey,
     isStale: (handle: Handle) => handle.fetched_at < now() - 3600,
-    loadItem: batcher(800, async (nip05s: string[]) => {
+    load: batcher(800, async (nip05s: string[]) => {
       const nip05Set = new Set(nip05s)
       const res = await postJson(`${DUFFLEPUD_URL}/handle/info`, {handles: Array.from(nip05Set)})
-      const items: Handle[] = (res?.data || []).map(({handle: nip05, info}: any) => ({...info, nip05, fetched_at: now()}))
+      const index = indexBy((item: any) => item.handle, res?.data || [])
+      const items: Handle[] = nip05s.map(nip05 => {
+        const {info = {}} = index.get(nip05) || {}
 
-      handles.update($handles => [
-        ...$handles.filter($handle => !nip05Set.has($handle.nip05)),
-        ...items,
-      ])
+        return {...info, nip05, fetched_at: now()}
+      })
+
+      handles.update($handles => uniqBy($handle => $handle.nip05, [...$handles, ...items]))
 
       return items
     }),
@@ -167,11 +206,38 @@ export const {
     store: profiles,
     getKey: profile => profile.event.pubkey,
     isStale: (profile: PublishedProfile) => profile.event.fetched_at < now() - 3600,
-    loadItem: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = []) =>
       load({
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [PROFILE], authors: [pubkey]}],
       }),
+})
+
+// Relay selections
+
+export const getReadRelayUrls = (event?: CustomEvent): string[] =>
+  getRelayTags(event?.tags || []).filter((t: string[]) => !t[2] || t[2] === 'read').map((t: string[]) => normalizeRelayUrl(t[1]))
+
+export const getWriteRelayUrls = (event?: CustomEvent): string[] =>
+  getRelayTags(event?.tags || []).filter((t: string[]) => !t[2] || t[2] === 'write').map((t: string[]) => normalizeRelayUrl(t[1]))
+
+export const relaySelections = deriveEvents({repository, filters: [{kinds: [RELAYS]}]})
+
+export const {
+  indexStore: relaySelectionsByPubkey,
+  getIndex: getRelaySelectionsByPubkey,
+  deriveItem: deriveRelaySelections,
+  loadItem: loadRelaySelections,
+  getItem: getRelaySelections,
+} = createCollection({
+    store: relaySelections,
+    getKey: relaySelections => relaySelections.pubkey,
+    isStale: (relaySelections: CustomEvent) => relaySelections.fetched_at < now() - 3600,
+    load: (pubkey: string, relays = []) =>
+      load({
+        relays: [...relays, ...INDEXER_RELAYS],
+        filters: [{kinds: [RELAYS], authors: [pubkey]}],
+      })
 })
 
 // Follows
@@ -198,7 +264,7 @@ export const {
     store: follows,
     getKey: follows => follows.event.pubkey,
     isStale: (follows: PublishedList) => follows.event.fetched_at < now() - 3600,
-    loadItem: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = []) =>
       load({
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
@@ -229,7 +295,7 @@ export const {
     store: mutes,
     getKey: mute => mute.event.pubkey,
     isStale: (mutes: PublishedList) => mutes.event.fetched_at < now() - 3600,
-    loadItem: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = []) =>
       load({
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [MUTES], authors: [pubkey]}],
@@ -241,7 +307,7 @@ export const {
 export const GROUP_DELIMITER = `'`
 
 export const makeGroupId = (url: string, nom: string) =>
-  [stripProtocol(url), nom].join(GROUP_DELIMITER)
+  [stripProtocol(url).replace(/\/$/, ''), nom].join(GROUP_DELIMITER)
 
 export const splitGroupId = (groupId: string) => {
   const [url, nom] = groupId.split(GROUP_DELIMITER)
@@ -258,9 +324,7 @@ export const getGroupName = (e?: CustomEvent) => e?.tags.find(nthEq(0, "name"))?
 export const getGroupPicture = (e?: CustomEvent) => e?.tags.find(nthEq(0, "picture"))?.[1]
 
 export type Group = {
-  id: string,
   nom: string,
-  url: string,
   name?: string,
   picture?: string,
   event?: CustomEvent
@@ -271,12 +335,11 @@ export type PublishedGroup = Omit<Group, "event"> & {
 }
 
 export const readGroup = (event: CustomEvent) => {
-  const id = getIdentifier(event)!
-  const [url, nom] = id.split(GROUP_DELIMITER)
+  const nom = getIdentifier(event)!
   const name = event?.tags.find(nthEq(0, "name"))?.[1]
   const picture = event?.tags.find(nthEq(0, "picture"))?.[1]
 
-  return {id, nom, url, name, picture, event}
+  return {nom, name, picture, event}
 }
 
 export const groups = deriveEventsMapped<PublishedGroup>({
@@ -286,37 +349,50 @@ export const groups = deriveEventsMapped<PublishedGroup>({
   itemToEvent: item => item.event,
 })
 
-export const validGroups = derived([relaysByUrl, groups], ([$relaysByUrl, $groups]) =>
-  $groups.filter(group => $relaysByUrl.get(group.url)?.pubkey === group.event.pubkey)
-)
-
 export const {
-  indexStore: groupsById,
-  getIndex: getGroupsById,
+  indexStore: groupsByNom,
+  getIndex: getGroupsByNom,
   deriveItem: deriveGroup,
   loadItem: loadGroup,
   getItem: getGroup,
 } = createCollection({
-    store: validGroups,
-    getKey: (group: PublishedGroup) => group.id,
+    store: groups,
+    getKey: (group: PublishedGroup) => group.nom,
     isStale: (group: PublishedGroup) => group.event.fetched_at < now() - 3600,
-    loadItem: (id: string) => {
-      const url = getGroupUrl(id)
-
-      return Promise.all([
-        loadRelay(url),
+    load: (nom: string, relays: string[] = []) =>
+      Promise.all([
+        ...relays.map(loadRelay),
         load({
-          relays: [url],
-          filters: [{kinds: [GROUP_META], '#d': [id]}],
+          relays,
+          filters: [{kinds: [GROUP_META], '#d': [nom]}],
         }),
       ])
-    }
 })
+
+// Qualified groups
+
+export type QualifiedGroup = {
+  id: string
+  relay: Relay
+  group: PublishedGroup
+}
+
+export const qualifiedGroups = derived([relaysByPubkey, groups], ([$relaysByPubkey, $groups]) =>
+  $groups.flatMap((group: PublishedGroup) => {
+    const relays = $relaysByPubkey.get(group.event.pubkey) || []
+
+    return relays.map(relay => ({id: makeGroupId(relay.url, group.nom), relay, group}))
+  })
+)
+
+export const qualifiedGroupsById = derived(qualifiedGroups, $qualifiedGroups => indexBy($qg => $qg.id, $qualifiedGroups))
 
 // Group membership
 
 export type GroupMembership = {
   ids: Set<string>
+  noms: Set<string>
+  urls: Set<string>
   event?: CustomEvent
 }
 
@@ -324,8 +400,19 @@ export type PublishedGroupMembership = Omit<GroupMembership, "event"> & {
   event: CustomEvent
 }
 
-export const readGroupMembership = (event: CustomEvent) =>
-  ({event, ids: new Set(getGroupTagValues(event.tags))})
+export const readGroupMembership = (event: CustomEvent) => {
+  const ids = new Set<string>()
+  const noms = new Set<string>()
+  const urls = new Set<string>()
+
+  for (const [_, nom, url] of getGroupTags(event.tags)) {
+    ids.add(makeGroupId(url, nom))
+    noms.add(nom)
+    urls.add(url)
+  }
+
+  return {event, ids, noms, urls}
+}
 
 export const groupMemberships = deriveEventsMapped<PublishedGroupMembership>({
   repository,
@@ -344,9 +431,29 @@ export const {
     store: groupMemberships,
     getKey: groupMembership => groupMembership.event.pubkey,
     isStale: (groupMembership: PublishedGroupMembership) => groupMembership.event.fetched_at < now() - 3600,
-    loadItem: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = []) =>
       load({
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [GROUPS], authors: [pubkey]}],
       })
 })
+
+// User stuff
+
+export const loadUserData = async (pubkey: string, hints: string[] = []) => {
+  const relaySelections = await loadRelaySelections(pubkey, INDEXER_RELAYS)
+  const relays = uniq([...getRelayTagValues(relaySelections?.tags || []), ...INDEXER_RELAYS, ...hints])
+
+  const [membership] = await Promise.all([
+    loadGroupMembership(pubkey, relays),
+    loadProfile(pubkey, relays),
+    loadFollows(pubkey, relays),
+    loadMutes(pubkey, relays),
+  ])
+
+  if (membership) {
+    await Promise.all(
+      getGroupTags(membership.event.tags).map(([_, nom, url]) => loadGroup(nom, [url]))
+    )
+  }
+}

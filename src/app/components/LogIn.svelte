@@ -4,12 +4,13 @@
   import Icon from '@lib/components/Icon.svelte'
   import Field from '@lib/components/Field.svelte'
   import Button from '@lib/components/Button.svelte'
+  import Spinner from '@lib/components/Spinner.svelte'
   import CardButton from '@lib/components/CardButton.svelte'
   import InfoNostr from '@app/components/LogIn.svelte'
   import {pushModal, clearModal} from '@app/modal'
   import {pushToast} from '@app/toast'
   import {addSession} from '@app/base'
-  import {loadProfile, loadFollows, loadMutes, loadHandle} from '@app/state'
+  import {loadUserData, loadHandle} from '@app/state'
 
   const back = () => history.back()
 
@@ -27,9 +28,7 @@
     const {pubkey, relays = []} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
     const [profile, success] = await Promise.all([
-      loadProfile(pubkey, relays),
-      loadFollows(pubkey, relays),
-      loadMutes(pubkey, relays),
+      loadUserData(pubkey, relays),
       broker.connect(),
     ])
 
@@ -86,8 +85,7 @@
   </Field>
   <div class="flex flex-col gap-2">
     <Button type="submit" class="btn btn-primary" disabled={loading}>
-      <span class="loading loading-spinner opacity-0" class:opacity-100={loading} />
-      Log In
+      <Spinner {loading}>Log In</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
     <div class="text-sm">

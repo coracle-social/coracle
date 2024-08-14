@@ -9,7 +9,7 @@ import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from '@welshman/sign
 import {synced} from '@lib/util'
 import type {Session} from "@app/types"
 
-export const INDEXER_RELAYS = ["wss://purplepag.es", "wss://relay.damus.io"]
+export const INDEXER_RELAYS = ["wss://purplepag.es", "wss://relay.damus.io", 'wss://nos.lol']
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
@@ -20,6 +20,8 @@ export const relay = new Relay(repository)
 export const tracker = new Tracker()
 
 export const pk = synced<string | null>('pk', null)
+
+export const getPk = getter(pk)
 
 export const sessions = synced<Record<string, Session>>('sessions', {})
 

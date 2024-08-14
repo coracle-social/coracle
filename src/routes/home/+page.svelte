@@ -1,5 +1,9 @@
 <script lang="ts">
   import CardButton from "@lib/components/CardButton.svelte"
+  import SpaceCreate from '@app/components/SpaceCreate.svelte'
+  import {pushModal} from '@app/modal'
+
+  export const createSpace = () => pushModal(SpaceCreate)
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -8,7 +12,7 @@
       <h1 class="text-stark-content text-center text-5xl">Welcome to</h1>
       <h1 class="text-stark-content mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
       <div class="grid lg:grid-cols-2 gap-3">
-        <CardButton icon="add-circle" title="Create a space" class="h-24">
+        <CardButton icon="add-circle" title="Create a space" class="h-24" on:click={createSpace}>
             Invite all your friends, do life together.
         </CardButton>
         <CardButton icon="compass" title="Discover spaces" class="h-24">

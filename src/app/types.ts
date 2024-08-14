@@ -1,7 +1,6 @@
 import {verifiedSymbol} from 'nostr-tools'
 import type {Nip46Handler} from "@welshman/signer"
-import type {SignedEvent, TrustedEvent} from "@welshman/util"
-import type {RelayProfile, Handle as HandleInfo} from "@welshman/domain"
+import type {SignedEvent, TrustedEvent, RelayProfile} from "@welshman/util"
 
 export type Session = {
   method: string
@@ -14,7 +13,11 @@ export type Relay = RelayProfile & {
   fetched_at: number,
 }
 
-export type Handle = HandleInfo & {
+export type Handle = {
+  pubkey: string
+  nip05: string
+  nip46: string[]
+  relays: string[]
   fetched_at: number,
 }
 
