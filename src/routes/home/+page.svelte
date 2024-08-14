@@ -9,8 +9,8 @@
 <div class="hero min-h-screen bg-base-200">
   <div class="hero-content">
     <div class="column content gap-4">
-      <h1 class="text-stark-content text-center text-5xl">Welcome to</h1>
-      <h1 class="text-stark-content mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
+      <h1 class="text-center text-5xl">Welcome to</h1>
+      <h1 class="mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
       <div class="grid lg:grid-cols-2 gap-3">
         <CardButton icon="add-circle" title="Create a space" class="h-24" on:click={createSpace}>
             Invite all your friends, do life together.

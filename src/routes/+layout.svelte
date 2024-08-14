@@ -10,6 +10,7 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
+  import {theme} from "@app/theme"
   import {session, sessions, pk, repository} from "@app/base"
   import {plaintext, relays, handles} from "@app/state"
   import {initStorage} from "@app/storage"
@@ -59,9 +60,9 @@
 </script>
 
 {#await ready}
-  <div data-theme="dark" />
+  <div data-theme={$theme} />
 {:then}
-  <div data-theme="dark">
+  <div data-theme={$theme}>
     <div class="flex h-screen">
       <PrimaryNav />
       <SecondaryNav />

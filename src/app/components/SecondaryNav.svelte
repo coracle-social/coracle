@@ -40,10 +40,10 @@
     </div>
     <div
       in:fly={{delay: 150}}
-      class="text-stark-content flex items-center justify-between px-4 py-2 text-sm font-bold uppercase">
+      class="flex items-center justify-between px-4 py-2 text-sm font-bold uppercase">
       Conversations
       <div class="cursor-pointer">
-        <Icon icon="add-circle" class="bg-stark-content" />
+        <Icon icon="add-circle" />
       </div>
     </div>
   {/if}

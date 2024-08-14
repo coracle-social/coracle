@@ -10,59 +10,24 @@
   import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
   import {pushModal} from '@app/modal'
   import {pushToast} from '@app/toast'
-  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup, updateList} from '@app/state'
+  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup} from '@app/state'
+  import {joinGroup} from '@app/commands'
 
   const back = () => history.back()
 
   const browse = () => goto("/browse", {state: {}})
 
-  const tryJoin = async () => {
-    const [url, nom] = splitGroupId(id)
-
-    const info = await loadRelay(url)
-
-    if (!info) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, we weren't able to find that relay."
-      })
-    }
-
-    if (!info.supported_nips?.includes(29)) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, it looks like that relay doesn't support nostr spaces."
-      })
-    }
-
-    const group = await loadGroup(nom, [url])
-
-    if (!group) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, we weren't able to find that space."
-      })
-    }
-
-    await updateList(GROUPS, (tags: string[][]) => uniqBy(t => t.join(''), append(["group", nom, url], tags)))
-
-    goto(`/spaces/${nom}`)
-    pushToast({
-      message: "Welcome to the space!"
-    })
-  }
-
   const join = async () => {
     loading = true
 
     try {
-      await tryJoin()
+      await joinGroup(id)
     } finally {
       loading = false
     }
   }
 
-  let id = "wss://devrelay.highlighter.com'group628195"
+  let id = ""
   let loading = false
 
   $: linkIsValid = Boolean(id.match(/.+\..+'.+/))

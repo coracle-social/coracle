@@ -42,36 +42,6 @@
   font-family: Lato;
 }
 
-[data-theme="dark"] {
-  --stark: #111;
-  --stark-content: #eee;
-}
-
-[data-theme="light"] {
-  --stark: #eee;
-  --stark-content: #111;
-}
-
-.text-stark,
-.hover\:text-stark:hover {
-  color: var(--stark);
-}
-
-.text-stark-content,
-.hover\:text-stark-content:hover {
-  color: var(--stark-content);
-}
-
-.bg-stark,
-.hover\:bg-stark:hover {
-  background-color: var(--stark);
-}
-
-.bg-stark-content,
-.hover\:bg-stark-content:hover {
-  background-color: var(--stark-content);
-}
-
 .card2 {
   padding: 1rem;
   background-color: oklch(var(--b2) / 1);
@@ -87,19 +57,19 @@
 }
 
 .content {
-  @apply max-w-2xl w-full p-12 m-auto;
+  @apply max-w-3xl w-full p-12 m-auto;
 }
 
 .heading {
-  @apply text-2xl text-stark-content text-center;
+  @apply text-2xl text-center;
 }
 
 .subheading {
-  @apply text-xl text-stark-content text-center;
+  @apply text-xl text-center;
 }
 
 .superheading {
-  @apply text-4xl text-stark-content text-center;
+  @apply text-4xl text-center;
 }
 
 .link {

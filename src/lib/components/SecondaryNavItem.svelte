@@ -8,8 +8,8 @@
 
 <a
   {href}
-  class="group justify-start border-none transition-all hover:bg-base-100"
-  class:text-stark-content={active}
+  class="group justify-start border-none transition-all hover:bg-base-100 hover:text-base-content"
+  class:text-base-content={active}
   class:bg-base-100={active}>
   <div class="flex items-center gap-3">
     <slot />

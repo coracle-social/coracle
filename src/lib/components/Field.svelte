@@ -3,7 +3,7 @@
     <slot name="label" />
   </label>
   <slot name="input" />
-  <p class="text-sm text-neutral-200">
+  <p class="text-sm">
     <slot name="info" />
   </p>
 </div>

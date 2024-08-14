@@ -3,7 +3,7 @@
   import Masonry from 'svelte-bricks'
   import {GROUP_META} from '@welshman/util'
   import Icon from '@lib/components/Icon.svelte'
-  import {load, relays, searchGroups} from '@app/state'
+  import {load, relays, groups, searchGroups} from '@app/state'
 
   let term = ""
 
@@ -15,18 +15,16 @@
   })
 </script>
 
-<div class="content column gap-8">
-  <div class="column gap-4 pt-20 pb-12">
-    <h1 class="superheading">Discover Spaces</h1>
-    <p class="text-center">Find communities all across the nostr network</p>
-    <label class="input input-bordered w-full flex items-center gap-2">
-      <Icon icon="magnifer" />
-      <input bind:value={term} class="grow" type="text" placeholder="Search for spaces..." />
-    </label>
-  </div>
-  <Masonry items={$searchGroups.searchOptions(term)} minColWidth={200} maxColWidth={400} gap={16} idKey="nom" let:item>
+<div class="content column gap-4">
+  <h1 class="superheading mt-20">Discover Spaces</h1>
+  <p class="text-center">Find communities all across the nostr network</p>
+  <label class="input input-bordered w-full flex items-center gap-2">
+    <Icon icon="magnifer" />
+    <input bind:value={term} class="grow" type="text" placeholder="Search for spaces..." />
+  </label>
+  <Masonry animate={false} items={$searchGroups.searchOptions(term)} minColWidth={250} maxColWidth={800} gap={16} idKey="nom" let:item>
     <div class="card bg-base-100 shadow-xl">
-      <div class="avatar center mt-4">
+      <div class="avatar center mt-8">
         <div class="w-20 rounded-full bg-base-300 border-2 border-solid border-base-300 !flex center">
           {#if item?.picture}
             <img alt="" src={item.picture} />

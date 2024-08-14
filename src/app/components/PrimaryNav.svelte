@@ -52,7 +52,7 @@
   <div class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300" style={`top: ${$activeOffset}px`} />
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem title={$userProfile?.name} on:click={gotoHome}>
+      <PrimaryNavItem on:click={gotoHome}>
         <div class="!flex w-10 items-center justify-center rounded-full border border-solid border-base-300">
           {#if $userProfile?.picture}
             <img alt="" src={$userProfile.picture} />

@@ -5,8 +5,8 @@ import type {Maybe} from "@welshman/lib"
 import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
 import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList} from "@welshman/util"
 import type {Filter, SignedEvent, CustomEvent, PublishedProfile, PublishedList} from '@welshman/util'
-import type {SubscribeRequest} from '@welshman/net'
-import {publish, subscribe} from '@welshman/net'
+import type {SubscribeRequest, PublishRequest} from '@welshman/net'
+import {publish as basePublish, subscribe} from '@welshman/net'
 import {decrypt} from '@welshman/signer'
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {parseJson, createSearch} from '@lib/util'
@@ -68,6 +68,12 @@ export const createCollection = <T>({
   return {indexStore, getIndex, deriveItem, loadItem, getItem}
 }
 
+export const publish = (request: PublishRequest) => {
+  repository.publish(request.event)
+
+  return basePublish(request)
+}
+
 export const load = (request: SubscribeRequest) =>
   new Promise<Maybe<CustomEvent>>(resolve => {
     const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
@@ -80,38 +86,6 @@ export const load = (request: SubscribeRequest) =>
 
     sub.emitter.on('complete', () => resolve(undefined))
   })
-
-export type ModifyTags = (tags: string[][]) => string[][]
-
-export const updateList = async (kind: number, modifyTags: ModifyTags) => {
-  const $pk = pk.get()!
-  const $signer = signer.get()!
-  const [prev] = repository.query([{kinds: [kind], authors: [$pk]}])
-
-  // Preserve content instead of use encrypted tags because kind 3 content is used for
-  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
-  const relays = [...INDEXER_RELAYS, ...getWriteRelayUrls(await loadRelaySelections($pk))]
-  const encrypt = (content: string) => $signer.nip44.encrypt($pk, content)
-
-  let encryptable
-  if (prev) {
-    const content = await ensurePlaintext(prev)
-    const list = readList(asDecryptedEvent(prev, {content}))
-    const publicTags = modifyTags(list.publicTags)
-
-    encryptable = editList({...list, publicTags})
-  } else {
-    const list = makeList({kind})
-    const publicTags = modifyTags(list.publicTags)
-
-    encryptable = createList({...list, publicTags})
-  }
-
-  const template = await encryptable.reconcile(encrypt)
-  const event = await $signer.sign({...template, created_at: now()})
-
-  await publish({event, relays})
-}
 
 // Freshness
 
