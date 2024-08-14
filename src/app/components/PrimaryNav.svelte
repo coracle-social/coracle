@@ -13,7 +13,7 @@
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
   import {session} from "@app/base"
-  import {deriveGroupMembership, makeGroupId, getGroup, deriveProfile, qualifiedGroupsById, getGroupNom} from "@app/state"
+  import {deriveGroupMembership, makeGroupId, loadGroup, deriveProfile, qualifiedGroupsById, splitGroupId} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const addSpace = () => pushModal(SpaceAdd)
@@ -27,9 +27,11 @@
     const $userGroupsByNom = new Map()
 
     for (const id of $membership?.ids || []) {
-      const nom = getGroupNom(id)
+      const [url, nom] = splitGroupId(id)
       const group = $qualifiedGroupsById.get(id)
       const groups = $userGroupsByNom.get(nom) || []
+
+      loadGroup(nom, [url])
 
       if (group) {
         groups.push(group)

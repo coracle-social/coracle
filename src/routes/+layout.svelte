@@ -9,8 +9,7 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import SecondaryNav from "@app/components/SecondaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
-  import {pk, session} from "@app/base"
-  import {loadUserData} from "@app/state"
+  import {session} from "@app/base"
 
   let dialog: HTMLDialogElement
   let prev: any
@@ -32,10 +31,6 @@
   }
 
   onMount(() => {
-    if ($pk) {
-      loadUserData($pk)
-    }
-
     dialog.addEventListener('close', () => {
       if (modal) {
         clearModal()

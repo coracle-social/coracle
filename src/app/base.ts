@@ -2,7 +2,7 @@ import {derived} from "svelte/store"
 import {memoize, assoc} from '@welshman/lib'
 import type {CustomEvent} from '@welshman/util'
 import {Repository, createEvent, Relay} from "@welshman/util"
-import {getter} from "@welshman/store"
+import {withGetter} from "@welshman/store"
 import {NetworkContext, Tracker} from "@welshman/net"
 import type {ISigner} from "@welshman/signer"
 import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from '@welshman/signer'
@@ -19,24 +19,20 @@ export const relay = new Relay(repository)
 
 export const tracker = new Tracker()
 
-export const pk = synced<string | null>('pk', null)
+export const pk = withGetter(synced<string | null>('pk', null))
 
-export const getPk = getter(pk)
+export const sessions = withGetter(synced<Record<string, Session>>('sessions', {}))
 
-export const sessions = synced<Record<string, Session>>('sessions', {})
+export const session = withGetter(derived([pk, sessions], ([$pk, $sessions]) => $pk ? $sessions[$pk] : null))
 
-export const getSessions = getter(sessions)
-
-export const session = derived([pk, sessions], ([$pk, $sessions]) => $pk ? $sessions[$pk] : null)
-
-export const getSession = getter(session)
+export const getSession = (pubkey: string) => sessions.get()[pubkey]
 
 export const addSession = (session: Session) => {
   sessions.update(assoc(session.pubkey, session))
   pk.set(session.pubkey)
 }
 
-export const makeSigner = memoize((session: Session) => {
+export const getSigner = memoize((session: Session) => {
   switch (session?.method) {
     case "extension":
       return new Nip07Signer()
@@ -49,9 +45,7 @@ export const makeSigner = memoize((session: Session) => {
   }
 })
 
-export const signer = derived(session, makeSigner)
-
-export const getSigner = getter(signer)
+export const signer = withGetter(derived(session, getSigner))
 
 const seenChallenges = new Set()
 
@@ -65,7 +59,7 @@ Object.assign(NetworkContext, {
 
     seenChallenges.add(challenge)
 
-    const event = await getSigner()!.sign(
+    const event = await signer.get()!.sign(
       createEvent(22242, {
         tags: [
           ["relay", url],

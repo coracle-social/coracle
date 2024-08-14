@@ -10,7 +10,7 @@
   import {pushModal, clearModal} from '@app/modal'
   import {pushToast} from '@app/toast'
   import {addSession} from '@app/base'
-  import {loadUserData, loadHandle} from '@app/state'
+  import {loadHandle} from '@app/state'
 
   const back = () => history.back()
 
@@ -27,12 +27,8 @@
 
     const {pubkey, relays = []} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
-    const [profile, success] = await Promise.all([
-      loadUserData(pubkey, relays),
-      broker.connect(),
-    ])
 
-    if (success) {
+    if (await broker.connect()) {
       addSession({method: "nip46", pubkey, secret, handler})
       pushToast({message: "Successfully logged in!"})
       clearModal()

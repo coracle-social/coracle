@@ -4,12 +4,13 @@ import type {Maybe} from "@welshman/lib"
 import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
 import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList} from "@welshman/util"
 import type {Filter, SignedEvent, CustomEvent, PublishedProfile, PublishedList} from '@welshman/util'
+import type {SubscribeRequest} from '@welshman/net'
 import {publish, subscribe} from '@welshman/net'
 import {decrypt} from '@welshman/signer'
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {synced, parseJson} from '@lib/util'
 import type {Session, Handle, Relay} from '@app/types'
-import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getPk, getSessions, makeSigner, getSigner} from "@app/base"
+import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, signer} from "@app/base"
 
 // Utils
 
@@ -56,14 +57,15 @@ export const createCollection = <T>({
   return {indexStore, getIndex, deriveItem, loadItem, getItem}
 }
 
-export const load = ({relays, filters}: {relays: string[], filters: Filter[]}) =>
+export const load = (request: SubscribeRequest) =>
   new Promise<Maybe<CustomEvent>>(resolve => {
-    const sub = subscribe({relays, filters, closeOnEose: true, timeout: 3000})
+    const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
 
     sub.emitter.on('event', (url: string, event: SignedEvent) => {
       const e: CustomEvent = {...event, fetched_at: now()}
 
       repository.publish(e)
+      sub.close()
       resolve(e)
     })
 
@@ -73,14 +75,14 @@ export const load = ({relays, filters}: {relays: string[], filters: Filter[]}) =
 export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateList = async (kind: number, modifyTags: ModifyTags) => {
-  const pk = getPk()!
-  const signer = getSigner()!
-  const [prev] = repository.query([{kinds: [kind], authors: [pk]}])
+  const $pk = pk.get()!
+  const $signer = signer.get()!
+  const [prev] = repository.query([{kinds: [kind], authors: [$pk]}])
 
   // Preserve content instead of use encrypted tags because kind 3 content is used for
   // relay selections in many places. Content isn't supported for mutes or relays so this is ok
-  const relays = [...INDEXER_RELAYS, ...getWriteRelayUrls(getRelaySelections(pk))]
-  const encrypt = (content: string) => signer.nip44.encrypt(pk, content)
+  const relays = [...INDEXER_RELAYS, ...getWriteRelayUrls(await loadRelaySelections($pk))]
+  const encrypt = (content: string) => $signer.nip44.encrypt($pk, content)
 
   let encryptable
   if (prev) {
@@ -97,7 +99,7 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
   }
 
   const template = await encryptable.reconcile(encrypt)
-  const event = await signer.sign({...template, created_at: now()})
+  const event = await $signer.sign({...template, created_at: now()})
 
   await publish({event, relays})
 }
@@ -113,12 +115,10 @@ export const setPlaintext = (e: CustomEvent, content: string) =>
 
 export const ensurePlaintext = async (e: CustomEvent) => {
   if (e.content && !getPlaintext(e)) {
-    const sessions = getSessions()
-    const session = sessions[e.pubkey]
-    const signer = makeSigner(session)
+    const $signer = getSigner(getSession(e.pubkey))
 
-    if (signer) {
-      setPlaintext(e, await decrypt(signer, e.pubkey, e.content))
+    if ($signer) {
+      setPlaintext(e, await decrypt($signer, e.pubkey, e.content))
     }
   }
 
@@ -136,7 +136,7 @@ export const {
   getIndex: getRelaysByUrl,
   deriveItem: deriveRelay,
   loadItem: loadRelay,
-  getItem: getRelay,
+  // getItem: getRelay,
 } = createCollection({
     store: relays,
     getKey: (relay: Relay) => relay.url,
@@ -166,7 +166,7 @@ export const {
   getIndex: getHandlesByPubkey,
   deriveItem: deriveHandle,
   loadItem: loadHandle,
-  getItem: getHandle,
+  // getItem: getHandle,
 } = createCollection({
     store: handles,
     getKey: (handle: Handle) => handle.pubkey,
@@ -201,13 +201,14 @@ export const {
   getIndex: getProfilesByPubkey,
   deriveItem: deriveProfile,
   loadItem: loadProfile,
-  getItem: getProfile,
+  // getItem: getProfile,
 } = createCollection({
     store: profiles,
     getKey: profile => profile.event.pubkey,
     isStale: (profile: PublishedProfile) => profile.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
+        ...request,
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [PROFILE], authors: [pubkey]}],
       }),
@@ -228,13 +229,14 @@ export const {
   getIndex: getRelaySelectionsByPubkey,
   deriveItem: deriveRelaySelections,
   loadItem: loadRelaySelections,
-  getItem: getRelaySelections,
+  // getItem: getRelaySelections,
 } = createCollection({
     store: relaySelections,
     getKey: relaySelections => relaySelections.pubkey,
     isStale: (relaySelections: CustomEvent) => relaySelections.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
+        ...request,
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [RELAYS], authors: [pubkey]}],
       })
@@ -259,13 +261,14 @@ export const {
   getIndex: getFollowsByPubkey,
   deriveItem: deriveFollows,
   loadItem: loadFollows,
-  getItem: getFollows,
+  // getItem: getFollows,
 } = createCollection({
     store: follows,
     getKey: follows => follows.event.pubkey,
     isStale: (follows: PublishedList) => follows.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
+        ...request,
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
       })
@@ -290,13 +293,14 @@ export const {
   getIndex: getMutesByPubkey,
   deriveItem: deriveMutes,
   loadItem: loadMutes,
-  getItem: getMutes,
+  // getItem: getMutes,
 } = createCollection({
     store: mutes,
     getKey: mute => mute.event.pubkey,
     isStale: (mutes: PublishedList) => mutes.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
+        ...request,
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [MUTES], authors: [pubkey]}],
       })
@@ -354,15 +358,16 @@ export const {
   getIndex: getGroupsByNom,
   deriveItem: deriveGroup,
   loadItem: loadGroup,
-  getItem: getGroup,
+  // getItem: getGroup,
 } = createCollection({
     store: groups,
     getKey: (group: PublishedGroup) => group.nom,
     isStale: (group: PublishedGroup) => group.event.fetched_at < now() - 3600,
-    load: (nom: string, relays: string[] = []) =>
+    load: (nom: string, relays: string[] = [], request: Partial<SubscribeRequest> = {}) =>
       Promise.all([
         ...relays.map(loadRelay),
         load({
+          ...request,
           relays,
           filters: [{kinds: [GROUP_META], '#d': [nom]}],
         }),
@@ -426,34 +431,15 @@ export const {
   getIndex: getGroupMembersipsByPubkey,
   deriveItem: deriveGroupMembership,
   loadItem: loadGroupMembership,
-  getItem: getGroupMembership,
+  // getItem: getGroupMembership,
 } = createCollection({
     store: groupMemberships,
     getKey: groupMembership => groupMembership.event.pubkey,
     isStale: (groupMembership: PublishedGroupMembership) => groupMembership.event.fetched_at < now() - 3600,
-    load: (pubkey: string, relays = []) =>
+    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
       load({
+        ...request,
         relays: [...relays, ...INDEXER_RELAYS],
         filters: [{kinds: [GROUPS], authors: [pubkey]}],
       })
 })
-
-// User stuff
-
-export const loadUserData = async (pubkey: string, hints: string[] = []) => {
-  const relaySelections = await loadRelaySelections(pubkey, INDEXER_RELAYS)
-  const relays = uniq([...getRelayTagValues(relaySelections?.tags || []), ...INDEXER_RELAYS, ...hints])
-
-  const [membership] = await Promise.all([
-    loadGroupMembership(pubkey, relays),
-    loadProfile(pubkey, relays),
-    loadFollows(pubkey, relays),
-    loadMutes(pubkey, relays),
-  ])
-
-  if (membership) {
-    await Promise.all(
-      getGroupTags(membership.event.tags).map(([_, nom, url]) => loadGroup(nom, [url]))
-    )
-  }
-}
