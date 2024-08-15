@@ -1,6 +1,8 @@
 import type {Page} from '@sveltejs/kit'
 import {userGroupsByNom} from '@app/state'
 
+export const makeSpacePath = (nom: string) => `/spaces/${nom}`
+
 export const getPrimaryNavItem = ($page: Page) => {
   if ($page.route?.id?.match('^/(spaces|themes)$')) return 'discover'
   if ($page.route?.id?.startsWith('/spaces'))       return 'space'

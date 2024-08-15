@@ -37,37 +37,5 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
   await publish({event, relays})
 }
 
-export const joinGroup = async (id: string) => {
-  const [url, nom] = splitGroupId(id)
-  const relay = await loadRelay(url)
-
-  if (!relay) {
-    return pushToast({
-      theme: "error",
-      message: "Sorry, we weren't able to find that relay."
-    })
-  }
-
-  if (!relay.supported_nips?.includes(29)) {
-    return pushToast({
-      theme: "error",
-      message: "Sorry, it looks like that relay doesn't support nostr spaces."
-    })
-  }
-
-  const group = await loadGroup(nom, [url])
-
-  if (!group) {
-    return pushToast({
-      theme: "error",
-      message: "Sorry, we weren't able to find that space."
-    })
-  }
-
-  await updateList(GROUPS, (tags: string[][]) => uniqBy(t => t.join(''), append(["group", nom, url], tags)))
-
-  goto(`/spaces/${nom}`)
-  pushToast({
-    message: "Welcome to the space!"
-  })
-}
+export const updateGroupMemberships = (newTags: string[][]) =>
+  updateList(GROUPS, (tags: string[][]) => uniqBy(t => t.join(''), [...tags, ...newTags]))

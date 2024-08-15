@@ -1,6 +1,6 @@
 import type {Readable} from "svelte/store"
 import type {FuseResult} from 'fuse.js'
-import {writable, readable, derived} from "svelte/store"
+import {get, writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
 import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
 import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList} from "@welshman/util"
@@ -138,7 +138,6 @@ export const {
   getIndex: getRelaysByUrl,
   deriveItem: deriveRelay,
   loadItem: loadRelay,
-  // getItem: getRelay,
 } = createCollection({
   name: 'relays',
   store: relays,
@@ -168,7 +167,6 @@ export const {
   getIndex: getHandlesByNip05,
   deriveItem: deriveHandle,
   loadItem: loadHandle,
-  // getItem: getHandle,
 } = createCollection({
   name: 'handles',
   store: handles,
@@ -191,8 +189,7 @@ export const {
 
 // Profiles
 
-export const profiles = deriveEventsMapped<PublishedProfile>({
-  repository,
+export const profiles = deriveEventsMapped<PublishedProfile>(repository, {
   filters: [{kinds: [PROFILE]}],
   eventToItem: readProfile,
   itemToEvent: item => item.event,
@@ -203,7 +200,6 @@ export const {
   getIndex: getProfilesByPubkey,
   deriveItem: deriveProfile,
   loadItem: loadProfile,
-  // getItem: getProfile,
 } = createCollection({
   name: 'profiles',
   store: profiles,
@@ -224,14 +220,13 @@ export const getReadRelayUrls = (event?: CustomEvent): string[] =>
 export const getWriteRelayUrls = (event?: CustomEvent): string[] =>
   getRelayTags(event?.tags || []).filter((t: string[]) => !t[2] || t[2] === 'write').map((t: string[]) => normalizeRelayUrl(t[1]))
 
-export const relaySelections = deriveEvents({repository, filters: [{kinds: [RELAYS]}]})
+export const relaySelections = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
 
 export const {
   indexStore: relaySelectionsByPubkey,
   getIndex: getRelaySelectionsByPubkey,
   deriveItem: deriveRelaySelections,
   loadItem: loadRelaySelections,
-  // getItem: getRelaySelections,
 } = createCollection({
   name: 'relaySelections',
   store: relaySelections,
@@ -246,8 +241,7 @@ export const {
 
 // Follows
 
-export const follows = deriveEventsMapped<PublishedList>({
-  repository,
+export const follows = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [FOLLOWS]}],
   itemToEvent: item => item.event,
   eventToItem: async (event: CustomEvent) =>
@@ -263,7 +257,6 @@ export const {
   getIndex: getFollowsByPubkey,
   deriveItem: deriveFollows,
   loadItem: loadFollows,
-  // getItem: getFollows,
 } = createCollection({
   name: 'follows',
   store: follows,
@@ -278,8 +271,7 @@ export const {
 
 // Mutes
 
-export const mutes = deriveEventsMapped<PublishedList>({
-  repository,
+export const mutes = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [MUTES]}],
   itemToEvent: item => item.event,
   eventToItem: async (event: CustomEvent) =>
@@ -295,7 +287,6 @@ export const {
   getIndex: getMutesByPubkey,
   deriveItem: deriveMutes,
   loadItem: loadMutes,
-  // getItem: getMutes,
 } = createCollection({
   name: 'mutes',
   store: mutes,
@@ -350,8 +341,7 @@ export const readGroup = (event: CustomEvent) => {
   return {nom, name, about, picture, event}
 }
 
-export const groups = deriveEventsMapped<PublishedGroup>({
-  repository,
+export const groups = deriveEventsMapped<PublishedGroup>(repository, {
   filters: [{kinds: [GROUP_META]}],
   eventToItem: readGroup,
   itemToEvent: item => item.event,
@@ -362,7 +352,6 @@ export const {
   getIndex: getGroupsByNom,
   deriveItem: deriveGroup,
   loadItem: loadGroup,
-  // getItem: getGroup,
 } = createCollection({
   name: 'groups',
   store: groups,
@@ -412,6 +401,18 @@ export const qualifiedGroups = derived([relaysByPubkey, groups], ([$relaysByPubk
 
 export const qualifiedGroupsById = derived(qualifiedGroups, $qualifiedGroups => indexBy($qg => $qg.id, $qualifiedGroups))
 
+export const qualifiedGroupsByNom = derived(qualifiedGroups, $qualifiedGroups => groupBy($qg => $qg.group.nom, $qualifiedGroups))
+
+export const relayUrlsByNom = derived(qualifiedGroups, $qualifiedGroups => {
+  const $relayUrlsByNom = new Map()
+
+  for (const {relay, group} of $qualifiedGroups) {
+    pushToMapKey($relayUrlsByNom, group.nom, relay.url)
+  }
+
+  return $relayUrlsByNom
+})
+
 // Group membership
 
 export type GroupMembership = {
@@ -439,8 +440,7 @@ export const readGroupMembership = (event: CustomEvent) => {
   return {event, ids, noms, urls}
 }
 
-export const groupMemberships = deriveEventsMapped<PublishedGroupMembership>({
-  repository,
+export const groupMemberships = deriveEventsMapped<PublishedGroupMembership>(repository, {
   filters: [{kinds: [GROUPS]}],
   eventToItem: readGroupMembership,
   itemToEvent: item => item.event,
@@ -451,17 +451,72 @@ export const {
   getIndex: getGroupMembersipByPubkey,
   deriveItem: deriveGroupMembership,
   loadItem: loadGroupMembership,
-  // getItem: getGroupMembership,
 } = createCollection({
-    name: 'groupMemberships',
-    store: groupMemberships,
-    getKey: groupMembership => groupMembership.event.pubkey,
-    load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-      load({
-        ...request,
-        relays: [...relays, ...INDEXER_RELAYS],
-        filters: [{kinds: [GROUPS], authors: [pubkey]}],
-      })
+  name: 'groupMemberships',
+  store: groupMemberships,
+  getKey: groupMembership => groupMembership.event.pubkey,
+  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+    load({
+      ...request,
+      relays: [...relays, ...INDEXER_RELAYS],
+      filters: [{kinds: [GROUPS], authors: [pubkey]}],
+    })
+})
+
+// Group Messages
+
+export type GroupMessage = {
+  nom: string
+  event: CustomEvent
+}
+
+export const readGroupMessage = (event: CustomEvent): Maybe<GroupMessage> => {
+  const nom = event.tags.find(nthEq(0, 'h'))?.[1]
+
+  if (!nom) {
+    return undefined
+  }
+
+  return {nom, event}
+}
+
+export const groupMessages = deriveEventsMapped<GroupMessage>(repository, {
+  filters: [{}],
+  eventToItem: readGroupMessage,
+  itemToEvent: item => item.event,
+})
+
+// Group Conversations
+
+export type GroupConversation = {
+  nom: string
+  messages: GroupMessage[]
+}
+
+export const groupConversations = derived(groupMessages, $groupMessages => {
+  const groupMessagesByNom = groupBy($groupMessage => $groupMessage.nom, $groupMessages)
+
+  return Array.from(groupMessagesByNom.entries()).map(([nom, messages]) => ({nom, messages}))
+})
+
+export const {
+  indexStore: groupConversationByNom,
+  getIndex: getGroupMembersipByNom,
+  deriveItem: deriveGroupConversation,
+  loadItem: loadGroupConversation,
+} = createCollection({
+  name: 'groupConversations',
+  store: groupConversations,
+  getKey: groupConversation => groupConversation.nom,
+  load: (nom: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
+    const relays = [...hints, ...get(relayUrlsByNom).get(nom) || []]
+
+    if (relays.length === 0) {
+      console.warn(`Attempted to load conversation for ${nom} with no qualified groups`)
+    }
+
+    return load({...request, relays, filters: [{'#h': [nom]}]})
+  },
 })
 
 // User stuff

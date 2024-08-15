@@ -1,9 +1,12 @@
 <script lang="ts">
+  import {goto} from '$app/navigation'
   import CardButton from "@lib/components/CardButton.svelte"
   import SpaceCreate from '@app/components/SpaceCreate.svelte'
   import {pushModal} from '@app/modal'
 
-  export const createSpace = () => pushModal(SpaceCreate)
+  const createSpace = () => pushModal(SpaceCreate)
+
+  const browseSpaces = () => goto("/spaces")
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -15,7 +18,7 @@
         <CardButton icon="add-circle" title="Create a space" class="h-24" on:click={createSpace}>
             Invite all your friends, do life together.
         </CardButton>
-        <CardButton icon="compass" title="Discover spaces" class="h-24">
+        <CardButton icon="compass" title="Discover spaces" class="h-24" on:click={browseSpaces}>
             Find a community based on your hobbies or interests.
         </CardButton>
         <CardButton icon="plain" title="Leave feedback" class="h-24">

@@ -12,7 +12,7 @@
 
 <div class="content column gap-4">
   <h1 class="superheading mt-20">Discover Themes</h1>
-  <p class="text-center">Make Flotilla look just how you like it</p>
+  <p class="text-center">Make your community feel like home</p>
   <label class="input input-bordered w-full flex items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for themes..." />

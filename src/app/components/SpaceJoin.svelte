@@ -11,17 +11,52 @@
   import {pushModal} from '@app/modal'
   import {pushToast} from '@app/toast'
   import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup} from '@app/state'
-  import {joinGroup} from '@app/commands'
+  import {updateGroupMemberships} from '@app/commands'
 
   const back = () => history.back()
 
-  const browse = () => goto("/browse", {state: {}})
+  const browse = () => goto("/spaces")
+
+  const joinQualifiedGroup = async (id: string) => {
+    const [url, nom] = splitGroupId(id)
+    const relay = await loadRelay(url)
+
+    if (!relay) {
+      return pushToast({
+        theme: "error",
+        message: "Sorry, we weren't able to find that relay."
+      })
+    }
+
+    if (!relay.supported_nips?.includes(29)) {
+      return pushToast({
+        theme: "error",
+        message: "Sorry, it looks like that relay doesn't support nostr spaces."
+      })
+    }
+
+    const group = await loadGroup(nom, [url])
+
+    if (!group) {
+      return pushToast({
+        theme: "error",
+        message: "Sorry, we weren't able to find that space."
+      })
+    }
+
+    await updateGroupMemberships([["group", nom, url]])
+
+    goto(`/spaces/${nom}`)
+    pushToast({
+      message: "Welcome to the space!"
+    })
+  }
 
   const join = async () => {
     loading = true
 
     try {
-      await joinGroup(id)
+      await joinQualifiedGroup(id)
     } finally {
       loading = false
     }
