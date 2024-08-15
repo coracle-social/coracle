@@ -4,26 +4,13 @@
   import {append, remove} from '@welshman/lib'
   import {GROUP_META, displayRelayUrl} from '@welshman/util'
   import Icon from '@lib/components/Icon.svelte'
-  import Button from '@lib/components/Button.svelte'
-  import Spinner from '@lib/components/Spinner.svelte'
   import {makeSpacePath} from '@app/routes'
   import {load, relays, groups, searchGroups, relayUrlsByNom, userMembership} from '@app/state'
   import {updateGroupMemberships} from '@app/commands'
 
   const getRelayUrls = (nom: string): string[] => $relayUrlsByNom.get(nom) || []
 
-  const join = async (nom: string) => {
-    loading = append(nom, loading)
-
-    try {
-      await updateGroupMemberships(getRelayUrls(nom).map(url => ["group", nom, url]))
-    } finally {
-      loading = remove(nom, loading)
-    }
-  }
-
   let term = ""
-  let loading: string[] = []
 
   onMount(() => {
     load({
@@ -41,9 +28,9 @@
     <input bind:value={term} class="grow" type="text" placeholder="Search for spaces..." />
   </label>
   <Masonry animate={false} items={$searchGroups.searchOptions(term)} minColWidth={250} maxColWidth={800} gap={16} idKey="nom" let:item={group}>
-    <div class="card bg-base-100 shadow-xl">
+    <a href={makeSpacePath(group.nom)} class="card bg-base-100 shadow-xl hover:shadow-2xl hover:brightness-[1.1] transition-all">
       <div class="avatar center mt-8">
-        <div class="w-20 rounded-full bg-base-300 border-2 border-solid border-base-300 !flex center">
+        <div class="w-20 rounded-full bg-base-300 border-2 border-solid border-base-300 !flex center relative">
           {#if group?.picture}
             <img alt="" src={group.picture} />
           {:else}
@@ -51,31 +38,22 @@
           {/if}
         </div>
       </div>
+      {#if $userMembership?.noms.has(group.nom)}
+        <div class="absolute flex center w-full">
+          <div class="bg-primary rounded-full relative top-[38px] left-8 tooltip" data-tip="You are already a member of this space.">
+            <Icon icon="check-circle" class="scale-110" />
+          </div>
+        </div>
+      {/if}
       <div class="card-body">
-        <a href={makeSpacePath(group.nom)}>
-          <h2 class="card-title justify-center">{group.name}</h2>
-        </a>
+        <h2 class="card-title justify-center">{group.name}</h2>
         <div class="text-sm text-center">
           {#each getRelayUrls(group.nom) as url}
             <div class="badge badge-neutral">{displayRelayUrl(url)}</div>
           {/each}
         </div>
         <p class="text-sm py-4">{group.about}</p>
-        <div class="card-actions">
-          <Button
-            class="btn btn-primary w-full"
-            disabled={loading.includes(group.nom) || $userMembership?.noms.has(group.nom)}
-            on:click={() => join(group.nom)}>
-            {#if $userMembership?.noms.has(group.nom)}
-              <Icon icon="check-circle" />
-              Joined
-            {:else}
-              <Spinner loading={loading.includes(group.nom)} />
-              Join Space
-            {/if}
-          </Button>
-        </div>
       </div>
-    </div>
+    </a>
   </Masonry>
 </div>
