@@ -18,8 +18,7 @@
   export let filter
   export let group = null
 
-  const calendarEvents = deriveEventsMapped({
-    repository,
+  const calendarEvents = deriveEventsMapped(repository, {
     filters: [filter],
     itemToEvent: (item: any) => item.event,
     eventToItem: (event: TrustedEvent) => {

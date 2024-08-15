@@ -1,4 +1,11 @@
-export type {Profile, PublishedProfile, DecryptedEvent} from "@welshman/domain"
+export type {
+  Profile,
+  PublishedProfile,
+  DecryptedEvent,
+  ListParams as SingletonParams,
+  List as Singleton,
+  PublishedList as PublishedSingleton,
+} from "@welshman/util"
 export {
   Encryptable,
   makeProfile,
@@ -10,7 +17,12 @@ export {
   profileHasName,
   isPublishedProfile,
   asDecryptedEvent,
-} from "@welshman/domain"
+  makeList as makeSingleton,
+  readList as readSingleton,
+  createList as createSingleton,
+  editList as editSingleton,
+  getListValues as getSingletonValues,
+} from "@welshman/util"
 
 export * from "./collection"
 export * from "./feed"
@@ -20,4 +32,3 @@ export * from "./handler"
 export * from "./kind"
 export * from "./list"
 export * from "./relay"
-export * from "./singleton"

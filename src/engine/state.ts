@@ -423,8 +423,7 @@ export const dufflepud = (path: string) => {
 
 // Profiles
 
-export const profiles = deriveEventsMapped<PublishedProfile>({
-  repository,
+export const profiles = deriveEventsMapped<PublishedProfile>(repository, {
   filters: [{kinds: [PROFILE]}],
   eventToItem: readProfile,
   itemToEvent: prop("event"),
@@ -541,10 +540,10 @@ export const getFollowList = (pk: string) =>
 export const deriveFollowList = (pk: string) =>
   derived(followListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getFollows = (pk: string) => getSingletonValues("p", getFollowList(pk))
+export const getFollows = (pk: string) => new Set(getSingletonValues("p", getFollowList(pk)))
 
 export const deriveFollows = (pk: string) =>
-  derived(followListsByPubkey, m => getSingletonValues("p", m.get(pk)))
+  derived(followListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
 
 export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
@@ -572,10 +571,10 @@ export const getMuteList = (pk: string) =>
 export const deriveMuteList = (pk: string) =>
   derived(muteListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getMutes = (pk: string) => getSingletonValues("p", getMuteList(pk))
+export const getMutes = (pk: string) => new Set(getSingletonValues("p", getMuteList(pk)))
 
 export const deriveMutes = (pk: string) =>
-  derived(muteListsByPubkey, m => getSingletonValues("p", m.get(pk)))
+  derived(muteListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
 
 export const isMuting = (pk, tpk) => getMutes(pk).has(tpk)
 
@@ -601,7 +600,7 @@ export const getFollowers = simpleCache(
     new Set(
       followLists
         .get()
-        .filter(l => l.valuesByKey.p?.has(pk))
+        .filter(l => getSingletonValues("p", l).includes(pk))
         .map(l => l.event.pubkey),
     ),
 )
@@ -665,13 +664,13 @@ export const userFollowList = derived(
   },
 )
 
-export const userFollows = derived(userFollowList, l => getSingletonValues("p", l))
+export const userFollows = derived(userFollowList, l => new Set(getSingletonValues("p", l)))
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
 export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
+export const userMutes = derived(userMuteList, l => new Set(getSingletonValues("p", l)))
 
 // Communities
 
@@ -711,15 +710,14 @@ export const getCommunityList = (pk: string) =>
 export const deriveCommunityList = (pk: string) =>
   derived(communityListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getCommunities = (pk: string) => getSingletonValues("a", getCommunityList(pk))
+export const getCommunities = (pk: string) => new Set(getSingletonValues("a", getCommunityList(pk)))
 
 export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => getSingletonValues("a", m.get(pk)))
+  derived(communityListsByPubkey, m => new Set(getSingletonValues("a", m.get(pk))))
 
 // Groups
 
-export const groupMeta = deriveEventsMapped<PublishedGroupMeta>({
-  repository,
+export const groupMeta = deriveEventsMapped<PublishedGroupMeta>(repository, {
   filters: [{kinds: [GROUP, COMMUNITY]}],
   itemToEvent: prop("event"),
   eventToItem: readGroupMeta,
@@ -1223,8 +1221,7 @@ export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
   )
 
 export const legacyRelayLists = withGetter(
-  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>({
-    repository,
+  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>(repository, {
     filters: [{kinds: [FOLLOWS]}],
     itemToEvent: prop("event"),
     eventToItem: event => {
@@ -1413,8 +1410,7 @@ export const searchTopicNames = searchTopics.derived(search => term => pluck("na
 
 // Lists
 
-export const lists = deriveEventsMapped<PublishedList>({
-  repository,
+export const lists = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readList(event) : null),
   itemToEvent: prop("event"),
@@ -1431,8 +1427,7 @@ export const listSearch = derived(lists, $lists => new ListSearch($lists))
 
 // Feeds
 
-export const feeds = deriveEventsMapped<PublishedFeed>({
-  repository,
+export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
   filters: [{kinds: [FEED]}],
   itemToEvent: prop("event"),
   eventToItem: readFeed,
@@ -1477,10 +1472,7 @@ export const userFeedFavorites = derived(
 )
 
 export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
-  Array.from(getSingletonValues("a", $singleton))
-    .map(repository.getEvent)
-    .filter(identity)
-    .map(readFeed),
+  getSingletonValues("a", $singleton).map(repository.getEvent).filter(identity).map(readFeed),
 )
 
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {
@@ -1514,8 +1506,7 @@ export class FeedSearch extends SearchHelper<PublishedFeed, string> {
 
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
-export const listFeeds = deriveEventsMapped<PublishedListFeed>({
-  repository,
+export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readList(event)) : undefined,
@@ -2217,6 +2208,8 @@ class IndexedDBAdapter {
         const newRecords = current.filter(r => !prevIds.has(r[key]))
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
+        prev = current
+
         if (newRecords.length > 0) {
           await storage.bulkPut(name, newRecords)
         }
@@ -2234,8 +2227,6 @@ class IndexedDBAdapter {
         if (current.length > limit * 1.5) {
           set((sort ? sort(current) : current).slice(0, limit))
         }
-
-        prev = current
       }),
     )
   }
@@ -2369,5 +2360,5 @@ export const storage = new Storage(15, [
     sort: sortBy(prop("created_at")),
   }),
   collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {limit: 1000}),
-  collectionAdapter("repository", "id", events, {limit: 100000, sort: sortBy(scoreEvent)}),
+  collectionAdapter("repository", "id", events, {limit: 30000, sort: sortBy(scoreEvent)}),
 ])
