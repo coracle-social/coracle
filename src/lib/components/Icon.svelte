@@ -12,6 +12,7 @@
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
   import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
+  import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
   import CheckCircle from "@assets/icons/Check Circle.svg?dataurl"
   import ClipboardText from "@assets/icons/Clipboard Text.svg?dataurl"
   import CloseCircle from "@assets/icons/Close Circle.svg?dataurl"
@@ -48,6 +49,7 @@
     "add-circle": AddCircle,
     "alt-arrow-right": AltArrowRight,
     "alt-arrow-left": AltArrowLeft,
+    "arrow-right": ArrowRight,
     "check-circle": CheckCircle,
     "clipboard-text": ClipboardText,
     "close-circle": CloseCircle,

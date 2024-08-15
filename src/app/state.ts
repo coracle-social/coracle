@@ -2,8 +2,8 @@ import type {Readable} from "svelte/store"
 import type {FuseResult} from 'fuse.js'
 import {get, writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {uniq, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
-import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList} from "@welshman/util"
+import {max, uniq, between, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
+import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList, GROUP_JOIN, GROUP_ADD_USER} from "@welshman/util"
 import type {Filter, SignedEvent, CustomEvent, PublishedProfile, PublishedList} from '@welshman/util'
 import type {SubscribeRequest, PublishRequest} from '@welshman/net'
 import {publish as basePublish, subscribe} from '@welshman/net'
@@ -75,16 +75,16 @@ export const publish = (request: PublishRequest) => {
 }
 
 export const load = (request: SubscribeRequest) =>
-  new Promise<Maybe<CustomEvent>>(resolve => {
+  new Promise<CustomEvent[]>(resolve => {
     const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
+    const events: CustomEvent[] = []
 
     sub.emitter.on('event', (url: string, e: SignedEvent) => {
       repository.publish(e)
-      sub.close()
-      resolve(e)
+      events.push(e)
     })
 
-    sub.emitter.on('complete', () => resolve(undefined))
+    sub.emitter.on('complete', () => resolve(events))
   })
 
 // Freshness
@@ -448,7 +448,7 @@ export const groupMemberships = deriveEventsMapped<PublishedGroupMembership>(rep
 
 export const {
   indexStore: groupMembershipByPubkey,
-  getIndex: getGroupMembersipByPubkey,
+  getIndex: getGroupMembershipsByPubkey,
   deriveItem: deriveGroupMembership,
   loadItem: loadGroupMembership,
 } = createCollection({
@@ -473,7 +473,7 @@ export type GroupMessage = {
 export const readGroupMessage = (event: CustomEvent): Maybe<GroupMessage> => {
   const nom = event.tags.find(nthEq(0, 'h'))?.[1]
 
-  if (!nom) {
+  if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind)) {
     return undefined
   }
 
@@ -501,7 +501,7 @@ export const groupConversations = derived(groupMessages, $groupMessages => {
 
 export const {
   indexStore: groupConversationByNom,
-  getIndex: getGroupMembersipByNom,
+  getIndex: getGroupConversationsByNom,
   deriveItem: deriveGroupConversation,
   loadItem: loadGroupConversation,
 } = createCollection({
@@ -510,12 +510,15 @@ export const {
   getKey: groupConversation => groupConversation.nom,
   load: (nom: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
     const relays = [...hints, ...get(relayUrlsByNom).get(nom) || []]
+    const conversation = get(groupConversations).find(c => c.nom === nom)
+    const timestamps = conversation?.messages.map(m => m.event.created_at) || []
+    const since = Math.min(0, max(timestamps) - 3600)
 
     if (relays.length === 0) {
       console.warn(`Attempted to load conversation for ${nom} with no qualified groups`)
     }
 
-    return load({...request, relays, filters: [{'#h': [nom]}]})
+    return load({...request, relays, filters: [{'#h': [nom], since}]})
   },
 })
 

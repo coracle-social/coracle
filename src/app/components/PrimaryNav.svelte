@@ -13,6 +13,7 @@
 	import {quintOut} from 'svelte/easing'
   import {identity, nth} from '@welshman/lib'
   import Icon from "@lib/components/Icon.svelte"
+  import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from '@app/components/SpaceAdd.svelte'
   import {session} from "@app/base"
@@ -53,13 +54,7 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem on:click={gotoHome}>
-        <div class="!flex w-10 items-center justify-center rounded-full border border-solid border-base-300">
-          {#if $userProfile?.picture}
-            <img alt="" src={$userProfile.picture} />
-          {:else}
-            <Icon icon="user-rounded" size={7} />
-          {/if}
-        </div>
+        <Avatar src={$userProfile?.picture} class="border border-solid border-base-300 !w-10 !h-10" size={7} />
       </PrimaryNavItem>
       {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
         {@const qualifiedGroup = qualifiedGroups[0]}

@@ -60,3 +60,33 @@ export const createSearch = <V, T>(data: T[], opts: SearchOptions<V, T>) => {
     searchValues: (term: string) => search(term).map(opts.getValue),
   }
 }
+
+
+export const secondsToDate = (ts: number) => new Date(ts * 1000)
+
+export const dateToSeconds = (date: Date) => Math.round(date.valueOf() / 1000)
+
+export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
+
+export const createLocalDate = (dateString: any) => new Date(`${dateString} ${getTimeZone()}`)
+
+export const getLocale = () => new Intl.DateTimeFormat().resolvedOptions().locale
+
+export const formatTimestamp = (ts: number) => {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
+    dateStyle: "short",
+    timeStyle: "short",
+  })
+
+  return formatter.format(secondsToDate(ts))
+}
+
+export const formatTimestampAsDate = (ts: number) => {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+
+  return formatter.format(secondsToDate(ts))
+}
