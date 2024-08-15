@@ -204,6 +204,7 @@ export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
+export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
 export const groups = new CollectionStore<Group>("address")
 export const relays = new CollectionStore<RelayInfo>("url")
@@ -211,7 +212,6 @@ export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
-export const publishes = new CollectionStore<PublishInfo>("id", 1000)
 export const topics = new CollectionStore<Topic>("name")
 
 export const projections = new Worker<TrustedEvent>({
@@ -1872,7 +1872,7 @@ export const publish = async ({forcePlatform = true, ...request}: MyPublishReque
   if (canUnwrap(request.event) || request.event.pubkey === pubkey.get()) {
     const pubInfo = omit(["emitter", "result"], pub)
 
-    pub.emitter.on("*", t => publishes.key(pubInfo.id).set(pubInfo))
+    pub.emitter.on("*", t => publishes.update(assoc(pubInfo.id, pubInfo)))
   }
 
   return pub
@@ -2345,11 +2345,11 @@ const collectionAdapter = (name, key, store, opts = {}) =>
     ...opts,
   })
 
-export const storage = new Storage(15, [
+export const storage = new Storage(16, [
   objectAdapter("handles", "key", handles, {limit: 10000}),
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
-  collectionAdapter("publishes", "id", publishes, {sort: sortBy(prop("created_at"))}),
+  objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
   collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {seconds} from "hurdak"
+  import {derived} from 'svelte/store'
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {toggleTheme, theme} from "src/partials/state"
@@ -26,12 +27,12 @@
 
   const {page} = router
 
-  const hud = publishes.derived($publishes => {
+  const hud = derived(publishes, $publishes => {
     const pending = []
     const success = []
     const failure = []
 
-    for (const {created_at, request, status} of $publishes) {
+    for (const {created_at, request, status} of Object.values($publishes)) {
       if (created_at < now() - seconds(5, "minute")) {
         continue
       }
