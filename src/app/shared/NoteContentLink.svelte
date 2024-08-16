@@ -22,6 +22,7 @@
 {#if url.match(coracleRegexp)}
   <Anchor
     modal
+    underline
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
     href={url.replace(coracleRegexp, '')}>
@@ -32,6 +33,7 @@
 {:else if isShareableRelayUrl(url)}
   <Anchor
     modal
+    underline
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
     href={router.at("relays").of(url).toString()}>
@@ -40,6 +42,7 @@
 {:else}
   <Anchor
     modal
+    underline
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
     externalHref={url}

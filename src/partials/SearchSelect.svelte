@@ -14,6 +14,7 @@
   export let delimiters = []
   export let search = null
   export let termToItem = null
+  export let termIsValid = null
   export let getKey: (x: any) => any = identity
   export let displayItem = getKey
   export let autofocus = false
@@ -158,6 +159,7 @@
         <Suggestions
           bind:this={suggestions}
           create={termToItem ? create : null}
+          {termIsValid}
           {loading}
           {select}
           {term}

@@ -33,6 +33,10 @@
 
   const onKindsChange = kinds => onChange([FeedType.Kind, ...kinds])
 
+  const termToItem = (s: string) => parseInt(s)
+
+  const termIsValid = (s: string) => !isNaN(parseInt(s))
+
   const helper = new KindSearch([
     {label: "Note", kind: NOTE},
     {label: "Profile", kind: PROFILE},
@@ -61,6 +65,12 @@
 </script>
 
 <span class="staatliches text-lg">What kind of content do you want to see?</span>
-<SearchSelect multiple search={helper.searchValues} value={feed.slice(1)} onChange={onKindsChange}>
+<SearchSelect
+  multiple
+  search={helper.searchValues}
+  value={feed.slice(1)}
+  onChange={onKindsChange}
+  {termToItem}
+  {termIsValid}>
   <div slot="item" let:item>{helper.displayValue(item)}</div>
 </SearchSelect>

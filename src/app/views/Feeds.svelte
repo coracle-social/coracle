@@ -25,7 +25,7 @@
   <div class="py-16 text-center">
     <p class="text-xl">Don't have an account?</p>
     <p>
-      Click <Anchor class="underline" on:click={showLogin}>here</Anchor> to join the nostr network.
+      Click <Anchor underline on:click={showLogin}>here</Anchor> to join the nostr network.
     </p>
   </div>
 {/if}
