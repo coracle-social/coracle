@@ -135,7 +135,12 @@
     </div>
     {#if $session?.privkey}
       <div>
-        <CopyValue isPassword label="Private Key" value={$session?.privkey} encode={nsecEncode} />
+        <CopyValue
+          isPassword
+          label="Private Key"
+          value={$session?.privkey}
+          encode={nsecEncode}
+          hasEncryptPrompt />
         <small class="text-neutral-100">
           Your private key is used to prove your identity by cryptographically signing messages. <strong
             >Do not share this with anyone.</strong>
