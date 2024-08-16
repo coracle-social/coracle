@@ -1,9 +1,9 @@
 import Fuse from "fuse.js"
-import type {IFuseOptions, FuseResult} from 'fuse.js'
-import {throttle} from 'throttle-debounce'
-import {writable} from 'svelte/store'
-import {sortBy} from '@welshman/lib'
-import {browser} from '$app/environment'
+import type {IFuseOptions, FuseResult} from "fuse.js"
+import {throttle} from "throttle-debounce"
+import {writable} from "svelte/store"
+import {sortBy} from "@welshman/lib"
+import {browser} from "$app/environment"
 
 export const parseJson = (json: string) => {
   if (!json) return null
@@ -15,8 +15,7 @@ export const parseJson = (json: string) => {
   }
 }
 
-export const getJson = (k: string) =>
-  browser ? parseJson(localStorage.getItem(k) || "") : null
+export const getJson = (k: string) => (browser ? parseJson(localStorage.getItem(k) || "") : null)
 
 export const setJson = (k: string, v: any) => {
   if (browser) {
@@ -60,7 +59,6 @@ export const createSearch = <V, T>(data: T[], opts: SearchOptions<V, T>) => {
     searchValues: (term: string) => search(term).map(opts.getValue),
   }
 }
-
 
 export const secondsToDate = (ts: number) => new Date(ts * 1000)
 

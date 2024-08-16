@@ -1,12 +1,12 @@
 import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
-import {throttle} from 'throttle-debounce'
-import {writable} from 'svelte/store'
-import type {Unsubscriber, Writable} from 'svelte/store'
-import {isNil, randomInt} from '@welshman/lib'
-import {withGetter} from '@welshman/store'
-import {getJson, setJson} from '@lib/util'
-import {pk, sessions, repository} from '@app/base'
+import {throttle} from "throttle-debounce"
+import {writable} from "svelte/store"
+import type {Unsubscriber, Writable} from "svelte/store"
+import {isNil, randomInt} from "@welshman/lib"
+import {withGetter} from "@welshman/store"
+import {getJson, setJson} from "@lib/util"
+import {pk, sessions, repository} from "@app/base"
 
 export type Item = Record<string, any>
 
@@ -74,7 +74,10 @@ export const initIndexedDbAdapter = async (name: string, adapter: IndexedDbAdapt
       }
 
       if (removedRecords.length > 0) {
-        await bulkDelete(name, removedRecords.map(item => item[adapter.keyPath]))
+        await bulkDelete(
+          name,
+          removedRecords.map(item => item[adapter.keyPath]),
+        )
       }
     }),
   )
@@ -106,8 +109,7 @@ export const initStorage = async (adapters: Record<string, IndexedDbAdapter>) =>
   })
 
   await Promise.all(
-    Object.entries(adapters)
-      .map(([name, config]) => initIndexedDbAdapter(name, config))
+    Object.entries(adapters).map(([name, config]) => initIndexedDbAdapter(name, config)),
   )
 }
 

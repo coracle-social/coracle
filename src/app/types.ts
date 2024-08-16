@@ -1,4 +1,4 @@
-import {verifiedSymbol} from 'nostr-tools'
+import {verifiedSymbol} from "nostr-tools"
 import type {Nip46Handler} from "@welshman/signer"
 import type {SignedEvent, TrustedEvent, RelayProfile} from "@welshman/util"
 

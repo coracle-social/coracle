@@ -1,17 +1,67 @@
 import type {Readable} from "svelte/store"
-import type {FuseResult} from 'fuse.js'
+import type {FuseResult} from "fuse.js"
 import {get, writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {max, uniq, between, uniqBy, groupBy, pushToMapKey, nthEq, batcher, postJson, stripProtocol, assoc, indexBy, now} from "@welshman/lib"
-import {getIdentifier, getRelayTags, getRelayTagValues, normalizeRelayUrl, getPubkeyTagValues, GROUP_META, PROFILE, RELAYS, FOLLOWS, MUTES, GROUPS, getGroupTags, readProfile, readList, asDecryptedEvent, editList, makeList, createList, GROUP_JOIN, GROUP_ADD_USER} from "@welshman/util"
-import type {Filter, SignedEvent, CustomEvent, PublishedProfile, PublishedList} from '@welshman/util'
-import type {SubscribeRequest, PublishRequest} from '@welshman/net'
-import {publish as basePublish, subscribe} from '@welshman/net'
-import {decrypt} from '@welshman/signer'
+import {
+  max,
+  uniq,
+  between,
+  uniqBy,
+  groupBy,
+  pushToMapKey,
+  nthEq,
+  batcher,
+  postJson,
+  stripProtocol,
+  assoc,
+  indexBy,
+  now,
+} from "@welshman/lib"
+import {
+  getIdFilters,
+  getIdentifier,
+  getRelayTags,
+  getRelayTagValues,
+  normalizeRelayUrl,
+  getPubkeyTagValues,
+  GROUP_META,
+  PROFILE,
+  RELAYS,
+  FOLLOWS,
+  MUTES,
+  GROUPS,
+  getGroupTags,
+  readProfile,
+  readList,
+  asDecryptedEvent,
+  editList,
+  makeList,
+  createList,
+  GROUP_JOIN,
+  GROUP_ADD_USER,
+} from "@welshman/util"
+import type {
+  Filter,
+  SignedEvent,
+  CustomEvent,
+  PublishedProfile,
+  PublishedList,
+} from "@welshman/util"
+import type {SubscribeRequest, PublishRequest} from "@welshman/net"
+import {publish as basePublish, subscribe} from "@welshman/net"
+import {decrypt} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
-import {parseJson, createSearch} from '@lib/util'
-import type {Session, Handle, Relay} from '@app/types'
-import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, signer} from "@app/base"
+import {parseJson, createSearch} from "@lib/util"
+import type {Session, Handle, Relay} from "@app/types"
+import {
+  INDEXER_RELAYS,
+  DUFFLEPUD_URL,
+  repository,
+  pk,
+  getSession,
+  getSigner,
+  signer,
+} from "@app/base"
 
 // Utils
 
@@ -21,15 +71,15 @@ export const createCollection = <T>({
   getKey,
   load,
 }: {
-  name: string,
-  store: Readable<T[]>,
-  getKey: (item: T) => string,
+  name: string
+  store: Readable<T[]>
+  getKey: (item: T) => string
   load: (key: string, ...args: any) => Promise<any>
 }) => {
   const indexStore = derived(store, $items => indexBy(getKey, $items))
   const getIndex = getter(indexStore)
   const getItem = (key: string) => getIndex().get(key)
-  const pending = new Map<string, Promise<Maybe<T>>>
+  const pending = new Map<string, Promise<Maybe<T>>>()
 
   const loadItem = async (key: string, ...args: any[]) => {
     if (getFreshness(name, key) > now() - 3600) {
@@ -68,6 +118,25 @@ export const createCollection = <T>({
   return {indexStore, getIndex, deriveItem, loadItem, getItem}
 }
 
+export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
+  let attempted = false
+
+  const filters = getIdFilters([idOrAddress])
+  const relays = [...hints, ...INDEXER_RELAYS]
+
+  return derived(
+    deriveEvents(repository, {filters, includeDeleted: true}),
+    (events: CustomEvent[]) => {
+      if (!attempted && events.length === 0) {
+        load({relays, filters})
+        attempted = true
+      }
+
+      return events[0]
+    },
+  )
+}
+
 export const publish = (request: PublishRequest) => {
   repository.publish(request.event)
 
@@ -79,12 +148,12 @@ export const load = (request: SubscribeRequest) =>
     const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
     const events: CustomEvent[] = []
 
-    sub.emitter.on('event', (url: string, e: SignedEvent) => {
+    sub.emitter.on("event", (url: string, e: SignedEvent) => {
       repository.publish(e)
       events.push(e)
     })
 
-    sub.emitter.on('complete', () => resolve(events))
+    sub.emitter.on("complete", () => resolve(events))
   })
 
 // Freshness
@@ -93,9 +162,11 @@ export const freshness = withGetter(writable<Record<string, number>>({}))
 
 export const getFreshnessKey = (ns: string, key: string) => `${ns}:${key}`
 
-export const getFreshness = (ns: string, key: string) => freshness.get()[getFreshnessKey(ns, key)] || 0
+export const getFreshness = (ns: string, key: string) =>
+  freshness.get()[getFreshnessKey(ns, key)] || 0
 
-export const setFreshness = (ns: string, key: string, ts: number) => freshness.update(assoc(getFreshnessKey(ns, key), ts))
+export const setFreshness = (ns: string, key: string, ts: number) =>
+  freshness.update(assoc(getFreshnessKey(ns, key), ts))
 
 export const setFreshnessBulk = (ns: string, updates: Record<string, number>) =>
   freshness.update($freshness => {
@@ -131,7 +202,9 @@ export const ensurePlaintext = async (e: CustomEvent) => {
 
 export const relays = writable<Relay[]>([])
 
-export const relaysByPubkey = derived(relays, $relays => groupBy(($relay: Relay) => $relay.pubkey, $relays))
+export const relaysByPubkey = derived(relays, $relays =>
+  groupBy(($relay: Relay) => $relay.pubkey, $relays),
+)
 
 export const {
   indexStore: relaysByUrl,
@@ -139,7 +212,7 @@ export const {
   deriveItem: deriveRelay,
   loadItem: loadRelay,
 } = createCollection({
-  name: 'relays',
+  name: "relays",
   store: relays,
   getKey: (relay: Relay) => relay.url,
   load: batcher(800, async (urls: string[]) => {
@@ -168,7 +241,7 @@ export const {
   deriveItem: deriveHandle,
   loadItem: loadHandle,
 } = createCollection({
-  name: 'handles',
+  name: "handles",
   store: handles,
   getKey: (handle: Handle) => handle.nip05,
   load: batcher(800, async (nip05s: string[]) => {
@@ -201,7 +274,7 @@ export const {
   deriveItem: deriveProfile,
   loadItem: loadProfile,
 } = createCollection({
-  name: 'profiles',
+  name: "profiles",
   store: profiles,
   getKey: profile => profile.event.pubkey,
   load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
@@ -215,10 +288,14 @@ export const {
 // Relay selections
 
 export const getReadRelayUrls = (event?: CustomEvent): string[] =>
-  getRelayTags(event?.tags || []).filter((t: string[]) => !t[2] || t[2] === 'read').map((t: string[]) => normalizeRelayUrl(t[1]))
+  getRelayTags(event?.tags || [])
+    .filter((t: string[]) => !t[2] || t[2] === "read")
+    .map((t: string[]) => normalizeRelayUrl(t[1]))
 
 export const getWriteRelayUrls = (event?: CustomEvent): string[] =>
-  getRelayTags(event?.tags || []).filter((t: string[]) => !t[2] || t[2] === 'write').map((t: string[]) => normalizeRelayUrl(t[1]))
+  getRelayTags(event?.tags || [])
+    .filter((t: string[]) => !t[2] || t[2] === "write")
+    .map((t: string[]) => normalizeRelayUrl(t[1]))
 
 export const relaySelections = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
 
@@ -228,7 +305,7 @@ export const {
   deriveItem: deriveRelaySelections,
   loadItem: loadRelaySelections,
 } = createCollection({
-  name: 'relaySelections',
+  name: "relaySelections",
   store: relaySelections,
   getKey: relaySelections => relaySelections.pubkey,
   load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
@@ -236,7 +313,7 @@ export const {
       ...request,
       relays: [...relays, ...INDEXER_RELAYS],
       filters: [{kinds: [RELAYS], authors: [pubkey]}],
-    })
+    }),
 })
 
 // Follows
@@ -258,7 +335,7 @@ export const {
   deriveItem: deriveFollows,
   loadItem: loadFollows,
 } = createCollection({
-  name: 'follows',
+  name: "follows",
   store: follows,
   getKey: follows => follows.event.pubkey,
   load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
@@ -266,7 +343,7 @@ export const {
       ...request,
       relays: [...relays, ...INDEXER_RELAYS],
       filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
-    })
+    }),
 })
 
 // Mutes
@@ -288,7 +365,7 @@ export const {
   deriveItem: deriveMutes,
   loadItem: loadMutes,
 } = createCollection({
-  name: 'mutes',
+  name: "mutes",
   store: mutes,
   getKey: mute => mute.event.pubkey,
   load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
@@ -296,7 +373,7 @@ export const {
       ...request,
       relays: [...relays, ...INDEXER_RELAYS],
       filters: [{kinds: [MUTES], authors: [pubkey]}],
-    })
+    }),
 })
 
 // Groups
@@ -304,7 +381,7 @@ export const {
 export const GROUP_DELIMITER = `'`
 
 export const makeGroupId = (url: string, nom: string) =>
-  [stripProtocol(url).replace(/\/$/, ''), nom].join(GROUP_DELIMITER)
+  [stripProtocol(url).replace(/\/$/, ""), nom].join(GROUP_DELIMITER)
 
 export const splitGroupId = (groupId: string) => {
   const [url, nom] = groupId.split(GROUP_DELIMITER)
@@ -321,10 +398,10 @@ export const getGroupName = (e?: CustomEvent) => e?.tags.find(nthEq(0, "name"))?
 export const getGroupPicture = (e?: CustomEvent) => e?.tags.find(nthEq(0, "picture"))?.[1]
 
 export type Group = {
-  nom: string,
-  name?: string,
-  about?: string,
-  picture?: string,
+  nom: string
+  name?: string
+  about?: string
+  picture?: string
   event?: CustomEvent
 }
 
@@ -353,7 +430,7 @@ export const {
   deriveItem: deriveGroup,
   loadItem: loadGroup,
 } = createCollection({
-  name: 'groups',
+  name: "groups",
   store: groups,
   getKey: (group: PublishedGroup) => group.nom,
   load: (nom: string, relays: string[] = [], request: Partial<SubscribeRequest> = {}) =>
@@ -362,25 +439,23 @@ export const {
       load({
         ...request,
         relays,
-        filters: [{kinds: [GROUP_META], '#d': [nom]}],
+        filters: [{kinds: [GROUP_META], "#d": [nom]}],
       }),
-    ])
+    ]),
 })
 
-export const searchGroups = derived(
-  groups,
-  $groups =>
-    createSearch($groups, {
-      getValue: (group: PublishedGroup) => group.nom,
-      sortFn: (result: FuseResult<PublishedGroup>) => {
-        const scale = result.item.picture ? 0.5 : 1
+export const searchGroups = derived(groups, $groups =>
+  createSearch($groups, {
+    getValue: (group: PublishedGroup) => group.nom,
+    sortFn: (result: FuseResult<PublishedGroup>) => {
+      const scale = result.item.picture ? 0.5 : 1
 
-        return result.score! * scale
-      },
-      fuseOptions: {
-        keys: ["name", {name: "about", weight: 0.3}],
-      },
-    })
+      return result.score! * scale
+    },
+    fuseOptions: {
+      keys: ["name", {name: "about", weight: 0.3}],
+    },
+  }),
 )
 
 // Qualified groups
@@ -396,12 +471,16 @@ export const qualifiedGroups = derived([relaysByPubkey, groups], ([$relaysByPubk
     const relays = $relaysByPubkey.get(group.event.pubkey) || []
 
     return relays.map(relay => ({id: makeGroupId(relay.url, group.nom), relay, group}))
-  })
+  }),
 )
 
-export const qualifiedGroupsById = derived(qualifiedGroups, $qualifiedGroups => indexBy($qg => $qg.id, $qualifiedGroups))
+export const qualifiedGroupsById = derived(qualifiedGroups, $qualifiedGroups =>
+  indexBy($qg => $qg.id, $qualifiedGroups),
+)
 
-export const qualifiedGroupsByNom = derived(qualifiedGroups, $qualifiedGroups => groupBy($qg => $qg.group.nom, $qualifiedGroups))
+export const qualifiedGroupsByNom = derived(qualifiedGroups, $qualifiedGroups =>
+  groupBy($qg => $qg.group.nom, $qualifiedGroups),
+)
 
 export const relayUrlsByNom = derived(qualifiedGroups, $qualifiedGroups => {
   const $relayUrlsByNom = new Map()
@@ -452,7 +531,7 @@ export const {
   deriveItem: deriveGroupMembership,
   loadItem: loadGroupMembership,
 } = createCollection({
-  name: 'groupMemberships',
+  name: "groupMemberships",
   store: groupMemberships,
   getKey: groupMembership => groupMembership.event.pubkey,
   load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
@@ -460,7 +539,7 @@ export const {
       ...request,
       relays: [...relays, ...INDEXER_RELAYS],
       filters: [{kinds: [GROUPS], authors: [pubkey]}],
-    })
+    }),
 })
 
 // Group Messages
@@ -471,7 +550,7 @@ export type GroupMessage = {
 }
 
 export const readGroupMessage = (event: CustomEvent): Maybe<GroupMessage> => {
-  const nom = event.tags.find(nthEq(0, 'h'))?.[1]
+  const nom = event.tags.find(nthEq(0, "h"))?.[1]
 
   if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind)) {
     return undefined
@@ -505,20 +584,20 @@ export const {
   deriveItem: deriveGroupConversation,
   loadItem: loadGroupConversation,
 } = createCollection({
-  name: 'groupConversations',
+  name: "groupConversations",
   store: groupConversations,
   getKey: groupConversation => groupConversation.nom,
   load: (nom: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
-    const relays = [...hints, ...get(relayUrlsByNom).get(nom) || []]
+    const relays = [...hints, ...(get(relayUrlsByNom).get(nom) || [])]
     const conversation = get(groupConversations).find(c => c.nom === nom)
     const timestamps = conversation?.messages.map(m => m.event.created_at) || []
-    const since = Math.min(0, max(timestamps) - 3600)
+    const since = Math.max(0, max(timestamps) - 3600)
 
     if (relays.length === 0) {
       console.warn(`Attempted to load conversation for ${nom} with no qualified groups`)
     }
 
-    return load({...request, relays, filters: [{'#h': [nom], since}]})
+    return load({...request, relays, filters: [{"#h": [nom], since}]})
   },
 })
 
@@ -532,30 +611,35 @@ export const userProfile = derived([pk, profilesByPubkey], ([$pk, $profilesByPub
   return $profilesByPubkey.get($pk)
 })
 
-export const userMembership = derived([pk, groupMembershipByPubkey], ([$pk, $groupMembershipByPubkey]) => {
-  if (!$pk) return null
+export const userMembership = derived(
+  [pk, groupMembershipByPubkey],
+  ([$pk, $groupMembershipByPubkey]) => {
+    if (!$pk) return null
 
-  loadGroupMembership($pk)
+    loadGroupMembership($pk)
 
-  return $groupMembershipByPubkey.get($pk)
-})
+    return $groupMembershipByPubkey.get($pk)
+  },
+)
 
-export const userGroupsByNom = withGetter(derived([userMembership, qualifiedGroupsById], ([$userMembership, $qualifiedGroupsById]) => {
-  const $userGroupsByNom = new Map()
+export const userGroupsByNom = withGetter(
+  derived([userMembership, qualifiedGroupsById], ([$userMembership, $qualifiedGroupsById]) => {
+    const $userGroupsByNom = new Map()
 
-  for (const id of $userMembership?.ids || []) {
-    const [url, nom] = splitGroupId(id)
-    const group = $qualifiedGroupsById.get(id)
-    const groups = $userGroupsByNom.get(nom) || []
+    for (const id of $userMembership?.ids || []) {
+      const [url, nom] = splitGroupId(id)
+      const group = $qualifiedGroupsById.get(id)
+      const groups = $userGroupsByNom.get(nom) || []
 
-    loadGroup(nom, [url])
+      loadGroup(nom, [url])
 
-    if (group) {
-      groups.push(group)
+      if (group) {
+        groups.push(group)
+      }
+
+      $userGroupsByNom.set(nom, groups)
     }
 
-    $userGroupsByNom.set(nom, groups)
-  }
-
-  return $userGroupsByNom
-}))
+    return $userGroupsByNom
+  }),
+)

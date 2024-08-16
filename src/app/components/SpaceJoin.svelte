@@ -1,17 +1,17 @@
 <script lang="ts">
-  import {goto} from '$app/navigation'
-  import {append, uniqBy} from '@welshman/lib'
-  import {GROUPS} from '@welshman/util'
-  import CardButton from '@lib/components/CardButton.svelte'
-  import Spinner from '@lib/components/Spinner.svelte'
+  import {goto} from "$app/navigation"
+  import {append, uniqBy} from "@welshman/lib"
+  import {GROUPS} from "@welshman/util"
+  import CardButton from "@lib/components/CardButton.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Field from '@lib/components/Field.svelte'
-  import Icon from '@lib/components/Icon.svelte'
-  import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
-  import {pushModal} from '@app/modal'
-  import {pushToast} from '@app/toast'
-  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup} from '@app/state'
-  import {updateGroupMemberships} from '@app/commands'
+  import Field from "@lib/components/Field.svelte"
+  import Icon from "@lib/components/Icon.svelte"
+  import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
+  import {pushModal} from "@app/modal"
+  import {pushToast} from "@app/toast"
+  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup} from "@app/state"
+  import {addGroupMemberships} from "@app/commands"
 
   const back = () => history.back()
 
@@ -24,14 +24,14 @@
     if (!relay) {
       return pushToast({
         theme: "error",
-        message: "Sorry, we weren't able to find that relay."
+        message: "Sorry, we weren't able to find that relay.",
       })
     }
 
     if (!relay.supported_nips?.includes(29)) {
       return pushToast({
         theme: "error",
-        message: "Sorry, it looks like that relay doesn't support nostr spaces."
+        message: "Sorry, it looks like that relay doesn't support nostr spaces.",
       })
     }
 
@@ -40,15 +40,15 @@
     if (!group) {
       return pushToast({
         theme: "error",
-        message: "Sorry, we weren't able to find that space."
+        message: "Sorry, we weren't able to find that space.",
       })
     }
 
-    await updateGroupMemberships([["group", nom, url]])
+    await addGroupMemberships([["group", nom, url]])
 
     goto(`/spaces/${nom}`)
     pushToast({
-      message: "Welcome to the space!"
+      message: "Welcome to the space!",
     })
   }
 
@@ -71,13 +71,11 @@
 <form class="column gap-4" on:submit|preventDefault={join}>
   <div class="py-2">
     <h1 class="heading">Join a Space</h1>
-    <p class="text-center">
-      Enter an invite link below to join an existing space.
-    </p>
+    <p class="text-center">Enter an invite link below to join an existing space.</p>
   </div>
   <Field>
     <p slot="label">Invite Link*</p>
-    <label class="input input-bordered w-full flex items-center gap-2" slot="input">
+    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="link-round" />
       <input bind:value={id} class="grow" type="text" />
     </label>
@@ -85,7 +83,7 @@
   <CardButton icon="compass" title="Don't have an invite?" on:click={browse}>
     Browse other spaces on the discover page.
   </CardButton>
-  <div class="flex flex-row justify-between items-center gap-4">
+  <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back

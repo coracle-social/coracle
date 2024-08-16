@@ -1,6 +1,6 @@
 import {writable} from "svelte/store"
 import {randomId} from "@welshman/lib"
-import {copyToClipboard} from '@lib/html'
+import {copyToClipboard} from "@lib/html"
 
 export type ToastParams = {
   message: string

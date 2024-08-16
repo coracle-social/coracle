@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {randomId} from '@welshman/lib'
-  import Icon from '@lib/components/Icon.svelte'
+  import {randomId} from "@welshman/lib"
+  import Icon from "@lib/components/Icon.svelte"
 
   export let file: File | null = null
   export let url: string | null = null
@@ -42,13 +42,18 @@
     if (file) {
       const reader = new FileReader()
 
-      reader.addEventListener("load", () => { url = reader.result as string }, false)
+      reader.addEventListener(
+        "load",
+        () => {
+          url = reader.result as string
+        },
+        false,
+      )
       reader.readAsDataURL(file)
     } else {
       url = initialUrl
     }
   }
-
 </script>
 
 <form>
@@ -57,14 +62,14 @@
     for={id}
     aria-label="Drag and drop files here."
     style="background-image: url({url});"
-    class="relative flex justify-center items-center w-24 h-24 rounded-full border-2 border-dashed border-base-content transition-all bg-base-300 cursor-pointer bg-cover bg-center shrink-0"
+    class="relative flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-base-content bg-base-300 bg-cover bg-center transition-all"
     class:border-primary={active}
     on:dragenter|preventDefault|stopPropagation={onDragEnter}
     on:dragover|preventDefault|stopPropagation={onDragOver}
     on:dragleave|preventDefault|stopPropagation={onDragLeave}
     on:drop|preventDefault|stopPropagation={onDrop}>
     <div
-      class="bg-primary right-0 top-0 absolute rounded-full overflow-hidden"
+      class="absolute right-0 top-0 overflow-hidden rounded-full bg-primary"
       class:bg-error={file}
       class:bg-primary={!file}>
       {#if file}
@@ -73,10 +78,10 @@
           tabindex="-1"
           on:mousedown|stopPropagation={onClear}
           on:touchstart|stopPropagation={onClear}>
-          <Icon icon="close-circle" class="!bg-base-300 scale-150" />
+          <Icon icon="close-circle" class="scale-150 !bg-base-300" />
         </span>
       {:else}
-        <Icon icon="add-circle" class="!bg-base-300 scale-150" />
+        <Icon icon="add-circle" class="scale-150 !bg-base-300" />
       {/if}
     </div>
     {#if !file}

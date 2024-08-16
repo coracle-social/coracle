@@ -10,6 +10,7 @@
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
+  import AltArrowDown from "@assets/icons/Alt Arrow Down.svg?dataurl"
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
   import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
   import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
@@ -19,9 +20,11 @@
   import Copy from "@assets/icons/Copy.svg?dataurl"
   import Compass from "@assets/icons/Compass.svg?dataurl"
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
+  import Exit from "@assets/icons/Exit.svg?dataurl"
   import FireMinimalistic from "@assets/icons/Fire Minimalistic.svg?dataurl"
   import GallerySend from "@assets/icons/Gallery Send.svg?dataurl"
   import Ghost from "@assets/icons/Ghost.svg?dataurl"
+  import Hashtag from "@assets/icons/Hashtag.svg?dataurl"
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
@@ -29,10 +32,14 @@
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
+  import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
+  import Reply from "@assets/icons/Reply.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
+  import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
+  import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
   import UFO3 from "@assets/icons/UFO 3.svg?dataurl"
   import UserHeart from "@assets/icons/User Heart.svg?dataurl"
   import UserRounded from "@assets/icons/User Rounded.svg?dataurl"
@@ -47,6 +54,7 @@
   const data = switcher(icon, {
     "add-square": AddSquare,
     "add-circle": AddCircle,
+    "alt-arrow-down": AltArrowDown,
     "alt-arrow-right": AltArrowRight,
     "alt-arrow-left": AltArrowLeft,
     "arrow-right": ArrowRight,
@@ -56,24 +64,30 @@
     copy: Copy,
     compass: Compass,
     "compass-big": CompassBig,
+    exit: Exit,
     "fire-minimalistic": FireMinimalistic,
     "gallery-send": GallerySend,
-    "ghost": Ghost,
+    ghost: Ghost,
+    hashtag: Hashtag,
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
     "link-round": LinkRound,
-    "login": Login,
+    login: Login,
     "login-2": Login2,
-    'magnifer': Magnifer,
-    'pallete-2': Pallete2,
+    magnifer: Magnifer,
+    "menu-dots": MenuDots,
+    "pallete-2": Pallete2,
     plain: Plain,
-    'remote-controller-minimalistic': RemoteControllerMinimalistic,
+    reply: Reply,
+    "remote-controller-minimalistic": RemoteControllerMinimalistic,
+    "smile-circle": SmileCircle,
     settings: Settings,
     "ufo-3": UFO3,
+    "square-share-line": SquareShareLine,
     "user-heart": UserHeart,
     "user-rounded": UserRounded,
-    "widget": Widget,
+    widget: Widget,
     "wifi-router-round": WiFiRouterRound,
   })
 

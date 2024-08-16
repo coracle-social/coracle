@@ -1,16 +1,16 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
-  import {makeSecret, Nip46Broker} from '@welshman/signer'
-  import Icon from '@lib/components/Icon.svelte'
-  import Field from '@lib/components/Field.svelte'
-  import Button from '@lib/components/Button.svelte'
-  import Spinner from '@lib/components/Spinner.svelte'
-  import CardButton from '@lib/components/CardButton.svelte'
-  import InfoNostr from '@app/components/LogIn.svelte'
-  import {pushModal, clearModal} from '@app/modal'
-  import {pushToast} from '@app/toast'
-  import {addSession} from '@app/base'
-  import {loadHandle} from '@app/state'
+  import {nip19} from "nostr-tools"
+  import {makeSecret, Nip46Broker} from "@welshman/signer"
+  import Icon from "@lib/components/Icon.svelte"
+  import Field from "@lib/components/Field.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
+  import CardButton from "@lib/components/CardButton.svelte"
+  import InfoNostr from "@app/components/LogIn.svelte"
+  import {pushModal, clearModal} from "@app/modal"
+  import {pushToast} from "@app/toast"
+  import {addSession} from "@app/base"
+  import {loadHandle} from "@app/state"
 
   const back = () => history.back()
 
@@ -22,7 +22,7 @@
     if (!handle?.pubkey) {
       return pushToast({
         theme: "error",
-        message: "Sorry, it looks like you don't have an account yet. Try signing up instead."
+        message: "Sorry, it looks like you don't have an account yet. Try signing up instead.",
       })
     }
 
@@ -36,7 +36,7 @@
     } else {
       pushToast({
         theme: "error",
-        message: "Something went wrong! Please try again."
+        message: "Something went wrong! Please try again.",
       })
     }
   }
@@ -66,14 +66,13 @@
     <h1 class="heading">Log in with Nostr</h1>
     <p class="text-center">
       Flotilla is built using the
-      <Button class="link" on:click={() => pushModal(InfoNostr)}>
-        nostr protocol
-      </Button>, which allows you to own your social identity.
+      <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which
+      allows you to own your social identity.
     </p>
   </div>
   <Field>
-    <div class="flex gap-2 items-center" slot="input">
-      <label class="input input-bordered w-full flex items-center gap-2">
+    <div class="flex items-center gap-2" slot="input">
+      <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="user-rounded" />
         <input bind:value={username} class="grow" type="text" placeholder="username" />
       </label>
@@ -87,9 +86,7 @@
     </Button>
     <div class="text-sm">
       Need an account?
-      <Button class="link" on:click={back}>
-        Register
-      </Button>
+      <Button class="link" on:click={back}>Register</Button>
     </div>
   </div>
 </form>

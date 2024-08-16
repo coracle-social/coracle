@@ -53,27 +53,27 @@
 }
 
 .center {
-  @apply flex justify-center items-center;
+  @apply flex items-center justify-center;
 }
 
 .content {
-  @apply max-w-3xl w-full p-12 m-auto;
+  @apply m-auto w-full max-w-3xl p-12;
 }
 
 .heading {
-  @apply text-2xl text-center;
+  @apply text-center text-2xl;
 }
 
 .subheading {
-  @apply text-xl text-center;
+  @apply text-center text-xl;
 }
 
 .superheading {
-  @apply text-4xl text-center;
+  @apply text-center text-4xl;
 }
 
 .link {
-  @apply text-primary underline cursor-pointer;
+  @apply cursor-pointer text-primary underline;
 }
 
 .input input::placeholder {

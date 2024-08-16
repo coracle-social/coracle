@@ -1,11 +1,11 @@
 <script lang="ts">
-  import InputProfilePicture from '@lib/components/InputProfilePicture.svelte'
+  import InputProfilePicture from "@lib/components/InputProfilePicture.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Field from '@lib/components/Field.svelte'
-  import Icon from '@lib/components/Icon.svelte'
-  import InfoNip29 from '@app/components/InfoNip29.svelte'
-  import SpaceCreateFinish from '@app/components/SpaceCreateFinish.svelte'
-  import {pushModal} from '@app/modal'
+  import Field from "@lib/components/Field.svelte"
+  import Icon from "@lib/components/Icon.svelte"
+  import InfoNip29 from "@app/components/InfoNip29.svelte"
+  import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
+  import {pushModal} from "@app/modal"
 
   const back = () => history.back()
 
@@ -19,34 +19,30 @@
 <form class="column gap-4" on:submit|preventDefault={next}>
   <div class="py-2">
     <h1 class="heading">Customize your Space</h1>
-    <p class="text-center">
-      Give people a few details to go on. You can always change this later.
-    </p>
+    <p class="text-center">Give people a few details to go on. You can always change this later.</p>
   </div>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file />
   </div>
   <Field>
     <p slot="label">Space Name</p>
-    <label class="input input-bordered w-full flex items-center gap-2" slot="input">
+    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="fire-minimalistic" />
       <input bind:value={name} class="grow" type="text" />
     </label>
   </Field>
   <Field>
     <p slot="label">Relay</p>
-    <label class="input input-bordered w-full flex items-center gap-2" slot="input">
+    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="remote-controller-minimalistic" />
       <input bind:value={relay} class="grow" type="text" />
     </label>
     <p slot="info">
       This should be a NIP-29 compatible nostr relay where you'd like to host your space.
-      <Button class="link" on:click={() => pushModal(InfoNip29)}>
-        More information
-      </Button>
+      <Button class="link" on:click={() => pushModal(InfoNip29)}>More information</Button>
     </p>
   </Field>
-  <div class="flex flex-row justify-between items-center gap-4">
+  <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back

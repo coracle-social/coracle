@@ -17,6 +17,6 @@ export const pushModal = (component: ComponentType, props: Record<string, any> =
 }
 
 export const clearModal = () => {
-  goto('#')
-  emitter.emit('close')
+  goto("#")
+  emitter.emit("close")
 }

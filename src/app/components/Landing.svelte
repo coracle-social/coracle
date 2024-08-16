@@ -1,8 +1,8 @@
 <script lang="ts">
-  import CardButton from '@lib/components/CardButton.svelte'
-  import LogIn from '@app/components/LogIn.svelte'
-  import SignUp from '@app/components/SignUp.svelte'
-  import {pushModal} from '@app/modal'
+  import CardButton from "@lib/components/CardButton.svelte"
+  import LogIn from "@app/components/LogIn.svelte"
+  import SignUp from "@app/components/SignUp.svelte"
+  import {pushModal} from "@app/modal"
 
   const logIn = () => pushModal(LogIn)
 

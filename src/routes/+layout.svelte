@@ -1,8 +1,8 @@
 <script lang="ts">
   import "@src/app.css"
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {createEventStore} from '@welshman/store'
+  import {createEventStore} from "@welshman/store"
   import {fly} from "@lib/transition"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
@@ -38,20 +38,20 @@
   onMount(() => {
     ready = initStorage({
       events: {
-        keyPath: 'id',
+        keyPath: "id",
         store: createEventStore(repository),
       },
       relays: {
-        keyPath: 'url',
+        keyPath: "url",
         store: relays,
       },
       handles: {
-        keyPath: 'nip05',
+        keyPath: "nip05",
         store: handles,
       },
     })
 
-    dialog.addEventListener('close', () => {
+    dialog.addEventListener("close", () => {
       if (modal) {
         clearModal()
       }
@@ -66,11 +66,11 @@
     <div class="flex h-screen">
       <PrimaryNav />
       <SecondaryNav />
-      <div class="flex-grow bg-base-200 max-h-screen overflow-auto">
+      <div class="max-h-screen flex-grow overflow-auto bg-base-200">
         <slot />
       </div>
     </div>
-    <dialog bind:this={dialog} class="modal modal-bottom sm:modal-middle !z-modal">
+    <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
       {#if prev}
         {#key prev}
           <ModalBox {...prev} />

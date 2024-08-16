@@ -7,24 +7,32 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {goto} from '$app/navigation'
-  import {derived} from 'svelte/store'
-	import {tweened} from 'svelte/motion'
-	import {quintOut} from 'svelte/easing'
-  import {identity, nth} from '@welshman/lib'
+  import {goto} from "$app/navigation"
+  import {derived} from "svelte/store"
+  import {tweened} from "svelte/motion"
+  import {quintOut} from "svelte/easing"
+  import {identity, nth} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
-  import SpaceAdd from '@app/components/SpaceAdd.svelte'
+  import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import {session} from "@app/base"
-  import {userProfile, userGroupsByNom, makeGroupId, loadGroup, deriveProfile, qualifiedGroupsById, splitGroupId} from "@app/state"
+  import {
+    userProfile,
+    userGroupsByNom,
+    makeGroupId,
+    loadGroup,
+    deriveProfile,
+    qualifiedGroupsById,
+    splitGroupId,
+  } from "@app/state"
   import {pushModal} from "@app/modal"
   import {getPrimaryNavItemIndex} from "@app/routes"
 
   const activeOffset = tweened(-44, {
-		duration: 300,
-		easing: quintOut
-	})
+    duration: 300,
+    easing: quintOut,
+  })
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -42,7 +50,7 @@
   $: {
     if (element) {
       const index = getPrimaryNavItemIndex($page)
-      const navItems: any = Array.from(element.querySelectorAll('.z-nav-item') || [])
+      const navItems: any = Array.from(element.querySelectorAll(".z-nav-item") || [])
 
       activeOffset.set(navItems[index].offsetTop - 44)
     }
@@ -50,11 +58,16 @@
 </script>
 
 <div class="relative w-14 bg-base-100" bind:this={element}>
-  <div class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300" style={`top: ${$activeOffset}px`} />
+  <div
+    class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300"
+    style={`top: ${$activeOffset}px`} />
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem on:click={gotoHome}>
-        <Avatar src={$userProfile?.picture} class="border border-solid border-base-300 !w-10 !h-10" size={7} />
+        <Avatar
+          src={$userProfile?.picture}
+          class="!h-10 !w-10 border border-solid border-base-300"
+          size={7} />
       </PrimaryNavItem>
       {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
         {@const qualifiedGroup = qualifiedGroups[0]}

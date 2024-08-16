@@ -1,15 +1,15 @@
 import {derived, writable} from "svelte/store"
-import {memoize, assoc} from '@welshman/lib'
-import type {CustomEvent} from '@welshman/util'
+import {memoize, assoc} from "@welshman/lib"
+import type {CustomEvent} from "@welshman/util"
 import {Repository, createEvent, Relay} from "@welshman/util"
 import {withGetter} from "@welshman/store"
 import {NetworkContext, Tracker} from "@welshman/net"
 import type {ISigner} from "@welshman/signer"
-import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from '@welshman/signer'
-import {synced} from '@lib/util'
+import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from "@welshman/signer"
+import {synced} from "@lib/util"
 import type {Session} from "@app/types"
 
-export const INDEXER_RELAYS = ["wss://purplepag.es", "wss://relay.damus.io", 'wss://nos.lol']
+export const INDEXER_RELAYS = ["wss://purplepag.es", "wss://relay.damus.io", "wss://nos.lol"]
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
@@ -19,11 +19,13 @@ export const relay = new Relay(repository)
 
 export const tracker = new Tracker()
 
-export const pk = withGetter(synced<string | null>('pk', null))
+export const pk = withGetter(synced<string | null>("pk", null))
 
-export const sessions = withGetter(synced<Record<string, Session>>('sessions', {}))
+export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
 
-export const session = withGetter(derived([pk, sessions], ([$pk, $sessions]) => $pk ? $sessions[$pk] : null))
+export const session = withGetter(
+  derived([pk, sessions], ([$pk, $sessions]) => ($pk ? $sessions[$pk] : null)),
+)
 
 export const getSession = (pubkey: string) => sessions.get()[pubkey]
 
@@ -73,4 +75,3 @@ Object.assign(NetworkContext, {
     return event
   },
 })
-
