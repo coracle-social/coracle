@@ -4,14 +4,15 @@
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/LogIn.svelte"
   import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
-  import {addSession} from "@app/base"
+  import {addSession, nip46Perms} from "@app/base"
   import {loadHandle} from "@app/state"
   import {loadUserData} from "@app/commands"
 
-  const back = () => history.back()
+  const signUp = () => pushModal(SignUp)
 
   const tryLogin = async () => {
     const secret = makeSecret()
@@ -29,7 +30,7 @@
 
     loadUserData(pubkey, relays)
 
-    if (await broker.connect()) {
+    if (await broker.connect("", nip46Perms)) {
       addSession({method: "nip46", pubkey, secret, handler})
       pushToast({message: "Successfully logged in!"})
       clearModal()
@@ -62,14 +63,12 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={login}>
-  <div class="py-2">
-    <h1 class="heading">Log in with Nostr</h1>
-    <p class="text-center">
-      Flotilla is built using the
-      <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which
-      allows you to own your social identity.
-    </p>
-  </div>
+  <h1 class="heading">Log in with Nostr</h1>
+  <p class="m-auto max-w-sm text-center">
+    Flotilla is built using the
+    <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
+    you to own your social identity.
+  </p>
   <Field>
     <div class="flex items-center gap-2" slot="input">
       <label class="input input-bordered flex w-full items-center gap-2">
@@ -80,13 +79,13 @@
     </div>
   </Field>
   <div class="flex flex-col gap-2">
-    <Button type="submit" class="btn btn-primary" disabled={loading}>
+    <Button type="submit" class="btn btn-primary" disabled={!username || loading}>
       <Spinner {loading}>Log In</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
     <div class="text-sm">
       Need an account?
-      <Button class="link" on:click={back}>Register</Button>
+      <Button class="link" on:click={signUp}>Register instead</Button>
     </div>
   </div>
 </form>

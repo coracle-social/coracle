@@ -2,6 +2,8 @@
   import "@src/app.css"
   import {onMount} from "svelte"
   import {page} from "$app/stores"
+  import {goto} from "$app/navigation"
+  import {browser} from "$app/environment"
   import {createEventStore} from "@welshman/store"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
@@ -9,8 +11,8 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {pk, session, repository} from "@app/base"
-  import {relays, handles} from "@app/state"
+  import {pk, session, repository, DEFAULT_RELAYS} from "@app/base"
+  import {relays, handles, loadRelay} from "@app/state"
   import {initStorage} from "@app/storage"
   import {loadUserData} from "@app/commands"
 
@@ -24,6 +26,10 @@
   $: {
     if (!modal && !$session) {
       modal = {component: Landing}
+
+      if (browser && $page.route?.id !== "/home") {
+        goto("/home")
+      }
     }
 
     if (modal) {
@@ -35,6 +41,10 @@
   }
 
   onMount(() => {
+    for (const url of DEFAULT_RELAYS) {
+      loadRelay(url)
+    }
+
     if ($pk) {
       loadUserData($pk)
     }

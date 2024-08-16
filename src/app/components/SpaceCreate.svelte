@@ -39,7 +39,7 @@
     </label>
     <p slot="info">
       This should be a NIP-29 compatible nostr relay where you'd like to host your space.
-      <Button class="link" on:click={() => pushModal(InfoNip29)}>More information</Button>
+      <Button class="link" on:click={() => pushModal(InfoNip29)}>What is a relay?</Button>
     </p>
   </Field>
   <div class="flex flex-row items-center justify-between gap-4">

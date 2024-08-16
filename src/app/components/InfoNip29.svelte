@@ -21,8 +21,8 @@
     >. If you do decide to join someone else's, make sure to follow their directions for registering
     as a user.
   </p>
-  <div class="alert !flex justify-between items-center">
-    <div class="flex gap-2 items-center">
+  <div class="alert !flex items-center justify-between">
+    <div class="flex items-center gap-2">
       <Icon icon="remote-controller-minimalistic" />
       groups.fiatjaf.com
     </div>

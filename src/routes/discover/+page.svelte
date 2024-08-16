@@ -4,7 +4,15 @@
   import {GROUP_META, displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {load, displayGroup, relays, searchGroups, relayUrlsByNom, userMembership} from "@app/state"
+  import {DEFAULT_RELAYS} from "@app/base"
+  import {
+    load,
+    displayGroup,
+    relays,
+    searchGroups,
+    relayUrlsByNom,
+    userMembership,
+  } from "@app/state"
 
   const getRelayUrls = (nom: string): string[] => $relayUrlsByNom.get(nom) || []
 
@@ -12,7 +20,7 @@
 
   onMount(() => {
     load({
-      relays: $relays.map(r => r.url),
+      relays: [...DEFAULT_RELAYS, ...$relays.map(r => r.url)],
       filters: [{kinds: [GROUP_META]}],
     })
   })

@@ -1,14 +1,11 @@
 <script lang="ts">
-  import {append, remove} from '@welshman/lib'
-  import {displayRelayUrl} from '@welshman/util'
+  import {append, remove} from "@welshman/lib"
+  import {displayRelayUrl} from "@welshman/util"
   import {goto} from "$app/navigation"
-  import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import InfoNip29 from '@app/components/InfoNip29.svelte'
-  import {pushToast} from "@app/toast"
+  import InfoNip29 from "@app/components/InfoNip29.svelte"
   import {pushModal} from "@app/modal"
   import {deriveGroup, displayGroup, relayUrlsByNom} from "@app/state"
   import {addGroupMemberships} from "@app/commands"
@@ -20,7 +17,9 @@
   const back = () => history.back()
 
   const onUrlChange = (e: any) => {
-    urls = urls.includes(e.target.value) ? remove(e.target.value, urls) : append(e.target.value, urls)
+    urls = urls.includes(e.target.value)
+      ? remove(e.target.value, urls)
+      : append(e.target.value, urls)
   }
 
   const join = async () => {
@@ -48,15 +47,20 @@
   </h1>
   <p class="text-center">
     Please select which relays you'd like to use for this group.
-    <Button class="link" on:click={() => pushModal(InfoNip29)}>More information</Button>
+    <Button class="link" on:click={() => pushModal(InfoNip29)}>What is a relay?</Button>
   </p>
   {#each urlOptions as url}
-    <div class="alert !flex justify-between items-center">
-      <div class="flex gap-2 items-center">
+    <div class="alert !flex items-center justify-between">
+      <div class="flex items-center gap-2">
         <Icon icon="remote-controller-minimalistic" />
         {displayRelayUrl(url)}
       </div>
-      <input type="checkbox" value={url} class="toggle toggle-primary" checked={urls.includes(url)} on:change={onUrlChange} />
+      <input
+        type="checkbox"
+        value={url}
+        class="toggle toggle-primary"
+        checked={urls.includes(url)}
+        on:change={onUrlChange} />
     </div>
   {/each}
   <div class="flex flex-row items-center justify-between gap-4">

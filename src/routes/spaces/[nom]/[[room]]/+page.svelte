@@ -1,22 +1,26 @@
-<script lang="ts">
-  import {sortBy} from "@welshman/lib"
-  import type {CustomEvent} from "@welshman/util"
-  import {page} from "$app/stores"
-  import {formatTimestampAsDate} from "@lib/util"
-  import Spinner from "@lib/components/Spinner.svelte"
-  import GroupNote from "@app/components/GroupNote.svelte"
-  import {deriveGroupConversation} from "@app/state"
-
-  $: conversation = deriveGroupConversation($page.params.nom)
-
-  const assertEvent = (e: any) => e as CustomEvent
-
+<script lang="ts" context="module">
   type Element = {
     id: string
     type: "date" | "note"
     value: string | CustomEvent
     showPubkey: boolean
   }
+</script>
+
+<script lang="ts">
+  import {sortBy} from "@welshman/lib"
+  import type {CustomEvent} from "@welshman/util"
+  import {page} from "$app/stores"
+  import {formatTimestampAsDate} from "@lib/util"
+  import Icon from "@lib/components/Icon.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
+  import GroupNote from "@app/components/GroupNote.svelte"
+  import {deriveGroupConversation} from "@app/state"
+
+  const {nom} = $page.params
+  const conversation = deriveGroupConversation(nom)
+
+  const assertEvent = (e: any) => e as CustomEvent
 
   let loading = true
   let elements: Element[] = []
@@ -54,15 +58,22 @@
   }, 3000)
 </script>
 
-<div class="flex h-screen flex-col">
-  <div class="min-h-24 bg-base-100 shadow-xl"></div>
+<div class="relative flex h-screen flex-col">
+  <div class="relative z-feature px-2 pt-4">
+    <div class="flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
+      <div class="flex items-center gap-2">
+        <Icon icon="hashtag" />
+        <strong>General</strong>
+      </div>
+    </div>
+  </div>
   <div class="flex flex-grow flex-col-reverse overflow-auto">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
-        <div class="flex items-center gap-2 py-2 text-xs opacity-50">
-          <div class="h-px flex-grow bg-base-content" />
+        <div class="flex items-center gap-2 p-2 text-xs opacity-50">
+          <div class="h-px flex-grow bg-base-content opacity-25" />
           <p>{value}</p>
-          <div class="h-px flex-grow bg-base-content" />
+          <div class="h-px flex-grow bg-base-content opacity-25" />
         </div>
       {:else}
         <GroupNote event={assertEvent(value)} {showPubkey} />
@@ -78,5 +89,7 @@
       </Spinner>
     </p>
   </div>
-  <div class="shadow-top-xl min-h-32 bg-base-100"></div>
+  <div class="relative z-feature border-t border-solid border-base-100 px-2 py-2">
+    <div class="shadow-top-xl flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4"></div>
+  </div>
 </div>

@@ -8,7 +8,9 @@ import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from "@welshman/sign
 import {synced} from "@lib/util"
 import type {Session} from "@app/types"
 
-export const INDEXER_RELAYS = ["wss://purplepag.es", "wss://relay.damus.io", "wss://nos.lol"]
+export const DEFAULT_RELAYS = ["wss://groups.fiatjaf.com/"]
+
+export const INDEXER_RELAYS = ["wss://purplepag.es/", "wss://relay.damus.io/", "wss://nos.lol/"]
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
@@ -32,6 +34,8 @@ export const addSession = (session: Session) => {
   sessions.update(assoc(session.pubkey, session))
   pk.set(session.pubkey)
 }
+
+export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
 export const getSigner = memoize((session: Session) => {
   switch (session?.method) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {page} from '$app/stores'
+  import {page} from "$app/stores"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -67,18 +67,13 @@
       <div class="h-2" />
       <SecondaryNavHeader>
         Rooms
-        <div class="cursor-pointer">
+        <Button on:click={() => alert("Uh, I don't know how to do rooms on NIP 29")}>
           <Icon icon="add-circle" />
-        </div>
+        </Button>
       </SecondaryNavHeader>
       <div in:fly|local>
-        <SecondaryNavItem href="/invalid">
-          <Icon icon="hashtag" /> Spaces
-        </SecondaryNavItem>
-      </div>
-      <div in:fly|local={{delay: 50}}>
-        <SecondaryNavItem href="/invalid">
-          <Icon icon="hashtag" /> Themes
+        <SecondaryNavItem href="/spaces/{nom}/general">
+          <Icon icon="hashtag" /> General
         </SecondaryNavItem>
       </div>
     </SecondaryNavSection>

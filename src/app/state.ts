@@ -36,7 +36,7 @@ import {
 } from "@welshman/util"
 import type {SignedEvent, CustomEvent, PublishedProfile, PublishedList} from "@welshman/util"
 import type {SubscribeRequest, PublishRequest} from "@welshman/net"
-import {publish as basePublish, subscribe} from "@welshman/net"
+import {publish as basePublish, subscribe as baseSubscribe} from "@welshman/net"
 import {decrypt} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
@@ -123,9 +123,17 @@ export const publish = (request: PublishRequest) => {
   return basePublish(request)
 }
 
+export const subscribe = (request: SubscribeRequest) => {
+  const sub = baseSubscribe({delay: 50, ...request})
+
+  sub.emitter.on("event", (url: string, e: SignedEvent) => repository.publish(e))
+
+  return sub
+}
+
 export const load = (request: SubscribeRequest) =>
   new Promise<CustomEvent[]>(resolve => {
-    const sub = subscribe({closeOnEose: true, timeout: 3000, delay: 50, ...request})
+    const sub = subscribe({closeOnEose: true, timeout: 3000, ...request})
     const events: CustomEvent[] = []
 
     sub.emitter.on("event", (url: string, e: SignedEvent) => {
