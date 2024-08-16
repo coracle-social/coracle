@@ -13,7 +13,7 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
-  import {userProfile, userGroupsByNom} from "@app/state"
+  import {userProfile, displayGroup, userGroupsByNom} from "@app/state"
   import {pushModal} from "@app/modal"
   import {getPrimaryNavItemIndex} from "@app/routes"
 
@@ -51,9 +51,9 @@
       </PrimaryNavItem>
       {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
         {@const qualifiedGroup = qualifiedGroups[0]}
-        <PrimaryNavItem title={qualifiedGroup?.group.name} href="/spaces/{nom}">
+        <PrimaryNavItem title={displayGroup(qualifiedGroup?.group)} href="/spaces/{nom}">
           <div class="w-10 rounded-full border border-solid border-base-300">
-            <img alt={qualifiedGroup?.group.name} src={qualifiedGroup?.group.picture} />
+            <img alt={displayGroup(qualifiedGroup?.group)} src={qualifiedGroup?.group.picture} />
           </div>
         </PrimaryNavItem>
       {/each}

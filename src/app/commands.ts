@@ -1,7 +1,24 @@
-import {uniqBy, now} from "@welshman/lib"
-import {GROUPS, asDecryptedEvent, readList, editList, makeList, createList} from "@welshman/util"
+import {uniqBy, uniq, now} from "@welshman/lib"
+import {GROUPS, asDecryptedEvent, getGroupTags, getRelayTagValues, readList, editList, makeList, createList} from "@welshman/util"
 import {pk, signer, repository, INDEXER_RELAYS} from "@app/base"
-import {getWriteRelayUrls, loadRelaySelections, publish, ensurePlaintext} from "@app/state"
+import {getWriteRelayUrls, loadGroup, loadGroupMembership, loadProfile, loadFollows, loadMutes, loadRelaySelections, publish, ensurePlaintext} from "@app/state"
+
+export const loadUserData = async (pubkey: string, hints: string[] = []) => {
+  const relaySelections = await loadRelaySelections(pubkey, INDEXER_RELAYS)
+  const relays = uniq([...getRelayTagValues(relaySelections?.tags || []), ...INDEXER_RELAYS, ...hints])
+  const membership = await loadGroupMembership(pubkey, relays)
+  const promises = [
+    loadProfile(pubkey, relays),
+    loadFollows(pubkey, relays),
+    loadMutes(pubkey, relays),
+  ]
+
+  for (const [_, nom, url] of getGroupTags(membership?.event.tags || [])) {
+    promises.push(loadGroup(nom, [url]))
+  }
+
+  await Promise.all(promises)
+}
 
 export type ModifyTags = (tags: string[][]) => string[][]
 

@@ -10,12 +10,12 @@
 <SecondaryNav>
   <SecondaryNavSection>
     <div in:fly>
-      <SecondaryNavItem href="/spaces">
+      <SecondaryNavItem href="/discover">
         <Icon icon="widget" /> Spaces
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: 50}}>
-      <SecondaryNavItem href="/themes">
+      <SecondaryNavItem href="/discover/themes">
         <Icon icon="pallete-2" /> Themes
       </SecondaryNavItem>
     </div>

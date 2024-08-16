@@ -9,6 +9,7 @@
   import {pushToast} from "@app/toast"
   import {addSession} from "@app/base"
   import {loadHandle} from "@app/state"
+  import {loadUserData} from "@app/commands"
 
   const back = () => history.back()
 
@@ -23,8 +24,10 @@
       })
     }
 
-    const {pubkey} = handle
+    const {pubkey, relays = []} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
+
+    loadUserData(pubkey, relays)
 
     if (await broker.connect()) {
       addSession({method: "nip46", pubkey, secret, handler})

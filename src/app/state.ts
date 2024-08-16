@@ -377,6 +377,8 @@ export const getGroupName = (e?: CustomEvent) => e?.tags.find(nthEq(0, "name"))?
 
 export const getGroupPicture = (e?: CustomEvent) => e?.tags.find(nthEq(0, "picture"))?.[1]
 
+export const displayGroup = (group?: Group) => group?.name || "[no name]"
+
 export type Group = {
   nom: string
   name?: string

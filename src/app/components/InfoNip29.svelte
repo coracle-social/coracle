@@ -21,8 +21,11 @@
     >. If you do decide to join someone else's, make sure to follow their directions for registering
     as a user.
   </p>
-  <div class="card2 flex-row justify-between">
-    groups.fiatjaf.com
+  <div class="alert !flex justify-between items-center">
+    <div class="flex gap-2 items-center">
+      <Icon icon="remote-controller-minimalistic" />
+      groups.fiatjaf.com
+    </div>
     <Button on:click={() => clip("groups.fiatjaf.com")}>
       <Icon icon="copy" />
     </Button>

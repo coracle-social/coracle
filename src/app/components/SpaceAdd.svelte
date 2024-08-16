@@ -2,12 +2,12 @@
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import SpaceCreate from "@app/components/SpaceCreate.svelte"
-  import SpaceJoin from "@app/components/SpaceJoin.svelte"
+  import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {pushModal} from "@app/modal"
 
   const startCreate = () => pushModal(SpaceCreate)
 
-  const startJoin = () => pushModal(SpaceJoin)
+  const startJoin = () => pushModal(SpaceInviteAccept)
 </script>
 
 <div class="column gap-4">

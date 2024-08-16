@@ -9,9 +9,10 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {session, repository} from "@app/base"
+  import {pk, session, repository} from "@app/base"
   import {relays, handles} from "@app/state"
   import {initStorage} from "@app/storage"
+  import {loadUserData} from "@app/commands"
 
   let ready: Promise<void>
   let dialog: HTMLDialogElement
@@ -34,6 +35,10 @@
   }
 
   onMount(() => {
+    if ($pk) {
+      loadUserData($pk)
+    }
+
     ready = initStorage({
       events: {
         keyPath: "id",

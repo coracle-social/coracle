@@ -4,7 +4,7 @@
   import {GROUP_META, displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {load, relays, searchGroups, relayUrlsByNom, userMembership} from "@app/state"
+  import {load, displayGroup, relays, searchGroups, relayUrlsByNom, userMembership} from "@app/state"
 
   const getRelayUrls = (nom: string): string[] => $relayUrlsByNom.get(nom) || []
 
@@ -39,7 +39,7 @@
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
-          {#if group?.picture}
+          {#if group.picture}
             <img alt="" src={group.picture} />
           {:else}
             <Icon icon="ghost" size={7} />
@@ -56,7 +56,7 @@
         </div>
       {/if}
       <div class="card-body">
-        <h2 class="card-title justify-center">{group.name}</h2>
+        <h2 class="card-title justify-center">{displayGroup(group)}</h2>
         <div class="text-center text-sm">
           {#each getRelayUrls(group.nom) as url}
             <div class="badge badge-neutral">{displayRelayUrl(url)}</div>

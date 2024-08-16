@@ -26,7 +26,7 @@
 
   export let href: string = ""
 
-  $: active = $page.route.id?.startsWith(href)
+  $: active = $page.url.pathname === href
 </script>
 
 {#if href}
