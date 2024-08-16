@@ -15,6 +15,7 @@ import {
   assoc,
   indexBy,
   now,
+  Worker,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -34,10 +35,10 @@ import {
   GROUP_JOIN,
   GROUP_ADD_USER,
 } from "@welshman/util"
-import type {SignedEvent, CustomEvent, PublishedProfile, PublishedList} from "@welshman/util"
-import type {SubscribeRequest, PublishRequest} from "@welshman/net"
+import type {SignedEvent, HashedEvent, EventTemplate, CustomEvent, PublishedProfile, PublishedList} from "@welshman/util"
+import type {SubscribeRequest, PublishRequest, PublishStatus} from "@welshman/net"
 import {publish as basePublish, subscribe as baseSubscribe} from "@welshman/net"
-import {decrypt} from "@welshman/signer"
+import {decrypt, stamp, own, hash} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
 import type {Handle, Relay} from "@app/types"
@@ -117,11 +118,58 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-export const publish = (request: PublishRequest) => {
-  repository.publish(request.event)
+// Publish
 
-  return basePublish(request)
+export type Thunk = {
+  event: HashedEvent
+  relays: string[]
 }
+
+export const thunkWorker = new Worker<Thunk>()
+
+thunkWorker.addGlobalHandler(async ({event, relays}: Thunk) => {
+  const session = getSession(event.pubkey)
+
+  if (!session) {
+    return console.warn(`No session found for ${event.pubkey}`)
+  }
+
+  const signedEvent = await getSigner(session)!.sign(event)
+  const savedEvent = repository.getEvent(signedEvent.id)
+  const pub = basePublish({event: signedEvent, relays})
+
+  // Copy the signature over since we had deferred it
+  if (savedEvent) {
+    savedEvent.sig = signedEvent.sig
+  }
+
+  // Watch for failures
+  pub.emitter.on('*', (status: PublishStatus, url: string) => {
+    console.log('pub status', status, url)
+  })
+})
+
+export type ThunkParams = {
+  event: EventTemplate
+  relays: string[]
+}
+
+export const makeThunk = ({event, relays}: ThunkParams) => {
+  const $pk = get(pk)
+
+  if (!$pk) {
+    throw new Error("Unable to make thunk if no user is logged in")
+  }
+
+  return {event: hash(own(stamp(event), $pk)), relays}
+}
+
+export const publishThunk = (thunk: Thunk) => {
+  thunkWorker.push(thunk)
+  repository.publish(thunk.event)
+}
+
+// Subscribe
 
 export const subscribe = (request: SubscribeRequest) => {
   const sub = baseSubscribe({delay: 50, ...request})
