@@ -176,7 +176,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = uniq([...admins, ...recipients])
-    const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
+    const filters = [{kinds: [...giftWrapKinds, 1311], "#p": pubkeys, since}] 
 
     if (pubkeys.length > 0) {
       promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
@@ -185,10 +185,11 @@ export const loadGroupMessages = (addresses?: string[]) => {
 
   for (const address of communityAddrs) {
     const {relays, ...info} = getCommunityReqInfo(address)
-    const kinds = [...noteKinds, ...repostKinds]
+    const kinds = [...noteKinds, 1311, ...repostKinds]
     const since = Math.max(now() - seconds(7, "day"), info.since)
     const filters = [{kinds, "#a": [address], since}]
 
+    
     promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
   }
 
@@ -397,6 +398,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
 export const getNotificationKinds = () =>
   without(env.get().ENABLE_ZAPS ? [] : [9735], [
     ...noteKinds,
+    1311,
     ...reactionKinds,
     ...giftWrapKinds,
     4,

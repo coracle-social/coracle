@@ -945,7 +945,7 @@ export const isSeen = derived(allReadReceipts, $m => e => $m.has(e.id))
 export const notifications = derived(
   [pubkey, events, isEventMuted],
   ([$pubkey, $events, $isEventMuted]) => {
-    const kinds = [...noteKinds, ...reactionKinds]
+    const kinds = [...noteKinds, 1311, ...reactionKinds]
 
     return Array.from(repository.query([{"#p": [$pubkey]}])).filter(
       e =>

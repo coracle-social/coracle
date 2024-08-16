@@ -49,7 +49,7 @@ export type FeedOpts = {
 
 const prepFilters = (filters, opts: FeedOpts) => {
   // Default to note kinds
-  filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
+  filters = filters?.map(filter => ({kinds: [...noteKinds, 1311], ...filter})) || []
 
   // Add reposts if we don't have any authors specified
   if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
@@ -253,11 +253,21 @@ export const createFeed = (opts: FeedOpts) => {
               e = parents.get(parentId)
             }
 
+            // If the event is of kind 1311, ensure it has a parent
+            if (e.kind === 1311) {
+              const parentIds = Tags.fromEvent(e).parents().values().valueOf()
+
+              if (parentIds.length === 0) {
+                return null // Skip the event if it has no parent
+              }
+            }
+
             return e
           })
           .concat(chunkParents)
           // If we've seen this note or its parent, don't add it again
           .filter(e => {
+            if (!e) return false // Skip null entries
             if (seen.has(getIdOrAddress(e))) return false
             if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
@@ -273,7 +283,9 @@ export const createFeed = (opts: FeedOpts) => {
           }),
       ),
     )
-  }
+}
+
+
 
   function loadParents(events) {
     // Add notes to parents too since they might match
