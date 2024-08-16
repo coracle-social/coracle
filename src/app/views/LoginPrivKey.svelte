@@ -9,13 +9,26 @@
   import Heading from "src/partials/Heading.svelte"
   import {loginWithPrivateKey} from "src/engine"
   import {boot} from "src/app/state"
+  import Modal from "src/partials/Modal.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Field from "src/partials/Field.svelte"
+  import {decrypt} from "nostr-tools/nip49"
+  import {bytesToHex} from "@noble/hashes/utils"
 
-  let nsec = ""
+  let value = ""
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
 
-  const logIn = () => {
-    const privkey = nsec.startsWith("nsec") ? toHex(nsec) : nsec
+  let willShowPasswordModal = false
 
+  const showPasswordModal = () => {
+    willShowPasswordModal = true
+  }
+
+  const closePasswordModal = () => {
+    willShowPasswordModal = false
+  }
+
+  const logIn = (privkey: string) => {
     if (isKeyValid(privkey)) {
       loginWithPrivateKey(privkey)
       boot()
@@ -23,6 +36,29 @@
       showWarning("Sorry, but that's an invalid private key.")
     }
   }
+
+  const onSubmit = () => {
+    if (value.startsWith("ncryptsec")) {
+      return showPasswordModal()
+    }
+
+    const privkey = value.startsWith("nsec") ? toHex(value) : value
+
+    logIn(privkey)
+  }
+
+  const onPasswordModalSubmit = () => {
+    try {
+      const privkey = bytesToHex(decrypt(value, password))
+
+      closePasswordModal()
+      logIn(privkey)
+    } catch {
+      showWarning("Password is invalid!")
+    }
+  }
+
+  $: password = ""
 </script>
 
 <Content size="lg" class="text-center">
@@ -30,11 +66,11 @@
   <p>To give {appName} full access to your nostr identity, enter your private key below.</p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input type="password" bind:value={nsec} placeholder="nsec..." class="rounded-full">
+      <Input type="password" bind:value placeholder="nsec... or ncryptsec..." class="rounded-full">
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor circle button accent tall class="cy-login-submit" on:click={logIn}>
+    <Anchor circle button accent tall class="cy-login-submit" on:click={onSubmit}>
       <i class="fa fa-right-to-bracket" />
     </Anchor>
   </div>
@@ -46,3 +82,20 @@
     </p>
   {/if}
 </Content>
+
+{#if willShowPasswordModal}
+  <Modal onEscape={closePasswordModal}>
+    <FlexColumn>
+      <p>
+        Enter password to decrypt your <strong>ncryptsec</strong>.
+      </p>
+      <Field label="Password">
+        <Input type="password" bind:value={password} />
+      </Field>
+      <div class="flex justify-center gap-2">
+        <Anchor button on:click={closePasswordModal}>Cancel</Anchor>
+        <Anchor button accent on:click={onPasswordModalSubmit}>Log In</Anchor>
+      </div>
+    </FlexColumn>
+  </Modal>
+{/if}
