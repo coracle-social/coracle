@@ -47,7 +47,7 @@ export default [
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
-        {args: "none", destructuredArrayIgnorePattern: "^_d?$"},
+        {args: "none", destructuredArrayIgnorePattern: "^_d?$", caughtErrors: "none"},
       ],
     },
   },

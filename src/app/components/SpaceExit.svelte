@@ -1,16 +1,9 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
-  import {append, uniqBy} from "@welshman/lib"
-  import {GROUPS} from "@welshman/util"
-  import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
-  import {pushModal} from "@app/modal"
-  import {pushToast} from "@app/toast"
-  import {GROUP_DELIMITER, splitGroupId, loadRelay, loadGroup, deriveGroup} from "@app/state"
+  import {deriveGroup} from "@app/state"
   import {removeGroupMemberships} from "@app/commands"
 
   export let nom

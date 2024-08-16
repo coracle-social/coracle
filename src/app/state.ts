@@ -4,7 +4,6 @@ import {get, writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
 import {
   max,
-  uniq,
   between,
   uniqBy,
   groupBy,
@@ -21,9 +20,7 @@ import {
   getIdFilters,
   getIdentifier,
   getRelayTags,
-  getRelayTagValues,
   normalizeRelayUrl,
-  getPubkeyTagValues,
   GROUP_META,
   PROFILE,
   RELAYS,
@@ -34,34 +31,17 @@ import {
   readProfile,
   readList,
   asDecryptedEvent,
-  editList,
-  makeList,
-  createList,
   GROUP_JOIN,
   GROUP_ADD_USER,
 } from "@welshman/util"
-import type {
-  Filter,
-  SignedEvent,
-  CustomEvent,
-  PublishedProfile,
-  PublishedList,
-} from "@welshman/util"
+import type {SignedEvent, CustomEvent, PublishedProfile, PublishedList} from "@welshman/util"
 import type {SubscribeRequest, PublishRequest} from "@welshman/net"
 import {publish as basePublish, subscribe} from "@welshman/net"
 import {decrypt} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
-import {parseJson, createSearch} from "@lib/util"
-import type {Session, Handle, Relay} from "@app/types"
-import {
-  INDEXER_RELAYS,
-  DUFFLEPUD_URL,
-  repository,
-  pk,
-  getSession,
-  getSigner,
-  signer,
-} from "@app/base"
+import {createSearch} from "@lib/util"
+import type {Handle, Relay} from "@app/types"
+import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner} from "@app/base"
 
 // Utils
 

@@ -5,7 +5,6 @@
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {repository} from "@app/base"
   import {deriveProfile, deriveEvent} from "@app/state"
 
   export let event: CustomEvent

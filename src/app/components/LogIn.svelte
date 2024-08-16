@@ -1,11 +1,9 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {makeSecret, Nip46Broker} from "@welshman/signer"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import CardButton from "@lib/components/CardButton.svelte"
   import InfoNostr from "@app/components/LogIn.svelte"
   import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
@@ -17,7 +15,6 @@
   const tryLogin = async () => {
     const secret = makeSecret()
     const handle = await loadHandle(`${username}@${handler.domain}`)
-    console.log(handle)
 
     if (!handle?.pubkey) {
       return pushToast({
@@ -26,7 +23,7 @@
       })
     }
 
-    const {pubkey, relays = []} = handle
+    const {pubkey} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
 
     if (await broker.connect()) {

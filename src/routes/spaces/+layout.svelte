@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {goto} from "$app/navigation"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -12,7 +11,6 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import {deriveGroup} from "@app/state"
   import {pushModal} from "@app/modal"
-  import {removeGroupMemberships} from "@app/commands"
 
   export let nom
 

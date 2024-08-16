@@ -11,10 +11,8 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {slide} from "svelte/transition"
   import {quintOut} from "svelte/easing"
   import {tweened} from "svelte/motion"
-  import {last} from "@welshman/lib"
 
   export let component
   export let props = {}

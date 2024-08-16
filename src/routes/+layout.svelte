@@ -3,15 +3,14 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {createEventStore} from "@welshman/store"
-  import {fly} from "@lib/transition"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
   import Landing from "@app/components/Landing.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {session, sessions, pk, repository} from "@app/base"
-  import {plaintext, relays, handles} from "@app/state"
+  import {session, repository} from "@app/base"
+  import {relays, handles} from "@app/state"
   import {initStorage} from "@app/storage"
 
   let ready: Promise<void>

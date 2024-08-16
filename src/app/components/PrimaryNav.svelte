@@ -7,25 +7,13 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {goto} from "$app/navigation"
-  import {derived} from "svelte/store"
   import {tweened} from "svelte/motion"
   import {quintOut} from "svelte/easing"
-  import {identity, nth} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
-  import {session} from "@app/base"
-  import {
-    userProfile,
-    userGroupsByNom,
-    makeGroupId,
-    loadGroup,
-    deriveProfile,
-    qualifiedGroupsById,
-    splitGroupId,
-  } from "@app/state"
+  import {userProfile, userGroupsByNom} from "@app/state"
   import {pushModal} from "@app/modal"
   import {getPrimaryNavItemIndex} from "@app/routes"
 

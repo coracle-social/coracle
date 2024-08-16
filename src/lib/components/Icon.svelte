@@ -6,7 +6,6 @@
 </style>
 
 <script lang="ts">
-  import cx from "classnames"
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"

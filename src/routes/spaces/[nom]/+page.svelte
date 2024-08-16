@@ -1,15 +1,12 @@
 <script lang="ts">
-  import {sleep, sortBy} from "@welshman/lib"
+  import {sortBy} from "@welshman/lib"
   import type {CustomEvent} from "@welshman/util"
   import {page} from "$app/stores"
-  import {fly} from "@lib/transition"
   import {formatTimestampAsDate} from "@lib/util"
   import Spinner from "@lib/components/Spinner.svelte"
-  import Avatar from "@lib/components/Avatar.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
-  import {deriveGroup, deriveGroupConversation} from "@app/state"
+  import {deriveGroupConversation} from "@app/state"
 
-  $: group = deriveGroup($page.params.nom)
   $: conversation = deriveGroupConversation($page.params.nom)
 
   const assertEvent = (e: any) => e as CustomEvent
@@ -31,7 +28,7 @@
     let previousPubkey
 
     for (const {event} of sortBy(m => m.event.created_at, $conversation?.messages || [])) {
-      const {id, kind, pubkey, created_at} = event
+      const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
       if (date !== previousDate) {

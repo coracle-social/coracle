@@ -1,12 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import Masonry from "svelte-bricks"
-  import {append, remove} from "@welshman/lib"
   import {GROUP_META, displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {load, relays, groups, searchGroups, relayUrlsByNom, userMembership} from "@app/state"
-  import {addGroupMemberships} from "@app/commands"
+  import {load, relays, searchGroups, relayUrlsByNom, userMembership} from "@app/state"
 
   const getRelayUrls = (nom: string): string[] => $relayUrlsByNom.get(nom) || []
 

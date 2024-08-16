@@ -1,17 +1,7 @@
-import {goto} from "$app/navigation"
-import {append, uniqBy, now} from "@welshman/lib"
+import {uniqBy, now} from "@welshman/lib"
 import {GROUPS, asDecryptedEvent, readList, editList, makeList, createList} from "@welshman/util"
-import {pushToast} from "@app/toast"
 import {pk, signer, repository, INDEXER_RELAYS} from "@app/base"
-import {
-  splitGroupId,
-  loadRelay,
-  loadGroup,
-  getWriteRelayUrls,
-  loadRelaySelections,
-  publish,
-  ensurePlaintext,
-} from "@app/state"
+import {getWriteRelayUrls, loadRelaySelections, publish, ensurePlaintext} from "@app/state"
 
 export type ModifyTags = (tags: string[][]) => string[][]
 
