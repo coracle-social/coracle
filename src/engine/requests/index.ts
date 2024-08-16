@@ -20,7 +20,6 @@ import {
   isSignedEvent,
   createEvent,
   WRAP,
-  WRAP_NIP04,
   EPOCH,
   LABEL,
   DELETE,
@@ -31,10 +30,11 @@ import {
   NAMED_BOOKMARKS,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
+  DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
 import {updateIn} from "src/util/misc"
-import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import type {Zapper} from "src/engine/model"
@@ -179,7 +179,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = uniq([...admins, ...recipients])
-    const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
+    const filters = [{kinds: [WRAP], "#p": pubkeys, since}]
 
     if (pubkeys.length > 0) {
       promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
@@ -401,8 +401,8 @@ export const getNotificationKinds = () =>
   without(env.get().ENABLE_ZAPS ? [] : [9735], [
     ...noteKinds,
     ...reactionKinds,
-    ...giftWrapKinds,
-    4,
+    WRAP,
+    DEPRECATED_DIRECT_MESSAGE,
   ])
 
 export const loadNotifications = () => {
@@ -435,7 +435,7 @@ export const listenForNotifications = () => {
     // Mentions
     {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [4, ...giftWrapKinds], "#p": [$session.pubkey], limit: 1, since},
+    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$session.pubkey], limit: 1, since},
   ]
 
   // Communities
@@ -493,7 +493,7 @@ export const loadFeedsAndLists = () =>
   })
 
 export const loadGiftWraps = ({reload = false} = {}) => {
-  let filter = {kinds: [WRAP, WRAP_NIP04], "#p": [pubkey.get()]}
+  let filter = {kinds: [WRAP], "#p": [pubkey.get()]}
 
   if (!reload) {
     filter = addSinceToFilter(filter, seconds(7, "day"))

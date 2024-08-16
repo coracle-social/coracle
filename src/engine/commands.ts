@@ -79,6 +79,7 @@ import {
   userSeenStatusEvents,
   getChannelIdFromEvent,
   getSession,
+  nip46Perms,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -887,7 +888,7 @@ export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) =>
   const connectKey = makeSecret()
   const connectHandler = {relays: [connectRelay]}
   const broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
-  const result = await broker.connect(connectToken)
+  const result = await broker.connect(connectToken, nip46Perms)
 
   if (result) {
     addSession({
@@ -909,7 +910,7 @@ export const loginWithNostrConnect = async (username, connectHandler: Nip46Handl
   let broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
 
   if (!pubkey) {
-    const pubkey = await broker.createAccount(username)
+    const pubkey = await broker.createAccount(username, nip46Perms)
 
     if (!pubkey) {
       return null
@@ -918,7 +919,7 @@ export const loginWithNostrConnect = async (username, connectHandler: Nip46Handl
     broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
   }
 
-  const result = await broker.connect()
+  const result = await broker.connect("", nip46Perms)
 
   if (result) {
     addSession({

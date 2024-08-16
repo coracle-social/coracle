@@ -10,8 +10,6 @@ import {
   REACTION,
   REMIX,
   REPOST,
-  WRAP,
-  WRAP_NIP04,
   ZAP_RESPONSE,
   Tags,
   Address,
@@ -42,7 +40,6 @@ export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT, REMIX, AUDIO, EVENT_TIME, 
 export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
-export const giftWrapKinds = [WRAP, WRAP_NIP04] as number[]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
@@ -115,8 +112,6 @@ export const getContentWarning = e => {
 
   return tags.topics().find(t => WARN_TAGS.has(t.toLowerCase()))
 }
-
-export const isGiftWrap = e => giftWrapKinds.includes(e.kind)
 
 export const parseAnything = async entity => {
   if (entity.includes("@")) {

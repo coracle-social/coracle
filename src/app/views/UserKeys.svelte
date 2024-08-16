@@ -2,10 +2,10 @@
   import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
-  import {getAddress} from "@welshman/util"
+  import {getAddress, WRAP, GROUP} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
-  import {toHex, nsecEncode, giftWrapKinds, isKeyValid} from "src/util/nostr"
+  import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -65,11 +65,11 @@
       ...LOAD_OPTS,
       relays: hints.User().getUrls().concat(relays),
       filters: [
-        {kinds: [35834], authors: [pubkey], limit: 1},
-        {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
+        {kinds: [GROUP], authors: [pubkey], limit: 1},
+        {kinds: [WRAP], "#p": [pubkey], limit: 500},
       ],
       onEvent: async event => {
-        if (giftWrapKinds.includes(event.kind)) {
+        if (event.kind === WRAP) {
           event = await helper.unwrap(event as SignedEvent)
         }
 

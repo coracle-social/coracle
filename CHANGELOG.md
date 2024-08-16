@@ -10,6 +10,7 @@
 - [x] Include signature in event json
 - [x] Use new read status NIP
 - [x] Simplify wot calculation
+- [x] Add ncryptsec support (notbiebs)
 
 # 0.4.8
 

@@ -14,10 +14,10 @@ import {
   FOLLOWS,
   RELAYS,
   COMMUNITIES,
+  WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {parseJson} from "src/util/misc"
-import {giftWrapKinds} from "src/util/nostr"
 import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess} from "src/engine/model"
 import {repository} from "src/engine/repository"
@@ -95,8 +95,8 @@ projections.addHandler(24, (e: TrustedEvent) => {
       relays: hints.fromRelays(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
-        {kinds: giftWrapKinds, "#p": [pubkey]},
-        {kinds: giftWrapKinds, authors: [pubkey]},
+        {kinds: [WRAP], "#p": [pubkey]},
+        {kinds: [WRAP], authors: [pubkey]},
       ],
     })
   } else if ([GroupAccess.Granted, GroupAccess.Requested].includes(status?.access)) {

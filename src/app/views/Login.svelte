@@ -75,14 +75,14 @@
     //    pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
     //  },
     {
-      domain: "highlighter.com",
-      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
-      pubkey: "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63",
-    },
-    {
       domain: "nsec.app",
       relays: ["wss://relay.nsec.app"],
       pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
+    },
+    {
+      domain: "highlighter.com",
+      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
+      pubkey: "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63",
     },
   ]
 

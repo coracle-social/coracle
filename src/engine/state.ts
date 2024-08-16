@@ -41,25 +41,64 @@ import {
   memoize,
 } from "@welshman/lib"
 import {
-  FEEDS,
-  COMMUNITY,
-  GROUP,
   APP_DATA,
-  INBOX_RELAYS,
+  BLOCKED_RELAYS,
+  BOOKMARKS,
+  CALENDAR,
+  CHANNELS,
+  CLIENT_AUTH,
   COMMUNITIES,
+  COMMUNITY,
+  DELETE,
+  DEPRECATED_DIRECT_MESSAGE,
+  DIRECT_MESSAGE,
+  DVM_REQUEST_DISCOVER_CONTENT,
+  DVM_REQUEST_DISCOVER_PEOPLE,
+  DVM_REQUEST_SEARCH_CONTENT,
+  DVM_REQUEST_SEARCH_PEOPLE,
+  EMOJIS,
+  EVENT_DATE,
+  EVENT_RSVP,
+  EVENT_TIME,
+  FEED,
+  FEEDS,
+  FILE_SERVERS,
+  FOLLOWS,
+  GENERIC_REPOST,
+  GROUP,
+  GROUPS,
+  HANDLER_INFORMATION,
+  HANDLER_RECOMMENDATION,
+  HTTP_AUTH,
+  INBOX_RELAYS,
+  LABEL,
+  MUTES,
+  NAMED_ARTIFACTS,
+  NAMED_BOOKMARKS,
+  NAMED_COMMUNITIES,
+  NAMED_CURATIONS,
+  NAMED_EMOJIS,
+  NAMED_PEOPLE,
+  NAMED_RELAYS,
+  NAMED_TOPICS,
+  NAMED_WIKI_AUTHORS,
+  NAMED_WIKI_RELAYS,
+  NOTE,
+  PINS,
+  PROFILE,
+  REACTION,
+  RELAYS,
+  REPORT,
+  REPOST,
+  REVIEW,
+  SEAL,
+  SEARCH_RELAYS,
+  SEEN_CONTEXT,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
-  SEEN_CONTEXT,
-  DIRECT_MESSAGE,
-  NAMED_BOOKMARKS,
-  HANDLER_RECOMMENDATION,
-  HANDLER_INFORMATION,
-  RELAYS,
-  FOLLOWS,
-  MUTES,
-  LABEL,
-  PROFILE,
-  FEED,
+  TOPICS,
+  WRAP,
+  ZAP_REQUEST,
   Address,
   Router,
   Tags,
@@ -105,8 +144,6 @@ import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {
   isLike,
-  isGiftWrap,
-  giftWrapKinds,
   repostKinds,
   noteKinds,
   reactionKinds,
@@ -236,6 +273,8 @@ export const getSession = pubkey => sessions.get()[pubkey]
 
 export const session = withGetter(derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk]))
 
+export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
+
 export const getSigner = memoize($s => {
   switch ($s?.method) {
     case "extension":
@@ -274,6 +313,7 @@ export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
 export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
 
 export const ensurePlaintext = async (e: TrustedEvent) => {
+  if (!e.content) return undefined
   if (!getPlaintext(e)) {
     const session = getSession(e.pubkey)
     const signer = getSigner(session)
@@ -293,6 +333,7 @@ export const ensurePlaintext = async (e: TrustedEvent) => {
 }
 
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
+  if (!e.content) return undefined
   if (!getPlaintext(e)) {
     const recipient = Tags.fromEvent(e).get("p")?.value()
     const session = getSession(e.pubkey) || getSession(recipient)
@@ -308,11 +349,11 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 }
 
 export const canUnwrap = (event: TrustedEvent) =>
-  isGiftWrap(event) &&
+  event.kind === WRAP &&
   (getSession(Tags.fromEvent(event).get("p")?.value()) || getRecipientKey(event))
 
 export const ensureUnwrapped = async (event: TrustedEvent) => {
-  if (!isGiftWrap(event)) {
+  if (!event.kind !== WRAP) {
     return event
   }
 
@@ -2323,8 +2364,8 @@ class Storage {
 }
 
 const scoreEvent = e => {
+  if (e.kind === WRAP) return -Infinity
   if (getSession(e.pubkey)) return -Infinity
-  if (giftWrapKinds.includes(e.kind)) return -Infinity
   if (reactionKinds.includes(e.kind)) return 0
   if (repostKinds.includes(e.kind)) return 0
   return -e.created_at
