@@ -648,7 +648,7 @@ export const getWotScore = (pk, tpk) => {
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
-  const score = follows.size - Math.floor(Math.pow(2, Math.log(mutes.size)))
+  const score = follows.size - mutes.size
 
   maxWot.update(maxScore => Math.max(maxScore, score))
 

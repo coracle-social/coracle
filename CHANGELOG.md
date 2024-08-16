@@ -9,6 +9,7 @@
 - [x] Improve NIP 17 UX
 - [x] Include signature in event json
 - [x] Use new read status NIP
+- [x] Simplify wot calculation
 
 # 0.4.8
 

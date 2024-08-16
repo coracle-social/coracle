@@ -19,8 +19,7 @@
     </p>
     <p>
       In {appName}, this number is equal to how many people you follow that also follow a given
-      person, minus <span class="code">pow(2, log(n))</span>, where
-      <span class="code">n</span> is how many people you follow who have muted this person. This allows
+      person, minus how many people you follow who have muted this person. This allows
       you to see at a glance if someone is accepted in your network. This helps reduce spam, impostors,
       and objectionable content.
     </p>
