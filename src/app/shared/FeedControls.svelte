@@ -15,7 +15,7 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {userListFeeds, signer, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
+  import {pubkey, userListFeeds, loadPubkeyFeeds, loadPubkeyLists, signer, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -94,6 +94,11 @@
     feed => getAddress(feed.event),
     sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
   )
+
+  if ($pubkey) {
+    loadPubkeyFeeds([$pubkey])
+    loadPubkeyLists([$pubkey])
+  }
 </script>
 
 <div class="flex flex-grow items-center justify-end gap-2">
