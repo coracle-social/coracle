@@ -38,9 +38,7 @@
   <h1 class="heading">
     You are leaving <span class="text-primary">{$group?.name || "[no name]"}</span>
   </h1>
-  <p class="text-center">
-    Are you sure you want to leave?
-  </p>
+  <p class="text-center">Are you sure you want to leave?</p>
   <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />

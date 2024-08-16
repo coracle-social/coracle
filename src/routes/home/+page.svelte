@@ -6,7 +6,7 @@
 
   const createSpace = () => pushModal(SpaceCreate)
 
-  const browseSpaces = () => goto("/spaces")
+  const browseSpaces = () => goto("/discover")
 </script>
 
 <div class="hero min-h-screen bg-base-200">

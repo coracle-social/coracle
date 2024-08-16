@@ -36,14 +36,6 @@
 
   const addSpace = () => pushModal(SpaceAdd)
 
-  const gotoHome = () => goto("/home")
-
-  const gotoSpaces = () => goto("/spaces")
-
-  const gotoSpace = (nom: string) => goto(`/spaces/${nom}`)
-
-  const gotoSettings = () => goto("/settings")
-
   let element: HTMLElement
 
   // Set the active highlight element to the offset of the nav item we're focused on
@@ -63,7 +55,7 @@
     style={`top: ${$activeOffset}px`} />
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem on:click={gotoHome}>
+      <PrimaryNavItem href="/home">
         <Avatar
           src={$userProfile?.picture}
           class="!h-10 !w-10 border border-solid border-base-300"
@@ -71,7 +63,7 @@
       </PrimaryNavItem>
       {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
         {@const qualifiedGroup = qualifiedGroups[0]}
-        <PrimaryNavItem title={qualifiedGroup?.group.name} on:click={() => gotoSpace(nom)}>
+        <PrimaryNavItem title={qualifiedGroup?.group.name} href="/spaces/{nom}">
           <div class="w-10 rounded-full border border-solid border-base-300">
             <img alt={qualifiedGroup?.group.name} src={qualifiedGroup?.group.picture} />
           </div>
@@ -82,14 +74,14 @@
           <Icon size={7} icon="add-circle" />
         </div>
       </PrimaryNavItem>
-      <PrimaryNavItem title="Browse Spaces" on:click={gotoSpaces}>
+      <PrimaryNavItem title="Discover Spaces" href="/discover">
         <div class="!flex w-10 items-center justify-center">
           <Icon size={6} icon="compass-big" />
         </div>
       </PrimaryNavItem>
     </div>
     <div>
-      <PrimaryNavItem title="Settings" on:click={gotoSettings}>
+      <PrimaryNavItem title="Settings" href="/settings">
         <div class="!flex w-10 items-center justify-center">
           <Icon size={7} icon="settings" />
         </div>

@@ -8,7 +8,6 @@
   import Toast from "@app/components/Toast.svelte"
   import Landing from "@app/components/Landing.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
-  import SecondaryNav from "@app/components/SecondaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
   import {session, sessions, pk, repository} from "@app/base"
@@ -65,10 +64,7 @@
   <div data-theme={$theme}>
     <div class="flex h-screen">
       <PrimaryNav />
-      <SecondaryNav />
-      <div class="max-h-screen flex-grow overflow-auto bg-base-200">
-        <slot />
-      </div>
+      <slot />
     </div>
     <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
       {#if prev}

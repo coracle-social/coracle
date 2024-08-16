@@ -15,7 +15,7 @@
 
   const back = () => history.back()
 
-  const browse = () => goto("/spaces")
+  const browse = () => goto("/discover")
 
   const joinQualifiedGroup = async (id: string) => {
     const [url, nom] = splitGroupId(id)
