@@ -2,6 +2,7 @@
   import {copyToClipboard} from "src/util/html"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Popover from "src/partials/Popover.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import {router} from "src/app/util/router"
   import Modal from "src/partials/Modal.svelte"
@@ -24,6 +25,7 @@
 
   $: password = ""
   $: confirmedPassword = ""
+  $: passwordIsValid = password && password === confirmedPassword
   $: displayValue = showEncoded && encode ? encode(value) : value
 
   const showEncryptModal = () => {
@@ -52,10 +54,6 @@
   }
 
   const copyEncrypted = () => {
-    if (!password || password !== confirmedPassword) {
-      return showWarning("Passwords don't match!.")
-    }
-
     copyToClipboard(encrypt(hexToBytes(value), password))
     closeEncryptModal()
     showInfo(`Copied ncryptsec to clipboard!`)
@@ -95,28 +93,23 @@
 
 {#if willShowEncryptModal}
   <Modal onEscape={closeEncryptModal}>
-    <FlexColumn>
-      <p>
-        Your encoded private key starts with <strong>nsec</strong>.
-      </p>
-      <div class="flex justify-center gap-2">
-        <Anchor button on:click={closeEncryptModal}>Cancel</Anchor>
-        <Anchor button accent on:click={copyEncoded}>Copy private key</Anchor>
+    <Subheading>Encrypt your private key</Subheading>
+    <p>
+      For additional security, you can encrypt your private key with a password. This key starts
+      with <strong>ncryptsec1</strong> and can't be used without your password.
+    </p>
+    <Field label="Password">
+      <Input type="password" bind:value={password} />
+    </Field>
+    <Field label="Confirm Password">
+      <Input type="password" bind:value={confirmedPassword} />
+    </Field>
+    <div class="flex justify-between gap-2">
+      <Anchor button on:click={closeEncryptModal}>Cancel</Anchor>
+      <div class="flex gap-2">
+        <Anchor button on:click={copyEncoded}>Copy plaintext</Anchor>
+        <Anchor button accent on:click={copyEncrypted} disabled={!passwordIsValid}>Copy encrypted</Anchor>
       </div>
-      <p class="pt-8">
-        For additional security, you can encrypt your private key with a password. This key starts
-        with <strong>ncryptsec1</strong> and can't be used without your password.
-      </p>
-      <Field label="Password">
-        <Input type="password" bind:value={password} />
-      </Field>
-      <Field label="Confirm Password">
-        <Input type="password" bind:value={confirmedPassword} />
-      </Field>
-      <div class="flex justify-center gap-2">
-        <Anchor button on:click={closeEncryptModal}>Cancel</Anchor>
-        <Anchor button accent on:click={copyEncrypted}>Copy encrypted private key</Anchor>
-      </div>
-    </FlexColumn>
+    </div>
   </Modal>
 {/if}
