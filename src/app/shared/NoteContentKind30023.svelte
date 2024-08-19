@@ -19,7 +19,7 @@
 
   let content
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w{10,1000}/g
-  const {title, summary, image} = fromPairs(note.tags) as Record<string, string>
+  const {title, summary, image, alt} = fromPairs(note.tags) as Record<string, string>
 
   const convertEntities = markdown => {
     for (const uri of markdown.match(regex) || []) {
@@ -64,8 +64,8 @@
 
 <div class="flex flex-col gap-4 overflow-hidden text-ellipsis">
   <h3 class="staatliches text-2xl">{title}</h3>
-  {#if summary && !showEntire}
-    <p>{summary}</p>
+  {#if (summary || alt) && (!showEntire || !note.content)}
+    <p>{summary || alt}</p>
   {/if}
   {#if showMedia && image && urlIsMedia(image)}
     <NoteContentLink value={{url: image, isMedia: true}} showMedia />
