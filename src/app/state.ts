@@ -35,7 +35,7 @@ import {
   GROUP_JOIN,
   GROUP_ADD_USER,
 } from "@welshman/util"
-import type {SignedEvent, HashedEvent, EventTemplate, CustomEvent, PublishedProfile, PublishedList} from "@welshman/util"
+import type {SignedEvent, HashedEvent, EventTemplate, TrustedEvent, PublishedProfile, PublishedList} from "@welshman/util"
 import type {SubscribeRequest, PublishRequest, PublishStatus} from "@welshman/net"
 import {publish as basePublish, subscribe as baseSubscribe} from "@welshman/net"
 import {decrypt, stamp, own, hash} from "@welshman/signer"
@@ -107,7 +107,7 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
 
   return derived(
     deriveEvents(repository, {filters, includeDeleted: true}),
-    (events: CustomEvent[]) => {
+    (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
         load({relays, filters})
         attempted = true
@@ -180,9 +180,9 @@ export const subscribe = (request: SubscribeRequest) => {
 }
 
 export const load = (request: SubscribeRequest) =>
-  new Promise<CustomEvent[]>(resolve => {
+  new Promise<TrustedEvent[]>(resolve => {
     const sub = subscribe({closeOnEose: true, timeout: 3000, ...request})
-    const events: CustomEvent[] = []
+    const events: TrustedEvent[] = []
 
     sub.emitter.on("event", (url: string, e: SignedEvent) => {
       repository.publish(e)
@@ -217,12 +217,12 @@ export const setFreshnessBulk = (ns: string, updates: Record<string, number>) =>
 
 export const plaintext = withGetter(writable<Record<string, string>>({}))
 
-export const getPlaintext = (e: CustomEvent) => plaintext.get()[e.id]
+export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
 
-export const setPlaintext = (e: CustomEvent, content: string) =>
+export const setPlaintext = (e: TrustedEvent, content: string) =>
   plaintext.update(assoc(e.id, content))
 
-export const ensurePlaintext = async (e: CustomEvent) => {
+export const ensurePlaintext = async (e: TrustedEvent) => {
   if (e.content && !getPlaintext(e)) {
     const $signer = getSigner(getSession(e.pubkey))
 
@@ -323,12 +323,12 @@ export const {
 
 // Relay selections
 
-export const getReadRelayUrls = (event?: CustomEvent): string[] =>
+export const getReadRelayUrls = (event?: TrustedEvent): string[] =>
   getRelayTags(event?.tags || [])
     .filter((t: string[]) => !t[2] || t[2] === "read")
     .map((t: string[]) => normalizeRelayUrl(t[1]))
 
-export const getWriteRelayUrls = (event?: CustomEvent): string[] =>
+export const getWriteRelayUrls = (event?: TrustedEvent): string[] =>
   getRelayTags(event?.tags || [])
     .filter((t: string[]) => !t[2] || t[2] === "write")
     .map((t: string[]) => normalizeRelayUrl(t[1]))
@@ -357,7 +357,7 @@ export const {
 export const follows = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [FOLLOWS]}],
   itemToEvent: item => item.event,
-  eventToItem: async (event: CustomEvent) =>
+  eventToItem: async (event: TrustedEvent) =>
     readList(
       asDecryptedEvent(event, {
         content: await ensurePlaintext(event),
@@ -387,7 +387,7 @@ export const {
 export const mutes = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [MUTES]}],
   itemToEvent: item => item.event,
-  eventToItem: async (event: CustomEvent) =>
+  eventToItem: async (event: TrustedEvent) =>
     readList(
       asDecryptedEvent(event, {
         content: await ensurePlaintext(event),
@@ -429,9 +429,9 @@ export const getGroupUrl = (groupId: string) => splitGroupId(groupId)[0]
 
 export const getGroupNom = (groupId: string) => splitGroupId(groupId)[1]
 
-export const getGroupName = (e?: CustomEvent) => e?.tags.find(nthEq(0, "name"))?.[1]
+export const getGroupName = (e?: TrustedEvent) => e?.tags.find(nthEq(0, "name"))?.[1]
 
-export const getGroupPicture = (e?: CustomEvent) => e?.tags.find(nthEq(0, "picture"))?.[1]
+export const getGroupPicture = (e?: TrustedEvent) => e?.tags.find(nthEq(0, "picture"))?.[1]
 
 export const displayGroup = (group?: Group) => group?.name || "[no name]"
 
@@ -440,14 +440,14 @@ export type Group = {
   name?: string
   about?: string
   picture?: string
-  event?: CustomEvent
+  event?: TrustedEvent
 }
 
 export type PublishedGroup = Omit<Group, "event"> & {
-  event: CustomEvent
+  event: TrustedEvent
 }
 
-export const readGroup = (event: CustomEvent) => {
+export const readGroup = (event: TrustedEvent) => {
   const nom = getIdentifier(event)!
   const name = event?.tags.find(nthEq(0, "name"))?.[1] || "[no name]"
   const about = event?.tags.find(nthEq(0, "about"))?.[1] || ""
@@ -536,14 +536,14 @@ export type GroupMembership = {
   ids: Set<string>
   noms: Set<string>
   urls: Set<string>
-  event?: CustomEvent
+  event?: TrustedEvent
 }
 
 export type PublishedGroupMembership = Omit<GroupMembership, "event"> & {
-  event: CustomEvent
+  event: TrustedEvent
 }
 
-export const readGroupMembership = (event: CustomEvent) => {
+export const readGroupMembership = (event: TrustedEvent) => {
   const ids = new Set<string>()
   const noms = new Set<string>()
   const urls = new Set<string>()
@@ -584,10 +584,10 @@ export const {
 
 export type GroupMessage = {
   nom: string
-  event: CustomEvent
+  event: TrustedEvent
 }
 
-export const readGroupMessage = (event: CustomEvent): Maybe<GroupMessage> => {
+export const readGroupMessage = (event: TrustedEvent): Maybe<GroupMessage> => {
   const nom = event.tags.find(nthEq(0, "h"))?.[1]
 
   if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind)) {

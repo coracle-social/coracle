@@ -2,14 +2,14 @@
   type Element = {
     id: string
     type: "date" | "note"
-    value: string | CustomEvent
+    value: string | TrustedEvent
     showPubkey: boolean
   }
 </script>
 
 <script lang="ts">
   import {sortBy} from "@welshman/lib"
-  import type {CustomEvent} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {page} from "$app/stores"
   import {formatTimestampAsDate} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
@@ -20,7 +20,7 @@
   const {nom} = $page.params
   const conversation = deriveGroupConversation(nom)
 
-  const assertEvent = (e: any) => e as CustomEvent
+  const assertEvent = (e: any) => e as TrustedEvent
 
   let loading = true
   let elements: Element[] = []

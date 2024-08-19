@@ -2,14 +2,14 @@
   import twColors from "tailwindcss/colors"
   import {readable} from "svelte/store"
   import {hash} from "@welshman/lib"
-  import type {CustomEvent} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {GROUP_REPLY, getAncestorTags, displayProfile, displayPubkey} from "@welshman/util"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import {deriveProfile, deriveEvent} from "@app/state"
 
-  export let event: CustomEvent
+  export let event: TrustedEvent
   export let showPubkey: boolean
 
   const colors = [

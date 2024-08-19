@@ -1,6 +1,6 @@
 import {derived} from "svelte/store"
 import {memoize, assoc} from "@welshman/lib"
-import type {CustomEvent} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {Repository, createEvent, Relay} from "@welshman/util"
 import {withGetter} from "@welshman/store"
 import {NetworkContext, Tracker} from "@welshman/net"
@@ -55,8 +55,8 @@ export const signer = withGetter(derived(session, getSigner))
 const seenChallenges = new Set()
 
 Object.assign(NetworkContext, {
-  onEvent: (url: string, event: CustomEvent) => tracker.track(event.id, url),
-  isDeleted: (url: string, event: CustomEvent) => repository.isDeleted(event),
+  onEvent: (url: string, event: TrustedEvent) => tracker.track(event.id, url),
+  isDeleted: (url: string, event: TrustedEvent) => repository.isDeleted(event),
   onAuth: async (url: string, challenge: string) => {
     if (seenChallenges.has(challenge)) {
       return
