@@ -1,8 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {filter} from "ramda"
   import {toTitle, Storage} from "hurdak"
-  import {derived, readable} from "svelte/store"
+  import {get, derived, readable} from "svelte/store"
   import {slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
@@ -13,23 +12,21 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import type {Channel} from "src/engine"
   import {
-    nip44,
-    pubkey,
-    canSign,
+    signer,
     channels,
+    hasNip44,
     hasNewMessages,
-    sortChannels,
     markAllChannelsRead,
     loadLegacyMessages,
     loadGiftWraps,
   } from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
-  const userChannels = channels.derived(filter((c: Channel) => c.members?.includes($pubkey)))
-  const accepted = userChannels.derived(filter((c: Channel) => Boolean(c.last_sent)))
-  const requests = userChannels.derived(filter((c: Channel) => c.last_received && !c.last_sent))
+  const accepted = derived(channels, $ch => $ch.filter(c => c.last_sent > 0))
+  const requests = derived(channels, $ch =>
+    $ch.filter(c => c.last_received > 0 && c.last_sent === 0),
+  )
   const setActiveTab = tab => {
     const path = tab === "requests" ? "channels/requests" : "channels"
 
@@ -55,7 +52,7 @@
     )
   }
 
-  $: tabChannels = sortChannels(activeTab === "conversations" ? $accepted : $requests)
+  $: tabChannels = activeTab === "conversations" ? $accepted : $requests
 
   let limit = 20
   let element
@@ -64,10 +61,10 @@
   let hideNip04Alert = Storage.getJson("hide_nip04_alert")
 
   onMount(() => {
-    const scroller = createScroller(loadMore, {element})
+    const scroller = createScroller(loadMore, {element, delay: 300})
 
     // Don't load if we just switched tabs
-    if (!router.history.get()[1]?.path.startsWith("/channels")) {
+    if (!get(router.history)[1]?.path.startsWith("/channels")) {
       loadMessages()
     }
 
@@ -81,7 +78,7 @@
 </script>
 
 <FlexColumn bind:element>
-  {#if $nip44.isEnabled() && !hideNip04Alert}
+  {#if $hasNip44 && !hideNip04Alert}
     <div class="-my-2">
       <div out:slide|local class="py-4">
         <Card class="relative">
@@ -105,7 +102,7 @@
       <i class="fa fa-comments fa-lg" />
       <h2 class="staatliches text-2xl">Your conversations</h2>
     </div>
-    <Anchor modal button accent href="/channels/create" disabled={!$canSign}>
+    <Anchor modal button accent href="/channels/create" disabled={!$signer}>
       <i class="fa-solid fa-plus" /> Create
     </Anchor>
   </div>

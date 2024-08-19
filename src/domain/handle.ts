@@ -1,4 +1,4 @@
-import {last} from '@welshman/lib'
+import {last} from "@welshman/lib"
 
 export type Handle = {
   pubkey: string

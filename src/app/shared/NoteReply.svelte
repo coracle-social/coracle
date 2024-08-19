@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {writable} from "@welshman/lib"
+  import {writable} from "svelte/store"
   import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"

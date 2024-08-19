@@ -114,7 +114,7 @@
   $: reply = tags.parent()
   $: root = tags.root()
 
-  $: muted = !showMuted && $isEventMuted(event)
+  $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
   $: children = context.filter(e => isChildOf(e, event))
@@ -277,13 +277,13 @@
                 {#if showReply}
                   <small class="text-neutral-100">
                     <i class="fa fa-code-merge" />
-                    <Anchor class="underline" on:click={goToParent}>View Parent</Anchor>
+                    <Anchor underline on:click={goToParent}>View Parent</Anchor>
                   </small>
                 {/if}
                 {#if showRoot}
                   <small class="text-neutral-100">
                     <i class="fa fa-code-pull-request" />
-                    <Anchor class="underline" on:click={goToThread}>View Thread</Anchor>
+                    <Anchor underline on:click={goToThread}>View Thread</Anchor>
                   </small>
                 {/if}
               </div>
@@ -311,7 +311,8 @@
                 {replies}
                 {likes}
                 {zaps}
-                {zapper} />
+                {zapper}
+                {muted} />
             </div>
           </div>
         </Card>

@@ -1,20 +1,10 @@
 import {throttle} from "throttle-debounce"
 import {writable} from "svelte/store"
-import type {Readable, Writable} from "svelte/store"
-import {now, stripProtocol} from "@welshman/lib"
-import {pluck, fromPairs, last, identity, sum, is, equals} from "ramda"
-import {Storage, ensurePlural, defer, isPojo, first, seconds, tryFunc, sleep, round} from "hurdak"
+import {now, stripProtocol, isPojo, first, sleep} from "@welshman/lib"
+import {pluck, fromPairs, last, identity, sum, is} from "ramda"
+import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
-
-export const fuzzy = <T>(data: T[], opts = {}) => {
-  const fuse = new Fuse(data, opts) as any
-
-  // Slice pattern because the docs warn that it"ll crash if too long
-  return (q: string) => {
-    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
-  }
-}
 
 export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
 
@@ -138,12 +128,15 @@ export const stringToHue = (value: string) => {
 export const hsl = (hue: number, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-export const tryJson = <T>(f: () => T) =>
-  tryFunc(f, (e: Error) => {
-    if (!e.toString().includes("JSON")) {
-      logger.warn(e)
-    }
-  })
+export const parseJson = (json: string) => {
+  if (!json) return null
+
+  try {
+    return JSON.parse(json)
+  } catch (e) {
+    return null
+  }
+}
 
 export const tryFetch = <T>(f: () => T) =>
   tryFunc(f, (e: Error) => {
@@ -159,20 +152,6 @@ export const formatSats = (sats: number) => {
   if (sats < 1_000_000) return numberFmt.format(round(1, sats / 1000)) + "K"
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
-}
-
-export const pushToKey = <T>(m: Record<string, T[]> | Map<string, T[]>, k: string, v: T) => {
-  if (m instanceof Map) {
-    const a = m.get(k) || []
-
-    a.push(v)
-    m.set(k, a)
-  } else {
-    m[k] = m[k] || []
-    m[k].push(v)
-  }
-
-  return m
 }
 
 export const race = (threshold, promises) => {
@@ -203,20 +182,6 @@ export const displayUrl = url => {
 
 export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
-}
-
-export const memoize = <T>(f: (...args: any[]) => T) => {
-  let prevArgs
-  let result: T
-
-  return (...args) => {
-    if (!equals(prevArgs, args)) {
-      prevArgs = args
-      result = f(...args)
-    }
-
-    return result
-  }
 }
 
 // https://stackoverflow.com/a/11900218/1467342
@@ -274,33 +239,6 @@ export const sumBy = (f, xs) => sum(xs.map(f))
 
 export const ensureProto = url => (url.includes("://") ? url : "https://" + url)
 
-export const createBatcher = <T, U>(t, execute: (request: T[]) => U[] | Promise<U[]>) => {
-  const queue = []
-
-  const _execute = async () => {
-    const items = queue.splice(0)
-    const results = await execute(pluck("request", items))
-
-    if (results.length !== items.length) {
-      logger.warn("Execute must return a promise for each request", results, items)
-    }
-
-    results.forEach(async (r, i) => items[i].deferred.resolve(await r))
-  }
-
-  return (request: T): Promise<U> => {
-    const deferred = defer<U>()
-
-    if (queue.length === 0) {
-      setTimeout(_execute, t)
-    }
-
-    queue.push({request, deferred})
-
-    return deferred
-  }
-}
-
 export const asArray = v => ensurePlural(v).filter(identity)
 
 export const buildQueryString = params => "?" + new URLSearchParams(params)
@@ -341,6 +279,15 @@ export const getStringWidth = (text: string) => {
   span.remove()
 
   return width
+}
+
+export const fuzzy = <T>(data: T[], opts = {}) => {
+  const fuse = new Fuse(data, opts) as any
+
+  // Slice pattern because the docs warn that it"ll crash if too long
+  return (q: string) => {
+    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
+  }
 }
 
 export class SearchHelper<T, V> {
@@ -395,65 +342,3 @@ export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
 
   return store
 }
-
-export const getter = <T>(store: Readable<T>) => {
-  let value: T
-
-  store.subscribe((newValue: T) => {
-    value = newValue
-  })
-
-  return () => value
-}
-
-type Stop = () => void
-type Sub<T> = (x: T) => void
-type Start<T> = (set: Sub<T>) => Stop
-
-export const custom = <T>(start: Start<T>, opts: {throttle?: number} = {}) => {
-  const subs: Sub<T>[] = []
-
-  let value: T
-  let stop: () => void
-
-  return {
-    subscribe: (sub: Sub<T>) => {
-      if (opts.throttle) {
-        sub = throttle(opts.throttle, sub)
-      }
-
-      if (subs.length === 0) {
-        stop = start((newValue: T) => {
-          for (const sub of subs) {
-            sub(newValue)
-          }
-
-          value = newValue
-        })
-      }
-
-      subs.push(sub)
-      sub(value)
-
-      return () => {
-        subs.splice(
-          subs.findIndex(s => s === sub),
-          1,
-        )
-
-        if (subs.length === 0) {
-          stop()
-        }
-      }
-    },
-  }
-}
-
-export function withGetter<T>(store: Writable<T>): Writable<T> & {get: () => T}
-export function withGetter<T>(store: Readable<T>): Readable<T> & {get: () => T}
-export function withGetter<T>(store: Readable<T> | Writable<T>) {
-  return {...store, get: getter<T>(store)}
-}
-
-export const throttled = <T>(delay: number, store: Readable<T>) =>
-  custom(set => store.subscribe(throttle(delay, set)))

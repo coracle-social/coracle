@@ -3,7 +3,6 @@ import dotenv from "dotenv"
 import * as path from "path"
 import {defineConfig} from "vite"
 import {VitePWA} from "vite-plugin-pwa"
-import mkcert from "vite-plugin-mkcert"
 import {favicons} from "favicons"
 import htmlPlugin from "vite-plugin-html-config"
 import sveltePreprocess from "svelte-preprocess"
@@ -37,7 +36,6 @@ export default defineConfig(async () => {
       },
     },
     plugins: [
-      mkcert(),
       nodePolyfills({
         protocolImports: true,
       }),

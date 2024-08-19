@@ -38,7 +38,7 @@
 
   const loadFeed = () => router.at("notes").cx({feed}).push()
 
-  $: isFavorite = getSingletonValues("a", $userFeedFavorites).has(address)
+  $: isFavorite = getSingletonValues("a", $userFeedFavorites).includes(address)
   $: favoritedPubkeys = remove(
     $pubkey,
     ($feedFavoritesByAddress.get(address) || []).map(s => s.event.pubkey),

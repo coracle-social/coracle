@@ -16,7 +16,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
     mention,
-    settings,
+    userSettings,
     publishSettings,
     searchTopics,
     userMutes,
@@ -24,12 +24,12 @@
     updateSingleton,
   } from "src/engine"
 
-  const values = {...$settings}
+  const values = {...$userSettings}
 
   const searchWords = q => pluck("name", $searchTopics(q))
 
   const submit = () => {
-    if (!equals($settings, values)) {
+    if (!equals($userSettings, values)) {
       publishSettings(values)
     }
 

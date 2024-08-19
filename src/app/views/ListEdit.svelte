@@ -1,15 +1,16 @@
 <script lang="ts">
   import {uniqBy, nth} from "@welshman/lib"
+  import {deriveEvent} from "@welshman/store"
   import Subheading from "src/partials/Subheading.svelte"
   import ListForm from "src/app/shared/ListForm.svelte"
   import {router} from "src/app/util"
   import {readList} from "src/domain"
-  import {deriveEvent} from "src/engine"
+  import {repository} from "src/engine"
 
   export let address
   export let tags = []
 
-  const event = deriveEvent(address)
+  const event = deriveEvent(repository, address)
 
   const exit = () => router.clearModals()
 

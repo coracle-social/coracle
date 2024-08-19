@@ -1,4 +1,5 @@
 import type {Publish} from "@welshman/net"
+import type {Nip46Handler} from "@welshman/signer"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
 import {isTrustedEvent} from "@welshman/util"
 import type {RelayProfile} from "src/domain"
@@ -8,12 +9,6 @@ export type RelayInfo = RelayProfile & {
   faults?: number[]
   first_seen?: number
   last_checked?: number
-}
-
-export type NostrConnectHandler = {
-  pubkey?: string
-  domain?: string
-  relays?: string[]
 }
 
 export enum GroupAccess {
@@ -86,11 +81,10 @@ export type Topic = {
 
 export type Channel = {
   id: string
-  relays: string[]
-  members: string[]
   last_sent?: number
   last_received?: number
   last_checked?: number
+  messages: TrustedEvent[]
 }
 
 export type GroupStatus = {
@@ -107,9 +101,7 @@ export type Session = {
   privkey?: string
   connectKey?: string
   connectToken?: string
-  connectHandler?: NostrConnectHandler
-  settings?: Record<string, any>
-  settings_updated_at?: number
+  connectHandler?: Nip46Handler
   groups_last_synced?: number
   notifications_last_synced?: number
   groups?: Record<string, GroupStatus>

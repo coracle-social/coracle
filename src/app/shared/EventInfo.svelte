@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {fromPairs} from "ramda"
   import {Tags, getAddress} from "@welshman/util"
+  import {deriveIsDeletedByAddress} from "@welshman/store"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -10,7 +11,7 @@
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {deriveIsDeletedByAddress, getSetting, pubkey} from "src/engine"
+  import {repository, getSetting, pubkey} from "src/engine"
 
   export let event
   export let showDate = false
@@ -22,7 +23,7 @@
   const detailPath = router.at("events").of(address).toString()
   const editLink = router.at("events").of(address).at("edit").toString()
   const deleteLink = router.at("events").of(address).at("delete").toString()
-  const deleted = deriveIsDeletedByAddress(event)
+  const deleted = deriveIsDeletedByAddress(repository, event)
 
   $: tags = Tags.fromEvent(event)
   $: groupAddrs = tags.context().values().valueOf()

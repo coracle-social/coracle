@@ -1,7 +1,7 @@
 import {fromPairs} from "@welshman/lib"
 import {getAddress, Tags} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {SearchHelper, tryJson} from "src/util/misc"
+import {SearchHelper, parseJson} from "src/util/misc"
 
 export type Handler = {
   kind: number
@@ -17,7 +17,7 @@ export type Handler = {
 
 export const readHandlers = (event: TrustedEvent) => {
   const {d: identifier} = fromPairs(event.tags)
-  const meta = tryJson(() => JSON.parse(event.content))
+  const meta = parseJson(event.content)
   const normalizedMeta = {
     name: meta?.name || meta?.display_name || "",
     image: meta?.image || meta?.picture || "",

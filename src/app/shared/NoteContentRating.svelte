@@ -38,7 +38,7 @@
   <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-neutral-600 pl-2">
     Rated
     {#if href}
-      <Anchor modal class="underline" {href}>{display}</Anchor>
+      <Anchor modal underline {href}>{display}</Anchor>
     {:else}
       {display}
     {/if}

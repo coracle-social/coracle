@@ -1,6 +1,6 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
-import {writable, derived} from "svelte/store"
+import {get, writable, derived} from "svelte/store"
 import {inc, assoc, pushToMapKey, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -18,7 +18,6 @@ import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
-import {withGetter} from "src/util/misc"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
@@ -103,7 +102,7 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
 
 export const createFeed = (opts: FeedOpts) => {
   const done = writable(false)
-  const notes = withGetter(writable<DisplayEvent[]>([]))
+  const notes = writable<DisplayEvent[]>([])
   const store = derived([done, notes], ([$done, $notes]) => ({done: $done, notes: $notes}))
 
   const buffer: TrustedEvent[] = []
@@ -173,7 +172,7 @@ export const createFeed = (opts: FeedOpts) => {
     }
 
     // Defer any really old notes until we're done loading from the network
-    const feed = notes.get()
+    const feed = get(notes)
     const cutoff = feed.reduce((t, e) => Math.min(t, e.created_at), now()) - delta
     const [ok, defer] = partition(e => e.created_at > cutoff, events.concat(buffer.splice(0)))
 
@@ -188,7 +187,7 @@ export const createFeed = (opts: FeedOpts) => {
             if (
               buffer.length > 0 &&
               !controller.signal.aborted &&
-              notes.get().length === feed.length + i
+              get(notes).length === feed.length + i
             ) {
               const [event, ...events] = sortEventsDesc(buffer)
 
@@ -215,7 +214,7 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function buildFeedChunk(events: TrustedEvent[]) {
-    const seen = new Set(notes.get().map(getIdOrAddress))
+    const seen = new Set(get(notes).map(getIdOrAddress))
     const chunkParents = []
 
     // Sort first to make sure we get the latest version of replaceable events, then

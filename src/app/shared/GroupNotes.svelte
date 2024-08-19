@@ -9,7 +9,7 @@
   import Feed from "src/app/shared/Feed.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import {makeFeed, readFeed} from "src/domain"
-  import {hints, repository, canSign, deriveGroupMeta, load} from "src/engine"
+  import {hints, repository, signer, deriveGroupMeta, load} from "src/engine"
 
   export let address
 
@@ -60,7 +60,7 @@
 </script>
 
 <FlexColumn large>
-  {#if $canSign}
+  {#if $signer}
     <NoteCreateInline group={address} />
   {/if}
   {#if tabs.length > 1}

@@ -4,7 +4,7 @@
   import {doPipe, Fetch} from "hurdak"
   import {now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {generatePrivateKey} from "src/util/nostr"
+  import {Nip01Signer} from "@welshman/signer"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -92,11 +92,9 @@
           tags.push(["anon"])
         }
 
-        const template = createEvent(9734, {content, tags})
-        const signedTemplate = anonymous
-          ? await signer.get().signWithKey(template, generatePrivateKey())
-          : await signer.get().signAsUser(template)
-        const zapString = encodeURI(JSON.stringify(signedTemplate))
+        const $signer = anonymous ? Nip01Signer.ephemeral() : signer.get()
+        const event = await $signer.sign(createEvent(9734, {content, tags}))
+        const zapString = encodeURI(JSON.stringify(event))
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
         const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
 

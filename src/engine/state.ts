@@ -1,16 +1,15 @@
 import Fuse from "fuse.js"
+import crypto from "crypto"
 import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
 import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
-  any,
   pluck,
   find,
   defaultTo,
   equals,
-  filter,
   assoc,
   sortBy,
   max,
@@ -22,9 +21,7 @@ import {
   fromPairs,
 } from "ramda"
 import {
-  Collection as CollectionStore,
   Worker,
-  Writable,
   simpleCache,
   clamp,
   identity,
@@ -38,26 +35,70 @@ import {
   sort,
   groupBy,
   indexBy,
+  pushToKey,
   pushToMapKey,
+  tryCatch,
+  memoize,
 } from "@welshman/lib"
 import {
-  WRAP,
-  FEEDS,
-  COMMUNITY,
-  GROUP,
-  INBOX_RELAYS,
-  WRAP_NIP04,
+  APP_DATA,
+  BLOCKED_RELAYS,
+  BOOKMARKS,
+  CALENDAR,
+  CHANNELS,
+  CLIENT_AUTH,
   COMMUNITIES,
-  READ_RECEIPT,
-  NAMED_BOOKMARKS,
-  HANDLER_RECOMMENDATION,
-  HANDLER_INFORMATION,
-  RELAYS,
-  FOLLOWS,
-  MUTES,
-  LABEL,
-  PROFILE,
+  COMMUNITY,
+  DELETE,
+  DEPRECATED_DIRECT_MESSAGE,
+  DIRECT_MESSAGE,
+  DVM_REQUEST_DISCOVER_CONTENT,
+  DVM_REQUEST_DISCOVER_PEOPLE,
+  DVM_REQUEST_SEARCH_CONTENT,
+  DVM_REQUEST_SEARCH_PEOPLE,
+  EMOJIS,
+  EVENT_DATE,
+  EVENT_RSVP,
+  EVENT_TIME,
   FEED,
+  FEEDS,
+  FILE_SERVERS,
+  FOLLOWS,
+  GENERIC_REPOST,
+  GROUP,
+  GROUPS,
+  HANDLER_INFORMATION,
+  HANDLER_RECOMMENDATION,
+  HTTP_AUTH,
+  INBOX_RELAYS,
+  LABEL,
+  MUTES,
+  NAMED_ARTIFACTS,
+  NAMED_BOOKMARKS,
+  NAMED_COMMUNITIES,
+  NAMED_CURATIONS,
+  NAMED_EMOJIS,
+  NAMED_PEOPLE,
+  NAMED_RELAYS,
+  NAMED_TOPICS,
+  NAMED_WIKI_AUTHORS,
+  NAMED_WIKI_RELAYS,
+  NOTE,
+  PINS,
+  PROFILE,
+  REACTION,
+  RELAYS,
+  REPORT,
+  REPOST,
+  REVIEW,
+  SEAL,
+  SEARCH_RELAYS,
+  SEEN_CONTEXT,
+  SEEN_CONVERSATION,
+  SEEN_GENERAL,
+  TOPICS,
+  WRAP,
+  ZAP_REQUEST,
   Address,
   Router,
   Tags,
@@ -66,6 +107,7 @@ import {
   isContextAddress,
   unionFilters,
   getAddress,
+  getIdentifier,
   getIdAndAddress,
   getIdOrAddress,
   getIdFilters,
@@ -77,8 +119,12 @@ import {
   isGroupAddress,
   isCommunityAddress,
   isHashedEvent,
+  getRelayTags,
+  getRelayTagValues,
+  getPubkeyTagValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
+import {Nip59, Nip07Signer, Nip01Signer, Nip46Signer, Nip46Broker, decrypt} from "@welshman/signer"
 import {
   ConnectionStatus,
   Executor,
@@ -93,17 +139,15 @@ import {
 } from "@welshman/net"
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {fuzzy, synced, withGetter, pushToKey, tryJson, fromCsv, SearchHelper} from "src/util/misc"
+import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
+import {Collection as CollectionStore} from "src/util/store"
 import {
-  generatePrivateKey,
   isLike,
-  isGiftWrap,
-  giftWrapKinds,
   repostKinds,
   noteKinds,
   reactionKinds,
-  getRelayTags,
-  getRelayTagValues,
+  appDataKeys,
 } from "src/util/nostr"
 import logger from "src/util/logger"
 import type {
@@ -158,33 +202,37 @@ import type {
   AnonymousUserState,
   RelayInfo,
 } from "src/engine/model"
+import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {getNip04, getNip44, getNip59, getSigner, getConnect} from "src/engine/utils"
-import {repository, events, deriveEvents, deriveEventsMapped, relay} from "src/engine/repository"
+import {repository, events, relay} from "src/engine/repository"
 
 // Base state
 
-export const env = new Writable({
-  CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
-  CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
-  DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
-  DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
-  INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
-  DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
-  DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
-  ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
-  ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
-  BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
-  FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
-  IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
-  MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
-  NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
-  ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
-  PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
-  PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
-  PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
-  SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
-})
+export const env = withGetter(
+  writable({
+    CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
+    CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
+    DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
+    DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
+    INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
+    DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
+    DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
+    ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
+    ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
+    BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
+    FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
+    IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
+    MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
+    NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
+    ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
+    PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
+    PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(
+      normalizeRelayUrl,
+    ) as string[],
+    PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
+    SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
+  }),
+)
 
 export const pubkey = withGetter(synced<string | null>("pubkey", null))
 export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
@@ -193,6 +241,7 @@ export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
+export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
 export const groups = new CollectionStore<Group>("address")
 export const relays = new CollectionStore<RelayInfo>("url")
@@ -200,9 +249,7 @@ export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
-export const publishes = new CollectionStore<PublishInfo>("id", 1000)
 export const topics = new CollectionStore<Topic>("name")
-export const channels = new CollectionStore<Channel>("id")
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -226,12 +273,126 @@ export const getSession = pubkey => sessions.get()[pubkey]
 
 export const session = withGetter(derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk]))
 
-export const connect = withGetter(derived(session, getConnect))
-export const signer = withGetter(derived(session, getSigner))
-export const nip04 = withGetter(derived(session, getNip04))
-export const nip44 = withGetter(derived(session, getNip44))
-export const nip59 = withGetter(derived(session, getNip59))
-export const canSign = withGetter(derived(signer, $signer => $signer.isEnabled()))
+export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
+
+export const getSigner = memoize($s => {
+  switch ($s?.method) {
+    case "extension":
+      return new Nip07Signer()
+    case "privkey":
+      return new Nip01Signer($s.privkey)
+    case "connect":
+      return new Nip46Signer(Nip46Broker.get($s.pubkey, $s.connectKey, $s.connectHandler))
+    default:
+      return null
+  }
+})
+
+export const signer = withGetter(
+  derived(
+    session,
+    memoize($session => {
+      const $signer = getSigner($session)
+
+      $signer?.nip44.encrypt($session.pubkey, "test").then(
+        () => hasNip44.set(true),
+        () => hasNip44.set(false),
+      )
+
+      return $signer
+    }),
+  ),
+)
+
+export const hasNip44 = writable(false)
+
+// Plaintext
+
+export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
+
+export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
+
+export const ensurePlaintext = async (e: TrustedEvent) => {
+  if (!e.content) return undefined
+  if (!getPlaintext(e)) {
+    const session = getSession(e.pubkey)
+    const signer = getSigner(session)
+
+    if (signer) {
+      try {
+        setPlaintext(e, await decrypt(signer, e.pubkey, e.content))
+      } catch (e) {
+        if (!e.toString().match(/invalid payload length/)) {
+          throw e
+        }
+      }
+    }
+  }
+
+  return getPlaintext(e)
+}
+
+export const ensureMessagePlaintext = async (e: TrustedEvent) => {
+  if (!e.content) return undefined
+  if (!getPlaintext(e)) {
+    const recipient = Tags.fromEvent(e).get("p")?.value()
+    const session = getSession(e.pubkey) || getSession(recipient)
+    const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
+    const signer = getSigner(session)
+
+    if (signer) {
+      setPlaintext(e, await signer.nip04.decrypt(other, e.content))
+    }
+  }
+
+  return getPlaintext(e)
+}
+
+export const canUnwrap = (event: TrustedEvent) =>
+  event.kind === WRAP &&
+  (getSession(Tags.fromEvent(event).get("p")?.value()) || getRecipientKey(event))
+
+export const ensureUnwrapped = async (event: TrustedEvent) => {
+  if (!event.kind !== WRAP) {
+    return event
+  }
+
+  let rumor = repository.eventsByWrap.get(event.id)
+
+  if (rumor) {
+    return rumor
+  }
+
+  // Decrypt by session
+  const session = getSession(Tags.fromEvent(event).get("p")?.value())
+  const signer = getSigner(session)
+
+  if (signer) {
+    try {
+      rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
+    } catch (e) {
+      // pass
+    }
+  }
+
+  // Decrypt by group key
+  const secret = getRecipientKey(event)
+
+  if (secret) {
+    try {
+      rumor = await Nip59.fromSecret(secret).unwrap(event as SignedEvent)
+    } catch (e) {
+      // pass
+    }
+  }
+
+  if (rumor && isHashedEvent(rumor)) {
+    tracker.copy(event.id, rumor.id)
+    relay.send("EVENT", rumor)
+  }
+
+  return rumor
+}
 
 // Settings
 
@@ -254,11 +415,26 @@ export const defaultSettings = {
   platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
 }
 
-export const settings = withGetter(
-  derived(session, $session => ({...defaultSettings, ...$session?.settings})),
+export const settingsEvents = deriveEvents(repository, {filters: [{kinds: [APP_DATA]}]})
+
+export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $settingsEvents]) =>
+  $settingsEvents.find(e => e.pubkey === $pubkey && getIdentifier(e) === appDataKeys.USER_SETTINGS),
 )
 
-export const getSetting = k => prop(k, settings.get())
+export const userSettingsPlaintext = derived(
+  [plaintext, userSettingsEvent],
+  ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id],
+)
+
+export const userSettings = withGetter(
+  derived(userSettingsPlaintext, $userSettingsPlaintext => {
+    const overrides = parseJson($userSettingsPlaintext) || {}
+
+    return {...defaultSettings, ...overrides}
+  }),
+)
+
+export const getSetting = k => prop(k, userSettings.get())
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
@@ -286,92 +462,9 @@ export const dufflepud = (path: string) => {
   return `${base}/${path}`
 }
 
-// Plaintext
-
-export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
-
-export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
-
-export const ensurePlaintext = async (e: TrustedEvent) => {
-  if (!getPlaintext(e)) {
-    const session = getSession(e.pubkey)
-
-    if (getSigner(session).isEnabled()) {
-      setPlaintext(e, await getNip59(session).decrypt(e))
-    }
-  }
-
-  return getPlaintext(e)
-}
-
-export const ensureMessagePlaintext = async (e: TrustedEvent) => {
-  if (!getPlaintext(e)) {
-    const recipient = Tags.fromEvent(e).get("p")?.value()
-    const session = getSession(e.pubkey) || getSession(recipient)
-    const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
-    const nip04 = getNip04(session)
-
-    if (nip04.isEnabled()) {
-      plaintext.update(assoc(e.id, await nip04.decryptAsUser(e.content, other)))
-    }
-  }
-
-  return getPlaintext(e)
-}
-
-export const canUnwrap = (event: TrustedEvent) =>
-  isGiftWrap(event) &&
-  (getSession(Tags.fromEvent(event).get("p")?.value()) || getRecipientKey(event))
-
-export const ensureUnwrapped = async (event: TrustedEvent) => {
-  if (!isGiftWrap(event)) {
-    return event
-  }
-
-  const rumor = repository.eventsByWrap.get(event.id)
-
-  if (rumor) {
-    return rumor
-  }
-
-  // Decrypt by session
-  const session = getSession(Tags.fromEvent(event).get("p")?.value())
-
-  if (session) {
-    const canDecrypt =
-      (event.kind === WRAP && getNip44(session).isEnabled()) ||
-      (event.kind === WRAP_NIP04 && getNip04(session).isEnabled())
-
-    if (canDecrypt) {
-      const rumor = await getNip59(session).unwrap(event, session.privkey)
-
-      if (rumor && isHashedEvent(rumor)) {
-        tracker.copy(event.id, rumor.id)
-        relay.send("EVENT", rumor)
-
-        return rumor
-      }
-    }
-  }
-
-  // Decrypt by group key
-  const sk = getRecipientKey(event)
-
-  if (sk) {
-    const rumor = await nip59.get().unwrap(event, sk)
-
-    if (rumor && isHashedEvent(rumor)) {
-      tracker.copy(event.id, rumor.id)
-      relay.send("EVENT", rumor)
-
-      return rumor
-    }
-  }
-}
-
 // Profiles
 
-export const profiles = deriveEventsMapped<PublishedProfile>({
+export const profiles = deriveEventsMapped<PublishedProfile>(repository, {
   filters: [{kinds: [PROFILE]}],
   eventToItem: readProfile,
   itemToEvent: prop("event"),
@@ -461,17 +554,18 @@ export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $za
 
 // Follows
 
+export const followListEvents = deriveEvents(repository, {filters: [{kinds: [FOLLOWS]}]})
+
 export const followLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    filters: [{kinds: [FOLLOWS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+  derived([plaintext, followListEvents], ([$plaintext, $followListEvents]) =>
+    $followListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: $plaintext[event.id],
         }),
       ),
-  }),
+    ),
+  ),
 )
 
 export const followListsByPubkey = withGetter(
@@ -487,26 +581,25 @@ export const getFollowList = (pk: string) =>
 export const deriveFollowList = (pk: string) =>
   derived(followListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getFollows = (pk: string) => getSingletonValues("p", getFollowList(pk))
+export const getFollows = (pk: string) => new Set(getSingletonValues("p", getFollowList(pk)))
 
 export const deriveFollows = (pk: string) =>
-  derived(followListsByPubkey, m => getSingletonValues("p", m.get(pk)))
+  derived(followListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
 
 export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
 
 // Mutes
 
-export const muteLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    filters: [{kinds: [MUTES]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: getPlaintext(event),
-        }),
-      ),
-  }),
+export const muteListEvents = deriveEvents(repository, {filters: [{kinds: [MUTES]}]})
+
+export const muteLists = derived([plaintext, muteListEvents], ([$plaintext, $muteListEvents]) =>
+  $muteListEvents.map(event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: $plaintext[event.id],
+      }),
+    ),
+  ),
 )
 
 export const muteListsByPubkey = withGetter(
@@ -519,10 +612,10 @@ export const getMuteList = (pk: string) =>
 export const deriveMuteList = (pk: string) =>
   derived(muteListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getMutes = (pk: string) => getSingletonValues("p", getMuteList(pk))
+export const getMutes = (pk: string) => new Set(getSingletonValues("p", getMuteList(pk)))
 
 export const deriveMutes = (pk: string) =>
-  derived(muteListsByPubkey, m => getSingletonValues("p", m.get(pk)))
+  derived(muteListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
 
 export const isMuting = (pk, tpk) => getMutes(pk).has(tpk)
 
@@ -548,7 +641,7 @@ export const getFollowers = simpleCache(
     new Set(
       followLists
         .get()
-        .filter(l => l.valuesByKey.p?.has(pk))
+        .filter(l => getSingletonValues("p", l).includes(pk))
         .map(l => l.event.pubkey),
     ),
 )
@@ -596,7 +689,7 @@ export const getWotScore = (pk, tpk) => {
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
-  const score = follows.size - Math.floor(Math.pow(2, Math.log(mutes.size)))
+  const score = follows.size - mutes.size
 
   maxWot.update(maxScore => Math.max(maxScore, score))
 
@@ -612,44 +705,28 @@ export const userFollowList = derived(
   },
 )
 
-export const userFollows = derived(userFollowList, l => getSingletonValues("p", l))
+export const userFollows = derived(userFollowList, l => new Set(getSingletonValues("p", l)))
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
 export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => getSingletonValues("p", l))
-
-// Channels
-
-export const sortChannels = $channels =>
-  sortBy((c: Channel) => -Math.max(c.last_sent || 0, c.last_received || 0), $channels)
-
-export const channelHasNewMessages = (c: Channel) =>
-  c.last_received > Math.max(c.last_sent || 0, c.last_checked || 0)
-
-export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
-
-export const getChannelIdFromEvent = (event: TrustedEvent) =>
-  getChannelId([event.pubkey, ...Tags.fromEvent(event).values("p").valueOf()])
-
-export const unreadChannels = channels.derived(filter(channelHasNewMessages))
-
-export const hasNewMessages = unreadChannels.derived(any((c: Channel) => Boolean(c.last_sent)))
+export const userMutes = derived(userMuteList, l => new Set(getSingletonValues("p", l)))
 
 // Communities
 
-export const communityLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    filters: [{kinds: [COMMUNITIES]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const communityListEvents = deriveEvents(repository, {filters: [{kinds: [COMMUNITIES]}]})
+
+export const communityLists = derived(
+  [plaintext, communityListEvents],
+  ([$plaintext, $communityListEvents]) =>
+    $communityListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: $plaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
 export const communityListsByPubkey = withGetter(
@@ -674,14 +751,14 @@ export const getCommunityList = (pk: string) =>
 export const deriveCommunityList = (pk: string) =>
   derived(communityListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getCommunities = (pk: string) => getSingletonValues("a", getCommunityList(pk))
+export const getCommunities = (pk: string) => new Set(getSingletonValues("a", getCommunityList(pk)))
 
 export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => getSingletonValues("a", m.get(pk)))
+  derived(communityListsByPubkey, m => new Set(getSingletonValues("a", m.get(pk))))
 
 // Groups
 
-export const groupMeta = deriveEventsMapped<PublishedGroupMeta>({
+export const groupMeta = deriveEventsMapped<PublishedGroupMeta>(repository, {
   filters: [{kinds: [GROUP, COMMUNITY]}],
   itemToEvent: prop("event"),
   eventToItem: readGroupMeta,
@@ -868,10 +945,10 @@ export const getUserCommunities = (session: Session) =>
 
 export const isEventMuted = withGetter(
   derived(
-    [userMutes, userFollows, settings, pubkey, userIsGroupMember],
-    ([$userMutes, $userFollows, $settings, $pubkey, $userIsGroupMember]) => {
-      const words = $settings.muted_words
-      const minWot = $settings.min_wot_score
+    [userMutes, userFollows, userSettings, pubkey, userIsGroupMember],
+    ([$userMutes, $userFollows, $userSettings, $pubkey, $userIsGroupMember]) => {
+      const words = $userSettings.muted_words
+      const minWot = $userSettings.min_wot_score
       const regex =
         words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
 
@@ -899,6 +976,7 @@ export const isEventMuted = withGetter(
         if (!strict) {
           return false
         }
+
         const isInGroup = tags.groups().values().some($userIsGroupMember)
         const isInCommunity = tags
           .communities()
@@ -921,24 +999,47 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const optimisticReadReceipts = withGetter(synced("seen", []))
+export const seenStatusEvents = deriveEvents(repository, {
+  filters: [{kinds: [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION]}],
+})
 
-export const publishedReadReceipts = derived(
-  deriveEvents({filters: [{kinds: [READ_RECEIPT]}]}),
-  events => new Set(events.flatMap(e => e.tags.map(nth(1)))),
+export const userSeenStatusEvents = derived(
+  [pubkey, seenStatusEvents],
+  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey),
 )
 
-export const unpublishedReadReceipts = derived(
-  [publishedReadReceipts, optimisticReadReceipts],
-  ([published, optimistic]: [Set<string>, string[]]) => optimistic.filter(id => !published.has(id)),
+export const userSeenStatuses = derived(
+  [pubkey, plaintext, userSeenStatusEvents],
+  ([$pubkey, $plaintext, $userSeenStatusEvents]) => {
+    const data = {}
+
+    for (const event of sortEventsAsc($userSeenStatusEvents)) {
+      const tags = tryCatch(() => JSON.parse($plaintext[event.id]))
+
+      if (!Array.isArray(tags)) {
+        continue
+      }
+
+      for (const tag of tags) {
+        if (tag[0] === "seen") {
+          data[tag[1]] = {
+            ts: parseInt(tag[2]),
+            ids: new Set(tag.slice(3)),
+          }
+        }
+      }
+    }
+
+    return data
+  },
 )
 
-export const allReadReceipts = derived(
-  [publishedReadReceipts, optimisticReadReceipts],
-  ([published, optimistic]: [Set<string>, string[]]) => new Set([...published, ...optimistic]),
+export const isSeen = derived(
+  [userSeenStatuses],
+  ([$userSeenStatuses]) =>
+    (key: string, event: TrustedEvent) =>
+      $userSeenStatuses[key]?.ts >= event.created_at || $userSeenStatuses[key]?.ids.has(event.id),
 )
-
-export const isSeen = derived(allReadReceipts, $m => e => $m.has(e.id))
 
 // Notifications
 
@@ -957,16 +1058,25 @@ export const notifications = derived(
   },
 )
 
-export const unreadNotifications = derived([isSeen, notifications], ([$isSeen, $notifications]) => {
-  const since = now() - seconds(30, "day")
+export const mainNotifications = derived(notifications, events =>
+  events.filter(e => noteKinds.includes(e.kind)),
+)
 
-  return $notifications.filter(
-    e => !reactionKinds.includes(e.kind) && e.created_at > since && !$isSeen(e),
-  )
-})
+export const reactionNotifications = derived(notifications, events =>
+  events.filter(e => reactionKinds.concat(9734).includes(e.kind)),
+)
+
+export const unreadMainNotifications = derived([isSeen, mainNotifications], ([$isSeen, events]) =>
+  events.filter(e => !$isSeen("replies", e) && !$isSeen("mentions", e)),
+)
+
+export const unreadReactionNotifications = derived(
+  [isSeen, reactionNotifications],
+  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
+)
 
 export const hasNewNotifications = derived(
-  [session, unreadNotifications],
+  [session, unreadMainNotifications],
   ([$session, $unread]) => {
     if ($unread.length > 0) {
       return true
@@ -984,7 +1094,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
   // Convert zaps to zap requests
   const convertZap = e => {
     if (e.kind === 9735) {
-      return tryJson(() => JSON.parse(Tags.fromEvent(e).get("description")?.value()))
+      return parseJson(e.tags.find(t => t[0] === "description")?.[1])
     }
 
     return e
@@ -1029,6 +1139,67 @@ export const createNotificationGroups = ($notifications, kinds) => {
   )
 }
 
+// Channels
+
+export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+
+export const getChannelIdFromEvent = (event: TrustedEvent) =>
+  getChannelId([event.pubkey, ...getPubkeyTagValues(event.tags)])
+
+export const getChannelSeenKey = (id: string) =>
+  crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
+
+export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
+
+export const channels = derived(
+  [pubkey, messages, userSeenStatuses],
+  ([$pubkey, $messages, $userSeenStatuses]) => {
+    const channelsById: Record<string, Channel> = {}
+
+    for (const e of $messages) {
+      const id = getChannelIdFromEvent(e)
+
+      if (!id.includes($pubkey)) {
+        continue
+      }
+
+      const key = getChannelSeenKey(id)
+      const chan = channelsById[id] || {
+        id,
+        last_sent: 0,
+        last_received: 0,
+        last_checked: 0,
+        messages: [],
+      }
+
+      chan.messages.push(e)
+
+      const status = $userSeenStatuses[key]
+
+      if (status?.ids.has(e.id)) {
+        chan.last_checked = Math.max(chan.last_checked, e.created_at)
+      } else {
+        chan.last_checked = Math.max(chan.last_checked, status?.ts || 0)
+      }
+
+      if (e.pubkey === $pubkey) {
+        chan.last_sent = Math.max(chan.last_sent, e.created_at)
+      } else {
+        chan.last_received = Math.max(chan.last_received, e.created_at)
+      }
+
+      channelsById[id] = chan
+    }
+
+    return sortBy(c => -Math.max(c.last_sent, c.last_received), Object.values(channelsById))
+  },
+)
+
+export const channelHasNewMessages = (channel: Channel) =>
+  channel.last_received > Math.max(channel.last_sent, channel.last_checked)
+
+export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
+
 // Relays
 
 export const getRelay = url => defaultTo({url}, relays.key(url).get())
@@ -1056,34 +1227,34 @@ export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
 
 // Relay policies
 
-export const relayLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    filters: [{kinds: [RELAYS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: getPlaintext(event),
-        }),
-      ),
-  }),
+export const relayListEvents = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
+
+export const relayLists = derived([plaintext, relayListEvents], ([$plaintext, $relayListEvents]) =>
+  $relayListEvents.map(event =>
+    readSingleton(
+      asDecryptedEvent(event, {
+        content: plaintext[event.id],
+      }),
+    ),
+  ),
 )
 
-export const inboxRelayLists = withGetter(
-  deriveEventsMapped<PublishedSingleton>({
-    filters: [{kinds: [INBOX_RELAYS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event =>
+export const inboxRelayListEvents = deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS]}]})
+
+export const inboxRelayLists = derived(
+  [plaintext, inboxRelayListEvents],
+  ([$plaintext, $inboxRelayListEvents]) =>
+    $inboxRelayListEvents.map(event =>
       readSingleton(
         asDecryptedEvent(event, {
-          content: getPlaintext(event),
+          content: plaintext[event.id],
         }),
       ),
-  }),
+    ),
 )
 
 export const deriveInboxRelays = (pubkeys: string[]) =>
-  deriveEvents({filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
+  deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
 
 export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
   derived(deriveInboxRelays(pubkeys), $events =>
@@ -1091,7 +1262,7 @@ export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
   )
 
 export const legacyRelayLists = withGetter(
-  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>({
+  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>(repository, {
     filters: [{kinds: [FOLLOWS]}],
     itemToEvent: prop("event"),
     eventToItem: event => {
@@ -1280,7 +1451,7 @@ export const searchTopicNames = searchTopics.derived(search => term => pluck("na
 
 // Lists
 
-export const lists = deriveEventsMapped<PublishedList>({
+export const lists = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readList(event) : null),
   itemToEvent: prop("event"),
@@ -1297,7 +1468,7 @@ export const listSearch = derived(lists, $lists => new ListSearch($lists))
 
 // Feeds
 
-export const feeds = deriveEventsMapped<PublishedFeed>({
+export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
   filters: [{kinds: [FEED]}],
   itemToEvent: prop("event"),
   eventToItem: readFeed,
@@ -1307,16 +1478,19 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
 )
 
-export const feedFavorites = deriveEventsMapped<PublishedSingleton>({
-  filters: [{kinds: [FEEDS]}],
-  itemToEvent: prop("event"),
-  eventToItem: event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: getPlaintext(event),
-      }),
+export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
+
+export const feedFavorites = derived(
+  [plaintext, feedFavoriteEvents],
+  ([$plaintext, $feedFavoriteEvents]) =>
+    $feedFavoriteEvents.map(event =>
+      readSingleton(
+        asDecryptedEvent(event, {
+          content: $plaintext[event.id],
+        }),
+      ),
     ),
-})
+)
 
 export const feedFavoritesByAddress = withGetter(
   derived(feedFavorites, $feedFavorites => {
@@ -1339,10 +1513,7 @@ export const userFeedFavorites = derived(
 )
 
 export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
-  Array.from(getSingletonValues("a", $singleton))
-    .map(repository.getEvent)
-    .filter(identity)
-    .map(readFeed),
+  getSingletonValues("a", $singleton).map(repository.getEvent).filter(identity).map(readFeed),
 )
 
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {
@@ -1376,7 +1547,7 @@ export class FeedSearch extends SearchHelper<PublishedFeed, string> {
 
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
-export const listFeeds = deriveEventsMapped<PublishedListFeed>({
+export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readList(event)) : undefined,
@@ -1395,7 +1566,7 @@ export const userListFeeds = derived(
 // Handlers
 
 export const handlers = derived(
-  deriveEvents({filters: [{kinds: [HANDLER_INFORMATION]}]}),
+  deriveEvents(repository, {filters: [{kinds: [HANDLER_INFORMATION]}]}),
   $events => $events.flatMap(readHandlers),
 )
 
@@ -1403,7 +1574,9 @@ export const handlersByKind = derived(handlers, $handlers =>
   groupBy(handler => handler.kind, $handlers),
 )
 
-export const recommendations = deriveEvents({filters: [{kinds: [HANDLER_RECOMMENDATION]}]})
+export const recommendations = deriveEvents(repository, {
+  filters: [{kinds: [HANDLER_RECOMMENDATION]}],
+})
 
 export const recommendationsByHandlerAddress = derived(recommendations, $events =>
   groupBy(getHandlerAddress, $events),
@@ -1423,7 +1596,7 @@ export const deriveHandlersForKind = simpleCache(([kind]: [number]) =>
 // Collections
 
 export const collections = derived(
-  deriveEvents({filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
+  deriveEvents(repository, {filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
   readCollections,
 )
 
@@ -1571,7 +1744,7 @@ const seenChallenges = new Set()
 export const onAuth = async (url, challenge) => {
   const {FORCE_GROUP, PLATFORM_RELAYS} = env.get()
 
-  if (!canSign.get()) {
+  if (!signer.get()) {
     return
   }
 
@@ -1585,7 +1758,7 @@ export const onAuth = async (url, challenge) => {
 
   seenChallenges.add(challenge)
 
-  const event = await signer.get().signAsUser(
+  const event = await signer.get().sign(
     createEvent(22242, {
       tags: [
         ["relay", url],
@@ -1715,7 +1888,7 @@ export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
 }
 
-export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
+export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
     : withPlatformRelays(request.relays)
@@ -1726,20 +1899,21 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
 
   logger.info(`Publishing event`, request)
 
-  const pub = basePublish(request)
-
-  // Add the event to projections
+  // Make sure the event is decrypted before updating stores
   if (canUnwrap(request.event)) {
-    ensureUnwrapped(request.event).then(projections.push)
-  } else {
-    projections.push(request.event)
+    await ensureUnwrapped(request.event)
+  } else if (projections.handlers.get(request.event.kind)?.includes(ensurePlaintext)) {
+    await ensurePlaintext(request.event)
   }
+
+  // Publish to local and remote relays
+  const pub = basePublish(request)
 
   // Listen to updates and update our publish queue
   if (canUnwrap(request.event) || request.event.pubkey === pubkey.get()) {
     const pubInfo = omit(["emitter", "result"], pub)
 
-    pub.emitter.on("*", t => publishes.key(pubInfo.id).set(pubInfo))
+    pub.emitter.on("*", t => publishes.update(assoc(pubInfo.id, pubInfo)))
   }
 
   return pub
@@ -1747,14 +1921,14 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
 
 export const sign = (template, opts: {anonymous?: boolean; sk?: string} = {}) => {
   if (opts.anonymous) {
-    return signer.get().signWithKey(template, generatePrivateKey())
+    return Nip01Signer.ephemeral().sign(template)
   }
 
   if (opts.sk) {
-    return signer.get().signWithKey(template, opts.sk)
+    return Nip01Signer.fromSecret(opts.sk).sign(template)
   }
 
-  return signer.get().signAsUser(template)
+  return signer.get().sign(template)
 }
 
 export type CreateAndPublishOpts = {
@@ -1762,6 +1936,7 @@ export type CreateAndPublishOpts = {
   relays: string[]
   tags?: string[][]
   content?: string
+  created_at?: number
   anonymous?: boolean
   sk?: string
   timeout?: number
@@ -1774,19 +1949,22 @@ export const createAndPublish = async ({
   relays,
   tags = [],
   content = "",
+  created_at = now(),
   anonymous,
   sk,
   timeout,
   verb,
   forcePlatform = true,
 }: CreateAndPublishOpts) => {
-  const template = createEvent(kind, {content, tags})
+  const template = createEvent(kind, {content, tags, created_at})
   const event = await sign(template, {anonymous, sk})
 
   return publish({event, relays, verb, timeout, forcePlatform})
 }
 
 export const tracker = new Tracker()
+
+tracker.setMaxListeners(100)
 
 Object.assign(NetworkContext, {
   onAuth,
@@ -2071,6 +2249,8 @@ class IndexedDBAdapter {
         const newRecords = current.filter(r => !prevIds.has(r[key]))
         const removedRecords = prev.filter(r => !currentIds.has(r[key]))
 
+        prev = current
+
         if (newRecords.length > 0) {
           await storage.bulkPut(name, newRecords)
         }
@@ -2088,8 +2268,6 @@ class IndexedDBAdapter {
         if (current.length > limit * 1.5) {
           set((sort ? sort(current) : current).slice(0, limit))
         }
-
-        prev = current
       }),
     )
   }
@@ -2186,8 +2364,8 @@ class Storage {
 }
 
 const scoreEvent = e => {
+  if (e.kind === WRAP) return -Infinity
   if (getSession(e.pubkey)) return -Infinity
-  if (giftWrapKinds.includes(e.kind)) return -Infinity
   if (reactionKinds.includes(e.kind)) return 0
   if (repostKinds.includes(e.kind)) return 0
   return -e.created_at
@@ -2208,14 +2386,13 @@ const collectionAdapter = (name, key, store, opts = {}) =>
     ...opts,
   })
 
-export const storage = new Storage(15, [
+export const storage = new Storage(16, [
   objectAdapter("handles", "key", handles, {limit: 10000}),
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
-  collectionAdapter("publishes", "id", publishes, {sort: sortBy(prop("created_at"))}),
+  objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
   collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
-  collectionAdapter("channels", "id", channels, {limit: 1000, sort: sortBy(prop("last_checked"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("groupRequests", "id", groupRequests, {sort: sortBy(prop("created_at"))}),
@@ -2224,5 +2401,5 @@ export const storage = new Storage(15, [
     sort: sortBy(prop("created_at")),
   }),
   collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {limit: 1000}),
-  collectionAdapter("repository", "id", events, {limit: 100000, sort: sortBy(scoreEvent)}),
+  collectionAdapter("repository", "id", events, {limit: 30000, sort: sortBy(scoreEvent)}),
 ])

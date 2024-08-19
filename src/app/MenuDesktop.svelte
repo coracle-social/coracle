@@ -1,5 +1,6 @@
 <script lang="ts">
   import {seconds} from "hurdak"
+  import {derived} from 'svelte/store'
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {toggleTheme, theme} from "src/partials/state"
@@ -15,7 +16,7 @@
   import {
     env,
     pubkey,
-    canSign,
+    signer,
     hasNewMessages,
     hasNewNotifications,
     displayProfileByPubkey,
@@ -26,12 +27,12 @@
 
   const {page} = router
 
-  const hud = publishes.derived($publishes => {
+  const hud = derived(publishes, $publishes => {
     const pending = []
     const success = []
     const failure = []
 
-    for (const {created_at, request, status} of $publishes) {
+    for (const {created_at, request, status} of Object.values($publishes)) {
       if (created_at < now() - seconds(5, "minute")) {
         continue
       }
@@ -90,7 +91,7 @@
   {/if}
   <MenuDesktopItem
     path="/notifications"
-    disabled={!$canSign}
+    disabled={!$signer}
     isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
       Notifications
@@ -101,7 +102,7 @@
   </MenuDesktopItem>
   <MenuDesktopItem
     path="/channels"
-    disabled={!$canSign}
+    disabled={!$signer}
     isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
       Messages
@@ -140,13 +141,13 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
-          disabled={!$canSign}>
+          disabled={!$signer}>
           <i class="fa fa-cog" /> App Settings
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/content"
-          disabled={!$canSign}>
+          disabled={!$signer}>
           <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
       </MenuDesktopSecondary>

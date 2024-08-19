@@ -5,6 +5,7 @@
   export let select
   export let term = null
   export let create = null
+  export let termIsValid = null
   export let loading = false
   export let getKey = identity
 
@@ -41,7 +42,7 @@
   <div
     transition:slide|local={{duration: 100}}
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
-    {#if create && term}
+    {#if create && term && (!termIsValid || termIsValid(term))}
       {@const i = data.length}
       <button
         class="flex cursor-pointer items-center gap-1 border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"

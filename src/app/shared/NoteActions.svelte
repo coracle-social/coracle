@@ -4,11 +4,11 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {last, sortBy} from "@welshman/lib"
+  import {custom} from "@welshman/store"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
     toNostrURI,
-    asHashedEvent,
     asSignedEvent,
     isSignedEvent,
     Tags,
@@ -42,7 +42,7 @@
   import {
     env,
     groups,
-    canSign,
+    signer,
     session,
     publish,
     mention,
@@ -59,13 +59,13 @@
     deleteEvent,
     getSetting,
     loadPubkeys,
-    isEventMuted,
     getReactionTags,
     getClientTags,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let note: TrustedEvent
+  export let muted
   export let replyCtrl
   export let showMuted
   export let addToContext
@@ -75,10 +75,10 @@
   export let zapper
 
   const tags = Tags.fromEvent(note)
+  const signedEvent = asSignedEvent(note as any)
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
-  const muted = derived(isEventMuted, $isEventMuted => $isEventMuted(note, true))
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
@@ -87,9 +87,19 @@
   const kindHandlers = deriveHandlersForKind(note.kind)
   const handlerId = tags.get("client")?.nth(2)
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
-  const seenOn = tracker.data.derived(m =>
-    Array.from(m.get(note.id) || []).filter(url => url !== LOCAL_RELAY_URL),
-  )
+
+  const seenOn = custom<string[]>(set => {
+    const update = () =>
+      set(Array.from(tracker.getRelays(note.id)).filter(url => url !== LOCAL_RELAY_URL))
+
+    update()
+
+    tracker.on("update", update)
+
+    return () => {
+      tracker.off("update", update)
+    }
+  })
 
   const setView = v => {
     view = v
@@ -215,7 +225,7 @@
   let handlersShown = false
 
   $: disableActions =
-    !$canSign || ($muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
+    !$signer || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
   $: like = likes.find(e => e.pubkey === $session?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
@@ -234,7 +244,7 @@
   $: {
     actions = []
 
-    if ($canSign) {
+    if ($signer) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
       if (isSignedEvent(note) && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
@@ -243,7 +253,7 @@
 
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
-      if ($muted) {
+      if (muted) {
         actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
       } else {
         actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
@@ -441,7 +451,7 @@
       <h1 class="staatliches text-2xl">Details</h1>
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
-      <CopyValue label="Event JSON" value={JSON.stringify(asHashedEvent(note))} />
+      <CopyValue label="Event JSON" value={JSON.stringify(signedEvent)} />
     {:else if view === "cross-post"}
       <div class="mb-4 flex items-center justify-center">
         <Heading>Cross-post</Heading>

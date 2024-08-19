@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {tryJson} from "src/util/misc"
+  import {parseJson} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -10,7 +10,7 @@
   export let note
 
   const {pubkey, content} = note
-  const {name, picture, about, banner} = tryJson(() => JSON.parse(content))
+  const {name, picture, about, banner} = parseJson(content) || {}
   const bannerUrl = imgproxy(banner)
 
   $: ({rgba} = $themeBackgroundGradient)

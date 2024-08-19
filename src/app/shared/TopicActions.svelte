@@ -1,7 +1,7 @@
 <script lang="ts">
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
-  import {canSign} from "src/engine"
+  import {signer} from "src/engine"
 
   export let topic
 
@@ -10,7 +10,7 @@
   $: {
     actions = []
 
-    if ($canSign) {
+    if ($signer) {
       actions.push({
         onClick: () => router.at("lists/select").qp({type: "t", value: topic}).open(),
         label: "Add to list",

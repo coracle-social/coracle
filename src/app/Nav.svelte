@@ -7,7 +7,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, pubkey, canSign, hasNewNotifications, hasNewMessages} from "src/engine"
+  import {env, pubkey, signer, hasNewNotifications, hasNewMessages} from "src/engine"
 
   let innerWidth = 0
   let searching = false
@@ -69,10 +69,13 @@
         <div
           on:mousedown|preventDefault
           out:fly|local={{y: 20, duration: 200}}
-          class="absolute right-0 top-10 w-96 rounded shadow-2xl opacity-100 transition-colors">
-          <div class="max-h-[70vh] overflow-auto bg-tinted-700 rounded">
+          class="absolute right-0 top-10 w-96 rounded opacity-100 shadow-2xl transition-colors">
+          <div class="max-h-[70vh] overflow-auto rounded bg-tinted-700">
             <SearchResults bind:searching term={searchTerm}>
-              <div slot="result" let:result class="px-4 py-2 transition-colors hover:bg-neutral-800 cursor-pointer">
+              <div
+                slot="result"
+                let:result
+                class="cursor-pointer px-4 py-2 transition-colors hover:bg-neutral-800">
                 {#if result.type === "topic"}
                   #{result.topic.name}
                 {:else if result.type === "profile"}
@@ -94,7 +97,7 @@
         </div>
       {/if}
     </div>
-    {#if $canSign}
+    {#if $signer}
       <Anchor button accent on:click={createNote}>Post +</Anchor>
     {:else if !$pubkey}
       <Anchor modal button accent href="/login">Log In</Anchor>
@@ -114,7 +117,7 @@
       </div>
     </div>
     <div>
-      {#if $canSign}
+      {#if $signer}
         <Anchor button accent on:click={createNote}>Post +</Anchor>
       {:else if !$pubkey}
         <Anchor modal button accent href="/login">Log In</Anchor>
@@ -133,7 +136,7 @@
             fill="currentColor"
             d="M0 88C0 74.7 10.7 64 24 64H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24s10.7-24 24-24H424c13.3 0 24 10.7 24 24z" />
         </svg>
-        {#if $canSign}
+        {#if $signer}
           <PersonCircle
             class="-ml-4 h-11 w-11 border-4 border-white dark:border-black"
             pubkey={$pubkey} />

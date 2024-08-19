@@ -3,7 +3,8 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {tryJson} from "src/util/misc"
+  import {getNip07, Nip07Signer} from "@welshman/signer"
+  import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Tile from "src/partials/Tile.svelte"
@@ -11,15 +12,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {
-    load,
-    hints,
-    loadHandle,
-    getExtension,
-    withExtension,
-    loginWithExtension,
-    loginWithNostrConnect,
-  } from "src/engine"
+  import {load, hints, loadHandle, loginWithExtension, loginWithNostrConnect} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -27,15 +20,13 @@
 
   const useBunker = () => router.at("login/bunker").replaceModal()
 
-  const useExtension = () =>
-    withExtension(async ext => {
-      const pubkey = ext && (await ext.getPublicKey())
+  const useExtension = async () => {
+    const signer = new Nip07Signer()
+    const pubkey = await signer.getPubkey()
 
-      if (pubkey) {
-        loginWithExtension(pubkey)
-        boot()
-      }
-    })
+    loginWithExtension(pubkey)
+    boot()
+  }
 
   const usePrivateKey = () => router.at("login/privkey").replaceModal()
 
@@ -84,14 +75,14 @@
     //    pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
     //  },
     {
-      domain: "highlighter.com",
-      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
-      pubkey: "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63",
-    },
-    {
       domain: "nsec.app",
       relays: ["wss://relay.nsec.app"],
       pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
+    },
+    {
+      domain: "highlighter.com",
+      relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
+      pubkey: "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63",
     },
   ]
 
@@ -109,7 +100,7 @@
         },
       ],
       onEvent: async e => {
-        const content = tryJson(() => JSON.parse(e.content))
+        const content = parseJson(e.content)
 
         if (!content) {
           return
@@ -166,7 +157,7 @@
     <div
       class={cx(
         "relative grid justify-center gap-2 xs:gap-5",
-        getExtension() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        getNip07() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
       <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
@@ -174,7 +165,7 @@
         </div>
         <span>Bunker URL</span>
       </Tile>
-      {#if getExtension()}
+      {#if getNip07()}
         <Tile class="cursor-pointer bg-tinted-800" on:click={useExtension}>
           <div>
             <i class="fa fa-puzzle-piece fa-xl" />

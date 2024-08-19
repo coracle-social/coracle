@@ -1,11 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {seconds} from "hurdak"
-  import {flatten, now} from "@welshman/lib"
+  import {throttle} from "throttle-debounce"
+  import {flatten, partition, pushToKey} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {
+    SEEN_CONTEXT,
+    SEEN_GENERAL,
+    REACTION,
+    getContextTagValues,
+    getAddressTags,
+  } from "@welshman/util"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
-  import {noteKinds, reactionKinds, repostKinds, getAddressTags} from "src/util/nostr"
+  import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
   import Content from "src/partials/Content.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -21,13 +28,12 @@
   import {
     pubkey,
     session,
-    settings,
+    userSettings,
     markAsSeen,
     notifications,
     createNotificationGroups,
     loadNotifications,
     loadGroupMessages,
-    unreadNotifications,
     events,
     unwrapRepost,
     groupRequests,
@@ -40,6 +46,10 @@
     isSeen,
     isGroupRequest,
     isGroupAlert,
+    mainNotifications,
+    reactionNotifications,
+    unreadMainNotifications,
+    unreadReactionNotifications,
   } from "src/engine"
 
   const allTabs = ["Mentions & Replies", "Reactions", "Groups"]
@@ -58,8 +68,6 @@
       return formatTimestampAsDate(cur.timestamp)
     }
   }
-
-  const getTabKinds = tab => (tab === allTabs[0] ? noteKinds : reactionKinds.concat(9734))
 
   const groupRequestNotifications = derived(groupRequests, $groupRequests =>
     $groupRequests.filter(r => !r.resolved && !repository.deletes.has(r.group)),
@@ -118,11 +126,8 @@
 
   const unreadGroupNotifications = derived(
     [isSeen, groupNotifications],
-    ([$isSeen, $groupNotifications]) => {
-      const since = now() - seconds(30, "day")
-
-      return $groupNotifications.filter(e => e.created_at > since && !$isSeen(e))
-    },
+    ([$isSeen, $groupNotifications]) =>
+      $groupNotifications.filter(e => !getContextTagValues(e.tags).some(a => $isSeen(a, e))),
   )
 
   export let activeTab = allTabs[0]
@@ -131,13 +136,11 @@
   let innerWidth = 0
   let element = null
   let tabNotifications = []
-  let unreadMainNotifications = []
-  let unreadReactionNotifications = []
 
   $: {
     const groupedNotifications = createNotificationGroups(
       $notifications,
-      getTabKinds(activeTab),
+      activeTab === allTabs[0] ? noteKinds : reactionKinds.concat(9734),
     ).slice(0, limit)
 
     tabNotifications =
@@ -148,18 +151,10 @@
         : groupedNotifications.filter(n =>
             n.interactions.find((e: TrustedEvent) => reactionKinds.includes(e.kind)),
           )
-
-    const unreadMainKinds = getTabKinds(allTabs[0])
-    const unreadReactionKinds = getTabKinds(allTabs[1])
-
-    unreadMainNotifications = $unreadNotifications.filter(e => unreadMainKinds.includes(e.kind))
-    unreadReactionNotifications = $unreadNotifications.filter(e =>
-      unreadReactionKinds.includes(e.kind),
-    )
   }
 
   $: displayTabs =
-    innerWidth <= 640 || !$settings.enable_reactions ? [allTabs[0], allTabs[2]] : allTabs
+    innerWidth <= 640 || !$userSettings.enable_reactions ? [allTabs[0], allTabs[2]] : allTabs
 
   document.title = "Notifications"
 
@@ -167,22 +162,48 @@
     loadGroupMessages()
     loadNotifications()
 
-    const unsubUnreadNotifications = unreadNotifications.subscribe(events => {
-      if (activeTab !== "Groups") {
-        markAsSeen(events)
-      }
-    })
+    const unsubUnreadMainNotifications = unreadMainNotifications.subscribe(
+      throttle(1000, events => {
+        if (activeTab === allTabs[0] && events.length > 0) {
+          return markAsSeen(SEEN_GENERAL, {
+            mentions: $mainNotifications,
+            replies: $mainNotifications,
+          })
+        }
+      }),
+    )
 
-    const unsubUnreadGroupNotifications = unreadGroupNotifications.subscribe(events => {
-      if (activeTab === "Groups") {
-        markAsSeen(events)
-      }
-    })
+    const unsubUnreadReactionNotifications = unreadReactionNotifications.subscribe(
+      throttle(1000, events => {
+        if (activeTab === allTabs[1] && events.length > 0) {
+          const [reactions, zaps] = partition(e => e.kind === REACTION, $reactionNotifications)
+
+          return markAsSeen(SEEN_GENERAL, {reactions, zaps})
+        }
+      }),
+    )
+
+    const unsubUnreadGroupNotifications = unreadGroupNotifications.subscribe(
+      throttle(1000, events => {
+        if (activeTab === allTabs[2] && events.length > 0) {
+          const eventsByContext = {}
+
+          for (const event of $groupNotifications) {
+            for (const a of getContextTagValues(event.tags)) {
+              pushToKey(eventsByContext, a, event)
+            }
+          }
+
+          return markAsSeen(SEEN_CONTEXT, eventsByContext)
+        }
+      }),
+    )
 
     const scroller = createScroller(loadMore, {element})
 
     return () => {
-      unsubUnreadNotifications()
+      unsubUnreadMainNotifications()
+      unsubUnreadReactionNotifications()
       unsubUnreadGroupNotifications()
       scroller.stop()
     }
@@ -194,18 +215,20 @@
 <Tabs tabs={displayTabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
-    {#if tab === allTabs[0] && unreadMainNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-700 px-2">
-        {unreadMainNotifications.length}
-      </div>
-    {:else if tab === allTabs[1] && unreadReactionNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-700 px-2">
-        {unreadReactionNotifications.length}
-      </div>
-    {:else if tab === allTabs[2] && $unreadGroupNotifications.length > 0}
-      <div class="h-6 rounded-full bg-neutral-700 px-2">
-        {$unreadGroupNotifications.length}
-      </div>
+    {#if activeTab !== tab}
+      {#if tab === allTabs[0] && $unreadMainNotifications.length > 0}
+        <div class="h-6 rounded-full bg-neutral-700 px-2">
+          {$unreadMainNotifications.length}
+        </div>
+      {:else if tab === allTabs[1] && $unreadReactionNotifications.length > 0}
+        <div class="h-6 rounded-full bg-neutral-700 px-2">
+          {$unreadReactionNotifications.length}
+        </div>
+      {:else if tab === allTabs[2] && $unreadGroupNotifications.length > 0}
+        <div class="h-6 rounded-full bg-neutral-700 px-2">
+          {$unreadGroupNotifications.length}
+        </div>
+      {/if}
     {/if}
   </div>
 </Tabs>

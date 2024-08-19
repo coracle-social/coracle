@@ -14,7 +14,7 @@
   import {displayRelayUrl, RelayMode} from "src/domain"
   import {
     deriveRelay,
-    canSign,
+    signer,
     getSetting,
     setInboxPolicy,
     setOutboxPolicy,
@@ -107,7 +107,7 @@
       </span>
     {/if}
   {/if}
-  {#if showControls && $canSign}
+  {#if showControls && $signer}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />
     <div>
       <Popover triggerType="mouseenter" class="inline-block">
@@ -136,7 +136,7 @@
           Notes you publish will {$policy.write ? "" : "not"} be sent to this relay.
         </div>
       </Popover>
-      {#if $canSign}
+      {#if $signer}
         <Popover triggerType="mouseenter" class="inline-block">
           <div slot="trigger">
             <Chip

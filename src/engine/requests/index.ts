@@ -1,4 +1,5 @@
 import {debounce} from "throttle-debounce"
+import {get, writable} from "svelte/store"
 import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
@@ -9,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, bech32ToHex, pick, cached, nthEq, nth, now, writable, max} from "@welshman/lib"
+import {Worker, bech32ToHex, batcher, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -19,19 +20,21 @@ import {
   isSignedEvent,
   createEvent,
   WRAP,
-  WRAP_NIP04,
   EPOCH,
   LABEL,
   DELETE,
   FEED,
-  READ_RECEIPT,
+  SEEN_CONVERSATION,
+  SEEN_GENERAL,
+  SEEN_CONTEXT,
   NAMED_BOOKMARKS,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
+  DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {updateIn, createBatcher} from "src/util/misc"
-import {giftWrapKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {updateIn} from "src/util/misc"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import type {Zapper} from "src/engine/model"
@@ -81,7 +84,7 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
 // Handles/Zappers
 
-const fetchHandle = createBatcher(500, async (handles: string[]) => {
+const fetchHandle = batcher(500, async (handles: string[]) => {
   const data =
     (await tryFunc(async () => {
       const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
@@ -100,7 +103,7 @@ export const loadHandle = cached({
   getValue: ([handle]) => fetchHandle(handle),
 })
 
-const fetchZapper = createBatcher(3000, async (lnurls: string[]) => {
+const fetchZapper = batcher(3000, async (lnurls: string[]) => {
   const data =
     (await tryFunc(async () => {
       // Dufflepud expects plaintext but we store lnurls encoded
@@ -176,7 +179,7 @@ export const loadGroupMessages = (addresses?: string[]) => {
   for (const address of groupAddrs) {
     const {admins, recipients, relays, since} = getGroupReqInfo(address)
     const pubkeys = uniq([...admins, ...recipients])
-    const filters = [{kinds: giftWrapKinds, "#p": pubkeys, since}]
+    const filters = [{kinds: [WRAP], "#p": pubkeys, since}]
 
     if (pubkeys.length > 0) {
       promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
@@ -263,7 +266,7 @@ export const createPeopleLoader = ({
   }
 }
 
-export const feedLoader = new FeedLoader<TrustedEvent>({
+export const feedLoader = new FeedLoader({
   request: async ({relays, filters, onEvent}) => {
     if (relays?.length > 0) {
       await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
@@ -279,7 +282,7 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
     tags = [...tags, ["expiration", String(now() + 5)]]
 
     const req = makeDvmRequest({
-      event: await signer.get().signAsUser(createEvent(kind, {tags})),
+      event: await signer.get().sign(createEvent(kind, {tags})),
       relays:
         request.relays?.length > 0
           ? hints.fromRelays(request.relays).getUrls()
@@ -325,7 +328,7 @@ export const feedLoader = new FeedLoader<TrustedEvent>({
   },
 })
 
-export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
+export const loadAll = (feed, opts: LoadOpts = {}) => {
   const loading = writable(true)
 
   const stop = () => loading.set(false)
@@ -339,7 +342,7 @@ export const loadAll = (feed, opts: LoadOpts<TrustedEvent> = {}) => {
       },
     })
 
-    while (loading.get()) {
+    while (get(loading)) {
       await load(100)
     }
 
@@ -398,8 +401,8 @@ export const getNotificationKinds = () =>
   without(env.get().ENABLE_ZAPS ? [] : [9735], [
     ...noteKinds,
     ...reactionKinds,
-    ...giftWrapKinds,
-    4,
+    WRAP,
+    DEPRECATED_DIRECT_MESSAGE,
   ])
 
 export const loadNotifications = () => {
@@ -432,7 +435,7 @@ export const listenForNotifications = () => {
     // Mentions
     {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [4, ...giftWrapKinds], "#p": [$session.pubkey], limit: 1, since},
+    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$session.pubkey], limit: 1, since},
   ]
 
   // Communities
@@ -471,7 +474,12 @@ export const loadSeen = () =>
   load({
     skipCache: true,
     relays: hints.WriteRelays().getUrls(),
-    filters: [addSinceToFilter({kinds: [READ_RECEIPT], authors: [pubkey.get()]})],
+    filters: [
+      addSinceToFilter({
+        kinds: [SEEN_CONVERSATION, SEEN_GENERAL, SEEN_CONTEXT],
+        authors: [pubkey.get()],
+      }),
+    ],
   })
 
 export const loadFeedsAndLists = () =>
@@ -485,7 +493,7 @@ export const loadFeedsAndLists = () =>
   })
 
 export const loadGiftWraps = ({reload = false} = {}) => {
-  let filter = {kinds: [WRAP, WRAP_NIP04], "#p": [pubkey.get()]}
+  let filter = {kinds: [WRAP], "#p": [pubkey.get()]}
 
   if (!reload) {
     filter = addSinceToFilter(filter, seconds(7, "day"))

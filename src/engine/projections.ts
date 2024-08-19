@@ -1,5 +1,5 @@
 import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
-import {switcherFn, tryFunc} from "hurdak"
+import {switcherFn} from "hurdak"
 import {nth, inc} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -7,23 +7,25 @@ import {
   isShareableRelayUrl,
   getIdFilters,
   MUTES,
+  APP_DATA,
+  SEEN_CONVERSATION,
+  SEEN_GENERAL,
+  SEEN_CONTEXT,
   FOLLOWS,
   RELAYS,
   COMMUNITIES,
+  WRAP,
 } from "@welshman/util"
-import {tryJson} from "src/util/misc"
-import {appDataKeys, giftWrapKinds, getPublicKey} from "src/util/nostr"
+import {getPubkey} from "@welshman/signer"
+import {parseJson} from "src/util/misc"
 import {normalizeRelayUrl} from "src/domain"
-import type {Channel} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {getNip04} from "src/engine/utils"
+import {repository} from "src/engine/repository"
 import {
-  channels,
   topics,
   relays,
   deriveAdminKeyForGroup,
   getGroupStatus,
-  getChannelId,
   getSession,
   groupAdminKeys,
   groupAlerts,
@@ -31,18 +33,14 @@ import {
   groupSharedKeys,
   groups,
   load,
-  nip04,
   projections,
-  sessions,
   hints,
   ensurePlaintext,
 } from "src/engine/state"
 import {
   modifyGroupStatus,
   setGroupStatus,
-  updateRecord,
   updateSession,
-  setSession,
   updateZapper,
   updateHandle,
 } from "src/engine/commands"
@@ -51,12 +49,11 @@ import {
 // repository, and when accepted, be propagated to projections. This avoids processing
 // the same event multiple times, since repository deduplicates
 
-// Currently commented out because when storage gets pruned and profiles etc need to be re-loaded,
-// the event isn't recognized as new by repository and so it doesn't get pushed to projections. TODO
-
-// storage.ready.then(() => {
-//   repository.on("event", (event: TrustedEvent) => projections.push(event))
-// })
+repository.on("update", ({added}: {added: TrustedEvent[]}) => {
+  for (const event of added) {
+    projections.push(event)
+  }
+})
 
 // Key sharing
 
@@ -74,7 +71,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
   const status = getGroupStatus(getSession(recipient), address)
 
   if (privkey) {
-    const pubkey = getPublicKey(privkey)
+    const pubkey = getPubkey(privkey)
     const role = tags.get("role")?.value()
     const keys = role === "admin" ? groupAdminKeys : groupSharedKeys
 
@@ -98,8 +95,8 @@ projections.addHandler(24, (e: TrustedEvent) => {
       relays: hints.fromRelays(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
-        {kinds: giftWrapKinds, "#p": [pubkey]},
-        {kinds: giftWrapKinds, authors: [pubkey]},
+        {kinds: [WRAP], "#p": [pubkey]},
+        {kinds: [WRAP], authors: [pubkey]},
       ],
     })
   } else if ([GroupAccess.Granted, GroupAccess.Requested].includes(status?.access)) {
@@ -186,12 +183,10 @@ projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
 
 projections.addHandler(0, e => {
-  tryJson(async () => {
-    const content = JSON.parse(e.content)
+  const content = parseJson(e.content)
 
-    updateHandle(e, content)
-    updateZapper(e, content)
-  })
+  updateHandle(e, content)
+  updateZapper(e, content)
 })
 
 // Relays
@@ -241,97 +236,11 @@ projections.addHandler(1985, (e: TrustedEvent) => {
   }
 })
 
-// Update channel metadata
-
-projections.addHandler(30078, async e => {
-  const d = Tags.fromEvent(e).get("d")?.value()
-  const session = getSession(e.pubkey)
-
-  if (!session) {
-    return
-  }
-
-  const nip04 = getNip04(session)
-
-  if (!nip04.isEnabled()) {
-    return
-  }
-
-  if (d === appDataKeys.NIP24_LAST_CHECKED) {
-    const payload = await tryJson(async () =>
-      JSON.parse(await nip04.decryptAsUser(e.content, e.pubkey)),
-    )
-
-    if (payload) {
-      channels.mapStore.update($channels => {
-        for (const [id, ts] of Object.entries(payload) as [string, number][]) {
-          const channel = $channels.get(id)
-
-          $channels.set(id, {
-            relays: [],
-            members: [],
-            ...channel,
-            last_checked: Math.max(ts, channel?.last_checked || 0),
-          })
-        }
-
-        return $channels
-      })
-    }
-  }
-})
-
-const handleChannelMessage = async e => {
-  const tags = Tags.fromEvent(e)
-  const pubkeys = uniq(tags.values("p").valueOf().concat(e.pubkey)) as string[]
-  const channelId = getChannelId(pubkeys)
-
-  for (const pubkey of Object.keys(sessions.get())) {
-    if (!pubkeys.includes(pubkey)) {
-      continue
-    }
-
-    const $channel = channels.key(channelId).get()
-    const relays = $channel?.relays || []
-    const updates: Channel = {
-      ...$channel,
-      id: channelId,
-      relays: uniq([...tags.relays().valueOf(), ...relays]),
-      members: pubkeys,
-    }
-
-    if (e.pubkey === pubkey) {
-      updates.last_sent = Math.max(updates.last_sent || 0, e.created_at)
-    } else {
-      updates.last_received = Math.max(updates.last_received || 0, e.created_at)
-    }
-
-    channels.key(channelId).set(updates)
-  }
-}
-
-projections.addHandler(4, handleChannelMessage)
-projections.addHandler(14, handleChannelMessage)
-
 // Decrypt encrypted events eagerly
 
+projections.addHandler(SEEN_GENERAL, ensurePlaintext)
+projections.addHandler(SEEN_CONTEXT, ensurePlaintext)
+projections.addHandler(SEEN_CONVERSATION, ensurePlaintext)
+projections.addHandler(APP_DATA, ensurePlaintext)
 projections.addHandler(FOLLOWS, ensurePlaintext)
 projections.addHandler(MUTES, ensurePlaintext)
-
-// Sync client settings
-
-projections.addHandler(30078, async e => {
-  if (Tags.fromEvent(e).get("d")?.value() === appDataKeys.USER_SETTINGS) {
-    const session = getSession(e.pubkey)
-
-    if (session) {
-      const settings = await tryFunc(async () =>
-        JSON.parse(await nip04.get().decryptAsUser(e.content, e.pubkey)),
-      )
-
-      if (settings) {
-        setSession(e.pubkey, updateRecord(session, e.created_at, {settings}))
-      }
-    }
-  }
-})

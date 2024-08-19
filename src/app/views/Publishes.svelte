@@ -12,7 +12,7 @@
   const hasStatus = (pub: PublishInfo, statuses: PublishStatus[]) =>
     Array.from(pub.status.values()).some(s => statuses.includes(s))
 
-  $: recent = $publishes.filter(p => p.created_at > now() - seconds(24, "hour"))
+  $: recent = Object.values($publishes).filter(p => p.created_at > now() - seconds(24, "hour"))
   $: relays = new Set(
     remove(
       LOCAL_RELAY_URL,

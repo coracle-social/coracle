@@ -54,7 +54,7 @@
     <p>
       Give people a friendly way to recognize you. We recommend you do not use your real name or
       share your personal information. The future of the internet is
-      <Anchor class="underline" external href={pseudUrl}>pseudonymous</Anchor>.
+      <Anchor underline external href={pseudUrl}>pseudonymous</Anchor>.
     </p>
   </div>
   <div class="flex w-full flex-col gap-8">
@@ -69,7 +69,7 @@
         <i slot="before" class="fa-solid fa-user-check" />
       </Input>
       <div slot="info">
-        Enter a <Anchor class="underline" external href={nip05Url}>NIP-05</Anchor> address to verify
+        Enter a <Anchor underline external href={nip05Url}>NIP-05</Anchor> address to verify
         your public key.
       </div>
     </Field>
@@ -78,7 +78,7 @@
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
-        Enter a <Anchor class="underline" external href={lud16Url}>lightning address</Anchor> to enable
+        Enter a <Anchor underline external href={lud16Url}>lightning address</Anchor> to enable
         sending and receiving bitcoin tips.
       </div>
     </Field>

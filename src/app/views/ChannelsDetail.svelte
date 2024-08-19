@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
+  import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
@@ -12,11 +13,11 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/util/router"
   import {
-    nip44,
     session,
+    hasNip44,
+    repository,
     displayProfileByPubkey,
     sendMessage,
-    deriveEvents,
     sendLegacyMessage,
     markChannelRead,
     getChannelIdFromEvent,
@@ -29,7 +30,9 @@
   export let initialMessage = null
 
   const messages = derived(
-    deriveEvents({filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}]}),
+    deriveEvents(repository, {
+      filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}],
+    }),
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
@@ -39,7 +42,7 @@
 
   const send = async (content, useNip17) => {
     // If we don't have nip44 support, just send a legacy message
-    if (!$nip44.isEnabled() || !useNip17) {
+    if (!$hasNip44 || !useNip17) {
       return sendLegacyMessage(channelId, content)
     }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {whereEq} from "ramda"
   import {ucFirst} from "hurdak"
+  import {get} from "svelte/store"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -49,7 +50,7 @@
       .at("groups")
       .of(address)
       .at(tab)
-      .push({key: router.getKey(router.current.get())})
+      .push({key: router.getKey(get(router.current))})
 
   loadGroups([address], relays || [])
 

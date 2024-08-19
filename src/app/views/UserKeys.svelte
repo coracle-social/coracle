@@ -2,8 +2,10 @@
   import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
-  import {getAddress} from "@welshman/util"
-  import {nsecEncode, giftWrapKinds, isKeyValid, getPublicKey, toHex} from "src/util/nostr"
+  import {getAddress, WRAP, GROUP} from "@welshman/util"
+  import type {SignedEvent} from "@welshman/util"
+  import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
+  import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -16,7 +18,6 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import {
-    nip59,
     session,
     hints,
     groupSharedKeys,
@@ -53,7 +54,9 @@
       return
     }
 
-    const pubkey = getPublicKey(privkey)
+    const pubkey = getPubkey(privkey)
+
+    const helper = Nip59.fromSigner(new Nip01Signer(privkey))
 
     let found
 
@@ -62,12 +65,12 @@
       ...LOAD_OPTS,
       relays: hints.User().getUrls().concat(relays),
       filters: [
-        {kinds: [35834], authors: [pubkey], limit: 1},
-        {kinds: giftWrapKinds, "#p": [pubkey], limit: 500},
+        {kinds: [GROUP], authors: [pubkey], limit: 1},
+        {kinds: [WRAP], "#p": [pubkey], limit: 500},
       ],
       onEvent: async event => {
-        if (giftWrapKinds.includes(event.kind)) {
-          event = await $nip59.unwrap(event, privkey)
+        if (event.kind === WRAP) {
+          event = await helper.unwrap(event as SignedEvent)
         }
 
         if (event?.kind !== 35834 || event?.pubkey !== pubkey) {
@@ -135,7 +138,12 @@
     </div>
     {#if $session?.privkey}
       <div>
-        <CopyValue isPassword label="Private Key" value={$session?.privkey} encode={nsecEncode} />
+        <CopyValue
+          isPassword
+          label="Private Key"
+          value={$session?.privkey}
+          encode={nsecEncode}
+          hasEncryptPrompt />
         <small class="text-neutral-100">
           Your private key is used to prove your identity by cryptographically signing messages. <strong
             >Do not share this with anyone.</strong>
