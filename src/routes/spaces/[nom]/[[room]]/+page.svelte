@@ -15,6 +15,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
+  import GroupCompose from "@app/components/GroupCompose.svelte"
   import {deriveGroupConversation} from "@app/state"
 
   const {nom} = $page.params
@@ -89,7 +90,5 @@
       </Spinner>
     </p>
   </div>
-  <div class="relative z-feature border-t border-solid border-base-100 px-2 py-2">
-    <div class="shadow-top-xl flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4"></div>
-  </div>
+  <GroupCompose />
 </div>

@@ -83,3 +83,11 @@
 .shadow-top-xl {
   @apply shadow-[0_20px_25px_-5px_rgb(0,0,0,0.1)_0_8px_10px_-6px_rgb(0,0,0,0.1)];
 }
+
+.tiptap {
+  @apply rounded-box bg-base-100 px-4 p-2;
+}
+
+.link-content {
+  @apply text-sm rounded px-1 bg-neutral text-neutral-content no-underline;
+}

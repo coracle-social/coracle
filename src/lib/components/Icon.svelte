@@ -33,6 +33,7 @@
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
+  import Paperclip from "@assets/icons/Paperclip.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
   import Reply from "@assets/icons/Reply.svg?dataurl"
@@ -77,6 +78,7 @@
     magnifer: Magnifer,
     "menu-dots": MenuDots,
     "pallete-2": Pallete2,
+    "paperclip": Paperclip,
     plain: Plain,
     reply: Reply,
     "remote-controller-minimalistic": RemoteControllerMinimalistic,

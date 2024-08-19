@@ -37,6 +37,7 @@
     "@noble/curves": "^1.5.0",
     "@noble/hashes": "^1.4.0",
     "@poppanator/sveltekit-svg": "^4.2.1",
+    "@tiptap/starter-kit": "^2.6.4",
     "@types/throttle-debounce": "^5.0.2",
     "@welshman/lib": "^0.0.14",
     "@welshman/net": "^0.0.18",
@@ -46,9 +47,11 @@
     "daisyui": "^4.12.10",
     "fuse.js": "^7.0.0",
     "idb": "^8.0.0",
+    "nostr-editor": "^0.0.1",
     "nostr-tools": "^2.7.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "svelte-bricks": "^0.2.1",
+    "svelte-tiptap": "^1.1.3",
     "throttle-debounce": "^5.0.2"
   }
 }
