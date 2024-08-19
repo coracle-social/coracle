@@ -12,6 +12,7 @@ import {
   isContextAddress,
   DIRECT_MESSAGE,
   REACTION,
+  LIVE_CHAT_MESSAGE,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
@@ -49,7 +50,7 @@ export type FeedOpts = {
 
 const prepFilters = (filters, opts: FeedOpts) => {
   // Default to note kinds
-  filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
+  filters = filters?.map(filter => ({kinds: [...noteKinds, LIVE_CHAT_MESSAGE], ...filter})) || []
 
   // Add reposts if we don't have any authors specified
   if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
@@ -261,6 +262,10 @@ export const createFeed = (opts: FeedOpts) => {
             if (seen.has(getIdOrAddress(e))) return false
             if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
+            if (e.kind === LIVE_CHAT_MESSAGE) {
+              const parentIds = Tags.fromEvent(e).parents().values().valueOf()
+              return parentIds.length > 0 // Ne montrer que s'il y a un parent
+            }
 
             seen.add(getIdOrAddress(e))
 
