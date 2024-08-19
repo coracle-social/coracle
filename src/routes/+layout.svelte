@@ -41,14 +41,6 @@
   }
 
   onMount(() => {
-    for (const url of DEFAULT_RELAYS) {
-      loadRelay(url)
-    }
-
-    if ($pk) {
-      loadUserData($pk)
-    }
-
     ready = initStorage({
       events: {
         keyPath: "id",
@@ -67,6 +59,16 @@
     dialog.addEventListener("close", () => {
       if (modal) {
         clearModal()
+      }
+    })
+
+    ready.then(() => {
+      for (const url of DEFAULT_RELAYS) {
+        loadRelay(url)
+      }
+
+      if ($pk) {
+        loadUserData($pk)
       }
     })
   })

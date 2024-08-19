@@ -36,8 +36,8 @@ import {
   GROUP_ADD_USER,
 } from "@welshman/util"
 import type {SignedEvent, HashedEvent, EventTemplate, TrustedEvent, PublishedProfile, PublishedList} from "@welshman/util"
-import type {SubscribeRequest, PublishRequest, PublishStatus} from "@welshman/net"
-import {publish as basePublish, subscribe as baseSubscribe} from "@welshman/net"
+import type {SubscribeRequest, PublishRequest} from "@welshman/net"
+import {publish as basePublish, subscribe as baseSubscribe, PublishStatus} from "@welshman/net"
 import {decrypt, stamp, own, hash} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
@@ -143,9 +143,19 @@ thunkWorker.addGlobalHandler(async ({event, relays}: Thunk) => {
     savedEvent.sig = signedEvent.sig
   }
 
+  const failures = new Set<string>()
+
   // Watch for failures
   pub.emitter.on('*', (status: PublishStatus, url: string) => {
     console.log('pub status', status, url)
+
+    if ([PublishStatus.Failure, PublishStatus.Timeout].includes(status)) {
+      failures.add(url)
+    }
+
+    if (failures.size === relays.length) {
+      console.warn("Failed to publish", pub)
+    }
   })
 })
 
@@ -172,7 +182,7 @@ export const publishThunk = (thunk: Thunk) => {
 // Subscribe
 
 export const subscribe = (request: SubscribeRequest) => {
-  const sub = baseSubscribe({delay: 50, ...request})
+  const sub = baseSubscribe({delay: 50, authTimeout: 3000, ...request})
 
   sub.emitter.on("event", (url: string, e: SignedEvent) => repository.publish(e))
 

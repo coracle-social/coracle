@@ -52,8 +52,7 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
   const $pk = pk.get()!
   const $signer = signer.get()!
   const [prev] = repository.query([{kinds: [kind], authors: [$pk]}])
-  const userRelays = getRelaySelectionsByPubkey().get($pk)
-  const relays = [...INDEXER_RELAYS, ...getWriteRelayUrls(userRelays)]
+  const relays = getWriteRelayUrls(getRelaySelectionsByPubkey().get($pk))
 
   // Preserve content if we have it
   const event = prev

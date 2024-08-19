@@ -20,7 +20,7 @@
     ['fuchsia', twColors.fuchsia[600]],
     ['green', twColors.green[600]],
     ['indigo', twColors.indigo[600]],
-    ['lightBlue', twColors.lightBlue[600]],
+    ['sky', twColors.sky[600]],
     ['lime', twColors.lime[600]],
     ['orange', twColors.orange[600]],
     ['pink', twColors.pink[600]],
