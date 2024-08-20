@@ -30,6 +30,10 @@ export const LinkExtension = Node.create({
 
   inline: true,
 
+  selectable: true,
+
+  draggable: true,
+
   priority: 1000,
 
   addAttributes() {

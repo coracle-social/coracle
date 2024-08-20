@@ -91,3 +91,7 @@
 .link-content {
   @apply text-sm rounded px-1 bg-neutral text-neutral-content no-underline;
 }
+
+.link-content.link-content-selected {
+  @apply bg-primary text-primary-content;
+}

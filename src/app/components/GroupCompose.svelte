@@ -5,19 +5,23 @@
   import StarterKit from '@tiptap/starter-kit'
   import {NostrExtension} from 'nostr-editor'
   import type {StampedEvent} from '@welshman/util'
-  import {LinkExtension} from '@lib/tiptap'
+  import {LinkExtension, Mention, Topic} from '@lib/tiptap'
   import GroupComposeMention from '@app/components/GroupComposeMention.svelte'
   import GroupComposeEvent from '@app/components/GroupComposeEvent.svelte'
   import GroupComposeImage from '@app/components/GroupComposeImage.svelte'
   import GroupComposeBolt11 from '@app/components/GroupComposeBolt11.svelte'
   import GroupComposeVideo from '@app/components/GroupComposeVideo.svelte'
   import GroupComposeLink from '@app/components/GroupComposeLink.svelte'
+  import GroupComposeSuggestions from '@app/components/GroupComposeSuggestions.svelte'
+  import GroupComposeTopicSuggestion from '@app/components/GroupComposeTopicSuggestion.svelte'
+  import GroupComposeProfileSuggestion from '@app/components/GroupComposeProfileSuggestion.svelte'
   import {signer} from '@app/base'
+  import {searchProfiles, searchTopics, displayProfileByPubkey} from '@app/state'
 
   let editor: Readable<Editor>
 
   const asInline = (extend: Record<string, any>) =>
-    ({inline: true, group: 'inline', draggable: false, ...extend})
+    ({inline: true, group: 'inline', ...extend})
 
   onMount(() => {
     editor = createEditor({
@@ -56,12 +60,57 @@
             onDrop() {
               //  setPending(true)
             },
-            onComplete(currentEditor: Editor) {
+            onComplete(currentEditor: any) {
               console.log('Upload Completed', currentEditor.getText())
               //  setPending(false)
             },
           },
         }),
+        Mention.configure(
+          (() => {
+            let suggestions: GroupComposeSuggestions
+
+            const mapProps = (props: any) => ({
+              term: props.query,
+              select: (id: string) => props.command({id}),
+              search: searchProfiles,
+              component: GroupComposeProfileSuggestion,
+            })
+
+            return {
+              getLabel: displayProfileByPubkey,
+              tippyOptions: {arrow: false, theme: "transparent"},
+              onStart: ({target, props}) => {
+                suggestions = new GroupComposeSuggestions({target, props: mapProps(props)})
+              },
+              onUpdate: ({props}) => suggestions.$set(mapProps(props)),
+              onKeyDown: ({event}) => suggestions.onKeyDown(event),
+              onExit: () => suggestions.$destroy(),
+            }
+          })(),
+        ),
+        Topic.configure(
+          (() => {
+            let suggestions: GroupComposeSuggestions
+
+            const mapProps = (props: any) => ({
+              term: props.query,
+              select: (id: string) => props.command({id}),
+              search: searchTopics,
+              component: GroupComposeTopicSuggestion,
+            })
+
+            return {
+              tippyOptions: {arrow: false, theme: "transparent"},
+              onStart: ({target, props}) => {
+                suggestions = new GroupComposeSuggestions({target, props: mapProps(props)})
+              },
+              onUpdate: ({props}) => suggestions.$set(mapProps(props)),
+              onKeyDown: ({event}) => suggestions.onKeyDown(event),
+              onExit: () => suggestions.$destroy(),
+            }
+          })(),
+        ),
       ],
       content: '',
       onUpdate: () => {

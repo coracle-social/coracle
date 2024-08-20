@@ -1,3 +1,4 @@
+import {throttle} from 'throttle-debounce'
 import type {Readable} from "svelte/store"
 import type {FuseResult} from "fuse.js"
 import {get, writable, readable, derived} from "svelte/store"
@@ -16,6 +17,7 @@ import {
   indexBy,
   now,
   Worker,
+  inc,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -32,6 +34,8 @@ import {
   readProfile,
   readList,
   asDecryptedEvent,
+  displayProfile,
+  displayPubkey,
   GROUP_JOIN,
   GROUP_ADD_USER,
 } from "@welshman/util"
@@ -39,7 +43,7 @@ import type {SignedEvent, HashedEvent, EventTemplate, TrustedEvent, PublishedPro
 import type {SubscribeRequest, PublishRequest} from "@welshman/net"
 import {publish as basePublish, subscribe as baseSubscribe, PublishStatus} from "@welshman/net"
 import {decrypt, stamp, own, hash} from "@welshman/signer"
-import {deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
+import {custom, deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
 import type {Handle, Relay} from "@app/types"
 import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner} from "@app/base"
@@ -244,6 +248,43 @@ export const ensurePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
+// Topics
+
+export type Topic = {
+  name: string
+  count: number
+}
+
+export const topics =  custom<Topic[]>(setter => {
+  const getTopics = () => {
+    const topics = new Map<string, number>()
+    for (const tagString of repository.eventsByTag.keys()) {
+      if (tagString.startsWith('t:')) {
+        const topic = tagString.slice(2).toLowerCase()
+
+        topics.set(topic, inc(topics.get(topic)))
+      }
+    }
+
+    return Array.from(topics.entries()).map(([name, count]) => ({name, count}))
+  }
+
+  setter(getTopics())
+
+  const onUpdate = throttle(3000, () => setter(getTopics()))
+
+  repository.on("update", onUpdate)
+
+  return () => repository.off("update", onUpdate)
+})
+
+export const searchTopics = derived(topics, $topics =>
+  createSearch($topics, {
+    getValue: (topic: Topic) => topic.name,
+    fuseOptions: {keys: ["name"]},
+  }),
+)
+
 // Relay info
 
 export const relays = writable<Relay[]>([])
@@ -330,6 +371,21 @@ export const {
       filters: [{kinds: [PROFILE], authors: [pubkey]}],
     }),
 })
+
+export const searchProfiles = derived(profiles, $profiles =>
+  createSearch($profiles, {
+    getValue: (profile: PublishedProfile) => profile.event.pubkey,
+    fuseOptions: {
+      keys: ["name", "display_name", {name: "about", weight: 0.3}],
+    },
+  }),
+)
+
+export const displayProfileByPubkey = (pubkey: string, profile?: PublishedProfile) =>
+  displayProfile(profile, pubkey ? displayPubkey(pubkey) : undefined)
+
+export const deriveProfileDisplay = (pubkey: string) =>
+  derived(deriveProfile(pubkey), $profile => displayProfileByPubkey(pubkey, $profile))
 
 // Relay selections
 

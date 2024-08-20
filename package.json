@@ -38,6 +38,7 @@
     "@noble/hashes": "^1.4.0",
     "@poppanator/sveltekit-svg": "^4.2.1",
     "@tiptap/starter-kit": "^2.6.4",
+    "@tiptap/suggestion": "^2.6.4",
     "@types/throttle-debounce": "^5.0.2",
     "@welshman/lib": "^0.0.14",
     "@welshman/net": "^0.0.18",

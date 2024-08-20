@@ -3,11 +3,11 @@
   import {readable} from "svelte/store"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {GROUP_REPLY, getAncestorTags, displayProfile, displayPubkey} from "@welshman/util"
+  import {GROUP_REPLY, getAncestorTags, displayPubkey} from "@welshman/util"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {deriveProfile, deriveEvent} from "@app/state"
+  import {deriveProfile, deriveProfileDisplay, deriveEvent} from "@app/state"
 
   export let event: TrustedEvent
   export let showPubkey: boolean
@@ -35,6 +35,7 @@
   ]
 
   const profile = deriveProfile(event.pubkey)
+  const profileDisplay = deriveProfileDisplay(event.pubkey)
   const {replies} = getAncestorTags(event.tags)
   const parentId = replies[0]?.[1]
   const parentHints = [replies[0]?.[2]].filter(Boolean)
@@ -43,6 +44,7 @@
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey)
+  $: parentProfileDisplay = deriveProfileDisplay(parentPubkey)
 </script>
 
 <div in:fly class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300">
@@ -50,7 +52,7 @@
     <div class="flex items-center gap-1 pl-12 text-xs">
       <Icon icon="arrow-right" />
       <Avatar src={$parentProfile?.picture} size={4} />
-      <p class="text-primary">{displayProfile($parentProfile, displayPubkey(parentPubkey))}</p>
+      <p class="text-primary">{$parentProfileDisplay}</p>
       <p></p>
       <p
         class="flex cursor-pointer items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap opacity-75 hover:underline">
@@ -67,8 +69,7 @@
     {/if}
     <div class="-mt-1">
       {#if showPubkey}
-        <strong class="text-sm" style="color: {colorValue}" data-color={colorName}
-          >{displayProfile($profile, displayPubkey(event.pubkey))}</strong>
+        <strong class="text-sm" style="color: {colorValue}" data-color={colorName}>{$profileDisplay}</strong>
       {/if}
       <p class="text-sm">{event.content}</p>
     </div>
