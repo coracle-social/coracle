@@ -46,11 +46,11 @@
 </script>
 
 <Card class="flex gap-3">
-  <div class="mt-[6px]">
+  <div class="mt-[6px] hidden sm:block">
     <i class="fa fa-rss fa-2xl" />
   </div>
   <FlexColumn small>
-    <div class="flex justify-between">
+    <div class="flex justify-between flex-col sm:flex-row">
       <span class="flex items-start gap-3">
         <div>
           <Anchor on:click={loadFeed} class="staatliches text-xl">
@@ -79,7 +79,7 @@
         <PersonCircles class="h-6 w-6" pubkeys={favoritedPubkeys.slice(0, 20)} />
       </div>
     {/if}
-    <div class="mt-2 flex items-start justify-between">
+    <div class="mt-2 flex items-start justify-between flex-col sm:flex-row" on:click|stopPropagation>
       <FeedSummary feed={feed.definition} />
       <div class="flex gap-1">
         <div

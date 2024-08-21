@@ -332,7 +332,7 @@
       <Popover theme="transparent" opts={{hideOnClick: true}}>
         <button
           slot="trigger"
-          class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0">
+          class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 hidden sm:block">
           <i class="fa fa-up-right-from-square fa-sm" />
         </button>
         <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
