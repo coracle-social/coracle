@@ -261,10 +261,7 @@ export const createFeed = (opts: FeedOpts) => {
             if (seen.has(getIdOrAddress(e))) return false
             if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
-            if (e.kind === LIVE_CHAT_MESSAGE) {
-              const parentIds = Tags.fromEvent(e).parents().values().valueOf()
-              return parentIds.length > 0 // Ne montrer que s'il y a un parent
-            }
+            if (e.kind === LIVE_CHAT_MESSAGE && !Tags.fromEvent(e).parents().exists()) return false
 
             seen.add(getIdOrAddress(e))
 
