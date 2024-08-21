@@ -95,6 +95,7 @@ export const createList = ({kind, title, description, identifier, tags}: List) =
   kind,
   tags: Tags.wrap(tags)
     .setTag("d", identifier)
+    .setTag("alt", title)
     .setTag("title", title)
     .setTag("description", description)
     .unwrap(),
@@ -104,6 +105,7 @@ export const editList = ({kind, title, description, identifier, tags}: List) => 
   kind: kind,
   tags: Tags.wrap(tags)
     .setTag("d", identifier)
+    .setTag("alt", title)
     .setTag("title", title)
     .setTag("description", description)
     .unwrap(),

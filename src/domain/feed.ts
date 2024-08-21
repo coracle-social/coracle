@@ -63,6 +63,7 @@ export const createFeed = ({identifier, definition, title, description}: Feed) =
   kind: FEED,
   tags: [
     ["d", identifier],
+    ["alt", title],
     ["title", title],
     ["description", description],
     ["feed", JSON.stringify(definition)],
@@ -72,6 +73,7 @@ export const createFeed = ({identifier, definition, title, description}: Feed) =
 export const editFeed = (feed: PublishedFeed) => ({
   kind: FEED,
   tags: Tags.fromEvent(feed.event)
+    .setTag("alt", feed.title)
     .setTag("title", feed.title)
     .setTag("description", feed.description)
     .setTag("feed", JSON.stringify(feed.definition))
