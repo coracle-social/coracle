@@ -49,7 +49,7 @@ export type FeedOpts = {
 
 const prepFilters = (filters, opts: FeedOpts) => {
   // Default to note kinds
-  filters = filters?.map(filter => ({kinds: [...noteKinds, LIVE_CHAT_MESSAGE], ...filter})) || []
+  filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
   // Add reposts if we don't have any authors specified
   if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
