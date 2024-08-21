@@ -13,6 +13,8 @@ import {
   ZAP_RESPONSE,
   Tags,
   Address,
+  isShareableRelayUrl,
+  LIVE_CHAT_MESSAGE,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
@@ -36,7 +38,7 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT, REMIX, AUDIO, EVENT_TIME, CLASSIFIED]
+export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT, REMIX, AUDIO, EVENT_TIME, CLASSIFIED, LIVE_CHAT_MESSAGE]
 export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]

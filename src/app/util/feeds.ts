@@ -12,6 +12,7 @@ import {
   isContextAddress,
   DIRECT_MESSAGE,
   REACTION,
+  LIVE_CHAT_MESSAGE,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
@@ -260,6 +261,7 @@ export const createFeed = (opts: FeedOpts) => {
             if (seen.has(getIdOrAddress(e))) return false
             if (repostKinds.includes(e.kind)) return false
             if (reactionKinds.includes(e.kind)) return false
+            if (e.kind === LIVE_CHAT_MESSAGE && !Tags.fromEvent(e).parents().exists()) return false
 
             seen.add(getIdOrAddress(e))
 
