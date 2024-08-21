@@ -93,7 +93,7 @@
               modal
               stopPropagation
               type="unstyled"
-              class="flex items-center gap-2 !no-underline"
+              class="flex items-center gap-2"
               href={router.at("people").of(quote.pubkey).toString()}>
               <h2 class="text-lg">{profileDisplay}</h2>
             </Anchor>

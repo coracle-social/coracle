@@ -69,49 +69,47 @@
 </script>
 
 <div
-  class="note-content flex flex-col gap-2 overflow-hidden text-ellipsis"
+  class="note-content overflow-hidden text-ellipsis"
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
-  <div>
-    {#each shortContent as parsed, i}
-      {#if isNewline(parsed)}
-        <NoteContentNewline value={parsed.value} />
-      {:else if isTopic(parsed)}
-        <NoteContentTopic value={parsed.value} />
-      {:else if isCode(parsed)}
-        <NoteContentCode value={parsed.value} />
-      {:else if isCashu(parsed)}
-        <div on:click|stopPropagation>
-          <QRCode copyOnClick code={parsed.value} />
-        </div>
-      {:else if isInvoice(parsed)}
-        <div on:click|stopPropagation>
-          <QRCode copyOnClick code={parsed.value} />
-        </div>
-      {:else if isLink(parsed)}
-        <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
-      {:else if isProfile(parsed)}
-        <PersonLink pubkey={parsed.value.pubkey} />
-      {:else if isEvent(parsed) || isAddress(parsed)}
-        {#if isStartOrEnd(i) && depth < 2}
-          <NoteContentQuote {depth} {note} value={parsed.value}>
-            <div slot="note-content" let:quote>
-              <slot name="note-content" {quote} />
-            </div>
-          </NoteContentQuote>
-        {:else}
-          <Anchor
-            modal
-            stopPropagation
-            class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-            href={fromNostrURI(parsed.raw)}>
-            {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
-          </Anchor>
-        {/if}
+  {#each shortContent as parsed, i}
+    {#if isNewline(parsed)}
+      <NoteContentNewline value={parsed.value} />
+    {:else if isTopic(parsed)}
+      <NoteContentTopic value={parsed.value} />
+    {:else if isCode(parsed)}
+      <NoteContentCode value={parsed.value} />
+    {:else if isCashu(parsed)}
+      <div on:click|stopPropagation>
+        <QRCode copyOnClick code={parsed.value} />
+      </div>
+    {:else if isInvoice(parsed)}
+      <div on:click|stopPropagation>
+        <QRCode copyOnClick code={parsed.value} />
+      </div>
+    {:else if isLink(parsed)}
+      <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
+    {:else if isProfile(parsed)}
+      <PersonLink pubkey={parsed.value.pubkey} />
+    {:else if isEvent(parsed) || isAddress(parsed)}
+      {#if isStartOrEnd(i) && depth < 2}
+        <NoteContentQuote {depth} {note} value={parsed.value}>
+          <div slot="note-content" let:quote>
+            <slot name="note-content" {quote} />
+          </div>
+        </NoteContentQuote>
       {:else}
-        {@html renderParsed(parsed)}
+        <Anchor
+          modal
+          stopPropagation
+          class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+          href={fromNostrURI(parsed.raw)}>
+          {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
+        </Anchor>
       {/if}
-    {/each}
-  </div>
+    {:else}
+      {@html renderParsed(parsed)}
+    {/if}
+  {/each}
 </div>
 
 {#if ellipsize}

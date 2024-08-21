@@ -239,6 +239,6 @@ body,
 
 /* note content */
 
-.note-content a {
+.note-content > a {
   text-decoration: underline;
 }
