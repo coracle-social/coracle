@@ -7,5 +7,5 @@
 {#if $env.FORCE_GROUP}
   <GroupDetail {...$$props} address={$env.FORCE_GROUP} activeTab="notes" />
 {:else}
-  <Feeds />
+  <Feeds {...$$props} />
 {/if}
