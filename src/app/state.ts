@@ -364,12 +364,15 @@ export const {
   name: "profiles",
   store: profiles,
   getKey: profile => profile.event.pubkey,
-  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-    load({
+  load: async (pubkey: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
+    const relays = getWriteRelayUrls(await loadRelaySelections(pubkey))
+
+    return load({
       ...request,
-      relays: [...relays, ...INDEXER_RELAYS],
+      relays: [...relays, ...hints, ...INDEXER_RELAYS],
       filters: [{kinds: [PROFILE], authors: [pubkey]}],
-    }),
+    })
+  },
 })
 
 export const searchProfiles = derived(profiles, $profiles =>
@@ -410,10 +413,10 @@ export const {
   name: "relaySelections",
   store: relaySelections,
   getKey: relaySelections => relaySelections.pubkey,
-  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
+  load: (pubkey: string, hints = [], request: Partial<SubscribeRequest> = {}) =>
     load({
       ...request,
-      relays: [...relays, ...INDEXER_RELAYS],
+      relays: [...hints, ...INDEXER_RELAYS],
       filters: [{kinds: [RELAYS], authors: [pubkey]}],
     }),
 })
@@ -440,12 +443,15 @@ export const {
   name: "follows",
   store: follows,
   getKey: follows => follows.event.pubkey,
-  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-    load({
+  load: async (pubkey: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
+    const relays = getWriteRelayUrls(await loadRelaySelections(pubkey, hints))
+
+    return load({
       ...request,
-      relays: [...relays, ...INDEXER_RELAYS],
+      relays: [...relays, ...hints, ...INDEXER_RELAYS],
       filters: [{kinds: [FOLLOWS], authors: [pubkey]}],
-    }),
+    })
+  },
 })
 
 // Mutes
@@ -470,12 +476,15 @@ export const {
   name: "mutes",
   store: mutes,
   getKey: mute => mute.event.pubkey,
-  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-    load({
+  load: async (pubkey: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
+    const relays = getWriteRelayUrls(await loadRelaySelections(pubkey, hints))
+
+    return load({
       ...request,
-      relays: [...relays, ...INDEXER_RELAYS],
+      relays: [...relays, ...hints, ...INDEXER_RELAYS],
       filters: [{kinds: [MUTES], authors: [pubkey]}],
-    }),
+    })
+  },
 })
 
 // Groups
@@ -537,12 +546,12 @@ export const {
   name: "groups",
   store: groups,
   getKey: (group: PublishedGroup) => group.nom,
-  load: (nom: string, relays: string[] = [], request: Partial<SubscribeRequest> = {}) =>
+  load: (nom: string, hints: string[] = [], request: Partial<SubscribeRequest> = {}) =>
     Promise.all([
-      ...relays.map(loadRelay),
+      ...hints.map(loadRelay),
       load({
         ...request,
-        relays,
+        relays: hints,
         filters: [{kinds: [GROUP_META], "#d": [nom]}],
       }),
     ]),
@@ -638,12 +647,15 @@ export const {
   name: "groupMemberships",
   store: groupMemberships,
   getKey: groupMembership => groupMembership.event.pubkey,
-  load: (pubkey: string, relays = [], request: Partial<SubscribeRequest> = {}) =>
-    load({
+  load: async (pubkey: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
+    const relays = getWriteRelayUrls(await loadRelaySelections(pubkey, hints))
+
+    return load({
       ...request,
-      relays: [...relays, ...INDEXER_RELAYS],
+      relays: [...hints, ...relays, ...INDEXER_RELAYS],
       filters: [{kinds: [GROUPS], authors: [pubkey]}],
-    }),
+    })
+  },
 })
 
 // Group Messages

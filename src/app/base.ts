@@ -58,7 +58,7 @@ Object.assign(NetworkContext, {
   onEvent: (url: string, event: TrustedEvent) => tracker.track(event.id, url),
   isDeleted: (url: string, event: TrustedEvent) => repository.isDeleted(event),
   onAuth: async (url: string, challenge: string) => {
-    if (seenChallenges.has(challenge)) {
+    if (seenChallenges.has(challenge) || !signer.get()) {
       return
     }
 

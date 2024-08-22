@@ -30,6 +30,7 @@
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
+  import Key from "@assets/icons/Key.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
@@ -80,6 +81,7 @@
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
+    key: Key,
     "link-round": LinkRound,
     login: Login,
     "login-2": Login2,

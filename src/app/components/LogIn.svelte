@@ -1,11 +1,13 @@
 <script lang="ts">
-  import {makeSecret, Nip46Broker} from "@welshman/signer"
+  import {first} from '@welshman/lib'
+  import {makeSecret, getNip07, Nip46Broker} from "@welshman/signer"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/LogIn.svelte"
+  import type {Session} from "@app/types"
   import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
   import {addSession, nip46Perms} from "@app/base"
@@ -14,7 +16,26 @@
 
   const signUp = () => pushModal(SignUp)
 
-  const tryLogin = async () => {
+  const withLoading = (cb: () => void) => async () => {
+    loading = true
+
+    try {
+      await cb()
+    } finally {
+      loading = false
+    }
+  }
+
+  const onSuccess = async (session: Session) => {
+    addSession(session)
+
+    await loadUserData(session.pubkey)
+
+    pushToast({message: "Successfully logged in!"})
+    clearModal()
+  }
+
+  const loginWithNip46 = withLoading(async () => {
     const secret = makeSecret()
     const handle = await loadHandle(`${username}@${handler.domain}`)
 
@@ -28,29 +49,28 @@
     const {pubkey, relays = []} = handle
     const broker = Nip46Broker.get(pubkey, secret, handler)
 
-    loadUserData(pubkey, relays)
-
     if (await broker.connect("", nip46Perms)) {
-      addSession({method: "nip46", pubkey, secret, handler})
-      pushToast({message: "Successfully logged in!"})
-      clearModal()
+      await onSuccess({method: "nip46", pubkey, secret, handler})
     } else {
       pushToast({
         theme: "error",
         message: "Something went wrong! Please try again.",
       })
     }
-  }
+  })
 
-  const login = async () => {
-    loading = true
+  const loginWithNip07 = withLoading(async () => {
+    const pubkey = await getNip07()?.getPublicKey()
 
-    try {
-      await tryLogin()
-    } finally {
-      loading = false
+    if (pubkey) {
+      await onSuccess({method: "extension", pubkey})
+    } else {
+      pushToast({
+        theme: "error",
+        message: "Something went wrong! Please try again.",
+      })
     }
-  }
+  })
 
   const handler = {
     domain: "nsec.app",
@@ -62,7 +82,7 @@
   let loading = false
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={login}>
+<form class="column gap-4" on:submit|preventDefault={loginWithNip46}>
   <h1 class="heading">Log in with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
     Flotilla is built using the
@@ -73,13 +93,22 @@
     <div class="flex items-center gap-2" slot="input">
       <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="user-rounded" />
-        <input bind:value={username} class="grow" type="text" placeholder="username" />
+        <input bind:value={username} disabled={loading} class="grow" type="text" placeholder="username" />
+        <span>@{handler.domain}</span>
       </label>
-      @{handler.domain}
+      {#if getNip07()}
+        <Button
+          disabled={loading}
+          on:click={loginWithNip07}
+          class="btn btn-neutral tooltip tooltip-left"
+          data-tip="Log in with browser extension">
+          <Icon icon="square-share-line" />
+        </Button>
+      {/if}
     </div>
   </Field>
   <div class="flex flex-col gap-2">
-    <Button type="submit" class="btn btn-primary" disabled={!username || loading}>
+    <Button type="submit" class="btn btn-primary flex-grow" disabled={!username || loading}>
       <Spinner {loading}>Log In</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

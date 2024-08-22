@@ -31,7 +31,9 @@
         goto("/home")
       }
     }
+  }
 
+  $: {
     if (modal) {
       dialog?.showModal()
       prev = modal
