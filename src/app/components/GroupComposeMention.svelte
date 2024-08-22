@@ -12,5 +12,5 @@
 </script>
 
 <NodeViewWrapper class="inline">
-  <Link external href="https://njump.me/{node.attrs.nprofile}">@{displayProfile($profile)}</Link>
+  <span class="text-primary">@</span><Link external href="https://njump.me/{node.attrs.nprofile}">{displayProfile($profile)}</Link>
 </NodeViewWrapper>

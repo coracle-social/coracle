@@ -1,44 +1,26 @@
+import type {SvelteComponent, ComponentType} from 'svelte'
+import type {Readable} from 'svelte/store'
 import tippy, {type Instance} from 'tippy.js'
 import {mergeAttributes, Node} from '@tiptap/core'
 import {PluginKey} from '@tiptap/pm/state'
 import Suggestion from '@tiptap/suggestion'
+import type {Search} from '@lib/util'
 
-export type PopoverOptions = {
-  tippyOptions: Record<string, any>
-  getLabel?: (id: string) => string
-  onStart?: (opts: any) => void
-  onUpdate?: (opts: any) => void
-  onKeyDown?: (opts: any) => boolean | undefined
-  onExit?: () => void
+export type SuggestionsOptions = {
+  char: string,
+  search: Readable<Search<any, any>>
+  select: (value: any, props: any) => void
+  suggestionComponent: ComponentType
+  suggestionsComponent: ComponentType
 }
 
-export const createPopoverNode = (name: string, char: string) => {
-  const pluginKey = new PluginKey(name)
-
-  return Node.create<PopoverOptions>({
+export const createSuggestions = (name: string) =>
+  Node.create<SuggestionsOptions>({
     name,
-    group: 'inline',
-    inline: true,
-    selectable: false,
     atom: true,
-    addAttributes: () => ({
-      id: {
-        default: null,
-        parseHTML: el => el.getAttribute('data-id'),
-        renderHTML: ({id}) => id ? {'data-id': id} : {},
-      },
-    }),
-    parseHTML() {
-      return [{tag: `span[data-type="${this.name}"]`}]
-    },
-    renderHTML({node, HTMLAttributes}) {
-      const label = this.options.getLabel?.(node.attrs.id) || node.attrs.id
-
-      return ['span', mergeAttributes({'data-type': this.name}, HTMLAttributes), `${char}${label}`]
-    },
-    renderText({node}) {
-      return `${char}${this.options.getLabel?.(node.attrs.id) || node.attrs.id}`
-    },
+    inline: true,
+    group: 'inline',
+    selectable: false,
     addKeyboardShortcuts() {
       return {
         Backspace: () => this.editor.commands.command(({ tr, state }) => {
@@ -66,9 +48,9 @@ export const createPopoverNode = (name: string, char: string) => {
     addProseMirrorPlugins() {
       return [
         Suggestion({
-          char,
-          pluginKey,
+          pluginKey: new PluginKey(name),
           editor: this.editor,
+          char: this.options.char,
           command: ({editor, range, props}) => {
             // increase range.to by one when the next node is of type "text"
             // and starts with a space character
@@ -100,6 +82,14 @@ export const createPopoverNode = (name: string, char: string) => {
           render: () => {
             let popover: Instance[]
             let target: HTMLElement
+            let suggestions: SvelteComponent
+
+            const mapProps = (props: any) => ({
+              term: props.query,
+              search: this.options.search,
+              component: this.options.suggestionComponent,
+              select: (value: string) => this.options.select(value, props),
+            })
 
             return {
               onStart: props => {
@@ -113,13 +103,12 @@ export const createPopoverNode = (name: string, char: string) => {
                   interactive: true,
                   trigger: "manual",
                   placement: "bottom-start",
-                  ...this.options.tippyOptions,
                 })
 
-                this.options.onStart?.({target, props})
+                suggestions = new this.options.suggestionsComponent({target, props: mapProps(props)})
               },
               onUpdate: props => {
-                this.options.onUpdate?.({props})
+                suggestions.$set(mapProps(props))
 
                 if (props.clientRect) {
                   popover[0].setProps({
@@ -134,11 +123,11 @@ export const createPopoverNode = (name: string, char: string) => {
                   return true
                 }
 
-                return Boolean(this.options.onKeyDown?.(props))
+                return Boolean(suggestions.onKeyDown?.(props.event))
               },
               onExit: () => {
                 popover[0].destroy()
-                this.options.onExit?.()
+                suggestions.$destroy()
               },
             }
           },
@@ -146,4 +135,3 @@ export const createPopoverNode = (name: string, char: string) => {
       ]
     },
   })
-}

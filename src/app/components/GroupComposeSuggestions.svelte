@@ -4,6 +4,7 @@
   import {throttle} from "throttle-debounce"
   import {slide} from "svelte/transition"
   import {clamp} from "@welshman/lib"
+  import {theme} from '@app/theme'
 
   export let term
   export let search
@@ -53,16 +54,15 @@
 
 {#if items.length > 0}
   <div
+    data-theme={$theme}
     bind:this={element}
     transition:slide|local={{duration: 100}}
-    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden border border-solid border-neutral-600">
+    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden shadow-xl">
     {#each items as value, i (value)}
       <button
-        class="cursor-pointer border-l-2 border-solid px-4 py-2 text-left text-neutral-100 hover:border-accent hover:bg-tinted-700"
-        class:bg-neutral-800={index !== i}
-        class:bg-tinted-700={index === i}
-        class:border-transparent={index !== i}
-        class:border-accent={index === i}
+        class="cursor-pointer px-4 py-2 text-left hover:bg-primary hover:text-primary-content transition-colors white-space-nowrap overflow-hidden text-ellipsis min-w-0"
+        class:bg-primary={index === i}
+        class:text-primary-content={index === i}
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
         <svelte:component this={component} {value} />

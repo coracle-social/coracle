@@ -5,9 +5,10 @@
   import Icon from '@lib/components/Icon.svelte'
 
   export let node: NodeViewProps['node']
+  export let selected: NodeViewProps['selected']
 </script>
 
-<NodeViewWrapper class="inline link-content">
+<NodeViewWrapper class={cx("inline link-content", {'link-content-selected': selected})}>
   <Icon icon="paperclip" size={3} class="inline-block translate-y-px" />
   {node.attrs.file.name}
 </NodeViewWrapper>

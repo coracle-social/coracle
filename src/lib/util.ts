@@ -38,7 +38,14 @@ export type SearchOptions<V, T> = {
   sortFn?: (items: FuseResult<T>) => any
 }
 
-export const createSearch = <V, T>(data: T[], opts: SearchOptions<V, T>) => {
+export type Search<V, T> = {
+  getValue: (item: T) => V
+  getOption: (value: V) => T | undefined
+  searchOptions: (term: string) => T[]
+  searchValues: (term: string) => V[]
+}
+
+export const createSearch = <V, T>(data: T[], opts: SearchOptions<V, T>): Search<V, T> => {
   const fuse = new Fuse(data, {...opts.fuseOptions, includeScore: true})
   const map = new Map<V, T>(data.map(item => [opts.getValue(item), item]))
 

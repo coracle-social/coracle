@@ -84,8 +84,18 @@
   @apply shadow-[0_20px_25px_-5px_rgb(0,0,0,0.1)_0_8px_10px_-6px_rgb(0,0,0,0.1)];
 }
 
+/* tiptap */
+
 .tiptap {
-  @apply rounded-box bg-base-100 px-4 p-2;
+  @apply rounded-box bg-base-300 px-4 p-2 max-h-[350px] overflow-y-auto;
+}
+
+.tiptap pre code {
+  @apply link-content w-full block;
+}
+
+.tiptap p code {
+  @apply link-content;
 }
 
 .link-content {

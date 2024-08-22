@@ -22,34 +22,24 @@ declare module '@tiptap/core' {
 }
 
 export const LinkExtension = Node.create({
-  name: 'link',
-
-  group: 'inline',
-
   atom: true,
-
+  name: 'link',
+  group: 'inline',
   inline: true,
-
   selectable: true,
-
   draggable: true,
-
   priority: 1000,
-
   addAttributes() {
     return {
       url: { default: null },
     }
   },
-
   renderHTML(props) {
     return ['div', { 'data-url': props.node.attrs.url }]
   },
-
   renderText(props) {
     return props.node.attrs.url
   },
-
   addStorage() {
     return {
       markdown: {
@@ -60,7 +50,6 @@ export const LinkExtension = Node.create({
       },
     }
   },
-
   addCommands() {
     return {
       insertLink:
@@ -75,7 +64,6 @@ export const LinkExtension = Node.create({
         },
     }
   },
-
   addPasteRules() {
     return [
       nodePasteRule({
