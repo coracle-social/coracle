@@ -27,7 +27,7 @@
     </div>
     <div in:fly={{delay: 150}}>
       <SecondaryNavHeader>
-        Conversations
+        Chats
         <div class="cursor-pointer">
           <Icon icon="add-circle" />
         </div>

@@ -669,36 +669,36 @@ export const groupMessages = deriveEventsMapped<GroupMessage>(repository, {
   itemToEvent: item => item.event,
 })
 
-// Group Conversations
+// Group Chats
 
-export type GroupConversation = {
+export type GroupChat = {
   nom: string
   messages: GroupMessage[]
 }
 
-export const groupConversations = derived(groupMessages, $groupMessages => {
+export const groupChats = derived(groupMessages, $groupMessages => {
   const groupMessagesByNom = groupBy($groupMessage => $groupMessage.nom, $groupMessages)
 
   return Array.from(groupMessagesByNom.entries()).map(([nom, messages]) => ({nom, messages}))
 })
 
 export const {
-  indexStore: groupConversationByNom,
-  getIndex: getGroupConversationsByNom,
-  deriveItem: deriveGroupConversation,
-  loadItem: loadGroupConversation,
+  indexStore: groupChatByNom,
+  getIndex: getGroupChatsByNom,
+  deriveItem: deriveGroupChat,
+  loadItem: loadGroupChat,
 } = createCollection({
-  name: "groupConversations",
-  store: groupConversations,
-  getKey: groupConversation => groupConversation.nom,
+  name: "groupChats",
+  store: groupChats,
+  getKey: groupChat => groupChat.nom,
   load: (nom: string, hints = [], request: Partial<SubscribeRequest> = {}) => {
     const relays = [...hints, ...(get(relayUrlsByNom).get(nom) || [])]
-    const conversation = get(groupConversations).find(c => c.nom === nom)
-    const timestamps = conversation?.messages.map(m => m.event.created_at) || []
+    const chat = get(groupChats).find(c => c.nom === nom)
+    const timestamps = chat?.messages.map(m => m.event.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
 
     if (relays.length === 0) {
-      console.warn(`Attempted to load conversation for ${nom} with no qualified groups`)
+      console.warn(`Attempted to load chat for ${nom} with no qualified groups`)
     }
 
     return load({...request, relays, filters: [{"#h": [nom], since}]})

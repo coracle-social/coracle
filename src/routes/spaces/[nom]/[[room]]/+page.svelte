@@ -16,10 +16,10 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
   import GroupCompose from "@app/components/GroupCompose.svelte"
-  import {deriveGroupConversation} from "@app/state"
+  import {deriveGroupChat} from "@app/state"
 
   const {nom} = $page.params
-  const conversation = deriveGroupConversation(nom)
+  const chat = deriveGroupChat(nom)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -32,7 +32,7 @@
     let previousDate
     let previousPubkey
 
-    for (const {event} of sortBy(m => m.event.created_at, $conversation?.messages || [])) {
+    for (const {event} of sortBy(m => m.event.created_at, $chat?.messages || [])) {
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
