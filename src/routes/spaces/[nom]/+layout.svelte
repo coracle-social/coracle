@@ -64,21 +64,37 @@
           </Popover>
         {/if}
       </div>
-      <div class="h-2" />
-      <SecondaryNavHeader>
-        Rooms
-        <Button on:click={() => alert("Uh, I don't know how to do rooms on NIP 29")}>
-          <Icon icon="add-circle" />
-        </Button>
-      </SecondaryNavHeader>
       <div in:fly|local>
-        <SecondaryNavItem href="/spaces/{nom}/general">
-          <Icon icon="hashtag" /> General
+        <SecondaryNavItem href="/spaces/{nom}">
+          <Icon icon="chat-round" /> Chat
         </SecondaryNavItem>
+      </div>
+      <div in:fly|local={{delay: 50}}>
+        <SecondaryNavItem href="/spaces/{nom}/threads">
+          <Icon icon="notes-minimalistic" /> Threads
+        </SecondaryNavItem>
+      </div>
+      <div in:fly|local={{delay: 100}}>
+        <SecondaryNavItem href="/spaces/{nom}/events">
+          <Icon icon="calendar-minimalistic" /> Calendar
+        </SecondaryNavItem>
+      </div>
+      <div in:fly|local={{delay: 150}}>
+        <SecondaryNavItem href="/spaces/{nom}/listings">
+          <Icon icon="shop-minimalistic" /> Market
+        </SecondaryNavItem>
+      </div>
+      <div in:fly|local={{delay: 200}}>
+        <div class="h-2" />
+        <SecondaryNavHeader>
+          Rooms
+          <Button on:click={() => alert("Uh, I don't know how to do rooms on NIP 29")}>
+            <Icon icon="add-circle" />
+          </Button>
+        </SecondaryNavHeader>
       </div>
     </SecondaryNavSection>
   </SecondaryNav>
-
   <Page>
     <slot />
   </Page>

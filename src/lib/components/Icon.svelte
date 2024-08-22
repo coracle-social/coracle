@@ -13,6 +13,9 @@
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
   import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
   import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
+  import Bag from "@assets/icons/Bag.svg?dataurl"
+  import CalendarMinimalistic from "@assets/icons/Calendar Minimalistic.svg?dataurl"
+  import ChatRound from "@assets/icons/Chat Round.svg?dataurl"
   import CheckCircle from "@assets/icons/Check Circle.svg?dataurl"
   import ClipboardText from "@assets/icons/Clipboard Text.svg?dataurl"
   import CloseCircle from "@assets/icons/Close Circle.svg?dataurl"
@@ -32,12 +35,14 @@
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
+  import NotesMinimalistic from "@assets/icons/Notes Minimalistic.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Paperclip from "@assets/icons/Paperclip.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
   import Reply from "@assets/icons/Reply.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
+  import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
   import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
   import UFO3 from "@assets/icons/UFO 3.svg?dataurl"
@@ -58,6 +63,9 @@
     "alt-arrow-right": AltArrowRight,
     "alt-arrow-left": AltArrowLeft,
     "arrow-right": ArrowRight,
+    bag: Bag,
+    "calendar-minimalistic": CalendarMinimalistic,
+    "chat-round": ChatRound,
     "check-circle": CheckCircle,
     "clipboard-text": ClipboardText,
     "close-circle": CloseCircle,
@@ -77,11 +85,13 @@
     "login-2": Login2,
     magnifer: Magnifer,
     "menu-dots": MenuDots,
+    "notes-minimalistic": NotesMinimalistic,
     "pallete-2": Pallete2,
     "paperclip": Paperclip,
     plain: Plain,
     reply: Reply,
     "remote-controller-minimalistic": RemoteControllerMinimalistic,
+    "shop-minimalistic": ShopMinimalistic,
     "smile-circle": SmileCircle,
     settings: Settings,
     "ufo-3": UFO3,
