@@ -1,14 +1,17 @@
 <script lang="ts">
   import {append, remove} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
+  import {PublishStatus} from "@welshman/net"
   import {goto} from "$app/navigation"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import InfoNip29 from "@app/components/InfoNip29.svelte"
-  import {pushModal} from "@app/modal"
+  import {pushModal, clearModal} from "@app/modal"
+  import {pushToast} from "@app/toast"
+  import type {PublishStatusData} from "@app/state"
   import {deriveGroup, displayGroup, relayUrlsByNom} from "@app/state"
-  import {addGroupMemberships} from "@app/commands"
+  import {sendJoinRequest, addGroupMemberships} from "@app/commands"
 
   export let nom
 
@@ -22,20 +25,35 @@
       : append(e.target.value, urls)
   }
 
+  const tryJoin = async () => {
+    for (const url of urls) {
+      const {status, message} = await sendJoinRequest(nom, url)
+
+      if (status !== PublishStatus.Success) {
+        return pushToast({
+          theme: 'error',
+          message: `Failed to join relay: ${message || status}`,
+        })
+      }
+    }
+
+    await addGroupMemberships(urls.map(url => ["group", nom, url]))
+
+    clearModal()
+  }
+
   const join = async () => {
     loading = true
 
     try {
-      await addGroupMemberships(urls.map(url => ["group", nom, url]))
+      await tryJoin()
     } finally {
       loading = false
     }
-
-    goto(`/spaces/${nom}`)
   }
 
-  let urls: string[] = $relayUrlsByNom.get(nom) || []
   let loading = false
+  let urls: string[] = $relayUrlsByNom.get(nom) || []
 
   $: hasUrls = urls.length > 0
   $: urlOptions = $relayUrlsByNom.get(nom)?.toSorted() || []

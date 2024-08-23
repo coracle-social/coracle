@@ -1,7 +1,9 @@
 <script lang="ts">
+  import {displayRelayUrl} from '@welshman/util'
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import {DEFAULT_RELAYS} from "@app/base"
   import {clip} from "@app/toast"
 </script>
 
@@ -21,14 +23,16 @@
     >. If you do decide to join someone else's, make sure to follow their directions for registering
     as a user.
   </p>
-  <div class="alert !flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <Icon icon="remote-controller-minimalistic" />
-      groups.fiatjaf.com
+  {#each DEFAULT_RELAYS as url}
+    <div class="alert !flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <Icon icon="remote-controller-minimalistic" />
+        {displayRelayUrl(url)}
+      </div>
+      <Button on:click={() => clip(url)}>
+        <Icon icon="copy" />
+      </Button>
     </div>
-    <Button on:click={() => clip("groups.fiatjaf.com")}>
-      <Icon icon="copy" />
-    </Button>
-  </div>
+  {/each}
   <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
 </div>

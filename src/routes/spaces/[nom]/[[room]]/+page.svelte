@@ -90,5 +90,5 @@
       </Spinner>
     </p>
   </div>
-  <GroupCompose />
+  <GroupCompose {nom} />
 </div>

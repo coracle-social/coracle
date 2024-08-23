@@ -7,10 +7,13 @@
   import {deriveProfile} from '@app/state'
 
   export let node: NodeViewProps['node']
+  export let selected: NodeViewProps['selected']
 
   $: profile = deriveProfile(node.attrs.pubkey, node.attrs.relays)
 </script>
 
 <NodeViewWrapper class="inline">
-  <span class="text-primary">@</span><Link external href="https://njump.me/{node.attrs.nprofile}">{displayProfile($profile)}</Link>
+  <Link external href="https://njump.me/{node.attrs.nprofile}" class={cx("link-content", {'link-content-selected': selected})}>
+    @{displayProfile($profile)}
+  </Link>
 </NodeViewWrapper>

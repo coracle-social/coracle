@@ -21,8 +21,6 @@ export const subs: Unsubscriber[] = []
 
 export const DB_NAME = "flotilla"
 
-export const DB_VERSION = 1
-
 export const getAll = async (name: string) => {
   const tx = db.transaction(name, "readwrite")
   const store = tx.objectStore(name)
@@ -81,12 +79,12 @@ export const initIndexedDbAdapter = async (name: string, adapter: IndexedDbAdapt
   )
 }
 
-export const initStorage = async (adapters: Record<string, IndexedDbAdapter>) => {
+export const initStorage = async (version: number, adapters: Record<string, IndexedDbAdapter>) => {
   if (!window.indexedDB) return
 
   window.addEventListener("beforeunload", () => closeStorage())
 
-  db = await openDB(DB_NAME, DB_VERSION, {
+  db = await openDB(DB_NAME, version, {
     upgrade(db: IDBPDatabase) {
       const names = Object.keys(adapters)
 

@@ -1,13 +1,15 @@
 <script lang="ts">
   import twColors from "tailwindcss/colors"
-  import {readable} from "svelte/store"
+  import {readable, derived} from "svelte/store"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {GROUP_REPLY, getAncestorTags, displayPubkey} from "@welshman/util"
-  import {fly} from "@lib/transition"
+  import {PublishStatus} from "@welshman/net"
+  import {GROUP_REPLY, displayRelayUrl, getAncestorTags, displayPubkey} from "@welshman/util"
+  import {fly, fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {deriveProfile, deriveProfileDisplay, deriveEvent} from "@app/state"
+  import type {PublishStatusData} from "@app/state"
+  import {deriveProfile, deriveProfileDisplay, deriveEvent, publishStatusData} from "@app/state"
 
   export let event: TrustedEvent
   export let showPubkey: boolean
@@ -41,10 +43,17 @@
   const parentHints = [replies[0]?.[2]].filter(Boolean)
   const parentEvent = parentId ? deriveEvent(parentId, parentHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+  const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
+
+  const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
+    $ps.find(({status}) => statuses.includes(status))
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey)
   $: parentProfileDisplay = deriveProfileDisplay(parentPubkey)
+  $: isPublished = findStatus($ps, [PublishStatus.Success])
+  $: isPending = findStatus($ps, [PublishStatus.Pending])
+  $: failure = !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
 <div in:fly class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300">
@@ -65,13 +74,28 @@
     {#if showPubkey}
       <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
     {:else}
-      <div class="w-10" />
+      <div class="min-w-10 max-w-10 w-10" />
     {/if}
     <div class="-mt-1">
       {#if showPubkey}
         <strong class="text-sm" style="color: {colorValue}" data-color={colorName}>{$profileDisplay}</strong>
       {/if}
-      <p class="text-sm">{event.content}</p>
+      <p class="text-sm">
+        {event.content}
+        {#if isPending}
+          <span class="ml-1 flex-inline gap-1">
+            <span class="loading loading-spinner h-3 w-3 mx-1 translate-y-px" />
+            <span class="opacity-50">Sending...</span>
+          </span>
+        {:else if failure}
+          <span
+            class="ml-1 flex-inline gap-1 tooltip cursor-pointer"
+            data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
+            <Icon icon="danger" class="translate-y-px" size={3} />
+            <span class="opacity-50">Failed to send!</span>
+          </span>
+        {/if}
+      </p>
     </div>
   </div>
   <div

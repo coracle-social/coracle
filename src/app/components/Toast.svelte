@@ -4,12 +4,14 @@
 </script>
 
 {#if $toast}
+  {@const theme = $toast.theme || "info"}
   {#key $toast.id}
     <div transition:fly class="toast z-toast">
       <div
         role="alert"
         class="alert flex justify-center"
-        class:alert-error={$toast.theme === "error"}>
+        class:alert-info={theme === "info"}
+        class:alert-error={theme === "error"}>
         {$toast.message}
       </div>
     </div>

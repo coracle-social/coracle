@@ -14,9 +14,9 @@
     userMembership,
   } from "@app/state"
 
-  const getRelayUrls = (nom: string): string[] => $relayUrlsByNom.get(nom) || []
-
   let term = ""
+
+  $: groups = $searchGroups.searchOptions(term).filter(g => $relayUrlsByNom.get(g.nom)?.length > 0)
 
   onMount(() => {
     load({
@@ -35,7 +35,7 @@
   </label>
   <Masonry
     animate={false}
-    items={$searchGroups.searchOptions(term)}
+    items={groups}
     minColWidth={250}
     maxColWidth={800}
     gap={16}
@@ -57,7 +57,7 @@
       {#if $userMembership?.noms.has(group.nom)}
         <div class="center absolute flex w-full">
           <div
-            class="tooltip relative left-8 top-[38px] rounded-full bg-primary"
+            class="tooltip relative left-8 w-5 h-5 top-[38px] rounded-full bg-primary"
             data-tip="You are already a member of this space.">
             <Icon icon="check-circle" class="scale-110" />
           </div>
@@ -66,7 +66,7 @@
       <div class="card-body">
         <h2 class="card-title justify-center">{displayGroup(group)}</h2>
         <div class="text-center text-sm">
-          {#each getRelayUrls(group.nom) as url}
+          {#each $relayUrlsByNom.get(group.nom) || [] as url}
             <div class="badge badge-neutral">{displayRelayUrl(url)}</div>
           {/each}
         </div>

@@ -5,7 +5,7 @@ export const createPasteRuleMatch = <T extends Record<string, unknown>>(
   data: T,
 ): PasteRuleMatch => ({ index: match.index!, replaceWith: match[2], text: match[0], match, data })
 
-export const findNodes = (json: JSONContent, type: string) => {
+export const findNodes = (type: string, json: JSONContent) => {
   const results: JSONContent[] = []
 
   for (const node of json.content || []) {
@@ -13,7 +13,7 @@ export const findNodes = (json: JSONContent, type: string) => {
       results.push(node)
     }
 
-    for (const result of findNodes(node, type)) {
+    for (const result of findNodes(type, node)) {
       results.push(result)
     }
   }

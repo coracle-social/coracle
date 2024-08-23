@@ -1,9 +1,17 @@
 <script lang="ts">
   import {onMount} from 'svelte'
   import type {Readable} from 'svelte/store'
+  import {nprofileEncode} from 'nostr-tools/nip19'
   import {createEditor, type Editor, EditorContent, SvelteNodeViewRenderer} from 'svelte-tiptap'
   import {Extension} from '@tiptap/core'
-  import StarterKit from '@tiptap/starter-kit'
+  import Code from '@tiptap/extension-code'
+  import CodeBlock from '@tiptap/extension-code-block'
+  import Document from '@tiptap/extension-document'
+  import Dropcursor from '@tiptap/extension-dropcursor'
+  import Gapcursor from '@tiptap/extension-gapcursor'
+  import History from '@tiptap/extension-history'
+  import Paragraph from '@tiptap/extension-paragraph'
+  import Text from '@tiptap/extension-text'
   import HardBreakExtension from '@tiptap/extension-hard-break'
   import {Bolt11Extension, NProfileExtension, NEventExtension, NAddrExtension, ImageExtension, VideoExtension, FileUploadExtension} from 'nostr-editor'
   import type {StampedEvent} from '@welshman/util'
@@ -21,8 +29,11 @@
   import GroupComposeSuggestions from '@app/components/GroupComposeSuggestions.svelte'
   import GroupComposeTopicSuggestion from '@app/components/GroupComposeTopicSuggestion.svelte'
   import GroupComposeProfileSuggestion from '@app/components/GroupComposeProfileSuggestion.svelte'
-  import {signer} from '@app/base'
-  import {searchProfiles, searchTopics, displayProfileByPubkey} from '@app/state'
+  import {signer, INDEXER_RELAYS} from '@app/base'
+  import {searchProfiles, publishThunk, makeThunk, searchTopics, userRelayUrlsByNom, getWriteRelayUrls, displayProfileByPubkey, getRelaySelectionsByPubkey} from '@app/state'
+  import {getPubkeyHints, makeMention, makeIMeta} from '@app/commands'
+
+  export let nom
 
   let editor: Readable<Editor>
   let uploading = false
@@ -34,31 +45,36 @@
 
   const uploadFiles = () => $editor.chain().uploadFiles().run()
 
-  const sendMessage = () => {
-    console.log($editor.getJSON())
-    $editor.chain().clearContent().run()
-    createEvent(CHAT_MESSAGE, {
-      content: '',
-      tags: [],
+  const sendMessage = async () => {
+    const json = $editor.getJSON()
+    const relays = $userRelayUrlsByNom.get(nom)
+    const event = createEvent(CHAT_MESSAGE, {
+      content: $editor.getText(),
+      tags: [
+        ["h", nom],
+        ...findNodes(TopicExtension.name, json).map(t => ["t", t.attrs!.name.toLowerCase()]),
+        ...findNodes(NProfileExtension.name, json).map(m => makeMention(m.attrs!.pubkey, m.attrs!.relays)),
+        ...findNodes(ImageExtension.name, json).map(({attrs: {src, sha256: x}}: any) => makeIMeta(src, {x, ox: x})),
+      ],
     })
+
+    publishThunk(makeThunk({event, relays}))
+
+    $editor.chain().clearContent().run()
   }
 
   onMount(() => {
     editor = createEditor({
       autofocus: true,
       extensions: [
-        StarterKit.configure({
-          blockquote: false,
-          bold: false,
-          bulletList: false,
-          heading: false,
-          horizontalRule: false,
-          italic: false,
-          listItem: false,
-          orderedList: false,
-          strike: false,
-          hardBreak: false,
-        }),
+        Code,
+        CodeBlock,
+        Document,
+        Dropcursor,
+        Gapcursor,
+        History,
+        Paragraph,
+        Text,
         HardBreakExtension.extend({
           addKeyboardShortcuts() {
             return {
@@ -79,7 +95,7 @@
         LinkExtension.extend({
           addNodeView: () => SvelteNodeViewRenderer(GroupComposeLink),
         }),
-        Bolt11Extension.extend({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)}),
+        Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)})),
         NProfileExtension.extend({
           addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
           addProseMirrorPlugins() {
@@ -89,7 +105,12 @@
                 name: 'nprofile',
                 editor: this.editor,
                 search: searchProfiles,
-                select: (pubkey: string, props: any) => props.command({pubkey}),
+                select: (pubkey: string, props: any) => {
+                  const relays = getPubkeyHints(pubkey)
+                  const nprofile = nprofileEncode({pubkey, relays})
+
+                  return props.command({pubkey, nprofile, relays})
+                },
                 suggestionComponent: GroupComposeProfileSuggestion,
                 suggestionsComponent: GroupComposeSuggestions,
               }),
@@ -135,11 +156,7 @@
         }),
       ],
       content: '',
-      onUpdate: () => {
-        //  console.log('update', $editor.getJSON(), $editor.getText())
-      },
     })
-    console.log($editor)
   })
 </script>
 

@@ -1,6 +1,7 @@
-import {uniqBy, uniq, now} from "@welshman/lib"
+import {uniqBy, uniq, now, choice} from "@welshman/lib"
 import {
   GROUPS,
+  GROUP_JOIN,
   asDecryptedEvent,
   getGroupTags,
   getRelayTagValues,
@@ -9,6 +10,7 @@ import {
   makeList,
   createList,
   createEvent,
+  displayProfile,
 } from "@welshman/util"
 import {pk, signer, repository, INDEXER_RELAYS} from "@app/base"
 import {
@@ -23,7 +25,33 @@ import {
   makeThunk,
   publishThunk,
   ensurePlaintext,
+  getProfilesByPubkey,
 } from "@app/state"
+
+// Utils
+
+export const getPubkeyHints = (pubkey: string) => {
+  const selections = getRelaySelectionsByPubkey().get(pubkey)
+  const relays = selections ? getWriteRelayUrls(selections) : []
+  const hints = relays.length ? relays : INDEXER_RELAYS
+
+  return hints
+}
+
+export const getPubkeyPetname = (pubkey: string) => {
+  const profile = getProfilesByPubkey().get(pubkey)
+  const display = displayProfile(profile)
+
+  return display
+}
+
+export const makeMention = (pubkey: string, hints?: string[]) =>
+  ["p", pubkey, choice(hints || getPubkeyHints(pubkey)), getPubkeyPetname(pubkey)]
+
+export const makeIMeta = (url: string, data: Record<string, string>) =>
+  ["imeta", `url ${url}`, ...Object.entries(data).map(([k, v]) => [k, v].join(' '))]
+
+// Loaders
 
 export const loadUserData = async (pubkey: string, hints: string[] = []) => {
   const relaySelections = await loadRelaySelections(pubkey, INDEXER_RELAYS)
@@ -46,6 +74,8 @@ export const loadUserData = async (pubkey: string, hints: string[] = []) => {
   await Promise.all(promises)
 }
 
+// Updates
+
 export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateList = async (kind: number, modifyTags: ModifyTags) => {
@@ -67,3 +97,10 @@ export const addGroupMemberships = (newTags: string[][]) =>
 
 export const removeGroupMemberships = (noms: string[]) =>
   updateList(GROUPS, (tags: string[][]) => tags.filter(t => !noms.includes(t[1])))
+
+export const sendJoinRequest = async (nom: string, url: string) => {
+  const event = createEvent(GROUP_JOIN, {tags: [["h", nom]]})
+  const result = await publishThunk(makeThunk({event, relays: [url]}))
+
+  return result[url]
+}

@@ -6,6 +6,7 @@
 </style>
 
 <script lang="ts">
+  import cx from 'classnames'
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
@@ -14,6 +15,7 @@
   import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
   import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
   import Bag from "@assets/icons/Bag.svg?dataurl"
+  import Bolt from "@assets/icons/Bolt.svg?dataurl"
   import CalendarMinimalistic from "@assets/icons/Calendar Minimalistic.svg?dataurl"
   import ChatRound from "@assets/icons/Chat Round.svg?dataurl"
   import CheckCircle from "@assets/icons/Check Circle.svg?dataurl"
@@ -22,6 +24,7 @@
   import Copy from "@assets/icons/Copy.svg?dataurl"
   import Compass from "@assets/icons/Compass.svg?dataurl"
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
+  import Danger from "@assets/icons/Danger.svg?dataurl"
   import Exit from "@assets/icons/Exit.svg?dataurl"
   import FireMinimalistic from "@assets/icons/Fire Minimalistic.svg?dataurl"
   import GallerySend from "@assets/icons/Gallery Send.svg?dataurl"
@@ -65,6 +68,7 @@
     "alt-arrow-left": AltArrowLeft,
     "arrow-right": ArrowRight,
     bag: Bag,
+    bolt: Bolt,
     "calendar-minimalistic": CalendarMinimalistic,
     "chat-round": ChatRound,
     "check-circle": CheckCircle,
@@ -73,6 +77,7 @@
     copy: Copy,
     compass: Compass,
     "compass-big": CompassBig,
+    danger: Danger,
     exit: Exit,
     "fire-minimalistic": FireMinimalistic,
     "gallery-send": GallerySend,
@@ -110,5 +115,5 @@
 </script>
 
 <div
-  class={$$props.class}
+  class={cx("inline-block", $$props.class)}
   style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px; background-color: currentcolor;" />
