@@ -8,7 +8,7 @@
 <a
   {href}
   {...$$props}
-  class={cx($$props.class, "cursor-pointer text-primary underline")}
+  class={cx($$props.class, "cursor-pointer")}
   rel={external ? "noopener noreferer" : ""}
   target={external ? "_blank" : ""}>
   <slot />

@@ -43,9 +43,7 @@
 }
 
 .card2 {
-  padding: 1rem;
-  background-color: oklch(var(--b2) / 1);
-  border-radius: var(--rounded-box, 1rem);
+  @apply p-6 bg-base-100 text-base-content rounded-box;
 }
 
 .column {

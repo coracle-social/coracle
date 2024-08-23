@@ -9,6 +9,10 @@
   import cx from 'classnames'
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
+  import Code2 from "@assets/icons/Code 2.svg?dataurl"
+  import Earth from "@assets/icons/Earth.svg?dataurl"
+  import Pen from "@assets/icons/Pen.svg?dataurl"
+  import HeadphonesRound from "@assets/icons/Headphones Round.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
   import AltArrowDown from "@assets/icons/Alt Arrow Down.svg?dataurl"
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
@@ -33,6 +37,7 @@
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
+  import InfoSquare from "@assets/icons/Info Square.svg?dataurl"
   import Key from "@assets/icons/Key.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
   import Login from "@assets/icons/Login.svg?dataurl"
@@ -62,6 +67,10 @@
 
   const data = switcher(icon, {
     "add-square": AddSquare,
+    "code-2": Code2,
+    "earth": Earth,
+    "pen": Pen,
+    "headphones-round": HeadphonesRound,
     "add-circle": AddCircle,
     "alt-arrow-down": AltArrowDown,
     "alt-arrow-right": AltArrowRight,
@@ -86,6 +95,7 @@
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     "info-circle": InfoCircle,
+    "info-square": InfoSquare,
     key: Key,
     "link-round": LinkRound,
     login: Login,

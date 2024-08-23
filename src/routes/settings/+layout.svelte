@@ -18,6 +18,11 @@
         <Icon icon="settings" /> Settings
       </SecondaryNavItem>
     </div>
+    <div in:fly|local>
+      <SecondaryNavItem href="/settings/about">
+        <Icon icon="info-square" /> About
+      </SecondaryNavItem>
+    </div>
     <div in:fly|local={{delay: 50}}>
       <SecondaryNavItem class="text-error hover:text-error" on:click={logout}>
         <Icon icon="exit" /> Log Out
