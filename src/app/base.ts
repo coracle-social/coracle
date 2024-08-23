@@ -1,7 +1,7 @@
 import {derived} from "svelte/store"
 import {memoize, assoc} from "@welshman/lib"
 import type {TrustedEvent, HashedEvent} from "@welshman/util"
-import {Repository, createEvent, Relay} from "@welshman/util"
+import {Repository, createEvent, Relay, REACTION, ZAP_RESPONSE} from "@welshman/util"
 import {withGetter} from "@welshman/store"
 import {NetworkContext, Tracker} from "@welshman/net"
 import {Nip46Broker, Nip46Signer, Nip07Signer, Nip01Signer} from "@welshman/signer"
@@ -12,11 +12,14 @@ export const DEFAULT_RELAYS = [
   "wss://groups.fiatjaf.com/",
   "wss://relay29.galaxoidlabs.com/",
   "wss://devrelay.highlighter.com/",
+  "wss://relay.groups.nip29.com/",
 ]
 
 export const INDEXER_RELAYS = ["wss://purplepag.es/", "wss://relay.damus.io/", "wss://nos.lol/"]
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
+
+export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
 
 export const repository = new Repository<HashedEvent>()
 

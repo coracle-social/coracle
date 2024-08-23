@@ -1,13 +1,17 @@
 <script lang="ts">
   import twColors from "tailwindcss/colors"
   import {readable, derived} from "svelte/store"
-  import {hash} from "@welshman/lib"
+  import {hash, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {deriveEvents} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
-  import {GROUP_REPLY, displayRelayUrl, getAncestorTags, displayPubkey} from "@welshman/util"
+  import {GROUP_REPLY, REACTION, ZAP_RESPONSE, displayRelayUrl, getAncestorTags, displayPubkey} from "@welshman/util"
   import {fly, fade} from "@lib/transition"
+  import {formatTimestampAsTime} from '@lib/util'
   import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
+  import {repository} from '@app/base'
   import type {PublishStatusData} from "@app/state"
   import {deriveProfile, deriveProfileDisplay, deriveEvent, publishStatusData} from "@app/state"
 
@@ -38,12 +42,20 @@
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
+  const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], '#e': [event.id]}]})
+  const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], '#e': [event.id]}]})
   const {replies} = getAncestorTags(event.tags)
   const parentId = replies[0]?.[1]
   const parentHints = [replies[0]?.[2]].filter(Boolean)
   const parentEvent = parentId ? deriveEvent(parentId, parentHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
+
+  const displayReaction = (content: string) => {
+    if (content === '+') return "❤️"
+    if (content === '-') return "👎"
+    return content
+  }
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
@@ -52,7 +64,7 @@
   $: parentProfile = deriveProfile(parentPubkey)
   $: parentProfileDisplay = deriveProfileDisplay(parentPubkey)
   $: isPublished = findStatus($ps, [PublishStatus.Success])
-  $: isPending = findStatus($ps, [PublishStatus.Pending])
+  $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
   $: failure = !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
@@ -78,7 +90,10 @@
     {/if}
     <div class="-mt-1">
       {#if showPubkey}
-        <strong class="text-sm" style="color: {colorValue}" data-color={colorName}>{$profileDisplay}</strong>
+        <div class="flex gap-2 items-center">
+          <strong class="text-sm" style="color: {colorValue}" data-color={colorName}>{$profileDisplay}</strong>
+          <span class="opacity-50 text-xs">{formatTimestampAsTime(event.created_at)}</span>
+        </div>
       {/if}
       <p class="text-sm">
         {event.content}
@@ -98,6 +113,18 @@
       </p>
     </div>
   </div>
+  {#if $reactions.length > 0 || $zaps.length > 0}
+    <div class="text-xs ml-12">
+      {#each groupBy(e => e.content, $reactions).entries() as [content, events]}
+        <Button class="btn btn-neutral btn-xs rounded-full mr-2 flex-inline gap-1">
+          <span>{displayReaction(content)}</span>
+          {#if events.length > 1}
+            <span>{events.length}</span>
+          {/if}
+        </Button>
+      {/each}
+    </div>
+  {/if}
   <div
     class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100">
     <button class="btn join-item btn-xs">

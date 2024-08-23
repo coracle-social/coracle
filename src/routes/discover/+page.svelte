@@ -70,7 +70,9 @@
             <div class="badge badge-neutral">{displayRelayUrl(url)}</div>
           {/each}
         </div>
-        <p class="py-4 text-sm">{group.about}</p>
+        {#if group.about}
+          <p class="py-4 text-sm">{group.about}</p>
+        {/if}
       </div>
     </a>
   </Masonry>

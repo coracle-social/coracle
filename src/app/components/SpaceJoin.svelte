@@ -27,13 +27,10 @@
 
   const tryJoin = async () => {
     for (const url of urls) {
-      const {status, message} = await sendJoinRequest(nom, url)
+      const [ok, message] = await sendJoinRequest(nom, url)
 
-      if (status !== PublishStatus.Success) {
-        return pushToast({
-          theme: 'error',
-          message: `Failed to join relay: ${message || status}`,
-        })
+      if (!ok) {
+        return pushToast({theme: 'error', message})
       }
     }
 

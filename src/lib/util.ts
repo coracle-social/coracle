@@ -33,6 +33,7 @@ export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
 }
 
 export type SearchOptions<V, T> = {
+
   getValue: (item: T) => V
   fuseOptions?: IFuseOptions<T>
   sortFn?: (items: FuseResult<T>) => any
@@ -91,6 +92,14 @@ export const formatTimestampAsDate = (ts: number) => {
     year: "numeric",
     month: "long",
     day: "numeric",
+  })
+
+  return formatter.format(secondsToDate(ts))
+}
+
+export const formatTimestampAsTime = (ts: number) => {
+  const formatter = new Intl.DateTimeFormat(getLocale(), {
+    timeStyle: "short",
   })
 
   return formatter.format(secondsToDate(ts))

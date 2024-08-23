@@ -5,6 +5,7 @@ import {get, writable, readable, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
 import {
   max,
+  first,
   append,
   between,
   uniqBy,
@@ -49,7 +50,7 @@ import {decrypt, stamp, own, hash} from "@welshman/signer"
 import {custom, deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
 import type {Handle, Relay} from "@app/types"
-import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner} from "@app/base"
+import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, REACTION_KINDS} from "@app/base"
 
 // Utils
 
@@ -206,6 +207,9 @@ export const load = (request: SubscribeRequest) =>
 
     sub.emitter.on("complete", () => resolve(events))
   })
+
+export const loadOne = async (request: SubscribeRequest) =>
+  first(await load(request))
 
 // Publish status
 
@@ -685,7 +689,7 @@ export type GroupMessage = {
 export const readGroupMessage = (event: TrustedEvent): Maybe<GroupMessage> => {
   const nom = event.tags.find(nthEq(0, "h"))?.[1]
 
-  if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind)) {
+  if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind) || REACTION_KINDS.includes(event.kind)) {
     return undefined
   }
 

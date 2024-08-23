@@ -12,8 +12,11 @@ import {
   createEvent,
   displayProfile,
 } from "@welshman/util"
+import {PublishStatus} from "@welshman/net"
 import {pk, signer, repository, INDEXER_RELAYS} from "@app/base"
 import {
+  loadOne,
+  subscribe,
   getWriteRelayUrls,
   loadGroup,
   loadGroupMembership,
@@ -98,9 +101,17 @@ export const addGroupMemberships = (newTags: string[][]) =>
 export const removeGroupMemberships = (noms: string[]) =>
   updateList(GROUPS, (tags: string[][]) => tags.filter(t => !noms.includes(t[1])))
 
-export const sendJoinRequest = async (nom: string, url: string) => {
-  const event = createEvent(GROUP_JOIN, {tags: [["h", nom]]})
-  const result = await publishThunk(makeThunk({event, relays: [url]}))
+export const sendJoinRequest = async (nom: string, url: string): Promise<[boolean, string]> => {
+  const relays = [url]
+  const filters = [{kinds: [9000], '#h': [nom], '#p': [pk.get()!], since: now() - 30}]
 
-  return result[url]
+  const event = createEvent(GROUP_JOIN, {tags: [["h", nom]]})
+  const statusData = await publishThunk(makeThunk({event, relays}))
+  const {status, message} = statusData[url]
+
+  if (message.includes('already a member')) return [true, ""]
+  if (status !== PublishStatus.Success) return [false, message]
+  if (await loadOne({filters, relays})) return [true, ""]
+
+  return [false, "Your request was not automatically approved, but may be approved manually later. Please try again later or contact the group admin."]
 }
