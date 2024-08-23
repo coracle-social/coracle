@@ -204,7 +204,6 @@ export const load = (request: SubscribeRequest) =>
     const events: TrustedEvent[] = []
 
     sub.emitter.on("event", (url: string, e: SignedEvent) => events.push(e))
-
     sub.emitter.on("complete", () => resolve(events))
   })
 
@@ -338,6 +337,15 @@ export const {
     return items
   }),
 })
+
+export const searchRelays = derived(relays, $relays =>
+  createSearch($relays, {
+    getValue: (relay: Relay) => relay.url,
+    fuseOptions: {
+      keys: ["url", "name", {name: "description", weight: 0.3}],
+    },
+  }),
+)
 
 // Handles
 

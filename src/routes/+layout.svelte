@@ -145,7 +145,7 @@
   <div data-theme={$theme} />
 {:then}
   <div data-theme={$theme}>
-    <div class="flex h-screen">
+    <div class="flex h-screen overflow-hidden">
       <PrimaryNav />
       <slot />
     </div>

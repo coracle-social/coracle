@@ -46,6 +46,14 @@
   @apply p-6 bg-base-100 text-base-content rounded-box;
 }
 
+.card2.card2-sm {
+  @apply p-4 bg-base-100 text-base-content rounded-box;
+}
+
+.card2.card2-alt {
+  @apply bg-base-300;
+}
+
 .column {
   @apply flex flex-col;
 }

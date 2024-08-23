@@ -24,7 +24,7 @@
     as a user.
   </p>
   {#each DEFAULT_RELAYS as url}
-    <div class="alert !flex items-center justify-between">
+    <div class="card2 card2-alt card2-sm flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Icon icon="remote-controller-minimalistic" />
         {displayRelayUrl(url)}

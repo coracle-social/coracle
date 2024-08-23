@@ -64,6 +64,7 @@
           </Popover>
         {/if}
       </div>
+      <div class="my-3 h-px bg-base-200" />
       <div in:fly|local>
         <SecondaryNavItem href="/spaces/{nom}">
           <Icon icon="chat-round" /> Chat

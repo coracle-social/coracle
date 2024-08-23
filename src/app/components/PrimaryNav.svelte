@@ -37,7 +37,7 @@
   }
 </script>
 
-<div class="relative w-14 bg-base-100 flex-shrink-0" bind:this={element}>
+<div class="relative w-14 bg-base-100 flex-shrink-0 pt-4" bind:this={element}>
   <div
     class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300"
     style={`top: ${$activeOffset}px`} />
