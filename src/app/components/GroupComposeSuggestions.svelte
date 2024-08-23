@@ -11,6 +11,7 @@
   export let select
   export let component
   export let loading = false
+  export let allowCreate = false
 
   let index = 0
   let element: Element
@@ -28,13 +29,20 @@
   }
 
   export const onKeyDown = (e: any) => {
-    if (e.code === "Enter") {
+    if (['Enter', 'Tab'].includes(e.code)) {
       const value = items[index]
 
       if (value) {
         select(value)
+        return true
+      } else if (term && allowCreate) {
+        select(term)
+        return true
       }
+    }
 
+    if (e.code === 'Space' && term && allowCreate) {
+      select(term)
       return true
     }
 
@@ -52,12 +60,20 @@
   }
 </script>
 
-{#if items.length > 0}
+{#if items.length > 0 || (term && allowCreate)}
   <div
     data-theme={$theme}
     bind:this={element}
     transition:slide|local={{duration: 100}}
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden shadow-xl">
+    {#if term && allowCreate}
+      <button
+        class="cursor-pointer px-4 py-2 text-left hover:bg-primary hover:text-primary-content transition-colors white-space-nowrap overflow-hidden text-ellipsis min-w-0"
+        on:mousedown|preventDefault
+        on:click|preventDefault={() => select(term)}>
+        Use "<svelte:component this={component} value={term} />"
+      </button>
+    {/if}
     {#each items as value, i (value)}
       <button
         class="cursor-pointer px-4 py-2 text-left hover:bg-primary hover:text-primary-content transition-colors white-space-nowrap overflow-hidden text-ellipsis min-w-0"

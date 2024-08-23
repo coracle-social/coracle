@@ -60,7 +60,7 @@
 </script>
 
 <div class="relative flex h-screen flex-col">
-  <div class="relative z-feature px-2 pt-4">
+  <div class="relative z-feature mx-2 pt-4 rounded-xl">
     <div class="flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
@@ -68,7 +68,7 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-grow flex-col-reverse overflow-auto">
+  <div class="flex flex-grow flex-col-reverse overflow-auto -mt-2 py-2">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <div class="flex items-center gap-2 p-2 text-xs opacity-50">

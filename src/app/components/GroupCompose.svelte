@@ -5,13 +5,14 @@
   import {Extension} from '@tiptap/core'
   import StarterKit from '@tiptap/starter-kit'
   import HardBreakExtension from '@tiptap/extension-hard-break'
-  import {NostrExtension} from 'nostr-editor'
+  import {Bolt11Extension, NProfileExtension, NEventExtension, NAddrExtension, ImageExtension, VideoExtension, FileUploadExtension} from 'nostr-editor'
   import type {StampedEvent} from '@welshman/util'
   import {createEvent, CHAT_MESSAGE} from '@welshman/util'
-  import {LinkExtension, createSuggestions, findNodes} from '@lib/tiptap'
+  import {LinkExtension, TopicExtension, createSuggestions, findNodes} from '@lib/tiptap'
   import Icon from '@lib/components/Icon.svelte'
   import Button from '@lib/components/Button.svelte'
   import GroupComposeMention from '@app/components/GroupComposeMention.svelte'
+  import GroupComposeTopic from '@app/components/GroupComposeTopic.svelte'
   import GroupComposeEvent from '@app/components/GroupComposeEvent.svelte'
   import GroupComposeImage from '@app/components/GroupComposeImage.svelte'
   import GroupComposeBolt11 from '@app/components/GroupComposeBolt11.svelte'
@@ -35,11 +36,7 @@
 
   const sendMessage = () => {
     console.log($editor.getJSON())
-    console.log(findNodes($editor.getJSON(), 'mention'))
-    console.log(findNodes($editor.getJSON(), 'nprofile'))
-    console.log(findNodes($editor.getJSON(), 'nevent'))
-    console.log(findNodes($editor.getJSON(), 'naddr'))
-    console.log(findNodes($editor.getJSON(), 'image'))
+    $editor.chain().clearContent().run()
     createEvent(CHAT_MESSAGE, {
       content: '',
       tags: [],
@@ -66,10 +63,15 @@
           addKeyboardShortcuts() {
             return {
               'Shift-Enter': () => this.editor.commands.setHardBreak(),
-              'Mod-Enter': () => {
-                uploadFiles()
+              'Mod-Enter': () => this.editor.commands.setHardBreak(),
+              'Enter': () => {
+                if (this.editor.getText().trim()) {
+                  uploadFiles()
 
-                return true
+                  return true
+                }
+
+                return false
               },
             }
           }
@@ -77,52 +79,59 @@
         LinkExtension.extend({
           addNodeView: () => SvelteNodeViewRenderer(GroupComposeLink),
         }),
-        NostrExtension.configure({
-          extend: {
-            bolt11: asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)}),
-            nprofile: asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention)}),
-            nevent: asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)}),
-            naddr: asInline({addNodeView: () =>  SvelteNodeViewRenderer(GroupComposeEvent)}),
-            image: asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeImage)}),
-            video: asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)}),
+        Bolt11Extension.extend({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)}),
+        NProfileExtension.extend({
+          addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
+          addProseMirrorPlugins() {
+            return [
+              createSuggestions({
+                char: '@',
+                name: 'nprofile',
+                editor: this.editor,
+                search: searchProfiles,
+                select: (pubkey: string, props: any) => props.command({pubkey}),
+                suggestionComponent: GroupComposeProfileSuggestion,
+                suggestionsComponent: GroupComposeSuggestions,
+              }),
+            ]
+          }
+        }),
+        NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)})),
+        NAddrExtension.extend(asInline({addNodeView: () =>  SvelteNodeViewRenderer(GroupComposeEvent)})),
+        ImageExtension
+          .extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeImage)}))
+          .configure({defaultUploadUrl: 'https://nostr.build', defaultUploadType: 'nip96'}),
+        VideoExtension
+          .extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)}))
+          .configure({defaultUploadUrl: 'https://nostr.build', defaultUploadType: 'nip96'}),
+        TopicExtension.extend({
+          addNodeView: () => SvelteNodeViewRenderer(GroupComposeTopic),
+          addProseMirrorPlugins() {
+            return [
+              createSuggestions({
+                char: '#',
+                name: 'topic',
+                editor: this.editor,
+                search: searchTopics,
+                select: (name: string, props: any) => props.command({name}),
+                allowCreate: true,
+                suggestionComponent: GroupComposeTopicSuggestion,
+                suggestionsComponent: GroupComposeSuggestions,
+              }),
+            ]
           },
-          link: false,
-          tweet: false,
-          youtube: false,
-          video: {defaultUploadUrl: 'https://nostr.build', defaultUploadType: 'nip96'},
-          image: {defaultUploadUrl: 'https://nostr.build', defaultUploadType: 'nip96'},
-          fileUpload: {
-            immediateUpload: false,
-            sign: (event: StampedEvent) => {
-              uploading = true
+        }),
+        FileUploadExtension.configure({
+          immediateUpload: false,
+          sign: (event: StampedEvent) => {
+            uploading = true
 
-              return $signer!.sign(event)
-            },
-            onComplete: () => {
-              uploading = false
-              sendMessage()
-            },
+            return $signer!.sign(event)
           },
-        }),
-        createSuggestions('mention').configure({
-          char: '@',
-          search: searchProfiles,
-          select: (pubkey: string, props: any) => props.command({pubkey}),
-          suggestionComponent: GroupComposeProfileSuggestion,
-          suggestionsComponent: GroupComposeSuggestions,
-        }).extend({
-          addAttributes: () => ({pubkey: {default: null}}),
-          addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
-        }),
-        createSuggestions('topic').configure({
-          char: '#',
-          search: searchTopics,
-          select: (name: string, props: any) => props.command({name}),
-          suggestionComponent: GroupComposeTopicSuggestion,
-          suggestionsComponent: GroupComposeSuggestions,
-        }).extend({
-          addAttributes: () => ({name: {default: null}}),
-          addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
+          onComplete: () => {
+            uploading = false
+            sendMessage()
+          },
         }),
       ],
       content: '',
