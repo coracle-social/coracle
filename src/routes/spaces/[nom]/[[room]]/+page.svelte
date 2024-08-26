@@ -8,15 +8,16 @@
 </script>
 
 <script lang="ts">
-  import {sortBy} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
+  import {onMount} from 'svelte'
   import {page} from "$app/stores"
+  import {sortBy, now} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {formatTimestampAsDate} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
   import GroupCompose from "@app/components/GroupCompose.svelte"
-  import {deriveGroupChat} from "@app/state"
+  import {subscribe, deriveGroupChat, userRelayUrlsByNom} from "@app/state"
 
   const {nom} = $page.params
   const chat = deriveGroupChat(nom)
@@ -57,6 +58,15 @@
   setTimeout(() => {
     loading = false
   }, 3000)
+
+  onMount(() => {
+    const sub = subscribe({
+      filters: [{'#h': [nom], since: now() - 30}],
+      relays: $userRelayUrlsByNom.get(nom)!,
+    })
+
+    return () => sub.close()
+  })
 </script>
 
 <div class="relative flex h-screen flex-col">

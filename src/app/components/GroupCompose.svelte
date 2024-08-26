@@ -161,7 +161,7 @@
 </script>
 
 <div class="flex gap-2 relative z-feature border-t border-solid border-base-100 p-2 shadow-top-xl bg-base-100">
-  <Button on:click={addFile} class="bg-base-300 rounded-box w-10 h-10 center">
+  <Button on:click={addFile} class="bg-base-300 rounded-box w-10 h-10 center hover:bg-base-200 transition-colors">
     {#if uploading}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}

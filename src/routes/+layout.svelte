@@ -5,6 +5,7 @@
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {browser} from "$app/environment"
+  import {sleep} from "@welshman/lib"
   import {createEventStore, adapter} from "@welshman/store"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
@@ -20,7 +21,7 @@
   import * as base from "@app/base"
   import * as state from "@app/state"
 
-  let ready: Promise<void>
+  let ready: Promise<unknown>
   let dialog: HTMLDialogElement
   let prev: any
 
@@ -121,7 +122,7 @@
           },
         }),
       },
-    })
+    }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 
     dialog.addEventListener("close", () => {
       if (modal) {
