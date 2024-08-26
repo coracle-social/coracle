@@ -1,4 +1,4 @@
-import {throttle} from 'throttle-debounce'
+import {throttle} from "throttle-debounce"
 import type {Readable} from "svelte/store"
 import type {FuseResult} from "fuse.js"
 import {get, writable, readable, derived} from "svelte/store"
@@ -6,7 +6,6 @@ import type {Maybe} from "@welshman/lib"
 import {
   max,
   first,
-  append,
   between,
   uniqBy,
   groupBy,
@@ -40,17 +39,30 @@ import {
   displayPubkey,
   GROUP_JOIN,
   GROUP_ADD_USER,
-  isStampedEvent,
-  isEventTemplate,
 } from "@welshman/util"
-import type {SignedEvent, HashedEvent, EventTemplate, TrustedEvent, PublishedProfile, PublishedList} from "@welshman/util"
-import type {SubscribeRequest, PublishRequest} from "@welshman/net"
+import type {
+  SignedEvent,
+  HashedEvent,
+  EventTemplate,
+  TrustedEvent,
+  PublishedProfile,
+  PublishedList,
+} from "@welshman/util"
+import type {SubscribeRequest} from "@welshman/net"
 import {publish as basePublish, subscribe as baseSubscribe, PublishStatus} from "@welshman/net"
 import {decrypt, stamp, own, hash} from "@welshman/signer"
 import {custom, deriveEvents, deriveEventsMapped, getter, withGetter} from "@welshman/store"
 import {createSearch} from "@lib/util"
 import type {Handle, Relay} from "@app/types"
-import {INDEXER_RELAYS, DUFFLEPUD_URL, repository, pk, getSession, getSigner, REACTION_KINDS} from "@app/base"
+import {
+  INDEXER_RELAYS,
+  DUFFLEPUD_URL,
+  repository,
+  pk,
+  getSession,
+  getSigner,
+  REACTION_KINDS,
+} from "@app/base"
 
 // Utils
 
@@ -156,10 +168,15 @@ thunkWorker.addGlobalHandler(async ({event, relays, resolve}: ThunkWithResolve) 
   const {id} = event
   const statusByUrl: PublishStatusDataByUrl = {}
 
-  pub.emitter.on('*', (status: PublishStatus, url: string, message: string) => {
-    publishStatusData.update(assoc(id, Object.assign(statusByUrl, {[url]: {id, url, status, message}})))
+  pub.emitter.on("*", (status: PublishStatus, url: string, message: string) => {
+    publishStatusData.update(
+      assoc(id, Object.assign(statusByUrl, {[url]: {id, url, status, message}})),
+    )
 
-    if (Object.values(statusByUrl).filter(s => s.status !== PublishStatus.Pending).length === relays.length) {
+    if (
+      Object.values(statusByUrl).filter(s => s.status !== PublishStatus.Pending).length ===
+      relays.length
+    ) {
       resolve(statusByUrl)
     }
   })
@@ -207,8 +224,7 @@ export const load = (request: SubscribeRequest) =>
     sub.emitter.on("complete", () => resolve(events))
   })
 
-export const loadOne = async (request: SubscribeRequest) =>
-  first(await load(request))
+export const loadOne = async (request: SubscribeRequest) => first(await load(request))
 
 // Publish status
 
@@ -218,7 +234,6 @@ export type PublishStatusData = {
   message: string
   status: PublishStatus
 }
-
 
 export type PublishStatusDataByUrl = Record<string, PublishStatusData>
 
@@ -279,7 +294,7 @@ export const topics = custom<Topic[]>(setter => {
   const getTopics = () => {
     const topics = new Map<string, number>()
     for (const tagString of repository.eventsByTag.keys()) {
-      if (tagString.startsWith('t:')) {
+      if (tagString.startsWith("t:")) {
         const topic = tagString.slice(2).toLowerCase()
 
         topics.set(topic, inc(topics.get(topic)))
@@ -310,7 +325,10 @@ export const searchTopics = derived(topics, $topics =>
 export const relays = writable<Relay[]>([])
 
 export const relaysByPubkey = derived(relays, $relays =>
-  groupBy(($relay: Relay) => $relay.pubkey, $relays.filter(r => r.pubkey)),
+  groupBy(
+    ($relay: Relay) => $relay.pubkey,
+    $relays.filter(r => r.pubkey),
+  ),
 )
 
 export const {
@@ -697,7 +715,11 @@ export type GroupMessage = {
 export const readGroupMessage = (event: TrustedEvent): Maybe<GroupMessage> => {
   const nom = event.tags.find(nthEq(0, "h"))?.[1]
 
-  if (!nom || between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind) || REACTION_KINDS.includes(event.kind)) {
+  if (
+    !nom ||
+    between(GROUP_ADD_USER - 1, GROUP_JOIN + 1, event.kind) ||
+    REACTION_KINDS.includes(event.kind)
+  ) {
     return undefined
   }
 
@@ -789,17 +811,14 @@ export const userGroupsByNom = withGetter(
   }),
 )
 
-export const userRelayUrlsByNom = derived(
-  userGroupsByNom,
-  $userGroupsByNom => {
-    const $userRelayUrlsByNom = new Map()
+export const userRelayUrlsByNom = derived(userGroupsByNom, $userGroupsByNom => {
+  const $userRelayUrlsByNom = new Map()
 
-    for (const [nom, groups] of $userGroupsByNom.entries()) {
-      for (const group of groups) {
-        pushToMapKey($userRelayUrlsByNom, nom, group.relay.url)
-      }
+  for (const [nom, groups] of $userGroupsByNom.entries()) {
+    for (const group of groups) {
+      pushToMapKey($userRelayUrlsByNom, nom, group.relay.url)
     }
-
-    return $userRelayUrlsByNom
   }
-)
+
+  return $userRelayUrlsByNom
+})

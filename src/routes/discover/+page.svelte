@@ -57,7 +57,7 @@
       {#if $userMembership?.noms.has(group.nom)}
         <div class="center absolute flex w-full">
           <div
-            class="tooltip relative left-8 w-5 h-5 top-[38px] rounded-full bg-primary"
+            class="tooltip relative left-8 top-[38px] h-5 w-5 rounded-full bg-primary"
             data-tip="You are already a member of this space.">
             <Icon icon="check-circle" class="scale-110" />
           </div>

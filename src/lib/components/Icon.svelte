@@ -6,7 +6,7 @@
 </style>
 
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import Code2 from "@assets/icons/Code 2.svg?dataurl"
@@ -69,8 +69,8 @@
   const data = switcher(icon, {
     "add-square": AddSquare,
     "code-2": Code2,
-    "earth": Earth,
-    "pen": Pen,
+    earth: Earth,
+    pen: Pen,
     "headphones-round": HeadphonesRound,
     "add-circle": AddCircle,
     "alt-arrow-down": AltArrowDown,
@@ -105,7 +105,7 @@
     "menu-dots": MenuDots,
     "notes-minimalistic": NotesMinimalistic,
     "pallete-2": Pallete2,
-    "paperclip": Paperclip,
+    paperclip: Paperclip,
     plain: Plain,
     reply: Reply,
     "remote-controller-minimalistic": RemoteControllerMinimalistic,

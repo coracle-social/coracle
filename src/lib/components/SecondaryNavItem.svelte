@@ -36,7 +36,7 @@
     on:click
     class={cx(
       $$props.class,
-      "flex items-center gap-3 transition-all hover:bg-base-100 hover:text-base-content text-left",
+      "flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
     )}
     class:text-base-content={active}
     class:bg-base-100={active}>
@@ -48,7 +48,7 @@
     on:click
     class={cx(
       $$props.class,
-      "flex w-full items-center gap-3 transition-all hover:bg-base-100 hover:text-base-content text-left",
+      "flex w-full items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
     )}
     class:text-base-content={active}
     class:bg-base-100={active}>

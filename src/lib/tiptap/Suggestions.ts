@@ -1,19 +1,18 @@
-import type {SvelteComponent, ComponentType} from 'svelte'
-import type {Readable} from 'svelte/store'
-import tippy, {type Instance} from 'tippy.js'
-import {mergeAttributes, Node} from '@tiptap/core'
-import type {Editor} from '@tiptap/core'
-import {PluginKey} from '@tiptap/pm/state'
-import Suggestion from '@tiptap/suggestion'
-import type {Search} from '@lib/util'
+import type {SvelteComponent, ComponentType} from "svelte"
+import type {Readable} from "svelte/store"
+import tippy, {type Instance} from "tippy.js"
+import type {Editor} from "@tiptap/core"
+import {PluginKey} from "@tiptap/pm/state"
+import Suggestion from "@tiptap/suggestion"
+import type {Search} from "@lib/util"
 
 export type SuggestionsOptions = {
-  char: string,
-  name: string,
-  editor: Editor,
+  char: string
+  name: string
+  editor: Editor
   search: Readable<Search<any, any>>
   select: (value: any, props: any) => void
-  allowCreate?: boolean,
+  allowCreate?: boolean
   suggestionComponent: ComponentType
   suggestionsComponent: ComponentType
 }
@@ -27,7 +26,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
       // increase range.to by one when the next node is of type "text"
       // and starts with a space character
       const nodeAfter = editor.view.state.selection.$to.nodeAfter
-      const overrideSpace = nodeAfter?.text?.startsWith(' ')
+      const overrideSpace = nodeAfter?.text?.startsWith(" ")
 
       if (overrideSpace) {
         range.to += 1
@@ -38,13 +37,13 @@ export const createSuggestions = (options: SuggestionsOptions) =>
         .focus()
         .insertContentAt(range, [
           {type: options.name, attrs: props},
-          {type: 'text', text: ' '},
+          {type: "text", text: " "},
         ])
         .run()
 
       window.getSelection()?.collapseToEnd()
     },
-    allow: ({ state, range }) => {
+    allow: ({state, range}) => {
       const $from = state.doc.resolve(range.from)
       const type = state.schema.nodes[options.name]
 
@@ -67,7 +66,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
         onStart: props => {
           target = document.createElement("div")
 
-          popover = tippy('body', {
+          popover = tippy("body", {
             getReferenceClientRect: props.clientRect as any,
             appendTo: document.body,
             content: target,

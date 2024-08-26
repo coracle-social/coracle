@@ -1,12 +1,10 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {readable} from 'svelte/store'
-  import {displayRelayUrl, isShareableRelayUrl} from '@welshman/util'
-  import type {SignedEvent} from '@welshman/util'
+  import {onMount} from "svelte"
+  import {readable} from "svelte/store"
+  import {displayRelayUrl, isShareableRelayUrl} from "@welshman/util"
+  import type {SignedEvent} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
-  import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {clip} from "@app/toast"
   import {DEFAULT_RELAYS, INDEXER_RELAYS} from "@app/base"
   import {searchRelays, subscribe, loadRelay} from "@app/state"
 
@@ -20,12 +18,12 @@
 
   onMount(() => {
     const sub = subscribe({
-      filters: [{kinds: [30166], '#N': ['29']}],
+      filters: [{kinds: [30166], "#N": ["29"]}],
       relays: [...INDEXER_RELAYS, ...DEFAULT_RELAYS],
     })
 
-    sub.emitter.on('event', (url: string, event: SignedEvent) => {
-      const d = event.tags.find(t => t[0] === 'd')?.[1] || ""
+    sub.emitter.on("event", (url: string, event: SignedEvent) => {
+      const d = event.tags.find(t => t[0] === "d")?.[1] || ""
 
       if (isShareableRelayUrl(d)) {
         loadRelay(d)

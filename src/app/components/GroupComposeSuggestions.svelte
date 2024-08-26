@@ -4,7 +4,7 @@
   import {throttle} from "throttle-debounce"
   import {slide} from "svelte/transition"
   import {clamp} from "@welshman/lib"
-  import {theme} from '@app/theme'
+  import {theme} from "@app/theme"
 
   export let term
   export let search
@@ -23,13 +23,13 @@
     items = $search.searchValues(term).slice(0, 30)
   })
 
-  const setIndex = (newIndex: number, block: ScrollLogicalPosition) => {
+  const setIndex = (newIndex: number, block: any) => {
     index = clamp([0, items.length - 1], newIndex)
     element.querySelector(`button:nth-child(${index})`)?.scrollIntoView({block})
   }
 
   export const onKeyDown = (e: any) => {
-    if (['Enter', 'Tab'].includes(e.code)) {
+    if (["Enter", "Tab"].includes(e.code)) {
       const value = items[index]
 
       if (value) {
@@ -41,7 +41,7 @@
       }
     }
 
-    if (e.code === 'Space' && term && allowCreate) {
+    if (e.code === "Space" && term && allowCreate) {
       select(term)
       return true
     }
@@ -68,7 +68,7 @@
     class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden shadow-xl">
     {#if term && allowCreate}
       <button
-        class="cursor-pointer px-4 py-2 text-left hover:bg-primary hover:text-primary-content transition-colors white-space-nowrap overflow-hidden text-ellipsis min-w-0"
+        class="white-space-nowrap min-w-0 cursor-pointer overflow-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(term)}>
         Use "<svelte:component this={component} value={term} />"
@@ -76,7 +76,7 @@
     {/if}
     {#each items as value, i (value)}
       <button
-        class="cursor-pointer px-4 py-2 text-left hover:bg-primary hover:text-primary-content transition-colors white-space-nowrap overflow-hidden text-ellipsis min-w-0"
+        class="white-space-nowrap min-w-0 cursor-pointer overflow-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
         class:bg-primary={index === i}
         class:text-primary-content={index === i}
         on:mousedown|preventDefault
@@ -86,7 +86,7 @@
     {/each}
   </div>
   {#if loading}
-    <div transition:slide|local class="flex gap-2 bg-tinted-700 px-4 py-2 text-neutral-200">
+    <div transition:slide|local class="bg-tinted-700 flex gap-2 px-4 py-2 text-neutral-200">
       <div>
         <i class="fa fa-circle-notch fa-spin" />
       </div>

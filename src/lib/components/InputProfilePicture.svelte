@@ -69,7 +69,7 @@
     on:dragleave|preventDefault|stopPropagation={onDragLeave}
     on:drop|preventDefault|stopPropagation={onDrop}>
     <div
-      class="absolute right-0 top-0 overflow-hidden rounded-full bg-primary h-5 w-5"
+      class="absolute right-0 top-0 h-5 w-5 overflow-hidden rounded-full bg-primary"
       class:bg-error={file}
       class:bg-primary={!file}>
       {#if file}

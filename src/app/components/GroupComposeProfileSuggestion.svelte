@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {deriveProfileDisplay} from '@app/state'
+  import {deriveProfileDisplay} from "@app/state"
 
   export let value
 

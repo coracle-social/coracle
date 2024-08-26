@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {first} from '@welshman/lib'
   import {makeSecret, getNip07, Nip46Broker} from "@welshman/signer"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -26,10 +25,10 @@
     }
   }
 
-  const onSuccess = async (session: Session) => {
+  const onSuccess = async (session: Session, relays: string[] = []) => {
     addSession(session)
 
-    await loadUserData(session.pubkey)
+    await loadUserData(session.pubkey, relays)
 
     pushToast({message: "Successfully logged in!"})
     clearModal()
@@ -50,7 +49,7 @@
     const broker = Nip46Broker.get(pubkey, secret, handler)
 
     if (await broker.connect("", nip46Perms)) {
-      await onSuccess({method: "nip46", pubkey, secret, handler})
+      await onSuccess({method: "nip46", pubkey, secret, handler}, relays)
     } else {
       pushToast({
         theme: "error",
@@ -93,7 +92,12 @@
     <div class="flex items-center gap-2" slot="input">
       <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="user-rounded" />
-        <input bind:value={username} disabled={loading} class="grow" type="text" placeholder="username" />
+        <input
+          bind:value={username}
+          disabled={loading}
+          class="grow"
+          type="text"
+          placeholder="username" />
         <span>@{handler.domain}</span>
       </label>
       {#if getNip07()}

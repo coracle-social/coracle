@@ -43,11 +43,11 @@
 }
 
 .card2 {
-  @apply p-6 bg-base-100 text-base-content rounded-box;
+  @apply rounded-box bg-base-100 p-6 text-base-content;
 }
 
 .card2.card2-sm {
-  @apply p-4 bg-base-100 text-base-content rounded-box;
+  @apply rounded-box bg-base-100 p-4 text-base-content;
 }
 
 .card2.card2-alt {
@@ -93,11 +93,11 @@
 /* tiptap */
 
 .tiptap {
-  @apply rounded-box bg-base-300 px-4 p-2 max-h-[350px] overflow-y-auto;
+  @apply max-h-[350px] overflow-y-auto rounded-box bg-base-300 p-2 px-4;
 }
 
 .tiptap pre code {
-  @apply link-content w-full block;
+  @apply link-content block w-full;
 }
 
 .tiptap p code {
@@ -105,7 +105,7 @@
 }
 
 .link-content {
-  @apply text-sm rounded px-1 bg-neutral text-neutral-content no-underline;
+  @apply rounded bg-neutral px-1 text-sm text-neutral-content no-underline;
 }
 
 .link-content.link-content-selected {

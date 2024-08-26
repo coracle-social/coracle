@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -61,7 +61,7 @@
 
   onMount(() => {
     const sub = subscribe({
-      filters: [{'#h': [nom], since: now() - 30}],
+      filters: [{"#h": [nom], since: now() - 30}],
       relays: $userRelayUrlsByNom.get(nom)!,
     })
 
@@ -70,7 +70,7 @@
 </script>
 
 <div class="relative flex h-screen flex-col">
-  <div class="relative z-feature mx-2 pt-4 rounded-xl">
+  <div class="relative z-feature mx-2 rounded-xl pt-4">
     <div class="flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
@@ -78,7 +78,7 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-grow flex-col-reverse overflow-auto -mt-2 py-2">
+  <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <div class="flex items-center gap-2 p-2 text-xs opacity-50">

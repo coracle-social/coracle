@@ -1,15 +1,12 @@
 <script lang="ts">
   import {append, remove} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
-  import {PublishStatus} from "@welshman/net"
-  import {goto} from "$app/navigation"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import InfoNip29 from "@app/components/InfoNip29.svelte"
   import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
-  import type {PublishStatusData} from "@app/state"
   import {deriveGroup, displayGroup, relayUrlsByNom} from "@app/state"
   import {sendJoinRequest, addGroupMemberships} from "@app/commands"
 
@@ -30,7 +27,7 @@
       const [ok, message] = await sendJoinRequest(nom, url)
 
       if (!ok) {
-        return pushToast({theme: 'error', message})
+        return pushToast({theme: "error", message})
       }
     }
 

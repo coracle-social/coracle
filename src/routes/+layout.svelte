@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
-  import {get, derived} from 'svelte/store'
+  import {get} from "svelte/store"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {browser} from "$app/environment"
@@ -70,8 +70,8 @@
           forward: ($psd: PublishStatusDataByUrlById) => {
             const data = []
 
-            for (const [id, itemsByUrl] of Object.entries($psd)) {
-              for (const [url, item] of Object.entries(itemsByUrl)) {
+            for (const itemsByUrl of Object.values($psd)) {
+              for (const item of Object.values(itemsByUrl)) {
                 data.push(item)
               }
             }
@@ -94,7 +94,8 @@
         keyPath: "key",
         store: adapter({
           store: freshness,
-          forward: ($freshness: Record<string, number>) => Object.entries($freshness).map(([key, ts]) => ({key, ts})),
+          forward: ($freshness: Record<string, number>) =>
+            Object.entries($freshness).map(([key, ts]) => ({key, ts})),
           backward: (data: any[]) => {
             const result: Record<string, number> = {}
 
@@ -110,7 +111,8 @@
         keyPath: "id",
         store: adapter({
           store: plaintext,
-          forward: ($plaintext: Record<string, string>) => Object.entries($plaintext).map(([id, plaintext]) => ({id, plaintext})),
+          forward: ($plaintext: Record<string, string>) =>
+            Object.entries($plaintext).map(([id, plaintext]) => ({id, plaintext})),
           backward: (data: any[]) => {
             const result: Record<string, string> = {}
 
