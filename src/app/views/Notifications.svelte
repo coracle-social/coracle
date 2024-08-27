@@ -154,7 +154,9 @@
   }
 
   $: displayTabs =
-    innerWidth <= 640 || !$userSettings.enable_reactions ? [allTabs[0], allTabs[2]] : allTabs
+    innerWidth <= 640 || !$userSettings.note_actions.includes("reactions")
+      ? [allTabs[0], allTabs[2]]
+      : allTabs
 
   document.title = "Notifications"
 

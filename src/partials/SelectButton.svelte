@@ -2,6 +2,7 @@
   import cx from "classnames"
   import SelectList from "src/partials/SelectList.svelte"
 
+  export let value = null
   export let displayOption = x => x
 
   const getClassName = active =>
@@ -12,7 +13,7 @@
 </script>
 
 <div class={cx($$props.class, "-mb-2 inline-block")}>
-  <SelectList {...$$props} optionClass="staatliches inline-block">
+  <SelectList {...$$props} bind:value optionClass="staatliches inline-block">
     <div slot="item" let:i let:active let:option class={getClassName(active)}>
       <slot name="item" {option} {active}>
         {displayOption(option)}

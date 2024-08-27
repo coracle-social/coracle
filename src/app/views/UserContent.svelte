@@ -10,6 +10,7 @@
   import Footer from "src/partials/Footer.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -27,6 +28,8 @@
   const values = {...$userSettings}
 
   const searchWords = q => pluck("name", $searchTopics(q))
+
+  const noteActionOptions = ["zaps", "replies", "reactions", "recommended_apps"]
 
   const submit = () => {
     if (!equals($userSettings, values)) {
@@ -55,13 +58,13 @@
     <p>Control who and what you see on {appName}.</p>
   </div>
   <div class="flex w-full flex-col gap-8">
-    <FieldInline label="Show likes on notes">
-      <Toggle bind:value={values.enable_reactions} />
+    <Field label="Note actions">
+      <SelectButton multiple bind:value={values.note_actions} options={noteActionOptions} />
       <p slot="info">
-        Show how many likes and reactions a note received. Disabling this can reduce how much data {appName}
-        uses.
+        Controls which icons appear at the bottom of any given note. Disabling these can reduce how
+        much data {appName} uses.
       </p>
-    </FieldInline>
+    </Field>
     <FieldInline label="Show images and link previews">
       <Toggle bind:value={values.show_media} />
       <p slot="info">

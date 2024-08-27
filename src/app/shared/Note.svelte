@@ -8,6 +8,9 @@
     getLnUrl,
     matchFilters,
     zapFromEvent,
+    NOTE,
+    REACTION,
+    ZAP_RESPONSE,
   } from "@welshman/util"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
@@ -198,14 +201,19 @@
       ready = true
       loadPubkeysFromEvent(event)
 
-      const kinds = [1]
+      const actions = getSetting("note_actions")
+      const kinds = []
 
-      if (getSetting("enable_reactions")) {
-        kinds.push(7)
+      if (actions.includes("replies")) {
+        kinds.push(NOTE)
       }
 
-      if ($env.ENABLE_ZAPS) {
-        kinds.push(9735)
+      if (actions.includes("reactions")) {
+        kinds.push(REACTION)
+      }
+
+      if ($env.ENABLE_ZAPS && actions.includes("zaps")) {
+        kinds.push(ZAP_RESPONSE)
       }
 
       load({

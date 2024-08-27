@@ -87,6 +87,7 @@
   const kindHandlers = deriveHandlersForKind(note.kind)
   const handlerId = tags.get("client")?.nth(2)
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
+  const noteActions = getSetting("note_actions")
 
   const seenOn = custom<string[]>(set => {
     const update = () =>
@@ -294,11 +295,11 @@
       })}
       on:click={replyCtrl?.start}>
       <Icon icon="message" color={reply ? "accent" : "neutral-100"} />
-      {#if $repliesCount > 0}
+      {#if $repliesCount > 0 && noteActions.includes("replies")}
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
     </button>
-    {#if $env.ENABLE_ZAPS}
+    {#if $env.ENABLE_ZAPS && noteActions.includes("zaps")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
@@ -311,7 +312,7 @@
         {/if}
       </button>
     {/if}
-    {#if getSetting("enable_reactions")}
+    {#if noteActions.includes("reactions")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
@@ -328,11 +329,11 @@
         {/if}
       </button>
     {/if}
-    {#if handlers.length > 0}
+    {#if handlers.length > 0 && noteActions.includes("recommended_apps")}
       <Popover theme="transparent" opts={{hideOnClick: true}}>
         <button
           slot="trigger"
-          class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 hidden sm:block">
+          class="relative flex hidden h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
           <i class="fa fa-up-right-from-square fa-sm" />
         </button>
         <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
