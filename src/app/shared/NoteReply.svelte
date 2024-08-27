@@ -144,7 +144,10 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if isOpen || forceOpen}
-  <div class="relative" class:opacity-50={loading} class:pointer-events-none={loading}>
+  <div
+    class="relative transition-colors"
+    class:opacity-50={loading}
+    class:pointer-events-none={loading}>
     {#if showBorder}
       <AltColor background class="absolute -top-4 z-none h-5 w-1" />
     {/if}

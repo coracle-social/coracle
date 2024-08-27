@@ -8,8 +8,9 @@
     getLnUrl,
     matchFilters,
     zapFromEvent,
+    ZAP_RESPONSE,
   } from "@welshman/util"
-  import {identity, reject, whereEq, uniqBy, prop} from "ramda"
+  import {reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
@@ -165,10 +166,9 @@
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
 
   // Split out zaps
-  $: zaps = children
-    .filter(e => e.kind === 9735)
-    .map(e => (zapper ? zapFromEvent(e, zapper) : null))
-    .filter(identity)
+  $: zaps = children.flatMap(e =>
+    e.kind === ZAP_RESPONSE && zapper ? [zapFromEvent(e, zapper)] : [],
+  )
 
   onMount(async () => {
     const zapAddress = tags.get("zap")?.value()

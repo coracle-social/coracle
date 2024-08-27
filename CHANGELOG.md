@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.4.10
+
+- [x] Show loading when sending note reply
+- [x] Support rendering zap responses
+
 # 0.4.9
 
 - [x] Add person zaps
