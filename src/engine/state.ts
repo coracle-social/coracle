@@ -244,23 +244,27 @@ export const getSigner = memoize($s => {
   }
 })
 
+export const hasNip44 = writable(false)
+
 export const signer = withGetter(
   derived(
     session,
     memoize($session => {
       const $signer = getSigner($session)
 
-      $signer?.nip44.encrypt($session.pubkey, "test").then(
-        () => hasNip44.set(true),
-        () => hasNip44.set(false),
-      )
+      if ($signer) {
+        $signer?.nip44.encrypt($session.pubkey, "test").then(
+          v => hasNip44.set(true),
+          () => hasNip44.set(false),
+        )
+      } else {
+        hasNip44.set(false)
+      }
 
       return $signer
     }),
   ),
 )
-
-export const hasNip44 = writable(false)
 
 // Plaintext
 

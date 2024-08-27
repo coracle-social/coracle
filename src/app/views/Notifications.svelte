@@ -97,7 +97,7 @@
             e = unwrapRepost(e)
 
             for (const tag of contextTags) {
-              e.tags.push(tag)
+              e?.tags.push(tag)
             }
           }
 
