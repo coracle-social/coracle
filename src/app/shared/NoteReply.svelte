@@ -37,7 +37,7 @@
   const nsecWarning = writable(null)
   const parentTags = Tags.fromEvent(parent)
 
-  let images, compose, container, options
+  let images, compose, container, options, loading
   let isOpen = false
   let mentions = []
   let opts = {warning: "", anonymous: false}
@@ -116,9 +116,13 @@
       publish({event: parent, relays: hints.PublishEvent(parent).getUrls()})
     }
 
+    loading = true
+
     const template = createEvent(1, {content, tags})
     const addresses = contextAddress ? [contextAddress] : parentTags.context().values().valueOf()
     const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
+
+    loading = false
 
     // Only track one event/pub to avoid apprent duplicates
     addToContext(events[0])
@@ -140,7 +144,7 @@
 <svelte:body on:click={onBodyClick} />
 
 {#if isOpen || forceOpen}
-  <div class="relative">
+  <div class="relative" class:opacity-50={loading} class:pointer-events-none={loading}>
     {#if showBorder}
       <AltColor background class="absolute -top-4 z-none h-5 w-1" />
     {/if}
@@ -156,7 +160,11 @@
               <button
                 on:click={() => send()}
                 class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
-                <i class="fa fa-paper-plane" />
+                {#if loading}
+                  <i class="fa fa-circle-notch fa-spin" />
+                {:else}
+                  <i class="fa fa-paper-plane" />
+                {/if}
               </button>
             </div>
           </Compose>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {sleep} from "hurdak"
   import type {TrustedEvent} from "@welshman/util"
+  import {isTrustedEvent} from "@welshman/util"
   import {error} from "src/util/logger"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
@@ -36,8 +37,10 @@
         const newEvents = jsonl.split("\n").map(l => JSON.parse(l)) as TrustedEvent[]
 
         for (const event of newEvents) {
-          repository.publish(event)
-          projections.push(event)
+          if (isTrustedEvent(event)) {
+            repository.publish(event)
+            projections.push(event)
+          }
         }
 
         while (projections.buffer.length > 0) {

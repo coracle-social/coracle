@@ -1,6 +1,6 @@
 <script lang="ts">
   import {copyToClipboard} from "src/util/html"
-  import {showInfo, showWarning} from "src/partials/Toast.svelte"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -11,7 +11,6 @@
   import {encrypt} from "nostr-tools/nip49"
   import {hexToBytes} from "@noble/hashes/utils"
   import Anchor from "src/partials/Anchor.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
 
   export let value
   export let label
@@ -108,7 +107,8 @@
       <Anchor button on:click={closeEncryptModal}>Cancel</Anchor>
       <div class="flex gap-2">
         <Anchor button on:click={copyEncoded}>Copy plaintext</Anchor>
-        <Anchor button accent on:click={copyEncrypted} disabled={!passwordIsValid}>Copy encrypted</Anchor>
+        <Anchor button accent on:click={copyEncrypted} disabled={!passwordIsValid}
+          >Copy encrypted</Anchor>
       </div>
     </div>
   </Modal>
