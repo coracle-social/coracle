@@ -4,6 +4,8 @@
 
 - [x] Show loading when sending note reply
 - [x] Support rendering zap responses
+- [x] Speed up web of trust calculation and search page
+- [x] Reduce extra encrypt/decrypt calls when updating lists
 
 # 0.4.9
 

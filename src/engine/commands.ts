@@ -28,17 +28,7 @@ import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} 
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
-import {
-  asDecryptedEvent,
-  makeSingleton,
-  editSingleton,
-  createSingleton,
-  readSingleton,
-  makeRelayPolicy,
-  isPublishedProfile,
-  createProfile,
-  editProfile,
-} from "src/domain"
+import {makeRelayPolicy, isPublishedProfile, createProfile, editProfile} from "src/domain"
 import type {RelayPolicy, Profile} from "src/domain"
 import type {Session} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
@@ -72,7 +62,6 @@ import {
   getFreshness,
   handles,
   zappers,
-  getPlaintext,
   anonymous,
   mentionGroup,
   userRelayPolicies,
@@ -80,6 +69,7 @@ import {
   getChannelIdFromEvent,
   getSession,
   nip46Perms,
+  uniqTags,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
 
@@ -631,33 +621,14 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
 export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
-  const [event] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
-
-  // Preserve content instead of use encrypted tags because kind 3 content is used for
-  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
+  const [prev] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
   const relays = withIndexers(hints.WriteRelays().getUrls())
-  const encrypt = content => signer.get().nip44.encrypt(pubkey.get(), content)
 
-  let encryptable
-  if (event) {
-    const singleton = readSingleton(asDecryptedEvent(event, {content: getPlaintext(event)}))
-    const publicTags = modifyTags(singleton.publicTags)
+  // Preserve content if we have it
+  const content = prev?.content || ""
+  const tags = modifyTags(uniqTags(prev?.tags || []))
 
-    encryptable = editSingleton({...singleton, publicTags})
-  } else {
-    const singleton = makeSingleton({kind})
-    const publicTags = modifyTags(singleton.publicTags)
-
-    encryptable = createSingleton({...singleton, publicTags})
-  }
-
-  const template = await encryptable.reconcile(encrypt)
-
-  try {
-    await createAndPublish({...template, relays})
-  } catch (error) {
-    console.error({...template, relays, error})
-  }
+  await createAndPublish({kind, content, tags, relays})
 }
 
 // Follows/mutes
