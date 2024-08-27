@@ -767,12 +767,10 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   }
 
   const json = JSON.stringify(tags)
+  const relays = hints.WriteRelays().getUrls()
+  const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
-  await createAndPublish({
-    kind,
-    content: await signer.get().nip44.encrypt(pubkey.get(), json),
-    relays: hints.WriteRelays().getUrls(),
-  })
+  await createAndPublish({kind, content, relays})
 }
 
 // Messages
@@ -821,17 +819,17 @@ export const markChannelsRead = (ids: Set<string>) => {
   const $pubkey = pubkey.get()
   const eventsByKey = {}
 
-  for (const channel of get(channels)) {
-    if (!ids.has(channel.id) || channel.last_sent > channel.last_received) {
+  for (const {id, last_sent = 0, last_received = 0, last_checked = 0} of get(channels)) {
+    if (!ids.has(id) || Math.max(last_sent, last_checked) > last_received) {
       continue
     }
 
-    const key = getChannelSeenKey(channel.id)
-    const members = channel.id.split(",")
-    const filter = {kinds: [4, DIRECT_MESSAGE], authors: members, "#p": members}
+    const members = id.split(",")
+    const key = getChannelSeenKey(id)
+    const since = Math.max(last_sent, last_checked)
     const events = repository
-      .query([filter])
-      .filter(e => getChannelIdFromEvent(e) === channel.id && e.pubkey !== $pubkey)
+      .query([{kinds: [4, DIRECT_MESSAGE], authors: members, "#p": members, since}])
+      .filter(e => getChannelIdFromEvent(e) === id && e.pubkey !== $pubkey)
 
     if (events.length > 0) {
       eventsByKey[key] = events

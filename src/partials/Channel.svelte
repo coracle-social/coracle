@@ -4,7 +4,7 @@
   import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
-  import {fly} from "src/util/transition"
+  import {fly, slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -42,7 +42,7 @@
     confirmIsOpen = false
   }
 
-  let textarea, element, scroller
+  let textarea, element, scroller, sending
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
@@ -104,9 +104,11 @@
 
     if (content) {
       textarea.value = ""
+      sending = true
 
       await sendMessage(content, useNip17)
 
+      sending = false
       stickToBottom()
     }
   }
@@ -148,20 +150,28 @@
   <div class="bg-neutral-900">
     <slot name="header" />
   </div>
-  <ul
+  <div
     bind:this={element}
     class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
+    <div>
+      {#if sending}
+        <div class="m-auto flex gap-2 justify-center items-center text-neutral-500 pt-2" transition:slide>
+          <i class="fa fa-circle-notch fa-spin" />
+          <span>Sending your message...</span>
+        </div>
+      {/if}
+    </div>
     {#each groupedMessages as m (m.id)}
-      <li in:fly={{y: 20}} class="grid gap-2 py-1">
+      <div in:fly={{y: 20}} class="grid gap-2 py-1">
         <slot name="message" message={m} />
-      </li>
+      </div>
     {/each}
     {#await loading}
       <Spinner>Looking for messages...</Spinner>
     {:then}
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
-  </ul>
+  </div>
   {#if $hasNip44 || !isGroupMessage}
     <div
       class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">

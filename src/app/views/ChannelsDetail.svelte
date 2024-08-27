@@ -46,7 +46,7 @@
       return sendLegacyMessage(channelId, content)
     }
 
-    sendMessage(channelId, content)
+    await sendMessage(channelId, content)
   }
 
   onMount(() => {
@@ -125,10 +125,12 @@
                 >here</Anchor
               >.
             </p>
-            <p>
-              Note that these messages are not yet universally supported. Make sure the person
-              you're chatting with is using a compatible nostr client.
-            </p>
+            {#if message.pubkey === $session.pubkey}
+              <p>
+                Note that these messages are not yet universally supported. Make sure the person
+                you're chatting with is using a compatible nostr client.
+              </p>
+            {/if}
           </div>
         </Popover>
       {/if}
