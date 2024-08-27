@@ -611,17 +611,23 @@ export const getFollowsWhoMute = simpleCache(
 )
 
 export const primeWotCaches = throttle(3000, pk => {
+  const userFollows = getFollows(pk)
   const mutes: Record<string, string[]> = {}
   const follows: Record<string, string[]> = {}
 
   // Get follows and mutes from the current user's follows list
-  for (const followPk of getFollows(pk)) {
-    for (const mutedPk of getMutes(followPk)) {
-      pushToKey(mutes, mutedPk, followPk)
-    }
+  for (const tpk of repository.eventsByAuthor.keys()) {
+    if (userFollows.has(tpk)) {
+      for (const mpk of getMutes(tpk)) {
+        pushToKey(mutes, mpk, tpk)
+      }
 
-    for (const followedPk of getFollows(followPk)) {
-      pushToKey(follows, followedPk, followPk)
+      for (const fpk of getFollows(tpk)) {
+        pushToKey(follows, fpk, tpk)
+      }
+    } else {
+      mutes[tpk] = []
+      follows[tpk] = []
     }
   }
 
