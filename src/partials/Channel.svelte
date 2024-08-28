@@ -155,7 +155,9 @@
     class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
     <div>
       {#if sending}
-        <div class="m-auto flex gap-2 justify-center items-center text-neutral-500 pt-2" transition:slide>
+        <div
+          class="m-auto flex items-center justify-center gap-2 pt-6 text-neutral-500"
+          transition:slide>
           <i class="fa fa-circle-notch fa-spin" />
           <span>Sending your message...</span>
         </div>

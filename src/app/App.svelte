@@ -3,8 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {nip19} from "nostr-tools"
-  import {pluck} from "ramda"
-  import {seconds, Fetch} from "hurdak"
+  import {seconds} from "hurdak"
   import * as store from "svelte/store"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -12,7 +11,7 @@
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage, session, pubkey, relays, getSetting, dufflepud} from "src/engine"
+  import {storage, session, pubkey, relays, getSetting} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -484,22 +483,8 @@
         .filter(r => (r.last_checked || 0) < lib.now() - seconds(7, "day"))
         .slice(0, 20)
 
-      if (staleRelays.length > 0) {
-        misc.tryFetch(async () => {
-          const result = await Fetch.fetchJson(dufflepud("relay/info"), {
-            method: "POST",
-            body: JSON.stringify({urls: pluck("url", staleRelays)}),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-
-          for (const {url: rawUrl, info} of result.data) {
-            const url = util.normalizeRelayUrl(rawUrl)
-
-            relays.key(url).merge({...info, url, last_checked: lib.now()})
-          }
-        })
+      for (const relay of staleRelays) {
+        engine.loadRelay(relay.url)
       }
     }, 30_000)
 
