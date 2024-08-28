@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {isNil} from "ramda"
+  import {isNil} from "@welshman/lib"
+  import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
@@ -19,6 +20,7 @@
     setInboxPolicy,
     setOutboxPolicy,
     deriveUserRelayPolicy,
+    loadRelay,
   } from "src/engine"
 
   export let url
@@ -43,6 +45,10 @@
       setOutboxPolicy(newPolicy)
     }
   }
+
+  onMount(() => {
+    loadRelay(url)
+  })
 </script>
 
 <div

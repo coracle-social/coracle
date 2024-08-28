@@ -1,6 +1,6 @@
 import {debounce} from "throttle-debounce"
 import {get, writable} from "svelte/store"
-import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
+import {batch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -10,7 +10,21 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, bech32ToHex, batcher, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
+import {
+  Worker,
+  bech32ToHex,
+  batcher,
+  pick,
+  simpleCache,
+  nthEq,
+  nth,
+  now,
+  max,
+  postJson,
+  indexBy,
+  uniqBy,
+  flatten,
+} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -19,6 +33,7 @@ import {
   isGroupAddress,
   isSignedEvent,
   createEvent,
+  normalizeRelayUrl,
   WRAP,
   EPOCH,
   LABEL,
@@ -37,7 +52,7 @@ import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
-import type {Zapper} from "src/engine/model"
+import type {Zapper, RelayInfo} from "src/engine/model"
 import {repository} from "src/engine/repository"
 import {
   getUserCircles,
@@ -64,6 +79,9 @@ import {
   subscribePersistent,
   dufflepud,
   signer,
+  relays,
+  getFreshness,
+  setFreshness,
 } from "src/engine/state"
 import {updateCurrentSession, updateSession} from "src/engine/commands"
 
@@ -84,57 +102,53 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
 // Handles/Zappers
 
-const fetchHandle = batcher(500, async (handles: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
+export const loadHandle = simpleCache(
+  batcher(500, async (handles: string[][]) => {
+    handles = uniq(flatten(handles))
 
-      return res?.data
-    })) || []
+    const data =
+      (await tryFunc(async () => {
+        const res = await postJson(dufflepud("handle/info"), {handles})
 
-  const infoByHandle = createMapOf("handle", "info", data)
+        return res?.data
+      })) || []
 
-  return handles.map(h => infoByHandle[h])
-})
+    const infoByHandle = createMapOf("handle", "info", data)
 
-export const loadHandle = cached({
-  maxSize: 100,
-  getKey: ([handle]) => handle,
-  getValue: ([handle]) => fetchHandle(handle),
-})
+    return handles.map(h => infoByHandle[h])
+  }),
+)
 
-const fetchZapper = batcher(3000, async (lnurls: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      // Dufflepud expects plaintext but we store lnurls encoded
-      const res = await Fetch.postJson(dufflepud("zapper/info"), {
-        lnurls: uniq(lnurls).map(bech32ToHex),
-      })
+export const loadZapper = simpleCache(
+  batcher(3000, async (lnurls: string[][]) => {
+    lnurls = uniq(flatten(lnurls))
 
-      return res?.data
-    })) || []
+    const data =
+      (await tryFunc(async () => {
+        // Dufflepud expects plaintext but we store lnurls encoded
+        const res = await postJson(dufflepud("zapper/info"), {
+          lnurls: lnurls.map(bech32ToHex),
+        })
 
-  const infoByLnurl = createMapOf("lnurl", "info", data)
+        return res?.data
+      })) || []
 
-  return lnurls.map(lnurl => {
-    const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
+    const infoByLnurl = createMapOf("lnurl", "info", data)
 
-    if (!zapper) {
-      return null
-    }
+    return lnurls.map(lnurl => {
+      const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
 
-    return {
-      ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
-      lnurl,
-    } as Zapper
-  })
-})
+      if (!zapper) {
+        return null
+      }
 
-export const loadZapper = cached({
-  maxSize: 100,
-  getKey: ([handle]) => handle,
-  getValue: ([handle]) => fetchZapper(handle),
-})
+      return {
+        ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
+        lnurl,
+      } as Zapper
+    })
+  }),
+)
 
 export const attemptedAddrs = new Map()
 
@@ -550,3 +564,34 @@ export const loadHandlers = () =>
       addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],
   })
+
+export const loadRelay = batcher(800, async (urls: string[]) => {
+  const urlSet = new Set(
+    urls
+      .map(url => normalizeRelayUrl(url))
+      .filter(url => getFreshness("relay", url) < now() - 3600),
+  )
+
+  for (const url of urlSet) {
+    setFreshness("relay", url, now())
+  }
+
+  const res = urlSet.size && await postJson(dufflepud("relay/info"), {urls: Array.from(urlSet)})
+  const index = indexBy((item: any) => item.url, res?.data || [])
+  const items: RelayInfo[] = urls.map(url => {
+    const normalizedUrl = normalizeRelayUrl(url)
+    const {info = {}} = index.get(normalizedUrl) || {}
+
+    return {...info, url: normalizedUrl, last_checked: now()}
+  })
+
+  relays.mapStore.update($relays => {
+    for (const relay of items) {
+      $relays.set(relay.url, {...$relays.get(relay.url) || {}, ...relay})
+    }
+
+    return $relays
+  })
+
+  return items
+})
