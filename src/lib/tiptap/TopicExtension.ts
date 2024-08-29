@@ -3,7 +3,7 @@ import type {Node as ProsemirrorNode} from "@tiptap/pm/model"
 import type {MarkdownSerializerState} from "prosemirror-markdown"
 import {createPasteRuleMatch} from "@lib/tiptap/util"
 
-export const TOPIC_REGEX = /(#[^\s]+)/g
+export const TOPIC_REGEX = /(?:^|\s)(#[^\s]+)/g
 
 export interface TopicAttributes {
   name: string

@@ -62,7 +62,7 @@
   onMount(() => {
     const sub = subscribe({
       filters: [{"#h": [nom], since: now() - 30}],
-      relays: $userRelayUrlsByNom.get(nom)!,
+      relays: $userRelayUrlsByNom.get(nom) || [],
     })
 
     return () => sub.close()

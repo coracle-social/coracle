@@ -1,5 +1,11 @@
 import type {JSONContent, PasteRuleMatch} from "@tiptap/core"
 
+export const asInline = (extend: Record<string, any>) => ({
+  inline: true,
+  group: "inline",
+  ...extend,
+})
+
 export const createPasteRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
   data: T,

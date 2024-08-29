@@ -593,15 +593,20 @@ export const {
   name: "groups",
   store: groups,
   getKey: (group: PublishedGroup) => group.nom,
-  load: (nom: string, hints: string[] = [], request: Partial<SubscribeRequest> = {}) =>
-    Promise.all([
+  load: async (nom: string, hints: string[] = [], request: Partial<SubscribeRequest> = {}) => {
+    if (hints.length === 0) {
+      hints = relayUrlsByNom.get().get(nom) || []
+    }
+
+    await Promise.all([
       ...hints.map(loadRelay),
       load({
         ...request,
         relays: hints,
         filters: [{kinds: [GROUP_META], "#d": [nom]}],
       }),
-    ]),
+    ])
+  },
 })
 
 export const searchGroups = derived(groups, $groups =>
@@ -642,15 +647,17 @@ export const qualifiedGroupsByNom = derived(qualifiedGroups, $qualifiedGroups =>
   groupBy($qg => $qg.group.nom, $qualifiedGroups),
 )
 
-export const relayUrlsByNom = derived(qualifiedGroups, $qualifiedGroups => {
-  const $relayUrlsByNom = new Map()
+export const relayUrlsByNom = withGetter(
+  derived(qualifiedGroups, $qualifiedGroups => {
+    const $relayUrlsByNom = new Map()
 
-  for (const {relay, group} of $qualifiedGroups) {
-    pushToMapKey($relayUrlsByNom, group.nom, relay.url)
-  }
+    for (const {relay, group} of $qualifiedGroups) {
+      pushToMapKey($relayUrlsByNom, group.nom, relay.url)
+    }
 
-  return $relayUrlsByNom
-})
+    return $relayUrlsByNom
+  }),
+)
 
 // Group membership
 
@@ -759,10 +766,6 @@ export const {
     const chat = get(groupChats).find(c => c.nom === nom)
     const timestamps = chat?.messages.map(m => m.event.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
-
-    if (relays.length === 0) {
-      console.warn(`Attempted to load chat for ${nom} with no qualified groups`)
-    }
 
     return load({...request, relays, filters: [{"#h": [nom], since}]})
   },

@@ -16,7 +16,7 @@ export interface LinkAttributes {
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
-    link: {
+    inlineLink: {
       insertLink: (options: {url: string}) => ReturnType
     }
   }
@@ -24,7 +24,7 @@ declare module "@tiptap/core" {
 
 export const LinkExtension = Node.create({
   atom: true,
-  name: "link",
+  name: "inlineLink",
   group: "inline",
   inline: true,
   selectable: true,
@@ -74,6 +74,7 @@ export const LinkExtension = Node.create({
           const matches = []
 
           for (const match of text.matchAll(LINK_REGEX)) {
+            console.log(text, match)
             try {
               matches.push(createPasteRuleMatch(match, {url: match[0]}))
             } catch (e) {
