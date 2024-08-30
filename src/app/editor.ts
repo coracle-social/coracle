@@ -1,3 +1,4 @@
+import cx from 'classnames'
 import type {Writable} from "svelte/store"
 import {nprofileEncode} from "nostr-tools/nip19"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
@@ -19,9 +20,10 @@ import {
   ImageExtension,
   VideoExtension,
   FileUploadExtension,
+  TagExtension as TopicExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
-import {LinkExtension, TopicExtension, asInline, createSuggestions} from "@lib/tiptap"
+import {LinkExtension, asInline, createSuggestions} from "@lib/tiptap"
 import GroupComposeMention from "@app/components/GroupComposeMention.svelte"
 import GroupComposeTopic from "@app/components/GroupComposeTopic.svelte"
 import GroupComposeEvent from "@app/components/GroupComposeEvent.svelte"
@@ -113,6 +115,18 @@ export const getChatEditorOptions = ({uploading, sendMessage}: ChatComposeEditor
     ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
     TopicExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(GroupComposeTopic),
+      renderHTML({mark, HTMLAttributes}) {
+        const attrs = {
+          ...mark.attrs,
+          ...HTMLAttributes,
+          target: '_blank',
+          rel: 'noopener noreferer',
+          href: `https://coracle.social/topics/${mark.attrs.tag.toLowerCase()}`,
+          class: "underline",
+        }
+
+        return ['a', attrs, 0]
+      },
       addProseMirrorPlugins() {
         return [
           createSuggestions({

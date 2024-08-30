@@ -11,8 +11,8 @@
 <NodeViewWrapper class="inline">
   <Link
     external
-    href="https://coracle.social/topics/{node.attrs.name.toLowerCase()}"
+    href="https://coracle.social/topics/{node.attrs.topic.toLowerCase()}"
     class={cx("link-content", {"link-content-selected": selected})}>
-    #{node.attrs.name}
+    #{node.attrs.topic}
   </Link>
 </NodeViewWrapper>
