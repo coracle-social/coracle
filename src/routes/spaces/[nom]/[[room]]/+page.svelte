@@ -12,12 +12,12 @@
   import {page} from "$app/stores"
   import {sortBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestampAsDate} from "@lib/util"
+  import {subscribe, formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
   import GroupCompose from "@app/components/GroupCompose.svelte"
-  import {subscribe, deriveGroupChat, userRelayUrlsByNom} from "@app/state"
+  import {deriveGroupChat, userRelayUrlsByNom} from "@app/state"
 
   const {nom} = $page.params
   const chat = deriveGroupChat(nom)

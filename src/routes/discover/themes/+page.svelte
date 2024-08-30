@@ -1,7 +1,7 @@
 <script lang="ts">
   import themes from "daisyui/src/theming/themes"
   import {identity} from "@welshman/lib"
-  import {createSearch} from "@lib/util"
+  import {createSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {theme} from "@app/theme"
 

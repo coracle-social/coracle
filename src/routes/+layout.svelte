@@ -6,6 +6,19 @@
   import {goto} from "$app/navigation"
   import {browser} from "$app/environment"
   import {sleep} from "@welshman/lib"
+  import {
+    relays,
+    handles,
+    loadRelay,
+    initStorage,
+    repository,
+    session,
+    pubkey,
+    publishStatusData,
+    plaintext,
+    freshness,
+  } from "@welshman/app"
+  import type {PublishStatusData, PublishStatusDataByUrlById} from "@welshman/app"
   import {createEventStore, adapter} from "@welshman/store"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
@@ -13,12 +26,8 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {pk, session, repository, DEFAULT_RELAYS} from "@app/base"
-  import type {PublishStatusData, PublishStatusDataByUrlById} from "@app/state"
-  import {relays, freshness, plaintext, handles, loadRelay, publishStatusData} from "@app/state"
-  import {initStorage} from "@app/storage"
+  import {DEFAULT_RELAYS} from "@app/state"
   import {loadUserData} from "@app/commands"
-  import * as base from "@app/base"
   import * as state from "@app/state"
 
   let ready: Promise<unknown>
@@ -48,7 +57,7 @@
   }
 
   onMount(() => {
-    Object.assign(window, {get, base, state})
+    Object.assign(window, {get, state})
 
     ready = initStorage(3, {
       events: {
@@ -137,8 +146,8 @@
         loadRelay(url)
       }
 
-      if ($pk) {
-        loadUserData($pk)
+      if ($pubkey) {
+        loadUserData($pubkey)
       }
     })
   })

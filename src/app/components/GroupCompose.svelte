@@ -5,10 +5,11 @@
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {NProfileExtension, TagExtension as TopicExtension, ImageExtension} from "nostr-editor"
   import {createEvent, CHAT_MESSAGE} from "@welshman/util"
+  import {publishThunk, makeThunk} from "@welshman/app"
   import {findNodes} from "@lib/tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {publishThunk, makeThunk, userRelayUrlsByNom} from "@app/state"
+  import {userRelayUrlsByNom} from "@app/state"
   import {makeMention, makeIMeta} from "@app/commands"
   import {getChatEditorOptions, addFile} from "@app/editor"
 

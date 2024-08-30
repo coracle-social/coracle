@@ -8,26 +8,26 @@ import {
   displayProfile,
 } from "@welshman/util"
 import {PublishStatus} from "@welshman/net"
-import {pk, repository, INDEXER_RELAYS} from "@app/base"
 import {
+  pubkey,
+  repository,
   loadOne,
-  getWriteRelayUrls,
-  loadGroup,
-  loadGroupMembership,
-  loadProfile,
-  loadFollows,
-  loadMutes,
-  getRelaySelectionsByPubkey,
-  loadRelaySelections,
   makeThunk,
   publishThunk,
-  getProfilesByPubkey,
-} from "@app/state"
+  loadProfile,
+  profilesByPubkey,
+  relaySelectionsByPubkey,
+  loadRelaySelections,
+  getWriteRelayUrls,
+  loadFollows,
+  loadMutes,
+} from "@welshman/app"
+import {loadGroup, loadGroupMembership, INDEXER_RELAYS} from "@app/state"
 
 // Utils
 
 export const getPubkeyHints = (pubkey: string) => {
-  const selections = getRelaySelectionsByPubkey().get(pubkey)
+  const selections = relaySelectionsByPubkey.get().get(pubkey)
   const relays = selections ? getWriteRelayUrls(selections) : []
   const hints = relays.length ? relays : INDEXER_RELAYS
 
@@ -35,7 +35,7 @@ export const getPubkeyHints = (pubkey: string) => {
 }
 
 export const getPubkeyPetname = (pubkey: string) => {
-  const profile = getProfilesByPubkey().get(pubkey)
+  const profile = profilesByPubkey.get().get(pubkey)
   const display = displayProfile(profile)
 
   return display
@@ -82,9 +82,9 @@ export const loadUserData = async (pubkey: string, hints: string[] = []) => {
 export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateList = async (kind: number, modifyTags: ModifyTags) => {
-  const $pk = pk.get()!
-  const [prev] = repository.query([{kinds: [kind], authors: [$pk]}])
-  const relays = getWriteRelayUrls(getRelaySelectionsByPubkey().get($pk))
+  const $pubkey = pubkey.get()!
+  const [prev] = repository.query([{kinds: [kind], authors: [$pubkey]}])
+  const relays = getWriteRelayUrls(relaySelectionsByPubkey.get().get($pubkey))
 
   // Preserve content if we have it
   const event = prev
@@ -102,7 +102,7 @@ export const removeGroupMemberships = (noms: string[]) =>
 
 export const sendJoinRequest = async (nom: string, url: string): Promise<[boolean, string]> => {
   const relays = [url]
-  const filters = [{kinds: [9000], "#h": [nom], "#p": [pk.get()!], since: now() - 30}]
+  const filters = [{kinds: [9000], "#h": [nom], "#p": [pubkey.get()!], since: now() - 30}]
 
   const event = createEvent(GROUP_JOIN, {tags: [["h", nom]]})
   const statusData = await publishThunk(makeThunk({event, relays}))

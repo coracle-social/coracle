@@ -9,20 +9,25 @@
   import {deriveEvents} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
   import {
+    publishStatusData,
+    deriveProfile,
+    deriveProfileDisplay,
+    formatTimestampAsTime,
+  } from "@welshman/app"
+  import type {PublishStatusData} from "@welshman/app"
+  import {
     GROUP_REPLY,
     REACTION,
     ZAP_RESPONSE,
     displayRelayUrl,
     getAncestorTags,
   } from "@welshman/util"
+  import {repository} from "@welshman/app"
   import {fly} from "@lib/transition"
-  import {formatTimestampAsTime} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {repository} from "@app/base"
-  import type {PublishStatusData} from "@app/state"
-  import {deriveProfile, deriveProfileDisplay, deriveEvent, publishStatusData} from "@app/state"
+  import {deriveEvent} from "@app/state"
   import {getChatViewOptions} from "@app/editor"
 
   export let event: TrustedEvent
@@ -73,8 +78,8 @@
   let editor: Readable<Editor>
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
-  $: parentProfile = deriveProfile(parentPubkey)
-  $: parentProfileDisplay = deriveProfileDisplay(parentPubkey)
+  $: parentProfile = deriveProfile(parentPubkey || "")
+  $: parentProfileDisplay = deriveProfileDisplay(parentPubkey || "")
   $: isPublished = findStatus($ps, [PublishStatus.Success])
   $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
   $: failure =

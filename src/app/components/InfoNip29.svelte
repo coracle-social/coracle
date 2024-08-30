@@ -3,7 +3,7 @@
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {DEFAULT_RELAYS} from "@app/base"
+  import {DEFAULT_RELAYS} from "@app/state"
   import {clip} from "@app/toast"
 </script>
 

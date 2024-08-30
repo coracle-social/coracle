@@ -3,10 +3,10 @@
   import {readable} from "svelte/store"
   import {displayRelayUrl, isShareableRelayUrl} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
+  import {subscribe, loadRelay, relaySearch} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {DEFAULT_RELAYS, INDEXER_RELAYS} from "@app/base"
-  import {searchRelays, subscribe, loadRelay} from "@app/state"
+  import {DEFAULT_RELAYS, INDEXER_RELAYS} from "@app/state"
 
   const relays = readable(DEFAULT_RELAYS)
 
@@ -52,7 +52,7 @@
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for relays..." />
   </label>
-  {#each $searchRelays.searchValues(term).filter(url => !$relays.includes(url)) as url (url)}
+  {#each $relaySearch.searchValues(term).filter(url => !$relays.includes(url)) as url (url)}
     <div class="card2 card2-sm flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Icon icon="remote-controller-minimalistic" />

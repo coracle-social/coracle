@@ -48,6 +48,7 @@
     "@tiptap/extension-text": "^2.6.6",
     "@tiptap/suggestion": "^2.6.4",
     "@types/throttle-debounce": "^5.0.2",
+    "@welshman/app": "^0.0.1",
     "@welshman/lib": "^0.0.15",
     "@welshman/net": "^0.0.20",
     "@welshman/signer": "^0.0.4",

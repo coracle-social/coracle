@@ -1,16 +1,14 @@
 <script lang="ts">
   import {makeSecret, getNip07, Nip46Broker} from "@welshman/signer"
+  import {addSession, loadHandle, nip46Perms, type Session} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/LogIn.svelte"
-  import type {Session} from "@app/types"
   import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
-  import {addSession, nip46Perms} from "@app/base"
-  import {loadHandle} from "@app/state"
   import {loadUserData} from "@app/commands"
 
   const signUp = () => pushModal(SignUp)

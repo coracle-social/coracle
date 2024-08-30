@@ -2,16 +2,15 @@
   import {onMount} from "svelte"
   import Masonry from "svelte-bricks"
   import {GROUP_META, displayRelayUrl} from "@welshman/util"
+  import {load, relays} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {DEFAULT_RELAYS} from "@app/base"
   import {
-    load,
     displayGroup,
-    relays,
     searchGroups,
     relayUrlsByNom,
     userMembership,
+    DEFAULT_RELAYS,
   } from "@app/state"
 
   let term = ""

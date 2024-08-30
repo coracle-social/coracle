@@ -1,12 +1,13 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import {loadRelay} from "@welshman/app"
   import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import {pushToast} from "@app/toast"
-  import {splitGroupId, loadRelay, loadGroup} from "@app/state"
+  import {splitGroupId, loadGroup} from "@app/state"
   import {addGroupMemberships} from "@app/commands"
 
   const back = () => history.back()
@@ -24,7 +25,7 @@
       })
     }
 
-    if (!relay.supported_nips?.includes(29)) {
+    if (!relay.profile?.supported_nips?.includes(29)) {
       return pushToast({
         theme: "error",
         message: "Sorry, it looks like that relay doesn't support nostr spaces.",

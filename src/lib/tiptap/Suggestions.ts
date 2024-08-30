@@ -4,7 +4,7 @@ import tippy, {type Instance} from "tippy.js"
 import type {Editor} from "@tiptap/core"
 import {PluginKey} from "@tiptap/pm/state"
 import Suggestion from "@tiptap/suggestion"
-import type {Search} from "@lib/util"
+import type {Search} from "@welshman/app"
 
 export type SuggestionsOptions = {
   char: string

@@ -3,8 +3,8 @@
   import type {NodeViewProps} from "@tiptap/core"
   import {NodeViewWrapper} from "svelte-tiptap"
   import {displayProfile} from "@welshman/util"
+  import {deriveProfile} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
-  import {deriveProfile} from "@app/state"
 
   export let node: NodeViewProps["node"]
   export let selected: NodeViewProps["selected"]

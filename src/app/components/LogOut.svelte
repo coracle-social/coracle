@@ -1,8 +1,8 @@
 <script lang="ts">
+  import {clearStorage} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import {clearStorage} from "@app/storage"
 
   const back = () => history.back()
 
