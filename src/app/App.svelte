@@ -8,10 +8,11 @@
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
+  import {session, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage, session, pubkey, relays, getSetting} from "src/engine"
+  import {storage, relays, getSetting} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -449,7 +450,7 @@
     const interval1 = setInterval(() => {
       slowConnections.set(
         engine
-          .getPubkeyRelayPolicies(engine.pubkey.get())
+          .getPubkeyRelayPolicies(pubkey.get())
           .filter(r => engine.hints.options.getRelayQuality(r.url) < 0.5),
       )
 

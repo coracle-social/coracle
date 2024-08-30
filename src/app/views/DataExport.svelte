@@ -1,10 +1,11 @@
 <script lang="ts">
+  import {repository, pubkey} from "@welshman/app"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {repository, getHandle, pubkey} from "src/engine"
+  import {getHandle} from "src/engine"
 
   const submit = async () => {
     const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))

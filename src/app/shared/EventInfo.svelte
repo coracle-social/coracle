@@ -3,6 +3,7 @@
   import {fromPairs} from "ramda"
   import {Tags, getAddress} from "@welshman/util"
   import {deriveIsDeletedByAddress} from "@welshman/store"
+  import {repository, pubkey} from "@welshman/app"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -11,7 +12,7 @@
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {repository, getSetting, pubkey} from "src/engine"
+  import {getSetting} from "src/engine"
 
   export let event
   export let showDate = false

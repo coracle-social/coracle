@@ -3,6 +3,7 @@
   import {first} from "@welshman/lib"
   import {Tags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
+  import {repository} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +13,6 @@
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readList, displayList, mapListToFeed} from "src/domain"
-  import {repository} from "src/engine"
   import {router} from "src/app/util"
 
   export let address
@@ -27,7 +27,10 @@
 
   const loadFeed = () => {
     if (!inert) {
-      router.at("notes").cx({feed: mapListToFeed(list)}).push()
+      router
+        .at("notes")
+        .cx({feed: mapListToFeed(list)})
+        .push()
     }
   }
 </script>

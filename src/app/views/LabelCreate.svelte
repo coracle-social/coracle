@@ -1,5 +1,6 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
+  import {pubkey} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -16,7 +17,6 @@
     deriveCollections,
     collectionSearch,
     createAndPublish,
-    pubkey,
   } from "src/engine"
 
   export let eid

@@ -48,12 +48,12 @@ import {
   DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
+import {pubkey, repository, signer, updateSession} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
-import type {Zapper, RelayInfo} from "src/engine/model"
-import {repository} from "src/engine/base"
+import type {Zapper, RelayInfo, SessionWithMeta} from "src/engine/model"
 import {
   getUserCircles,
   getGroupReqInfo,
@@ -71,19 +71,16 @@ import {
   maxWot,
   getNetwork,
   primeWotCaches,
-  pubkey,
   publish,
   getNip50Relays,
-  session,
   subscribe,
   subscribePersistent,
   dufflepud,
-  signer,
   relays,
   getFreshness,
   setFreshness,
+  sessionWithMeta,
 } from "src/engine/state"
-import {updateCurrentSession, updateSession} from "src/engine/commands"
 
 export * from "src/engine/requests/pubkeys"
 
@@ -103,12 +100,10 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 // Handles/Zappers
 
 export const loadHandle = simpleCache(
-  batcher(500, async (handles: string[][]) => {
-    handles = uniq(flatten(handles))
-
+  batcher(500, async (handles: string[]) => {
     const data =
       (await tryFunc(async () => {
-        const res = await postJson(dufflepud("handle/info"), {handles})
+        const res = await postJson(dufflepud("handle/info"), {handles: uniq(handles)})
 
         return res?.data
       })) || []
@@ -120,14 +115,12 @@ export const loadHandle = simpleCache(
 )
 
 export const loadZapper = simpleCache(
-  batcher(3000, async (lnurls: string[][]) => {
-    lnurls = uniq(flatten(lnurls))
-
+  batcher(3000, async (lnurls: string[]) => {
     const data =
       (await tryFunc(async () => {
         // Dufflepud expects plaintext but we store lnurls encoded
         const res = await postJson(dufflepud("zapper/info"), {
-          lnurls: lnurls.map(bech32ToHex),
+          lnurls: uniq(lnurls).map(bech32ToHex),
         })
 
         return res?.data
@@ -187,7 +180,7 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
 export const loadGroupMessages = (addresses?: string[]) => {
   const promises = []
-  const addrs = addresses || getUserCircles(session.get())
+  const addrs = addresses || getUserCircles(sessionWithMeta.get())
   const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
 
   for (const address of groupAddrs) {
@@ -209,14 +202,14 @@ export const loadGroupMessages = (addresses?: string[]) => {
     promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
   }
 
-  updateCurrentSession($session => {
+  updateSession(pubkey.get(), ($sessionWithMeta: SessionWithMeta) => {
     for (const address of addrs) {
-      if ($session.groups?.[address]) {
-        $session.groups[address].last_synced = now()
+      if ($sessionWithMeta.groups?.[address]) {
+        $sessionWithMeta.groups[address].last_synced = now()
       }
     }
 
-    return $session
+    return $sessionWithMeta
   })
 
   return Promise.all(promises)
@@ -320,7 +313,7 @@ export const feedLoader = new FeedLoader({
       [Scope.Followers]: () => Array.from(getFollowers($pubkey)),
     })
 
-    return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
+    return pubkeys.length === 0 ? env.DEFAULT_FOLLOWS : pubkeys
   },
   getPubkeysForWOTRange: (min, max) => {
     const pubkeys = []
@@ -412,7 +405,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [9735], [
+  without(env.ENABLE_ZAPS ? [] : [9735], [
     ...noteKinds,
     ...reactionKinds,
     WRAP,
@@ -422,7 +415,7 @@ export const getNotificationKinds = () =>
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
   const cutoff = now() - seconds(30, "day")
-  const {pubkey, notifications_last_synced = 0} = session.get()
+  const {pubkey, notifications_last_synced = 0} = sessionWithMeta.get()
   const since = Math.max(cutoff, notifications_last_synced - seconds(6, "hour"))
 
   const filters = [
@@ -442,14 +435,14 @@ export const loadNotifications = () => {
 
 export const listenForNotifications = () => {
   const since = now() - 30
-  const $session = session.get()
-  const addrs = getUserCommunities($session)
+  const $sessionWithMeta = sessionWithMeta.get()
+  const addrs = getUserCommunities($sessionWithMeta)
 
   const filters: Filter[] = [
     // Mentions
-    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
+    {kinds: noteKinds, "#p": [$sessionWithMeta.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$session.pubkey], limit: 1, since},
+    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$sessionWithMeta.pubkey], limit: 1, since},
   ]
 
   // Communities

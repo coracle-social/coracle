@@ -2,16 +2,11 @@
   import {without} from "ramda"
   import {displayList} from "hurdak"
   import {derived} from "svelte/store"
+  import {pubkey} from "@welshman/app"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
-  import {
-    pubkey,
-    profiles,
-    loadPubkeys,
-    channelHasNewMessages,
-    displayProfileByPubkey,
-  } from "src/engine"
+  import {profiles, loadPubkeys, channelHasNewMessages, displayProfileByPubkey} from "src/engine"
 
   export let channel
 

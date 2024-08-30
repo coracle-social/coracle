@@ -2,6 +2,7 @@
   import {join, identity} from "ramda"
   import {writable} from "svelte/store"
   import {Tags, createEvent} from "@welshman/util"
+  import {pubkey} from "@welshman/app"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -16,7 +17,6 @@
   import {
     env,
     hints,
-    pubkey,
     publish,
     getClientTags,
     tagsFromContent,
@@ -31,8 +31,8 @@
     throw new Error("Either parent or group is allowed, not both")
   }
 
-  const defaultGroups = $env.FORCE_GROUP
-    ? [$env.FORCE_GROUP]
+  const defaultGroups = env.FORCE_GROUP
+    ? [env.FORCE_GROUP]
     : parent
       ? Tags.fromEvent(parent).context().values().valueOf()
       : [group].filter(identity)

@@ -4,8 +4,8 @@
   import {env} from "src/engine"
 </script>
 
-{#if $env.FORCE_GROUP}
-  <GroupDetail {...$$props} address={$env.FORCE_GROUP} activeTab="notes" />
+{#if env.FORCE_GROUP}
+  <GroupDetail {...$$props} address={env.FORCE_GROUP} activeTab="notes" />
 {:else}
   <Feeds {...$$props} />
 {/if}

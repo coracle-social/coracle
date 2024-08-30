@@ -23,6 +23,17 @@ import {
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
+import {
+  updateSession,
+  repository,
+  getSession,
+  pubkey,
+  nip46Perms,
+  signer,
+  sessions,
+  session,
+} from "@welshman/app"
+import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} from "ramda"
 import {stripExifData, blobToFile} from "src/util/html"
@@ -30,9 +41,7 @@ import {joinPath, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {makeRelayPolicy, isPublishedProfile, createProfile, editProfile} from "src/domain"
 import type {RelayPolicy, Profile} from "src/domain"
-import type {Session} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {repository} from "src/engine/base"
 import {
   channels,
   getChannelSeenKey,
@@ -50,12 +59,8 @@ import {
   groups,
   hints,
   mention,
-  pubkey,
   publish,
-  session,
-  sessions,
   sign,
-  signer,
   hasNip44,
   withIndexers,
   setFreshness,
@@ -67,8 +72,6 @@ import {
   userRelayPolicies,
   userSeenStatusEvents,
   getChannelIdFromEvent,
-  getSession,
-  nip46Perms,
   uniqTags,
 } from "src/engine/state"
 import {loadHandle, loadZapper} from "src/engine/requests"
@@ -404,7 +407,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
       .merge([
         hints.ForPubkeys([pubkey]),
         hints.WithinContext(address),
-        hints.fromRelays(env.get().PLATFORM_RELAYS),
+        hints.fromRelays(env.PLATFORM_RELAYS),
       ])
       .policy(hints.addNoFallbacks)
       .getUrls()
@@ -850,37 +853,31 @@ const addSession = (s: Session) => {
   pubkey.set(s.pubkey)
 }
 
-export const loginWithPrivateKey = (privkey, extra = {}) =>
-  addSession({method: "privkey", pubkey: getPubkey(privkey), privkey, ...extra})
+export const loginWithPrivateKey = (secret, extra = {}) =>
+  addSession({method: "privkey", pubkey: getPubkey(secret), secret, ...extra})
 
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
 export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
 
-export const loginWithNsecBunker = async (pubkey, connectToken, connectRelay) => {
-  const connectKey = makeSecret()
-  const connectHandler = {relays: [connectRelay]}
-  const broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
-  const result = await broker.connect(connectToken, nip46Perms)
+export const loginWithNsecBunker = async (pubkey, token, connectRelay) => {
+  const secret = makeSecret()
+  const handler = {relays: [connectRelay]}
+  const broker = Nip46Broker.get(pubkey, secret, handler)
+  const result = await broker.connect(token, nip46Perms)
 
   if (result) {
-    addSession({
-      method: "connect",
-      pubkey,
-      connectKey,
-      connectToken,
-      connectHandler,
-    })
+    addSession({method: "nip46", pubkey, secret, token, handler})
   }
 
   return result
 }
 
-export const loginWithNostrConnect = async (username, connectHandler: Nip46Handler) => {
-  const connectKey = makeSecret()
-  const {pubkey} = (await loadHandle(`${username}@${connectHandler.domain}`)) || {}
+export const loginWithNostrConnect = async (username, handler: Nip46Handler) => {
+  const secret = makeSecret()
+  const {pubkey} = (await loadHandle(`${username}@${handler.domain}`)) || {}
 
-  let broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
+  let broker = Nip46Broker.get(pubkey, secret, handler)
 
   if (!pubkey) {
     const pubkey = await broker.createAccount(username, nip46Perms)
@@ -889,18 +886,13 @@ export const loginWithNostrConnect = async (username, connectHandler: Nip46Handl
       return null
     }
 
-    broker = Nip46Broker.get(pubkey, connectKey, connectHandler)
+    broker = Nip46Broker.get(pubkey, secret, handler)
   }
 
   const result = await broker.connect("", nip46Perms)
 
   if (result) {
-    addSession({
-      method: "connect",
-      pubkey: broker.pubkey,
-      connectKey,
-      connectHandler,
-    })
+    addSession({method: "nip46", pubkey: broker.pubkey, secret, handler})
   }
 
   return result
@@ -935,24 +927,6 @@ export const setAppData = async (d: string, data: any) => {
 
 export const publishSettings = ($settings: Record<string, any>) =>
   setAppData(appDataKeys.USER_SETTINGS, $settings)
-
-export const setSession = (pubkey, data) => {
-  if (!equals(getSession(pubkey), data)) {
-    sessions.update(assoc(pubkey, data))
-  }
-}
-
-export const updateSession = (pubkey, f) => {
-  const session = getSession(pubkey)
-
-  if (session) {
-    setSession(pubkey, f(session))
-  }
-}
-
-export const setCurrentSession = data => setSession(pubkey.get(), data)
-
-export const updateCurrentSession = f => updateSession(pubkey.get(), f)
 
 export const broadcastUserData = async (relays: string[]) => {
   const authors = [pubkey.get()]

@@ -1,6 +1,5 @@
 export * from "src/engine/model"
 export * from "src/engine/utils"
-export * from "src/engine/base"
 export * from "src/engine/state"
 export * from "src/engine/requests"
 export * from "src/engine/commands"

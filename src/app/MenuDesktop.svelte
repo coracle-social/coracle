@@ -1,8 +1,9 @@
 <script lang="ts">
   import {seconds} from "hurdak"
-  import {derived} from 'svelte/store'
+  import {derived} from "svelte/store"
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
+  import {signer, pubkey, sessions} from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -15,12 +16,9 @@
   import {router} from "src/app/util/router"
   import {
     env,
-    pubkey,
-    signer,
     hasNewMessages,
     hasNewNotifications,
     displayProfileByPubkey,
-    sessions,
     userDisplay,
     publishes,
   } from "src/engine"
@@ -79,7 +77,7 @@
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
-  {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
+  {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem path="/settings/relays" isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
         Relays
@@ -113,11 +111,11 @@
   </MenuDesktopItem>
   <MenuDesktopItem path="/events" isActive={$page?.path.startsWith("/events")}
     >Calendar</MenuDesktopItem>
-  {#if $env.ENABLE_MARKET}
+  {#if env.ENABLE_MARKET}
     <MenuDesktopItem path="/listings" isActive={$page?.path.startsWith("/listings")}
       >Market</MenuDesktopItem>
   {/if}
-  {#if !$env.FORCE_GROUP}
+  {#if !env.FORCE_GROUP}
     <MenuDesktopItem path="/groups" isActive={$page?.path.startsWith("/groups")}
       >Groups</MenuDesktopItem>
   {/if}

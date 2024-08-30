@@ -1,6 +1,7 @@
 import type {Publish} from "@welshman/net"
 import type {Nip46Handler} from "@welshman/signer"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
+import type {Session} from "@welshman/app"
 import {isTrustedEvent} from "@welshman/util"
 import type {RelayProfile} from "src/domain"
 
@@ -95,13 +96,7 @@ export type GroupStatus = {
   last_synced: number
 }
 
-export type Session = {
-  method: string
-  pubkey: string
-  privkey?: string
-  connectKey?: string
-  connectToken?: string
-  connectHandler?: Nip46Handler
+export type SessionWithMeta = Session & {
   groups_last_synced?: number
   notifications_last_synced?: number
   groups?: Record<string, GroupStatus>

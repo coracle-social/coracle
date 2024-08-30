@@ -1,8 +1,9 @@
 <script lang="ts">
   import {last} from "ramda"
   import {derived} from "svelte/store"
+  import {signer} from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {signer, relays, userRelayPolicies, joinRelay, leaveRelay} from "src/engine"
+  import {relays, userRelayPolicies, joinRelay, leaveRelay} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let url

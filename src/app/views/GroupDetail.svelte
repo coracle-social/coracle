@@ -68,7 +68,7 @@
   $: {
     tabs = ["notes"]
 
-    if (!$env.FORCE_GROUP) {
+    if (!env.FORCE_GROUP) {
       tabs.push("calendar")
       tabs.push("market")
     }

@@ -1,9 +1,10 @@
 <script lang="ts">
   import {isGroupAddress} from "@welshman/util"
+  import {session} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {session, deriveAdminKeyForGroup} from "src/engine"
+  import {deriveAdminKeyForGroup} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address

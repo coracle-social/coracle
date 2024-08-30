@@ -110,7 +110,7 @@
           </div>
         </FieldInline>
       {/if}
-      {#if $env.PLATFORM_RELAYS.length === 0}
+      {#if env.PLATFORM_RELAYS.length === 0}
         <Field label="Relays">
           <SearchSelect
             multiple

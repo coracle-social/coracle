@@ -3,6 +3,7 @@
   import {deriveEvent} from "@welshman/store"
   import {getIdOrAddress, getIdFilters} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
+  import {repository} from "@welshman/app"
   import {fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -10,7 +11,7 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import {loadOne, repository} from "src/engine"
+  import {loadOne} from "src/engine"
   import {makeFeed} from "src/domain"
 
   export let address

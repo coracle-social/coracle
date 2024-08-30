@@ -4,6 +4,7 @@
   import {sortBy, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
+  import {pubkey, signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
   import Modal from "src/partials/Modal.svelte"
@@ -15,7 +16,14 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {pubkey, userListFeeds, loadPubkeyFeeds, loadPubkeyLists, signer, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
+  import {
+    userListFeeds,
+    loadPubkeyFeeds,
+    loadPubkeyLists,
+    deleteEvent,
+    userFeeds,
+    userFavoritedFeeds,
+  } from "src/engine"
 
   export let feed
   export let updateFeed

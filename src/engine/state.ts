@@ -101,6 +101,18 @@ import {
 import type {PublishRequest, SubscribeRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {
+  session,
+  getSession,
+  getSigner,
+  signer,
+  repository,
+  events,
+  relay,
+  tracker,
+  pubkey,
+  sessions,
+} from "@welshman/app"
 import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {isLike, repostKinds, noteKinds, reactionKinds, appDataKeys} from "src/util/nostr"
@@ -151,7 +163,7 @@ import type {
   GroupRequest,
   GroupStatus,
   PublishInfo,
-  Session,
+  SessionWithMeta,
   Topic,
   Zapper,
   AnonymousUserState,
@@ -159,7 +171,43 @@ import type {
 } from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {repository, events, relay, tracker, sessions, pubkey} from "src/engine/base"
+
+export const env = {
+  CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
+  CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
+  DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
+  DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
+  INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
+  DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
+  DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
+  ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
+  ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
+  BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
+  FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
+  IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
+  MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
+  NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
+  ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
+  PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
+  PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
+  PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
+  SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
+}
+
+export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
+
+export const hasNip44 = writable(false)
+
+signer.subscribe($signer => {
+  if ($signer) {
+    $signer?.nip44.encrypt(pubkey.get(), "test").then(
+      v => hasNip44.set(true),
+      () => hasNip44.set(false),
+    )
+  } else {
+    hasNip44.set(false)
+  }
+})
 
 // Base state
 
@@ -296,11 +344,11 @@ export const defaultSettings = {
   enable_client_tag: false,
   auto_authenticate: true,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
-  nip96_urls: env.get().NIP96_URLS.slice(0, 1),
-  imgproxy_url: env.get().IMGPROXY_URL,
-  dufflepud_url: env.get().DUFFLEPUD_URL,
-  multiplextr_url: env.get().MULTIPLEXTR_URL,
-  platform_zap_split: env.get().PLATFORM_ZAP_SPLIT,
+  nip96_urls: env.NIP96_URLS.slice(0, 1),
+  imgproxy_url: env.IMGPROXY_URL,
+  dufflepud_url: env.DUFFLEPUD_URL,
+  multiplextr_url: env.MULTIPLEXTR_URL,
+  platform_zap_split: env.PLATFORM_ZAP_SPLIT,
 }
 
 export const settingsEvents = deriveEvents(repository, {filters: [{kinds: [APP_DATA]}]})
@@ -730,12 +778,12 @@ export const getRecipientKey = wrap => {
 }
 
 export const getGroupReqInfo = (address = null) => {
-  let since = session.get()?.groups_last_synced || 0
+  let since = sessionWithMeta.get()?.groups_last_synced || 0
   let $groupSharedKeys = groupSharedKeys.get()
   let $groupAdminKeys = groupAdminKeys.get()
 
   if (address) {
-    since = session.get()?.groups?.[address]?.last_synced || 0
+    since = sessionWithMeta.get()?.groups?.[address]?.last_synced || 0
     $groupSharedKeys = $groupSharedKeys.filter(whereEq({group: address}))
     $groupAdminKeys = $groupAdminKeys.filter(whereEq({group: address}))
   }
@@ -761,7 +809,7 @@ export const getGroupReqInfo = (address = null) => {
 }
 
 export const getCommunityReqInfo = (address = null) => {
-  const {groups, groups_last_synced} = session.get() || {}
+  const {groups, groups_last_synced} = sessionWithMeta.get() || {}
   const since = groups?.[address]?.last_synced || groups_last_synced || 0
 
   return {
@@ -777,15 +825,15 @@ export const deriveSharedKeyForGroup = (address: string) =>
 
 export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
 
-export const getGroupStatus = (session, address) =>
-  (session?.groups?.[address] || {}) as GroupStatus
+export const getGroupStatus = (sessionWithMeta: SessionWithMeta, address: string) =>
+  (sessionWithMeta?.groups?.[address] || {}) as GroupStatus
 
 export const deriveGroupStatus = address =>
-  derived(session, $session => getGroupStatus($session, address))
+  derived(sessionWithMeta, $sessionWithMeta => getGroupStatus($sessionWithMeta, address))
 
 export const userIsGroupMember = withGetter(
-  derived(session, $session => (address, includeRequests = false) => {
-    const status = getGroupStatus($session, address)
+  derived(sessionWithMeta, $sessionWithMeta => (address, includeRequests = false) => {
+    const status = getGroupStatus($sessionWithMeta, address)
 
     if (isCommunityAddress(address)) {
       return status.joined
@@ -804,10 +852,10 @@ export const userIsGroupMember = withGetter(
 )
 
 export const deriveGroupOptions = (defaultGroups = []) =>
-  derived([session, userIsGroupMember], ([$session, $userIsGroupMember]) => {
+  derived([sessionWithMeta, userIsGroupMember], ([$sessionWithMeta, $userIsGroupMember]) => {
     const options = []
 
-    for (const address of Object.keys($session?.groups || {})) {
+    for (const address of Object.keys($sessionWithMeta?.groups || {})) {
       const group = groups.key(address).get()
 
       if (group && $userIsGroupMember(address)) {
@@ -822,18 +870,19 @@ export const deriveGroupOptions = (defaultGroups = []) =>
     return uniqBy(prop("address"), options)
   })
 
-export const getUserCircles = (session: Session) => {
+export const getUserCircles = (sessionWithMeta: SessionWithMeta) => {
   const $userIsGroupMember = userIsGroupMember.get()
 
-  return Object.entries(session?.groups || {})
+  return Object.entries(sessionWithMeta?.groups || {})
     .filter(([a, s]) => !repository.deletes.has(a) && $userIsGroupMember(a))
     .map(([a, s]) => a)
 }
 
-export const getUserGroups = (session: Session) => getUserCircles(session).filter(isGroupAddress)
+export const getUserGroups = (sessionWithMeta: SessionWithMeta) =>
+  getUserCircles(sessionWithMeta).filter(isGroupAddress)
 
-export const getUserCommunities = (session: Session) =>
-  getUserCircles(session).filter(isCommunityAddress)
+export const getUserCommunities = (sessionWithMeta: SessionWithMeta) =>
+  getUserCircles(sessionWithMeta).filter(isCommunityAddress)
 
 // Events
 
@@ -970,14 +1019,17 @@ export const unreadReactionNotifications = derived(
 )
 
 export const hasNewNotifications = derived(
-  [session, unreadMainNotifications],
-  ([$session, $unread]) => {
+  [sessionWithMeta, unreadMainNotifications],
+  ([$sessionWithMeta, $unread]) => {
     if ($unread.length > 0) {
       return true
     }
 
-    if ($session?.onboarding_tasks_completed) {
-      return without($session.onboarding_tasks_completed, Object.values(OnboardingTask)).length > 0
+    if ($sessionWithMeta?.onboarding_tasks_completed) {
+      return (
+        without($sessionWithMeta.onboarding_tasks_completed, Object.values(OnboardingTask)).length >
+        0
+      )
     }
 
     return false
@@ -1101,7 +1153,7 @@ export const getRelay = url => defaultTo({url}, relays.key(url).get())
 export const deriveRelay = url => derived(relays.key(url), defaultTo({url}))
 
 export const getNip50Relays = () =>
-  uniq([...env.get().SEARCH_RELAYS, ...filterRelaysByNip(50, relays.get()).map(r => r.url)])
+  uniq([...env.SEARCH_RELAYS, ...filterRelaysByNip(50, relays.get()).map(r => r.url)])
 
 export class RelaySearch extends SearchHelper<RelayInfo, string> {
   config = {keys: ["url", "name", "description"]}
@@ -1277,12 +1329,11 @@ export const withRelays = (relays: string[], otherRelays: string[]) =>
   uniq([...relays, ...otherRelays])
 
 export const forcePlatformRelays = (relays: string[]) =>
-  forceRelays(relays, Array.from(env.get().PLATFORM_RELAYS))
+  forceRelays(relays, Array.from(env.PLATFORM_RELAYS))
 
-export const withPlatformRelays = (relays: string[]) =>
-  withRelays(relays, env.get().PLATFORM_RELAYS)
+export const withPlatformRelays = (relays: string[]) => withRelays(relays, env.PLATFORM_RELAYS)
 
-export const withIndexers = (relays: string[]) => withRelays(relays, env.get().INDEXER_RELAYS)
+export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER_RELAYS)
 
 export const hints = new Router({
   getUserPubkey: () => pubkey.get(),
@@ -1290,8 +1341,8 @@ export const hints = new Router({
   getCommunityRelays: getGroupRelayUrls,
   getPubkeyRelays: (pubkey: string, mode: string) =>
     getPubkeyRelayPolicies(pubkey, mode).map(r => r.url),
-  getFallbackRelays: () => [...env.get().PLATFORM_RELAYS, ...env.get().DEFAULT_RELAYS],
-  getSearchRelays: () => env.get().SEARCH_RELAYS,
+  getFallbackRelays: () => [...env.PLATFORM_RELAYS, ...env.DEFAULT_RELAYS],
+  getSearchRelays: () => env.SEARCH_RELAYS,
   getLimit: () => parseInt(getSetting("relay_limit")),
   getRedundancy: () => parseInt(getSetting("relay_redundancy")),
   getRelayQuality: (url: string) => {
@@ -1636,7 +1687,7 @@ export const getExecutor = (urls: string[]) => {
 const seenChallenges = new Set()
 
 export const onAuth = async (url, challenge) => {
-  const {FORCE_GROUP, PLATFORM_RELAYS} = env.get()
+  const {FORCE_GROUP, PLATFORM_RELAYS} = env
 
   if (!signer.get()) {
     return
@@ -2007,7 +2058,7 @@ export const getClientTags = () => {
     return []
   }
 
-  const {CLIENT_NAME = "", CLIENT_ID} = env.get()
+  const {CLIENT_NAME = "", CLIENT_ID} = env
   const tag = ["client", CLIENT_NAME]
 
   if (CLIENT_ID) {

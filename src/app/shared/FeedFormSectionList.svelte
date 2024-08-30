@@ -1,8 +1,9 @@
 <script lang="ts">
   import {makeListFeed} from "@welshman/feeds"
+  import {repository} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {listSearch, displayProfileByPubkey, repository} from "src/engine"
+  import {listSearch, displayProfileByPubkey} from "src/engine"
   import {router} from "src/app/util"
 
   export let feed

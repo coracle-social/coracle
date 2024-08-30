@@ -39,7 +39,7 @@
   }
 </script>
 
-<div class:blur-sm={$env.BLUR_CONTENT}>
+<div class:blur-sm={env.BLUR_CONTENT}>
   {#if warning}
     <div class="flex gap-2 text-neutral-300">
       <i class="fa fa-warning m-1" />

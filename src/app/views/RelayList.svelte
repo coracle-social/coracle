@@ -4,6 +4,7 @@
   import {groupBy, sortBy, uniqBy, prop} from "ramda"
   import {displayList} from "hurdak"
   import {pushToMapKey} from "@welshman/lib"
+  import {pubkey} from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -21,7 +22,6 @@
     load,
     hints,
     relays,
-    pubkey,
     userFollows,
     getProfile,
     displayProfileByPubkey,

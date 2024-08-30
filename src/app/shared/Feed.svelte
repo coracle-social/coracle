@@ -28,7 +28,7 @@
   export let showGroup = false
   export let onEvent = null
 
-  const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
+  const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
   const promptDismissed = synced("feed/promptDismissed", 0)
 

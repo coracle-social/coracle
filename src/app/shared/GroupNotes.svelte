@@ -3,13 +3,14 @@
   import {remove} from "@welshman/lib"
   import {isGroupAddress, getAddress, getIdFilters, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
+  import {signer, repository} from "@welshman/app"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import {makeFeed, readFeed} from "src/domain"
-  import {hints, repository, signer, deriveGroupMeta, load} from "src/engine"
+  import {hints, deriveGroupMeta, load} from "src/engine"
 
   export let address
 

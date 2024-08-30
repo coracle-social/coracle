@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {isNil} from "@welshman/lib"
+  import {signer} from "@welshman/app"
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
@@ -15,7 +16,6 @@
   import {displayRelayUrl, RelayMode} from "src/domain"
   import {
     deriveRelay,
-    signer,
     getSetting,
     setInboxPolicy,
     setOutboxPolicy,

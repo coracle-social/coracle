@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {signer} from "@welshman/app"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
@@ -8,7 +9,6 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
   import {
-    signer,
     GroupAccess,
     deriveAdminKeyForGroup,
     publishGroupExitRequest,

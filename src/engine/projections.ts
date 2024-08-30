@@ -17,16 +17,15 @@ import {
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
+import {repository, putSession, getSession} from "@welshman/app"
 import {parseJson} from "src/util/misc"
 import {normalizeRelayUrl} from "src/domain"
-import {GroupAccess} from "src/engine/model"
-import {repository} from "src/engine/base"
+import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
   topics,
   relays,
   deriveAdminKeyForGroup,
   getGroupStatus,
-  getSession,
   groupAdminKeys,
   groupAlerts,
   groupRequests,
@@ -37,13 +36,7 @@ import {
   hints,
   ensurePlaintext,
 } from "src/engine/state"
-import {
-  modifyGroupStatus,
-  setGroupStatus,
-  updateSession,
-  updateZapper,
-  updateHandle,
-} from "src/engine/commands"
+import {modifyGroupStatus, setGroupStatus, updateZapper, updateHandle} from "src/engine/commands"
 
 // Synchronize repository with projections. All events should be published to the
 // repository, and when accepted, be propagated to projections. This avoids processing
@@ -141,7 +134,7 @@ projections.addHandler(27, (e: TrustedEvent) => {
 // Membership
 
 projections.addHandler(COMMUNITIES, (e: TrustedEvent) => {
-  let session = getSession(e.pubkey)
+  let session = getSession(e.pubkey) as SessionWithMeta
 
   if (!session) {
     return
@@ -155,7 +148,7 @@ projections.addHandler(COMMUNITIES, (e: TrustedEvent) => {
     })
   }
 
-  updateSession(e.pubkey, always(session))
+  putSession(session)
 })
 
 const handleGroupRequest = access => (e: TrustedEvent) => {

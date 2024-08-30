@@ -2,6 +2,7 @@
   import {sleep} from "hurdak"
   import type {TrustedEvent} from "@welshman/util"
   import {isTrustedEvent} from "@welshman/util"
+  import {repository} from "@welshman/app"
   import {error} from "src/util/logger"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
@@ -11,7 +12,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {repository, projections} from "src/engine"
+  import {projections} from "src/engine"
 
   const setFile = e => {
     file = e.target.files[0]

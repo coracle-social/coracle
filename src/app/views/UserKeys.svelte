@@ -5,6 +5,7 @@
   import {getAddress, WRAP, GROUP} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
+  import {session} from "@welshman/app"
   import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -18,7 +19,6 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import {
-    session,
     hints,
     groupSharedKeys,
     relaySearch,
@@ -136,12 +136,12 @@
         on nostr.
       </small>
     </div>
-    {#if $session?.privkey}
+    {#if $session?.secret}
       <div>
         <CopyValue
           isPassword
           label="Private Key"
-          value={$session?.privkey}
+          value={$session?.secret}
           encode={nsecEncode}
           hasEncryptPrompt />
         <small class="text-neutral-100">

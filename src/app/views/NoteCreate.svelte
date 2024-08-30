@@ -7,6 +7,7 @@
   import {writable} from "svelte/store"
   import {now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
+  import {session} from "@welshman/app"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -30,14 +31,7 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {publish, mention} from "src/engine"
   import {router} from "src/app/util/router"
-  import {
-    env,
-    hints,
-    session,
-    getClientTags,
-    tagsFromContent,
-    publishToZeroOrMoreGroups,
-  } from "src/engine"
+  import {env, hints, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
 
   export let type = "note"
   export let quote = null
@@ -45,7 +39,7 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = $env.FORCE_GROUP ? [$env.FORCE_GROUP] : [group].filter(identity)
+  const defaultGroups = env.FORCE_GROUP ? [env.FORCE_GROUP] : [group].filter(identity)
 
   let images, compose
   let charCount = 0
@@ -290,7 +284,7 @@
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
         <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
-      {#if !$env.FORCE_GROUP}
+      {#if !env.FORCE_GROUP}
         <small
           class="flex cursor-pointer items-center justify-end gap-4"
           on:click={() => options.setView("settings")}>
