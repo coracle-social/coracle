@@ -95,7 +95,6 @@ import {
   Plex,
   Local,
   Relays,
-  Tracker,
   publish as basePublish,
   subscribe as baseSubscribe,
 } from "@welshman/net"
@@ -160,38 +159,10 @@ import type {
 } from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
-import {repository, events, relay} from "src/engine/repository"
+import {repository, events, relay, tracker, sessions, pubkey} from "src/engine/base"
 
 // Base state
 
-export const env = withGetter(
-  writable({
-    CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
-    CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
-    DEFAULT_FOLLOWS: fromCsv(import.meta.env.VITE_DEFAULT_FOLLOWS) as string,
-    DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
-    INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
-    DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
-    DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
-    ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
-    ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
-    BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
-    FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
-    IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
-    MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
-    NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
-    ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
-    PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
-    PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(
-      normalizeRelayUrl,
-    ) as string[],
-    PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
-    SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
-  }),
-)
-
-export const pubkey = withGetter(synced<string | null>("pubkey", null))
-export const sessions = withGetter(synced<Record<string, Session>>("sessions", {}))
 export const handles = withGetter(writable<Record<string, Handle>>({}))
 export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
@@ -222,49 +193,6 @@ export const getFreshness = (key: string, value: any) =>
 
 export const setFreshness = (key: string, value: any, ts: number) =>
   freshness.set(getFreshnessKey(key, value), ts)
-
-// Session, signing, encryption
-
-export const getSession = pubkey => sessions.get()[pubkey]
-
-export const session = withGetter(derived([pubkey, sessions], ([$pk, $sessions]) => $sessions[$pk]))
-
-export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
-
-export const getSigner = memoize($s => {
-  switch ($s?.method) {
-    case "extension":
-      return new Nip07Signer()
-    case "privkey":
-      return new Nip01Signer($s.privkey)
-    case "connect":
-      return new Nip46Signer(Nip46Broker.get($s.pubkey, $s.connectKey, $s.connectHandler))
-    default:
-      return null
-  }
-})
-
-export const hasNip44 = writable(false)
-
-export const signer = withGetter(
-  derived(
-    session,
-    memoize($session => {
-      const $signer = getSigner($session)
-
-      if ($signer) {
-        $signer?.nip44.encrypt($session.pubkey, "test").then(
-          v => hasNip44.set(true),
-          () => hasNip44.set(false),
-        )
-      } else {
-        hasNip44.set(false)
-      }
-
-      return $signer
-    }),
-  ),
-)
 
 // Plaintext
 
@@ -1927,10 +1855,6 @@ export const createAndPublish = async ({
 
   return publish({event, relays, verb, timeout, forcePlatform})
 }
-
-export const tracker = new Tracker()
-
-tracker.setMaxListeners(100)
 
 Object.assign(NetworkContext, {
   onAuth,

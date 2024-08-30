@@ -20,7 +20,7 @@ import {getPubkey} from "@welshman/signer"
 import {parseJson} from "src/util/misc"
 import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess} from "src/engine/model"
-import {repository} from "src/engine/repository"
+import {repository} from "src/engine/base"
 import {
   topics,
   relays,

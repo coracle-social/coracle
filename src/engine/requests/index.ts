@@ -53,7 +53,7 @@ import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import type {Zapper, RelayInfo} from "src/engine/model"
-import {repository} from "src/engine/repository"
+import {repository} from "src/engine/base"
 import {
   getUserCircles,
   getGroupReqInfo,
@@ -576,7 +576,7 @@ export const loadRelay = batcher(800, async (urls: string[]) => {
     setFreshness("relay", url, now())
   }
 
-  const res = urlSet.size && await postJson(dufflepud("relay/info"), {urls: Array.from(urlSet)})
+  const res = urlSet.size && (await postJson(dufflepud("relay/info"), {urls: Array.from(urlSet)}))
   const index = indexBy((item: any) => item.url, res?.data || [])
   const items: RelayInfo[] = urls.map(url => {
     const normalizedUrl = normalizeRelayUrl(url)
@@ -587,7 +587,7 @@ export const loadRelay = batcher(800, async (urls: string[]) => {
 
   relays.mapStore.update($relays => {
     for (const relay of items) {
-      $relays.set(relay.url, {...$relays.get(relay.url) || {}, ...relay})
+      $relays.set(relay.url, {...($relays.get(relay.url) || {}), ...relay})
     }
 
     return $relays

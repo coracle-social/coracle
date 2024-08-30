@@ -32,7 +32,7 @@ import {makeRelayPolicy, isPublishedProfile, createProfile, editProfile} from "s
 import type {RelayPolicy, Profile} from "src/domain"
 import type {Session} from "src/engine/model"
 import {GroupAccess} from "src/engine/model"
-import {repository} from "src/engine/repository"
+import {repository} from "src/engine/base"
 import {
   channels,
   getChannelSeenKey,
