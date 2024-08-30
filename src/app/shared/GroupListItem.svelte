@@ -51,7 +51,7 @@
       </slot>
     </div>
     {#if $meta?.about}
-      <p class="text-start text-neutral-100">
+      <p class="text-start text-neutral-100 overflow-hidden text-ellipsis">
         {ellipsize($meta.about, 300)}
       </p>
     {/if}

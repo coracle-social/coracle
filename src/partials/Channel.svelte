@@ -3,6 +3,7 @@
   import {displayList, pluralize} from "hurdak"
   import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {Nip46Signer} from "@welshman/signer"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly, slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -12,7 +13,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {hasNip44, session, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
+  import {hasNip44, signer, session, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
 
@@ -154,7 +155,7 @@
     bind:this={element}
     class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
     <div>
-      {#if sending}
+      {#if sending && $signer instanceof Nip46Signer}
         <div
           class="m-auto flex items-center justify-center gap-2 pt-6 text-neutral-500"
           transition:slide>
