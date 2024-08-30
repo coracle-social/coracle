@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
   import {Tags, NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS} from "@welshman/util"
+  import {topicSearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -10,14 +11,7 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {
-    hints,
-    mention,
-    relaySearch,
-    searchTopicNames,
-    createAndPublish,
-    deleteEvent,
-  } from "src/engine"
+  import {hints, mention, relaySearch, createAndPublish, deleteEvent} from "src/engine"
   import {KindSearch, normalizeRelayUrl, createList, displayList, editList} from "src/domain"
 
   export let list
@@ -110,7 +104,7 @@
           <SearchSelect
             multiple
             value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
-            search={$searchTopicNames}
+            search={$topicSearch.searchValues}
             termToItem={identity}
             onChange={onTopicsChange}>
             <span slot="item" let:item>#{item}</span>

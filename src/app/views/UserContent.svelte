@@ -3,6 +3,7 @@
   import {pluck, equals} from "ramda"
   import {identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
+  import {topicSearch} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -19,15 +20,12 @@
     mention,
     userSettings,
     publishSettings,
-    searchTopics,
     userMutes,
     loadPubkeys,
     updateSingleton,
   } from "src/engine"
 
   const values = {...$userSettings}
-
-  const searchWords = q => pluck("name", $searchTopics(q))
 
   const noteActionOptions = ["zaps", "replies", "reactions", "recommended_apps"]
 
@@ -96,7 +94,7 @@
       <SearchSelect
         multiple
         bind:value={values.muted_words}
-        search={searchWords}
+        search={$topicSearch.searchValues}
         termToItem={identity} />
       <p slot="info">Notes containing these words will be hidden by default.</p>
     </Field>

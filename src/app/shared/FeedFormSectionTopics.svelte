@@ -1,8 +1,8 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
   import {FeedType} from "@welshman/feeds"
+  import {topicSearch} from "@welshman/app"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {searchTopicNames} from "src/engine"
 
   export let feed
   export let onChange
@@ -12,7 +12,7 @@
 <SearchSelect
   multiple
   value={feed.slice(2)}
-  search={$searchTopicNames}
+  search={$topicSearch.searchValues}
   termToItem={identity}
   onChange={topics => onChange([FeedType.Tag, "#t", ...topics])}>
   <span slot="item" let:item>#{item}</span>

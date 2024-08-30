@@ -224,7 +224,6 @@ export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
 export const groupAlerts = new CollectionStore<GroupAlert>("id")
-export const topics = new CollectionStore<Topic>("name")
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -1386,14 +1385,6 @@ export const hints = new Router({
   },
 })
 
-// Topics
-
-export const getTopicSearch = $topics => fuzzy($topics, {keys: ["name"], threshold: 0.3})
-
-export const searchTopics = topics.derived(getTopicSearch)
-
-export const searchTopicNames = searchTopics.derived(search => term => pluck("name", search(term)))
-
 // Lists
 
 export const lists = deriveEventsMapped<PublishedList>(repository, {
@@ -2332,7 +2323,6 @@ export const storage = new Storage(16, [
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
   objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
-  collectionAdapter("topics", "name", topics, {limit: 1000, sort: sortBy(prop("last_seen"))}),
   collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
