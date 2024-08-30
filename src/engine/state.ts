@@ -112,6 +112,7 @@ import {
   tracker,
   pubkey,
   sessions,
+  relaysByUrl,
 } from "@welshman/app"
 import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -150,7 +151,6 @@ import {
   asDecryptedEvent,
   normalizeRelayUrl,
   makeRelayPolicy,
-  filterRelaysByNip,
   displayRelayUrl,
   readGroupMeta,
   displayGroupMeta,
@@ -167,7 +167,6 @@ import type {
   Topic,
   Zapper,
   AnonymousUserState,
-  RelayInfo,
 } from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
@@ -219,7 +218,6 @@ export const groupHints = withGetter(writable<Record<string, string[]>>({}))
 export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
 export const groups = new CollectionStore<Group>("address")
-export const relays = new CollectionStore<RelayInfo>("url")
 export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
 export const groupRequests = new CollectionStore<GroupRequest>("id")
@@ -1145,31 +1143,6 @@ export const channelHasNewMessages = (channel: Channel) =>
 
 export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
 
-// Relays
-
-export const getRelay = url => defaultTo({url}, relays.key(url).get())
-
-export const deriveRelay = url => derived(relays.key(url), defaultTo({url}))
-
-export const getNip50Relays = () =>
-  uniq([...env.SEARCH_RELAYS, ...filterRelaysByNip(50, relays.get()).map(r => r.url)])
-
-export class RelaySearch extends SearchHelper<RelayInfo, string> {
-  config = {keys: ["url", "name", "description"]}
-
-  getSearch = () => {
-    const search = fuzzy(this.options, this.config)
-
-    return term => (term ? search(term) : sortBy(r => -r.count || 0, this.options))
-  }
-
-  getValue = (option: RelayInfo) => option.url
-
-  displayValue = displayRelayUrl
-}
-
-export const relaySearch = derived(relays, $relays => new RelaySearch($relays))
-
 // Relay policies
 
 export const relayListEvents = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
@@ -1349,24 +1322,26 @@ export const hints = new Router({
     const oneHour = 60 * oneMinute
     const oneDay = 24 * oneHour
     const oneWeek = 7 * oneDay
-    const {count = 0, faults = []} = relays.key(url).get() || {}
+    const relay = relaysByUrl.get().get(url)
+    const connect_count = relay?.stats?.connect_count || 0
+    const recent_errors = relay?.stats?.recent_errors || []
     const connection = NetworkContext.pool.get(url, {autoConnect: false})
 
     // If we haven't connected, consult our relay record and see if there has
     // been a recent fault. If there has been, penalize the relay. If there have been several,
     // don't use the relay.
     if (!connection) {
-      const lastFault = last(faults) || 0
+      const lastFault = last(recent_errors) || 0
 
-      if (faults.filter(n => n > Date.now() - oneHour).length > 10) {
+      if (recent_errors.filter(n => n > Date.now() - oneHour).length > 10) {
         return 0
       }
 
-      if (faults.filter(n => n > Date.now() - oneDay).length > 50) {
+      if (recent_errors.filter(n => n > Date.now() - oneDay).length > 50) {
         return 0
       }
 
-      if (faults.filter(n => n > Date.now() - oneWeek).length > 100) {
+      if (recent_errors.filter(n => n > Date.now() - oneWeek).length > 100) {
         return 0
       }
 
@@ -1380,7 +1355,7 @@ export const hints = new Router({
       [ConnectionStatus.Closed]: 0.6,
       [ConnectionStatus.Slow]: 0.5,
       [ConnectionStatus.Ok]: 1,
-      default: clamp([0.5, 1], count / 1000),
+      default: clamp([0.5, 1], connect_count / 1000),
     })
   },
 })
@@ -2323,7 +2298,6 @@ export const storage = new Storage(16, [
   objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
   objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
-  collectionAdapter("relays", "url", relays, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
   collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("groupRequests", "id", groupRequests, {sort: sortBy(prop("created_at"))}),

@@ -3,14 +3,6 @@ import type {Nip46Handler} from "@welshman/signer"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
 import type {Session} from "@welshman/app"
 import {isTrustedEvent} from "@welshman/util"
-import type {RelayProfile} from "src/domain"
-
-export type RelayInfo = RelayProfile & {
-  count?: number
-  faults?: number[]
-  first_seen?: number
-  last_checked?: number
-}
 
 export enum GroupAccess {
   None = null,

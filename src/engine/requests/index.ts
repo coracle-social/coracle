@@ -48,12 +48,12 @@ import {
   DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {pubkey, repository, signer, updateSession} from "@welshman/app"
+import {pubkey, relays, repository, signer, updateSession} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
-import {LIST_KINDS} from "src/domain"
-import type {Zapper, RelayInfo, SessionWithMeta} from "src/engine/model"
+import {LIST_KINDS, filterRelaysByNip} from "src/domain"
+import type {Zapper, SessionWithMeta} from "src/engine/model"
 import {
   getUserCircles,
   getGroupReqInfo,
@@ -72,11 +72,9 @@ import {
   getNetwork,
   primeWotCaches,
   publish,
-  getNip50Relays,
   subscribe,
   subscribePersistent,
   dufflepud,
-  relays,
   getFreshness,
   setFreshness,
   sessionWithMeta,
@@ -247,6 +245,10 @@ export const createPeopleLoader = ({
   onEvent = noop,
 }: PeopleLoaderOpts = {}) => {
   const loading = writable(false)
+  const nip50Relays = uniq([
+    ...env.SEARCH_RELAYS,
+    ...filterRelaysByNip(50, relays.get()).map(r => r.url),
+  ])
 
   return {
     loading,
@@ -260,7 +262,7 @@ export const createPeopleLoader = ({
           onEvent,
           skipCache: true,
           forcePlatform: false,
-          relays: getNip50Relays().slice(0, 8),
+          relays: nip50Relays.slice(0, 8),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
             await sleep(Math.min(1000, Date.now() - now))
@@ -557,34 +559,3 @@ export const loadHandlers = () =>
       addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],
   })
-
-export const loadRelay = batcher(800, async (urls: string[]) => {
-  const urlSet = new Set(
-    urls
-      .map(url => normalizeRelayUrl(url))
-      .filter(url => getFreshness("relay", url) < now() - 3600),
-  )
-
-  for (const url of urlSet) {
-    setFreshness("relay", url, now())
-  }
-
-  const res = urlSet.size && (await postJson(dufflepud("relay/info"), {urls: Array.from(urlSet)}))
-  const index = indexBy((item: any) => item.url, res?.data || [])
-  const items: RelayInfo[] = urls.map(url => {
-    const normalizedUrl = normalizeRelayUrl(url)
-    const {info = {}} = index.get(normalizedUrl) || {}
-
-    return {...info, url: normalizedUrl, last_checked: now()}
-  })
-
-  relays.mapStore.update($relays => {
-    for (const relay of items) {
-      $relays.set(relay.url, {...($relays.get(relay.url) || {}), ...relay})
-    }
-
-    return $relays
-  })
-
-  return items
-})

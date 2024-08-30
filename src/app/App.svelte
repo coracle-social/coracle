@@ -8,11 +8,11 @@
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
-  import {session, pubkey} from "@welshman/app"
+  import {session, pubkey, relays} from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage, relays, getSetting} from "src/engine"
+  import {storage, getSetting} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -459,39 +459,14 @@
         const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
         const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
 
-        if (lastFault) {
-          relays.key(url).update($r => ({
-            ...$r,
-            faults: lib.uniq(($r.faults || []).concat(lastFault)).slice(-10),
-          }))
-        }
-
         if (lastActivity < Date.now() - 60_000) {
           connection.disconnect()
         }
       }
     }, 5_000)
 
-    const interval2 = setInterval(async () => {
-      if (!getSetting("dufflepud_url")) {
-        return
-      }
-
-      // Find relays with old/missing metadata and refresh them. Only pick a
-      // few so we're not asking for too much data at once
-      const staleRelays = relays
-        .get()
-        .filter(r => (r.last_checked || 0) < lib.now() - seconds(7, "day"))
-        .slice(0, 20)
-
-      for (const relay of staleRelays) {
-        engine.loadRelay(relay.url)
-      }
-    }, 30_000)
-
     return () => {
       clearInterval(interval1)
-      clearInterval(interval2)
     }
   })
 </script>

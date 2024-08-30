@@ -1,6 +1,7 @@
 <script lang="ts">
   import {without, identity} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
+  import {relaySearch} from "@welshman/app"
   import {onMount} from "svelte"
   import {pickVals, toSpliced} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -16,7 +17,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {displayRelayUrl} from "src/domain"
-  import {hints, relaySearch, groupMetaSearch, displayGroupByAddress} from "src/engine"
+  import {hints, groupMetaSearch, displayGroupByAddress} from "src/engine"
 
   export let initialPubkey = null
   export let initialGroupAddress = null

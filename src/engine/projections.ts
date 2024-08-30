@@ -22,7 +22,6 @@ import {parseJson} from "src/util/misc"
 import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
-  relays,
   deriveAdminKeyForGroup,
   getGroupStatus,
   groupAdminKeys,
@@ -179,21 +178,6 @@ projections.addHandler(0, e => {
 
   updateHandle(e, content)
   updateZapper(e, content)
-})
-
-// Relays
-
-projections.addHandler(RELAYS, (e: TrustedEvent) => {
-  for (const [key, value] of e.tags) {
-    if (["r", "relay"].includes(key) && isShareableRelayUrl(value)) {
-      relays.key(normalizeRelayUrl(value)).update($relay => ({
-        url: value,
-        last_checked: 0,
-        count: inc($relay?.count || 0),
-        first_seen: $relay?.first_seen || e.created_at,
-      }))
-    }
-  }
 })
 
 // Decrypt encrypted events eagerly
