@@ -27,7 +27,6 @@ export {
 export * from "./collection"
 export * from "./feed"
 export * from "./group"
-export * from "./handle"
 export * from "./handler"
 export * from "./kind"
 export * from "./list"

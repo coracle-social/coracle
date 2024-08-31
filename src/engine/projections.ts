@@ -1,10 +1,8 @@
-import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
+import {mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn} from "hurdak"
-import {nth, inc} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
-  isShareableRelayUrl,
   getIdFilters,
   MUTES,
   APP_DATA,
@@ -12,14 +10,11 @@ import {
   SEEN_GENERAL,
   SEEN_CONTEXT,
   FOLLOWS,
-  RELAYS,
   COMMUNITIES,
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {repository, putSession, getSession} from "@welshman/app"
-import {parseJson} from "src/util/misc"
-import {normalizeRelayUrl} from "src/domain"
 import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
   deriveAdminKeyForGroup,
@@ -34,7 +29,7 @@ import {
   hints,
   ensurePlaintext,
 } from "src/engine/state"
-import {modifyGroupStatus, setGroupStatus, updateZapper, updateHandle} from "src/engine/commands"
+import {modifyGroupStatus, setGroupStatus} from "src/engine/commands"
 
 // Synchronize repository with projections. All events should be published to the
 // repository, and when accepted, be propagated to projections. This avoids processing
@@ -172,13 +167,6 @@ const handleGroupRequest = access => (e: TrustedEvent) => {
 projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
-
-projections.addHandler(0, e => {
-  const content = parseJson(e.content)
-
-  updateHandle(e, content)
-  updateZapper(e, content)
-})
 
 // Decrypt encrypted events eagerly
 

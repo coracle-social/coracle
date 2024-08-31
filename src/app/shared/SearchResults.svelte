@@ -3,7 +3,6 @@
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
   import {topicSearch} from "@welshman/app"
-  import {fuzzy} from "src/util/misc"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
   import {profileSearch, createPeopleLoader} from "src/engine"

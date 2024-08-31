@@ -1,15 +1,5 @@
 import "src/app.css"
-
-import Bugsnag from "@bugsnag/js"
-import App from "src/app/App.svelte"
-import {installPrompt} from "src/partials/state"
-
-if (import.meta.env.VITE_BUGSNAG_API_KEY) {
-  Bugsnag.start({
-    apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
-    collectUserIp: false,
-  })
-}
+import {getJson, setJson} from "@welshman/lib"
 
 // Migrate sessions
 
@@ -34,6 +24,17 @@ for (const [key, {privkey, connectKey, connectToken, connectHandler, ...session}
 }
 
 setJson("sessions", sessions)
+
+import Bugsnag from "@bugsnag/js"
+import App from "src/app/App.svelte"
+import {installPrompt} from "src/partials/state"
+
+if (import.meta.env.VITE_BUGSNAG_API_KEY) {
+  Bugsnag.start({
+    apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
+    collectUserIp: false,
+  })
+}
 
 // Analytics
 window.plausible =

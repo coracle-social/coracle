@@ -12,7 +12,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {repository, deriveZapper, loadZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -37,12 +37,10 @@
     hints,
     loadOne,
     ensureUnwrapped,
-    loadZapper,
     isEventMuted,
     getSetting,
     loadPubkeysFromEvent,
     sortEventsDesc,
-    deriveZapper,
   } from "src/engine"
 
   export let note

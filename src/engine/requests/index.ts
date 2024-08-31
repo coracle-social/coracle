@@ -1,6 +1,6 @@
 import {debounce} from "throttle-debounce"
 import {get, writable} from "svelte/store"
-import {batch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
+import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -10,21 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {
-  Worker,
-  bech32ToHex,
-  batcher,
-  pick,
-  simpleCache,
-  nthEq,
-  nth,
-  now,
-  max,
-  postJson,
-  indexBy,
-  uniqBy,
-  flatten,
-} from "@welshman/lib"
+import {Worker, nthEq, nth, now, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -33,7 +19,6 @@ import {
   isGroupAddress,
   isSignedEvent,
   createEvent,
-  normalizeRelayUrl,
   WRAP,
   EPOCH,
   LABEL,
@@ -53,7 +38,7 @@ import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS, filterRelaysByNip} from "src/domain"
-import type {Zapper, SessionWithMeta} from "src/engine/model"
+import type {SessionWithMeta} from "src/engine/model"
 import {
   getUserCircles,
   getGroupReqInfo,
@@ -74,9 +59,6 @@ import {
   publish,
   subscribe,
   subscribePersistent,
-  dufflepud,
-  getFreshness,
-  setFreshness,
   sessionWithMeta,
 } from "src/engine/state"
 
@@ -94,52 +76,6 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
   return {...filter, since}
 }
-
-// Handles/Zappers
-
-export const loadHandle = simpleCache(
-  batcher(500, async (handles: string[]) => {
-    const data =
-      (await tryFunc(async () => {
-        const res = await postJson(dufflepud("handle/info"), {handles: uniq(handles)})
-
-        return res?.data
-      })) || []
-
-    const infoByHandle = createMapOf("handle", "info", data)
-
-    return handles.map(h => infoByHandle[h])
-  }),
-)
-
-export const loadZapper = simpleCache(
-  batcher(3000, async (lnurls: string[]) => {
-    const data =
-      (await tryFunc(async () => {
-        // Dufflepud expects plaintext but we store lnurls encoded
-        const res = await postJson(dufflepud("zapper/info"), {
-          lnurls: uniq(lnurls).map(bech32ToHex),
-        })
-
-        return res?.data
-      })) || []
-
-    const infoByLnurl = createMapOf("lnurl", "info", data)
-
-    return lnurls.map(lnurl => {
-      const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
-
-      if (!zapper) {
-        return null
-      }
-
-      return {
-        ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
-        lnurl,
-      } as Zapper
-    })
-  }),
-)
 
 export const attemptedAddrs = new Map()
 

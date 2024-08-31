@@ -6,7 +6,6 @@ import {
   getAddress,
   Tags,
   createEvent,
-  getLnUrl,
   Address,
   isSignedEvent,
   normalizeRelayUrl,
@@ -26,12 +25,12 @@ import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/
 import {
   updateSession,
   repository,
-  getSession,
   pubkey,
   nip46Perms,
   signer,
   sessions,
   session,
+  loadHandle,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -63,10 +62,6 @@ import {
   sign,
   hasNip44,
   withIndexers,
-  setFreshness,
-  getFreshness,
-  handles,
-  zappers,
   anonymous,
   mentionGroup,
   userRelayPolicies,
@@ -74,7 +69,6 @@ import {
   getChannelIdFromEvent,
   uniqTags,
 } from "src/engine/state"
-import {loadHandle, loadZapper} from "src/engine/requests"
 
 // Helpers
 
@@ -193,44 +187,6 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
   const nip94Events = await uploadFilesToHosts(urls, compressedFiles)
 
   return eventsToMeta(nip94Events)
-}
-
-// Handles/Zappers
-
-export const updateHandle = async ({pubkey, created_at}, {nip05}) => {
-  if (!nip05 || getFreshness("handle", pubkey) >= created_at) {
-    return
-  }
-
-  setFreshness("handle", pubkey, created_at)
-
-  const handle = await loadHandle(nip05)
-
-  if (handle?.pubkey === pubkey) {
-    handles.update(assoc(pubkey, {...handle, nip05}))
-  }
-}
-
-export const updateZapper = async ({pubkey, created_at}, {lud16, lud06}) => {
-  const address = (lud16 || lud06 || "").toLowerCase()
-
-  if (!address) {
-    return
-  }
-
-  const lnurl = getLnUrl(address)
-
-  if (!lnurl || getFreshness("zapper", pubkey) >= created_at) {
-    return
-  }
-
-  setFreshness("zapper", pubkey, created_at)
-
-  const zapper = await loadZapper(lnurl)
-
-  if (zapper?.allowsNostr && zapper?.nostrPubkey) {
-    zappers.update(assoc(pubkey, {...zapper, pubkey, lnurl}))
-  }
 }
 
 // Groups

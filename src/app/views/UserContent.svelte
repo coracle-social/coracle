@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {pluck, equals} from "ramda"
+  import {equals} from "ramda"
   import {identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
   import {topicSearch} from "@welshman/app"

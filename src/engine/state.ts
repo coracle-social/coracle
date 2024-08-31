@@ -6,7 +6,6 @@ import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
 import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
 import {
-  pluck,
   find,
   defaultTo,
   equals,
@@ -38,7 +37,6 @@ import {
   pushToKey,
   pushToMapKey,
   tryCatch,
-  memoize,
 } from "@welshman/lib"
 import {
   APP_DATA,
@@ -86,7 +84,7 @@ import {
   getPubkeyTagValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
-import {Nip59, Nip07Signer, Nip01Signer, Nip46Signer, Nip46Broker, decrypt} from "@welshman/signer"
+import {Nip59, Nip01Signer, decrypt} from "@welshman/signer"
 import {
   ConnectionStatus,
   Executor,
@@ -111,10 +109,10 @@ import {
   relay,
   tracker,
   pubkey,
-  sessions,
   relaysByUrl,
+  handles,
 } from "@welshman/app"
-import {fuzzy, synced, parseJson, fromCsv, SearchHelper} from "src/util/misc"
+import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
 import {isLike, repostKinds, noteKinds, reactionKinds, appDataKeys} from "src/util/nostr"
 import logger from "src/util/logger"
@@ -127,7 +125,6 @@ import type {
   PublishedList,
   PublishedGroupMeta,
   RelayPolicy,
-  Handle,
 } from "src/domain"
 import {
   RelayMode,
@@ -151,7 +148,6 @@ import {
   asDecryptedEvent,
   normalizeRelayUrl,
   makeRelayPolicy,
-  displayRelayUrl,
   readGroupMeta,
   displayGroupMeta,
 } from "src/domain"
@@ -164,8 +160,6 @@ import type {
   GroupStatus,
   PublishInfo,
   SessionWithMeta,
-  Topic,
-  Zapper,
   AnonymousUserState,
 } from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
@@ -210,8 +204,6 @@ signer.subscribe($signer => {
 
 // Base state
 
-export const handles = withGetter(writable<Record<string, Handle>>({}))
-export const zappers = withGetter(writable<Record<string, Zapper>>({}))
 export const plaintext = withGetter(writable<Record<string, string>>({}))
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
@@ -474,16 +466,6 @@ export const profileSearch = derived(
         .map($p => ({...$p, nip05: $handles[$p.event.pubkey]?.nip05})),
     ),
 )
-
-// Handles/Zappers
-
-export const getHandle = (pubkey: string) => handles.get()[pubkey]
-
-export const deriveHandle = (pubkey: string) => derived(handles, $handles => $handles[pubkey])
-
-export const getZapper = (pubkey: string) => zappers.get()[pubkey]
-
-export const deriveZapper = (pubkey: string) => derived(zappers, $zappers => $zappers[pubkey])
 
 // Follows
 
@@ -2294,8 +2276,6 @@ const collectionAdapter = (name, key, store, opts = {}) =>
   })
 
 export const storage = new Storage(16, [
-  objectAdapter("handles", "key", handles, {limit: 10000}),
-  objectAdapter("zappers", "key", zappers, {limit: 10000}),
   objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
   objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
   collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),

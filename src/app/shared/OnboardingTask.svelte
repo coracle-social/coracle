@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {derived} from "svelte/store"
   import {append} from "@welshman/lib"
   import {pubkey, updateSession} from "@welshman/app"
   import {updateIn} from "src/util/misc"

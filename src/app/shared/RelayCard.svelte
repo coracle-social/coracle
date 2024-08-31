@@ -1,8 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {isNil} from "@welshman/lib"
   import {signer, deriveRelay} from "@welshman/app"
-  import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"

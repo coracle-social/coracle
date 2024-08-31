@@ -3,16 +3,15 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {nip19} from "nostr-tools"
-  import {seconds} from "hurdak"
   import * as store from "svelte/store"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
-  import {session, pubkey, relays} from "@welshman/app"
+  import {session, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage, getSetting} from "src/engine"
+  import {storage} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -455,7 +454,7 @@
       )
 
       // Prune connections we haven't used in a while. Clear errors periodically
-      for (const [url, connection] of network.NetworkContext.pool.data.entries()) {
+      for (const [_, connection] of network.NetworkContext.pool.data.entries()) {
         const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
         const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
 

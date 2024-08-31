@@ -1,5 +1,4 @@
 import type {Publish} from "@welshman/net"
-import type {Nip46Handler} from "@welshman/signer"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
 import type {Session} from "@welshman/app"
 import {isTrustedEvent} from "@welshman/util"
