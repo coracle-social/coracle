@@ -20,8 +20,10 @@
   import WotScore from "src/partials/WotScore.svelte"
   import {displayPubkey} from "src/domain"
   import {userFollows, deriveProfileDisplay, session, maxWot, getWotScore} from "src/engine"
+  import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 
   export let pubkey
+  export let displayNpubCopyButton = false
 
   const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getWotScore($session?.pubkey, pubkey)
@@ -34,7 +36,12 @@
   <div class="flex flex-col overflow-hidden text-ellipsis">
     <span class="cy-person-name">{$profileDisplay}</span>
     {#if $profileDisplay != npubDisplay}
-      <small class="text-xs">{npubDisplay}</small>
+      <div class="flex flex-row items-center text-xs">
+        <small>{npubDisplay}</small>
+        {#if displayNpubCopyButton}
+          <CopyValueSimple class="pl-1" value={pubkey} label={npubDisplay} />
+        {/if}
+      </div>
     {/if}
   </div>
   {#if $session}

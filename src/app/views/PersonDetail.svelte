@@ -71,7 +71,7 @@
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex flex-col">
       <div class="flex items-center justify-between gap-4">
-        <PersonName class="text-2xl" {pubkey} />
+        <PersonName class="text-2xl" {pubkey} displayNpubCopyButton />
         <div class="hidden xs:block">
           <PersonActions {pubkey} />
         </div>
