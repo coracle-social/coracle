@@ -77,13 +77,13 @@ Enhancement suggestions are tracked as [GitHub issues](/issues).
 
 We welcome pull requests. To ensure your pull request is accepted, please follow the guidelines below:
 
-- Base your pull request on an issue that has already been discussed and acknowledged as a problem or desirable enhancement. (ROADMAP.md)[ROADMAP.md] also contains several tasks that have not been put into issues yet.
+- Base your pull request on an issue that has already been discussed and acknowledged as a problem or desirable enhancement.
 - Set your pull request up to merge into the `dev` branch of the upstream repo.
 - Make sure your pull request passes all checks and follows code style. You can autoformat, lint, and check types using the scripts in package.json. More broadly, code style is generally procedural, with some functional paradigms, using objects mostly as singletons with an initialization step. Try to use (but not over-use) svelte stores, ramda, and hurdak when possible.
 
 #### Development and Deployment
 
-To create a working copy, please fork the repository and clone it so that all PRs can go through a review. Run `yarn && yarn dev` to start the dev server, and `yarn run check` to run all checks. Pushes to the `dev` branch are autodeployed via render.com to `dev.coracle.social`. Pushes to `master` are autodeployed via render.com to `app.coracle.social`.
+To create a working copy, please fork the repository and clone it so that all PRs can go through a review. Run `npm i && npm run dev` to start the dev server, and `npm run check` to run all checks. Pushes to the `dev` branch are autodeployed via render.com to `dev.coracle.social`. Pushes to `master` are autodeployed via render.com to `app.coracle.social`.
 
 ### Project Structure
 
