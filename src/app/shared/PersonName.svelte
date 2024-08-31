@@ -16,6 +16,7 @@
   import cx from "classnames"
   import {derived} from "svelte/store"
   import {session, deriveProfileDisplay} from "@welshman/app"
+  import {isMobile} from "src/util/html"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
@@ -31,9 +32,20 @@
   const npubDisplay = displayPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const accent = $following || pubkey === $session?.pubkey
+
+  function handleClick(event: MouseEvent) {
+    if (isMobile) {
+      const target = event.target as HTMLElement
+      const popoverBlock = (event.currentTarget as HTMLElement).querySelector(".popover-block")
+
+      if (popoverBlock && popoverBlock.contains(target)) {
+        event.stopPropagation()
+      }
+    }
+  }
 </script>
 
-<div class={cx("flex gap-1", $$props.class)}>
+<button type="button" class={cx("flex gap-1", $$props.class)} on:click={handleClick}>
   <div class="flex flex-col overflow-hidden text-ellipsis">
     <span class="cy-person-name">{$profileDisplay}</span>
     {#if $profileDisplay != npubDisplay}
@@ -46,7 +58,7 @@
     {/if}
   </div>
   {#if $session}
-    <div class="flex gap-1 font-normal">
+    <div class="popover-block flex gap-1 font-normal">
       <Popover triggerType="mouseenter">
         <div slot="trigger">
           <WotScore score={wotScore} max={$maxWot} {accent} />
@@ -58,4 +70,4 @@
       </Popover>
     </div>
   {/if}
-</div>
+</button>

@@ -9,7 +9,7 @@
   export let instance = null
   export let theme = "dark"
   export let triggerType = "click"
-  export let placement = "top"
+  export let placement: Placement = "top"
   export let interactive = true
   export let arrow = false
   export let opts = {} as {
@@ -20,10 +20,10 @@
   let trigger
   let tooltip
 
-  $: isNoOp = (isMobile && triggerType === "mouseenter") || !triggerType
+  $: adjustedTriggerType = isMobile && triggerType === "mouseenter" ? "click" : triggerType
 
   onMount(() => {
-    if (isNoOp) {
+    if (!adjustedTriggerType) {
       return
     }
 
@@ -31,11 +31,11 @@
       ...opts,
       theme,
       arrow,
-      placement: placement as Placement,
+      placement,
       appendTo: () => document.body,
       allowHTML: true,
       interactive,
-      trigger: triggerType,
+      trigger: adjustedTriggerType,
       animation: "shift-away",
       onShow: () => {
         const [tooltipContents] = tooltip?.children || []
@@ -45,7 +45,7 @@
           instance.popper.querySelector(".tippy-content").appendChild(tooltipContents)
 
           instance.popper.addEventListener("mouseleave", e => {
-            if (triggerType !== "click") {
+            if (adjustedTriggerType !== "click") {
               instance.hide()
             }
           })
@@ -84,7 +84,7 @@
   <slot name="trigger" />
 </div>
 
-{#if !isNoOp}
+{#if adjustedTriggerType}
   <div bind:this={tooltip} class="hidden">
     <div>
       <slot name="tooltip" {instance} />
