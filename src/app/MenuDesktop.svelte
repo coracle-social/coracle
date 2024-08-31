@@ -3,7 +3,13 @@
   import {derived} from "svelte/store"
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {signer, pubkey, sessions} from "@welshman/app"
+  import {
+    signer,
+    pubkey,
+    sessions,
+    deriveProfileDisplay,
+    displayProfileByPubkey,
+  } from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -14,14 +20,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {
-    env,
-    hasNewMessages,
-    hasNewNotifications,
-    displayProfileByPubkey,
-    userDisplay,
-    publishes,
-  } from "src/engine"
+  import {env, hasNewMessages, hasNewNotifications, publishes} from "src/engine"
 
   const {page} = router
 
@@ -66,6 +65,7 @@
 
   $: isFeedPage = Boolean($page?.path.match(/^\/(notes)?$/))
   $: isListPage = Boolean($page?.path.match(/^\/(lists)?$/))
+  $: userDisplay = deriveProfileDisplay($pubkey)
 </script>
 
 <div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">

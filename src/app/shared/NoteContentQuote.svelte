@@ -1,13 +1,14 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {getAddress, getIdFilters} from "@welshman/util"
+  import {displayProfileByPubkey} from "@welshman/app"
   import {filterVals} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {hints, loadOne, loadPubkeys, displayProfileByPubkey, isEventMuted} from "src/engine"
+  import {hints, loadOne, loadPubkeys, isEventMuted} from "src/engine"
 
   export let note
   export let value

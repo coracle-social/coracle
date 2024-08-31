@@ -1,7 +1,7 @@
 <script lang="ts">
+  import {deriveProfile} from "@welshman/app"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PlaceholderCircle from "src/app/shared/PlaceholderCircle.svelte"
-  import {deriveProfile} from "src/engine"
 
   export let pubkey
 

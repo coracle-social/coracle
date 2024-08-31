@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pubkey} from "@welshman/app"
+  import {pubkey, profilesByPubkey} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -10,7 +10,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
-  import {env, getProfile, publishProfile} from "src/engine"
+  import {env, publishProfile} from "src/engine"
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
@@ -42,7 +42,7 @@
     }
   }
 
-  const values = {...getProfile($pubkey)}
+  const values = {...$profilesByPubkey.get($pubkey)}
 
   let modal
 

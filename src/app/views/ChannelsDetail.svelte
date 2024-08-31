@@ -4,7 +4,7 @@
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
-  import {repository, session} from "@welshman/app"
+  import {repository, session, displayProfileByPubkey} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Channel from "src/partials/Channel.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -15,7 +15,6 @@
   import {router} from "src/app/util/router"
   import {
     hasNip44,
-    displayProfileByPubkey,
     sendMessage,
     sendLegacyMessage,
     markChannelRead,

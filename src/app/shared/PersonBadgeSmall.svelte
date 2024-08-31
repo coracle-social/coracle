@@ -1,9 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
+  import {deriveProfileDisplay} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {deriveProfileDisplay} from "src/engine"
 
   export let pubkey
   export let inert = false

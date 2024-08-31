@@ -1,6 +1,6 @@
 <script lang="ts">
   import {walkFeed, isAuthorFeed} from "@welshman/feeds"
-  import {pubkey, signer} from "@welshman/app"
+  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -12,13 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {
-    displayProfileByPubkey,
-    deleteEvent,
-    createAndPublish,
-    loadPubkeys,
-    hints,
-  } from "src/engine"
+  import {deleteEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
 
   export let feed
   export let exit

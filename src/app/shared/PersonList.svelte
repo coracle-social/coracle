@@ -1,11 +1,12 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {flatten, partition} from "ramda"
+  import {profilesByPubkey} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {profileHasName} from "src/domain"
-  import {loadPubkeys, getProfile} from "src/engine"
+  import {loadPubkeys} from "src/engine"
 
   export let pubkeys
 
@@ -16,7 +17,7 @@
     limit += 10
   }
 
-  const hasName = pubkey => profileHasName(getProfile(pubkey))
+  const hasName = pubkey => profileHasName($profilesByPubkey.get(pubkey))
 
   onMount(() => {
     const scroller = createScroller(loadMore, {

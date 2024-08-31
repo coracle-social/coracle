@@ -31,6 +31,7 @@ import {
   sessions,
   session,
   loadHandle,
+  displayProfileByPubkey,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -49,7 +50,6 @@ import {
   deriveAdminKeyForGroup,
   userIsGroupMember,
   deriveSharedKeyForGroup,
-  displayProfileByPubkey,
   env,
   addClientTags,
   getClientTags,

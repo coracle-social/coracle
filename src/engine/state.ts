@@ -51,7 +51,6 @@ import {
   INBOX_RELAYS,
   LABEL,
   MUTES,
-  PROFILE,
   RELAYS,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
@@ -111,6 +110,8 @@ import {
   pubkey,
   relaysByUrl,
   handles,
+  profiles,
+  displayProfileByPubkey,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -136,14 +137,11 @@ import {
   profileHasName,
   readFeed,
   readList,
-  readProfile,
   readCollections,
   CollectionSearch,
   readHandlers,
   mapListToFeed,
   getHandlerAddress,
-  displayProfile,
-  displayPubkey,
   readSingleton,
   asDecryptedEvent,
   normalizeRelayUrl,
@@ -388,33 +386,6 @@ export const dufflepud = (path: string) => {
 }
 
 // Profiles
-
-export const profiles = deriveEventsMapped<PublishedProfile>(repository, {
-  filters: [{kinds: [PROFILE]}],
-  eventToItem: readProfile,
-  itemToEvent: prop("event"),
-})
-
-export const profilesByPubkey = withGetter(
-  derived(profiles, $profiles => indexBy(p => p.event.pubkey, $profiles)),
-)
-
-export const getProfile = (pk: string) => profilesByPubkey.get().get(pk)
-
-export const deriveProfile = pk => derived(profilesByPubkey, $m => $m.get(pk))
-
-export const displayProfileByPubkey = (pk: string) => {
-  const profile = getProfile(pk)
-
-  return profile ? displayProfile(profile) : displayPubkey(pk)
-}
-
-export const deriveProfileDisplay = (pk: string) =>
-  derived(deriveProfile(pk), () => displayProfileByPubkey(pk))
-
-export const userDisplay = derived([pubkey, profilesByPubkey], ([$pk, $p]) =>
-  $pk ? displayProfileByPubkey($pk) : "",
-)
 
 export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   getSearch = () => {

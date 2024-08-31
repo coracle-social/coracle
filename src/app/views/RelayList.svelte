@@ -4,7 +4,14 @@
   import {groupBy, sortBy, uniqBy, prop} from "ramda"
   import {displayList} from "hurdak"
   import {pushToMapKey} from "@welshman/lib"
-  import {pubkey, relays, relaySearch, type Relay} from "@welshman/app"
+  import {
+    pubkey,
+    relays,
+    relaySearch,
+    type Relay,
+    displayProfileByPubkey,
+    profilesByPubkey,
+  } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -21,8 +28,6 @@
     load,
     hints,
     userFollows,
-    getProfile,
-    displayProfileByPubkey,
     userRelayPolicies,
     getPubkeyRelayPolicies,
     sortEventsDesc,
@@ -36,7 +41,7 @@
     const m = new Map<string, string[]>()
 
     for (const pk of $userFollows) {
-      if (!profileHasName(getProfile(pk))) {
+      if (!profileHasName($profilesByPubkey.get(pk))) {
         continue
       }
 

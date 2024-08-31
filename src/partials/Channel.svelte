@@ -4,7 +4,7 @@
   import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {Nip46Signer} from "@welshman/signer"
-  import {session, signer} from "@welshman/app"
+  import {session, signer, displayProfileByPubkey} from "@welshman/app"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly, slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -14,7 +14,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {hasNip44, derivePubkeysWithoutInbox, displayProfileByPubkey} from "src/engine"
+  import {hasNip44, derivePubkeysWithoutInbox} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
 

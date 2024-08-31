@@ -1,6 +1,6 @@
 <script lang="ts">
   import {makeScopeFeed, Scope} from "@welshman/feeds"
-  import {signer, pubkey, sessions} from "@welshman/app"
+  import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import SliderMenu from "src/partials/SliderMenu.svelte"
@@ -11,7 +11,7 @@
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
   import {makeFeed, normalizeFeedDefinition} from "src/domain"
-  import {env, hasNewMessages, hasNewNotifications, displayProfileByPubkey} from "src/engine"
+  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const closeSubMenu = () => {
     subMenu = null

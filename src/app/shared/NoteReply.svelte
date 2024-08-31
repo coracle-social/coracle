@@ -3,7 +3,7 @@
   import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
-  import {session} from "@welshman/app"
+  import {session, displayProfileByPubkey} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -22,7 +22,6 @@
     tagsFromContent,
     getClientTags,
     getReplyTags,
-    displayProfileByPubkey,
     mention,
   } from "src/engine"
   import {drafts} from "src/app/state"
