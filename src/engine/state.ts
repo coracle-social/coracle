@@ -50,7 +50,6 @@ import {
   HANDLER_RECOMMENDATION,
   INBOX_RELAYS,
   LABEL,
-  MUTES,
   RELAYS,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
@@ -81,6 +80,7 @@ import {
   getRelayTags,
   getRelayTagValues,
   getPubkeyTagValues,
+  getListValues,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip01Signer, decrypt} from "@welshman/signer"
@@ -112,6 +112,9 @@ import {
   handles,
   profiles,
   displayProfileByPubkey,
+  follows,
+  mutesByPubkey,
+  followsByPubkey,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -131,7 +134,6 @@ import {
   RelayMode,
   displayFeed,
   EDITABLE_LIST_KINDS,
-  getSingletonValues,
   makeSingleton,
   ListSearch,
   profileHasName,
@@ -437,78 +439,14 @@ export const profileSearch = derived(
         .map($p => ({...$p, nip05: $handles[$p.event.pubkey]?.nip05})),
     ),
 )
-
-// Follows
-
-export const followListEvents = deriveEvents(repository, {filters: [{kinds: [FOLLOWS]}]})
-
-export const followLists = withGetter(
-  derived([plaintext, followListEvents], ([$plaintext, $followListEvents]) =>
-    $followListEvents.map(event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: $plaintext[event.id],
-        }),
-      ),
-    ),
-  ),
-)
-
-export const followListsByPubkey = withGetter(
-  derived(
-    followLists,
-    $ls => indexBy($l => $l.event.pubkey, $ls) as Map<string, PublishedSingleton>,
-  ),
-)
-
-export const getFollowList = (pk: string) =>
-  followListsByPubkey.get().get(pk) as PublishedSingleton | undefined
-
-export const deriveFollowList = (pk: string) =>
-  derived(followListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
-
-export const getFollows = (pk: string) => new Set(getSingletonValues("p", getFollowList(pk)))
-
-export const deriveFollows = (pk: string) =>
-  derived(followListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
-
-export const isFollowing = (pk: string, tpk: string) => getFollows(pk).has(tpk)
-
-// Mutes
-
-export const muteListEvents = deriveEvents(repository, {filters: [{kinds: [MUTES]}]})
-
-export const muteLists = derived([plaintext, muteListEvents], ([$plaintext, $muteListEvents]) =>
-  $muteListEvents.map(event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: $plaintext[event.id],
-      }),
-    ),
-  ),
-)
-
-export const muteListsByPubkey = withGetter(
-  derived(muteLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
-)
-
-export const getMuteList = (pk: string) =>
-  muteListsByPubkey.get().get(pk) as PublishedSingleton | undefined
-
-export const deriveMuteList = (pk: string) =>
-  derived(muteListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
-
-export const getMutes = (pk: string) => new Set(getSingletonValues("p", getMuteList(pk)))
-
-export const deriveMutes = (pk: string) =>
-  derived(muteListsByPubkey, m => new Set(getSingletonValues("p", m.get(pk))))
-
-export const isMuting = (pk, tpk) => getMutes(pk).has(tpk)
-
 // Network, followers, wot
 
+export const getFollows = (pubkey: string) => getListValues("p", followsByPubkey.get().get(pubkey))
+
+export const getMutes = (pubkey: string) => getListValues("p", mutesByPubkey.get().get(pubkey))
+
 export const getNetwork = simpleCache(([pk]) => {
-  const pubkeys = getFollows(pk)
+  const pubkeys = new Set(getFollows(pk))
   const network = new Set<string>()
 
   for (const follow of pubkeys) {
@@ -519,29 +457,26 @@ export const getNetwork = simpleCache(([pk]) => {
     }
   }
 
-  return network
+  return Array.from(network)
 })
 
-export const getFollowers = simpleCache(
-  ([pk]) =>
-    new Set(
-      followLists
-        .get()
-        .filter(l => getSingletonValues("p", l).includes(pk))
-        .map(l => l.event.pubkey),
-    ),
+export const getFollowers = simpleCache(([pk]) =>
+  follows
+    .get()
+    .filter(l => getListValues("p", l).includes(pk))
+    .map(l => l.event.pubkey),
 )
 
 export const getFollowsWhoFollow = simpleCache(
-  ([pk, tpk]) => new Set(Array.from(getFollows(pk)).filter(other => isFollowing(other, tpk))),
+  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getFollows(other).includes(tpk))),
 )
 
 export const getFollowsWhoMute = simpleCache(
-  ([pk, tpk]) => new Set(Array.from(getFollows(pk)).filter(other => isMuting(other, tpk))),
+  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getFollows(other).includes(tpk))),
 )
 
 export const primeWotCaches = throttle(3000, pk => {
-  const userFollows = getFollows(pk)
+  const userFollows = new Set(getFollows(pk))
   const mutes: Record<string, string[]> = {}
   const follows: Record<string, string[]> = {}
 
@@ -577,7 +512,7 @@ export const maxWot = withGetter(writable(10))
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
 
 export const getWotScore = (pk, tpk) => {
-  if (!pk) return getFollowers(tpk).size
+  if (!pk) return getFollowers(tpk).length
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
@@ -590,20 +525,17 @@ export const getWotScore = (pk, tpk) => {
 
 // User follows/mutes/network
 
-export const userFollowList = derived(
-  [followListsByPubkey, pubkey, anonymous],
-  ([$m, $pk, $anon]) => {
-    return $pk ? $m.get($pk) : makeSingleton({kind: FOLLOWS, publicTags: $anon.follows})
-  },
-)
+export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m, $pk, $anon]) => {
+  return $pk ? $m.get($pk) : makeSingleton({kind: FOLLOWS, publicTags: $anon.follows})
+})
 
-export const userFollows = derived(userFollowList, l => new Set(getSingletonValues("p", l)))
+export const userFollows = derived(userFollowList, l => new Set(getListValues("p", l)))
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
-export const userMuteList = derived([muteListsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
+export const userMuteList = derived([mutesByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => new Set(getSingletonValues("p", l)))
+export const userMutes = derived(userMuteList, l => new Set(getListValues("p", l)))
 
 // Communities
 
@@ -629,7 +561,7 @@ export const communityListsByAddress = derived(communityLists, $communityLists =
   const m = new Map<string, PublishedSingleton[]>()
 
   for (const list of $communityLists) {
-    for (const a of getSingletonValues("a", list)) {
+    for (const a of getListValues("a", list)) {
       pushToMapKey(m, a, list)
     }
   }
@@ -643,10 +575,10 @@ export const getCommunityList = (pk: string) =>
 export const deriveCommunityList = (pk: string) =>
   derived(communityListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
 
-export const getCommunities = (pk: string) => new Set(getSingletonValues("a", getCommunityList(pk)))
+export const getCommunities = (pk: string) => new Set(getListValues("a", getCommunityList(pk)))
 
 export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => new Set(getSingletonValues("a", m.get(pk))))
+  derived(communityListsByPubkey, m => new Set(getListValues("a", m.get(pk))))
 
 // Groups
 
@@ -1361,7 +1293,7 @@ export const feedFavoritesByAddress = withGetter(
     const $feedFavoritesByAddress = new Map<string, PublishedSingleton[]>()
 
     for (const singleton of $feedFavorites) {
-      for (const address of getSingletonValues("a", singleton)) {
+      for (const address of getListValues("a", singleton)) {
         pushToMapKey($feedFavoritesByAddress, address, singleton)
       }
     }
@@ -1377,7 +1309,7 @@ export const userFeedFavorites = derived(
 )
 
 export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
-  getSingletonValues("a", $singleton).map(repository.getEvent).filter(identity).map(readFeed),
+  getListValues("a", $singleton).map(repository.getEvent).filter(identity).map(readFeed),
 )
 
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {

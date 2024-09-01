@@ -44,7 +44,6 @@ import {
   getGroupReqInfo,
   getCommunityReqInfo,
   env,
-  getFollows,
   getFilterSelections,
   getFollowers,
   getUserCommunities,
@@ -60,6 +59,7 @@ import {
   subscribe,
   subscribePersistent,
   sessionWithMeta,
+  getFollows,
 } from "src/engine/state"
 
 export * from "src/engine/requests/pubkeys"
@@ -246,9 +246,9 @@ export const feedLoader = new FeedLoader({
 
     const pubkeys = switcherFn(scope, {
       [Scope.Self]: () => ($pubkey ? [$pubkey] : []),
-      [Scope.Follows]: () => Array.from(getFollows($pubkey)),
-      [Scope.Network]: () => Array.from(getNetwork($pubkey)),
-      [Scope.Followers]: () => Array.from(getFollowers($pubkey)),
+      [Scope.Follows]: () => getFollows($pubkey),
+      [Scope.Network]: () => getNetwork($pubkey),
+      [Scope.Followers]: () => getFollowers($pubkey),
     })
 
     return pubkeys.length === 0 ? env.DEFAULT_FOLLOWS : pubkeys
@@ -490,7 +490,7 @@ export const loadHandlers = () =>
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],
-        authors: Array.from(getFollows(pubkey.get())),
+        authors: getFollows(pubkey.get()),
       }),
       addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],

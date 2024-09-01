@@ -1,21 +1,29 @@
 <script lang="ts">
   import {tweened} from "svelte/motion"
+  import {getListValues} from "@welshman/util"
+  import {deriveFollows} from "@welshman/app"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/util/router"
-  import {getFollows, getFollowers} from "src/engine"
+  import {getFollowers} from "src/engine"
 
   export let pubkey
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const followsCount = tweened(0, {interpolate, duration: 1000})
   const followersCount = tweened(0, {interpolate, duration: 1300})
+  const follows = deriveFollows(pubkey)
 
   const showFollows = () => router.at("people").of(pubkey).at("follows").open()
 
   const showFollowers = () => router.at("people").of(pubkey).at("followers").open()
 
-  followsCount.set(getFollows(pubkey).size)
-  followersCount.set(getFollowers(pubkey).size)
+  followersCount.set(getFollowers(pubkey).length)
+
+  $: pubkeys = getListValues("p", $follows)
+
+  $: {
+    followsCount.set(pubkeys.length)
+  }
 </script>
 
 <div class="flex gap-8">
