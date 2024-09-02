@@ -25,10 +25,10 @@
 
 <Card interactive on:click={() => openPerson(pubkey)}>
   <PersonSummary inert {pubkey}>
-    <div slot="actions" on:click|stopPropagation>
+    <button type="button" slot="actions" on:click|stopPropagation>
       {#if $adminKey && pubkey !== $session.pubkey && isGroupAddress(address)}
         <Anchor on:click={remove} button accent>Remove</Anchor>
       {/if}
-    </div>
+    </button>
   </PersonSummary>
 </Card>

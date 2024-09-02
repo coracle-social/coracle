@@ -55,7 +55,7 @@
   const leave = () => publishCommunitiesList(remove(address, getUserCommunities(session.get())))
 </script>
 
-<div class="flex items-center gap-3" on:click|stopPropagation>
+<button type="button" class="flex items-center gap-3" on:click|stopPropagation>
   {#if $session}
     {#if $status.joined}
       <Popover triggerType="mouseenter">
@@ -74,4 +74,4 @@
     {/if}
   {/if}
   <OverflowMenu {actions} />
-</div>
+</button>

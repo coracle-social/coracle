@@ -82,7 +82,7 @@
   const leave = () => publishGroupExitRequest(address)
 </script>
 
-<div class="flex items-center gap-3" on:click|stopPropagation>
+<button type="button" class="flex items-center gap-3" on:click|stopPropagation>
   {#if $signer}
     {#if !$status.access}
       <Popover triggerType="mouseenter">
@@ -115,7 +115,7 @@
     {/if}
   {/if}
   <OverflowMenu {actions} />
-</div>
+</button>
 
 {#if showClaim}
   <Modal onEscape={cancelJoin}>

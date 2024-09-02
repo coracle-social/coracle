@@ -24,17 +24,18 @@
 </script>
 
 <div class={cx(className, "relative")}>
-  <div class:opacity-0={!value} on:click={init}>
+  <button type="button" class:opacity-0={!value} on:click={init}>
     <DateInput format="yyyy-MM-dd HH:mm" bind:value />
-  </div>
+  </button>
   <div class="absolute left-0 top-0 flex gap-2 px-4 pt-3 text-black opacity-75">
     <i class="fa fa-calendar-days" />
   </div>
   {#if value}
-    <div
+    <button
+      type="button"
       class="absolute right-0 top-0 m-px flex cursor-pointer gap-2 rounded-full px-4 pt-3 text-black opacity-75"
       on:click={clear}>
       <i class="fa fa-times" />
-    </div>
+    </button>
   {/if}
 </div>

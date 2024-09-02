@@ -274,9 +274,9 @@
             {commaFormat(wordCount)} words
           </small>
           <span>•</span>
-          <small on:click={togglePreview} class="cursor-pointer underline">
+          <button type="button" on:click={togglePreview} class="cursor-pointer underline text-sm">
             {showPreview ? "Hide" : "Show"} Preview
-          </small>
+          </button>
         </div>
       </Field>
       <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
@@ -285,15 +285,16 @@
         <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
       {#if !env.FORCE_GROUP}
-        <small
-          class="flex cursor-pointer items-center justify-end gap-4"
+        <button
+          type="button"
+          class="flex cursor-pointer items-center justify-end gap-4 text-sm"
           on:click={() => options.setView("settings")}>
           <span class:text-accent={opts.groups.length > 0}>
             <i class="fa fa-circle-nodes" />
             {opts.groups.length}
           </span>
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
-        </small>
+        </button>
       {/if}
     </FlexColumn>
   </Content>

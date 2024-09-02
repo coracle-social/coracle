@@ -34,9 +34,9 @@
   actionText={`${actionText} your note`} />
 
 <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
-  <div on:click|stopPropagation class="flex justify-between">
+  <button type="button" on:click|stopPropagation class="flex justify-between">
     {formatTimestamp(timestamp)}
-  </div>
+  </button>
   <div class="break-word overflow-hidden text-neutral-100">
     <NoteContent {note} />
   </div>

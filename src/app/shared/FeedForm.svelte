@@ -136,9 +136,9 @@
       </Field>
     </FlexColumn>
     {#if !showSave}
-      <div class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>
+      <button type="button" class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>
         <i class="fa fa-times" />
-      </div>
+      </button>
     {/if}
   </Card>
 {/if}

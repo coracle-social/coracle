@@ -285,7 +285,7 @@
   })
 </script>
 
-<div class="flex justify-between text-neutral-100" on:click|stopPropagation>
+<button tabindex="-1" type="button" class="flex justify-between text-neutral-100" on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
     <button
       class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
@@ -374,7 +374,7 @@
     {/if}
     <OverflowMenu {actions} />
   </div>
-</div>
+</button>
 
 {#if view}
   <Modal onEscape={() => setView(null)}>

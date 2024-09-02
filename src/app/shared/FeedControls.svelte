@@ -123,11 +123,12 @@
   <div class="float-right flex h-8 items-center justify-end gap-2">
     <slot name="controls" />
     <div class="relative">
-      <div
+      <button
+        type="button"
         class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
         on:click={$listMenu.enable}>
         <i class="fa fa-sm fa-ellipsis-v" />
-      </div>
+      </button>
       {#if $listMenu.enabled}
         <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
           <Menu>
