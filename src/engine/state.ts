@@ -1638,8 +1638,6 @@ export const createAndPublish = async ({
 Object.assign(NetworkContext, {
   onAuth,
   getExecutor,
-  onEvent: (url: string, event: SignedEvent) => tracker.track(event.id, url),
-  isDeleted: (url: string, event: SignedEvent) => repository.isDeleted(event),
   hasValidSignature: (url: string, event: SignedEvent) => {
     if (url === LOCAL_RELAY_URL) {
       return true

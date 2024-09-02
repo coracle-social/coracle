@@ -699,6 +699,11 @@
     // pass
   }
 
+  network.NetworkContext.pool.on("init", connection => {
+    app.loadRelay(connection.url)
+    app.trackRelayStats(connection)
+  })
+
   // App data boostrap and relay meta fetching
 
   storage.ready.then(async () => {

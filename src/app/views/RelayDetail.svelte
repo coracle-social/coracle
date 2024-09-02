@@ -41,7 +41,6 @@
 
   $: url = normalizeRelayUrl(url)
   $: rating = getAvgRating(reviews)
-  $: console.log($relay)
 
   document.title = displayRelayUrl(url)
 </script>

@@ -9,6 +9,9 @@ import {
   loadHandle,
   loadRelaySelections,
   getRelayUrls,
+  loadProfile,
+  loadFollows,
+  loadMutes,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -26,6 +29,8 @@ import {
   loadNotifications,
   loadFeedsAndLists,
   listenForNotifications,
+  primeWotCaches,
+  getFollows,
   getSetting,
 } from "src/engine"
 
@@ -95,12 +100,16 @@ export const loadUserData = async (hints: string[] = []) => {
   const relaySelections = await loadRelaySelections($pubkey, {relays: hints})
   const relays = uniq([...hints, ...getRelayUrls(relaySelections)])
 
-  // Load the user's profile, mutes, follows using the usual loaders
-  loadPubkeys([$pubkey], relays)
+  // Load crucial user data
+  await Promise.all([
+    loadProfile($pubkey, {relays}),
+    loadFollows($pubkey, {relays}),
+    loadMutes($pubkey, {relays}),
+  ])
+
+  // Load less important user data
   loadZapper($pubkey)
   loadHandle($pubkey)
-
-  // Load community selections, feeds, app data directly
   load({
     relays,
     filters: [
@@ -112,6 +121,9 @@ export const loadUserData = async (hints: string[] = []) => {
       },
     ],
   })
+
+  // Load enough to figure out web of trust
+  loadPubkeys(getFollows($pubkey)).then(() => primeWotCaches($pubkey))
 
   // Load anything they might need to be notified about
   loadSeen()
