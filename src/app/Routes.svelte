@@ -77,7 +77,7 @@
 {/key}
 
 {#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
-  {@const promise = router.getMatch(m.path).route.component}
+  {@const promise = router.getMatch(m.path).route.component()}
   <Modal virtual={false} canClose={!m.noEscape}>
     {#key $pubkey}
       {#await promise}
