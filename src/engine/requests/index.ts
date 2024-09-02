@@ -33,17 +33,17 @@ import {
   DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {pubkey, relays, repository, signer, updateSession} from "@welshman/app"
+import {pubkey, relays, repository, signer, getSession, updateSession} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS, filterRelaysByNip} from "src/domain"
 import type {SessionWithMeta} from "src/engine/model"
 import {
+  env,
   getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  env,
   getFilterSelections,
   getFollowers,
   getUserCommunities,
@@ -324,14 +324,16 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   const pubkeys = uniq(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {
-    updateSession(
-      pubkey,
-      updateIn("notifications_last_synced", (t: number) =>
-        pluck("created_at", events)
-          .concat(t || 0)
-          .reduce((a, b) => Math.max(a, b), 0),
-      ),
-    )
+    if (getSession(pubkey)) {
+      updateSession(
+        pubkey,
+        updateIn("notifications_last_synced", (t: number) =>
+          pluck("created_at", events)
+            .concat(t || 0)
+            .reduce((a, b) => Math.max(a, b), 0),
+        ),
+      )
+    }
   }
 
   if (eventsWithParent.length > 0) {

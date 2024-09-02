@@ -115,6 +115,7 @@ import {
   follows,
   mutesByPubkey,
   followsByPubkey,
+  env as welshmanEnv,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -186,6 +187,10 @@ export const env = {
   PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
 }
+
+Object.assign(welshmanEnv, {
+  DUFFLEPUD_URL: env.DUFFLEPUD_URL,
+})
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
 

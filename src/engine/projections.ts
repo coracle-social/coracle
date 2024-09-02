@@ -89,9 +89,11 @@ projections.addHandler(24, (e: TrustedEvent) => {
     groupAlerts.key(e.id).set({...e, group: address, type: "exit"})
   }
 
-  setGroupStatus(recipient, address, e.created_at, {
-    access: privkey ? GroupAccess.Granted : GroupAccess.Revoked,
-  })
+  if (getSession(recipient)) {
+    setGroupStatus(recipient, address, e.created_at, {
+      access: privkey ? GroupAccess.Granted : GroupAccess.Revoked,
+    })
+  }
 })
 
 projections.addHandler(27, (e: TrustedEvent) => {
