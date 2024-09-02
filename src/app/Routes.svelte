@@ -62,7 +62,7 @@
       "pointer-events-none": $menuIsOpen,
     })}>
     {#if $page}
-      {@const promise = router.getMatch($page.path).route.component}
+      {@const promise = router.getMatch($page.path).route.component()}
       {#key router.getKey($page)}
         <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 p-4">
           {#await promise}

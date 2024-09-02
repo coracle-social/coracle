@@ -40,59 +40,59 @@
 
   // Routes
 
-  router.register("/about", import("src/app/views/About.svelte"))
-  router.register("/search", import("src/app/views/Search.svelte"))
-  router.register("/events", import("src/app/views/Calendar.svelte"))
+  router.register("/about", () => import("src/app/views/About.svelte"))
+  router.register("/search", () => import("src/app/views/Search.svelte"))
+  router.register("/events", () => import("src/app/views/Calendar.svelte"))
 
-  router.register("/channels", import("src/app/views/ChannelsList.svelte"), {
+  router.register("/channels", () => import("src/app/views/ChannelsList.svelte"), {
     requireSigner: true,
   })
-  router.register("/channels/create", import("src/app/views/ChannelCreate.svelte"), {
+  router.register("/channels/create", () => import("src/app/views/ChannelCreate.svelte"), {
     requireSigner: true,
   })
-  router.register("/channels/requests", import("src/app/views/ChannelsList.svelte"), {
+  router.register("/channels/requests", () => import("src/app/views/ChannelsList.svelte"), {
     requireSigner: true,
   })
-  router.register("/channels/:channelId", import("src/app/views/ChannelsDetail.svelte"), {
+  router.register("/channels/:channelId", () => import("src/app/views/ChannelsDetail.svelte"), {
     requireSigner: true,
     serializers: {
       channelId: asChannelId,
     },
   })
 
-  router.register("/events/:address", import("src/app/views/EventDetail.svelte"), {
+  router.register("/events/:address", () => import("src/app/views/EventDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
   })
-  router.register("/events/:address/edit", import("src/app/views/EventEdit.svelte"), {
+  router.register("/events/:address/edit", () => import("src/app/views/EventEdit.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
   })
-  router.register("/events/:address/delete", import("src/app/views/EventDelete.svelte"), {
+  router.register("/events/:address/delete", () => import("src/app/views/EventDelete.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
   })
 
-  router.register("/groups", import("src/app/views/GroupList.svelte"))
-  router.register("/groups/new", import("src/app/views/GroupCreate.svelte"), {
+  router.register("/groups", () => import("src/app/views/GroupList.svelte"))
+  router.register("/groups/new", () => import("src/app/views/GroupCreate.svelte"), {
     requireSigner: true,
   })
-  router.register("/groups/:address/edit", import("src/app/views/GroupEdit.svelte"), {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/groups/:address/delete", import("src/app/views/GroupDelete.svelte"), {
+  router.register("/groups/:address/edit", () => import("src/app/views/GroupEdit.svelte"), {
     requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
   })
-  router.register("/groups/:address/info", import("src/app/views/GroupInfo.svelte"), {
+  router.register("/groups/:address/delete", () => import("src/app/views/GroupDelete.svelte"), {
+    requireSigner: true,
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
+  router.register("/groups/:address/info", () => import("src/app/views/GroupInfo.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
@@ -106,7 +106,7 @@
       },
     },
   )
-  router.register("/groups/:address/rotate", import("src/app/views/GroupRotate.svelte"), {
+  router.register("/groups/:address/rotate", () => import("src/app/views/GroupRotate.svelte"), {
     requireSigner: true,
     serializers: {
       address: asNaddr("address"),
@@ -114,46 +114,46 @@
       removeMembers: asCsv("removeMembers"),
     },
   })
-  router.register("/groups/:address/:activeTab", import("src/app/views/GroupDetail.svelte"), {
+  router.register("/groups/:address/:activeTab", () => import("src/app/views/GroupDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
       claim: asString("claim"),
     },
   })
-  router.register("/groups/:address", import("src/app/views/GroupDetail.svelte"), {
+  router.register("/groups/:address", () => import("src/app/views/GroupDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
       claim: asString("claim"),
     },
   })
 
-  router.register("/help/:topic", import("src/app/views/Help.svelte"))
+  router.register("/help/:topic", () => import("src/app/views/Help.svelte"))
 
-  router.register("/invite", import("src/app/views/InviteAccept.svelte"), {
+  router.register("/invite", () => import("src/app/views/InviteAccept.svelte"), {
     serializers: {
       people: asCsv("people"),
       relays: asCsv("relays"),
       groups: asCsv("groups"),
     },
   })
-  router.register("/invite/create", import("src/app/views/InviteCreate.svelte"), {
+  router.register("/invite/create", () => import("src/app/views/InviteCreate.svelte"), {
     serializers: {
       initialPubkey: asUrlComponent("initialPubkey"),
       initialGroupAddress: asUrlComponent("initialGroupAddress"),
     },
   })
 
-  router.register("/feeds", import("src/app/views/FeedList.svelte"))
-  router.register("/feeds/create", import("src/app/views/FeedCreate.svelte"))
-  router.register("/feeds/:address", import("src/app/views/FeedEdit.svelte"), {
+  router.register("/feeds", () => import("src/app/views/FeedList.svelte"))
+  router.register("/feeds/create", () => import("src/app/views/FeedCreate.svelte"))
+  router.register("/feeds/:address", () => import("src/app/views/FeedEdit.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
   })
 
-  router.register("/lists", import("src/app/views/ListList.svelte"))
-  router.register("/lists/create", import("src/app/views/ListCreate.svelte"))
-  router.register("/lists/:address", import("src/app/views/ListDetail.svelte"), {
+  router.register("/lists", () => import("src/app/views/ListList.svelte"))
+  router.register("/lists/create", () => import("src/app/views/ListCreate.svelte"))
+  router.register("/lists/:address", () => import("src/app/views/ListDetail.svelte"), {
     serializers: {
       address: asNaddr("address"),
     },
@@ -250,76 +250,80 @@
       pubkeys: asCsv("pubkeys"),
     },
   })
-  router.register("/people/:entity", import("src/app/views/PersonDetail.svelte"), {
+  router.register("/people/:entity", () => import("src/app/views/PersonDetail.svelte"), {
     required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
-  router.register("/people/:entity/followers", import("src/app/views/PersonFollowers.svelte"), {
+  router.register(
+    "/people/:entity/followers",
+    () => import("src/app/views/PersonFollowers.svelte"),
+    {
+      required: ["pubkey"],
+      serializers: {
+        entity: asPerson,
+      },
+    },
+  )
+  router.register("/people/:entity/follows", () => import("src/app/views/PersonFollows.svelte"), {
     required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
-  router.register("/people/:entity/follows", import("src/app/views/PersonFollows.svelte"), {
-    required: ["pubkey"],
-    serializers: {
-      entity: asPerson,
-    },
-  })
-  router.register("/people/:entity/info", import("src/app/views/PersonInfo.svelte"), {
+  router.register("/people/:entity/info", () => import("src/app/views/PersonInfo.svelte"), {
     required: ["pubkey"],
     serializers: {
       entity: asPerson,
     },
   })
 
-  router.register("/qrcode/:code", import("src/app/views/QRCode.svelte"), {
+  router.register("/qrcode/:code", () => import("src/app/views/QRCode.svelte"), {
     serializers: {
       code: asUrlComponent("code"),
     },
   })
 
-  router.register("/publishes", import("src/app/views/Publishes.svelte"))
+  router.register("/publishes", () => import("src/app/views/Publishes.svelte"))
 
-  router.register("/relays/:entity", import("src/app/views/RelayDetail.svelte"), {
+  router.register("/relays/:entity", () => import("src/app/views/RelayDetail.svelte"), {
     serializers: {
       entity: asRelay,
     },
   })
-  router.register("/relays/:entity/review", import("src/app/views/RelayReview.svelte"), {
+  router.register("/relays/:entity/review", () => import("src/app/views/RelayReview.svelte"), {
     serializers: {
       entity: asRelay,
     },
   })
 
-  router.register("/settings", import("src/app/views/UserSettings.svelte"), {
+  router.register("/settings", () => import("src/app/views/UserSettings.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/content", import("src/app/views/UserContent.svelte"), {
+  router.register("/settings/content", () => import("src/app/views/UserContent.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/data", import("src/app/views/UserData.svelte"), {
+  router.register("/settings/data", () => import("src/app/views/UserData.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/data/export", import("src/app/views/DataExport.svelte"), {
+  router.register("/settings/data/export", () => import("src/app/views/DataExport.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/data/import", import("src/app/views/DataImport.svelte"), {
+  router.register("/settings/data/import", () => import("src/app/views/DataImport.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/keys", import("src/app/views/UserKeys.svelte"), {
+  router.register("/settings/keys", () => import("src/app/views/UserKeys.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/profile", import("src/app/views/UserProfile.svelte"), {
+  router.register("/settings/profile", () => import("src/app/views/UserProfile.svelte"), {
     requireUser: true,
   })
-  router.register("/settings/relays", import("src/app/views/RelayList.svelte"))
+  router.register("/settings/relays", () => import("src/app/views/RelayList.svelte"))
 
-  router.register("/topics/:topic", import("src/app/views/TopicFeed.svelte"))
+  router.register("/topics/:topic", () => import("src/app/views/TopicFeed.svelte"))
 
-  router.register("/zap", import("src/app/views/Zap.svelte"), {
+  router.register("/zap", () => import("src/app/views/Zap.svelte"), {
     required: ["splits"],
     serializers: {
       eid: asNote,
@@ -329,12 +333,12 @@
     },
   })
 
-  router.register("/:entity", import("src/app/views/Bech32Entity.svelte"), {
+  router.register("/:entity", () => import("src/app/views/Bech32Entity.svelte"), {
     serializers: {
       entity: asEntity,
     },
   })
-  router.register("/:entity/*", import("src/app/views/Bech32Entity.svelte"), {
+  router.register("/:entity/*", () => import("src/app/views/Bech32Entity.svelte"), {
     serializers: {
       entity: asEntity,
     },

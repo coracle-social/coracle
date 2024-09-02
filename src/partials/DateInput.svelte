@@ -44,7 +44,13 @@
 
   let date = toDate(value)
 
-  $: date ? setDate(date) : setValue(null)
+  $: {
+    if (date) {
+      setDate(date)
+    } else {
+      setValue(null)
+    }
+  }
 </script>
 
 <div class={cx(className, "relative")}>
