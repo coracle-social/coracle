@@ -7,15 +7,12 @@
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import {router} from "src/app/util/router"
-  import {loadPubkeys} from 'src/engine'
 
   export let pubkey
   export let inert = false
   export let hideActions = false
 
   const showDetail = () => router.at("people").of(pubkey).open()
-
-  loadPubkeys([pubkey])
 </script>
 
 <div class="relative flex flex-grow flex-col gap-4">

@@ -1,11 +1,10 @@
 <script lang="ts">
   import {switcherFn} from "hurdak"
-  import {Tags} from "@welshman/util"
+  import {Tags, displayRelayUrl} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelayUrl} from "src/domain"
   import {hints} from "src/engine"
 
   export let note, rating

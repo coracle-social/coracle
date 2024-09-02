@@ -1,30 +1,42 @@
 <script lang="ts">
   import {last} from "ramda"
-  import {derived} from "svelte/store"
-  import {signer, deriveRelay} from "@welshman/app"
+  import {
+    pubkey,
+    signer,
+    getRelayUrls,
+    deriveRelaySelections,
+    deriveInboxRelaySelections,
+    deriveRelay,
+  } from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {userRelayPolicies, joinRelay, leaveRelay} from "src/engine"
+  import {joinRelay, leaveRelay} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let url
 
   const relay = deriveRelay(url)
-  const joined = derived(userRelayPolicies, $policies =>
-    Boolean($policies.find(p => p.url === url)),
-  )
+
+  const userRelaySelections = deriveRelaySelections($pubkey)
+
+  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
 
   let actions = []
 
   $: {
     actions = []
 
-    if (!$joined) {
+    const userRelayUrls = [
+      ...getRelayUrls($userRelaySelections),
+      ...getRelayUrls($userInboxRelaySelections),
+    ]
+
+    if (!userRelayUrls.includes(url)) {
       actions.push({
         onClick: () => joinRelay(url),
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if ($userRelayPolicies.length > 1) {
+    } else if (userRelayUrls.length > 1) {
       actions.push({
         onClick: () => leaveRelay(url),
         label: "Leave",

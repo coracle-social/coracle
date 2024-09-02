@@ -2,7 +2,7 @@
   import {asSignedEvent, createEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
-  import {repository} from "@welshman/app"
+  import {repository, loadRelaySelections} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +12,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {router} from "src/app/util/router"
-  import {loadPubkeys, publish, hints} from "src/engine"
+  import {loadRelaySelections, publish, hints} from "src/engine"
 
   export let eid
 
@@ -45,7 +45,7 @@
 
   let message = ""
 
-  loadPubkeys([tagr])
+  loadRelaySelections(tagr)
 </script>
 
 <form on:submit|preventDefault={submit}>

@@ -1,7 +1,18 @@
 <script lang="ts">
   import cx from "classnames"
-  import {signer, deriveRelay} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
+  import {
+    pubkey,
+    signer,
+    deriveRelay,
+    getRelayUrls,
+    getWriteRelayUrls,
+    getReadRelayUrls,
+    deriveRelaySelections,
+    deriveInboxRelaySelections,
+  } from "@welshman/app"
   import {quantify} from "hurdak"
+  import {derived} from "svelte/store"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import Chip from "src/partials/Chip.svelte"
@@ -11,8 +22,7 @@
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelayUrl, RelayMode} from "src/domain"
-  import {getSetting, setInboxPolicy, setOutboxPolicy, deriveUserRelayPolicy} from "src/engine"
+  import {getSetting, setInboxPolicy, setOutboxPolicy} from "src/engine"
 
   export let url
   export let claim = null
@@ -25,15 +35,27 @@
   export let inert = false
 
   const relay = deriveRelay(url)
-  const policy = deriveUserRelayPolicy(url)
+  const userRelaySelections = deriveRelaySelections($pubkey)
+  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
+  const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
+  const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
+  const inboxRelayUrls = derived(userInboxRelaySelections, getRelayUrls)
 
-  const policySetter = mode => () => {
-    const newPolicy = {...$policy, [mode]: !$policy[mode]}
+  const policySetter = (mode: string) => () => {
+    const read = $readRelayUrls.includes(url)
+    const write = $writeRelayUrls.includes(url)
+    const inbox = $inboxRelayUrls.includes(url)
 
-    if (mode === RelayMode.Inbox) {
-      setInboxPolicy(newPolicy)
-    } else {
-      setOutboxPolicy(newPolicy)
+    if (mode === "read") {
+      setOutboxPolicy(url, !read, write)
+    }
+
+    if (mode === "write") {
+      setOutboxPolicy(url, read, !write)
+    }
+
+    if (mode === "inbox") {
+      setInboxPolicy(url, !inbox)
     }
   }
 </script>
@@ -108,26 +130,31 @@
         <div slot="trigger">
           <Chip
             pad
-            class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.read})}
-            on:click={policySetter(RelayMode.Read)}>
+            class={cx("cursor-pointer transition-opacity", {
+              "opacity-50": !$readRelayUrls.includes(url),
+            })}
+            on:click={policySetter("read")}>
             <i class="fa fa-book-open text-neutral-300" /> Read
           </Chip>
         </div>
         <div slot="tooltip">
-          Notes intended for you will {$policy.read ? "" : "not"} be delivered to this relay.
+          Notes intended for you will {$readRelayUrls.includes(url) ? "" : "not"} be delivered to this
+          relay.
         </div>
       </Popover>
       <Popover triggerType="mouseenter" class="inline-block">
         <div slot="trigger">
           <Chip
             pad
-            class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.write})}
-            on:click={policySetter(RelayMode.Write)}>
+            class={cx("cursor-pointer transition-opacity", {
+              "opacity-50": !$writeRelayUrls.includes(url),
+            })}
+            on:click={policySetter("write")}>
             <i class="fa fa-feather text-neutral-300" /> Write
           </Chip>
         </div>
         <div slot="tooltip">
-          Notes you publish will {$policy.write ? "" : "not"} be sent to this relay.
+          Notes you publish will {$writeRelayUrls.includes(url) ? "" : "not"} be sent to this relay.
         </div>
       </Popover>
       {#if $signer}
@@ -135,13 +162,16 @@
           <div slot="trigger">
             <Chip
               pad
-              class={cx("cursor-pointer transition-opacity", {"opacity-50": !$policy.inbox})}
-              on:click={policySetter(RelayMode.Inbox)}>
+              class={cx("cursor-pointer transition-opacity", {
+                "opacity-50": !$inboxRelayUrls.includes(url),
+              })}
+              on:click={policySetter("inbox")}>
               <i class="fa fa-inbox text-neutral-300" /> Inbox
             </Chip>
           </div>
           <div slot="tooltip">
-            Encrypted messages will {$policy.inbox ? "" : "not"} be delivered to this relay.
+            Encrypted messages will {$inboxRelayUrls.includes(url) ? "" : "not"} be delivered to this
+            relay.
           </div>
         </Popover>
       {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {groupBy, sortBy, uniqBy, prop} from "ramda"
+  import {groupBy, sortBy, uniq} from "ramda"
   import {displayList} from "hurdak"
   import {pushToMapKey} from "@welshman/lib"
   import {
@@ -11,6 +11,11 @@
     type Relay,
     displayProfileByPubkey,
     profilesByPubkey,
+    getRelayUrls,
+    deriveRelaySelections,
+    deriveInboxRelaySelections,
+    getWriteRelayUrls,
+    relaySelectionsByPubkey,
   } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
@@ -23,19 +28,14 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {profileHasName, RelayMode} from "src/domain"
-  import {
-    load,
-    hints,
-    userFollows,
-    userRelayPolicies,
-    getPubkeyRelayPolicies,
-    sortEventsDesc,
-    joinRelay,
-    loadPubkeyRelays,
-  } from "src/engine"
+  import {profileHasName} from "src/domain"
+  import {load, hints, userFollows, sortEventsDesc, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]
+
+  const userRelaySelections = deriveRelaySelections($pubkey)
+
+  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
 
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
@@ -45,8 +45,8 @@
         continue
       }
 
-      for (const r of getPubkeyRelayPolicies(pk, RelayMode.Write)) {
-        pushToMapKey(m, r.url, pk)
+      for (const url of getWriteRelayUrls($relaySelectionsByPubkey.get(pk))) {
+        pushToMapKey(m, url, pk)
       }
     }
 
@@ -54,21 +54,20 @@
   })()
 
   const searchRelays = derived(
-    [relays, userRelayPolicies],
-    ([$relays, $userRelayPolicies]) =>
-      (term: string) =>
-        (term
-          ? $relaySearch.searchOptions(term)
-          : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
-        ).map((relay: Relay) => {
-          const pubkeys = pubkeysByUrl.get(relay.url) || []
-          const description =
-            pubkeys.length > 0
-              ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
-              : relay.profile?.description
+    relays,
+    $relays => (term: string) =>
+      (term
+        ? $relaySearch.searchOptions(term)
+        : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
+      ).map((relay: Relay) => {
+        const pubkeys = pubkeysByUrl.get(relay.url) || []
+        const description =
+          pubkeys.length > 0
+            ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
+            : relay.profile?.description
 
-          return {...relay, description}
-        }),
+        return {...relay, description}
+      }),
   )
 
   const setActiveTab = tab => {
@@ -106,12 +105,13 @@
   let reviews = []
   let activeTab = "search"
   let customRelay = ""
-  let currentRelayPolicies = $userRelayPolicies
+  let currentRelayUrls: string[] = []
 
-  $: currentRelayPolicies = sortBy(
-    prop("url"),
-    uniqBy(prop("url"), $userRelayPolicies.concat(currentRelayPolicies)),
-  )
+  $: currentRelayUrls = uniq([
+    ...currentRelayUrls,
+    ...getRelayUrls($userRelaySelections),
+    ...getRelayUrls($userInboxRelaySelections),
+  ]).sort()
 
   $: ratings = groupBy(e => {
     try {
@@ -120,11 +120,6 @@
       return ""
     }
   }, reviews)
-
-  // Force reload user relays to make sure we're up to date
-  if ($pubkey) {
-    loadPubkeyRelays([$pubkey], {force: true})
-  }
 
   load({
     relays: hints.ReadRelays().getUrls(),
@@ -159,15 +154,15 @@
     Relays are hubs for your content and connections. At least one is required to interact with the
     network, but you can join as many as you like.
   </p>
-  {#if currentRelayPolicies.length === 0}
+  {#if currentRelayUrls.length === 0}
     <div class="mt-8 flex items-center justify-center gap-2 text-center">
       <i class="fa fa-triangle-exclamation" />
       No relays connected
     </div>
   {/if}
   <div class="grid grid-cols-1 gap-4">
-    {#each currentRelayPolicies as policy (policy.url)}
-      <RelayCard showStatus showControls url={policy.url} ratings={ratings[policy.url]} />
+    {#each currentRelayUrls as url (url)}
+      <RelayCard showStatus showControls {url} ratings={ratings[url]} />
     {/each}
   </div>
   <div class="flex items-center gap-2">

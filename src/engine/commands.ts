@@ -31,7 +31,9 @@ import {
   sessions,
   session,
   loadHandle,
+  getRelayUrls,
   displayProfileByPubkey,
+  inboxRelaySelectionsByPubkey,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -39,8 +41,8 @@ import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} 
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
-import {makeRelayPolicy, isPublishedProfile, createProfile, editProfile} from "src/domain"
-import type {RelayPolicy, Profile} from "src/domain"
+import {isPublishedProfile, createProfile, editProfile} from "src/domain"
+import type {Profile} from "src/domain"
 import {GroupAccess} from "src/engine/model"
 import {
   channels,
@@ -64,7 +66,6 @@ import {
   withIndexers,
   anonymous,
   mentionGroup,
-  userRelayPolicies,
   userSeenStatusEvents,
   getChannelIdFromEvent,
   uniqTags,
@@ -646,13 +647,15 @@ export const setOutboxPolicies = async (modifyTags: ModifyTags) => {
 export const setInboxPolicies = async (modifyTags: ModifyTags) =>
   updateSingleton(INBOX_RELAYS, modifyTags)
 
-export const setInboxPolicy = ({url, inbox}: RelayPolicy) => {
+export const setInboxPolicy = (url: string, enabled: boolean) => {
+  const urls = getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))
+
   // Only update inbox policies if they already exist or we're adding them
-  if (inbox || get(userRelayPolicies).find(p => p.url === url && p.inbox)) {
+  if (enabled || urls.includes(url)) {
     setInboxPolicies($tags => {
       $tags = $tags.filter(t => t[1] !== url)
 
-      if (inbox) {
+      if (enabled) {
         $tags.push(["relay", url])
       }
 
@@ -661,7 +664,7 @@ export const setInboxPolicy = ({url, inbox}: RelayPolicy) => {
   }
 }
 
-export const setOutboxPolicy = ({url, read, write}: RelayPolicy) =>
+export const setOutboxPolicy = (url: string, read: boolean, write: boolean) =>
   setOutboxPolicies($tags => {
     $tags = $tags.filter(t => t[1] !== url)
 
@@ -677,10 +680,7 @@ export const setOutboxPolicy = ({url, read, write}: RelayPolicy) =>
   })
 
 export const leaveRelay = async (url: string) => {
-  await Promise.all([
-    setInboxPolicy(makeRelayPolicy({url})),
-    setOutboxPolicy(makeRelayPolicy({url})),
-  ])
+  await Promise.all([setInboxPolicy(url, false), setOutboxPolicy(url, false, false)])
 
   // Make sure the new relay selections get to the old relay
   if (pubkey.get()) {
@@ -695,7 +695,7 @@ export const joinRelay = async (url: string, claim?: string) => {
     await requestRelayAccess(url, claim)
   }
 
-  await setOutboxPolicy(makeRelayPolicy({url, read: true, write: true}))
+  await setOutboxPolicy(url, true, true)
 
   // Re-publish user meta to the new relay
   if (pubkey.get()) {

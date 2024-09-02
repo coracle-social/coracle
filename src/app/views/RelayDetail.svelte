@@ -1,5 +1,6 @@
 <script lang="ts">
   import {batch} from "hurdak"
+  import {displayRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {makeRelayFeed, feedFromFilter} from "@welshman/feeds"
   import {deriveRelay} from "@welshman/app"
   import {getAvgRating} from "src/util/nostr"
@@ -8,7 +9,7 @@
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {makeFeed, normalizeRelayUrl, displayRelayUrl} from "src/domain"
+  import {makeFeed} from "src/domain"
 
   export let url
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {repository, pubkey, handlesByPubkey} from "@welshman/app"
+  import {repository, pubkey, profilesByPubkey} from "@welshman/app"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -14,7 +14,7 @@
       .map(e => JSON.stringify(e.wrap || e))
       .join("\n")
 
-    const filename = $handlesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
+    const filename = $profilesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
     const data = new TextEncoder().encode(jsonl)
     const blob = new Blob([data], {type: "application/octet-stream"})
     const url = URL.createObjectURL(blob)

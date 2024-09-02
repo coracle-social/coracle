@@ -8,7 +8,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {hints, loadOne, loadPubkeys, isEventMuted} from "src/engine"
+  import {hints, loadOne, isEventMuted} from "src/engine"
 
   export let note
   export let value
@@ -69,7 +69,6 @@
     if (quote) {
       loading = false
       muted = $isEventMuted(quote, true)
-      loadPubkeys([quote.pubkey])
     }
   })
 </script>

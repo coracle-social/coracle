@@ -48,9 +48,7 @@ import {
   GROUP,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
-  INBOX_RELAYS,
   LABEL,
-  RELAYS,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
@@ -72,15 +70,13 @@ import {
   hasValidSignature,
   LOCAL_RELAY_URL,
   getFilterResultCardinality,
-  isShareableRelayUrl,
   isReplaceable,
   isGroupAddress,
   isCommunityAddress,
   isHashedEvent,
-  getRelayTags,
-  getRelayTagValues,
   getPubkeyTagValues,
   getListValues,
+  normalizeRelayUrl,
 } from "@welshman/util"
 import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip01Signer, decrypt} from "@welshman/signer"
@@ -116,6 +112,11 @@ import {
   mutesByPubkey,
   followsByPubkey,
   env as welshmanEnv,
+  getRelayUrls,
+  getReadRelayUrls,
+  getWriteRelayUrls,
+  relaySelectionsByPubkey,
+  inboxRelaySelectionsByPubkey,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -129,10 +130,8 @@ import type {
   PublishedSingleton,
   PublishedList,
   PublishedGroupMeta,
-  RelayPolicy,
 } from "src/domain"
 import {
-  RelayMode,
   displayFeed,
   EDITABLE_LIST_KINDS,
   makeSingleton,
@@ -147,8 +146,6 @@ import {
   getHandlerAddress,
   readSingleton,
   asDecryptedEvent,
-  normalizeRelayUrl,
-  makeRelayPolicy,
   readGroupMeta,
   displayGroupMeta,
 } from "src/domain"
@@ -1033,137 +1030,6 @@ export const channelHasNewMessages = (channel: Channel) =>
 
 export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
 
-// Relay policies
-
-export const relayListEvents = deriveEvents(repository, {filters: [{kinds: [RELAYS]}]})
-
-export const relayLists = derived([plaintext, relayListEvents], ([$plaintext, $relayListEvents]) =>
-  $relayListEvents.map(event =>
-    readSingleton(
-      asDecryptedEvent(event, {
-        content: plaintext[event.id],
-      }),
-    ),
-  ),
-)
-
-export const inboxRelayListEvents = deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS]}]})
-
-export const inboxRelayLists = derived(
-  [plaintext, inboxRelayListEvents],
-  ([$plaintext, $inboxRelayListEvents]) =>
-    $inboxRelayListEvents.map(event =>
-      readSingleton(
-        asDecryptedEvent(event, {
-          content: plaintext[event.id],
-        }),
-      ),
-    ),
-)
-
-export const deriveInboxRelays = (pubkeys: string[]) =>
-  deriveEvents(repository, {filters: [{kinds: [INBOX_RELAYS], authors: pubkeys}]})
-
-export const derivePubkeysWithoutInbox = (pubkeys: string[]) =>
-  derived(deriveInboxRelays(pubkeys), $events =>
-    pubkeys.filter(pk => !$events.some(e => e.pubkey === pk && e.tags.length > 0)),
-  )
-
-export const legacyRelayLists = withGetter(
-  deriveEventsMapped<{event: TrustedEvent; policy: RelayPolicy[]}>(repository, {
-    filters: [{kinds: [FOLLOWS]}],
-    itemToEvent: prop("event"),
-    eventToItem: event => {
-      try {
-        const policy = Object.entries(
-          JSON.parse(event.content) as Record<string, {write: boolean; read: boolean}>,
-        )
-          .filter(([url]) => isShareableRelayUrl(url))
-          .map(([url, {write = true, read = true}]) => makeRelayPolicy({url, read, write}))
-
-        return {event, policy}
-      } catch (e) {
-        // pass
-      }
-    },
-  }),
-)
-
-export const relayPoliciesByPubkey = withGetter(
-  derived(
-    [relayLists, inboxRelayLists, legacyRelayLists],
-    ([$relayLists, $inboxRelayLists, $legacyRelayLists]) => {
-      const policiesByUrlByPubkey = new Map<string, Map<string, RelayPolicy>>()
-
-      for (const {event, publicTags} of $relayLists) {
-        const policiesByUrl = new Map()
-
-        for (const [_, url, mode] of getRelayTags(publicTags)) {
-          const read = !mode || mode === RelayMode.Read
-          const write = !mode || mode === RelayMode.Write
-          const policy = makeRelayPolicy({url, read, write})
-
-          policiesByUrl.set(policy.url, policy)
-        }
-
-        policiesByUrlByPubkey.set(event.pubkey, policiesByUrl)
-      }
-
-      for (const {event, publicTags} of $inboxRelayLists) {
-        const policiesByUrl = policiesByUrlByPubkey.get(event.pubkey) || new Map()
-
-        for (const url of getRelayTagValues(publicTags)) {
-          const normalizedUrl = normalizeRelayUrl(url)
-          const defaultPolicy = makeRelayPolicy({url})
-          const policy = policiesByUrl.get(defaultPolicy.url)
-
-          policiesByUrl.set(normalizedUrl, {...defaultPolicy, ...policy, inbox: true})
-        }
-
-        policiesByUrlByPubkey.set(event.pubkey, policiesByUrl)
-      }
-
-      for (const {event, policy} of $legacyRelayLists) {
-        if (!policiesByUrlByPubkey.has(event.pubkey)) {
-          policiesByUrlByPubkey.set(event.pubkey, indexBy(prop("url"), policy))
-        }
-      }
-
-      const result = new Map<string, RelayPolicy[]>()
-
-      for (const [pubkey, policiesByUrl] of policiesByUrlByPubkey.entries()) {
-        result.set(pubkey, Array.from(policiesByUrl.values()))
-      }
-
-      return result
-    },
-  ),
-)
-
-export const getPubkeyRelayPolicies = (pubkey: string, mode: string = null) => {
-  const policies = relayPoliciesByPubkey.get().get(pubkey) || []
-
-  return mode ? policies.filter(prop(mode)) : policies
-}
-
-export const userRelayPolicies = derived(
-  [relayPoliciesByPubkey, pubkey, anonymous],
-  ([$m, $pk, $anon]) =>
-    $m.get($pk) ||
-    getRelayTags($anon.relays).map(([_, url, mode]) => {
-      const read = !mode || mode === RelayMode.Read
-      const write = !mode || mode === RelayMode.Write
-
-      return makeRelayPolicy({url, read, write})
-    }),
-)
-
-export const deriveUserRelayPolicy = url =>
-  derived(
-    userRelayPolicies,
-    $policies => $policies.find(p => p.url === url) || makeRelayPolicy({url}),
-  )
-
 // Relay selection
 
 export const getGroupRelayUrls = address => {
@@ -1201,8 +1067,13 @@ export const hints = new Router({
   getUserPubkey: () => pubkey.get(),
   getGroupRelays: getGroupRelayUrls,
   getCommunityRelays: getGroupRelayUrls,
-  getPubkeyRelays: (pubkey: string, mode: string) =>
-    getPubkeyRelayPolicies(pubkey, mode).map(r => r.url),
+  getPubkeyRelays: (pubkey: string, mode: string) => {
+    if (mode === "read") return getReadRelayUrls(relaySelectionsByPubkey.get().get(pubkey))
+    if (mode === "write") return getWriteRelayUrls(relaySelectionsByPubkey.get().get(pubkey))
+    if (mode === "inbox") return getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey))
+
+    return []
+  },
   getFallbackRelays: () => [...env.PLATFORM_RELAYS, ...env.DEFAULT_RELAYS],
   getSearchRelays: () => env.SEARCH_RELAYS,
   getLimit: () => parseInt(getSetting("relay_limit")),

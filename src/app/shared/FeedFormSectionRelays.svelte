@@ -1,8 +1,8 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
   import {relaySearch} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {displayRelayUrl} from 'src/domain'
 
   export let feed
   export let onChange

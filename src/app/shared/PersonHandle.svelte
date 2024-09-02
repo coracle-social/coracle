@@ -1,10 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
-  import {deriveHandle, displayHandle} from "@welshman/app"
+  import {deriveProfile, deriveHandle, displayHandle} from "@welshman/app"
 
   export let pubkey
 
-  const handle = deriveHandle(pubkey)
+  const profile = deriveProfile(pubkey)
+
+  $: handle = deriveHandle($profile?.nip05)
 </script>
 
 {#if $handle}

@@ -19,8 +19,8 @@
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
+  import {env} from "src/engine"
   import {loadUserData} from "src/app/state"
-  import {env, loadPubkeyUserData} from "src/engine"
 
   const t = Date.now()
 
@@ -33,7 +33,7 @@
   const searchRelays = async relays => {
     failed = false
 
-    loadPubkeyUserData([$session.pubkey], {relays})
+    loadUserData(relays)
 
     await sleep(3000)
 

@@ -1,10 +1,10 @@
 <script lang="ts">
+  import {displayRelayUrl} from "@welshman/util"
   import {stringToHue, hsl} from "src/util/misc"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import {router} from "src/app/util/router"
-  import {displayRelayUrl} from "src/domain"
   import {getSetting} from "src/engine"
 
   export let url

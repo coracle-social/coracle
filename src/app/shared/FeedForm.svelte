@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {walkFeed, isAuthorFeed} from "@welshman/feeds"
   import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -12,7 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {deleteEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
+  import {deleteEvent, createAndPublish, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -81,14 +80,6 @@
 
   // Sync definition in case they're editing it
   $: draft.definition = feed.definition
-
-  walkFeed(feed.definition, subFeed => {
-    if (isAuthorFeed(subFeed)) {
-      loadPubkeys(subFeed.slice(1))
-    } else if (isMentionFeed(subFeed)) {
-      loadPubkeys(subFeed.slice(2) as string[])
-    }
-  })
 </script>
 
 <FeedField bind:feed={feed.definition} />

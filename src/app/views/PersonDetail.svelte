@@ -3,7 +3,13 @@
   import {stripProtocol} from "@welshman/lib"
   import {REACTION} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
-  import {deriveZapper, deriveProfile, displayProfileByPubkey} from "@welshman/app"
+  import {
+    deriveZapper,
+    deriveProfile,
+    displayProfileByPubkey,
+    getRelayUrls,
+    deriveRelaySelections,
+  } from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -20,14 +26,14 @@
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
-  import {makeZapSplit, userMutes, loadPubkeys, imgproxy, getPubkeyRelayPolicies} from "src/engine"
+  import {makeZapSplit, userMutes, imgproxy} from "src/engine"
   import {router} from "src/app/util"
 
   export let pubkey
   export let relays = []
 
-  const zapper = deriveZapper(pubkey)
-  const profile = deriveProfile(pubkey)
+  const profile = deriveProfile(pubkey, {relays})
+  const relaySelections = deriveRelaySelections(pubkey, {relays})
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
@@ -35,15 +41,13 @@
   let activeTab = "notes"
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
-  $: relayPolicies = getPubkeyRelayPolicies(pubkey)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
+  $: zapper = deriveZapper($profile?.lnurl)
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
   $: zapLink = router
     .at("zap")
     .qp({splits: [makeZapSplit(pubkey)]})
     .toString()
-
-  loadPubkeys([pubkey], {force: true, relays})
 
   document.title = displayProfileByPubkey(pubkey)
 
@@ -105,8 +109,8 @@
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
-  {#if relayPolicies.length > 0}
-    <PersonRelays urls={relayPolicies.map(p => p.url)} />
+  {#if $relaySelections}
+    <PersonRelays urls={getRelayUrls($relaySelections)} />
   {:else}
     <Spinner />
   {/if}

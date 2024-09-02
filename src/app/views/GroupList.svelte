@@ -20,6 +20,8 @@
     communityListsByAddress,
     groupMetaSearch,
     groupMeta,
+    loadPubkeyCommunities,
+    getFollows,
   } from "src/engine"
 
   const loadMore = async () => {
@@ -48,6 +50,10 @@
     updateSession(pubkey.get(), assoc("groups_last_synced", now()))
 
     loadGroupMessages()
+
+    if ($pubkey) {
+      loadPubkeyCommunities(getFollows($pubkey))
+    }
 
     load({
       skipCache: true,

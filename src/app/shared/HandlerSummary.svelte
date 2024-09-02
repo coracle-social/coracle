@@ -5,7 +5,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
-  import {recommendationsByHandlerAddress, loadPubkeys} from "src/engine"
+  import {recommendationsByHandlerAddress} from "src/engine"
 
   export let handler
 
@@ -13,8 +13,6 @@
   const recommendations = $recommendationsByHandlerAddress.get(address) || []
   const pubkeys = uniq(pluck("pubkey", recommendations))
   const actionText = `${pluralize(pubkeys.length, "recommends", "recommend")} this app`
-
-  loadPubkeys(pubkeys)
 </script>
 
 <div class="flex gap-3">

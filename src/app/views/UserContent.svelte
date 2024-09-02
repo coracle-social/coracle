@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {equals} from "ramda"
   import {identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
@@ -21,7 +20,6 @@
     userSettings,
     publishSettings,
     userMutes,
-    loadPubkeys,
     updateSingleton,
   } from "src/engine"
 
@@ -42,10 +40,6 @@
   }
 
   let mutedPubkeys = Array.from($userMutes)
-
-  onMount(() => {
-    loadPubkeys(mutedPubkeys)
-  })
 
   document.title = "Content Preferences"
 </script>

@@ -9,7 +9,7 @@
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "prettier --check $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
-    "check:errors": "run-p check:es check:ts",
+    "check:errors": "run-s check:ts check:es",
     "check": "run-p check:errors check:fmt",
     "format": "prettier --write $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
     "watch": "find src -type f | entr -r"

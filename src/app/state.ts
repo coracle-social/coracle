@@ -1,15 +1,19 @@
 import Bugsnag from "@bugsnag/js"
 import {writable} from "svelte/store"
-import {pubkey, session} from "@welshman/app"
+import {uniq} from "@welshman/lib"
+import {COMMUNITIES, FEEDS, APP_DATA} from "@welshman/util"
+import {pubkey, session, loadRelaySelections, getRelayUrls} from "@welshman/app"
+import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
   env,
+  load,
+  loadPubkeys,
   loadSeen,
   loadGroups,
   loadDeletes,
   loadHandlers,
   loadGiftWraps,
-  loadPubkeyUserData,
   loadLegacyMessages,
   loadGroupMessages,
   loadNotifications,
@@ -78,9 +82,27 @@ export const loadAppData = () => {
   }
 }
 
-export const loadUserData = async () => {
-  // Refresh our user's data
-  await loadPubkeyUserData([pubkey.get()])
+export const loadUserData = async (hints: string[] = []) => {
+  // Load relays, then load everything else so we have a better chance of finding it
+  const $pubkey = pubkey.get()
+  const relaySelections = await loadRelaySelections($pubkey, {relays: hints})
+  const relays = uniq([...hints, ...getRelayUrls(relaySelections)])
+
+  // Load the user's profile, mutes, follows using the usual loaders
+  loadPubkeys([$pubkey], relays)
+
+  // Load community selections, feeds, app data directly
+  load({
+    relays,
+    filters: [
+      {authors: [$pubkey], kinds: [COMMUNITIES, FEEDS]},
+      {
+        authors: [$pubkey],
+        kinds: [APP_DATA],
+        "#d": Object.values(appDataKeys),
+      },
+    ],
+  })
 
   // Load anything they might need to be notified about
   loadSeen()

@@ -5,8 +5,9 @@
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import PersonLink from "src/app/shared/PersonLink.svelte"
   import {router} from "src/app/util/router"
-  import {profileSearch, loadPubkeyProfiles, createPeopleLoader} from "src/engine"
+  import {profileSearch, createPeopleLoader} from "src/engine"
 
   export let value
   export let multiple = false
@@ -23,14 +24,12 @@
 
       parseAnything(term).then(result => {
         if (result?.type === "npub") {
-          loadPubkeyProfiles([result.data])
           value = uniq(value.concat(result.data))
           input.clearTerm()
           onChange?.(value)
         }
 
         if (result?.type === "nprofile") {
-          loadPubkeyProfiles([result.data.pubkey])
           value = uniq(value.concat(result.data.pubkey))
           input.clearTerm()
           onChange?.(value)
@@ -51,11 +50,9 @@
   bind:this={input}
   loading={$loading}>
   <div slot="item" let:item let:context>
-    <div class="-my-1">
+    <div class="-mt-1">
       {#if context === "value"}
-        <Anchor modal href={router.at("people").of(item).toString()}>
-          {$profileSearch.displayValue(item)}
-        </Anchor>
+        <PersonLink underline={false} pubkey={item} />
       {:else}
         <PersonBadge inert pubkey={item} />
       {/if}

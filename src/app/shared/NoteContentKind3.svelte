@@ -1,10 +1,8 @@
 <script lang="ts">
   import {Tags} from "@welshman/util"
-  import {onMount} from "svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
-  import {loadPubkeys} from "src/engine"
 
   export let note
   export let showEntire
@@ -16,10 +14,6 @@
   let limit = showEntire ? Infinity : 5
 
   $: pubkeys = Tags.fromEvent(note).values("p").take(limit).valueOf()
-
-  onMount(() => {
-    loadPubkeys(pubkeys)
-  })
 </script>
 
 <FlexColumn small>

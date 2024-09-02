@@ -1,20 +1,23 @@
 <script lang="ts">
+  import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
-  import {pubkey, displayProfileByPubkey} from "@welshman/app"
+  import {pubkey, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import {displayList, pluralize} from "hurdak"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {hasNip44, derivePubkeysWithoutInbox} from "src/engine"
+  import {hasNip44} from "src/engine"
 
   let value = []
 
   const submit = () => router.at("channels").of(pubkeys).push()
 
   $: pubkeys = uniq(value.concat($pubkey))
-  $: pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
+  $: pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
+    pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
+  )
   $: nip44Disabled = pubkeys.length > 2 && !$hasNip44
   $: missingInbox = pubkeys.length > 2 && $pubkeysWithoutInbox.length > 0
 </script>

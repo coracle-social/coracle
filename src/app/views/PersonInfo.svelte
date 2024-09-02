@@ -7,10 +7,10 @@
 
   export let pubkey
 
-  const handle = deriveHandle(pubkey)
   const profile = deriveProfile(pubkey)
   const relays = hints.FromPubkeys([pubkey]).getUrls()
 
+  $: handle = deriveHandle($profile?.nip05)
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>
 

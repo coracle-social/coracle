@@ -3,10 +3,10 @@
   import {flatten, partition} from "ramda"
   import {profilesByPubkey} from "@welshman/app"
   import {createScroller} from "src/util/misc"
+  import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import {profileHasName} from "src/domain"
-  import {loadPubkeys} from "src/engine"
 
   export let pubkeys
 
@@ -34,11 +34,12 @@
   $: [withName, withoutName] = partition(hasName, pubkeys)
   $: sorted = flatten([...withName, ...withoutName])
   $: results = sorted.slice(0, limit)
-  $: loadPubkeys(results.filter(pubkey => !hasName(pubkey)))
 </script>
 
 <FlexColumn bind:element>
   {#each results as pubkey (pubkey)}
-    <PersonSummary {pubkey} />
+    <Card>
+      <PersonSummary {pubkey} />
+    </Card>
   {/each}
 </FlexColumn>

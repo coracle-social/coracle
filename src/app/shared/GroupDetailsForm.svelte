@@ -1,7 +1,7 @@
 <script lang="ts">
   import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
-  import {Address, GROUP, COMMUNITY} from "@welshman/util"
+  import {Address, GROUP, COMMUNITY, normalizeRelayUrl, displayRelayUrl} from "@welshman/util"
   import {relaySearch} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -20,7 +20,6 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupMeta} from "src/domain"
-  import {normalizeRelayUrl, displayRelayUrl} from "src/domain"
   import {env, hints, feedSearch} from "src/engine"
 
   export let onSubmit

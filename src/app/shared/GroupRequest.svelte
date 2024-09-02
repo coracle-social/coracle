@@ -7,7 +7,7 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {groupRequests, loadPubkeys} from "src/engine"
+  import {groupRequests} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address
@@ -36,8 +36,6 @@
         .open()
     }
   }
-
-  loadPubkeys([request.pubkey])
 </script>
 
 <Card interactive>

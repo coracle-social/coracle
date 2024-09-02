@@ -18,7 +18,6 @@
   import {
     env,
     GroupAccess,
-    loadPubkeys,
     groupRequests,
     deriveGroup,
     deriveGroupMeta,
@@ -61,7 +60,6 @@
   $: {
     if (key) {
       loadGroupMessages([address])
-      loadPubkeys($group.members || [])
     }
   }
 

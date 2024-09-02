@@ -5,7 +5,7 @@
   import {now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, zappersByPubkey} from "@welshman/app"
+  import {signer, profilesByPubkey, zappersByLnurl} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -61,7 +61,8 @@
         // Add our zapper and relay hints
         return zaps.map((zap, i) => {
           const content = i === 0 ? message : ""
-          const zapper = $zappersByPubkey.get(zap.pubkey)
+          const profile = $profilesByPubkey.get(zap.pubkey)
+          const zapper = $zappersByLnurl.get(profile?.lnurl)
           const relays = hints
             .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
             .getUrls()

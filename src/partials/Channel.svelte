@@ -1,10 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {displayList, pluralize} from "hurdak"
+  import {derived} from "svelte/store"
   import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {Nip46Signer} from "@welshman/signer"
-  import {session, signer, displayProfileByPubkey} from "@welshman/app"
+  import {
+    session,
+    signer,
+    displayProfileByPubkey,
+    inboxRelaySelectionsByPubkey,
+  } from "@welshman/app"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly, slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -14,7 +20,7 @@
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {hasNip44, derivePubkeysWithoutInbox} from "src/engine"
+  import {hasNip44} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
 
@@ -50,8 +56,10 @@
   let groupedMessages = []
 
   const isGroupMessage = pubkeys.length > 2
-  const pubkeysWithoutInbox = derivePubkeysWithoutInbox(pubkeys)
   const recipients = remove($session?.pubkey, pubkeys)
+  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
+    pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
+  )
 
   let useNip17 = isGroupMessage || ($hasNip44 && $pubkeysWithoutInbox.length === 0)
 

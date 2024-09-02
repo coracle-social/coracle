@@ -31,13 +31,15 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   DEPRECATED_DIRECT_MESSAGE,
+  COMMUNITIES,
+  FEEDS,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {pubkey, relays, repository, signer, getSession, updateSession} from "@welshman/app"
+import {pubkey, relays, repository, signer, getSession, updateSession, loadProfile, loadFollows, loadMutes, loadRelaySelections, getWriteRelayUrls, relaySelectionsByPubkey} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
-import {LIST_KINDS, filterRelaysByNip} from "src/domain"
+import {LIST_KINDS} from "src/domain"
 import type {SessionWithMeta} from "src/engine/model"
 import {
   env,
@@ -48,6 +50,9 @@ import {
   getFollowers,
   getUserCommunities,
   getWotScore,
+  withIndexers,
+  setFreshness,
+  getFreshness,
   hints,
   isEventMuted,
   load,
@@ -62,7 +67,7 @@ import {
   getFollows,
 } from "src/engine/state"
 
-export * from "src/engine/requests/pubkeys"
+// Utils
 
 export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
   const limit = 50
@@ -96,6 +101,51 @@ export const getStaleAddrs = (addrs: string[]) => {
 
   return Array.from(stale)
 }
+
+export const loadAll = (feed, opts: LoadOpts = {}) => {
+  const loading = writable(true)
+
+  const stop = () => loading.set(false)
+
+  const promise = new Promise<void>(async resolve => {
+    const load = await feedLoader.getLoader(feed, {
+      onEvent: opts.onEvent,
+      onExhausted: () => {
+        opts.onExhausted?.()
+        stop()
+      },
+    })
+
+    while (get(loading)) {
+      await load(100)
+    }
+
+    resolve()
+  })
+
+  return {promise, loading, stop}
+}
+
+export const sync = (fromUrl, toUrl, filters) => {
+  const worker = new Worker<SignedEvent>()
+
+  worker.addGlobalHandler(event => publish({event, relays: [toUrl], forcePlatform: false}))
+
+  const feed = makeIntersectionFeed(
+    makeRelayFeed(fromUrl),
+    makeUnionFeed(...filters.map(feedFromFilter)),
+  )
+
+  return loadAll(feed, {
+    onEvent: e => {
+      if (isSignedEvent(e)) {
+        worker.push(e)
+      }
+    },
+  })
+}
+
+// Groups
 
 export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs)
@@ -171,6 +221,8 @@ export const dereferenceNote = async ({
   return null
 }
 
+// People
+
 type PeopleLoaderOpts = {
   shouldLoad?: (term: string) => boolean
   onEvent?: (e: TrustedEvent) => void
@@ -183,7 +235,7 @@ export const createPeopleLoader = ({
   const loading = writable(false)
   const nip50Relays = uniq([
     ...env.SEARCH_RELAYS,
-    ...filterRelaysByNip(50, relays.get()).map(r => r.url),
+    ...relays.get().filter(r => r.profile?.supported_nips?.includes(50)).map(r => r.url),
   ])
 
   return {
@@ -210,6 +262,58 @@ export const createPeopleLoader = ({
     }),
   }
 }
+
+export const loadPubkeyData = (key: string, pubkeys: string[], kinds: number[]) => {
+  const promises = []
+  const $relaySelectionsByPubkey = relaySelectionsByPubkey.get()
+
+  for (const pubkey of pubkeys) {
+    if (getFreshness(key, pubkey) < now() - seconds(1, 'day')) {
+      setFreshness(key, pubkey, now())
+
+      promises.push(
+        load({
+          filters: [{authors: [pubkey], kinds}],
+          relays: withIndexers(getWriteRelayUrls($relaySelectionsByPubkey.get(pubkey))),
+        })
+      )
+    }
+  }
+
+  return Promise.all(promises)
+}
+
+export const loadPubkeyLists = (pubkeys: string[]) =>
+  loadPubkeyData('pubkey/lists', pubkeys, LIST_KINDS)
+
+export const loadPubkeyFeeds = (pubkeys: string[]) =>
+  loadPubkeyData('pubkey/feeds', pubkeys, [NAMED_BOOKMARKS, FEED, FEEDS])
+
+export const loadPubkeyHandlers = (pubkeys: string[]) =>
+  loadPubkeyData('pubkey/handlers', pubkeys, [HANDLER_INFORMATION])
+
+export const loadPubkeyCommunities = (pubkeys: string[]) =>
+  loadPubkeyData('pubkey/communities', pubkeys, [COMMUNITIES])
+
+export const loadPubkeys = async (pubkeys: string[], relays: string[] = []) => {
+  const promises = []
+
+  for (const pubkey of pubkeys) {
+    // Load relays, then load profiles so we have a better chance of finding them
+    promises.push(
+      loadRelaySelections(pubkey, {relays})
+        .then(() => Promise.all([
+          loadProfile(pubkey, {relays}),
+          loadFollows(pubkey, {relays}),
+          loadMutes(pubkey, {relays}),
+        ]))
+    )
+  }
+
+  await Promise.all(promises)
+}
+
+// Feeds
 
 export const feedLoader = new FeedLoader({
   request: async ({relays, filters, onEvent}) => {
@@ -273,48 +377,7 @@ export const feedLoader = new FeedLoader({
   },
 })
 
-export const loadAll = (feed, opts: LoadOpts = {}) => {
-  const loading = writable(true)
-
-  const stop = () => loading.set(false)
-
-  const promise = new Promise<void>(async resolve => {
-    const load = await feedLoader.getLoader(feed, {
-      onEvent: opts.onEvent,
-      onExhausted: () => {
-        opts.onExhausted?.()
-        stop()
-      },
-    })
-
-    while (get(loading)) {
-      await load(100)
-    }
-
-    resolve()
-  })
-
-  return {promise, loading, stop}
-}
-
-export const sync = (fromUrl, toUrl, filters) => {
-  const worker = new Worker<SignedEvent>()
-
-  worker.addGlobalHandler(event => publish({event, relays: [toUrl], forcePlatform: false}))
-
-  const feed = makeIntersectionFeed(
-    makeRelayFeed(fromUrl),
-    makeUnionFeed(...filters.map(feedFromFilter)),
-  )
-
-  return loadAll(feed, {
-    onEvent: e => {
-      if (isSignedEvent(e)) {
-        worker.push(e)
-      }
-    },
-  })
-}
+// Notifications
 
 const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   const kinds = getNotificationKinds()
@@ -400,6 +463,8 @@ export const listenForNotifications = () => {
     onEvent: onNotificationEvent,
   })
 }
+
+// Other user data
 
 export const loadLabels = (authors: string[]) =>
   load({

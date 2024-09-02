@@ -1,6 +1,13 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
-  import {Tags, NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS} from "@welshman/util"
+  import {
+    Tags,
+    NAMED_PEOPLE,
+    NAMED_RELAYS,
+    NAMED_TOPICS,
+    normalizeRelayUrl,
+    displayRelayUrl,
+  } from "@welshman/util"
   import {topicSearch, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -12,14 +19,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {hints, mention, createAndPublish, deleteEvent} from "src/engine"
-  import {
-    KindSearch,
-    normalizeRelayUrl,
-    createList,
-    displayList,
-    editList,
-    displayRelayUrl,
-  } from "src/domain"
+  import {KindSearch, createList, displayList, editList} from "src/domain"
 
   export let list
   export let exit

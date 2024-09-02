@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {nthEq} from "@welshman/lib"
   import {
     isChildOf,
     getIdFilters,
@@ -12,9 +13,9 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {repository, deriveZapper, loadZapper} from "@welshman/app"
+  import {repository, deriveZapper, deriveProfile} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {replyKinds, isLike} from "src/util/nostr"
@@ -39,7 +40,6 @@
     ensureUnwrapped,
     isEventMuted,
     getSetting,
-    loadPubkeysFromEvent,
     sortEventsDesc,
   } from "src/engine"
 
@@ -57,7 +57,6 @@
   export let showMedia = getSetting("show_media")
   export let contextAddress = null
 
-  let zapper, unsubZapper
   let ready = false
   let event = note
   let replyCtrl = null
@@ -114,7 +113,9 @@
   $: tags = Tags.fromEvent(event)
   $: reply = tags.parent()
   $: root = tags.root()
-
+  $: profile = deriveProfile(event.pubkey)
+  $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || $profile?.lnurl || "")
+  $: zapper = lnurl && deriveZapper(lnurl)
   $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
@@ -168,20 +169,10 @@
   // Split out zaps
   $: zaps = children
     .filter(e => e.kind === 9735)
-    .map(e => (zapper ? zapFromEvent(e, zapper) : null))
+    .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
 
   onMount(async () => {
-    const zapAddress = tags.get("zap")?.value()
-
-    if (zapAddress && getLnUrl(zapAddress)) {
-      zapper = await loadZapper(getLnUrl(zapAddress))
-    } else {
-      unsubZapper = deriveZapper(event.pubkey).subscribe($zapper => {
-        zapper = $zapper
-      })
-    }
-
     if (!event.pubkey) {
       await loadOne({
         forcePlatform: false,
@@ -197,7 +188,6 @@
 
     if (event.pubkey) {
       ready = true
-      loadPubkeysFromEvent(event)
 
       const actions = getSetting("note_actions")
       const kinds = []
@@ -222,10 +212,6 @@
         }),
       })
     }
-  })
-
-  onDestroy(() => {
-    unsubZapper?.()
   })
 </script>
 
@@ -308,6 +294,7 @@
               <div class="cy-note-click-target h-[2px]" />
               <NoteActions
                 note={event}
+                zapper={$zapper}
                 bind:this={actions}
                 {removeFromContext}
                 {contextAddress}
@@ -317,7 +304,6 @@
                 {replies}
                 {likes}
                 {zaps}
-                {zapper}
                 {muted} />
             </div>
           </div>

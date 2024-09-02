@@ -6,7 +6,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
-  import {loadPubkeys, channelHasNewMessages} from "src/engine"
+  import {channelHasNewMessages} from "src/engine"
 
   export let channel
 
@@ -15,8 +15,6 @@
   const membersDisplay = derived(profiles, () => members.map(displayProfileByPubkey))
 
   const enter = () => router.at("channels").of(pubkeys).push()
-
-  loadPubkeys(pubkeys)
 
   $: showAlert = channelHasNewMessages(channel)
 </script>
