@@ -40,63 +40,119 @@
 
   // Routes
 
-  router.register("/about", () => import("src/app/views/About.svelte"))
-  router.register("/search", () => import("src/app/views/Search.svelte"))
-  router.register("/events", () => import("src/app/views/Calendar.svelte"))
+  router.register(
+    "/about",
+    lib.memoize(() => import("src/app/views/About.svelte")),
+  )
+  router.register(
+    "/search",
+    lib.memoize(() => import("src/app/views/Search.svelte")),
+  )
+  router.register(
+    "/events",
+    lib.memoize(() => import("src/app/views/Calendar.svelte")),
+  )
 
-  router.register("/channels", () => import("src/app/views/ChannelsList.svelte"), {
-    requireSigner: true,
-  })
-  router.register("/channels/create", () => import("src/app/views/ChannelCreate.svelte"), {
-    requireSigner: true,
-  })
-  router.register("/channels/requests", () => import("src/app/views/ChannelsList.svelte"), {
-    requireSigner: true,
-  })
-  router.register("/channels/:channelId", () => import("src/app/views/ChannelsDetail.svelte"), {
-    requireSigner: true,
-    serializers: {
-      channelId: asChannelId,
+  router.register(
+    "/channels",
+    lib.memoize(() => import("src/app/views/ChannelsList.svelte")),
+    {
+      requireSigner: true,
     },
-  })
+  )
+  router.register(
+    "/channels/create",
+    lib.memoize(() => import("src/app/views/ChannelCreate.svelte")),
+    {
+      requireSigner: true,
+    },
+  )
+  router.register(
+    "/channels/requests",
+    lib.memoize(() => import("src/app/views/ChannelsList.svelte")),
+    {
+      requireSigner: true,
+    },
+  )
+  router.register(
+    "/channels/:channelId",
+    lib.memoize(() => import("src/app/views/ChannelsDetail.svelte")),
+    {
+      requireSigner: true,
+      serializers: {
+        channelId: asChannelId,
+      },
+    },
+  )
 
-  router.register("/events/:address", () => import("src/app/views/EventDetail.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
+  router.register(
+    "/events/:address",
+    lib.memoize(() => import("src/app/views/EventDetail.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
-  router.register("/events/:address/edit", () => import("src/app/views/EventEdit.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
+  )
+  router.register(
+    "/events/:address/edit",
+    lib.memoize(() => import("src/app/views/EventEdit.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
-  router.register("/events/:address/delete", () => import("src/app/views/EventDelete.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
+  )
+  router.register(
+    "/events/:address/delete",
+    lib.memoize(() => import("src/app/views/EventDelete.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
+  )
 
-  router.register("/groups", () => import("src/app/views/GroupList.svelte"))
-  router.register("/groups/new", () => import("src/app/views/GroupCreate.svelte"), {
-    requireSigner: true,
-  })
-  router.register("/groups/:address/edit", () => import("src/app/views/GroupEdit.svelte"), {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
+  router.register(
+    "/groups",
+    lib.memoize(() => import("src/app/views/GroupList.svelte")),
+  )
+  router.register(
+    "/groups/new",
+    lib.memoize(() => import("src/app/views/GroupCreate.svelte")),
+    {
+      requireSigner: true,
     },
-  })
-  router.register("/groups/:address/delete", () => import("src/app/views/GroupDelete.svelte"), {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
+  )
+  router.register(
+    "/groups/:address/edit",
+    lib.memoize(() => import("src/app/views/GroupEdit.svelte")),
+    {
+      requireSigner: true,
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
-  router.register("/groups/:address/info", () => import("src/app/views/GroupInfo.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
+  )
+  router.register(
+    "/groups/:address/delete",
+    lib.memoize(() => import("src/app/views/GroupDelete.svelte")),
+    {
+      requireSigner: true,
+      serializers: {
+        address: asNaddr("address"),
+      },
     },
-  })
+  )
+  router.register(
+    "/groups/:address/info",
+    lib.memoize(() => import("src/app/views/GroupInfo.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
+    },
+  )
   router.register(
     "/groups/:address/invite-admin",
     import("src/app/views/GroupInviteAdmin.svelte"),
@@ -106,102 +162,145 @@
       },
     },
   )
-  router.register("/groups/:address/rotate", () => import("src/app/views/GroupRotate.svelte"), {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-      addMembers: asCsv("addMembers"),
-      removeMembers: asCsv("removeMembers"),
+  router.register(
+    "/groups/:address/rotate",
+    lib.memoize(() => import("src/app/views/GroupRotate.svelte")),
+    {
+      requireSigner: true,
+      serializers: {
+        address: asNaddr("address"),
+        addMembers: asCsv("addMembers"),
+        removeMembers: asCsv("removeMembers"),
+      },
     },
-  })
-  router.register("/groups/:address/:activeTab", () => import("src/app/views/GroupDetail.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
-      claim: asString("claim"),
+  )
+  router.register(
+    "/groups/:address/:activeTab",
+    lib.memoize(() => import("src/app/views/GroupDetail.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+        claim: asString("claim"),
+      },
     },
-  })
-  router.register("/groups/:address", () => import("src/app/views/GroupDetail.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
-      claim: asString("claim"),
+  )
+  router.register(
+    "/groups/:address",
+    lib.memoize(() => import("src/app/views/GroupDetail.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+        claim: asString("claim"),
+      },
     },
-  })
+  )
 
-  router.register("/help/:topic", () => import("src/app/views/Help.svelte"))
+  router.register(
+    "/help/:topic",
+    lib.memoize(() => import("src/app/views/Help.svelte")),
+  )
 
-  router.register("/invite", () => import("src/app/views/InviteAccept.svelte"), {
-    serializers: {
-      people: asCsv("people"),
-      relays: asCsv("relays"),
-      groups: asCsv("groups"),
+  router.register(
+    "/invite",
+    lib.memoize(() => import("src/app/views/InviteAccept.svelte")),
+    {
+      serializers: {
+        people: asCsv("people"),
+        relays: asCsv("relays"),
+        groups: asCsv("groups"),
+      },
     },
-  })
-  router.register("/invite/create", () => import("src/app/views/InviteCreate.svelte"), {
-    serializers: {
-      initialPubkey: asUrlComponent("initialPubkey"),
-      initialGroupAddress: asUrlComponent("initialGroupAddress"),
+  )
+  router.register(
+    "/invite/create",
+    lib.memoize(() => import("src/app/views/InviteCreate.svelte")),
+    {
+      serializers: {
+        initialPubkey: asUrlComponent("initialPubkey"),
+        initialGroupAddress: asUrlComponent("initialGroupAddress"),
+      },
     },
-  })
+  )
 
-  router.register("/feeds", () => import("src/app/views/FeedList.svelte"))
-  router.register("/feeds/create", () => import("src/app/views/FeedCreate.svelte"))
-  router.register("/feeds/:address", () => import("src/app/views/FeedEdit.svelte"), {
+  router.register(
+    "/feeds",
+    lib.memoize(() => import("src/app/views/FeedList.svelte")),
+  )
+  router.register(
+    "/feeds/create",
+    lib.memoize(() => import("src/app/views/FeedCreate.svelte")),
+  )
+  router.register(
+    "/feeds/:address",
+    lib.memoize(() => import("src/app/views/FeedEdit.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
+    },
+  )
+
+  router.register(
+    "/lists",
+    lib.memoize(() => import("src/app/views/ListList.svelte")),
+  )
+  router.register(
+    "/lists/create",
+    lib.memoize(() => import("src/app/views/ListCreate.svelte")),
+  )
+  router.register(
+    "/lists/:address",
+    lib.memoize(() => import("src/app/views/ListDetail.svelte")),
+    {
+      serializers: {
+        address: asNaddr("address"),
+      },
+    },
+  )
+  router.register("/lists/:address/edit", lib.memoize(() => import("src/app/views/ListEdit.svelte")), {
     serializers: {
       address: asNaddr("address"),
     },
   })
-
-  router.register("/lists", () => import("src/app/views/ListList.svelte"))
-  router.register("/lists/create", () => import("src/app/views/ListCreate.svelte"))
-  router.register("/lists/:address", () => import("src/app/views/ListDetail.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/lists/:address/edit", import("src/app/views/ListEdit.svelte"), {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/lists/select", import("src/app/views/ListSelect.svelte"), {
+  router.register("/lists/select", lib.memoize(() => import("src/app/views/ListSelect.svelte")), {
     serializers: {
       type: asString("type"),
       value: asString("value"),
     },
   })
 
-  router.register("/login", import("src/app/views/Login.svelte"))
-  router.register("/login/bunker", import("src/app/views/LoginBunker.svelte"))
-  router.register("/login/privkey", import("src/app/views/LoginPrivKey.svelte"))
-  router.register("/login/pubkey", import("src/app/views/LoginPubKey.svelte"))
-  router.register("/login/connect", import("src/app/views/LoginConnect.svelte"), {
+  router.register("/login", lib.memoize(() => import("src/app/views/Login.svelte")))
+  router.register("/login/bunker", lib.memoize(() => import("src/app/views/LoginBunker.svelte")))
+  router.register("/login/privkey", lib.memoize(() => import("src/app/views/LoginPrivKey.svelte")))
+  router.register("/login/pubkey", lib.memoize(() => import("src/app/views/LoginPubKey.svelte")))
+  router.register("/login/connect", lib.memoize(() => import("src/app/views/LoginConnect.svelte")), {
     requireUser: true,
   })
-  router.register("/logout", import("src/app/views/Logout.svelte"))
+  router.register("/logout", lib.memoize(() => import("src/app/views/Logout.svelte")))
 
-  router.register("/listings", import("src/app/views/Market.svelte"))
-  router.register("/listings/:address/edit", import("src/app/views/ListingEdit.svelte"), {
+  router.register("/listings", lib.memoize(() => import("src/app/views/Market.svelte")))
+  router.register("/listings/:address/edit", lib.memoize(() => import("src/app/views/ListingEdit.svelte")), {
     requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
   })
-  router.register("/listings/:address/delete", import("src/app/views/ListingDelete.svelte"), {
+  router.register("/listings/:address/delete", lib.memoize(() => import("src/app/views/ListingDelete.svelte")), {
     requireSigner: true,
     serializers: {
       address: asNaddr("address"),
     },
   })
 
-  router.register("/media/:url", import("src/app/views/MediaDetail.svelte"), {
+  router.register("/media/:url", lib.memoize(() => import("src/app/views/MediaDetail.svelte")), {
     serializers: {
       url: asUrlComponent("url"),
     },
   })
 
-  router.register("/", import("src/app/views/Home.svelte"))
-  router.register("/notes", import("src/app/views/Home.svelte"))
-  router.register("/notes/create", import("src/app/views/NoteCreate.svelte"), {
+  router.register("/", lib.memoize(() => import("src/app/views/Home.svelte")))
+  router.register("/notes", lib.memoize(() => import("src/app/views/Home.svelte")))
+  router.register("/notes/create", lib.memoize(() => import("src/app/views/NoteCreate.svelte")), {
     requireSigner: true,
     serializers: {
       pubkey: asPerson,
@@ -209,56 +308,50 @@
       type: asString("type"),
     },
   })
-  router.register("/notes/:entity", import("src/app/views/NoteDetail.svelte"), {
+  router.register("/notes/:entity", lib.memoize(() => import("src/app/views/NoteDetail.svelte")), {
     serializers: {
       entity: asNote,
     },
   })
-  router.register("/notes/:entity/label", import("src/app/views/LabelCreate.svelte"), {
+  router.register("/notes/:entity/label", lib.memoize(() => import("src/app/views/LabelCreate.svelte")), {
     serializers: {
       entity: asNote,
     },
   })
-  router.register("/notes/:entity/report", import("src/app/views/ReportCreate.svelte"), {
+  router.register("/notes/:entity/report", lib.memoize(() => import("src/app/views/ReportCreate.svelte")), {
     serializers: {
       entity: asNote,
     },
   })
-  router.register("/notes/:entity/thread", import("src/app/views/ThreadDetail.svelte"), {
+  router.register("/notes/:entity/thread", lib.memoize(() => import("src/app/views/ThreadDetail.svelte")), {
     serializers: {
       entity: asNote,
     },
   })
-  router.register("/notes/:entity/delete", import("src/app/views/NoteDelete.svelte"), {
+  router.register("/notes/:entity/delete", lib.memoize(() => import("src/app/views/NoteDelete.svelte")), {
     serializers: {
       entity: asNote,
       kind: asString("kind"),
     },
   })
 
-  router.register("/notifications", import("src/app/views/Notifications.svelte"), {
+  router.register("/notifications", lib.memoize(() => import("src/app/views/Notifications.svelte")), {
     requireUser: true,
   })
-  router.register("/notifications/:activeTab", import("src/app/views/Notifications.svelte"), {
+  router.register("/notifications/:activeTab", lib.memoize(() => import("src/app/views/Notifications.svelte")), {
     requireUser: true,
   })
 
-  router.register("/signup", import("src/app/views/Onboarding.svelte"))
+  router.register("/signup", lib.memoize(() => import("src/app/views/Onboarding.svelte")))
 
-  router.register("/people/list", import("src/app/shared/PersonList.svelte"), {
+  router.register("/people/list", lib.memoize(() => import("src/app/shared/PersonList.svelte")), {
     serializers: {
       pubkeys: asCsv("pubkeys"),
     },
   })
-  router.register("/people/:entity", () => import("src/app/views/PersonDetail.svelte"), {
-    required: ["pubkey"],
-    serializers: {
-      entity: asPerson,
-    },
-  })
   router.register(
-    "/people/:entity/followers",
-    () => import("src/app/views/PersonFollowers.svelte"),
+    "/people/:entity",
+    lib.memoize(() => import("src/app/views/PersonDetail.svelte")),
     {
       required: ["pubkey"],
       serializers: {
@@ -266,83 +359,162 @@
       },
     },
   )
-  router.register("/people/:entity/follows", () => import("src/app/views/PersonFollows.svelte"), {
-    required: ["pubkey"],
-    serializers: {
-      entity: asPerson,
+  router.register(
+    "/people/:entity/followers",
+    lib.memoize(() => import("src/app/views/PersonFollowers.svelte")),
+    {
+      required: ["pubkey"],
+      serializers: {
+        entity: asPerson,
+      },
     },
-  })
-  router.register("/people/:entity/info", () => import("src/app/views/PersonInfo.svelte"), {
-    required: ["pubkey"],
-    serializers: {
-      entity: asPerson,
+  )
+  router.register(
+    "/people/:entity/follows",
+    lib.memoize(() => import("src/app/views/PersonFollows.svelte")),
+    {
+      required: ["pubkey"],
+      serializers: {
+        entity: asPerson,
+      },
     },
-  })
+  )
+  router.register(
+    "/people/:entity/info",
+    lib.memoize(() => import("src/app/views/PersonInfo.svelte")),
+    {
+      required: ["pubkey"],
+      serializers: {
+        entity: asPerson,
+      },
+    },
+  )
 
-  router.register("/qrcode/:code", () => import("src/app/views/QRCode.svelte"), {
-    serializers: {
-      code: asUrlComponent("code"),
+  router.register(
+    "/qrcode/:code",
+    lib.memoize(() => import("src/app/views/QRCode.svelte")),
+    {
+      serializers: {
+        code: asUrlComponent("code"),
+      },
     },
-  })
+  )
 
-  router.register("/publishes", () => import("src/app/views/Publishes.svelte"))
+  router.register(
+    "/publishes",
+    lib.memoize(() => import("src/app/views/Publishes.svelte")),
+  )
 
-  router.register("/relays/:entity", () => import("src/app/views/RelayDetail.svelte"), {
-    serializers: {
-      entity: asRelay,
+  router.register(
+    "/relays/:entity",
+    lib.memoize(() => import("src/app/views/RelayDetail.svelte")),
+    {
+      serializers: {
+        entity: asRelay,
+      },
     },
-  })
-  router.register("/relays/:entity/review", () => import("src/app/views/RelayReview.svelte"), {
-    serializers: {
-      entity: asRelay,
+  )
+  router.register(
+    "/relays/:entity/review",
+    lib.memoize(() => import("src/app/views/RelayReview.svelte")),
+    {
+      serializers: {
+        entity: asRelay,
+      },
     },
-  })
+  )
 
-  router.register("/settings", () => import("src/app/views/UserSettings.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/content", () => import("src/app/views/UserContent.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/data", () => import("src/app/views/UserData.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/data/export", () => import("src/app/views/DataExport.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/data/import", () => import("src/app/views/DataImport.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/keys", () => import("src/app/views/UserKeys.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/profile", () => import("src/app/views/UserProfile.svelte"), {
-    requireUser: true,
-  })
-  router.register("/settings/relays", () => import("src/app/views/RelayList.svelte"))
-
-  router.register("/topics/:topic", () => import("src/app/views/TopicFeed.svelte"))
-
-  router.register("/zap", () => import("src/app/views/Zap.svelte"), {
-    required: ["splits"],
-    serializers: {
-      eid: asNote,
-      amount: asJson("amount"),
-      splits: asJson("splits"),
-      anonymous: asJson("anonymous"),
+  router.register(
+    "/settings",
+    lib.memoize(() => import("src/app/views/UserSettings.svelte")),
+    {
+      requireUser: true,
     },
-  })
+  )
+  router.register(
+    "/settings/content",
+    lib.memoize(() => import("src/app/views/UserContent.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/data",
+    lib.memoize(() => import("src/app/views/UserData.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/data/export",
+    lib.memoize(() => import("src/app/views/DataExport.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/data/import",
+    lib.memoize(() => import("src/app/views/DataImport.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/keys",
+    lib.memoize(() => import("src/app/views/UserKeys.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/profile",
+    lib.memoize(() => import("src/app/views/UserProfile.svelte")),
+    {
+      requireUser: true,
+    },
+  )
+  router.register(
+    "/settings/relays",
+    lib.memoize(() => import("src/app/views/RelayList.svelte")),
+  )
 
-  router.register("/:entity", () => import("src/app/views/Bech32Entity.svelte"), {
-    serializers: {
-      entity: asEntity,
+  router.register(
+    "/topics/:topic",
+    lib.memoize(() => import("src/app/views/TopicFeed.svelte")),
+  )
+
+  router.register(
+    "/zap",
+    lib.memoize(() => import("src/app/views/Zap.svelte")),
+    {
+      required: ["splits"],
+      serializers: {
+        eid: asNote,
+        amount: asJson("amount"),
+        splits: asJson("splits"),
+        anonymous: asJson("anonymous"),
+      },
     },
-  })
-  router.register("/:entity/*", () => import("src/app/views/Bech32Entity.svelte"), {
-    serializers: {
-      entity: asEntity,
+  )
+
+  router.register(
+    "/:entity",
+    lib.memoize(() => import("src/app/views/Bech32Entity.svelte")),
+    {
+      serializers: {
+        entity: asEntity,
+      },
     },
-  })
+  )
+  router.register(
+    "/:entity/*",
+    lib.memoize(() => import("src/app/views/Bech32Entity.svelte")),
+    {
+      serializers: {
+        entity: asEntity,
+      },
+    },
+  )
 
   router.init()
 
