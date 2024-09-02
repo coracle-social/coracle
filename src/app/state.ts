@@ -2,7 +2,14 @@ import Bugsnag from "@bugsnag/js"
 import {writable} from "svelte/store"
 import {uniq} from "@welshman/lib"
 import {COMMUNITIES, FEEDS, APP_DATA} from "@welshman/util"
-import {pubkey, session, loadRelaySelections, getRelayUrls} from "@welshman/app"
+import {
+  pubkey,
+  session,
+  loadZapper,
+  loadHandle,
+  loadRelaySelections,
+  getRelayUrls,
+} from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
@@ -90,6 +97,8 @@ export const loadUserData = async (hints: string[] = []) => {
 
   // Load the user's profile, mutes, follows using the usual loaders
   loadPubkeys([$pubkey], relays)
+  loadZapper($pubkey)
+  loadHandle($pubkey)
 
   // Load community selections, feeds, app data directly
   load({

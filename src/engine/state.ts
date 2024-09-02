@@ -187,6 +187,7 @@ export const env = {
 
 Object.assign(welshmanEnv, {
   DUFFLEPUD_URL: env.DUFFLEPUD_URL,
+  BOOTSTRAP_RELAYS: env.INDEXER_RELAYS,
 })
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
@@ -474,7 +475,7 @@ export const getFollowsWhoFollow = simpleCache(
 )
 
 export const getFollowsWhoMute = simpleCache(
-  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getFollows(other).includes(tpk))),
+  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getMutes(other).includes(tpk))),
 )
 
 export const primeWotCaches = throttle(3000, pk => {
@@ -499,13 +500,13 @@ export const primeWotCaches = throttle(3000, pk => {
   }
 
   // Populate mutes cache
-  for (const [k, pubkeys] of Object.entries(mutes)) {
-    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, k]), new Set(pubkeys))
+  for (const [tpk, pubkeys] of Object.entries(mutes)) {
+    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, tpk]), new Set(pubkeys))
   }
 
   // Populate follows cache
-  for (const [k, pubkeys] of Object.entries(follows)) {
-    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, k]), new Set(pubkeys))
+  for (const [tpk, pubkeys] of Object.entries(follows)) {
+    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, tpk]), new Set(pubkeys))
   }
 })
 

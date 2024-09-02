@@ -886,7 +886,7 @@ export const publishSettings = ($settings: Record<string, any>) =>
 
 export const broadcastUserData = async (relays: string[]) => {
   const authors = [pubkey.get()]
-  const kinds = [RELAYS, FOLLOWS, PROFILE]
+  const kinds = [RELAYS, INBOX_RELAYS, FOLLOWS, PROFILE]
   const events = repository.query([{kinds, authors}])
 
   for (const event of events) {
