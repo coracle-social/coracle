@@ -97,18 +97,18 @@
   </div>
   {#if !hideDescription}
     <slot name="description">
-      {#if $relay.profile?.description}
-        <p>{$relay.profile.description}</p>
+      {#if $relay?.profile?.description}
+        <p>{$relay?.profile.description}</p>
       {/if}
     </slot>
-    {#if !$relay.stats}
+    {#if $relay?.stats}
       <span class="flex items-center gap-1 text-sm text-neutral-400">
-        {#if $relay.profile?.contact}
+        {#if $relay?.profile?.contact}
           <Anchor external underline href={$relay.profile.contact}
             >{displayUrl($relay.profile.contact)}</Anchor>
           &bull;
         {/if}
-        {#if $relay.profile?.supported_nips}
+        {#if $relay?.profile?.supported_nips}
           <Popover>
             <span slot="trigger" class="cursor-pointer underline">
               {$relay.profile.supported_nips.length} NIPs

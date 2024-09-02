@@ -10,7 +10,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
+  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
   import {deleteEvent, createAndPublish, hints} from "src/engine"
 
   export let feed

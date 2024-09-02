@@ -12,7 +12,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {router} from "src/app/util/router"
-  import {loadRelaySelections, publish, hints} from "src/engine"
+  import {publish, hints} from "src/engine"
 
   export let eid
 

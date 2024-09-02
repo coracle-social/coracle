@@ -2,11 +2,9 @@
   import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
   import {parseAnything} from "src/util/nostr"
-  import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
-  import {router} from "src/app/util/router"
   import {profileSearch, createPeopleLoader} from "src/engine"
 
   export let value

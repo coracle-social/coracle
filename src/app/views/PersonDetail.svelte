@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {stripProtocol} from "@welshman/lib"
-  import {REACTION} from "@welshman/util"
+  import {REACTION, isShareableRelayUrl} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
     deriveZapper,
@@ -110,7 +110,7 @@
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
   {#if $relaySelections}
-    <PersonRelays urls={getRelayUrls($relaySelections)} />
+    <PersonRelays urls={getRelayUrls($relaySelections).filter(isShareableRelayUrl)} />
   {:else}
     <Spinner />
   {/if}
