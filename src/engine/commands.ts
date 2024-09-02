@@ -275,7 +275,7 @@ export const publishAsGroupAdminPrivately = async (address, template, relays = [
 export const publishToGroupsPublicly = async (addresses, template, {anonymous = false} = {}) => {
   for (const address of addresses) {
     if (!address.startsWith("34550:")) {
-      throw new Error("Attempted to publish publicly to an invalid address", address)
+      throw new Error(`Attempted to publish publicly to an invalid address: ${address}`)
     }
   }
 
@@ -296,7 +296,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
     if (!address.startsWith("35834:")) {
-      throw new Error("Attempted to publish privately to an invalid address", address)
+      throw new Error(`Attempted to publish privately to an invalid address: ${address}`)
     }
 
     if (!$userIsGroupMember(address)) {
