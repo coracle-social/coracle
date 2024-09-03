@@ -111,7 +111,7 @@ import {
   follows,
   mutesByPubkey,
   followsByPubkey,
-  env as welshmanEnv,
+  AppContext,
   getRelayUrls,
   getReadRelayUrls,
   getWriteRelayUrls,
@@ -185,7 +185,7 @@ export const env = {
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
 }
 
-Object.assign(welshmanEnv, {
+Object.assign(AppContext, {
   DUFFLEPUD_URL: env.DUFFLEPUD_URL,
   BOOTSTRAP_RELAYS: env.INDEXER_RELAYS,
 })

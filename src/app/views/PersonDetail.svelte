@@ -4,8 +4,8 @@
   import {REACTION, isShareableRelayUrl} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
-    deriveZapper,
     deriveProfile,
+    deriveZapperForPubkey,
     displayProfileByPubkey,
     getRelayUrls,
     deriveRelaySelections,
@@ -33,6 +33,7 @@
   export let relays = []
 
   const profile = deriveProfile(pubkey, {relays})
+  const zapper = deriveZapperForPubkey(pubkey, {relays})
   const relaySelections = deriveRelaySelections(pubkey, {relays})
   const tabs = ["notes", "likes", "collections", "relays"].filter(identity)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
@@ -42,7 +43,6 @@
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
-  $: zapper = deriveZapper($profile?.lnurl)
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
   $: zapLink = router
     .at("zap")

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {nthEq} from "@welshman/lib"
   import {zapFromEvent} from "@welshman/util"
-  import {deriveProfile, deriveZapper, loadZapper} from "@welshman/app"
+  import {deriveZapperForPubkey, loadZapper} from "@welshman/app"
   import {formatSats} from "src/util/misc"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
@@ -12,9 +12,8 @@
 
   const recipient = note.tags.find(nthEq(0, "p"))?.[1]
   const url = note.tags.find(nthEq(0, "i"))?.[2]
-  const profile = deriveProfile(recipient)
+  const zapper = deriveZapperForPubkey(recipient)
 
-  $: zapper = deriveZapper($profile?.lnurl)
   $: zap = zapFromEvent(note, $zapper)
 
   onMount(() => {

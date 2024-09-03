@@ -13,7 +13,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {repository, deriveZapper, deriveProfile} from "@welshman/app"
+  import {repository, deriveZapperForPubkey, deriveZapper, deriveProfile} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -114,8 +114,8 @@
   $: reply = tags.parent()
   $: root = tags.root()
   $: profile = deriveProfile(event.pubkey)
-  $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || $profile?.lnurl || "")
-  $: zapper = lnurl && deriveZapper(lnurl)
+  $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
+  $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = !showMuted && $isEventMuted(event, true)
 
   // Find children in our context
