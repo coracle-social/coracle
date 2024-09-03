@@ -2,7 +2,7 @@
   import {join, identity} from "ramda"
   import {writable} from "svelte/store"
   import {Tags, createEvent} from "@welshman/util"
-  import {pubkey} from "@welshman/app"
+  import {pubkey, AppContext} from "@welshman/app"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -16,7 +16,6 @@
   import GroupLink from "src/app/shared/GroupLink.svelte"
   import {
     env,
-    hints,
     publish,
     getClientTags,
     tagsFromContent,
@@ -81,7 +80,7 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      publish({event: parent, relays: hints.PublishEvent(parent).getUrls()})
+      publish({event: parent, relays: AppContext.router.PublishEvent(parent).getUrls()})
     }
 
     const template = createEvent(1, {content, tags})

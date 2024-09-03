@@ -5,7 +5,7 @@
   import {getAddress, WRAP, GROUP} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
-  import {session, relaySearch} from "@welshman/app"
+  import {session, relaySearch, AppContext} from "@welshman/app"
   import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -19,7 +19,6 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import {
-    hints,
     groupSharedKeys,
     userIsGroupMember,
     groupAdminKeys,
@@ -62,7 +61,7 @@
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
       ...LOAD_OPTS,
-      relays: hints.User().getUrls().concat(relays),
+      relays: AppContext.router.User().getUrls().concat(relays),
       filters: [
         {kinds: [GROUP], authors: [pubkey], limit: 1},
         {kinds: [WRAP], "#p": [pubkey], limit: 500},
@@ -83,7 +82,7 @@
           pubkey,
           privkey,
           created_at: event.created_at,
-          hints: hints.Event(event).getUrls(),
+          hints: AppContext.router.Event(event).getUrls(),
         })
       },
       onComplete: () => {

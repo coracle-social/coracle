@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {deriveIsDeletedByAddress} from "@welshman/store"
   import {Tags, Address} from "@welshman/util"
-  import {repository, pubkey} from "@welshman/app"
+  import {repository, AppContext, pubkey} from "@welshman/app"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
@@ -13,7 +13,6 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {hints} from "src/engine"
 
   export let note
   export let showMedia = false
@@ -23,7 +22,7 @@
   const images = tags.values("image").valueOf()
   const {title, summary, location, status} = tags.asObject()
   const [price, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
-  const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
+  const address = Address.fromEvent(note, AppContext.router.Event(note).redundancy(3).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
   const deleted = deriveIsDeletedByAddress(repository, note)

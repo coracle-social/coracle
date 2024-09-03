@@ -5,14 +5,14 @@
   import {now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, profilesByPubkey, zappersByLnurl} from "@welshman/app"
+  import {signer, profilesByPubkey, zappersByLnurl, AppContext} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import {router} from "src/app/util/router"
-  import {env, load, hints, getSetting} from "src/engine"
+  import {env, load, getSetting} from "src/engine"
 
   export let splits
   export let eid = null
@@ -51,7 +51,7 @@
         if (percent > 0 && totalWeight > 0) {
           zaps.push({
             pubkey: env.PLATFORM_PUBKEY,
-            relay: hints.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
+            relay: AppContext.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
             amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
             status: "pending",
             isTip: true,
@@ -63,8 +63,11 @@
           const content = i === 0 ? message : ""
           const profile = $profilesByPubkey.get(zap.pubkey)
           const zapper = $zappersByLnurl.get(profile?.lnurl)
-          const relays = hints
-            .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
+          const relays = AppContext.router
+            .merge([
+              AppContext.router.PublishMessage(zap.pubkey),
+              AppContext.router.fromRelays([zap.relay]),
+            ])
             .getUrls()
 
           return {...zap, zapper, relays, content}

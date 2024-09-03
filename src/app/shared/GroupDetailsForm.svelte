@@ -2,7 +2,7 @@
   import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
   import {Address, GROUP, COMMUNITY, normalizeRelayUrl, displayRelayUrl} from "@welshman/util"
-  import {relaySearch} from "@welshman/app"
+  import {relaySearch, AppContext} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
   import {formCtrl} from "src/partials/utils"
@@ -20,7 +20,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupMeta} from "src/domain"
-  import {env, hints, feedSearch} from "src/engine"
+  import {env, feedSearch} from "src/engine"
 
   export let onSubmit
   export let values: GroupMeta & {members: string[]}
@@ -34,7 +34,7 @@
 
   const addFeed = address => {
     if (address) {
-      const relayHint = hints.FromPubkeys([Address.from(address).pubkey]).getUrl()
+      const relayHint = AppContext.router.FromPubkeys([Address.from(address).pubkey]).getUrl()
       const feedTag = ["feed", address, relayHint, "Custom Feed"]
 
       values.feeds = uniqBy(join(":"), values.feeds.concat([feedTag]))

@@ -3,7 +3,7 @@
   import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
-  import {session, displayProfileByPubkey} from "@welshman/app"
+  import {session, displayProfileByPubkey, AppContext} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -15,7 +15,6 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {
     env,
-    hints,
     publish,
     uniqTags,
     publishToZeroOrMoreGroups,
@@ -112,7 +111,7 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      publish({event: parent, relays: hints.PublishEvent(parent).getUrls()})
+      publish({event: parent, relays: AppContext.router.PublishEvent(parent).getUrls()})
     }
 
     loading = true

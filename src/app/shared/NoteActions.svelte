@@ -5,7 +5,7 @@
   import {derived} from "svelte/store"
   import {last, sortBy} from "@welshman/lib"
   import {custom} from "@welshman/store"
-  import {repository, signer, tracker} from "@welshman/app"
+  import {repository, signer, tracker, AppContext} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -44,7 +44,6 @@
     env,
     groups,
     publish,
-    hints,
     makeZapSplit,
     mention,
     mentionEvent,
@@ -76,7 +75,7 @@
   const signedEvent = asSignedEvent(note as any)
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
-  const nevent = nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
+  const nevent = nip19.neventEncode({id: note.id, relays: AppContext.router.Event(note).getUrls()})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
@@ -124,7 +123,7 @@
 
   const react = async content => {
     if (isSignedEvent(note)) {
-      publish({event: note, relays: hints.PublishEvent(note).getUrls()})
+      publish({event: note, relays: AppContext.router.PublishEvent(note).getUrls()})
     }
 
     const tags = [...getReactionTags(note), ...getClientTags()]
@@ -178,7 +177,7 @@
   const broadcast = () => {
     publish({
       event: asSignedEvent(note as SignedEvent),
-      relays: hints.WriteRelays().getUrls(),
+      relays: AppContext.router.WriteRelays().getUrls(),
     })
 
     showInfo("Note has been re-published!")
@@ -199,7 +198,7 @@
     const entity =
       last(templateTag) === "note"
         ? nip19.noteEncode(note.id)
-        : nip19.neventEncode({id: note.id, relays: hints.Event(note).getUrls()})
+        : nip19.neventEncode({id: note.id, relays: AppContext.router.Event(note).getUrls()})
 
     window.open(templateTag[1].replace("<bech32>", entity))
   }
@@ -285,7 +284,11 @@
   })
 </script>
 
-<button tabindex="-1" type="button" class="flex justify-between text-neutral-100" on:click|stopPropagation>
+<button
+  tabindex="-1"
+  type="button"
+  class="flex justify-between text-neutral-100"
+  on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
     <button
       class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {

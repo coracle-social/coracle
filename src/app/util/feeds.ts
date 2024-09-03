@@ -17,7 +17,7 @@ import {
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
-import {repository, tracker} from "@welshman/app"
+import {repository, AppContext, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
@@ -26,9 +26,7 @@ import {
   sortEventsDesc,
   unwrapRepost,
   isEventMuted,
-  hints,
   addRepostFilters,
-  getFilterSelections,
   subscribe,
   load,
 } from "src/engine"
@@ -301,7 +299,9 @@ export const createFeed = (opts: FeedOpts) => {
       return true
     })
 
-    const selections = hints.merge(notesWithParent.map(hints.EventParents)).getSelections()
+    const selections = AppContext.router
+      .merge(notesWithParent.map(AppContext.router.EventParents))
+      .getSelections()
 
     for (const {relay, values} of selections) {
       load({

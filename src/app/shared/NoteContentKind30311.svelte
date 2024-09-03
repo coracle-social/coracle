@@ -2,6 +2,7 @@
   import {fromPairs} from "ramda"
   import {Address} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
+  import {AppContext} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -9,12 +10,11 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {hints} from "src/engine"
 
   export let note
   export let showMedia = false
 
-  const address = Address.fromEvent(note, hints.Event(note).redundancy(3).getUrls())
+  const address = Address.fromEvent(note, AppContext.router.Event(note).redundancy(3).getUrls())
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

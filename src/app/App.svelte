@@ -718,21 +718,16 @@
     }
 
     const interval1 = setInterval(() => {
-      const userRelayUrls = [
-        ...app.getRelayUrls(app.relaySelectionsByPubkey.get().get($pubkey)),
-        ...app.getRelayUrls(app.inboxRelaySelectionsByPubkey.get().get($pubkey)),
-      ]
-
       slowConnections.set(
-        userRelayUrls.filter(url => engine.hints.options.getRelayQuality(url) < 0.5),
+        app.getPubkeyRelays($pubkey).filter(url => app.getRelayQuality(url) < 0.5),
       )
 
-      // Prune connections we haven't used in a while. Clear errors periodically
+      // Prune connections we haven't used in a while
       for (const [_, connection] of network.NetworkContext.pool.data.entries()) {
         const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
         const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
 
-        if (lastActivity < Date.now() - 60_000) {
+        if (lastActivity < Date.now() - 30_000) {
           connection.disconnect()
         }
       }

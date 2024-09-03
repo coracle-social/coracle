@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {remove} from "@welshman/lib"
-  import {repository, pubkey} from "@welshman/app"
+  import {repository, AppContext, pubkey} from "@welshman/app"
   import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
@@ -15,7 +15,6 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readFeed, readList, displayFeed, mapListToFeed, getSingletonValues} from "src/domain"
   import {
-    hints,
     addFeedFavorite,
     removeFeedFavorite,
     userFeedFavorites,
@@ -28,7 +27,7 @@
   const expandDefinition = boolCtrl()
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
-  const naddr = Address.from(address, hints.Event(event).getUrls()).toNaddr()
+  const naddr = Address.from(address, AppContext.router.Event(event).getUrls()).toNaddr()
   const feed = address.startsWith(NAMED_BOOKMARKS)
     ? mapListToFeed(readList(event))
     : readFeed(event)

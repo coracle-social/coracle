@@ -10,6 +10,7 @@
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/util/router"
@@ -89,9 +90,7 @@
       "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}
-      <Anchor class="mb-1" on:click={() => showPerson(message.pubkey)}>
-        <strong>{displayProfileByPubkey(message.pubkey)}</strong>
-      </Anchor>
+      <PersonName pubkey={message.pubkey} />
     {/if}
     <div class="break-words">
       {#await getContent(message)}

@@ -1,11 +1,12 @@
 <script lang="ts">
+  import {AppContext} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import {router} from "src/app/util/router"
-  import {imgproxy, hints} from "src/engine"
+  import {imgproxy} from "src/engine"
 
   export let note
 
@@ -19,7 +20,7 @@
     router
       .at("people")
       .of(pubkey)
-      .cx({relays: hints.Event(note).getUrls()})
+      .cx({relays: AppContext.router.Event(note).getUrls()})
       .open()
 </script>
 

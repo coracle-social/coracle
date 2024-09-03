@@ -1,12 +1,13 @@
 <script lang="ts">
   import {pluck, uniq} from "ramda"
   import {Tags} from "@welshman/util"
+  import {AppContext} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
-  import {hints, dereferenceNote} from "src/engine"
+  import {dereferenceNote} from "src/engine"
 
   export let notification: Notification
 
@@ -20,7 +21,7 @@
     ? Promise.resolve(note)
     : dereferenceNote({
         eid: note.id,
-        relays: hints.EventParents(interactions[0]).getUrls(),
+        relays: AppContext.router.EventParents(interactions[0]).getUrls(),
       }).then(note => note || interactions[0])
 </script>
 

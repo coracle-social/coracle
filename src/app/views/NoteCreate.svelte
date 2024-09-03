@@ -7,7 +7,7 @@
   import {writable} from "svelte/store"
   import {now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {session} from "@welshman/app"
+  import {session, AppContext} from "@welshman/app"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -31,7 +31,7 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {publish, mention} from "src/engine"
   import {router} from "src/app/util/router"
-  import {env, hints, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
+  import {env, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
 
   export let type = "note"
   export let quote = null
@@ -121,7 +121,7 @@
 
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
-        publish({event: quote, relays: hints.WriteRelays().getUrls()})
+        publish({event: quote, relays: AppContext.router.WriteRelays().getUrls()})
       }
     }
 
@@ -185,7 +185,7 @@
     if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
-        relays: hints.Event(quote).getUrls(),
+        relays: AppContext.router.Event(quote).getUrls(),
       })
 
       compose.nevent("nostr:" + nevent)
@@ -274,7 +274,7 @@
             {commaFormat(wordCount)} words
           </small>
           <span>•</span>
-          <button type="button" on:click={togglePreview} class="cursor-pointer underline text-sm">
+          <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
             {showPreview ? "Hide" : "Show"} Preview
           </button>
         </div>

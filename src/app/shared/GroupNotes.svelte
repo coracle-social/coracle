@@ -3,14 +3,14 @@
   import {remove} from "@welshman/lib"
   import {isGroupAddress, getAddress, getIdFilters, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
-  import {signer, repository} from "@welshman/app"
+  import {signer, AppContext, repository} from "@welshman/app"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
   import {makeFeed, readFeed} from "src/domain"
-  import {hints, deriveGroupMeta, load} from "src/engine"
+  import {deriveGroupMeta, load} from "src/engine"
 
   export let address
 
@@ -40,8 +40,11 @@
       feeds = feeds.concat({name, feed: readFeed(event)})
       tabs = tabs.concat(name)
     } else {
-      const relays = hints
-        .merge([hints.fromRelays([relay]), hints.FromPubkeys([Address.from(address).pubkey])])
+      const relays = AppContext.router
+        .merge([
+          AppContext.router.fromRelays([relay]),
+          AppContext.router.FromPubkeys([Address.from(address).pubkey]),
+        ])
         .getUrls()
 
       load({

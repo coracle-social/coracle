@@ -4,7 +4,7 @@ import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
-import {defer, doPipe, batch, randomInt, seconds, sleep, switcher} from "hurdak"
+import {defer, doPipe, batch, randomInt, seconds, sleep} from "hurdak"
 import {
   find,
   defaultTo,
@@ -22,11 +22,9 @@ import {
 import {
   Worker,
   simpleCache,
-  clamp,
   identity,
   last,
   nth,
-  splitAt,
   uniq,
   uniqBy,
   now,
@@ -56,12 +54,8 @@ import {
   NAMED_BOOKMARKS,
   WRAP,
   Address,
-  Router,
   Tags,
   createEvent,
-  getFilterId,
-  isContextAddress,
-  unionFilters,
   getAddress,
   getIdentifier,
   getIdAndAddress,
@@ -69,7 +63,6 @@ import {
   getIdFilters,
   hasValidSignature,
   LOCAL_RELAY_URL,
-  getFilterResultCardinality,
   isReplaceable,
   isGroupAddress,
   isCommunityAddress,
@@ -78,10 +71,9 @@ import {
   getListValues,
   normalizeRelayUrl,
 } from "@welshman/util"
-import type {Filter, RouterScenario, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
+import type {Filter, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip01Signer, decrypt} from "@welshman/signer"
 import {
-  ConnectionStatus,
   Executor,
   Multi,
   NetworkContext,
@@ -89,9 +81,9 @@ import {
   Local,
   Relays,
   publish as basePublish,
-  subscribe as baseSubscribe,
 } from "@welshman/net"
-import type {PublishRequest, SubscribeRequest} from "@welshman/net"
+import type {PartialSubscribeRequest} from "@welshman/app"
+import type {PublishRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
 import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
 import {
@@ -104,7 +96,6 @@ import {
   relay,
   tracker,
   pubkey,
-  relaysByUrl,
   handles,
   profiles,
   displayProfileByPubkey,
@@ -112,11 +103,9 @@ import {
   mutesByPubkey,
   followsByPubkey,
   AppContext,
-  getRelayUrls,
-  getReadRelayUrls,
-  getWriteRelayUrls,
-  relaySelectionsByPubkey,
-  inboxRelaySelectionsByPubkey,
+  makeRouter,
+  splitRequest,
+  subscribe as baseSubscribe,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -184,11 +173,6 @@ export const env = {
   PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
 }
-
-Object.assign(AppContext, {
-  DUFFLEPUD_URL: env.DUFFLEPUD_URL,
-  BOOTSTRAP_RELAYS: env.INDEXER_RELAYS,
-})
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
 
@@ -325,8 +309,8 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 // Settings
 
 export const defaultSettings = {
-  relay_limit: 10,
-  relay_redundancy: 3,
+  relay_limit: 5,
+  relay_redundancy: 2,
   default_zap: 21,
   show_media: true,
   muted_words: [],
@@ -688,7 +672,7 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = hints.WithinMultipleContexts(addresses).getUrls()
+  const relays = AppContext.router.WithinMultipleContexts(addresses).getUrls()
 
   return {admins, recipients, relays, since}
 }
@@ -699,7 +683,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: hints.WithinContext(address).getUrls(),
+    relays: AppContext.router.WithinContext(address).getUrls(),
   }
 }
 
@@ -1057,70 +1041,11 @@ export const forceRelays = (relays: string[], forceRelays: string[]) =>
 export const withRelays = (relays: string[], otherRelays: string[]) =>
   uniq([...relays, ...otherRelays])
 
-export const forcePlatformRelays = (relays: string[]) =>
-  forceRelays(relays, Array.from(env.PLATFORM_RELAYS))
+export const forcePlatformRelays = (relays: string[]) => forceRelays(relays, env.PLATFORM_RELAYS)
 
 export const withPlatformRelays = (relays: string[]) => withRelays(relays, env.PLATFORM_RELAYS)
 
 export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER_RELAYS)
-
-export const hints = new Router({
-  getUserPubkey: () => pubkey.get(),
-  getGroupRelays: getGroupRelayUrls,
-  getCommunityRelays: getGroupRelayUrls,
-  getPubkeyRelays: (pubkey: string, mode: string) => {
-    if (mode === "read") return getReadRelayUrls(relaySelectionsByPubkey.get().get(pubkey))
-    if (mode === "write") return getWriteRelayUrls(relaySelectionsByPubkey.get().get(pubkey))
-    if (mode === "inbox") return getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey))
-
-    return []
-  },
-  getFallbackRelays: () => [...env.PLATFORM_RELAYS, ...env.DEFAULT_RELAYS],
-  getSearchRelays: () => env.SEARCH_RELAYS,
-  getLimit: () => parseInt(getSetting("relay_limit")),
-  getRedundancy: () => parseInt(getSetting("relay_redundancy")),
-  getRelayQuality: (url: string) => {
-    const oneMinute = 60 * 1000
-    const oneHour = 60 * oneMinute
-    const oneDay = 24 * oneHour
-    const oneWeek = 7 * oneDay
-    const relay = relaysByUrl.get().get(url)
-    const connect_count = relay?.stats?.connect_count || 0
-    const recent_errors = relay?.stats?.recent_errors || []
-    const connection = NetworkContext.pool.get(url, {autoConnect: false})
-
-    // If we haven't connected, consult our relay record and see if there has
-    // been a recent fault. If there has been, penalize the relay. If there have been several,
-    // don't use the relay.
-    if (!connection) {
-      const lastFault = last(recent_errors) || 0
-
-      if (recent_errors.filter(n => n > Date.now() - oneHour).length > 10) {
-        return 0
-      }
-
-      if (recent_errors.filter(n => n > Date.now() - oneDay).length > 50) {
-        return 0
-      }
-
-      if (recent_errors.filter(n => n > Date.now() - oneWeek).length > 100) {
-        return 0
-      }
-
-      return Math.max(0, Math.min(0.5, (Date.now() - oneMinute - lastFault) / oneHour))
-    }
-
-    return switcher(connection.meta.getStatus(), {
-      [ConnectionStatus.Unauthorized]: 0.5,
-      [ConnectionStatus.Forbidden]: 0,
-      [ConnectionStatus.Error]: 0,
-      [ConnectionStatus.Closed]: 0.6,
-      [ConnectionStatus.Slow]: 0.5,
-      [ConnectionStatus.Ok]: 1,
-      default: clamp([0.5, 1], connect_count / 1000),
-    })
-  },
-})
 
 // Lists
 
@@ -1309,80 +1234,6 @@ export const addRepostFilters = (filters: Filter[]) =>
     return filterChunk
   })
 
-export type RelayFilters = {
-  relay: string
-  filters: Filter[]
-}
-
-export const getFilterSelections = (filters: Filter[]): RelayFilters[] => {
-  const scenarios: RouterScenario[] = []
-  const filtersById = new Map<string, Filter>()
-
-  for (const filter of filters) {
-    if (filter.search) {
-      const id = getFilterId(filter)
-
-      filtersById.set(id, filter)
-      scenarios.push(hints.product([id], hints.options.getSearchRelays()))
-    } else {
-      const contexts = filter["#a"]?.filter(isContextAddress)
-
-      if (contexts?.length > 0) {
-        for (const {relay, values} of hints
-          .WithinMultipleContexts(contexts)
-          .policy(hints.addMinimalFallbacks)
-          .getSelections()) {
-          const contextFilter = {...filter, "#a": Array.from(values)}
-          const id = getFilterId(contextFilter)
-
-          filtersById.set(id, contextFilter)
-          scenarios.push(hints.product([id], [relay]))
-        }
-      } else if (filter.authors) {
-        for (const {relay, values} of hints
-          .FromPubkeys(filter.authors)
-          .policy(hints.addMinimalFallbacks)
-          .getSelections()) {
-          const authorsFilter = {...filter, authors: Array.from(values)}
-          const id = getFilterId(authorsFilter)
-
-          filtersById.set(id, authorsFilter)
-          scenarios.push(hints.product([id], [relay]))
-        }
-      } else {
-        const id = getFilterId(filter)
-
-        filtersById.set(id, filter)
-        scenarios.push(
-          hints.product([id], hints.ReadRelays().policy(hints.addMinimalFallbacks).getUrls()),
-        )
-      }
-    }
-  }
-
-  const selections = sortBy(
-    ({filters}) => -filters[0].authors?.length,
-    hints
-      .merge(scenarios)
-      // Use low redundancy because filters will be very low cardinality
-      .redundancy(1)
-      .getSelections()
-      .map(({values, relay}) => ({
-        filters: values.map((id: string) => filtersById.get(id)),
-        relay,
-      })),
-  )
-
-  // Pubkey-based selections can get really big. Use the most popular relays for the long tail
-  const [keep, discard] = splitAt(getSetting("relay_limit"), selections)
-
-  for (const target of keep.slice(0, getSetting("relay_redundancy"))) {
-    target.filters = unionFilters(discard.concat(target).flatMap(prop("filters")))
-  }
-
-  return keep
-}
-
 export const getExecutor = (urls: string[]) => {
   const muxUrl = getSetting("multiplextr_url")
   const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)
@@ -1445,7 +1296,7 @@ export const onAuth = async (url, challenge) => {
   return event
 }
 
-export type MySubscribeRequest = SubscribeRequest & {
+export type MySubscribeRequest = PartialSubscribeRequest & {
   onEvent?: (event: TrustedEvent) => void
   onEose?: (url: string) => void
   onComplete?: () => void
@@ -1453,36 +1304,7 @@ export type MySubscribeRequest = SubscribeRequest & {
   forcePlatform?: boolean
 }
 
-export const subscribe = ({forcePlatform = true, ...request}: MySubscribeRequest) => {
-  const events = []
-
-  // If we already have all results for any filter, don't send the filter to the network
-  for (const filter of request.filters.splice(0)) {
-    const cardinality = getFilterResultCardinality(filter)
-
-    if (cardinality !== null) {
-      const results = repository.query([filter])
-
-      if (results.length === cardinality) {
-        for (const event of results) {
-          events.push(event)
-        }
-
-        break
-      }
-    }
-
-    request.filters.push(filter)
-  }
-
-  request.relays = forcePlatform
-    ? forcePlatformRelays(request.relays)
-    : withPlatformRelays(request.relays)
-
-  if (!request.skipCache) {
-    request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
-  }
-
+export const subscribe = (request: MySubscribeRequest) => {
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
@@ -1499,13 +1321,6 @@ export const subscribe = ({forcePlatform = true, ...request}: MySubscribeRequest
   if (request.onComplete) {
     sub.emitter.on("complete", request.onComplete)
   }
-
-  // Keep cached results async so the caller can set up handlers
-  setTimeout(() => {
-    for (const event of events) {
-      sub.emitter.emit("event", LOCAL_RELAY_URL, event)
-    }
-  })
 
   return sub
 }
@@ -1562,14 +1377,6 @@ export type MyPublishRequest = PublishRequest & {
 }
 
 export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
-  request.relays = forcePlatform
-    ? forcePlatformRelays(request.relays)
-    : withPlatformRelays(request.relays)
-
-  // Make sure it gets published to our repository as well. We do it via our local
-  // relay rather than directly so that listening subscriptions get notified.
-  request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
-
   logger.info(`Publishing event`, request)
 
   // Make sure the event is decrypted before updating stores
@@ -1655,25 +1462,25 @@ export const uniqTags = tags =>
 export const makeZapSplit = (pubkey: string, split = 1) => [
   "zap",
   pubkey,
-  hints.FromPubkeys([pubkey]).getUrl(),
+  AppContext.router.FromPubkeys([pubkey]).getUrl(),
   String(split),
 ]
 
 export const mention = (pubkey: string, ...args: unknown[]) => [
   "p",
   pubkey,
-  hints.FromPubkeys([pubkey]).getUrl(),
+  AppContext.router.FromPubkeys([pubkey]).getUrl(),
   displayProfileByPubkey(pubkey),
 ]
 
 export const mentionGroup = (address: string, ...args: unknown[]) => [
   "a",
   address,
-  hints.WithinContext(address).getUrl(),
+  AppContext.router.WithinContext(address).getUrl(),
 ]
 
 export const mentionEvent = (event: TrustedEvent, mark = "") => {
-  const url = hints.Event(event).getUrl()
+  const url = AppContext.router.Event(event).getUrl()
   const tags = [["e", event.id, url, mark, event.pubkey]]
 
   if (isReplaceable(event)) {
@@ -1727,11 +1534,15 @@ export const getReplyTags = (parent: TrustedEvent) => {
   // Root comes first
   if (roots.exists()) {
     for (const t of roots.valueOf()) {
-      replyTags.push(t.set(2, hints.EventRoots(parent).getUrl()).set(3, "root").valueOf())
+      replyTags.push(
+        t.set(2, AppContext.router.EventRoots(parent).getUrl()).set(3, "root").valueOf(),
+      )
     }
   } else {
     for (const t of replies.valueOf()) {
-      replyTags.push(t.set(2, hints.EventParents(parent).getUrl()).set(3, "root").valueOf())
+      replyTags.push(
+        t.set(2, AppContext.router.EventParents(parent).getUrl()).set(3, "root").valueOf(),
+      )
     }
   }
 
@@ -1835,7 +1646,7 @@ export class ThreadLoader {
     if (filteredIds.length > 0) {
       load({
         filters: getIdFilters(filteredIds),
-        relays: hints.fromRelays(this.relays).getUrls(),
+        relays: AppContext.router.fromRelays(this.relays).getUrls(),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(getAncestorIds))
@@ -1875,6 +1686,27 @@ export class ThreadLoader {
     }
   }
 }
+
+// Configuration
+
+Object.assign(AppContext, {
+  dufflepudUrl: env.DUFFLEPUD_URL,
+  router: makeRouter({
+    getRedundancy: () => getSetting("relay_redundancy"),
+    getLimit: () => getSetting("relay_limit"),
+  }),
+  splitRequest: (req: MySubscribeRequest) => {
+    if (env.PLATFORM_RELAYS.length === 0) {
+      return splitRequest(req)
+    }
+
+    if (req.forcePlatform !== false) {
+      return [{...req, relays: env.PLATFORM_RELAYS}]
+    }
+
+    return [...splitRequest(req), {...req, relays: env.PLATFORM_RELAYS}]
+  },
+})
 
 // Storage
 

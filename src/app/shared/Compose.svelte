@@ -3,11 +3,11 @@
   import {throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
   import {last, partition, whereEq} from "ramda"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {displayProfileByPubkey, AppContext} from "@welshman/app"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {hints, userFollows, profileSearch, createPeopleLoader} from "src/engine"
+  import {userFollows, profileSearch, createPeopleLoader} from "src/engine"
 
   export let onSubmit
   export let autofocus = false
@@ -24,7 +24,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = hints.FromPubkeys([pubkey]).getUrls()
+      const relays = AppContext.router.FromPubkeys([pubkey]).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

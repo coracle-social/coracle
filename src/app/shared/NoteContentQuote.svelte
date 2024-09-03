@@ -1,14 +1,14 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {getAddress, getIdFilters} from "@welshman/util"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {deriveProfileDisplay, AppContext} from "@welshman/app"
   import {filterVals} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {hints, loadOne, isEventMuted} from "src/engine"
+  import {loadOne, isEventMuted} from "src/engine"
 
   export let note
   export let value
@@ -20,11 +20,11 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
 
-  const relays = hints
+  const relays = AppContext.router
     .merge([
-      hints.fromRelays(relayHints),
-      hints.EventMentions(note),
-      hints.ForPubkeys([note.pubkey]),
+      AppContext.router.fromRelays(relayHints),
+      AppContext.router.EventMentions(note),
+      AppContext.router.ForPubkeys([note.pubkey]),
     ])
     .getUrls()
 
@@ -49,7 +49,7 @@
 
   $: address = quote ? getAddress(quote) : ""
   $: isGroup = address.match(/^(34550|35834):/)
-  $: profileDisplay = quote ? displayProfileByPubkey(quote.pubkey) : ""
+  $: profileDisplay = deriveProfileDisplay(quote?.pubkey)
 
   onMount(async () => {
     quote = await loadOne({
@@ -95,7 +95,7 @@
               type="unstyled"
               class="flex items-center gap-2"
               href={router.at("people").of(quote.pubkey).toString()}>
-              <h2 class="text-lg">{profileDisplay}</h2>
+              <h2 class="text-lg">{$profileDisplay}</h2>
             </Anchor>
           </div>
         {/if}

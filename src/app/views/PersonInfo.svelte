@@ -1,15 +1,14 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {deriveProfile, deriveHandleForPubkey, displayHandle} from "@welshman/app"
+  import {deriveProfile, deriveHandleForPubkey, displayHandle, AppContext} from "@welshman/app"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {hints} from "src/engine"
 
   export let pubkey
 
   const profile = deriveProfile(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
-  const relays = hints.FromPubkeys([pubkey]).getUrls()
+  const relays = AppContext.router.FromPubkeys([pubkey]).getUrls()
 
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>

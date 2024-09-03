@@ -3,7 +3,7 @@
   import {uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {makeSecret} from "@welshman/signer"
-  import {session} from "@welshman/app"
+  import {session, AppContext} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -13,7 +13,6 @@
     env,
     load,
     anonymous,
-    hints,
     mention,
     loadPubkeys,
     createAndPublish,
@@ -88,7 +87,7 @@
         kind: 1,
         content: noteContent,
         tags: tagsFromContent(noteContent),
-        relays: hints.WriteRelays().getUrls(),
+        relays: AppContext.router.WriteRelays().getUrls(),
       })
     }
 
@@ -97,15 +96,13 @@
   }
 
   onMount(async () => {
-    const {DEFAULT_FOLLOWS, ONBOARDING_LISTS} = env
-    const listOwners = uniq(ONBOARDING_LISTS.map(a => Address.from(a).pubkey))
+    const listOwners = uniq(env.ONBOARDING_LISTS.map(a => Address.from(a).pubkey))
 
     // Prime our database with our default follows and list owners
-    loadPubkeys([...DEFAULT_FOLLOWS, ...listOwners])
+    loadPubkeys([...env.DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
     load({
-      relays: hints.FromPubkeys(listOwners).redundancy(5).getUrls(),
       filters: getIdFilters(env.ONBOARDING_LISTS),
       onEvent: e => {
         if (!onboardingLists.find(l => getAddress(l) === getAddress(e))) {

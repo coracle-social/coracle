@@ -14,7 +14,7 @@ import {
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {repository, putSession, getSession} from "@welshman/app"
+import {repository, AppContext, putSession, getSession} from "@welshman/app"
 import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
   deriveAdminKeyForGroup,
@@ -26,7 +26,6 @@ import {
   groups,
   load,
   projections,
-  hints,
   ensurePlaintext,
 } from "src/engine/state"
 import {modifyGroupStatus, setGroupStatus} from "src/engine/commands"
@@ -77,8 +76,9 @@ projections.addHandler(24, (e: TrustedEvent) => {
 
     // Load the group's metadata and posts
     load({
+      delay: 3000,
       skipCache: true,
-      relays: hints.fromRelays(relays).getUrls(),
+      relays: AppContext.router.fromRelays(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
         {kinds: [WRAP], "#p": [pubkey]},

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
-  import {pubkey, topicSearch} from "@welshman/app"
+  import {pubkey, topicSearch, AppContext} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -10,7 +10,6 @@
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
   import {
-    hints,
     loadLabels,
     getClientTags,
     deriveCollections,
@@ -41,7 +40,7 @@
 
     createAndPublish({
       kind: 1985,
-      relays: hints.User().getUrls(),
+      relays: AppContext.router.User().getUrls(),
       tags: [["e", eid], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
     })
 

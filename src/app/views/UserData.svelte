@@ -2,7 +2,7 @@
   import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {events} from "@welshman/app"
+  import {events, AppContext} from "@welshman/app"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -10,7 +10,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/util/router"
-  import {hints, sortEventsDesc} from "src/engine"
+  import {sortEventsDesc} from "src/engine"
 
   const sortedEvents = derived(events, sortEventsDesc)
 
@@ -75,7 +75,7 @@
           <Anchor
             href={router
               .at("notes")
-              .of(event.id, {relays: hints.Event(event).getUrls()})
+              .of(event.id, {relays: AppContext.router.Event(event).getUrls()})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Anchor>

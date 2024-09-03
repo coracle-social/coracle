@@ -1,11 +1,12 @@
 <script lang="ts">
+  import {AppContext} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
-  import {hints, createAndPublish, getClientTags, tagsFromContent} from "src/engine"
+  import {createAndPublish, getClientTags, tagsFromContent} from "src/engine"
 
   export let url
 
@@ -16,7 +17,7 @@
     const content = compose.parse()
 
     createAndPublish({
-      relays: hints.WriteRelays().getUrls(),
+      relays: AppContext.router.WriteRelays().getUrls(),
       kind: 1986,
       content,
       tags: [

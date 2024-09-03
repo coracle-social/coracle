@@ -35,7 +35,22 @@ import {
   FEEDS,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
-import {pubkey, relays, repository, signer, getSession, updateSession, loadProfile, loadFollows, loadMutes, loadRelaySelections, getWriteRelayUrls, relaySelectionsByPubkey} from "@welshman/app"
+import {
+  pubkey,
+  relays,
+  repository,
+  signer,
+  getSession,
+  updateSession,
+  loadProfile,
+  loadFollows,
+  loadMutes,
+  loadRelaySelections,
+  getWriteRelayUrls,
+  relaySelectionsByPubkey,
+  AppContext,
+  getFilterSelections,
+} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
@@ -46,14 +61,12 @@ import {
   getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  getFilterSelections,
   getFollowers,
   getUserCommunities,
   getWotScore,
   withIndexers,
   setFreshness,
   getFreshness,
-  hints,
   isEventMuted,
   load,
   loadOne,
@@ -154,8 +167,11 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
   if (addrs.length > 0) {
     const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
-    const relays = hints
-      .merge([hints.product(addrs, explicitRelays), hints.WithinMultipleContexts(addrs)])
+    const relays = AppContext.router
+      .merge([
+        AppContext.router.product(addrs, explicitRelays),
+        AppContext.router.WithinMultipleContexts(addrs),
+      ])
       .getUrls()
 
     return load({relays, filters, skipCache: true, forcePlatform: false})
@@ -206,7 +222,7 @@ export const dereferenceNote = async ({
   identifier = "",
   relays = [],
 }) => {
-  relays = hints.fromRelays(relays).getUrls()
+  relays = AppContext.router.fromRelays(relays).getUrls()
 
   if (eid) {
     return loadOne({relays, filters: getIdFilters([eid]), forcePlatform: false})
@@ -235,7 +251,10 @@ export const createPeopleLoader = ({
   const loading = writable(false)
   const nip50Relays = uniq([
     ...env.SEARCH_RELAYS,
-    ...relays.get().filter(r => r.profile?.supported_nips?.includes(50)).map(r => r.url),
+    ...relays
+      .get()
+      .filter(r => r.profile?.supported_nips?.includes(50))
+      .map(r => r.url),
   ])
 
   return {
@@ -268,14 +287,14 @@ export const loadPubkeyData = (key: string, pubkeys: string[], kinds: number[]) 
   const $relaySelectionsByPubkey = relaySelectionsByPubkey.get()
 
   for (const pubkey of pubkeys) {
-    if (getFreshness(key, pubkey) < now() - seconds(1, 'day')) {
+    if (getFreshness(key, pubkey) < now() - seconds(1, "day")) {
       setFreshness(key, pubkey, now())
 
       promises.push(
         load({
           filters: [{authors: [pubkey], kinds}],
           relays: withIndexers(getWriteRelayUrls($relaySelectionsByPubkey.get(pubkey))),
-        })
+        }),
       )
     }
   }
@@ -284,16 +303,16 @@ export const loadPubkeyData = (key: string, pubkeys: string[], kinds: number[]) 
 }
 
 export const loadPubkeyLists = (pubkeys: string[]) =>
-  loadPubkeyData('pubkey/lists', pubkeys, LIST_KINDS)
+  loadPubkeyData("pubkey/lists", pubkeys, LIST_KINDS)
 
 export const loadPubkeyFeeds = (pubkeys: string[]) =>
-  loadPubkeyData('pubkey/feeds', pubkeys, [NAMED_BOOKMARKS, FEED, FEEDS])
+  loadPubkeyData("pubkey/feeds", pubkeys, [NAMED_BOOKMARKS, FEED, FEEDS])
 
 export const loadPubkeyHandlers = (pubkeys: string[]) =>
-  loadPubkeyData('pubkey/handlers', pubkeys, [HANDLER_INFORMATION])
+  loadPubkeyData("pubkey/handlers", pubkeys, [HANDLER_INFORMATION])
 
 export const loadPubkeyCommunities = (pubkeys: string[]) =>
-  loadPubkeyData('pubkey/communities', pubkeys, [COMMUNITIES])
+  loadPubkeyData("pubkey/communities", pubkeys, [COMMUNITIES])
 
 export const loadPubkeys = async (pubkeys: string[], relays: string[] = []) => {
   const promises = []
@@ -301,12 +320,13 @@ export const loadPubkeys = async (pubkeys: string[], relays: string[] = []) => {
   for (const pubkey of pubkeys) {
     // Load relays, then load profiles so we have a better chance of finding them
     promises.push(
-      loadRelaySelections(pubkey, {relays})
-        .then(() => Promise.all([
+      loadRelaySelections(pubkey, {relays}).then(() =>
+        Promise.all([
           loadProfile(pubkey, {relays}),
           loadFollows(pubkey, {relays}),
           loadMutes(pubkey, {relays}),
-        ]))
+        ]),
+      ),
     )
   }
 
@@ -334,8 +354,8 @@ export const feedLoader = new FeedLoader({
       event: await signer.get().sign(createEvent(kind, {tags})),
       relays:
         request.relays?.length > 0
-          ? hints.fromRelays(request.relays).getUrls()
-          : hints.Messages(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
+          ? AppContext.router.fromRelays(request.relays).getUrls()
+          : AppContext.router.Messages(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
     })
 
     await new Promise<void>(resolve => {
@@ -400,7 +420,9 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   }
 
   if (eventsWithParent.length > 0) {
-    const relays = hints.merge(eventsWithParent.map(hints.EventParents)).getUrls()
+    const relays = AppContext.router
+      .merge(eventsWithParent.map(AppContext.router.EventParents))
+      .getUrls()
     const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
 
     load({relays, filters: getIdFilters(ids), skipCache: true})
@@ -431,7 +453,6 @@ export const loadNotifications = () => {
     timeout: 15000,
     skipCache: true,
     closeOnEose: true,
-    relays: hints.ReadRelays().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -459,7 +480,6 @@ export const listenForNotifications = () => {
     filters,
     timeout: 30_000,
     skipCache: true,
-    relays: hints.ReadRelays().getUrls(),
     onEvent: onNotificationEvent,
   })
 }
@@ -470,7 +490,6 @@ export const loadLabels = (authors: string[]) =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.FromPubkeys(authors).getUrls(),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
@@ -478,14 +497,12 @@ export const loadDeletes = () =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.User().getUrls(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
 
 export const loadSeen = () =>
   load({
     skipCache: true,
-    relays: hints.WriteRelays().getUrls(),
     filters: [
       addSinceToFilter({
         kinds: [SEEN_CONVERSATION, SEEN_GENERAL, SEEN_CONTEXT],
@@ -498,7 +515,6 @@ export const loadFeedsAndLists = () =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.WriteRelays().getUrls(),
     filters: [
       addSinceToFilter({kinds: [FEED, NAMED_BOOKMARKS, ...LIST_KINDS], authors: [pubkey.get()]}),
     ],
@@ -512,7 +528,10 @@ export const loadGiftWraps = ({reload = false} = {}) => {
   }
 
   return loadAll(
-    makeIntersectionFeed(makeRelayFeed(...hints.User().getUrls()), feedFromFilter(filter)),
+    makeIntersectionFeed(
+      makeRelayFeed(...AppContext.router.User().getUrls()),
+      feedFromFilter(filter),
+    ),
   )
 }
 
@@ -528,7 +547,7 @@ export const loadLegacyMessages = ({reload = false} = {}) => {
 
   return loadAll(
     makeIntersectionFeed(
-      makeRelayFeed(...hints.User().getUrls()),
+      makeRelayFeed(...AppContext.router.User().getUrls()),
       makeUnionFeed(...filters.map(feedFromFilter)),
     ),
   )
@@ -540,7 +559,7 @@ export const listenForMessages = (pubkeys: string[]) => {
   return subscribePersistent({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.Messages(pubkeys).getUrls(),
+    relays: AppContext.router.Messages(pubkeys).getUrls(),
     filters: [
       addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(14, "day")),
       addSinceToFilter({kinds: [4], authors: allPubkeys}),
@@ -553,7 +572,7 @@ export const loadHandlers = () =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: hints.ReadRelays().getUrls().concat("wss://relay.nostr.band/"),
+    relays: AppContext.router.ReadRelays().getUrls().concat("wss://relay.nostr.band/"),
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],

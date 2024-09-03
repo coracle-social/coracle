@@ -2,7 +2,7 @@
   import {asSignedEvent, createEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
-  import {repository, loadRelaySelections} from "@welshman/app"
+  import {repository, AppContext, loadRelaySelections} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +12,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {router} from "src/app/util/router"
-  import {publish, hints} from "src/engine"
+  import {publish} from "src/engine"
 
   export let eid
 
@@ -33,8 +33,11 @@
 
     publish({
       event: rumor.wrap,
-      relays: hints
-        .merge([hints.fromRelays(["wss://relay.nos.social"]), hints.PublishMessage(tagr)])
+      relays: AppContext.router
+        .merge([
+          AppContext.router.fromRelays(["wss://relay.nos.social"]),
+          AppContext.router.PublishMessage(tagr),
+        ])
         .getUrls(),
       forcePlatform: false,
     })

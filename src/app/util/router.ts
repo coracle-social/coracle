@@ -1,10 +1,11 @@
 import {last, identity} from "ramda"
 import {Address, fromNostrURI} from "@welshman/util"
+import {AppContext} from "@welshman/app"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"
-import {decodeEvent, getChannelId, hints} from "src/engine"
+import {decodeEvent, getChannelId} from "src/engine"
 
 // Decoders
 
@@ -56,7 +57,7 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: hints.FromPubkeys([pubkey]).getUrls(),
+        relays: AppContext.router.FromPubkeys([pubkey]).getUrls(),
       }
     }
 
@@ -65,7 +66,9 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: hints.merge([hints.fromRelays(relays), hints.FromPubkeys([pubkey])]).getUrls(),
+        relays: AppContext.router
+          .merge([AppContext.router.fromRelays(relays), AppContext.router.FromPubkeys([pubkey])])
+          .getUrls(),
       }
     }
 
@@ -127,7 +130,7 @@ router.extend("notes", (id, {relays = []} = {}) => {
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
     relays = relays.concat(
-      hints
+      AppContext.router
         .FromPubkeys([pubkey])
         .limit(3 - relays.length)
         .getUrls(),

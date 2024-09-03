@@ -2,7 +2,7 @@
   import {COMMUNITIES} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import GroupMember from "src/app/shared/GroupMember.svelte"
-  import {load, hints, deriveGroup, communityListsByAddress} from "src/engine"
+  import {load, deriveGroup, communityListsByAddress} from "src/engine"
 
   export let address
 
@@ -12,11 +12,7 @@
   $: members =
     $group.members || $communityListsByAddress.get(address)?.map(l => l.event.pubkey) || []
 
-  load({
-    filters,
-    skipCache: true,
-    relays: hints.merge([hints.WithinContext(address), hints.User()]).getUrls(),
-  })
+  load({filters, skipCache: true})
 </script>
 
 <FlexColumn>

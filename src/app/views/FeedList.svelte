@@ -14,7 +14,6 @@
   import {displayFeed} from "src/domain"
   import {
     load,
-    hints,
     userFeeds,
     feedSearch,
     userListFeeds,
@@ -32,11 +31,7 @@
     const addresses = flatten(addresseses).filter(a => !repository.getEvent(a))
 
     if (addresses.length > 0) {
-      load({
-        relays: hints.User().getUrls(),
-        filters: getIdFilters(addresses),
-        skipCache: true,
-      })
+      load({skipCache: true, filters: getIdFilters(addresses)})
     }
   })
 

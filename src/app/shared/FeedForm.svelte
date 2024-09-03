@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
+  import {pubkey, signer, displayProfileByPubkey, AppContext} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -11,7 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {deleteEvent, createAndPublish, hints} from "src/engine"
+  import {deleteEvent, createAndPublish} from "src/engine"
 
   export let feed
   export let exit
@@ -60,7 +60,7 @@
   }
 
   const saveFeed = async () => {
-    const relays = hints.WriteRelays().getUrls()
+    const relays = AppContext.router.WriteRelays().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
     const pub = await createAndPublish({...template, relays})
 
@@ -127,7 +127,10 @@
       </Field>
     </FlexColumn>
     {#if !showSave}
-      <button type="button" class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>
+      <button
+        type="button"
+        class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
+        on:click={closeSave}>
         <i class="fa fa-times" />
       </button>
     {/if}

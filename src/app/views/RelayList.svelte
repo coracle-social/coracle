@@ -16,6 +16,7 @@
     deriveInboxRelaySelections,
     getWriteRelayUrls,
     relaySelectionsByPubkey,
+    AppContext,
   } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
@@ -29,7 +30,7 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {profileHasName} from "src/domain"
-  import {load, hints, userFollows, sortEventsDesc, joinRelay} from "src/engine"
+  import {load, userFollows, sortEventsDesc, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]
 
@@ -122,7 +123,7 @@
   }, reviews)
 
   load({
-    relays: hints.ReadRelays().getUrls(),
+    relays: AppContext.router.ReadRelays().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
     onEvent: event => {
       if (isShareableRelayUrl(Tags.fromEvent(event).get("r")?.value())) {

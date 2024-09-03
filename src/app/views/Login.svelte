@@ -13,7 +13,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, hints, loginWithExtension, loginWithNostrConnect} from "src/engine"
+  import {load, loginWithExtension, loginWithNostrConnect} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -93,7 +93,6 @@
 
   onMount(() => {
     load({
-      relays: hints.ReadRelays().getUrls(),
       filters: [
         {
           kinds: [HANDLER_INFORMATION],

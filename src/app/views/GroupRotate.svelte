@@ -1,5 +1,6 @@
 <script lang="ts">
   import {without} from "@welshman/lib"
+  import {AppContext} from "@welshman/app"
   import {difference} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -11,7 +12,6 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupRequest} from "src/engine"
   import {
-    hints,
     groups,
     groupRequests,
     initSharedKey,
@@ -37,7 +37,7 @@
 
   const onSubmit = () => {
     if (!soft || !$sharedKey) {
-      initSharedKey(address, hints.WithinContext(address).getUrls())
+      initSharedKey(address, AppContext.router.WithinContext(address).getUrls())
     }
 
     const allMembers = new Set(members)

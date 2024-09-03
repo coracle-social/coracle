@@ -13,7 +13,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {repository, deriveZapperForPubkey, deriveZapper, deriveProfile} from "@welshman/app"
+  import {repository, AppContext, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -35,7 +35,6 @@
   import {
     env,
     load,
-    hints,
     loadOne,
     ensureUnwrapped,
     isEventMuted,
@@ -76,7 +75,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(getIdOrAddress(event), {relays: hints.Event(event).getUrls()})
+        .of(getIdOrAddress(event), {relays: AppContext.router.Event(event).getUrls()})
         .open()
     }
   }
@@ -86,19 +85,19 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.Event(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: AppContext.router.Event(event).getUrls()})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: hints.EventParents(event).getUrls()})
+      .of(reply.value(), {relays: AppContext.router.EventParents(event).getUrls()})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: hints.EventRoots(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: AppContext.router.EventRoots(event).getUrls()})
       .at("thread")
       .open()
 
@@ -113,7 +112,6 @@
   $: tags = Tags.fromEvent(event)
   $: reply = tags.parent()
   $: root = tags.root()
-  $: profile = deriveProfile(event.pubkey)
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = !showMuted && $isEventMuted(event, true)
@@ -176,7 +174,7 @@
     if (!event.pubkey) {
       await loadOne({
         forcePlatform: false,
-        relays: hints.fromRelays(relays).getUrls(),
+        relays: AppContext.router.fromRelays(relays).getUrls(),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e
@@ -205,7 +203,7 @@
       }
 
       load({
-        relays: hints.EventChildren(event).getUrls(),
+        relays: AppContext.router.EventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           context = uniqBy(prop("id"), context.concat(events))

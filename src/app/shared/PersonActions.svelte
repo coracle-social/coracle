@@ -2,11 +2,10 @@
   import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
   import {toNostrURI} from "@welshman/util"
-  import {session, signer} from "@welshman/app"
+  import {session, AppContext, signer} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
-    hints,
     loginWithPublicKey,
     unfollowPerson,
     followPerson,
@@ -43,7 +42,11 @@
   const share = () =>
     router
       .at("qrcode")
-      .of(toNostrURI(nip19.nprofileEncode({pubkey, relays: hints.FromPubkeys([pubkey]).getUrls()})))
+      .of(
+        toNostrURI(
+          nip19.nprofileEncode({pubkey, relays: AppContext.router.FromPubkeys([pubkey]).getUrls()}),
+        ),
+      )
       .open()
 
   let actions = []
