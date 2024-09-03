@@ -1,6 +1,6 @@
 import {debounce} from "throttle-debounce"
 import {get, writable} from "svelte/store"
-import {batch, Fetch, noop, tryFunc, seconds, createMapOf, sleep, switcherFn} from "hurdak"
+import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
   FeedLoader,
@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, bech32ToHex, batcher, pick, cached, nthEq, nth, now, max} from "@welshman/lib"
+import {Worker, nthEq, nth, now, max} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -33,18 +33,17 @@ import {
   DEPRECATED_DIRECT_MESSAGE,
 } from "@welshman/util"
 import {makeDvmRequest} from "@welshman/dvm"
+import {pubkey, relays, repository, signer, getSession, updateSession} from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {always, partition, pluck, uniq, without} from "ramda"
-import {LIST_KINDS} from "src/domain"
-import type {Zapper} from "src/engine/model"
-import {repository} from "src/engine/repository"
+import {LIST_KINDS, filterRelaysByNip} from "src/domain"
+import type {SessionWithMeta} from "src/engine/model"
 import {
+  env,
   getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  env,
-  getFollows,
   getFilterSelections,
   getFollowers,
   getUserCommunities,
@@ -56,16 +55,12 @@ import {
   maxWot,
   getNetwork,
   primeWotCaches,
-  pubkey,
   publish,
-  getNip50Relays,
-  session,
   subscribe,
   subscribePersistent,
-  dufflepud,
-  signer,
+  sessionWithMeta,
+  getFollows,
 } from "src/engine/state"
-import {updateCurrentSession, updateSession} from "src/engine/commands"
 
 export * from "src/engine/requests/pubkeys"
 
@@ -81,60 +76,6 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 
   return {...filter, since}
 }
-
-// Handles/Zappers
-
-const fetchHandle = batcher(500, async (handles: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      const res = await Fetch.postJson(dufflepud("handle/info"), {handles: uniq(handles)})
-
-      return res?.data
-    })) || []
-
-  const infoByHandle = createMapOf("handle", "info", data)
-
-  return handles.map(h => infoByHandle[h])
-})
-
-export const loadHandle = cached({
-  maxSize: 100,
-  getKey: ([handle]) => handle,
-  getValue: ([handle]) => fetchHandle(handle),
-})
-
-const fetchZapper = batcher(3000, async (lnurls: string[]) => {
-  const data =
-    (await tryFunc(async () => {
-      // Dufflepud expects plaintext but we store lnurls encoded
-      const res = await Fetch.postJson(dufflepud("zapper/info"), {
-        lnurls: uniq(lnurls).map(bech32ToHex),
-      })
-
-      return res?.data
-    })) || []
-
-  const infoByLnurl = createMapOf("lnurl", "info", data)
-
-  return lnurls.map(lnurl => {
-    const zapper = tryFunc(() => infoByLnurl[bech32ToHex(lnurl)])
-
-    if (!zapper) {
-      return null
-    }
-
-    return {
-      ...pick(["callback", "minSendable", "maxSendable", "nostrPubkey", "allowsNostr"], zapper),
-      lnurl,
-    } as Zapper
-  })
-})
-
-export const loadZapper = cached({
-  maxSize: 100,
-  getKey: ([handle]) => handle,
-  getValue: ([handle]) => fetchZapper(handle),
-})
 
 export const attemptedAddrs = new Map()
 
@@ -173,7 +114,7 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
 export const loadGroupMessages = (addresses?: string[]) => {
   const promises = []
-  const addrs = addresses || getUserCircles(session.get())
+  const addrs = addresses || getUserCircles(sessionWithMeta.get())
   const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
 
   for (const address of groupAddrs) {
@@ -195,14 +136,14 @@ export const loadGroupMessages = (addresses?: string[]) => {
     promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
   }
 
-  updateCurrentSession($session => {
+  updateSession(pubkey.get(), ($sessionWithMeta: SessionWithMeta) => {
     for (const address of addrs) {
-      if ($session.groups?.[address]) {
-        $session.groups[address].last_synced = now()
+      if ($sessionWithMeta.groups?.[address]) {
+        $sessionWithMeta.groups[address].last_synced = now()
       }
     }
 
-    return $session
+    return $sessionWithMeta
   })
 
   return Promise.all(promises)
@@ -240,6 +181,10 @@ export const createPeopleLoader = ({
   onEvent = noop,
 }: PeopleLoaderOpts = {}) => {
   const loading = writable(false)
+  const nip50Relays = uniq([
+    ...env.SEARCH_RELAYS,
+    ...filterRelaysByNip(50, relays.get()).map(r => r.url),
+  ])
 
   return {
     loading,
@@ -253,7 +198,7 @@ export const createPeopleLoader = ({
           onEvent,
           skipCache: true,
           forcePlatform: false,
-          relays: getNip50Relays().slice(0, 8),
+          relays: nip50Relays.slice(0, 8),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
             await sleep(Math.min(1000, Date.now() - now))
@@ -301,12 +246,12 @@ export const feedLoader = new FeedLoader({
 
     const pubkeys = switcherFn(scope, {
       [Scope.Self]: () => ($pubkey ? [$pubkey] : []),
-      [Scope.Follows]: () => Array.from(getFollows($pubkey)),
-      [Scope.Network]: () => Array.from(getNetwork($pubkey)),
-      [Scope.Followers]: () => Array.from(getFollowers($pubkey)),
+      [Scope.Follows]: () => getFollows($pubkey),
+      [Scope.Network]: () => getNetwork($pubkey),
+      [Scope.Followers]: () => getFollowers($pubkey),
     })
 
-    return pubkeys.length === 0 ? env.get().DEFAULT_FOLLOWS : pubkeys
+    return pubkeys.length === 0 ? env.DEFAULT_FOLLOWS : pubkeys
   },
   getPubkeysForWOTRange: (min, max) => {
     const pubkeys = []
@@ -379,14 +324,16 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   const pubkeys = uniq(pluck("pubkey", events))
 
   for (const pubkey of pubkeys) {
-    updateSession(
-      pubkey,
-      updateIn("notifications_last_synced", (t: number) =>
-        pluck("created_at", events)
-          .concat(t || 0)
-          .reduce((a, b) => Math.max(a, b), 0),
-      ),
-    )
+    if (getSession(pubkey)) {
+      updateSession(
+        pubkey,
+        updateIn("notifications_last_synced", (t: number) =>
+          pluck("created_at", events)
+            .concat(t || 0)
+            .reduce((a, b) => Math.max(a, b), 0),
+        ),
+      )
+    }
   }
 
   if (eventsWithParent.length > 0) {
@@ -398,7 +345,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.get().ENABLE_ZAPS ? [] : [9735], [
+  without(env.ENABLE_ZAPS ? [] : [9735], [
     ...noteKinds,
     ...reactionKinds,
     WRAP,
@@ -408,7 +355,7 @@ export const getNotificationKinds = () =>
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
   const cutoff = now() - seconds(30, "day")
-  const {pubkey, notifications_last_synced = 0} = session.get()
+  const {pubkey, notifications_last_synced = 0} = sessionWithMeta.get()
   const since = Math.max(cutoff, notifications_last_synced - seconds(6, "hour"))
 
   const filters = [
@@ -428,14 +375,14 @@ export const loadNotifications = () => {
 
 export const listenForNotifications = () => {
   const since = now() - 30
-  const $session = session.get()
-  const addrs = getUserCommunities($session)
+  const $sessionWithMeta = sessionWithMeta.get()
+  const addrs = getUserCommunities($sessionWithMeta)
 
   const filters: Filter[] = [
     // Mentions
-    {kinds: noteKinds, "#p": [$session.pubkey], limit: 1, since},
+    {kinds: noteKinds, "#p": [$sessionWithMeta.pubkey], limit: 1, since},
     // Messages/groups
-    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$session.pubkey], limit: 1, since},
+    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$sessionWithMeta.pubkey], limit: 1, since},
   ]
 
   // Communities
@@ -545,7 +492,7 @@ export const loadHandlers = () =>
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],
-        authors: Array.from(getFollows(pubkey.get())),
+        authors: getFollows(pubkey.get()),
       }),
       addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
     ],

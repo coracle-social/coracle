@@ -1,6 +1,7 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
-  import {session, publishGroupEntryRequest, GroupAccess, deriveGroupStatus} from "src/engine"
+  import {session} from "@welshman/app"
+  import {publishGroupEntryRequest, GroupAccess, deriveGroupStatus} from "src/engine"
 
   export let address
 

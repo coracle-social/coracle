@@ -1,6 +1,6 @@
 <script lang="ts">
+  import {deriveProfile} from "@welshman/app"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {deriveProfile} from "src/engine"
 
   export let pubkey
   export let truncate = false

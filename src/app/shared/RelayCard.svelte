@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {isNil} from "ramda"
+  import {signer, deriveRelay} from "@welshman/app"
   import {quantify} from "hurdak"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
@@ -12,14 +12,7 @@
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
   import {displayRelayUrl, RelayMode} from "src/domain"
-  import {
-    deriveRelay,
-    signer,
-    getSetting,
-    setInboxPolicy,
-    setOutboxPolicy,
-    deriveUserRelayPolicy,
-  } from "src/engine"
+  import {getSetting, setInboxPolicy, setOutboxPolicy, deriveUserRelayPolicy} from "src/engine"
 
   export let url
   export let claim = null
@@ -82,28 +75,29 @@
   </div>
   {#if !hideDescription}
     <slot name="description">
-      {#if $relay.description}
-        <p>{$relay.description}</p>
+      {#if $relay.profile?.description}
+        <p>{$relay.profile.description}</p>
       {/if}
     </slot>
-    {#if !isNil($relay.count)}
+    {#if !$relay.stats}
       <span class="flex items-center gap-1 text-sm text-neutral-400">
-        {#if $relay.contact}
-          <Anchor external underline href={$relay.contact}>{displayUrl($relay.contact)}</Anchor>
+        {#if $relay.profile?.contact}
+          <Anchor external underline href={$relay.profile.contact}
+            >{displayUrl($relay.profile.contact)}</Anchor>
           &bull;
         {/if}
-        {#if $relay.supported_nips}
+        {#if $relay.profile?.supported_nips}
           <Popover>
             <span slot="trigger" class="cursor-pointer underline">
-              {$relay.supported_nips.length} NIPs
+              {$relay.profile.supported_nips.length} NIPs
             </span>
             <span slot="tooltip">
-              NIPs supported: {$relay.supported_nips.join(", ")}
+              NIPs supported: {$relay.profile.supported_nips.join(", ")}
             </span>
           </Popover>
           &bull;
         {/if}
-        Seen {quantify($relay.count || 0, "time")}
+        Connected {quantify($relay.stats.connect_count, "time")}
       </span>
     {/if}
   {/if}

@@ -9,6 +9,7 @@
     isShareableRelayUrl,
   } from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
+  import {session, repository} from "@welshman/app"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -19,7 +20,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
   import {loadUserData} from "src/app/state"
-  import {env, loadPubkeyUserData, repository, session} from "src/engine"
+  import {env, loadPubkeyUserData} from "src/engine"
 
   const t = Date.now()
 
@@ -55,7 +56,7 @@
 
   const tryDefaultRelays = () => {
     // Pull out all the stops to try to find the user's profile
-    searchRelays([LOCAL_RELAY_URL, ...env.get().DEFAULT_RELAYS, ...env.get().PLATFORM_RELAYS])
+    searchRelays([LOCAL_RELAY_URL, ...env.DEFAULT_RELAYS, ...env.PLATFORM_RELAYS])
   }
 
   const openModal = m => {

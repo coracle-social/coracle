@@ -1,5 +1,6 @@
 <script lang="ts">
   import {getAddress} from "@welshman/util"
+  import {pubkey} from "@welshman/app"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -8,7 +9,7 @@
   import Input from "src/partials/Input.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, userLists, userFollows, listSearch, loadPubkeyLists} from "src/engine"
+  import {userLists, userFollows, listSearch, loadPubkeyLists} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
 

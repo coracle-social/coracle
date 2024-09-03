@@ -4,6 +4,7 @@
   import {sortBy, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
+  import {pubkey, signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
   import Modal from "src/partials/Modal.svelte"
@@ -15,7 +16,14 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
-  import {pubkey, userListFeeds, loadPubkeyFeeds, loadPubkeyLists, signer, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
+  import {
+    userListFeeds,
+    loadPubkeyFeeds,
+    loadPubkeyLists,
+    deleteEvent,
+    userFeeds,
+    userFavoritedFeeds,
+  } from "src/engine"
 
   export let feed
   export let updateFeed
@@ -115,11 +123,12 @@
   <div class="float-right flex h-8 items-center justify-end gap-2">
     <slot name="controls" />
     <div class="relative">
-      <div
+      <button
+        type="button"
         class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
         on:click={$listMenu.enable}>
         <i class="fa fa-sm fa-ellipsis-v" />
-      </div>
+      </button>
       {#if $listMenu.enabled}
         <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
           <Menu>

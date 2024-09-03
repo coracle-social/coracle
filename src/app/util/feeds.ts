@@ -17,6 +17,7 @@ import {
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
+import {repository, tracker} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
@@ -25,12 +26,10 @@ import {
   sortEventsDesc,
   unwrapRepost,
   isEventMuted,
-  repository,
   hints,
   addRepostFilters,
   getFilterSelections,
   subscribe,
-  tracker,
   load,
 } from "src/engine"
 

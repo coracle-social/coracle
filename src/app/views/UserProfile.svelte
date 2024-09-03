@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {pubkey, profilesByPubkey} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
@@ -9,7 +10,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
-  import {env, pubkey, getProfile, publishProfile} from "src/engine"
+  import {env, publishProfile} from "src/engine"
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
@@ -34,14 +35,14 @@
   }
 
   const submit = () => {
-    if ($env.PLATFORM_RELAYS.length === 0) {
+    if (env.PLATFORM_RELAYS.length === 0) {
       publishToNetwork()
     } else {
-      modal = 'select-scope'
+      modal = "select-scope"
     }
   }
 
-  const values = {...getProfile($pubkey)}
+  const values = {...$profilesByPubkey.get($pubkey)}
 
   let modal
 
@@ -69,8 +70,8 @@
         <i slot="before" class="fa-solid fa-user-check" />
       </Input>
       <div slot="info">
-        Enter a <Anchor underline external href={nip05Url}>NIP-05</Anchor> address to verify
-        your public key.
+        Enter a <Anchor underline external href={nip05Url}>NIP-05</Anchor> address to verify your public
+        key.
       </div>
     </Field>
     <Field label="Lightning address">
@@ -78,8 +79,8 @@
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
-        Enter a <Anchor underline external href={lud16Url}>lightning address</Anchor> to enable
-        sending and receiving bitcoin tips.
+        Enter a <Anchor underline external href={lud16Url}>lightning address</Anchor> to enable sending
+        and receiving bitcoin tips.
       </div>
     </Field>
     <Field label="Website">
@@ -110,7 +111,7 @@
   </Footer>
 </form>
 
-{#if modal === 'select-scope'}
+{#if modal === "select-scope"}
   <Modal onEscape={closeModal}>
     <div class="mb-4 flex flex-col items-center justify-center">
       <Heading>Update Profile</Heading>
@@ -126,8 +127,8 @@
           <i class="fa fa-arrow-right" />
         </div>
         <p>
-          Publishing your profile to the wider nostr network will allow anyone to see it.
-          Use this if you plan to use other clients or relay selections.
+          Publishing your profile to the wider nostr network will allow anyone to see it. Use this
+          if you plan to use other clients or relay selections.
         </p>
       </FlexColumn>
     </Card>
@@ -141,8 +142,8 @@
           <i class="fa fa-arrow-right" />
         </div>
         <p>
-          Publish your profile just to the relays configured on this instance if you prefer.
-          Be aware that how private this is depends on how the instance operator has set things up.
+          Publish your profile just to the relays configured on this instance if you prefer. Be
+          aware that how private this is depends on how the instance operator has set things up.
         </p>
       </FlexColumn>
     </Card>

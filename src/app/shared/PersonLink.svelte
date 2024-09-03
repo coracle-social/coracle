@@ -1,7 +1,8 @@
 <script lang="ts">
+  import {deriveProfileDisplay} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
-  import {deriveProfileDisplay, loadPubkeys} from "src/engine"
+  import {loadPubkeys} from "src/engine"
 
   export let pubkey
 

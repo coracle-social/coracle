@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {nthEq} from '@welshman/lib'
-  import {zapFromEvent} from '@welshman/util'
+  import {onMount} from "svelte"
+  import {nthEq} from "@welshman/lib"
+  import {zapFromEvent} from "@welshman/util"
+  import {deriveZapper, loadZapper} from "@welshman/app"
   import {formatSats} from "src/util/misc"
-  import PersonLink from 'src/app/shared/PersonLink.svelte'
+  import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {deriveZapper, loadZapper} from 'src/engine'
 
   export let note, showEntire, showMedia
 
@@ -15,7 +15,6 @@
   const zapper = deriveZapper(recipient)
 
   $: zap = zapFromEvent(note, $zapper)
-  $: amount = formatSats(zap.invoiceAmount / 1000)
 
   onMount(() => {
     loadZapper(recipient)
@@ -25,7 +24,8 @@
 {#if zap}
   <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
     <div>
-      <PersonLink pubkey={zap.request?.pubkey} /> zapped <PersonLink pubkey={recipient} /> {amount} sats!
+      <PersonLink pubkey={zap.request?.pubkey} /> zapped <PersonLink pubkey={recipient} />
+      {formatSats(zap.invoiceAmount / 1000)} sats!
     </div>
     <NoteContentKind1 note={zap.request} {showEntire} />
     {#if url}

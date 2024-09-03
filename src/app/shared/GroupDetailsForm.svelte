@@ -2,6 +2,7 @@
   import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
   import {Address, GROUP, COMMUNITY} from "@welshman/util"
+  import {relaySearch} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
   import {formCtrl} from "src/partials/utils"
@@ -20,7 +21,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import type {GroupMeta} from "src/domain"
   import {normalizeRelayUrl, displayRelayUrl} from "src/domain"
-  import {env, hints, relaySearch, feedSearch} from "src/engine"
+  import {env, hints, feedSearch} from "src/engine"
 
   export let onSubmit
   export let values: GroupMeta & {members: string[]}
@@ -110,7 +111,7 @@
           </div>
         </FieldInline>
       {/if}
-      {#if $env.PLATFORM_RELAYS.length === 0}
+      {#if env.PLATFORM_RELAYS.length === 0}
         <Field label="Relays">
           <SearchSelect
             multiple

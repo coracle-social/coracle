@@ -12,6 +12,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
+  import {repository, deriveZapper, loadZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount, onDestroy} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -36,13 +37,10 @@
     hints,
     loadOne,
     ensureUnwrapped,
-    loadZapper,
     isEventMuted,
     getSetting,
     loadPubkeysFromEvent,
     sortEventsDesc,
-    deriveZapper,
-    repository,
   } from "src/engine"
 
   export let note
@@ -212,7 +210,7 @@
         kinds.push(REACTION)
       }
 
-      if ($env.ENABLE_ZAPS && actions.includes("zaps")) {
+      if (env.ENABLE_ZAPS && actions.includes("zaps")) {
         kinds.push(ZAP_RESPONSE)
       }
 

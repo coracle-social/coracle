@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
   import {Tags, NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS} from "@welshman/util"
+  import {topicSearch, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -10,15 +11,15 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
+  import {hints, mention, createAndPublish, deleteEvent} from "src/engine"
   import {
-    hints,
-    mention,
-    relaySearch,
-    searchTopicNames,
-    createAndPublish,
-    deleteEvent,
-  } from "src/engine"
-  import {KindSearch, normalizeRelayUrl, createList, displayList, editList} from "src/domain"
+    KindSearch,
+    normalizeRelayUrl,
+    createList,
+    displayList,
+    editList,
+    displayRelayUrl,
+  } from "src/domain"
 
   export let list
   export let exit
@@ -104,13 +105,13 @@
             search={$relaySearch.searchValues}
             termToItem={normalizeRelayUrl}
             onChange={onRelaysChange}>
-            <span slot="item" let:item>{$relaySearch.displayValue(item)}</span>
+            <span slot="item" let:item>{displayRelayUrl(item)}</span>
           </SearchSelect>
         {:else if list.kind === NAMED_TOPICS}
           <SearchSelect
             multiple
             value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
-            search={$searchTopicNames}
+            search={$topicSearch.searchValues}
             termToItem={identity}
             onChange={onTopicsChange}>
             <span slot="item" let:item>#{item}</span>

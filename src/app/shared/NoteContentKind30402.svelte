@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {deriveIsDeletedByAddress} from "@welshman/store"
   import {Tags, Address} from "@welshman/util"
+  import {repository, pubkey} from "@welshman/app"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
@@ -12,7 +13,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
-  import {hints, pubkey, repository} from "src/engine"
+  import {hints} from "src/engine"
 
   export let note
   export let showMedia = false

@@ -1,12 +1,18 @@
 <script lang="ts">
+  import {getListValues} from "@welshman/util"
+  import {deriveFollows} from "@welshman/app"
   import PersonList from "src/app/shared/PersonList.svelte"
-  import {loadPubkeys, deriveFollows} from "src/engine"
+  import {loadPubkeys} from "src/engine"
 
   export let pubkey
 
-  const pubkeys = deriveFollows(pubkey)
+  const follows = deriveFollows(pubkey)
 
-  loadPubkeys(Array.from($pubkeys))
+  $: pubkeys = getListValues("p", $follows)
+
+  $: {
+    loadPubkeys(pubkeys)
+  }
 </script>
 
-<PersonList pubkeys={Array.from($pubkeys)} />
+<PersonList {pubkeys} />

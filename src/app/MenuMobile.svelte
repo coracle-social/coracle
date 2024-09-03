@@ -1,5 +1,6 @@
 <script lang="ts">
   import {makeScopeFeed, Scope} from "@welshman/feeds"
+  import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import SliderMenu from "src/partials/SliderMenu.svelte"
@@ -10,15 +11,7 @@
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
   import {makeFeed, normalizeFeedDefinition} from "src/domain"
-  import {
-    env,
-    signer,
-    hasNewMessages,
-    hasNewNotifications,
-    pubkey,
-    sessions,
-    displayProfileByPubkey,
-  } from "src/engine"
+  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const closeSubMenu = () => {
     subMenu = null
@@ -79,7 +72,7 @@
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
-      {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
+      {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
         <MenuMobileItem href="/settings/relays" on:click={closeMenu}>
           <i class="fa fa-server" />
           <div class="relative inline-block">
@@ -101,11 +94,11 @@
           {/if}
         </div>
       </MenuMobileItem>
-      {#if $env.FORCE_GROUP}
+      {#if env.FORCE_GROUP}
         <MenuMobileItem href="/events" on:click={closeMenu}>
           <i class="fa fa-calendar-days" /> Calendar
         </MenuMobileItem>
-        {#if $env.ENABLE_MARKET}
+        {#if env.ENABLE_MARKET}
           <MenuMobileItem href="/listings" on:click={closeMenu}>
             <i class="fa fa-store" /> Market
           </MenuMobileItem>
@@ -144,12 +137,12 @@
       <MenuMobileItem href="/events" on:click={closeMenu}>
         <i class="fa fa-calendar-days" /> Calendar
       </MenuMobileItem>
-      {#if $env.ENABLE_MARKET}
+      {#if env.ENABLE_MARKET}
         <MenuMobileItem href="/listings" on:click={closeMenu}>
           <i class="fa fa-store" /> Market
         </MenuMobileItem>
       {/if}
-      {#if !$env.FORCE_GROUP}
+      {#if !env.FORCE_GROUP}
         <MenuMobileItem href="/groups" on:click={closeMenu}>
           <i class="fa fa-circle-nodes" /> Groups
         </MenuMobileItem>

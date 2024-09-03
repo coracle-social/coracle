@@ -1,10 +1,9 @@
 import Bugsnag from "@bugsnag/js"
 import {writable} from "svelte/store"
+import {pubkey, session} from "@welshman/app"
 import {router} from "src/app/util/router"
 import {
   env,
-  pubkey,
-  session,
   loadSeen,
   loadGroups,
   loadDeletes,
@@ -74,8 +73,8 @@ export const slowConnections = writable([])
 
 export const loadAppData = () => {
   // If we have a group, load that
-  if (env.get().FORCE_GROUP) {
-    loadGroups([env.get().FORCE_GROUP])
+  if (env.FORCE_GROUP) {
+    loadGroups([env.FORCE_GROUP])
   }
 }
 

@@ -28,7 +28,7 @@
   export let showGroup = false
   export let onEvent = null
 
-  const splits = [["zap", $env.PLATFORM_PUBKEY, "", "1"]]
+  const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
   const promptDismissed = synced("feed/promptDismissed", 0)
 
@@ -128,7 +128,7 @@
 {#if !hideSpinner}
   {#if $loader.done}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
-      <img class="h-20 w-20" src="/images/pumpkin.png" />
+      <img alt="" class="h-20 w-20" src="/images/pumpkin.png" />
       That's all!
     </div>
   {:else}

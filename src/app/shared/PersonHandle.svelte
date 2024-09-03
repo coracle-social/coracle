@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {displayHandle} from "src/domain"
-  import {deriveHandle} from "src/engine"
+  import {deriveHandle, displayHandle} from "@welshman/app"
 
   export let pubkey
 

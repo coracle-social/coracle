@@ -1,5 +1,6 @@
 <script lang="ts">
   import {walkFeed, isAuthorFeed} from "@welshman/feeds"
+  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -11,15 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, isMentionFeed, displayFeed} from "src/domain"
-  import {
-    pubkey,
-    displayProfileByPubkey,
-    signer,
-    deleteEvent,
-    createAndPublish,
-    loadPubkeys,
-    hints,
-  } from "src/engine"
+  import {deleteEvent, createAndPublish, loadPubkeys, hints} from "src/engine"
 
   export let feed
   export let exit
@@ -143,9 +136,9 @@
       </Field>
     </FlexColumn>
     {#if !showSave}
-      <div class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>
+      <button type="button" class="absolute right-2 top-2 h-4 w-4 cursor-pointer" on:click={closeSave}>
         <i class="fa fa-times" />
-      </div>
+      </button>
     {/if}
   </Card>
 {/if}

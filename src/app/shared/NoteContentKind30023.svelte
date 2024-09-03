@@ -7,12 +7,12 @@
   import {switcherFn} from "hurdak"
   import {urlIsMedia} from "@welshman/content"
   import {fromNostrURI, Tags} from "@welshman/util"
+  import {displayProfileByPubkey} from "@welshman/app"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import {router} from "src/app/util/router"
-  import {displayProfileByPubkey} from "src/engine"
 
   export let note, showEntire
   export let showMedia = false

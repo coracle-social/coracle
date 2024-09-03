@@ -6,7 +6,7 @@
   const onRemove = () => dispatch('remove')
 </script>
 
-<div class="flex items-center justify-between">
+<button type="button" class="flex items-center justify-between">
   <div class="flex items-center gap-4">
     <span class="cursor-pointer p-2" on:click={onRemove}>
       <i class="fa fa-times" />
@@ -14,4 +14,4 @@
     <slot name="label" />
   </div>
   <slot name="data" />
-</div>
+</button>

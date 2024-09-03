@@ -2,6 +2,7 @@
   import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import {events} from "@welshman/app"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -9,7 +10,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/util/router"
-  import {events, hints, sortEventsDesc} from "src/engine"
+  import {hints, sortEventsDesc} from "src/engine"
 
   const sortedEvents = derived(events, sortEventsDesc)
 

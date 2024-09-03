@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {remove} from "@welshman/lib"
+  import {repository, pubkey} from "@welshman/app"
   import {NAMED_BOOKMARKS, toNostrURI, Address} from "@welshman/util"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
@@ -15,8 +16,6 @@
   import {readFeed, readList, displayFeed, mapListToFeed, getSingletonValues} from "src/domain"
   import {
     hints,
-    pubkey,
-    repository,
     addFeedFavorite,
     removeFeedFavorite,
     userFeedFavorites,
@@ -50,7 +49,7 @@
     <i class="fa fa-rss fa-2xl" />
   </div>
   <FlexColumn small>
-    <div class="flex justify-between flex-col sm:flex-row">
+    <div class="flex flex-col justify-between sm:flex-row">
       <span class="flex items-start gap-3">
         <div>
           <Anchor on:click={loadFeed} class="staatliches text-xl">
@@ -79,7 +78,9 @@
         <PersonCircles class="h-6 w-6" pubkeys={favoritedPubkeys.slice(0, 20)} />
       </div>
     {/if}
-    <div class="mt-2 flex items-start justify-between flex-col sm:flex-row" on:click|stopPropagation>
+    <div
+      class="mt-2 flex flex-col items-start justify-between sm:flex-row"
+      on:click|stopPropagation>
       <FeedSummary feed={feed.definition} />
       <div class="flex gap-1">
         <div

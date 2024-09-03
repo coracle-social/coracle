@@ -7,6 +7,7 @@
   import {writable} from "svelte/store"
   import {now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
+  import {session} from "@welshman/app"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -30,14 +31,7 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import {publish, mention} from "src/engine"
   import {router} from "src/app/util/router"
-  import {
-    env,
-    hints,
-    session,
-    getClientTags,
-    tagsFromContent,
-    publishToZeroOrMoreGroups,
-  } from "src/engine"
+  import {env, hints, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
 
   export let type = "note"
   export let quote = null
@@ -45,7 +39,7 @@
   export let group = null
   export let initialValues = {}
 
-  const defaultGroups = $env.FORCE_GROUP ? [$env.FORCE_GROUP] : [group].filter(identity)
+  const defaultGroups = env.FORCE_GROUP ? [env.FORCE_GROUP] : [group].filter(identity)
 
   let images, compose
   let charCount = 0
@@ -280,9 +274,9 @@
             {commaFormat(wordCount)} words
           </small>
           <span>•</span>
-          <small on:click={togglePreview} class="cursor-pointer underline">
+          <button type="button" on:click={togglePreview} class="cursor-pointer underline text-sm">
             {showPreview ? "Hide" : "Show"} Preview
-          </small>
+          </button>
         </div>
       </Field>
       <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
@@ -290,16 +284,17 @@
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
         <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
-      {#if !$env.FORCE_GROUP}
-        <small
-          class="flex cursor-pointer items-center justify-end gap-4"
+      {#if !env.FORCE_GROUP}
+        <button
+          type="button"
+          class="flex cursor-pointer items-center justify-end gap-4 text-sm"
           on:click={() => options.setView("settings")}>
           <span class:text-accent={opts.groups.length > 0}>
             <i class="fa fa-circle-nodes" />
             {opts.groups.length}
           </span>
           <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
-        </small>
+        </button>
       {/if}
     </FlexColumn>
   </Content>

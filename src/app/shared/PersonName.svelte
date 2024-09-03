@@ -15,11 +15,12 @@
 <script lang="ts">
   import cx from "classnames"
   import {derived} from "svelte/store"
+  import {session, deriveProfileDisplay} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import {displayPubkey} from "src/domain"
-  import {userFollows, deriveProfileDisplay, session, maxWot, getWotScore} from "src/engine"
+  import {userFollows, maxWot, getWotScore} from "src/engine"
   import {isMobile} from "src/util/html"
 
   export let pubkey

@@ -5,6 +5,7 @@
   import {getAddress, WRAP, GROUP} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
+  import {session, relaySearch} from "@welshman/app"
   import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -18,10 +19,8 @@
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
   import {
-    session,
     hints,
     groupSharedKeys,
-    relaySearch,
     userIsGroupMember,
     groupAdminKeys,
     subscribe,
@@ -136,12 +135,12 @@
         on nostr.
       </small>
     </div>
-    {#if $session?.privkey}
+    {#if $session?.secret}
       <div>
         <CopyValue
           isPassword
           label="Private Key"
-          value={$session?.privkey}
+          value={$session?.secret}
           encode={nsecEncode}
           hasEncryptPrompt />
         <small class="text-neutral-100">
@@ -204,9 +203,8 @@
     <Field label="Relays to search">
       <SearchSelect
         multiple
-        getKey={$relaySearch.displayValue}
-        search={$relaySearch.searchValues}
         bind:value={relays}
+        search={$relaySearch.searchValues}
         placeholder="wss://..." />
     </Field>
     <Anchor button accent loading={importing} on:click={finishImport}>Import key</Anchor>

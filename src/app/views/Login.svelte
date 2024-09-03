@@ -4,6 +4,7 @@
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
   import {getNip07, Nip07Signer} from "@welshman/signer"
+  import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -12,7 +13,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, hints, loadHandle, loginWithExtension, loginWithNostrConnect} from "src/engine"
+  import {load, hints, loginWithExtension, loginWithNostrConnect} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -107,15 +108,15 @@
         }
 
         const domain = last(content.nip05.split("@"))
-        const {pubkey, ...handle} = (await loadHandle(`_@${domain}`)) || {}
-        const relays = handle.nip46 || handle.relays || []
+        const handle = await loadHandle(`_@${domain}`)
+        const relays = handle?.nip46 || handle?.relays || []
 
         if (handlers.some(h => h.domain === domain)) {
           return
         }
 
-        if (pubkey === e.pubkey) {
-          handlers = handlers.concat({pubkey, domain, relays})
+        if (handle?.pubkey === e.pubkey) {
+          handlers = handlers.concat({pubkey: e.pubkey, domain, relays})
         }
       },
     })

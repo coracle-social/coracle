@@ -108,11 +108,12 @@
           {/if}
         </FlexColumn>
         {#if i > 0}
-          <div
+          <button
+            type="button"
             class="absolute right-2 top-2 h-4 w-4 cursor-pointer"
             on:click={() => onSubFeedRemove(idx)}>
             <i class="fa fa-times" />
-          </div>
+          </button>
         {/if}
       </Card>
     {/if}

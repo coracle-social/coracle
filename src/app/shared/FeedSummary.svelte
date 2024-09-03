@@ -16,10 +16,10 @@
     hasSubFeeds,
     getFeedArgs,
   } from "@welshman/feeds"
+  import {displayProfileByPubkey} from "@welshman/app"
   import {formatTimestampAsDate} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
   import {displayRelayUrl} from "src/domain"
-  import {displayProfileByPubkey} from "src/engine"
 
   export let feed
   export let shallow = false

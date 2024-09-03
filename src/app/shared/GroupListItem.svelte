@@ -3,13 +3,14 @@
   import {derived} from "svelte/store"
   import {remove, intersection} from "@welshman/lib"
   import {isGroupAddress, isCommunityAddress} from "@welshman/util"
+  import {pubkey} from "@welshman/app"
   import Chip from "src/partials/Chip.svelte"
   import Card from "src/partials/Card.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
   import {displayGroupMeta} from "src/domain"
-  import {deriveGroupMeta, userFollows, communityListsByAddress, pubkey} from "src/engine"
+  import {deriveGroupMeta, userFollows, communityListsByAddress} from "src/engine"
 
   export let address
   export let modal = false
@@ -51,7 +52,7 @@
       </slot>
     </div>
     {#if $meta?.about}
-      <p class="text-start text-neutral-100">
+      <p class="text-start text-neutral-100 overflow-hidden text-ellipsis">
         {ellipsize($meta.about, 300)}
       </p>
     {/if}

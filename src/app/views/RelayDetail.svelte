@@ -1,13 +1,13 @@
 <script lang="ts">
   import {batch} from "hurdak"
   import {makeRelayFeed, feedFromFilter} from "@welshman/feeds"
+  import {deriveRelay} from "@welshman/app"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Rating from "src/partials/Rating.svelte"
   import RelayTitle from "src/app/shared/RelayTitle.svelte"
   import RelayActions from "src/app/shared/RelayActions.svelte"
-  import {deriveRelay} from "src/engine"
   import {makeFeed, normalizeRelayUrl, displayRelayUrl} from "src/domain"
 
   export let url
@@ -40,6 +40,7 @@
 
   $: url = normalizeRelayUrl(url)
   $: rating = getAvgRating(reviews)
+  $: console.log($relay)
 
   document.title = displayRelayUrl(url)
 </script>
@@ -53,8 +54,8 @@
     <Rating inert value={rating} />
   </div>
 {/if}
-{#if $relay.description}
-  <p>{$relay.description}</p>
+{#if $relay.profile?.description}
+  <p>{$relay.profile.description}</p>
 {/if}
 <Tabs {tabs} {activeTab} {setActiveTab} />
 {#if activeTab === "reviews"}
