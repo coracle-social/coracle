@@ -4,6 +4,14 @@
   import {groupBy, sortBy, uniqBy, prop} from "ramda"
   import {displayList} from "hurdak"
   import {pushToMapKey} from "@welshman/lib"
+  import {
+    pubkey,
+    relays,
+    relaySearch,
+    type Relay,
+    displayProfileByPubkey,
+    profilesByPubkey,
+  } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -16,17 +24,11 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {profileHasName, RelayMode} from "src/domain"
-  import type {RelayInfo} from "src/engine"
   import {
     load,
     hints,
-    relays,
-    pubkey,
     userFollows,
-    getProfile,
-    displayProfileByPubkey,
     userRelayPolicies,
-    relaySearch,
     getPubkeyRelayPolicies,
     sortEventsDesc,
     joinRelay,
@@ -39,7 +41,7 @@
     const m = new Map<string, string[]>()
 
     for (const pk of $userFollows) {
-      if (!profileHasName(getProfile(pk))) {
+      if (!profileHasName($profilesByPubkey.get(pk))) {
         continue
       }
 
@@ -58,14 +60,14 @@
         (term
           ? $relaySearch.searchOptions(term)
           : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
-        ).map((profile: RelayInfo) => {
-          const pubkeys = pubkeysByUrl.get(profile.url) || []
+        ).map((relay: Relay) => {
+          const pubkeys = pubkeysByUrl.get(relay.url) || []
           const description =
             pubkeys.length > 0
               ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
-              : profile.description
+              : relay.profile?.description
 
-          return {...profile, description}
+          return {...relay, description}
         }),
   )
 
@@ -189,9 +191,9 @@
       placeholder="Search relays or add a custom url">
       <i slot="before" class="fa-solid fa-search" />
     </Input>
-    {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
+    {#each $searchRelays(q).slice(0, limit) as { url, profile } (url)}
       <RelayCard {url} ratings={ratings[url]}>
-        <p slot="description">{description || ""}</p>
+        <p slot="description">{profile?.description || ""}</p>
       </RelayCard>
     {/each}
   {/if}

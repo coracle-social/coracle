@@ -3,16 +3,11 @@
   import {throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
   import {last, partition, whereEq} from "ramda"
+  import {displayProfileByPubkey} from "@welshman/app"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {
-    hints,
-    userFollows,
-    displayProfileByPubkey,
-    profileSearch,
-    createPeopleLoader,
-  } from "src/engine"
+  import {hints, userFollows, profileSearch, createPeopleLoader} from "src/engine"
 
   export let onSubmit
   export let autofocus = false

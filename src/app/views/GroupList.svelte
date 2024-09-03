@@ -4,6 +4,7 @@
   import {derived} from "svelte/store"
   import {now, shuffle} from "@welshman/lib"
   import {GROUP, COMMUNITY, getAddress, getIdFilters} from "@welshman/util"
+  import {pubkey, updateSession} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -16,7 +17,6 @@
     loadGiftWraps,
     loadGroupMessages,
     userIsGroupMember,
-    updateCurrentSession,
     communityListsByAddress,
     groupMetaSearch,
     groupMeta,
@@ -45,7 +45,7 @@
       a => !groups.key(a).get()?.meta,
     )
 
-    updateCurrentSession(assoc("groups_last_synced", now()))
+    updateSession(pubkey.get(), assoc("groups_last_synced", now()))
 
     loadGroupMessages()
 

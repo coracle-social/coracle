@@ -1,10 +1,8 @@
-import {always, mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
+import {mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn} from "hurdak"
-import {nth, inc} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
-  isShareableRelayUrl,
   getIdFilters,
   MUTES,
   APP_DATA,
@@ -12,21 +10,15 @@ import {
   SEEN_GENERAL,
   SEEN_CONTEXT,
   FOLLOWS,
-  RELAYS,
   COMMUNITIES,
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {parseJson} from "src/util/misc"
-import {normalizeRelayUrl} from "src/domain"
-import {GroupAccess} from "src/engine/model"
-import {repository} from "src/engine/repository"
+import {repository, putSession, getSession} from "@welshman/app"
+import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
-  topics,
-  relays,
   deriveAdminKeyForGroup,
   getGroupStatus,
-  getSession,
   groupAdminKeys,
   groupAlerts,
   groupRequests,
@@ -37,13 +29,7 @@ import {
   hints,
   ensurePlaintext,
 } from "src/engine/state"
-import {
-  modifyGroupStatus,
-  setGroupStatus,
-  updateSession,
-  updateZapper,
-  updateHandle,
-} from "src/engine/commands"
+import {modifyGroupStatus, setGroupStatus} from "src/engine/commands"
 
 // Synchronize repository with projections. All events should be published to the
 // repository, and when accepted, be propagated to projections. This avoids processing
@@ -103,9 +89,11 @@ projections.addHandler(24, (e: TrustedEvent) => {
     groupAlerts.key(e.id).set({...e, group: address, type: "exit"})
   }
 
-  setGroupStatus(recipient, address, e.created_at, {
-    access: privkey ? GroupAccess.Granted : GroupAccess.Revoked,
-  })
+  if (getSession(recipient)) {
+    setGroupStatus(recipient, address, e.created_at, {
+      access: privkey ? GroupAccess.Granted : GroupAccess.Revoked,
+    })
+  }
 })
 
 projections.addHandler(27, (e: TrustedEvent) => {
@@ -141,7 +129,7 @@ projections.addHandler(27, (e: TrustedEvent) => {
 // Membership
 
 projections.addHandler(COMMUNITIES, (e: TrustedEvent) => {
-  let session = getSession(e.pubkey)
+  let session = getSession(e.pubkey) as SessionWithMeta
 
   if (!session) {
     return
@@ -155,7 +143,7 @@ projections.addHandler(COMMUNITIES, (e: TrustedEvent) => {
     })
   }
 
-  updateSession(e.pubkey, always(session))
+  putSession(session)
 })
 
 const handleGroupRequest = access => (e: TrustedEvent) => {
@@ -181,60 +169,6 @@ const handleGroupRequest = access => (e: TrustedEvent) => {
 projections.addHandler(25, handleGroupRequest(GroupAccess.Requested))
 
 projections.addHandler(26, handleGroupRequest(GroupAccess.None))
-
-projections.addHandler(0, e => {
-  const content = parseJson(e.content)
-
-  updateHandle(e, content)
-  updateZapper(e, content)
-})
-
-// Relays
-
-projections.addHandler(RELAYS, (e: TrustedEvent) => {
-  for (const [key, value] of e.tags) {
-    if (["r", "relay"].includes(key) && isShareableRelayUrl(value)) {
-      relays.key(normalizeRelayUrl(value)).update($relay => ({
-        url: value,
-        last_checked: 0,
-        count: inc($relay?.count || 0),
-        first_seen: $relay?.first_seen || e.created_at,
-      }))
-    }
-  }
-})
-
-// Topics
-
-const addTopic = (e, name) => {
-  if (name) {
-    const topic = topics.key(name.toLowerCase())
-
-    topic.merge({
-      count: inc(topic.get()?.count || 0),
-      last_seen: e.created_at,
-    })
-  }
-}
-
-projections.addHandler(1, (e: TrustedEvent) => {
-  const tagTopics = Tags.fromEvent(e).topics().valueOf()
-  const contentTopics = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g)).map(nth(1))
-
-  for (const name of tagTopics.concat(contentTopics)) {
-    addTopic(e, name)
-  }
-})
-
-projections.addHandler(1985, (e: TrustedEvent) => {
-  for (const name of Tags.fromEvent(e)
-    .whereKey("l")
-    .filter(t => t.last() === "#t")
-    .values()
-    .valueOf()) {
-    addTopic(e, name)
-  }
-})
 
 // Decrypt encrypted events eagerly
 

@@ -5,6 +5,7 @@
   import {derived} from "svelte/store"
   import {last, sortBy} from "@welshman/lib"
   import {custom} from "@welshman/store"
+  import {repository, signer, tracker} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -42,15 +43,11 @@
   import {
     env,
     groups,
-    signer,
-    session,
     publish,
-    mention,
-    tracker,
     hints,
     makeZapSplit,
+    mention,
     mentionEvent,
-    repository,
     unmuteNote,
     muteNote,
     deriveHandlersForKind,
@@ -61,6 +58,7 @@
     loadPubkeys,
     getReactionTags,
     getClientTags,
+    sessionWithMeta,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
@@ -206,10 +204,10 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const groupOptions = derived(session, $session => {
+  const groupOptions = derived(sessionWithMeta, $sessionWithMeta => {
     const options = []
 
-    for (const addr of Object.keys($session?.groups || {})) {
+    for (const addr of Object.keys($sessionWithMeta?.groups || {})) {
       const group = groups.key(addr).get()
       const isMember = $userIsGroupMember(addr)
 
@@ -227,12 +225,12 @@
 
   $: disableActions =
     !$signer || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
-  $: like = likes.find(e => e.pubkey === $session?.pubkey)
+  $: like = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $likesCount = likes.length
-  $: zap = zaps.find(e => e.request.pubkey === $session?.pubkey)
+  $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
   $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
-  $: canZap = zapper && note.pubkey !== $session?.pubkey
-  $: reply = replies.find(e => e.pubkey === $session?.pubkey)
+  $: canZap = zapper && note.pubkey !== $sessionWithMeta?.pubkey
+  $: reply = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $repliesCount = replies.length
   $: handlers = $kindHandlers.filter(
     h =>
@@ -248,7 +246,7 @@
     if ($signer) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-      if (isSignedEvent(note) && !$env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
+      if (isSignedEvent(note) && !env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
         actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
       }
 
@@ -263,11 +261,11 @@
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
     }
 
-    if (!$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
+    if (!env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
-    if (note.pubkey === $session?.pubkey) {
+    if (note.pubkey === $sessionWithMeta?.pubkey) {
       actions.push({
         label: "Delete",
         icon: "trash",
@@ -287,7 +285,7 @@
   })
 </script>
 
-<div class="flex justify-between text-neutral-100" on:click|stopPropagation>
+<button tabindex="-1" type="button" class="flex justify-between text-neutral-100" on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
     <button
       class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
@@ -299,7 +297,7 @@
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
     </button>
-    {#if $env.ENABLE_ZAPS && noteActions.includes("zaps")}
+    {#if env.ENABLE_ZAPS && noteActions.includes("zaps")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions || !canZap,
@@ -315,7 +313,8 @@
     {#if noteActions.includes("reactions")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-          "pointer-events-none opacity-50": disableActions || note.pubkey === $session?.pubkey,
+          "pointer-events-none opacity-50":
+            disableActions || note.pubkey === $sessionWithMeta?.pubkey,
         })}
         on:click={() => (like ? deleteReaction(like) : react("+"))}>
         <Icon
@@ -365,7 +364,7 @@
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
-    {#if $seenOn?.length > 0 && ($env.PLATFORM_RELAYS.length === 0 || $env.PLATFORM_RELAYS.length > 1)}
+    {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
@@ -375,7 +374,7 @@
     {/if}
     <OverflowMenu {actions} />
   </div>
-</div>
+</button>
 
 {#if view}
   <Modal onEscape={() => setView(null)}>
@@ -400,7 +399,7 @@
           {/each}
         </div>
       {/if}
-      {#if $seenOn?.length > 0 && ($env.PLATFORM_RELAYS.length === 0 || $env.PLATFORM_RELAYS.length > 1)}
+      {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
         <h1 class="staatliches text-2xl">Relays</h1>
         <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
         <div class="flex flex-col gap-2">

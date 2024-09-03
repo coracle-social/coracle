@@ -1,4 +1,29 @@
 import "src/app.css"
+import {getJson, setJson} from "@welshman/lib"
+
+// Migrate sessions
+
+const sessions = {}
+
+for (const [key, {privkey, connectKey, connectToken, connectHandler, ...session}] of Object.entries(
+  getJson("sessions") || {},
+)) {
+  if (session.method === "extension") {
+    sessions[key] = session
+  } else if (session.method === "privkey") {
+    sessions[key] = {...session, secret: privkey}
+  } else if (session.method === "connect") {
+    sessions[key] = {
+      ...session,
+      method: "nip46",
+      secret: connectKey,
+      token: connectToken,
+      handler: connectHandler,
+    }
+  }
+}
+
+setJson("sessions", sessions)
 
 import Bugsnag from "@bugsnag/js"
 import App from "src/app/App.svelte"

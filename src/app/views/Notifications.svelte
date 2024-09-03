@@ -11,6 +11,7 @@
     getContextTagValues,
     getAddressTags,
   } from "@welshman/util"
+  import {repository, events, pubkey} from "@welshman/app"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -26,22 +27,19 @@
   import {router} from "src/app/util/router"
   import type {GroupRequest as GroupRequestType, GroupAlert as GroupAlertType} from "src/engine"
   import {
-    pubkey,
-    session,
+    sessionWithMeta,
     userSettings,
     markAsSeen,
     notifications,
     createNotificationGroups,
     loadNotifications,
     loadGroupMessages,
-    events,
     unwrapRepost,
     groupRequests,
     groupAlerts,
     groupAdminKeys,
     isEventMuted,
     getUserCircles,
-    repository,
     sortEventsDesc,
     isSeen,
     isGroupRequest,
@@ -85,10 +83,10 @@
   )
 
   const groupEventNotifications = derived(
-    [session, events, isEventMuted],
-    ([$session, $events, $isEventMuted]) =>
+    [sessionWithMeta, events, isEventMuted],
+    ([$sessionWithMeta, $events, $isEventMuted]) =>
       repository
-        .query([{"#a": getUserCircles($session)}])
+        .query([{"#a": getUserCircles($sessionWithMeta)}])
         .map(e => {
           // Unwrap reposts, add community tags so we know where stuff was posted to
           if (repostKinds.includes(e.kind)) {
@@ -108,9 +106,9 @@
             e &&
             !(
               !noteKinds.includes(e.kind) ||
-              e.pubkey === $session.pubkey ||
+              e.pubkey === $sessionWithMeta.pubkey ||
               // Skip mentions since they're covered in normal notifications
-              e.tags.find(t => t[0] === "p" && t[1] === $session.pubkey) ||
+              e.tags.find(t => t[0] === "p" && t[1] === $sessionWithMeta.pubkey) ||
               $isEventMuted(e)
             ),
         ),
@@ -235,7 +233,7 @@
   </div>
 </Tabs>
 
-{#if $session?.onboarding_tasks_completed}
+{#if $sessionWithMeta?.onboarding_tasks_completed}
   <OnboardingTasks />
 {/if}
 

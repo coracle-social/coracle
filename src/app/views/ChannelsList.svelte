@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {toTitle, Storage} from "hurdak"
   import {get, derived, readable} from "svelte/store"
+  import {signer} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
@@ -13,7 +14,6 @@
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
   import {
-    signer,
     channels,
     hasNip44,
     hasNewMessages,

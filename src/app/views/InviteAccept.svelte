@@ -1,6 +1,7 @@
 <script lang="ts">
   import {zipObj, pluck} from "ramda"
   import {normalizeRelayUrl} from "@welshman/util"
+  import {session} from "@welshman/app"
   import {updateIn} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -12,7 +13,7 @@
   import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {session, loadGroups, groupHints} from "src/engine"
+  import {loadGroups, groupHints} from "src/engine"
 
   export let people = []
   export let relays = []

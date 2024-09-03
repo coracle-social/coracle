@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {pubkey, signer} from "@welshman/app"
   import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -7,7 +8,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, pubkey, signer, hasNewNotifications, hasNewMessages} from "src/engine"
+  import {env, hasNewNotifications, hasNewMessages} from "src/engine"
 
   let innerWidth = 0
   let searching = false
@@ -39,8 +40,8 @@
       params.pubkey = props.pubkey
     }
 
-    if ($env.FORCE_GROUP) {
-      params.group = $env.FORCE_GROUP
+    if (env.FORCE_GROUP) {
+      params.group = env.FORCE_GROUP
     }
 
     router.at("notes/create").qp(params).open()

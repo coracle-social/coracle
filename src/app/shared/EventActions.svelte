@@ -1,8 +1,9 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
+  import {repository, pubkey} from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, repository, hints} from "src/engine"
+  import {hints} from "src/engine"
 
   export let event
 

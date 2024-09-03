@@ -26,7 +26,7 @@
   <p>You can find your keys by clicking on your profile picture, then the "Keys" menu item.</p>
 </OnboardingTaskComponent>
 
-{#if $env.ENABLE_ZAPS}
+{#if env.ENABLE_ZAPS}
   <OnboardingTaskComponent task={OnboardingTask.SetupWallet}>
     <p class="staatliches flex items-center gap-4 text-xl">
       <i class="fa fa-bolt" /> Get paid

@@ -1,7 +1,8 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
+  import {relaySearch} from "@welshman/app"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {relaySearch} from "src/engine"
+  import {displayRelayUrl} from 'src/domain'
 
   export let feed
   export let onChange
@@ -13,5 +14,5 @@
   value={feed.slice(1)}
   search={$relaySearch.searchValues}
   onChange={urls => onChange([FeedType.Relay, ...urls])}>
-  <span slot="item" let:item>{$relaySearch.displayValue(item)}</span>
+  <span slot="item" let:item>{displayRelayUrl(item)}</span>
 </SearchSelect>

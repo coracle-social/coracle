@@ -2,6 +2,7 @@
   import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
   import {FEEDS, getAddress, getAddressTagValues, getIdFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
+  import {repository} from "@welshman/app"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -15,7 +16,6 @@
     load,
     hints,
     userFeeds,
-    repository,
     feedSearch,
     userListFeeds,
     loadPubkeyFeeds,

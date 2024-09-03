@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {signer} from "@welshman/app"
   import Modal from "src/partials/Modal.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
@@ -8,7 +9,6 @@
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
   import {
-    signer,
     GroupAccess,
     deriveAdminKeyForGroup,
     publishGroupExitRequest,
@@ -82,7 +82,7 @@
   const leave = () => publishGroupExitRequest(address)
 </script>
 
-<div class="flex items-center gap-3" on:click|stopPropagation>
+<button type="button" class="flex items-center gap-3" on:click|stopPropagation>
   {#if $signer}
     {#if !$status.access}
       <Popover triggerType="mouseenter">
@@ -115,7 +115,7 @@
     {/if}
   {/if}
   <OverflowMenu {actions} />
-</div>
+</button>
 
 {#if showClaim}
   <Modal onEscape={cancelJoin}>

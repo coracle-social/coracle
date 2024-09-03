@@ -1,19 +1,20 @@
 <script lang="ts">
   import {makeRelayFeed, makeScopeFeed, Scope} from "@welshman/feeds"
+  import {session} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
   import {makeFeed} from "src/domain"
-  import {session, env} from "src/engine"
+  import {env} from "src/engine"
 
   export let feed = null
 
-  const isPlatformFeed = $env.PLATFORM_RELAYS.length > 0
+  const isPlatformFeed = env.PLATFORM_RELAYS.length > 0
 
   const showLogin = () => router.at("login").open()
 
   if (isPlatformFeed) {
-    feed = makeFeed({definition: makeRelayFeed(...$env.PLATFORM_RELAYS)})
+    feed = makeFeed({definition: makeRelayFeed(...env.PLATFORM_RELAYS)})
   } else if (!feed) {
     feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
   }

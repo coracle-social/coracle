@@ -21,7 +21,7 @@
     showInfo("Your settings have been saved!")
   }
 
-  const searchUploadProviders = fuzzy($env.NIP96_URLS, {keys: ["url"]})
+  const searchUploadProviders = fuzzy(env.NIP96_URLS, {keys: ["url"]})
 
   const formatPercent = d => String(Math.round(d * 100))
   const parsePercent = p => parseInt(p) / 100
@@ -66,7 +66,7 @@
         faster, but will require more bandwidth and processing power.
       </p>
     </Field>
-    {#if !$env.FORCE_GROUP && $env.PLATFORM_RELAYS.length === 0}
+    {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
       <FieldInline label="Authenticate with relays">
         <Toggle bind:value={values.auto_authenticate} />
         <p slot="info">

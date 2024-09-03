@@ -3,6 +3,7 @@
   import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
+  import {session, displayProfileByPubkey} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -21,8 +22,6 @@
     tagsFromContent,
     getClientTags,
     getReplyTags,
-    session,
-    displayProfileByPubkey,
     mention,
   } from "src/engine"
   import {drafts} from "src/app/state"
@@ -182,7 +181,7 @@
               <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
                 <i slot="button" class="fa fa-paperclip" />
               </ImageInput>
-              {#if !$env.FORCE_GROUP}
+              {#if !env.FORCE_GROUP}
                 <i class="fa fa-cog" on:click={() => options.setView("settings")} />
               {/if}
               <i class="fa fa-at" />
@@ -204,7 +203,7 @@
   </div>
 {/if}
 
-{#if !$env.FORCE_GROUP}
+{#if !env.FORCE_GROUP}
   <NoteOptions
     bind:this={options}
     on:change={setOpts}

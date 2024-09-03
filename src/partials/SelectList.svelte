@@ -19,7 +19,8 @@
   }
 </script>
 
-<div
+<button
+  type="button"
   class={$$props.class}
   class:pointer-events-none={disabled}
   class:opacity-75={disabled}
@@ -33,4 +34,4 @@
         active={multiple ? value.includes(option) : value === option} />
     </div>
   {/each}
-</div>
+</button>

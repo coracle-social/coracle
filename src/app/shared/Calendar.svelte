@@ -2,6 +2,7 @@
   import {batch} from "hurdak"
   import {onMount} from "svelte"
   import {fromPairs} from "@welshman/lib"
+  import {signer, pubkey, repository} from "@welshman/app"
   import {deriveEventsMapped} from "@welshman/store"
   import {getAddress, getReplyFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -12,7 +13,7 @@
   import {secondsToDate} from "src/util/misc"
   import {themeColors} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
-  import {hints, load, pubkey, signer, loadAll, repository} from "src/engine"
+  import {hints, load, loadAll} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let filter

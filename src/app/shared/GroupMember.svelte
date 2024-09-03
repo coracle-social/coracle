@@ -1,9 +1,10 @@
 <script lang="ts">
   import {isGroupAddress} from "@welshman/util"
+  import {session} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {session, deriveAdminKeyForGroup} from "src/engine"
+  import {deriveAdminKeyForGroup} from "src/engine"
   import {router} from "src/app/util/router"
 
   export let address
@@ -24,10 +25,10 @@
 
 <Card interactive on:click={() => openPerson(pubkey)}>
   <PersonSummary inert {pubkey}>
-    <div slot="actions" on:click|stopPropagation>
+    <button type="button" slot="actions" on:click|stopPropagation>
       {#if $adminKey && pubkey !== $session.pubkey && isGroupAddress(address)}
         <Anchor on:click={remove} button accent>Remove</Anchor>
       {/if}
-    </div>
+    </button>
   </PersonSummary>
 </Card>

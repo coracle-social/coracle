@@ -1,6 +1,7 @@
 <script lang="ts">
   import {nth} from "@welshman/lib"
   import {COMMUNITY, GROUP} from "@welshman/util"
+  import {session, pubkey} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -8,8 +9,6 @@
   import type {GroupMeta} from "src/domain"
   import {
     env,
-    pubkey,
-    session,
     initGroup,
     publishGroupMeta,
     publishGroupInvites,
@@ -28,7 +27,7 @@
     image: "",
     banner: "",
     feeds: [],
-    relays: $env.PLATFORM_RELAYS.map(url => ["relay", url]),
+    relays: env.PLATFORM_RELAYS.map(url => ["relay", url]),
     listing_is_public: false,
     members: [$pubkey],
     moderators: [],

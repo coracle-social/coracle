@@ -1,8 +1,8 @@
 <script lang="ts">
   import {deriveEvent} from "@welshman/store"
+  import {repository, pubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
-  import {repository, pubkey} from "src/engine"
   import {router} from "src/app/util"
 
   export let address

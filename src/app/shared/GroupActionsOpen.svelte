@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {without} from "ramda"
+  import {remove} from "@welshman/lib"
+  import {session, pubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
   import {
-    session,
-    pubkey,
     publishCommunitiesList,
     deriveGroup,
     deriveGroupStatus,
@@ -53,10 +52,10 @@
 
   const join = () => publishCommunitiesList(getUserCommunities(session.get()).concat(address))
 
-  const leave = () => publishCommunitiesList(without([address], getUserCommunities(session.get())))
+  const leave = () => publishCommunitiesList(remove(address, getUserCommunities(session.get())))
 </script>
 
-<div class="flex items-center gap-3" on:click|stopPropagation>
+<button type="button" class="flex items-center gap-3" on:click|stopPropagation>
   {#if $session}
     {#if $status.joined}
       <Popover triggerType="mouseenter">
@@ -75,4 +74,4 @@
     {/if}
   {/if}
   <OverflowMenu {actions} />
-</div>
+</button>

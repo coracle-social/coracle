@@ -2,13 +2,12 @@
   import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
   import {toNostrURI} from "@welshman/util"
+  import {session, signer} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
-    loginWithPublicKey,
-    session,
     hints,
-    signer,
+    loginWithPublicKey,
     unfollowPerson,
     followPerson,
     unmutePerson,

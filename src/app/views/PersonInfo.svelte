@@ -1,9 +1,9 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {deriveHandle, displayHandle, deriveProfile} from "@welshman/app"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {displayHandle} from "src/domain"
-  import {hints, deriveHandle, deriveProfile} from "src/engine"
+  import {hints} from "src/engine"
 
   export let pubkey
 

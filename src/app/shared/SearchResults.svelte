@@ -2,10 +2,10 @@
   import type {Writable} from "svelte/store"
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
-  import {fuzzy} from "src/util/misc"
+  import {topicSearch} from "@welshman/app"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
-  import {topics, profileSearch, createPeopleLoader} from "src/engine"
+  import {profileSearch, createPeopleLoader} from "src/engine"
 
   export let term: Writable<string>
   export let replace = false
@@ -47,13 +47,9 @@
 
   const {loading: loadingPeople, load: loadPeople} = createPeopleLoader()
 
-  const searchTopics = topics
-    .throttle(1000)
-    .derived($topics => fuzzy($topics, {keys: ["name"], threshold: 0.5, shouldSort: true}))
-
   const results = derived(
-    [term, searchTopics, profileSearch],
-    ([$term, $searchTopics, $profileSearch]) => {
+    [term, topicSearch, profileSearch],
+    ([$term, $topicSearch, $profileSearch]) => {
       $term = $term || ""
 
       if ($term.length > 30) {
@@ -61,7 +57,9 @@
       }
 
       return $term.startsWith("#")
-        ? $searchTopics($term.slice(1)).map(topic => ({type: "topic", id: topic.name, topic}))
+        ? $topicSearch
+            .searchOptions($term.slice(1))
+            .map(topic => ({type: "topic", id: topic.name, topic}))
         : $profileSearch
             .searchOptions($term)
             .map(profile => ({type: "profile", id: profile.event.pubkey, profile}))

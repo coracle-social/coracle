@@ -5,13 +5,14 @@
   import {now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
+  import {signer, zappersByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import {router} from "src/app/util/router"
-  import {env, load, hints, signer, getSetting, getZapper} from "src/engine"
+  import {env, load, hints, getSetting} from "src/engine"
 
   export let splits
   export let eid = null
@@ -49,8 +50,8 @@
         // Add our platform split on top as a "tip"
         if (percent > 0 && totalWeight > 0) {
           zaps.push({
-            pubkey: $env.PLATFORM_PUBKEY,
-            relay: hints.FromPubkeys([$env.PLATFORM_PUBKEY]).getUrl(),
+            pubkey: env.PLATFORM_PUBKEY,
+            relay: hints.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
             amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
             status: "pending",
             isTip: true,
@@ -60,7 +61,7 @@
         // Add our zapper and relay hints
         return zaps.map((zap, i) => {
           const content = i === 0 ? message : ""
-          const zapper = getZapper(zap.pubkey)
+          const zapper = $zappersByPubkey.get(zap.pubkey)
           const relays = hints
             .merge([hints.PublishMessage(zap.pubkey), hints.fromRelays([zap.relay])])
             .getUrls()

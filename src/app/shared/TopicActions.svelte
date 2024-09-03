@@ -1,7 +1,7 @@
 <script lang="ts">
+  import {signer} from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
-  import {signer} from "src/engine"
 
   export let topic
 

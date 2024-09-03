@@ -1,11 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
   import {reverse} from "ramda"
+  import {signer, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {signer, pubkey} from "src/engine"
 
   const {current, page, modal, modals} = router
 
@@ -62,7 +62,7 @@
       "pointer-events-none": $menuIsOpen,
     })}>
     {#if $page}
-      {@const promise = router.getMatch($page.path).route.component}
+      {@const promise = router.getMatch($page.path).route.component()}
       {#key router.getKey($page)}
         <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 p-4">
           {#await promise}

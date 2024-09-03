@@ -3,6 +3,7 @@
   import {stripProtocol} from "@welshman/lib"
   import {REACTION} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
+  import {deriveZapper, deriveProfile, displayProfileByPubkey} from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -19,16 +20,7 @@
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
-  import {
-    makeZapSplit,
-    userMutes,
-    deriveProfile,
-    displayProfileByPubkey,
-    loadPubkeys,
-    imgproxy,
-    deriveZapper,
-    getPubkeyRelayPolicies,
-  } from "src/engine"
+  import {makeZapSplit, userMutes, loadPubkeys, imgproxy, getPubkeyRelayPolicies} from "src/engine"
   import {router} from "src/app/util"
 
   export let pubkey

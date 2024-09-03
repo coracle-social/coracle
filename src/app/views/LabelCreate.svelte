@@ -1,5 +1,6 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
+  import {pubkey, topicSearch} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,11 +13,9 @@
     hints,
     loadLabels,
     getClientTags,
-    searchTopicNames,
     deriveCollections,
     collectionSearch,
     createAndPublish,
-    pubkey,
   } from "src/engine"
 
   export let eid
@@ -74,7 +73,7 @@
       <Field label="Collections">
         <SearchSelect
           bind:this={topicInput}
-          search={$searchTopicNames}
+          search={$topicSearch.searchValues}
           termToItem={identity}
           onChange={onTopicChange} />
         <div slot="info">Search for existing topics, or create your own.</div>
