@@ -128,11 +128,18 @@
       $groupNotifications.filter(e => !getContextTagValues(e.tags).some(a => $isSeen(a, e))),
   )
 
+  const trackLoading = async p => {
+    loading = true
+    await p
+    loading = false
+  }
+
   export let activeTab = allTabs[0]
 
   let limit = 4
   let innerWidth = 0
   let element = null
+  let loading = false
   let tabNotifications = []
 
   $: {
@@ -164,28 +171,30 @@
 
     const unsubUnreadMainNotifications = unreadMainNotifications.subscribe(
       throttle(1000, events => {
-        if (activeTab === allTabs[0] && events.length > 0) {
-          return markAsSeen(SEEN_GENERAL, {
-            mentions: $mainNotifications,
-            replies: $mainNotifications,
-          })
+        if (!loading && activeTab === allTabs[0] && events.length > 0) {
+          trackLoading(
+            markAsSeen(SEEN_GENERAL, {
+              mentions: $mainNotifications,
+              replies: $mainNotifications,
+            }),
+          )
         }
       }),
     )
 
     const unsubUnreadReactionNotifications = unreadReactionNotifications.subscribe(
       throttle(1000, events => {
-        if (activeTab === allTabs[1] && events.length > 0) {
+        if (!loading && activeTab === allTabs[1] && events.length > 0) {
           const [reactions, zaps] = partition(e => e.kind === REACTION, $reactionNotifications)
 
-          return markAsSeen(SEEN_GENERAL, {reactions, zaps})
+          trackLoading(markAsSeen(SEEN_GENERAL, {reactions, zaps}))
         }
       }),
     )
 
     const unsubUnreadGroupNotifications = unreadGroupNotifications.subscribe(
       throttle(1000, events => {
-        if (activeTab === allTabs[2] && events.length > 0) {
+        if (!loading && activeTab === allTabs[2] && events.length > 0) {
           const eventsByContext = {}
 
           for (const event of $groupNotifications) {
@@ -194,7 +203,7 @@
             }
           }
 
-          return markAsSeen(SEEN_CONTEXT, eventsByContext)
+          trackLoading(markAsSeen(SEEN_CONTEXT, eventsByContext))
         }
       }),
     )

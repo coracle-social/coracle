@@ -78,7 +78,15 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
 
       await Promise.all(
         Array.from(getRequestItems({relays, filters}, opts)).map(opts =>
-          load({...opts, onEvent, tracker, signal, skipCache: true, forcePlatform}),
+          load({
+            ...opts,
+            onEvent,
+            tracker,
+            signal,
+            authTimeout: 300,
+            skipCache: true,
+            forcePlatform,
+          }),
         ),
       )
 

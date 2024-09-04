@@ -178,7 +178,7 @@ export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWi
 export const hasNip44 = writable(false)
 
 signer.subscribe($signer => {
-  if ($signer) {
+  if ($signer?.nip44) {
     $signer?.nip44.encrypt(pubkey.get(), "test").then(
       v => hasNip44.set(true),
       () => hasNip44.set(false),
@@ -845,11 +845,24 @@ export const userSeenStatuses = derived(
   },
 )
 
-export const isSeen = derived(
+export const getSeenAt = derived(
   [userSeenStatuses],
   ([$userSeenStatuses]) =>
-    (key: string, event: TrustedEvent) =>
-      $userSeenStatuses[key]?.ts >= event.created_at || $userSeenStatuses[key]?.ids.has(event.id),
+    (key: string, event: TrustedEvent) => {
+      const match = $userSeenStatuses[key]
+      const fallback = $userSeenStatuses["*"]
+      const ts = Math.max(match?.ts || 0, fallback?.ts || 0)
+
+      if (ts >= event.created_at) return ts
+      if (match?.ids.has(event.id)) return event.created_at
+
+      return 0
+    },
+)
+
+export const isSeen = derived(
+  getSeenAt,
+  $getSeenAt => (key: string, event: TrustedEvent) => $getSeenAt(key, event) > 0,
 )
 
 // Notifications
@@ -966,8 +979,8 @@ export const getChannelSeenKey = (id: string) =>
 export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
 
 export const channels = derived(
-  [pubkey, messages, userSeenStatuses],
-  ([$pubkey, $messages, $userSeenStatuses]) => {
+  [pubkey, messages, getSeenAt],
+  ([$pubkey, $messages, $getSeenAt]) => {
     const channelsById: Record<string, Channel> = {}
 
     for (const e of $messages) {
@@ -987,14 +1000,7 @@ export const channels = derived(
       }
 
       chan.messages.push(e)
-
-      const status = $userSeenStatuses[key]
-
-      if (status?.ids.has(e.id)) {
-        chan.last_checked = Math.max(chan.last_checked, e.created_at)
-      } else {
-        chan.last_checked = Math.max(chan.last_checked, status?.ts || 0)
-      }
+      chan.last_checked = Math.max(chan.last_checked, $getSeenAt(key, e))
 
       if (e.pubkey === $pubkey) {
         chan.last_sent = Math.max(chan.last_sent, e.created_at)
@@ -1309,7 +1315,7 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
   }
 
   if (!skipCache) {
-    request.relays = [...request.relays || [], LOCAL_RELAY_URL]
+    request.relays = [...(request.relays || []), LOCAL_RELAY_URL]
   }
 
   const sub = baseSubscribe(request)
@@ -1384,6 +1390,14 @@ export type MyPublishRequest = PublishRequest & {
 }
 
 export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
+  request.relays = forcePlatform
+    ? forcePlatformRelays(request.relays)
+    : withPlatformRelays(request.relays)
+
+  // Make sure it gets published to our repository as well. We do it via our local
+  // relay rather than directly so that listening subscriptions get notified.
+  request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
+
   logger.info(`Publishing event`, request)
 
   // Make sure the event is decrypted before updating stores

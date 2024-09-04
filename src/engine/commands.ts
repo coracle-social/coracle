@@ -1,6 +1,18 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
-import {cached, equals, splitAt, first, last, append, nthEq, groupBy, now} from "@welshman/lib"
+import {
+  cached,
+  indexBy,
+  nthNe,
+  equals,
+  splitAt,
+  first,
+  last,
+  append,
+  nthEq,
+  groupBy,
+  now,
+} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getAddress,
@@ -715,22 +727,30 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
     return
   }
 
+  const cutoff = now() - seconds(180, "day")
   const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const rawTags = parseJson(await ensurePlaintext(prev))
-  const tags = Array.isArray(rawTags) ? rawTags.filter(t => !eventsByKey[t[1]]) : []
+  const prevTags = parseJson(await ensurePlaintext(prev))?.filter?.(nthNe(1, "*")) || []
+  const data = indexBy(t => t[1], prevTags)
 
   for (const [key, events] of Object.entries(eventsByKey)) {
-    if (events.length === 0) {
-      continue
-    }
-
-    const [newer, older] = splitAt(10, events)
+    const [newer, older] = splitAt(1, events)
     const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
 
-    tags.push(["seen", key, ts, ...newer.map(e => e.id)])
+    if (ts >= cutoff) {
+      data.set(key, ["seen", key, String(ts), ...newer.map(e => e.id)])
+    } else {
+      data.delete(key)
+    }
   }
 
-  const json = JSON.stringify(tags)
+  const tags = Array.from(data.values())
+
+  if (equals(tags, prevTags)) {
+    return
+  }
+
+  // Wait until after comparing for equality to add our current timestamp
+  const json = JSON.stringify([...tags, ["seen", "*", String(cutoff)]])
   const relays = AppContext.router.WriteRelays().getUrls()
   const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
