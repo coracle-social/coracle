@@ -72,7 +72,6 @@ import {
   loadOne,
   maxWot,
   getNetwork,
-  primeWotCaches,
   publish,
   subscribe,
   subscribePersistent,
@@ -380,8 +379,6 @@ export const feedLoader = new FeedLoader({
     const $pubkey = pubkey.get()
     const thresholdMin = maxWot.get() * min
     const thresholdMax = maxWot.get() * max
-
-    primeWotCaches($pubkey)
 
     for (const tpk of repository.eventsByAuthor.keys()) {
       const score = getWotScore($pubkey, tpk)

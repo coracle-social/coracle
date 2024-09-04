@@ -1,6 +1,5 @@
 import Fuse from "fuse.js"
 import crypto from "crypto"
-import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
 import {doPipe, batch, seconds, sleep} from "hurdak"
 import {
@@ -82,7 +81,13 @@ import {
 import type {PartialSubscribeRequest} from "@welshman/app"
 import type {PublishRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {withGetter, deriveEvents, deriveEventsMapped, createEventStore} from "@welshman/store"
+import {
+  withGetter,
+  deriveEvents,
+  deriveEventsMapped,
+  createEventStore,
+  throttled,
+} from "@welshman/store"
 import {
   session,
   getSession,
@@ -350,8 +355,6 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
   getSearch = () => {
     const $pubkey = pubkey.get()
 
-    primeWotCaches($pubkey)
-
     const options = this.options.map(profile => ({
       profile,
       score: getWotScore($pubkey, profile.event.pubkey),
@@ -432,40 +435,6 @@ export const getFollowsWhoMute = simpleCache(
   ([pk, tpk]) => new Set(getFollows(pk).filter(other => getMutes(other).includes(tpk))),
 )
 
-export const primeWotCaches = throttle(3000, pk => {
-  const userFollows = new Set(getFollows(pk))
-  const mutes: Record<string, string[]> = {}
-  const follows: Record<string, string[]> = {}
-
-  // Get follows and mutes from the current user's follows list
-  for (const tpk of repository.eventsByAuthor.keys()) {
-    if (userFollows.has(tpk)) {
-      for (const mpk of getMutes(tpk)) {
-        pushToKey(mutes, mpk, tpk)
-      }
-
-      for (const fpk of getFollows(tpk)) {
-        pushToKey(follows, fpk, tpk)
-      }
-    } else {
-      mutes[tpk] = []
-      follows[tpk] = []
-    }
-  }
-
-  // Populate mutes cache
-  for (const [tpk, pubkeys] of Object.entries(mutes)) {
-    getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([pk, tpk]), new Set(pubkeys))
-  }
-
-  // Populate follows cache
-  for (const [tpk, pubkeys] of Object.entries(follows)) {
-    getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([pk, tpk]), new Set(pubkeys))
-  }
-})
-
-export const maxWot = withGetter(writable(10))
-
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
 
 export const getWotScore = (pk, tpk) => {
@@ -473,12 +442,51 @@ export const getWotScore = (pk, tpk) => {
 
   const follows = getFollowsWhoFollow(pk, tpk)
   const mutes = getFollowsWhoMute(pk, tpk)
-  const score = follows.size - mutes.size
 
-  maxWot.update(maxScore => Math.max(maxScore, score))
-
-  return score
+  return follows.size - mutes.size
 }
+
+export const maxWot = withGetter(
+  derived(
+    [pubkey, throttled(3000, followsByPubkey), throttled(3000, mutesByPubkey)],
+    ([$pubkey, $followsByPubkey, $mutesByPubkey]) => {
+      const userFollows = new Set(getListValues("p", $followsByPubkey.get($pubkey)))
+      const mutes: Record<string, string[]> = {}
+      const follows: Record<string, string[]> = {}
+
+      // Get follows and mutes from the current user's follows list
+      for (const tpk of repository.eventsByAuthor.keys()) {
+        if (userFollows.has(tpk)) {
+          for (const mpk of getListValues("p", $mutesByPubkey.get(tpk))) {
+            pushToKey(mutes, mpk, tpk)
+          }
+
+          for (const fpk of getListValues("p", $followsByPubkey.get(tpk))) {
+            pushToKey(follows, fpk, tpk)
+          }
+        } else {
+          mutes[tpk] = []
+          follows[tpk] = []
+        }
+      }
+
+      // Populate mutes cache
+      for (const [tpk, pubkeys] of Object.entries(mutes)) {
+        getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([$pubkey, tpk]), new Set(pubkeys))
+      }
+
+      let $maxWot = 10
+
+      // Populate follows cache
+      for (const [tpk, pubkeys] of Object.entries(follows)) {
+        $maxWot = Math.max($maxWot, pubkeys.length)
+        getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([$pubkey, tpk]), new Set(pubkeys))
+      }
+
+      return $maxWot
+    },
+  ),
+)
 
 // User follows/mutes/network
 

@@ -29,7 +29,6 @@ import {
   loadNotifications,
   loadFeedsAndLists,
   listenForNotifications,
-  primeWotCaches,
   getFollows,
   getSetting,
 } from "src/engine"
@@ -123,7 +122,7 @@ export const loadUserData = async (hints: string[] = []) => {
   })
 
   // Load enough to figure out web of trust
-  loadPubkeys(getFollows($pubkey)).then(() => primeWotCaches($pubkey))
+  loadPubkeys(getFollows($pubkey))
 
   // Load anything they might need to be notified about
   loadSeen()

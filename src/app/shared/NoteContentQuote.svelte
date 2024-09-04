@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {getAddress, getIdFilters} from "@welshman/util"
-  import {deriveProfileDisplay, AppContext} from "@welshman/app"
+  import {getAddress, Address, getIdFilters} from "@welshman/util"
+  import {deriveProfileDisplay, deriveEvent, AppContext} from "@welshman/app"
   import {filterVals} from "hurdak"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -14,12 +14,10 @@
   export let value
   export let depth = 0
 
-  let quote
-  let muted = false
-  let loading = true
+  let showMuted = false
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
-
+  const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
   const relays = AppContext.router
     .merge([
       AppContext.router.fromRelays(relayHints),
@@ -28,8 +26,10 @@
     ])
     .getUrls()
 
+  const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
+
   const openQuote = e => {
-    const noteId = value.id || quote?.id
+    const noteId = value.id || $quote?.id
 
     // stopPropagation wasn't working for some reason
     if (e.detail.target.textContent === "Show") {
@@ -44,67 +44,41 @@
   }
 
   const unmute = e => {
-    muted = false
+    showMuted = true
   }
 
-  $: address = quote ? getAddress(quote) : ""
+  $: address = $quote ? getAddress($quote) : ""
   $: isGroup = address.match(/^(34550|35834):/)
-  $: profileDisplay = deriveProfileDisplay(quote?.pubkey)
-
-  onMount(async () => {
-    quote = await loadOne({
-      relays,
-      forcePlatform: false,
-      filters: id
-        ? getIdFilters([id])
-        : [
-            filterVals(xs => xs.length > 0, {
-              "#d": [identifier],
-              kinds: [kind],
-              authors: [pubkey],
-            }),
-          ],
-    })
-
-    if (quote) {
-      loading = false
-      muted = $isEventMuted(quote, true)
-    }
-  })
+  $: profileDisplay = deriveProfileDisplay($quote?.pubkey)
+  $: muted = $quote && $isEventMuted($quote, true)
 </script>
 
 <div class="py-2" on:click|stopPropagation>
   <Card interactive stopPropagation class="my-2" on:click={openQuote}>
-    {#if loading}
+    {#if muted && !showMuted}
+      <p class="mb-1 py-24 text-center text-neutral-600">
+        You have hidden this note.
+        <Anchor underline stopPropagation on:click={unmute}>Show</Anchor>
+      </p>
+    {:else if $quote}
+      {#if !isGroup}
+        <div class="mb-4 flex items-center gap-4">
+          <PersonCircle class="h-6 w-6" pubkey={$quote.pubkey} />
+          <Anchor
+            modal
+            stopPropagation
+            type="unstyled"
+            class="flex items-center gap-2"
+            href={router.at("people").of($quote.pubkey).toString()}>
+            <h2 class="text-lg">{$profileDisplay}</h2>
+          </Anchor>
+        </div>
+      {/if}
+      <slot name="note-content" quote={$quote} {depth} />
+    {:else}
       <div class="px-20">
         <Spinner />
       </div>
-    {:else if quote}
-      {#if muted}
-        <p class="mb-1 py-24 text-center text-neutral-600">
-          You have hidden this note.
-          <Anchor underline stopPropagation on:click={unmute}>Show</Anchor>
-        </p>
-      {:else}
-        {#if !isGroup}
-          <div class="mb-4 flex items-center gap-4">
-            <PersonCircle class="h-6 w-6" pubkey={quote.pubkey} />
-            <Anchor
-              modal
-              stopPropagation
-              type="unstyled"
-              class="flex items-center gap-2"
-              href={router.at("people").of(quote.pubkey).toString()}>
-              <h2 class="text-lg">{$profileDisplay}</h2>
-            </Anchor>
-          </div>
-        {/if}
-        <slot name="note-content" {quote} {depth} />
-      {/if}
-    {:else}
-      <p class="mb-1 py-24 text-center text-neutral-600">
-        Unable to load a preview for quoted event
-      </p>
     {/if}
   </Card>
 </div>
