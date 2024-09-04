@@ -104,7 +104,6 @@ import {
   followsByPubkey,
   AppContext,
   makeRouter,
-  splitRequest,
   subscribe as baseSubscribe,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
@@ -1304,7 +1303,15 @@ export type MySubscribeRequest = PartialSubscribeRequest & {
   forcePlatform?: boolean
 }
 
-export const subscribe = (request: MySubscribeRequest) => {
+export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeRequest) => {
+  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform !== false) {
+    request.relays = env.PLATFORM_RELAYS
+  }
+
+  if (!skipCache) {
+    request.relays = [...request.relays || [], LOCAL_RELAY_URL]
+  }
+
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
@@ -1695,17 +1702,6 @@ Object.assign(AppContext, {
     getRedundancy: () => getSetting("relay_redundancy"),
     getLimit: () => getSetting("relay_limit"),
   }),
-  splitRequest: (req: MySubscribeRequest) => {
-    if (env.PLATFORM_RELAYS.length === 0) {
-      return splitRequest(req)
-    }
-
-    if (req.forcePlatform !== false) {
-      return [{...req, relays: env.PLATFORM_RELAYS}]
-    }
-
-    return [...splitRequest(req), {...req, relays: env.PLATFORM_RELAYS}]
-  },
 })
 
 // Storage

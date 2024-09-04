@@ -63,11 +63,7 @@ function* getRequestItems({relays, filters}: RequestItem, opts: FeedOpts) {
   if (relays?.length > 0) {
     yield {filters, relays}
   } else if (!opts.skipNetwork) {
-    const selections = getFilterSelections(filters)
-
-    for (const {relay, filters} of selections) {
-      yield {filters, relays: [relay]}
-    }
+    yield* getFilterSelections(filters)
   }
 }
 

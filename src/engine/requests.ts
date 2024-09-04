@@ -341,8 +341,8 @@ export const feedLoader = new FeedLoader({
       await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
     } else {
       await Promise.all(
-        getFilterSelections(filters).map(({relay, filters}) =>
-          load({filters, relays: [relay], onEvent}),
+        getFilterSelections(filters).map(({relays, filters}) =>
+          load({filters, relays, onEvent}),
         ),
       )
     }
