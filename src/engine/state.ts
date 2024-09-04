@@ -1,10 +1,8 @@
 import Fuse from "fuse.js"
 import crypto from "crypto"
-import {openDB, deleteDB} from "idb"
-import type {IDBPDatabase} from "idb"
 import {throttle} from "throttle-debounce"
 import {get, derived, writable} from "svelte/store"
-import {defer, doPipe, batch, randomInt, seconds, sleep} from "hurdak"
+import {doPipe, batch, seconds, sleep} from "hurdak"
 import {
   find,
   defaultTo,
@@ -17,7 +15,6 @@ import {
   prop,
   whereEq,
   without,
-  fromPairs,
 } from "ramda"
 import {
   Worker,
@@ -72,7 +69,7 @@ import {
   normalizeRelayUrl,
 } from "@welshman/util"
 import type {Filter, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
-import {Nip59, Nip01Signer, decrypt} from "@welshman/signer"
+import {Nip59, Nip01Signer} from "@welshman/signer"
 import {
   Executor,
   Multi,
@@ -85,7 +82,7 @@ import {
 import type {PartialSubscribeRequest} from "@welshman/app"
 import type {PublishRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {withGetter, deriveEvents, deriveEventsMapped} from "@welshman/store"
+import {withGetter, deriveEvents, deriveEventsMapped, createEventStore} from "@welshman/store"
 import {
   session,
   getSession,
@@ -105,6 +102,17 @@ import {
   AppContext,
   makeRouter,
   subscribe as baseSubscribe,
+  storageAdapters,
+  publishStatusData,
+  freshness,
+  zappers,
+  relays,
+  initStorage,
+  db,
+  plaintext,
+  getPlaintext,
+  setPlaintext,
+  ensurePlaintext,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -190,7 +198,6 @@ signer.subscribe($signer => {
 
 // Base state
 
-export const plaintext = withGetter(writable<Record<string, string>>({}))
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
 export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
@@ -205,43 +212,7 @@ export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
 
-// Freshness
-
-export const freshness = new Map<string, number>()
-
-export const getFreshnessKey = (key: string, value: any) => `${key}:${value}`
-
-export const getFreshness = (key: string, value: any) =>
-  freshness.get(getFreshnessKey(key, value)) || 0
-
-export const setFreshness = (key: string, value: any, ts: number) =>
-  freshness.set(getFreshnessKey(key, value), ts)
-
 // Plaintext
-
-export const getPlaintext = (e: TrustedEvent) => plaintext.get()[e.id]
-
-export const setPlaintext = (e: TrustedEvent, content) => plaintext.update(assoc(e.id, content))
-
-export const ensurePlaintext = async (e?: TrustedEvent) => {
-  if (!e?.content) return undefined
-  if (!getPlaintext(e)) {
-    const session = getSession(e.pubkey)
-    const signer = getSigner(session)
-
-    if (signer) {
-      try {
-        setPlaintext(e, await decrypt(signer, e.pubkey, e.content))
-      } catch (e) {
-        if (!e.toString().match(/invalid payload length/)) {
-          throw e
-        }
-      }
-    }
-  }
-
-  return getPlaintext(e)
-}
 
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   if (!e.content) return undefined
@@ -1720,157 +1691,9 @@ Object.assign(AppContext, {
 
 // Storage
 
-type IndexedDBAdapterOpts = {
-  limit?: number
-  set?: (xs: any[]) => void
-  subscribe?: (f: (xs: any[]) => void) => () => void
-  sort?: (xs: any[]) => any[]
-  filter?: (x: any) => boolean
-  migrate?: (xs: any[]) => any[]
-}
-
-class IndexedDBAdapter {
-  constructor(
-    readonly name,
-    readonly key,
-    readonly opts: IndexedDBAdapterOpts,
-  ) {}
-
-  async initialize(storage: Storage) {
-    const {name, key, opts} = this
-    const {set, subscribe, sort, limit = 100, filter = identity, migrate = identity} = opts
-    const data = await storage.getAll(name)
-
-    let prev: any[] = migrate(data.filter(filter))
-
-    await set(prev)
-
-    subscribe(
-      throttle(randomInt(3000, 5000), async current => {
-        if (storage.dead.get()) {
-          return
-        }
-
-        current = current.filter(prop(key))
-
-        const prevIds = new Set(prev.map(prop(key)))
-        const currentIds = new Set(current.map(prop(key)))
-        const newRecords = current.filter(r => !prevIds.has(r[key]))
-        const removedRecords = prev.filter(r => !currentIds.has(r[key]))
-
-        prev = current
-
-        if (newRecords.length > 0) {
-          await storage.bulkPut(name, newRecords)
-        }
-
-        if (removedRecords.length > 0) {
-          if (name === "repository") {
-            console.trace("deleting", removedRecords.length, current.length)
-          } else {
-            await storage.bulkDelete(name, removedRecords.map(prop(key)))
-          }
-        }
-
-        // If we have much more than our limit, prune our store. This will get persisted
-        // the next time around.
-        if (current.length > limit * 1.5) {
-          set((sort ? sort(current) : current).slice(0, limit))
-        }
-      }),
-    )
-  }
-}
-
-const DB_NAME = "nostr-engine/Storage"
-
-class Storage {
-  db: IDBPDatabase
-  ready = defer()
-  dead = withGetter(writable(false))
-
-  constructor(
-    readonly version,
-    readonly adapters: IndexedDBAdapter[],
-  ) {
-    this.initialize()
-  }
-
-  close = async () => {
-    this.dead.set(true)
-
-    await this.db?.close()
-  }
-
-  clear = async () => {
-    localStorage.clear()
-
-    await this.close()
-    await deleteDB(DB_NAME)
-  }
-
-  async initialize() {
-    const indexedDBAdapters = this.adapters.filter(
-      a => a instanceof IndexedDBAdapter,
-    ) as IndexedDBAdapter[]
-
-    if (window.indexedDB) {
-      window.addEventListener("beforeunload", () => this.close())
-
-      this.db = await openDB(DB_NAME, this.version, {
-        upgrade(db, oldVersion, newVersion, transaction, event) {
-          const names = indexedDBAdapters.map(adapter => adapter.name)
-
-          for (const name of db.objectStoreNames) {
-            if (!names.includes(name)) {
-              db.deleteObjectStore(name)
-            }
-          }
-
-          for (const adapter of indexedDBAdapters) {
-            try {
-              db.createObjectStore(adapter.name, {
-                keyPath: adapter.key,
-              })
-            } catch (e) {
-              logger.warn(e)
-            }
-          }
-        },
-      })
-
-      await Promise.all(this.adapters.map(adapter => adapter.initialize(this)))
-    }
-
-    this.ready.resolve()
-  }
-
-  getAll = async (name: string) => {
-    const tx = this.db.transaction(name, "readwrite")
-    const store = tx.objectStore(name)
-    const result = await store.getAll()
-
-    await tx.done
-
-    return result
-  }
-
-  bulkPut = async (name: string, data: any[]) => {
-    const tx = this.db.transaction(name, "readwrite")
-    const store = tx.objectStore(name)
-
-    await Promise.all(data.map(item => store.put(item)))
-    await tx.done
-  }
-
-  bulkDelete = async (name: string, ids: string[]) => {
-    const tx = this.db.transaction(name, "readwrite")
-    const store = tx.objectStore(name)
-
-    await Promise.all(ids.map(id => store.delete(id)))
-    await tx.done
-  }
-}
+// Remove the old database. TODO remove this
+import {deleteDB} from "idb"
+deleteDB("nostr-engine/Storage")
 
 const scoreEvent = e => {
   if (e.kind === WRAP) return -Infinity
@@ -1880,31 +1703,19 @@ const scoreEvent = e => {
   return -e.created_at
 }
 
-const objectAdapter = (name, key, store, opts = {}) =>
-  new IndexedDBAdapter(name, key, {
-    set: xs => store.set(fromPairs(xs.map(({key, value}) => [key, value]))),
-    subscribe: f =>
-      store.subscribe(m => f(Object.entries(m).map(([key, value]) => ({key, value})))),
-    ...opts,
-  })
-
-const collectionAdapter = (name, key, store, opts = {}) =>
-  new IndexedDBAdapter(name, key, {
-    set: xs => store.set(xs),
-    subscribe: f => store.subscribe(f),
-    ...opts,
-  })
-
-export const storage = new Storage(16, [
-  objectAdapter("plaintext", "key", plaintext, {limit: 100000}),
-  objectAdapter("publishes2", "id", publishes, {sort: sortBy(prop("created_at"))}),
-  collectionAdapter("groups", "address", groups, {limit: 1000, sort: sortBy(prop("count"))}),
-  collectionAdapter("groupAlerts", "id", groupAlerts, {sort: sortBy(prop("created_at"))}),
-  collectionAdapter("groupRequests", "id", groupRequests, {sort: sortBy(prop("created_at"))}),
-  collectionAdapter("groupSharedKeys", "pubkey", groupSharedKeys, {
-    limit: 1000,
-    sort: sortBy(prop("created_at")),
-  }),
-  collectionAdapter("groupAdminKeys", "pubkey", groupAdminKeys, {limit: 1000}),
-  collectionAdapter("repository", "id", events, {limit: 30000, sort: sortBy(scoreEvent)}),
-])
+export const ready = db
+  ? Promise.resolve()
+  : initStorage("coracle", 1, {
+      events: {keyPath: "id", store: createEventStore(repository)},
+      relays: {keyPath: "url", store: relays},
+      handles: {keyPath: "nip05", store: handles},
+      zappers: {keyPath: "lnurl", store: zappers},
+      freshness: storageAdapters.fromObjectStore(freshness),
+      plaintext: storageAdapters.fromObjectStore(plaintext),
+      publishStatus: storageAdapters.fromObjectStore(publishStatusData),
+      groups: {keyPath: "address", store: groups},
+      groupAlerts: {keyPath: "id", store: groupAlerts},
+      groupRequests: {keyPath: "id", store: groupRequests},
+      groupSharedKeys: {keyPath: "pubkey", store: groupSharedKeys},
+      groupAdminKeys: {keyPath: "pubkey", store: groupAdminKeys},
+    }).then(() => sleep(300))

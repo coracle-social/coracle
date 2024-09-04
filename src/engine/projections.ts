@@ -14,7 +14,7 @@ import {
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {repository, AppContext, putSession, getSession} from "@welshman/app"
+import {repository, AppContext, putSession, getSession, ensurePlaintext} from "@welshman/app"
 import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
   deriveAdminKeyForGroup,
@@ -26,7 +26,6 @@ import {
   groups,
   load,
   projections,
-  ensurePlaintext,
 } from "src/engine/state"
 import {modifyGroupStatus, setGroupStatus} from "src/engine/commands"
 

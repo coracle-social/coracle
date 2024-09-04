@@ -1,10 +1,10 @@
 <script lang="ts">
+  import {clearStorage} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {theme} from "src/partials/state"
   import Content from "src/partials/Content.svelte"
-  import {storage} from "src/engine"
 
-  storage.clear()
+  clearStorage()
 
   // After our state has been cleared, set the theme again
   setTimeout(() => {

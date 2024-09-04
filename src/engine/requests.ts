@@ -50,6 +50,8 @@ import {
   relaySelectionsByPubkey,
   AppContext,
   getFilterSelections,
+  setFreshness,
+  getFreshness,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -65,8 +67,6 @@ import {
   getUserCommunities,
   getWotScore,
   withIndexers,
-  setFreshness,
-  getFreshness,
   isEventMuted,
   load,
   loadOne,
@@ -341,9 +341,7 @@ export const feedLoader = new FeedLoader({
       await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
     } else {
       await Promise.all(
-        getFilterSelections(filters).map(({relays, filters}) =>
-          load({filters, relays, onEvent}),
-        ),
+        getFilterSelections(filters).map(({relays, filters}) => load({filters, relays, onEvent})),
       )
     }
   },

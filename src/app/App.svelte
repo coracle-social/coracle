@@ -11,7 +11,7 @@
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {storage} from "src/engine"
+  import {ready} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadAppData, slowConnections, loadUserData} from "src/app/state"
@@ -680,7 +680,6 @@
       unsubModal()
       unsubRouter()
       unsubHistory()
-      storage.close()
     }
   })
 
@@ -706,7 +705,7 @@
 
   // App data boostrap and relay meta fetching
 
-  storage.ready.then(async () => {
+  ready.then(async () => {
     // Our stores are throttled by 300, so wait until they're populated
     // before loading app data
     await lib.sleep(350)
@@ -739,7 +738,7 @@
   })
 </script>
 
-{#await storage.ready}
+{#await ready}
   <!-- pass -->
 {:then}
   <div class="text-tinted-200">

@@ -48,6 +48,7 @@ import {
   displayProfileByPubkey,
   inboxRelaySelectionsByPubkey,
   addNoFallbacks,
+  ensurePlaintext,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -62,7 +63,6 @@ import {
   channels,
   getChannelSeenKey,
   createAndPublish,
-  ensurePlaintext,
   deriveAdminKeyForGroup,
   userIsGroupMember,
   deriveSharedKeyForGroup,
