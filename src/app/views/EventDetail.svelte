@@ -11,7 +11,7 @@
   import EventDate from "src/app/shared/EventDate.svelte"
   import EventInfo from "src/app/shared/EventInfo.svelte"
   import NoteCreateInline from "src/app/shared/NoteCreateInline.svelte"
-  import {loadOne} from "src/engine"
+  import {load} from "src/engine"
   import {makeFeed} from "src/domain"
 
   export let address
@@ -24,7 +24,7 @@
   let loading = true
 
   onMount(async () => {
-    await loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
+    await load({relays, filters: getIdFilters([address]), forcePlatform: false})
 
     loading = false
   })

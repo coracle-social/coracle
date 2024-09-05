@@ -8,7 +8,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {loadOne, isEventMuted} from "src/engine"
+  import {isEventMuted} from "src/engine"
 
   export let note
   export let value

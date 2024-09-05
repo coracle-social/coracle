@@ -35,7 +35,6 @@
   import {
     env,
     load,
-    loadOne,
     ensureUnwrapped,
     isEventMuted,
     getSetting,
@@ -172,7 +171,7 @@
 
   onMount(async () => {
     if (!event.pubkey) {
-      await loadOne({
+      await load({
         forcePlatform: false,
         relays: AppContext.router.fromRelays(relays).getUrls(),
         filters: getIdFilters([event.id]),

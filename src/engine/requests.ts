@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, nthEq, nth, now, max} from "@welshman/lib"
+import {Worker, nthEq, nth, now, max, first} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -69,7 +69,6 @@ import {
   withIndexers,
   isEventMuted,
   load,
-  loadOne,
   maxWot,
   getNetwork,
   publish,
@@ -224,13 +223,26 @@ export const dereferenceNote = async ({
   relays = AppContext.router.fromRelays(relays).getUrls()
 
   if (eid) {
-    return loadOne({relays, filters: getIdFilters([eid]), forcePlatform: false})
+    return new Promise(resolve => {
+      const sub = subscribe({
+        relays,
+        filters: getIdFilters([eid]),
+        forcePlatform: false,
+        closeOnEose: true,
+        timeout: 3000,
+      })
+
+      sub.emitter.on('event', (url: string, event: TrustedEvent) => {
+        resolve(event)
+        sub.close()
+      })
+    })
   }
 
   if (kind && pubkey) {
     const address = new Address(kind, pubkey, identifier).toString()
 
-    return loadOne({relays, filters: getIdFilters([address]), forcePlatform: false})
+    return first(await load({relays, filters: getIdFilters([address]), forcePlatform: false}))
   }
 
   return null

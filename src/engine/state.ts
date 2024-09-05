@@ -1350,20 +1350,6 @@ export const load = (request: MySubscribeRequest) =>
     sub.emitter.on("complete", (url: string) => resolve(events))
   })
 
-export const loadOne = (request: MySubscribeRequest) =>
-  new Promise<TrustedEvent | null>(resolve => {
-    const sub = subscribe({...request, ...LOAD_OPTS})
-
-    sub.emitter.on("event", (url: string, event: TrustedEvent) => {
-      resolve(event)
-      sub.close()
-    })
-
-    sub.emitter.on("complete", () => {
-      resolve(null)
-    })
-  })
-
 export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
 }
