@@ -1,6 +1,13 @@
 <script lang="ts">
   import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
-  import {FEED, FEEDS, getAddress, getAddressTagValues, getIdFilters} from "@welshman/util"
+  import {
+    FEED,
+    FEEDS,
+    NAMED_BOOKMARKS,
+    getAddress,
+    getAddressTagValues,
+    getIdFilters,
+  } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {onMount} from "svelte"
@@ -57,7 +64,9 @@
   load({
     skipCache: true,
     forcePlatform: false,
-    filters: [addSinceToFilter({kinds: [FEED, FEEDS], authors: Array.from($userFollows)})],
+    filters: [
+      addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors: Array.from($userFollows)}),
+    ],
   })
 
   onMount(() => {

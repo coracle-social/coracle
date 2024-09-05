@@ -219,7 +219,7 @@ export const dereferenceNote = async ({
   pubkey = null,
   identifier = "",
   relays = [],
-}) => {
+}): Promise<TrustedEvent | undefined> => {
   relays = AppContext.router.fromRelays(relays).getUrls()
 
   if (eid) {
@@ -232,7 +232,7 @@ export const dereferenceNote = async ({
         timeout: 3000,
       })
 
-      sub.emitter.on('event', (url: string, event: TrustedEvent) => {
+      sub.emitter.on("event", (url: string, event: TrustedEvent) => {
         resolve(event)
         sub.close()
       })
@@ -244,8 +244,6 @@ export const dereferenceNote = async ({
 
     return first(await load({relays, filters: getIdFilters([address]), forcePlatform: false}))
   }
-
-  return null
 }
 
 // People
@@ -491,7 +489,10 @@ export const loadFeedsAndLists = () =>
     skipCache: true,
     forcePlatform: false,
     filters: [
-      addSinceToFilter({kinds: [FEED, NAMED_BOOKMARKS, ...LIST_KINDS], authors: [pubkey.get()]}),
+      addSinceToFilter({
+        kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...LIST_KINDS],
+        authors: [pubkey.get()],
+      }),
     ],
   })
 

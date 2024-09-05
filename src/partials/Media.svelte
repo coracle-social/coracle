@@ -1,7 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {last} from "ramda"
-  import {ellipsize, Fetch} from "hurdak"
+  import {last, ellipsize, postJson} from "@welshman/lib"
   import {Tags} from "@welshman/util"
   import Audio from "src/partials/Audio.svelte"
   import Image from "src/partials/Image.svelte"
@@ -16,7 +15,7 @@
   export let fullSize = false
 
   const loadPreview = async () => {
-    const json = await Fetch.postJson(dufflepud("link/preview"), {url})
+    const json = await postJson(dufflepud("link/preview"), {url})
 
     if (!json?.title && !json?.image) {
       throw new Error("Failed to load link preview")

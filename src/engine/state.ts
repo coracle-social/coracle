@@ -1342,8 +1342,8 @@ export const subscribePersistent = (request: MySubscribeRequest) => {
 export const LOAD_OPTS = {timeout: 5000, closeOnEose: true}
 
 export const load = (request: MySubscribeRequest) =>
-  new Promise(resolve => {
-    const events = []
+  new Promise<TrustedEvent[]>(resolve => {
+    const events: TrustedEvent[] = []
     const sub = subscribe({...request, ...LOAD_OPTS})
 
     sub.emitter.on("event", (url: string, event: TrustedEvent) => events.push(event))
