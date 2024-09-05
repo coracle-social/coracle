@@ -35,7 +35,7 @@
 
     loadUserData(relays)
 
-    await sleep(3000)
+    await sleep(5000)
 
     if (!found) {
       failed = true

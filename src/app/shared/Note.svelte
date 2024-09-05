@@ -2,7 +2,6 @@
   import {ctx, nthEq} from "@welshman/lib"
   import {
     isChildOf,
-    getIdFilters,
     getReplyFilters,
     getIdOrAddress,
     Tags,
@@ -32,7 +31,15 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/util/router"
-  import {env, load, loadEvent, ensureUnwrapped, isEventMuted, getSetting, sortEventsDesc} from "src/engine"
+  import {
+    env,
+    load,
+    loadEvent,
+    ensureUnwrapped,
+    isEventMuted,
+    getSetting,
+    sortEventsDesc,
+  } from "src/engine"
 
   export let note
   export let relays = []

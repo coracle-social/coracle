@@ -248,13 +248,6 @@ export const createPeopleLoader = ({
   onEvent = noop,
 }: PeopleLoaderOpts = {}) => {
   const loading = writable(false)
-  const nip50Relays = uniq([
-    ...env.SEARCH_RELAYS,
-    ...relays
-      .get()
-      .filter(r => r.profile?.supported_nips?.includes(50))
-      .map(r => r.url),
-  ])
 
   return {
     loading,
@@ -268,7 +261,6 @@ export const createPeopleLoader = ({
           onEvent,
           skipCache: true,
           forcePlatform: false,
-          relays: nip50Relays.slice(0, 8),
           filters: [{kinds: [0], search: term, limit: 100}],
           onComplete: async () => {
             await sleep(Math.min(1000, Date.now() - now))

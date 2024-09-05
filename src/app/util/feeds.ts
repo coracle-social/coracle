@@ -75,9 +75,10 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
       const tracker = new Tracker()
       const forceRelays = relays?.length > 0
       const forcePlatform = opts.forcePlatform && !forceRelays
+      const requestItems = Array.from(getRequestItems({relays, filters}, opts))
 
       await Promise.all(
-        Array.from(getRequestItems({relays, filters}, opts)).map(opts =>
+        requestItems.map(opts =>
           load({
             ...opts,
             onEvent,

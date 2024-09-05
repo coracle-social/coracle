@@ -59,7 +59,6 @@ import {
   getIdAndAddress,
   getIdOrAddress,
   getIdFilters,
-  hasValidSignature,
   LOCAL_RELAY_URL,
   isReplaceable,
   isGroupAddress,
@@ -71,14 +70,7 @@ import {
 } from "@welshman/util"
 import type {Filter, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip01Signer} from "@welshman/signer"
-import {
-  Executor,
-  Multi,
-  Plex,
-  Local,
-  Relays,
-  publish as basePublish,
-} from "@welshman/net"
+import {Executor, Multi, Plex, Local, Relays, publish as basePublish} from "@welshman/net"
 import type {PartialSubscribeRequest} from "@welshman/app"
 import type {PublishRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
@@ -120,6 +112,7 @@ import {
   ensurePlaintext,
   getDefaultNetContext,
   getDefaultAppContext,
+  loadRelay,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -191,17 +184,6 @@ export const env = {
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
 
 export const hasNip44 = writable(false)
-
-signer.subscribe($signer => {
-  if ($signer?.nip44) {
-    $signer?.nip44.encrypt(pubkey.get(), "test").then(
-      v => hasNip44.set(true),
-      () => hasNip44.set(false),
-    )
-  } else {
-    hasNip44.set(false)
-  }
-})
 
 // Base state
 
@@ -1661,10 +1643,41 @@ const scoreEvent = e => {
   return -e.created_at
 }
 
-let ready = Promise.resolve()
+let ready: Promise<any> = Promise.resolve()
 
 // Avoid initializing multiple times on hot reload
 if (!db) {
+  const initialRelays = [
+    ...env.DEFAULT_RELAYS,
+    ...env.DVM_RELAYS,
+    ...env.INDEXER_RELAYS,
+    ...env.PLATFORM_RELAYS,
+    ...env.SEARCH_RELAYS,
+  ]
+
+  setContext({
+    net: getDefaultNetContext({onAuth, getExecutor}),
+    app: getDefaultAppContext({
+      dufflepudUrl: env.DUFFLEPUD_URL,
+      indexerRelays: env.INDEXER_RELAYS,
+      router: makeRouter({
+        getRedundancy: () => getSetting("relay_redundancy"),
+        getLimit: () => getSetting("relay_limit"),
+      }),
+    }),
+  })
+
+  signer.subscribe($signer => {
+    if ($signer?.nip44) {
+      $signer?.nip44.encrypt(pubkey.get(), "test").then(
+        v => hasNip44.set(true),
+        () => hasNip44.set(false),
+      )
+    } else {
+      hasNip44.set(false)
+    }
+  })
+
   ready = initStorage("coracle", 1, {
     events: {keyPath: "id", store: createEventStore(repository)},
     relays: {keyPath: "url", store: relays},
@@ -1678,28 +1691,7 @@ if (!db) {
     groupRequests: {keyPath: "id", store: groupRequests},
     groupSharedKeys: {keyPath: "pubkey", store: groupSharedKeys},
     groupAdminKeys: {keyPath: "pubkey", store: groupAdminKeys},
-  }).then(() => sleep(300))
-
-  setContext({
-    net: getDefaultNetContext({
-      onAuth,
-      getExecutor,
-      hasValidSignature: (url: string, event: SignedEvent) => {
-        if (url === LOCAL_RELAY_URL) {
-          return true
-        }
-
-        return hasValidSignature(event)
-      },
-    }),
-    app: getDefaultAppContext({
-      dufflepudUrl: env.DUFFLEPUD_URL,
-      router: makeRouter({
-        getRedundancy: () => getSetting("relay_redundancy"),
-        getLimit: () => getSetting("relay_limit"),
-      }),
-    }),
-  })
+  }).then(() => Promise.all(initialRelays.map(loadRelay)))
 }
 
 export {ready}
