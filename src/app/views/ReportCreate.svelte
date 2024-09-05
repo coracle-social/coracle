@@ -15,9 +15,9 @@
   import {router} from "src/app/util/router"
   import {publish} from "src/engine"
 
-  export let eid
+  export let id
 
-  const event = repository.getEvent(eid)
+  const event = repository.getEvent(id)
 
   const tagr = "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65"
 

@@ -1416,21 +1416,6 @@ export const createAndPublish = async ({
   return publish({event, relays, verb, timeout, forcePlatform})
 }
 
-setContext({
-  app: getDefaultAppContext(),
-  net: getDefaultNetContext({
-    onAuth,
-    getExecutor,
-    hasValidSignature: (url: string, event: SignedEvent) => {
-      if (url === LOCAL_RELAY_URL) {
-        return true
-      }
-
-      return hasValidSignature(event)
-    },
-  }),
-})
-
 // Publish
 
 export const uniqTags = tags =>
@@ -1662,16 +1647,6 @@ export class ThreadLoader {
   }
 }
 
-// Configuration
-
-Object.assign(ctx.app, {
-  dufflepudUrl: env.DUFFLEPUD_URL,
-  router: makeRouter({
-    getRedundancy: () => getSetting("relay_redundancy"),
-    getLimit: () => getSetting("relay_limit"),
-  }),
-})
-
 // Storage
 
 // Remove the old database. TODO remove this
@@ -1686,19 +1661,45 @@ const scoreEvent = e => {
   return -e.created_at
 }
 
-export const ready = db
-  ? Promise.resolve()
-  : initStorage("coracle", 1, {
-      events: {keyPath: "id", store: createEventStore(repository)},
-      relays: {keyPath: "url", store: relays},
-      handles: {keyPath: "nip05", store: handles},
-      zappers: {keyPath: "lnurl", store: zappers},
-      freshness: storageAdapters.fromObjectStore(freshness),
-      plaintext: storageAdapters.fromObjectStore(plaintext),
-      publishStatus: storageAdapters.fromObjectStore(publishStatusData),
-      groups: {keyPath: "address", store: groups},
-      groupAlerts: {keyPath: "id", store: groupAlerts},
-      groupRequests: {keyPath: "id", store: groupRequests},
-      groupSharedKeys: {keyPath: "pubkey", store: groupSharedKeys},
-      groupAdminKeys: {keyPath: "pubkey", store: groupAdminKeys},
-    }).then(() => sleep(300))
+let ready = Promise.resolve()
+
+// Avoid initializing multiple times on hot reload
+if (!db) {
+  ready = initStorage("coracle", 1, {
+    events: {keyPath: "id", store: createEventStore(repository)},
+    relays: {keyPath: "url", store: relays},
+    handles: {keyPath: "nip05", store: handles},
+    zappers: {keyPath: "lnurl", store: zappers},
+    freshness: storageAdapters.fromObjectStore(freshness),
+    plaintext: storageAdapters.fromObjectStore(plaintext),
+    publishStatus: storageAdapters.fromObjectStore(publishStatusData),
+    groups: {keyPath: "address", store: groups},
+    groupAlerts: {keyPath: "id", store: groupAlerts},
+    groupRequests: {keyPath: "id", store: groupRequests},
+    groupSharedKeys: {keyPath: "pubkey", store: groupSharedKeys},
+    groupAdminKeys: {keyPath: "pubkey", store: groupAdminKeys},
+  }).then(() => sleep(300))
+
+  setContext({
+    net: getDefaultNetContext({
+      onAuth,
+      getExecutor,
+      hasValidSignature: (url: string, event: SignedEvent) => {
+        if (url === LOCAL_RELAY_URL) {
+          return true
+        }
+
+        return hasValidSignature(event)
+      },
+    }),
+    app: getDefaultAppContext({
+      dufflepudUrl: env.DUFFLEPUD_URL,
+      router: makeRouter({
+        getRedundancy: () => getSetting("relay_redundancy"),
+        getLimit: () => getSetting("relay_limit"),
+      }),
+    }),
+  })
+}
+
+export {ready}

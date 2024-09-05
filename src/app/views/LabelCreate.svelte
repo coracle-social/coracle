@@ -17,7 +17,7 @@
     createAndPublish,
   } from "src/engine"
 
-  export let eid
+  export let id
 
   const collections = deriveCollections($pubkey)
 
@@ -41,7 +41,7 @@
     createAndPublish({
       kind: 1985,
       relays: ctx.app.router.User().getUrls(),
-      tags: [["e", eid], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
+      tags: [["e", id], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
     })
 
     showInfo("Your tag has been saved!")

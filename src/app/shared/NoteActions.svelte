@@ -167,7 +167,7 @@
       .at("zap")
       .qp({
         splits,
-        eid: note.id,
+        id: note.id,
         anonymous: Boolean(note.wrap),
       })
       .cx({callback: addToContext})
@@ -228,7 +228,7 @@
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
   $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
-  $: canZap = zapper && note.pubkey !== $sessionWithMeta?.pubkey
+  $: canZap = zapper?.allowsNostr && note.pubkey !== $sessionWithMeta?.pubkey
   $: reply = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $repliesCount = replies.length
   $: handlers = $kindHandlers.filter(

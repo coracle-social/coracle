@@ -107,9 +107,9 @@ export const loadUserData = async (hints: string[] = []) => {
   ])
 
   // Load less important user data
-  await loadZapper($pubkey)
-  await loadHandle($pubkey)
-  await load({
+  loadZapper($pubkey)
+  loadHandle($pubkey)
+  load({
     relays,
     filters: [
       {authors: [$pubkey], kinds: [COMMUNITIES, FEEDS]},
@@ -122,17 +122,17 @@ export const loadUserData = async (hints: string[] = []) => {
   })
 
   // Load enough to figure out web of trust
-  await loadPubkeys(getFollows($pubkey))
+  loadPubkeys(getFollows($pubkey))
 
   // Load anything they might need to be notified about
-  await loadSeen()
-  await loadGiftWraps()
-  await loadLegacyMessages()
-  await loadGroupMessages()
-  await loadNotifications()
-  await loadFeedsAndLists()
-  await loadHandlers()
-  await loadDeletes()
+  loadSeen()
+  loadGiftWraps()
+  loadLegacyMessages()
+  loadGroupMessages()
+  loadNotifications()
+  loadFeedsAndLists()
+  loadHandlers()
+  loadDeletes()
 
   // Start listening for notifications
   listenForNotifications()

@@ -4,13 +4,13 @@
   import {router} from "src/app/util/router"
   import {publishDeletion} from "src/engine"
 
-  export let eid
+  export let id
   export let kind
 
   const onCancel = () => router.pop()
 
   const onConfirm = () => {
-    publishDeletion({kind, id: eid})
+    publishDeletion({kind, id})
     router.pop()
   }
 </script>

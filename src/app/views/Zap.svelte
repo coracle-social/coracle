@@ -1,8 +1,8 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
   import {sortBy, uniqBy, filter, map, reject} from "ramda"
-  import {doPipe, Fetch} from "hurdak"
-  import {ctx, now, tryCatch} from "@welshman/lib"
+  import {doPipe} from "hurdak"
+  import {ctx, now, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, profilesByPubkey, zappersByLnurl} from "@welshman/app"
@@ -15,7 +15,7 @@
   import {env, load, getSetting} from "src/engine"
 
   export let splits
-  export let eid = null
+  export let id = null
   export let anonymous = false
   export let callback = null
   export let amount = getSetting("default_zap")
@@ -73,7 +73,7 @@
           return {...zap, zapper, relays, content}
         })
       },
-      filter((zap: any) => zap.zapper?.lnurl),
+      filter((zap: any) => zap.zapper?.allowsNostr),
     ])
   }
 
@@ -89,8 +89,8 @@
           ["p", pubkey],
         ]
 
-        if (eid) {
-          tags.push(["e", eid])
+        if (id) {
+          tags.push(["e", id])
         }
 
         if (anonymous) {
@@ -101,7 +101,7 @@
         const event = await $signer.sign(createEvent(9734, {content, tags}))
         const zapString = encodeURI(JSON.stringify(event))
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCatch(() => Fetch.fetchJson(zapper.callback + qs))
+        const res = await tryCatch(() => fetchJson(zapper.callback + qs))
 
         return {...zap, invoice: res?.pr}
       }),

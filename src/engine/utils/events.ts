@@ -10,11 +10,11 @@ export const sortEventsAsc = events => sortBy((e: TrustedEvent) => e.created_at,
 export const sortEventsDesc = events => sortBy((e: TrustedEvent) => -e.created_at, events)
 
 export const decodeEvent = entity => {
-  const annotateEvent = eid => ({
-    eid,
+  const annotateEvent = id => ({
+    id,
     relays: [],
-    note: tryFunc(() => nip19.noteEncode(eid)),
-    nevent: tryFunc(() => nip19.neventEncode({id: eid, relays: []})),
+    note: tryFunc(() => nip19.noteEncode(id)),
+    nevent: tryFunc(() => nip19.neventEncode({id, relays: []})),
   })
 
   entity = fromNostrURI(entity)
@@ -27,19 +27,8 @@ export const decodeEvent = entity => {
   }
 
   return switcherFn(type, {
-    nevent: () => ({
-      eid: data.id,
-      relays: data.relays,
-      note: nip19.noteEncode(data.id),
-      nevent: nip19.neventEncode(data),
-    }),
-    naddr: () => ({
-      kind: data.kind,
-      pubkey: data.pubkey,
-      identifier: data.identifier,
-      relays: data.relays,
-      address: Address.fromNaddr(data).toString(),
-    }),
+    nevent: () => ({...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)}),
+    naddr: () => ({...data, address: Address.fromNaddr(data).toString()}),
     note: () => annotateEvent(data),
     default: () => annotateEvent(entity),
   })

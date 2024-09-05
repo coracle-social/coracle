@@ -32,6 +32,7 @@ import {
   INBOX_RELAYS,
   DIRECT_MESSAGE,
   SEEN_CONVERSATION,
+  LOCAL_RELAY_URL,
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
@@ -754,7 +755,9 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   const relays = ctx.app.router.WriteRelays().getUrls()
   const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
-  await createAndPublish({kind, content, relays})
+  console.log("markAsSeen", tags, prevTags)
+
+  await createAndPublish({kind, content, relays: [LOCAL_RELAY_URL]})
 }
 
 // Messages
