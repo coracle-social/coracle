@@ -5,9 +5,9 @@
   import {join, whereEq, identity} from "ramda"
   import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
   import {writable} from "svelte/store"
-  import {now} from "@welshman/lib"
+  import {ctx, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {session, AppContext} from "@welshman/app"
+  import {session} from "@welshman/app"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -121,7 +121,7 @@
 
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {
-        publish({event: quote, relays: AppContext.router.WriteRelays().getUrls()})
+        publish({event: quote, relays: ctx.app.router.WriteRelays().getUrls()})
       }
     }
 
@@ -185,7 +185,7 @@
     if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
-        relays: AppContext.router.Event(quote).getUrls(),
+        relays: ctx.app.router.Event(quote).getUrls(),
       })
 
       compose.nevent("nostr:" + nevent)

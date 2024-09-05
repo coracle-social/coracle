@@ -1,8 +1,9 @@
 <script lang="ts">
+  import {ctx} from "@welshman/lib"
   import {asSignedEvent, createEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
-  import {repository, AppContext, loadRelaySelections} from "@welshman/app"
+  import {repository, loadRelaySelections} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -33,10 +34,10 @@
 
     publish({
       event: rumor.wrap,
-      relays: AppContext.router
+      relays: ctx.app.router
         .merge([
-          AppContext.router.fromRelays(["wss://relay.nos.social"]),
-          AppContext.router.PublishMessage(tagr),
+          ctx.app.router.fromRelays(["wss://relay.nos.social"]),
+          ctx.app.router.PublishMessage(tagr),
         ])
         .getUrls(),
       forcePlatform: false,

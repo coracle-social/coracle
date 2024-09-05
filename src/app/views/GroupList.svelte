@@ -2,9 +2,9 @@
   import {onMount} from "svelte"
   import {filter, reject, assoc} from "ramda"
   import {derived} from "svelte/store"
-  import {now, shuffle} from "@welshman/lib"
+  import {ctx, now, shuffle} from "@welshman/lib"
   import {GROUP, COMMUNITY, COMMUNITIES, getAddress, getIdFilters} from "@welshman/util"
-  import {pubkey, updateSession, AppContext} from "@welshman/app"
+  import {pubkey, updateSession} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -58,14 +58,14 @@
 
     load({
       skipCache: true,
-      relays: AppContext.router.User().getUrls(),
+      relays: ctx.app.router.User().getUrls(),
       filters: [{kinds: [GROUP, COMMUNITY], limit: 1000 - communityAddrs.length}],
     })
 
     load({
       skipCache: true,
       forcePlatform: false,
-      relays: AppContext.router.User().getUrls(),
+      relays: ctx.app.router.User().getUrls(),
       filters: getIdFilters(shuffle(communityAddrs).slice(0, 1000)),
     })
 

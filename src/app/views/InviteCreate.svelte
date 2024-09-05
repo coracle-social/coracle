@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {without, identity} from "@welshman/lib"
+  import {ctx, without, identity} from "@welshman/lib"
   import {getAddress, displayRelayUrl} from "@welshman/util"
-  import {relaySearch, AppContext} from "@welshman/app"
+  import {relaySearch} from "@welshman/app"
   import {onMount} from "svelte"
   import {pickVals, toSpliced} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -59,7 +59,7 @@
         ...groups,
         {
           address: address,
-          relay: AppContext.router.WithinContext(address).getUrl(),
+          relay: ctx.app.router.WithinContext(address).getUrl(),
           claim: "",
         },
       ]
@@ -109,7 +109,7 @@
       showSection("groups")
       groups = groups.concat({
         address: initialGroupAddress,
-        relay: AppContext.router.WithinContext(initialGroupAddress).getUrl(),
+        relay: ctx.app.router.WithinContext(initialGroupAddress).getUrl(),
         claim: "",
       })
     }

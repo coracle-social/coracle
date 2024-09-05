@@ -1,7 +1,8 @@
 <script lang="ts">
   import {switcherFn} from "hurdak"
+  import {ctx} from "@welshman/lib"
   import {Tags, displayRelayUrl} from "@welshman/util"
-  import {displayProfileByPubkey, AppContext} from "@welshman/app"
+  import {displayProfileByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
@@ -15,7 +16,7 @@
 
   if (tag) {
     const [type, value] = tag.valueOf()
-    const relays = AppContext.router.Event(note).getUrls()
+    const relays = ctx.app.router.Event(note).getUrls()
 
     href = switcherFn(type, {
       r: () => router.at("relays").of(value).toString(),

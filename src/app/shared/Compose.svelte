@@ -2,8 +2,9 @@
   import {nip19} from "nostr-tools"
   import {throttle} from "throttle-debounce"
   import {createEventDispatcher} from "svelte"
-  import {last, partition, whereEq} from "ramda"
-  import {displayProfileByPubkey, AppContext} from "@welshman/app"
+  import {whereEq} from "ramda"
+  import {ctx, last, partition} from "@welshman/lib"
+  import {displayProfileByPubkey} from "@welshman/app"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
@@ -24,7 +25,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = AppContext.router.FromPubkeys([pubkey]).getUrls()
+      const relays = ctx.app.router.FromPubkeys([pubkey]).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return "nostr:" + nprofile

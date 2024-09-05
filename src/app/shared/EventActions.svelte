@@ -1,12 +1,13 @@
 <script lang="ts">
+  import {ctx} from "@welshman/lib"
   import {Address} from "@welshman/util"
-  import {repository, AppContext, pubkey} from "@welshman/app"
+  import {repository, pubkey} from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
 
   export let event
 
-  const address = Address.fromEvent(event, AppContext.router.Event(event).redundancy(3).getUrls())
+  const address = Address.fromEvent(event, ctx.app.router.Event(event).redundancy(3).getUrls())
 
   let actions = []
 

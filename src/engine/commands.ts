@@ -1,6 +1,7 @@
 import crypto from "crypto"
 import {get} from "svelte/store"
 import {
+  ctx,
   cached,
   indexBy,
   nthNe,
@@ -42,7 +43,6 @@ import {
   signer,
   sessions,
   session,
-  AppContext,
   loadHandle,
   getRelayUrls,
   displayProfileByPubkey,
@@ -254,7 +254,7 @@ const addGroupATags = (template, addresses) => ({
 // relays, and can straddle public/private contexts.
 
 export const publishToGroupAdmin = async (address, template) => {
-  const relays = AppContext.router.WithinContext(address).getUrls()
+  const relays = ctx.app.router.WithinContext(address).getUrls()
   const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
   const expireTag = [["expiration", String(now() + seconds(30, "day"))]]
   const helper = Nip59.fromSigner(signer.get())
@@ -267,8 +267,8 @@ export const publishToGroupAdmin = async (address, template) => {
 }
 
 export const publishAsGroupAdminPublicly = async (address, template, relays = []) => {
-  const _relays = AppContext.router
-    .merge([AppContext.router.fromRelays(relays), AppContext.router.WithinContext(address)])
+  const _relays = ctx.app.router
+    .merge([ctx.app.router.fromRelays(relays), ctx.app.router.WithinContext(address)])
     .getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const event = await sign(template, {sk: adminKey.privkey})
@@ -277,8 +277,8 @@ export const publishAsGroupAdminPublicly = async (address, template, relays = []
 }
 
 export const publishAsGroupAdminPrivately = async (address, template, relays = []) => {
-  const _relays = AppContext.router
-    .merge([AppContext.router.fromRelays(relays), AppContext.router.WithinContext(address)])
+  const _relays = ctx.app.router
+    .merge([ctx.app.router.fromRelays(relays), ctx.app.router.WithinContext(address)])
     .getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const sharedKey = deriveSharedKeyForGroup(address).get()
@@ -298,7 +298,7 @@ export const publishToGroupsPublicly = async (addresses, template, {anonymous = 
   }
 
   const event = await sign(addGroupATags(template, addresses), {anonymous})
-  const relays = AppContext.router.PublishEvent(event).getUrls()
+  const relays = ctx.app.router.PublishEvent(event).getUrls()
 
   return publish({event, relays, forcePlatform: false})
 }
@@ -309,7 +309,7 @@ export const publishToGroupsPrivately = async (addresses, template, {anonymous =
   const events = []
   const pubs = []
   for (const address of addresses) {
-    const relays = AppContext.router.WithinContext(address).getUrls()
+    const relays = ctx.app.router.WithinContext(address).getUrls()
     const thisTemplate = addGroupATags(template, [address])
     const sharedKey = deriveSharedKeyForGroup(address).get()
 
@@ -339,7 +339,7 @@ export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous 
 
   if (addresses.length === 0) {
     const event = await sign(template, {anonymous})
-    const relays = AppContext.router.PublishEvent(event).getUrls()
+    const relays = ctx.app.router.PublishEvent(event).getUrls()
 
     events.push(event)
     pubs.push(await publish({event, relays}))
@@ -377,11 +377,11 @@ export const publishKeyShares = async (address, pubkeys, template) => {
   const pubs = []
 
   for (const pubkey of pubkeys) {
-    const relays = AppContext.router
+    const relays = ctx.app.router
       .merge([
-        AppContext.router.ForPubkeys([pubkey]),
-        AppContext.router.WithinContext(address),
-        AppContext.router.fromRelays(env.PLATFORM_RELAYS),
+        ctx.app.router.ForPubkeys([pubkey]),
+        ctx.app.router.WithinContext(address),
+        ctx.app.router.fromRelays(env.PLATFORM_RELAYS),
       ])
       .policy(addNoFallbacks)
       .getUrls()
@@ -397,7 +397,7 @@ export const publishKeyShares = async (address, pubkeys, template) => {
 }
 
 export const publishAdminKeyShares = async (address, pubkeys) => {
-  const relays = AppContext.router.WithinContext(address).getUrls()
+  const relays = ctx.app.router.WithinContext(address).getUrls()
   const {privkey} = deriveAdminKeyForGroup(address).get()
   const template = createEvent(24, {
     tags: [
@@ -413,7 +413,7 @@ export const publishAdminKeyShares = async (address, pubkeys) => {
 }
 
 export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => {
-  const relays = AppContext.router.WithinContext(address).getUrls()
+  const relays = ctx.app.router.WithinContext(address).getUrls()
   const adminKey = deriveAdminKeyForGroup(address).get()
   const {privkey} = deriveSharedKeyForGroup(address).get()
   const template = createEvent(24, {
@@ -554,7 +554,7 @@ export const publishCommunitiesList = addresses =>
   createAndPublish({
     kind: 10004,
     tags: [...addresses.map(mentionGroup), ...getClientTags()],
-    relays: AppContext.router.WriteRelays().getUrls(),
+    relays: ctx.app.router.WriteRelays().getUrls(),
   })
 
 // Deletes
@@ -573,7 +573,7 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
   return createAndPublish({
     tags,
     kind: 5,
-    relays: AppContext.router.WriteRelays().getUrls(),
+    relays: ctx.app.router.WriteRelays().getUrls(),
     forcePlatform: false,
   })
 }
@@ -587,7 +587,7 @@ export const deleteEventByAddress = (address: string) =>
 // Profile
 
 export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) => {
-  const relays = withIndexers(AppContext.router.WriteRelays().getUrls())
+  const relays = withIndexers(ctx.app.router.WriteRelays().getUrls())
   const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
 
   return createAndPublish({...addClientTags(template), relays, forcePlatform})
@@ -599,7 +599,7 @@ export type ModifyTags = (tags: string[][]) => string[][]
 
 export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
   const [prev] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
-  const relays = withIndexers(AppContext.router.WriteRelays().getUrls())
+  const relays = withIndexers(ctx.app.router.WriteRelays().getUrls())
 
   // Preserve content if we have it
   const content = prev?.content || ""
@@ -751,7 +751,7 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   // Wait until after comparing for equality to add our current timestamp
   const json = JSON.stringify([...tags, ["seen", "*", String(cutoff)]])
-  const relays = AppContext.router.WriteRelays().getUrls()
+  const relays = ctx.app.router.WriteRelays().getUrls()
   const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
   await createAndPublish({kind, content, relays})
@@ -773,7 +773,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
     kind: 4,
     tags: [mention(recipient), ...getClientTags()],
     content: await signer.get().nip04.encrypt(recipient, content),
-    relays: AppContext.router.PublishMessage(recipient).getUrls(),
+    relays: ctx.app.router.PublishMessage(recipient).getUrls(),
     forcePlatform: false,
   })
 }
@@ -793,7 +793,7 @@ export const sendMessage = async (channelId: string, content: string) => {
 
     await publish({
       event: rumor.wrap,
-      relays: AppContext.router.PublishMessage(recipient).getUrls(),
+      relays: ctx.app.router.PublishMessage(recipient).getUrls(),
       forcePlatform: false,
     })
   }
@@ -900,7 +900,7 @@ export const setAppData = async (d: string, data: any) => {
       kind: 30078,
       tags: [["d", d]],
       content: await signer.get().nip04.encrypt(pubkey, JSON.stringify(data)),
-      relays: AppContext.router.WriteRelays().getUrls(),
+      relays: ctx.app.router.WriteRelays().getUrls(),
       forcePlatform: false,
     })
   }

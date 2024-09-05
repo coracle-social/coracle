@@ -2,10 +2,10 @@
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
   import {sortBy, uniqBy, filter, map, reject} from "ramda"
   import {doPipe, Fetch} from "hurdak"
-  import {now, tryCatch} from "@welshman/lib"
+  import {ctx, now, tryCatch} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, profilesByPubkey, zappersByLnurl, AppContext} from "@welshman/app"
+  import {signer, profilesByPubkey, zappersByLnurl} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -51,7 +51,7 @@
         if (percent > 0 && totalWeight > 0) {
           zaps.push({
             pubkey: env.PLATFORM_PUBKEY,
-            relay: AppContext.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
+            relay: ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
             amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
             status: "pending",
             isTip: true,
@@ -63,10 +63,10 @@
           const content = i === 0 ? message : ""
           const profile = $profilesByPubkey.get(zap.pubkey)
           const zapper = $zappersByLnurl.get(profile?.lnurl)
-          const relays = AppContext.router
+          const relays = ctx.app.router
             .merge([
-              AppContext.router.PublishMessage(zap.pubkey),
-              AppContext.router.fromRelays([zap.relay]),
+              ctx.app.router.PublishMessage(zap.pubkey),
+              ctx.app.router.fromRelays([zap.relay]),
             ])
             .getUrls()
 

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {without} from "@welshman/lib"
-  import {AppContext} from "@welshman/app"
+  import {ctx, without} from "@welshman/lib"
   import {difference} from "hurdak"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -37,7 +36,7 @@
 
   const onSubmit = () => {
     if (!soft || !$sharedKey) {
-      initSharedKey(address, AppContext.router.WithinContext(address).getUrls())
+      initSharedKey(address, ctx.app.router.WithinContext(address).getUrls())
     }
 
     const allMembers = new Set(members)

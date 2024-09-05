@@ -1,6 +1,7 @@
 <script lang="ts">
+  import {ctx} from "@welshman/lib"
   import {getAddress, Address} from "@welshman/util"
-  import {deriveProfileDisplay, AppContext} from "@welshman/app"
+  import {deriveProfileDisplay} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -16,11 +17,11 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const relays = AppContext.router
+  const relays = ctx.app.router
     .merge([
-      AppContext.router.fromRelays(relayHints),
-      AppContext.router.EventMentions(note),
-      AppContext.router.ForPubkeys([note.pubkey]),
+      ctx.app.router.fromRelays(relayHints),
+      ctx.app.router.EventMentions(note),
+      ctx.app.router.ForPubkeys([note.pubkey]),
     ])
     .getUrls()
 

@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {Worker, nthEq, nth, now, max, first} from "@welshman/lib"
+import {ctx, Worker, nthEq, nth, now, max, first} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -46,7 +46,6 @@ import {
   loadFollows,
   loadMutes,
   loadRelaySelections,
-  AppContext,
   getFilterSelections,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
@@ -161,10 +160,10 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
 
   if (addrs.length > 0) {
     const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
-    const relays = AppContext.router
+    const relays = ctx.app.router
       .merge([
-        AppContext.router.product(addrs, explicitRelays),
-        AppContext.router.WithinMultipleContexts(addrs),
+        ctx.app.router.product(addrs, explicitRelays),
+        ctx.app.router.WithinMultipleContexts(addrs),
       ])
       .getUrls()
 
@@ -320,8 +319,8 @@ export const feedLoader = new FeedLoader({
       event: await signer.get().sign(createEvent(kind, {tags})),
       relays:
         request.relays?.length > 0
-          ? AppContext.router.fromRelays(request.relays).getUrls()
-          : AppContext.router.Messages(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
+          ? ctx.app.router.fromRelays(request.relays).getUrls()
+          : ctx.app.router.Messages(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
     })
 
     await new Promise<void>(resolve => {
@@ -384,9 +383,7 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
   }
 
   if (eventsWithParent.length > 0) {
-    const relays = AppContext.router
-      .merge(eventsWithParent.map(AppContext.router.EventParents))
-      .getUrls()
+    const relays = ctx.app.router.merge(eventsWithParent.map(ctx.app.router.EventParents)).getUrls()
     const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
 
     load({relays, filters: getIdFilters(ids), skipCache: true})
@@ -495,10 +492,7 @@ export const loadGiftWraps = ({reload = false} = {}) => {
   }
 
   return loadAll(
-    makeIntersectionFeed(
-      makeRelayFeed(...AppContext.router.User().getUrls()),
-      feedFromFilter(filter),
-    ),
+    makeIntersectionFeed(makeRelayFeed(...ctx.app.router.User().getUrls()), feedFromFilter(filter)),
   )
 }
 
@@ -514,7 +508,7 @@ export const loadLegacyMessages = ({reload = false} = {}) => {
 
   return loadAll(
     makeIntersectionFeed(
-      makeRelayFeed(...AppContext.router.User().getUrls()),
+      makeRelayFeed(...ctx.app.router.User().getUrls()),
       makeUnionFeed(...filters.map(feedFromFilter)),
     ),
   )
@@ -526,7 +520,7 @@ export const listenForMessages = (pubkeys: string[]) => {
   return subscribePersistent({
     skipCache: true,
     forcePlatform: false,
-    relays: AppContext.router.Messages(pubkeys).getUrls(),
+    relays: ctx.app.router.Messages(pubkeys).getUrls(),
     filters: [
       addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(14, "day")),
       addSinceToFilter({kinds: [4], authors: allPubkeys}),
@@ -539,7 +533,7 @@ export const loadHandlers = () =>
   load({
     skipCache: true,
     forcePlatform: false,
-    relays: AppContext.router.ReadRelays().getUrls().concat("wss://relay.nostr.band/"),
+    relays: ctx.app.router.ReadRelays().getUrls().concat("wss://relay.nostr.band/"),
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],

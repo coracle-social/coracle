@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {uniq, nth, concat} from "@welshman/lib"
+  import {ctx, uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {makeSecret} from "@welshman/signer"
-  import {session, AppContext} from "@welshman/app"
+  import {session} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -87,7 +87,7 @@
         kind: 1,
         content: noteContent,
         tags: tagsFromContent(noteContent),
-        relays: AppContext.router.WriteRelays().getUrls(),
+        relays: ctx.app.router.WriteRelays().getUrls(),
       })
     }
 

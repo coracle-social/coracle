@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {identity} from "@welshman/lib"
+  import {ctx, identity} from "@welshman/lib"
   import {
     Tags,
     NAMED_PEOPLE,
@@ -8,7 +8,7 @@
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {topicSearch, AppContext, relaySearch} from "@welshman/app"
+  import {topicSearch, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -40,7 +40,7 @@
   }
 
   const submit = async () => {
-    const relays = AppContext.router.WriteRelays().getUrls()
+    const relays = ctx.app.router.WriteRelays().getUrls()
     const template = list.event ? editList(list) : createList(list)
     const pub = await createAndPublish({...template, relays})
 

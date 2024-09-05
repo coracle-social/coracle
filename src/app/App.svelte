@@ -698,7 +698,7 @@
     // pass
   }
 
-  network.NetworkContext.pool.on("init", connection => {
+  lib.ctx.net.pool.on("init", connection => {
     app.loadRelay(connection.url)
     app.trackRelayStats(connection)
   })
@@ -722,7 +722,7 @@
       )
 
       // Prune connections we haven't used in a while
-      for (const [_, connection] of network.NetworkContext.pool.data.entries()) {
+      for (const [_, connection] of lib.ctx.net.pool.data.entries()) {
         const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
         const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
 

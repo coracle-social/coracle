@@ -1,7 +1,7 @@
 <script lang="ts">
   import {poll} from "hurdak"
   import {onMount} from "svelte"
-  import {NetworkContext} from "@welshman/net"
+  import {ctx} from "@welshman/lib"
 
   export let url
 
@@ -11,7 +11,7 @@
 
   onMount(() => {
     return poll(3000, () => {
-      const cxn = NetworkContext.pool.get(url, {autoConnect: false})
+      const cxn = ctx.net.pool.get(url, {autoConnect: false})
 
       if (cxn) {
         description = cxn.meta.getDescription()

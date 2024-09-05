@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nthEq} from "@welshman/lib"
+  import {ctx, nthEq} from "@welshman/lib"
   import {
     isChildOf,
     getIdFilters,
@@ -13,7 +13,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {repository, AppContext, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
+  import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
@@ -32,14 +32,7 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {router} from "src/app/util/router"
-  import {
-    env,
-    load,
-    ensureUnwrapped,
-    isEventMuted,
-    getSetting,
-    sortEventsDesc,
-  } from "src/engine"
+  import {env, load, ensureUnwrapped, isEventMuted, getSetting, sortEventsDesc} from "src/engine"
 
   export let note
   export let relays = []
@@ -74,7 +67,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(getIdOrAddress(event), {relays: AppContext.router.Event(event).getUrls()})
+        .of(getIdOrAddress(event), {relays: ctx.app.router.Event(event).getUrls()})
         .open()
     }
   }
@@ -84,19 +77,19 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: AppContext.router.Event(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: ctx.app.router.Event(event).getUrls()})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: AppContext.router.EventParents(event).getUrls()})
+      .of(reply.value(), {relays: ctx.app.router.EventParents(event).getUrls()})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: AppContext.router.EventRoots(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: ctx.app.router.EventRoots(event).getUrls()})
       .at("thread")
       .open()
 
@@ -173,7 +166,7 @@
     if (!event.pubkey) {
       await load({
         forcePlatform: false,
-        relays: AppContext.router.fromRelays(relays).getUrls(),
+        relays: ctx.app.router.fromRelays(relays).getUrls(),
         filters: getIdFilters([event.id]),
         onEvent: e => {
           event = e
@@ -202,7 +195,7 @@
       }
 
       load({
-        relays: AppContext.router.EventChildren(event).getUrls(),
+        relays: ctx.app.router.EventChildren(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
         onEvent: batch(200, events => {
           context = uniqBy(prop("id"), context.concat(events))

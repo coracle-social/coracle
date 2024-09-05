@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {pubkey, signer, displayProfileByPubkey, AppContext} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
+  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -60,7 +61,7 @@
   }
 
   const saveFeed = async () => {
-    const relays = AppContext.router.WriteRelays().getUrls()
+    const relays = ctx.app.router.WriteRelays().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
     const pub = await createAndPublish({...template, relays})
 

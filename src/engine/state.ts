@@ -16,6 +16,8 @@ import {
   without,
 } from "ramda"
 import {
+  ctx,
+  setContext,
   Worker,
   simpleCache,
   identity,
@@ -72,7 +74,6 @@ import {Nip59, Nip01Signer} from "@welshman/signer"
 import {
   Executor,
   Multi,
-  NetworkContext,
   Plex,
   Local,
   Relays,
@@ -104,7 +105,6 @@ import {
   follows,
   mutesByPubkey,
   followsByPubkey,
-  AppContext,
   makeRouter,
   subscribe as baseSubscribe,
   storageAdapters,
@@ -118,6 +118,8 @@ import {
   getPlaintext,
   setPlaintext,
   ensurePlaintext,
+  getDefaultNetContext,
+  getDefaultAppContext,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -650,7 +652,7 @@ export const getGroupReqInfo = (address = null) => {
     recipients.push(key.pubkey)
   }
 
-  const relays = AppContext.router.WithinMultipleContexts(addresses).getUrls()
+  const relays = ctx.app.router.WithinMultipleContexts(addresses).getUrls()
 
   return {admins, recipients, relays, since}
 }
@@ -661,7 +663,7 @@ export const getCommunityReqInfo = (address = null) => {
 
   return {
     since: since - seconds(6, "hour"),
-    relays: AppContext.router.WithinContext(address).getUrls(),
+    relays: ctx.app.router.WithinContext(address).getUrls(),
   }
 }
 
@@ -1229,7 +1231,7 @@ export const getExecutor = (urls: string[]) => {
   let target
 
   if (muxUrl && remoteUrls.length > 0) {
-    const connection = NetworkContext.pool.get(muxUrl)
+    const connection = ctx.net.pool.get(muxUrl)
 
     if (connection.socket.isOpen()) {
       target = new Plex(remoteUrls, connection)
@@ -1237,7 +1239,7 @@ export const getExecutor = (urls: string[]) => {
   }
 
   if (!target) {
-    target = new Relays(remoteUrls.map(url => NetworkContext.pool.get(url)))
+    target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
   }
 
   if (localUrls.length > 0) {
@@ -1275,7 +1277,7 @@ export const onAuth = async (url, challenge) => {
     }),
   )
 
-  NetworkContext.pool.get(url).send(["AUTH", event])
+  ctx.net.pool.get(url).send(["AUTH", event])
 
   return event
 }
@@ -1414,16 +1416,19 @@ export const createAndPublish = async ({
   return publish({event, relays, verb, timeout, forcePlatform})
 }
 
-Object.assign(NetworkContext, {
-  onAuth,
-  getExecutor,
-  hasValidSignature: (url: string, event: SignedEvent) => {
-    if (url === LOCAL_RELAY_URL) {
-      return true
-    }
+setContext({
+  app: getDefaultAppContext(),
+  net: getDefaultNetContext({
+    onAuth,
+    getExecutor,
+    hasValidSignature: (url: string, event: SignedEvent) => {
+      if (url === LOCAL_RELAY_URL) {
+        return true
+      }
 
-    return hasValidSignature(event)
-  },
+      return hasValidSignature(event)
+    },
+  }),
 })
 
 // Publish
@@ -1434,25 +1439,25 @@ export const uniqTags = tags =>
 export const makeZapSplit = (pubkey: string, split = 1) => [
   "zap",
   pubkey,
-  AppContext.router.FromPubkeys([pubkey]).getUrl(),
+  ctx.app.router.FromPubkeys([pubkey]).getUrl(),
   String(split),
 ]
 
 export const mention = (pubkey: string, ...args: unknown[]) => [
   "p",
   pubkey,
-  AppContext.router.FromPubkeys([pubkey]).getUrl(),
+  ctx.app.router.FromPubkeys([pubkey]).getUrl(),
   displayProfileByPubkey(pubkey),
 ]
 
 export const mentionGroup = (address: string, ...args: unknown[]) => [
   "a",
   address,
-  AppContext.router.WithinContext(address).getUrl(),
+  ctx.app.router.WithinContext(address).getUrl(),
 ]
 
 export const mentionEvent = (event: TrustedEvent, mark = "") => {
-  const url = AppContext.router.Event(event).getUrl()
+  const url = ctx.app.router.Event(event).getUrl()
   const tags = [["e", event.id, url, mark, event.pubkey]]
 
   if (isReplaceable(event)) {
@@ -1506,14 +1511,12 @@ export const getReplyTags = (parent: TrustedEvent) => {
   // Root comes first
   if (roots.exists()) {
     for (const t of roots.valueOf()) {
-      replyTags.push(
-        t.set(2, AppContext.router.EventRoots(parent).getUrl()).set(3, "root").valueOf(),
-      )
+      replyTags.push(t.set(2, ctx.app.router.EventRoots(parent).getUrl()).set(3, "root").valueOf())
     }
   } else {
     for (const t of replies.valueOf()) {
       replyTags.push(
-        t.set(2, AppContext.router.EventParents(parent).getUrl()).set(3, "root").valueOf(),
+        t.set(2, ctx.app.router.EventParents(parent).getUrl()).set(3, "root").valueOf(),
       )
     }
   }
@@ -1618,7 +1621,7 @@ export class ThreadLoader {
     if (filteredIds.length > 0) {
       load({
         filters: getIdFilters(filteredIds),
-        relays: AppContext.router.fromRelays(this.relays).getUrls(),
+        relays: ctx.app.router.fromRelays(this.relays).getUrls(),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(getAncestorIds))
@@ -1661,7 +1664,7 @@ export class ThreadLoader {
 
 // Configuration
 
-Object.assign(AppContext, {
+Object.assign(ctx.app, {
   dufflepudUrl: env.DUFFLEPUD_URL,
   router: makeRouter({
     getRedundancy: () => getSetting("relay_redundancy"),

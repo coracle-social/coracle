@@ -1,9 +1,9 @@
 <script lang="ts">
   import {ucFirst} from "hurdak"
-  import {remove} from "@welshman/lib"
+  import {ctx, remove} from "@welshman/lib"
   import {isGroupAddress, getAddress, getIdFilters, Address} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
-  import {signer, AppContext, repository} from "@welshman/app"
+  import {signer, repository} from "@welshman/app"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -40,10 +40,10 @@
       feeds = feeds.concat({name, feed: readFeed(event)})
       tabs = tabs.concat(name)
     } else {
-      const relays = AppContext.router
+      const relays = ctx.app.router
         .merge([
-          AppContext.router.fromRelays([relay]),
-          AppContext.router.FromPubkeys([Address.from(address).pubkey]),
+          ctx.app.router.fromRelays([relay]),
+          ctx.app.router.FromPubkeys([Address.from(address).pubkey]),
         ])
         .getUrls()
 

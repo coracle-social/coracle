@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
 import {get, writable, derived} from "svelte/store"
-import {inc, assoc, pushToMapKey, now} from "@welshman/lib"
+import {ctx, inc, assoc, pushToMapKey, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -17,7 +17,7 @@ import {
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
 import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
-import {repository, AppContext, tracker, getFilterSelections} from "@welshman/app"
+import {repository, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
@@ -303,8 +303,8 @@ export const createFeed = (opts: FeedOpts) => {
       return true
     })
 
-    const selections = AppContext.router
-      .merge(notesWithParent.map(AppContext.router.EventParents))
+    const selections = ctx.app.router
+      .merge(notesWithParent.map(ctx.app.router.EventParents))
       .getSelections()
 
     for (const {relay, values} of selections) {

@@ -2,10 +2,11 @@
   import {uniqBy, uniq, sortBy, prop} from "ramda"
   import {createMap} from "hurdak"
   import {nip19} from "nostr-tools"
+  import {ctx} from "@welshman/lib"
   import {getAddress, WRAP, GROUP} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
-  import {session, relaySearch, AppContext} from "@welshman/app"
+  import {session, relaySearch} from "@welshman/app"
   import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -61,7 +62,7 @@
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
       ...LOAD_OPTS,
-      relays: AppContext.router.User().getUrls().concat(relays),
+      relays: ctx.app.router.User().getUrls().concat(relays),
       filters: [
         {kinds: [GROUP], authors: [pubkey], limit: 1},
         {kinds: [WRAP], "#p": [pubkey], limit: 500},
@@ -82,7 +83,7 @@
           pubkey,
           privkey,
           created_at: event.created_at,
-          hints: AppContext.router.Event(event).getUrls(),
+          hints: ctx.app.router.Event(event).getUrls(),
         })
       },
       onComplete: () => {

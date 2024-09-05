@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {AppContext} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -17,7 +17,7 @@
     const content = compose.parse()
 
     createAndPublish({
-      relays: AppContext.router.WriteRelays().getUrls(),
+      relays: ctx.app.router.WriteRelays().getUrls(),
       kind: 1986,
       content,
       tags: [

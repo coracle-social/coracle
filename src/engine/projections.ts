@@ -1,5 +1,6 @@
 import {mergeRight, prop, sortBy, uniq, whereEq, without} from "ramda"
 import {switcherFn} from "hurdak"
+import {ctx} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -14,7 +15,7 @@ import {
   WRAP,
 } from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {repository, AppContext, putSession, getSession, ensurePlaintext} from "@welshman/app"
+import {repository, putSession, getSession, ensurePlaintext} from "@welshman/app"
 import {GroupAccess, type SessionWithMeta} from "src/engine/model"
 import {
   deriveAdminKeyForGroup,
@@ -77,7 +78,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
     load({
       delay: 3000,
       skipCache: true,
-      relays: AppContext.router.fromRelays(relays).getUrls(),
+      relays: ctx.app.router.fromRelays(relays).getUrls(),
       filters: [
         ...getIdFilters([address]),
         {kinds: [WRAP], "#p": [pubkey]},

@@ -3,7 +3,8 @@
   import {Tags, createEvent} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
-  import {session, displayProfileByPubkey, AppContext} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
+  import {session, displayProfileByPubkey} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -111,7 +112,7 @@
 
     // Re-broadcast the note we're replying to
     if (!parent.wrap) {
-      publish({event: parent, relays: AppContext.router.PublishEvent(parent).getUrls()})
+      publish({event: parent, relays: ctx.app.router.PublishEvent(parent).getUrls()})
     }
 
     loading = true

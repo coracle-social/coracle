@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {identity} from "@welshman/lib"
-  import {pubkey, topicSearch, AppContext} from "@welshman/app"
+  import {ctx, identity} from "@welshman/lib"
+  import {pubkey, topicSearch} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -40,7 +40,7 @@
 
     createAndPublish({
       kind: 1985,
-      relays: AppContext.router.User().getUrls(),
+      relays: ctx.app.router.User().getUrls(),
       tags: [["e", eid], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
     })
 

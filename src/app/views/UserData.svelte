@@ -2,7 +2,8 @@
   import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {events, AppContext} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
+  import {events} from "@welshman/app"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -75,7 +76,7 @@
           <Anchor
             href={router
               .at("notes")
-              .of(event.id, {relays: AppContext.router.Event(event).getUrls()})
+              .of(event.id, {relays: ctx.app.router.Event(event).getUrls()})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Anchor>

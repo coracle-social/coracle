@@ -1,8 +1,9 @@
 <script lang="ts">
   import {join, identity} from "ramda"
   import {writable} from "svelte/store"
+  import {ctx} from "@welshman/lib"
   import {Tags, createEvent} from "@welshman/util"
-  import {pubkey, AppContext} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -80,7 +81,7 @@
 
     // Re-broadcast the note we're replying to
     if (parent && !parent.wrap) {
-      publish({event: parent, relays: AppContext.router.PublishEvent(parent).getUrls()})
+      publish({event: parent, relays: ctx.app.router.PublishEvent(parent).getUrls()})
     }
 
     const template = createEvent(1, {content, tags})

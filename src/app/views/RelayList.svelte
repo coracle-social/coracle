@@ -3,7 +3,7 @@
   import {derived} from "svelte/store"
   import {groupBy, sortBy, uniq} from "ramda"
   import {displayList} from "hurdak"
-  import {pushToMapKey} from "@welshman/lib"
+  import {ctx, pushToMapKey} from "@welshman/lib"
   import {
     pubkey,
     relays,
@@ -16,7 +16,6 @@
     deriveInboxRelaySelections,
     getWriteRelayUrls,
     relaySelectionsByPubkey,
-    AppContext,
   } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {createScroller} from "src/util/misc"
@@ -123,7 +122,7 @@
   }, reviews)
 
   load({
-    relays: AppContext.router.ReadRelays().getUrls(),
+    relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
     onEvent: event => {
       if (isShareableRelayUrl(Tags.fromEvent(event).get("r")?.value())) {

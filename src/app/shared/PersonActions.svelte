@@ -1,8 +1,9 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
+  import {ctx} from "@welshman/lib"
   import {toNostrURI} from "@welshman/util"
-  import {session, AppContext, signer} from "@welshman/app"
+  import {session, signer} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
@@ -44,7 +45,7 @@
       .at("qrcode")
       .of(
         toNostrURI(
-          nip19.nprofileEncode({pubkey, relays: AppContext.router.FromPubkeys([pubkey]).getUrls()}),
+          nip19.nprofileEncode({pubkey, relays: ctx.app.router.FromPubkeys([pubkey]).getUrls()}),
         ),
       )
       .open()

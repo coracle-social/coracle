@@ -1,6 +1,6 @@
 import {last, identity} from "ramda"
 import {Address, fromNostrURI} from "@welshman/util"
-import {AppContext} from "@welshman/app"
+import {ctx} from "@welshman/lib"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
@@ -57,7 +57,7 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: AppContext.router.FromPubkeys([pubkey]).getUrls(),
+        relays: ctx.app.router.FromPubkeys([pubkey]).getUrls(),
       }
     }
 
@@ -66,8 +66,8 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: AppContext.router
-          .merge([AppContext.router.fromRelays(relays), AppContext.router.FromPubkeys([pubkey])])
+        relays: ctx.app.router
+          .merge([ctx.app.router.fromRelays(relays), ctx.app.router.FromPubkeys([pubkey])])
           .getUrls(),
       }
     }
@@ -130,7 +130,7 @@ router.extend("notes", (id, {relays = []} = {}) => {
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
     relays = relays.concat(
-      AppContext.router
+      ctx.app.router
         .FromPubkeys([pubkey])
         .limit(3 - relays.length)
         .getUrls(),

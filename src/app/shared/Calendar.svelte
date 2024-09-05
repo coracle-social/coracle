@@ -1,8 +1,8 @@
 <script lang="ts">
   import {batch} from "hurdak"
   import {onMount} from "svelte"
-  import {fromPairs} from "@welshman/lib"
-  import {signer, AppContext, pubkey, repository} from "@welshman/app"
+  import {ctx, fromPairs} from "@welshman/lib"
+  import {signer, pubkey, repository} from "@welshman/app"
   import {deriveEventsMapped} from "@welshman/store"
   import {getAddress, getReplyFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -62,9 +62,7 @@
       // Load deletes for these events
       onEvent: batch(300, (chunk: TrustedEvent[]) => {
         load({
-          relays: AppContext.router
-            .merge(chunk.map(e => AppContext.router.EventChildren(e)))
-            .getUrls(),
+          relays: ctx.app.router.merge(chunk.map(e => ctx.app.router.EventChildren(e))).getUrls(),
           filters: getReplyFilters(chunk, {kinds: [5]}),
         })
       }),

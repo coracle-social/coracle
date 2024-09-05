@@ -1,8 +1,9 @@
 <script lang="ts">
   import {join, uniqBy} from "ramda"
   import {ucFirst} from "hurdak"
+  import {ctx} from "@welshman/lib"
   import {Address, GROUP, COMMUNITY, normalizeRelayUrl, displayRelayUrl} from "@welshman/util"
-  import {relaySearch, AppContext} from "@welshman/app"
+  import {relaySearch} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {fly} from "src/util/transition"
   import {formCtrl} from "src/partials/utils"
@@ -34,7 +35,7 @@
 
   const addFeed = address => {
     if (address) {
-      const relayHint = AppContext.router.FromPubkeys([Address.from(address).pubkey]).getUrl()
+      const relayHint = ctx.app.router.FromPubkeys([Address.from(address).pubkey]).getUrl()
       const feedTag = ["feed", address, relayHint, "Custom Feed"]
 
       values.feeds = uniqBy(join(":"), values.feeds.concat([feedTag]))
