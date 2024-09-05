@@ -5,6 +5,7 @@
   import Content from "src/partials/Content.svelte"
 
   clearStorage()
+  localStorage.clear()
 
   // After our state has been cleared, set the theme again
   setTimeout(() => {

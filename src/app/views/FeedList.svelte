@@ -1,6 +1,6 @@
 <script lang="ts">
   import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
-  import {FEEDS, getAddress, getAddressTagValues, getIdFilters} from "@welshman/util"
+  import {FEED, FEEDS, getAddress, getAddressTagValues, getIdFilters} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {onMount} from "svelte"
@@ -17,10 +17,10 @@
     userFeeds,
     feedSearch,
     userListFeeds,
-    loadPubkeyFeeds,
     feedFavorites,
     userFavoritedFeeds,
     userFollows,
+    addSinceToFilter,
   } from "src/engine"
 
   const createFeed = () => router.at("feeds/create").open()
@@ -52,8 +52,13 @@
     sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
   )
 
-  loadPubkeyFeeds(Array.from($userFollows))
   loadFeeds($feedFavorites.flatMap(s => getAddressTagValues(s.event.tags)))
+
+  load({
+    skipCache: true,
+    forcePlatform: false,
+    filters: [addSinceToFilter({kinds: [FEED, FEEDS], authors: Array.from($userFollows)})],
+  })
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

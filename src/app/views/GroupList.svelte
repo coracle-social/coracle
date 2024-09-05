@@ -3,8 +3,8 @@
   import {filter, reject, assoc} from "ramda"
   import {derived} from "svelte/store"
   import {now, shuffle} from "@welshman/lib"
-  import {GROUP, COMMUNITY, getAddress, getIdFilters} from "@welshman/util"
-  import {pubkey, updateSession} from "@welshman/app"
+  import {GROUP, COMMUNITY, COMMUNITIES, getAddress, getIdFilters} from "@welshman/util"
+  import {pubkey, updateSession, AppContext} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,7 +12,6 @@
   import GroupListItem from "src/app/shared/GroupListItem.svelte"
   import {
     load,
-    hints,
     groups,
     loadGiftWraps,
     loadGroupMessages,
@@ -20,8 +19,8 @@
     communityListsByAddress,
     groupMetaSearch,
     groupMeta,
-    loadPubkeyCommunities,
-    getFollows,
+    userFollows,
+    addSinceToFilter,
   } from "src/engine"
 
   const loadMore = async () => {
@@ -51,20 +50,22 @@
 
     loadGroupMessages()
 
-    if ($pubkey) {
-      loadPubkeyCommunities(getFollows($pubkey))
-    }
+    load({
+      skipCache: true,
+      forcePlatform: false,
+      filters: [addSinceToFilter({kinds: [COMMUNITIES], authors: Array.from($userFollows)})],
+    })
 
     load({
       skipCache: true,
-      relays: hints.User().getUrls(),
+      relays: AppContext.router.User().getUrls(),
       filters: [{kinds: [GROUP, COMMUNITY], limit: 1000 - communityAddrs.length}],
     })
 
     load({
       skipCache: true,
       forcePlatform: false,
-      relays: hints.User().getUrls(),
+      relays: AppContext.router.User().getUrls(),
       filters: getIdFilters(shuffle(communityAddrs).slice(0, 1000)),
     })
 

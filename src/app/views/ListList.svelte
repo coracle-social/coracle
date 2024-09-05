@@ -9,7 +9,8 @@
   import Input from "src/partials/Input.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util/router"
-  import {userLists, userFollows, listSearch, loadPubkeyLists} from "src/engine"
+  import {EDITABLE_LIST_KINDS} from "src/domain"
+  import {userLists, userFollows, listSearch, load, addSinceToFilter} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
 
@@ -21,7 +22,11 @@
   let limit = 20
   let element
 
-  loadPubkeyLists(Array.from($userFollows))
+  load({
+    skipCache: true,
+    forcePlatform: false,
+    filters: [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors: Array.from($userFollows)})],
+  })
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

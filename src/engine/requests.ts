@@ -281,38 +281,6 @@ export const createPeopleLoader = ({
   }
 }
 
-export const loadPubkeyData = (key: string, pubkeys: string[], kinds: number[]) => {
-  const promises = []
-  const $relaySelectionsByPubkey = relaySelectionsByPubkey.get()
-
-  for (const pubkey of pubkeys) {
-    if (getFreshness(key, pubkey) < now() - seconds(1, "day")) {
-      setFreshness(key, pubkey, now())
-
-      promises.push(
-        load({
-          filters: [{authors: [pubkey], kinds}],
-          relays: withIndexers(getWriteRelayUrls($relaySelectionsByPubkey.get(pubkey))),
-        }),
-      )
-    }
-  }
-
-  return Promise.all(promises)
-}
-
-export const loadPubkeyLists = (pubkeys: string[]) =>
-  loadPubkeyData("pubkey/lists", pubkeys, LIST_KINDS)
-
-export const loadPubkeyFeeds = (pubkeys: string[]) =>
-  loadPubkeyData("pubkey/feeds", pubkeys, [NAMED_BOOKMARKS, FEED, FEEDS])
-
-export const loadPubkeyHandlers = (pubkeys: string[]) =>
-  loadPubkeyData("pubkey/handlers", pubkeys, [HANDLER_INFORMATION])
-
-export const loadPubkeyCommunities = (pubkeys: string[]) =>
-  loadPubkeyData("pubkey/communities", pubkeys, [COMMUNITIES])
-
 export const loadPubkeys = async (pubkeys: string[], relays: string[] = []) => {
   const promises = []
 
