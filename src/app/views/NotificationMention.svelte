@@ -7,22 +7,20 @@
   import Note from "src/app/shared/Note.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
-  import {dereferenceNote} from "src/engine"
+  import {loadEvent} from "src/engine"
 
   export let notification: Notification
 
   const {timestamp, interactions} = notification
   const parent = Tags.fromEvent(interactions[0]).whereKey("e").parent()
+  const relays = AppContext.router.EventParents(interactions[0]).getUrls()
   const note = parent ? {id: parent.value()} : interactions[0]
   const pubkeys = uniq(pluck("pubkey", interactions))
 
   // Make sure we have something to show, even if we can't load the parent
   const promise = !parent
     ? Promise.resolve(note)
-    : dereferenceNote({
-        eid: note.id,
-        relays: AppContext.router.EventParents(interactions[0]).getUrls(),
-      }).then(note => note || interactions[0])
+    : loadEvent(note.id, {relays}).then(note => note || interactions[0])
 </script>
 
 <div>

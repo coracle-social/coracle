@@ -1281,9 +1281,6 @@ export const onAuth = async (url, challenge) => {
 }
 
 export type MySubscribeRequest = PartialSubscribeRequest & {
-  onEvent?: (event: TrustedEvent) => void
-  onEose?: (url: string) => void
-  onComplete?: () => void
   skipCache?: boolean
   forcePlatform?: boolean
 }
@@ -1300,19 +1297,8 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
   const sub = baseSubscribe(request)
 
   sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
-    repository.publish(event)
-    request.onEvent?.(event)
-
     projections.push(await ensureUnwrapped(event))
   })
-
-  if (request.onEose) {
-    sub.emitter.on("eose", request.onEose)
-  }
-
-  if (request.onComplete) {
-    sub.emitter.on("complete", request.onComplete)
-  }
 
   return sub
 }

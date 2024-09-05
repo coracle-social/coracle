@@ -1,5 +1,5 @@
 import {debounce} from "throttle-debounce"
-import {get, writable} from "svelte/store"
+import {get, writable, derived} from "svelte/store"
 import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {
@@ -31,9 +31,9 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   DEPRECATED_DIRECT_MESSAGE,
-  COMMUNITIES,
   FEEDS,
 } from "@welshman/util"
+import {deriveEvents} from "@welshman/store"
 import {makeDvmRequest} from "@welshman/dvm"
 import {
   pubkey,
@@ -46,12 +46,8 @@ import {
   loadFollows,
   loadMutes,
   loadRelaySelections,
-  getWriteRelayUrls,
-  relaySelectionsByPubkey,
   AppContext,
   getFilterSelections,
-  setFreshness,
-  getFreshness,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -66,7 +62,6 @@ import {
   getFollowers,
   getUserCommunities,
   getWotScore,
-  withIndexers,
   isEventMuted,
   load,
   maxWot,
@@ -76,6 +71,7 @@ import {
   subscribePersistent,
   sessionWithMeta,
   getFollows,
+  type MySubscribeRequest,
 } from "src/engine/state"
 
 // Utils
@@ -213,37 +209,32 @@ export const loadGroupMessages = (addresses?: string[]) => {
   return Promise.all(promises)
 }
 
-export const dereferenceNote = async ({
-  eid = null,
-  kind = null,
-  pubkey = null,
-  identifier = "",
-  relays = [],
-}): Promise<TrustedEvent | undefined> => {
-  relays = AppContext.router.fromRelays(relays).getUrls()
+export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>
+  first(
+    await load({
+      ...request,
+      skipCache: true,
+      forcePlatform: false,
+      filters: getIdFilters([idOrAddress]),
+    }),
+  )
 
-  if (eid) {
-    return new Promise(resolve => {
-      const sub = subscribe({
-        relays,
-        filters: getIdFilters([eid]),
-        forcePlatform: false,
-        closeOnEose: true,
-        timeout: 3000,
-      })
+export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) => {
+  let attempted = false
 
-      sub.emitter.on("event", (url: string, event: TrustedEvent) => {
-        resolve(event)
-        sub.close()
-      })
-    })
-  }
+  const filters = getIdFilters([idOrAddress])
 
-  if (kind && pubkey) {
-    const address = new Address(kind, pubkey, identifier).toString()
+  return derived(
+    deriveEvents(repository, {filters, includeDeleted: true}),
+    (events: TrustedEvent[]) => {
+      if (!attempted && events.length === 0) {
+        loadEvent(idOrAddress, request)
+        attempted = true
+      }
 
-    return first(await load({relays, filters: getIdFilters([address]), forcePlatform: false}))
-  }
+      return events[0]
+    },
+  )
 }
 
 // People

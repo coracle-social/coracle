@@ -11,9 +11,9 @@
 </script>
 
 {#if type === "nevent"}
-  <NoteDetail eid={data.id} {relays} />
+  <NoteDetail id={data.id} {relays} />
 {:else if type === "note"}
-  <NoteDetail eid={data} {relays} />
+  <NoteDetail id={data} {relays} />
 {:else if type === "naddr"}
   {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
   {#if [35834, 34550].includes(data.kind)}
@@ -21,7 +21,7 @@
   {:else if data.kind === 31923}
     <EventDetail {address} relays={data.relays} />
   {:else}
-    <NoteDetail {...data} />
+    <NoteDetail {address} relays={data.relays} />
   {/if}
 {:else if type === "nrelay"}
   <RelayDetail url={data} />

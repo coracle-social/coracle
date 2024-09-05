@@ -4,7 +4,7 @@
   import {sortBy, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
-  import {pubkey, signer} from "@welshman/app"
+  import {signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
   import Modal from "src/partials/Modal.svelte"

@@ -1,14 +1,12 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {getAddress, Address, getIdFilters} from "@welshman/util"
-  import {deriveProfileDisplay, deriveEvent, AppContext} from "@welshman/app"
-  import {filterVals} from "hurdak"
+  import {getAddress, Address} from "@welshman/util"
+  import {deriveProfileDisplay, AppContext} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import {router} from "src/app/util/router"
-  import {isEventMuted} from "src/engine"
+  import {isEventMuted, deriveEvent} from "src/engine"
 
   export let note
   export let value

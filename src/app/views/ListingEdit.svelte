@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {Tags, Address, asEventTemplate} from "@welshman/util"
+  import {Tags, asStampedEvent} from "@welshman/util"
   import {sleep, ucFirst} from "hurdak"
   import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
@@ -17,13 +16,14 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/util/router"
-  import {dereferenceNote, publishToZeroOrMoreGroups} from "src/engine"
+  import {deriveEvent, publishToZeroOrMoreGroups} from "src/engine"
 
   export let address
-  export let event
+
+  const event = deriveEvent(address)
 
   const onSubmit = async () => {
-    const tags = Tags.fromEvent(event)
+    const tags = Tags.fromEvent($event)
       .setTag("title", values.title)
       .setTag("summary", values.summary)
       .setTag("location", values.location)
@@ -32,11 +32,11 @@
       .setImages(images.getValue())
       .removeContext()
 
-    const template = asEventTemplate({
-      ...event,
+    const template = asStampedEvent({
+      ...$event,
       tags: tags.unwrap(),
       content: compose.parse(),
-      created_at: inc(event.created_at),
+      created_at: inc($event.created_at),
     })
 
     publishToZeroOrMoreGroups(values.groups, template)
@@ -47,16 +47,12 @@
   let images, compose
   let values: any = {}
 
-  onMount(async () => {
-    if (!event) {
-      event = await dereferenceNote(Address.from(address))
-    }
-
-    loading = false
-
-    if (event) {
-      const tags = Tags.fromEvent(event)
+  $: {
+    if ($event && loading) {
+      const tags = Tags.fromEvent($event)
       const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
+
+      loading = false
 
       values = {
         groups: tags.context().values().valueOf(),
@@ -69,15 +65,15 @@
       }
 
       // Wait for components to mount
-      await sleep(10)
+      sleep(10).then(() => {
+        compose.write($event.content)
 
-      compose.write(event.content)
-
-      for (const url of tags.values("image").valueOf()) {
-        images.addImage(Tags.wrap([["url", url]]))
-      }
+        for (const url of tags.values("image").valueOf()) {
+          images.addImage(Tags.wrap([["url", url]]))
+        }
+      })
     }
-  })
+  }
 </script>
 
 {#if loading}

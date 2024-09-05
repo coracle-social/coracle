@@ -1,36 +1,34 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {quantify, defer} from "hurdak"
+  import {onDestroy} from "svelte"
+  import {quantify} from "hurdak"
   import {ThreadLoader} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {dereferenceNote} from "src/engine"
+  import {deriveEvent} from "src/engine"
 
+  export let id = null
+  export let address = null
   export let relays
 
+  const event = deriveEvent(id || address)
+
   let loading = true
-  let promise: Promise<void> = defer()
   let showAncestors = false
-  let loader: ThreadLoader, anchor, root, parent, ancestors
+  let loader: ThreadLoader, root, parent, ancestors
 
   $: {
-    if (anchor && $root && $parent) {
+    if ($event && !loader) {
+      loader = new ThreadLoader($event, relays)
+      ;({root, parent, ancestors} = loader)
+    }
+
+    if ($event && $root && $parent) {
       loading = false
     }
   }
 
-  onMount(() => {
-    promise = dereferenceNote($$props).then(note => {
-      anchor = note
-      loader = new ThreadLoader(note, relays)
-      ;({root, parent, ancestors} = loader)
-    })
-
-    return () => {
-      promise.then(() => loader.stop())
-    }
-  })
+  onDestroy(() => loader?.stop())
 </script>
 
 {#if loading}
@@ -52,5 +50,5 @@
     </Anchor>
   {/if}
   <Note topLevel showParent={false} note={$parent} />
-  <Note topLevel showParent={false} note={anchor} depth={2} />
+  <Note topLevel showParent={false} note={$event} depth={2} />
 {/if}
