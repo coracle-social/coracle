@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {stripProtocol} from "@welshman/lib"
-  import {REACTION, isShareableRelayUrl} from "@welshman/util"
+  import {REACTION, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS, isShareableRelayUrl} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
     deriveProfile,
@@ -26,7 +26,7 @@
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
-  import {makeZapSplit, userMutes, imgproxy} from "src/engine"
+  import {load, makeZapSplit, userMutes, imgproxy} from "src/engine"
   import {router} from "src/app/util"
 
   export let pubkey
@@ -50,6 +50,9 @@
     .toString()
 
   document.title = displayProfileByPubkey(pubkey)
+
+  // Force load profile when the user visits the detail page
+  load({filters: [{kinds: [PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}]})
 
   const setActiveTab = tab => {
     activeTab = tab

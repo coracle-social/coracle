@@ -1275,8 +1275,9 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
     request.relays = env.PLATFORM_RELAYS
   }
 
-  if (!skipCache) {
-    request.relays = [...(request.relays || []), LOCAL_RELAY_URL]
+  // Only add our local relay if we have relay selections to avoid bypassing auto relay selection
+  if (!skipCache && relays?.length > 0) {
+    request.relays = [...relays, LOCAL_RELAY_URL]
   }
 
   const sub = baseSubscribe(request)
