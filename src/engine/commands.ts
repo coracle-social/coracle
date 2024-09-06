@@ -730,8 +730,8 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   const cutoff = now() - seconds(180, "day")
   const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const prevTags = parseJson(await ensurePlaintext(prev))?.filter?.(nthNe(1, "*")) || []
-  const data = indexBy(t => t[1], prevTags)
+  const prevTags = prev ? parseJson(await ensurePlaintext(prev))?.filter?.(nthNe(1, "*")) : []
+  const data = indexBy(t => t[1], prevTags || [])
 
   for (const [key, events] of Object.entries(eventsByKey)) {
     const [newer, older] = splitAt(1, events)
@@ -752,7 +752,7 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
   // Wait until after comparing for equality to add our current timestamp
   const json = JSON.stringify([...tags, ["seen", "*", String(cutoff)]])
-  const relays = ctx.app.router.WriteRelays().getUrls()
+  // const relays = ctx.app.router.WriteRelays().getUrls()
   const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
   console.log("markAsSeen", tags, prevTags)

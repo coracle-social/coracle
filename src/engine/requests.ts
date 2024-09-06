@@ -37,7 +37,6 @@ import {deriveEvents} from "@welshman/store"
 import {makeDvmRequest} from "@welshman/dvm"
 import {
   pubkey,
-  relays,
   repository,
   signer,
   getSession,
