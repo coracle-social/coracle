@@ -10,6 +10,7 @@
 - [x] Large refactor to use @welshman/app utilities
 - [x] Add profile picture to DMs
 - [x] Add pubkey to profile name, fix wot info on mobile (zmjohnson)
+- [x] Render highlight comments
 
 # 0.4.9
 
