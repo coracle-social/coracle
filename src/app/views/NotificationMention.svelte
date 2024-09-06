@@ -17,7 +17,7 @@
   const pubkeys = uniq(pluck("pubkey", interactions))
 
   // Make sure we have something to show, even if we can't load the parent
-  const event = deriveEvent(parent.value() || interactions[0]?.id, {relays})
+  const event = deriveEvent(parent?.value() || interactions[0]?.id, {relays})
 </script>
 
 <div>

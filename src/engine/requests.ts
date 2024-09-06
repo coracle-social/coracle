@@ -272,23 +272,12 @@ export const createPeopleLoader = ({
   }
 }
 
-export const loadPubkeys = async (pubkeys: string[], relays: string[] = []) => {
-  const promises = []
-
-  for (const pubkey of pubkeys) {
-    // Load relays, then load profiles so we have a better chance of finding them
-    promises.push(
-      loadRelaySelections(pubkey, {relays}).then(() =>
-        Promise.all([
-          loadProfile(pubkey, {relays}),
-          loadFollows(pubkey, {relays}),
-          loadMutes(pubkey, {relays}),
-        ]),
-      ),
-    )
+export const loadPubkeys = (pubkeys: string[]) => {
+  for (const pubkey of pubkeys ) {
+    loadProfile(pubkey)
+    loadFollows(pubkey)
+    loadMutes(pubkey)
   }
-
-  await Promise.all(promises)
 }
 
 // Feeds
