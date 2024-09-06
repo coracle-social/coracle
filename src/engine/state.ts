@@ -725,7 +725,9 @@ export const isEventMuted = withGetter(
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
       const regex =
-        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`) : null
+        words.length > 0
+          ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
+          : null
 
       return (e: Partial<TrustedEvent>, strict = false) => {
         if (!$pubkey || e.pubkey === $pubkey) {
@@ -744,7 +746,7 @@ export const isEventMuted = withGetter(
           return true
         }
 
-        if (regex){
+        if (regex) {
           if (e.content?.toLowerCase().match(regex)) {
             return true
           }
@@ -1282,8 +1284,8 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
   }
 
   // Only add our local relay if we have relay selections to avoid bypassing auto relay selection
-  if (!skipCache && relays?.length > 0) {
-    request.relays = [...relays, LOCAL_RELAY_URL]
+  if (!skipCache && request.relays?.length > 0) {
+    request.relays = [...request.relays, LOCAL_RELAY_URL]
   }
 
   const sub = baseSubscribe(request)

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {onMount} from "svelte"
   import {displayList, pluralize} from "hurdak"
   import {derived} from "svelte/store"
@@ -13,16 +14,18 @@
   } from "@welshman/app"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly, slide} from "src/util/transition"
-  import {createScroller} from "src/util/misc"
+  import {createScroller, formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
-  import {hasNip44} from "src/engine"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
+  import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
+  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import {hasNip44, ensureMessagePlaintext} from "src/engine"
 
   export let pubkeys
   export let sendMessage
@@ -43,9 +46,12 @@
 
   let confirmIsOpen = false
 
+  const getContent = e => (e.kind === 4 ? ensureMessagePlaintext(e) : e.content) || ""
+
   const openConfirm = () => {
     confirmIsOpen = true
   }
+
   const closeConfirm = () => {
     confirmIsOpen = false
   }
@@ -173,9 +179,60 @@
         </div>
       {/if}
     </div>
-    {#each groupedMessages as m (m.id)}
+    {#each groupedMessages as message (message.id)}
       <div in:fly={{y: 20}} class="grid gap-2 py-1">
-        <slot name="message" message={m} />
+        <div
+          class={cx("max-w-xl rounded-2xl px-4 py-2 flex flex-col gap-2", {
+            "ml-12 justify-self-end rounded-br-none bg-neutral-100 text-neutral-800":
+              message.pubkey === $session.pubkey,
+            "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
+          })}>
+          {#if message.showProfile && message.pubkey !== $session.pubkey}
+            <PersonBadgeMedium pubkey={message.pubkey} />
+          {/if}
+          <div class="break-words">
+            {#await getContent(message)}
+              <!-- pass -->
+            {:then content}
+              <NoteContent showEntire note={{...message, content}} />
+            {/await}
+          </div>
+          <small
+            class="mt-1 flex items-center justify-between gap-2 text-xs"
+            class:text-tinted-700={message.pubkey === $session.pubkey}
+            class:text-neutral-100={message.pubkey !== $session.pubkey}>
+            {formatTimestamp(message.created_at)}
+            {#if message.kind === 4}
+              <Popover triggerType="mouseenter">
+                <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
+                <p slot="tooltip">
+                  This message was sent using nostr's legacy DMs, which have a number of shortcomings.
+                  Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
+                </p>
+              </Popover>
+            {:else}
+              <Popover triggerType="mouseenter">
+                <i slot="trigger" class="fa fa-lock cursor-pointer text-neutral-400" />
+                <div slot="tooltip" class="flex flex-col gap-2">
+                  <p>
+                    This message was sent using nostr's new group chat specification, which solves
+                    several problems with legacy DMs. Read more <Anchor
+                      underline
+                      modal
+                      href="/help/nip-44-dms">here</Anchor
+                    >.
+                  </p>
+                  {#if message.pubkey === $session.pubkey}
+                    <p>
+                      Note that these messages are not yet universally supported. Make sure the person
+                      you're chatting with is using a compatible nostr client.
+                    </p>
+                  {/if}
+                </div>
+              </Popover>
+            {/if}
+          </small>
+        </div>
       </div>
     {/each}
     {#await loading}
