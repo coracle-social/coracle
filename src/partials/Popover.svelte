@@ -20,13 +20,9 @@
   let trigger
   let tooltip
 
-  $: adjustedTriggerType = isMobile && triggerType === "mouseenter" ? "click" : triggerType
+  $: adjustedTriggerType = isMobile ? "click" : triggerType
 
   onMount(() => {
-    if (!adjustedTriggerType) {
-      return
-    }
-
     instance = tippy(trigger, {
       ...opts,
       theme,
@@ -84,10 +80,8 @@
   <slot name="trigger" />
 </div>
 
-{#if adjustedTriggerType}
-  <div bind:this={tooltip} class="hidden">
-    <div>
-      <slot name="tooltip" {instance} />
-    </div>
+<div bind:this={tooltip} class="hidden">
+  <div>
+    <slot name="tooltip" {instance} />
   </div>
-{/if}
+</div>
