@@ -725,7 +725,7 @@ export const isEventMuted = withGetter(
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
       const regex =
-        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase()).join("|")})\\b`) : null
+        words.length > 0 ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`) : null
 
       return (e: Partial<TrustedEvent>, strict = false) => {
         if (!$pubkey || e.pubkey === $pubkey) {
@@ -744,8 +744,14 @@ export const isEventMuted = withGetter(
           return true
         }
 
-        if (regex && e.content?.toLowerCase().match(regex)) {
-          return true
+        if (regex){
+          if (e.content?.toLowerCase().match(regex)) {
+            return true
+          }
+
+          if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) {
+            return true
+          }
         }
 
         if (!strict) {
