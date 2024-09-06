@@ -1648,17 +1648,19 @@ deleteDB("nostr-engine/Storage")
 let ready: Promise<any> = Promise.resolve()
 
 const migrateEvents = (events: TrustedEvent[]) =>
-  take(
-    30_000,
-    sortBy(e => {
-      if (e.kind === WRAP) return -Infinity
-      if (getSession(e.pubkey)) return -Infinity
-      if (e.tags.find(t => getSession(t[1]))) return -seconds(90, "day")
-      if (reactionKinds.includes(e.kind)) return 0
-      if (repostKinds.includes(e.kind)) return 0
-      return e.created_at - now()
-    }, events),
-  )
+  events.length < 50_000
+    ? events
+    : take(
+        30_000,
+        sortBy(e => {
+          if (e.kind === WRAP) return -Infinity
+          if (getSession(e.pubkey)) return -Infinity
+          if (e.tags.find(t => getSession(t[1]))) return -seconds(90, "day")
+          if (reactionKinds.includes(e.kind)) return 0
+          if (repostKinds.includes(e.kind)) return 0
+          return e.created_at - now()
+        }, events),
+      )
 
 // Avoid initializing multiple times on hot reload
 if (!db) {

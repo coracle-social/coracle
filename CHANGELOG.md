@@ -8,6 +8,8 @@
 - [x] Reduce extra encrypt/decrypt calls when updating lists
 - [x] Apply mute keywords to usernames as well as note content
 - [x] Large refactor to use @welshman/app utilities
+- [x] Add profile picture to DMs
+- [x] Add pubkey to profile name, fix wot info on mobile (zmjohnson)
 
 # 0.4.9
 

@@ -46,14 +46,14 @@
       a => !groups.key(a).get()?.meta,
     )
 
-    updateSession(pubkey.get(), assoc("groups_last_synced", now()))
+    updateSession($pubkey, assoc("groups_last_synced", now()))
 
     loadGroupMessages()
 
     load({
       skipCache: true,
       forcePlatform: false,
-      filters: [addSinceToFilter({kinds: [COMMUNITIES], authors: Array.from($userFollows)})],
+      filters: [addSinceToFilter({kinds: [COMMUNITIES], authors: [$pubkey, ...Array.from($userFollows)]})],
     })
 
     load({
