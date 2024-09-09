@@ -24,7 +24,6 @@
     userIsGroupMember,
     groupAdminKeys,
     subscribe,
-    LOAD_OPTS,
   } from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
@@ -61,7 +60,7 @@
 
     // Look for group definition events by this pubkey so we can associate the key with the group
     const sub = subscribe({
-      ...LOAD_OPTS,
+      closeOnEose: true,
       relays: ctx.app.router.User().getUrls().concat(relays),
       filters: [
         {kinds: [GROUP], authors: [pubkey], limit: 1},

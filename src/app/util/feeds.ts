@@ -84,7 +84,6 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
             onEvent,
             tracker,
             signal,
-            authTimeout: 300,
             skipCache: true,
             forcePlatform,
           }),

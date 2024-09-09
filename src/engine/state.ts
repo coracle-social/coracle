@@ -1319,12 +1319,10 @@ export const subscribePersistent = (request: MySubscribeRequest) => {
   }
 }
 
-export const LOAD_OPTS = {timeout: 5000, closeOnEose: true}
-
 export const load = (request: MySubscribeRequest) =>
   new Promise<TrustedEvent[]>(resolve => {
     const events: TrustedEvent[] = []
-    const sub = subscribe({...request, ...LOAD_OPTS})
+    const sub = subscribe({...request, closeOnEose: true})
 
     sub.emitter.on("event", (url: string, event: TrustedEvent) => events.push(event))
     sub.emitter.on("complete", (url: string) => resolve(events))
@@ -1677,6 +1675,7 @@ if (!db) {
     app: getDefaultAppContext({
       dufflepudUrl: env.DUFFLEPUD_URL,
       indexerRelays: env.INDEXER_RELAYS,
+      requestTimeout: 5000,
       router: makeRouter({
         getRedundancy: () => getSetting("relay_redundancy"),
         getLimit: () => getSetting("relay_limit"),
