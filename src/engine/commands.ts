@@ -838,11 +838,11 @@ const addSession = (s: Session) => {
 }
 
 export const loginWithPrivateKey = (secret, extra = {}) =>
-  addSession({method: "privkey", pubkey: getPubkey(secret), secret, ...extra})
+  addSession({method: "nip01", pubkey: getPubkey(secret), secret, ...extra})
 
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
-export const loginWithExtension = pubkey => addSession({method: "extension", pubkey})
+export const loginWithExtension = pubkey => addSession({method: "nip07", pubkey})
 
 export const loginWithNsecBunker = async (pubkey, token, connectRelay) => {
   const secret = makeSecret()
