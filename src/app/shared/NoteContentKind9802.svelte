@@ -6,7 +6,7 @@
 
   export let note, showEntire, showMedia
 
-  const meta = fromPairs(note.tags)
+  const meta: Record<string, string> = fromPairs(note.tags)
 </script>
 
 <div class="flex flex-col gap-2">

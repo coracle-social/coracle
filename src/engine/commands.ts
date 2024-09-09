@@ -33,6 +33,11 @@ import {
   DIRECT_MESSAGE,
   SEEN_CONVERSATION,
   LOCAL_RELAY_URL,
+  asDecryptedEvent,
+  readList,
+  editList,
+  makeList,
+  createList,
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
@@ -594,26 +599,45 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
   return createAndPublish({...addClientTags(template), relays, forcePlatform})
 }
 
-// Singletons
+// Lists
 
 export type ModifyTags = (tags: string[][]) => string[][]
 
-export const updateSingleton = async (kind: number, modifyTags: ModifyTags) => {
+export type UpdateSingletonOpts = {
+  only?: "public" | "private"
+}
+
+export const updateSingleton = async (
+  kind: number,
+  modifyTags: ModifyTags,
+  {only}: UpdateSingletonOpts = {},
+) => {
   const [prev] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
+
+  // Preserve content instead of use encrypted tags because kind 3 content is used for
+  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
   const relays = withIndexers(ctx.app.router.WriteRelays().getUrls())
+  const encrypt = content => signer.get().nip44.encrypt(pubkey.get(), content)
+  const update = list => ({
+    ...list,
+    publicTags: only === "private" ? list.publicTags : uniqTags(modifyTags(list.publicTags)),
+    privateTags: only === "public" ? list.privateTags : uniqTags(modifyTags(list.privateTags)),
+  })
 
-  // Preserve content if we have it
-  const content = prev?.content || ""
-  const tags = modifyTags(uniqTags(prev?.tags || []))
+  const encryptable = prev
+    ? editList(update(readList(asDecryptedEvent(prev, {content: await ensurePlaintext(prev)}))))
+    : createList(update(makeList({kind})))
 
-  await createAndPublish({kind, content, tags, relays})
+  const template = await encryptable.reconcile(encrypt)
+
+  await createAndPublish({...template, relays})
 }
 
 // Follows/mutes
 
 export const unfollowPerson = (pubkey: string) => {
   if (signer.get()) {
-    updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)))
+    updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)), {only: "public"})
   } else {
     anonymous.update($a => ({...$a, follows: reject(nthEq(1, pubkey), $a.follows)}))
   }
@@ -621,7 +645,7 @@ export const unfollowPerson = (pubkey: string) => {
 
 export const followPerson = (pubkey: string) => {
   if (signer.get()) {
-    updateSingleton(FOLLOWS, tags => append(mention(pubkey), tags))
+    updateSingleton(FOLLOWS, tags => append(mention(pubkey), tags), {only: "public"})
   } else {
     anonymous.update($a => ({...$a, follows: append(mention(pubkey), $a.follows)}))
   }
@@ -631,17 +655,17 @@ export const unmutePerson = (pubkey: string) =>
   updateSingleton(MUTES, tags => reject(nthEq(1, pubkey), tags))
 
 export const mutePerson = (pubkey: string) =>
-  updateSingleton(MUTES, tags => append(mention(pubkey), tags))
+  updateSingleton(MUTES, tags => append(mention(pubkey), tags), {only: "public"})
 
 export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
 
 export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(["e", id], tags))
 
 export const removeFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags))
+  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags), {only: "public"})
 
 export const addFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => append(["a", address], tags))
+  updateSingleton(FEEDS, tags => append(["a", address], tags), {only: "public"})
 
 // Relays
 
@@ -656,14 +680,14 @@ export const requestRelayAccess = async (url: string, claim: string, sk?: string
 
 export const setOutboxPolicies = async (modifyTags: ModifyTags) => {
   if (signer.get()) {
-    updateSingleton(RELAYS, modifyTags)
+    updateSingleton(RELAYS, modifyTags, {only: "public"})
   } else {
     anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
   }
 }
 
 export const setInboxPolicies = async (modifyTags: ModifyTags) =>
-  updateSingleton(INBOX_RELAYS, modifyTags)
+  updateSingleton(INBOX_RELAYS, modifyTags, {only: "public"})
 
 export const setInboxPolicy = (url: string, enabled: boolean) => {
   const urls = getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))

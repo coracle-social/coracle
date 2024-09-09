@@ -79,7 +79,7 @@
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    updateSingleton(FOLLOWS, () => follows.map(mention))
+    updateSingleton(FOLLOWS, () => follows.map(mention), {only: "public"})
 
     // Publish our welcome note
     if (noteContent) {

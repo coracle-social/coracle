@@ -44,7 +44,6 @@ import {
   loadProfile,
   loadFollows,
   loadMutes,
-  loadRelaySelections,
   getFilterSelections,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
@@ -273,7 +272,7 @@ export const createPeopleLoader = ({
 }
 
 export const loadPubkeys = (pubkeys: string[]) => {
-  for (const pubkey of pubkeys ) {
+  for (const pubkey of pubkeys) {
     loadProfile(pubkey)
     loadFollows(pubkey)
     loadMutes(pubkey)
