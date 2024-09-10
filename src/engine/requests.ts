@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {ctx, Worker, nthEq, nth, now, max, first} from "@welshman/lib"
+import {ctx, Worker, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -271,11 +271,16 @@ export const createPeopleLoader = ({
   }
 }
 
-export const loadPubkeys = (pubkeys: string[]) => {
-  for (const pubkey of pubkeys) {
-    loadProfile(pubkey)
-    loadFollows(pubkey)
-    loadMutes(pubkey)
+export const loadPubkeys = async (pubkeys: string[]) => {
+  // Load slowly to avoid congestion and messing up relay selections for profiles.
+  for (const pubkeyChunk of chunk(50, pubkeys)) {
+    await sleep(300)
+
+    for (const pubkey of pubkeyChunk) {
+      loadProfile(pubkey)
+      loadFollows(pubkey)
+      loadMutes(pubkey)
+    }
   }
 }
 
