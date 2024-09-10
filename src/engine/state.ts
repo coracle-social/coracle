@@ -1683,6 +1683,10 @@ if (!db) {
     }),
   })
 
+  userSettings.subscribe($settings => {
+    ctx.app.dufflepudUrl = getSetting('dufflepud_url')
+  })
+
   signer.subscribe($signer => {
     if ($signer?.nip44) {
       $signer?.nip44.encrypt(pubkey.get(), "test").then(
