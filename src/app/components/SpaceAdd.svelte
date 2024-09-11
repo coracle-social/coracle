@@ -1,11 +1,11 @@
 <script lang="ts">
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
-  import SpaceCreate from "@app/components/SpaceCreate.svelte"
+  import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {pushModal} from "@app/modal"
 
-  const startCreate = () => pushModal(SpaceCreate)
+  const startCreate = () => pushModal(SpaceCreateExternal)
 
   const startJoin = () => pushModal(SpaceInviteAccept)
 </script>

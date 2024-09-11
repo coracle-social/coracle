@@ -3,18 +3,28 @@
   import Masonry from "svelte-bricks"
   import {displayRelayUrl} from "@welshman/util"
   import {relaySearch} from "@welshman/app"
+  import {createScroller} from '@lib/html'
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
   import {userMembership, discoverRelays} from "@app/state"
 
   let term = ""
+  let limit = 20
 
-  $: relays = $relaySearch.searchOptions(term)
+  const loadMore = async () => {
+    limit += 20
+  }
+
+  $: relays = $relaySearch.searchOptions(term).slice(0, limit)
 
   onMount(() => {
     const sub = discoverRelays()
+    const scroller = createScroller(loadMore)
 
-    return () => sub.close()
+    return () => {
+      sub.close()
+      scroller.stop()
+    }
   })
 </script>
 

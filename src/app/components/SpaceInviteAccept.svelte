@@ -8,7 +8,9 @@
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import InfoRelay from "@app/components/InfoRelay.svelte"
   import {pushToast} from "@app/toast"
+  import {pushModal} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
 
@@ -55,14 +57,18 @@
 <form class="column gap-4" on:submit|preventDefault={join}>
   <div class="py-2">
     <h1 class="heading">Join a Space</h1>
-    <p class="text-center">Enter an invite link below to join an existing space.</p>
+    <p class="text-center">Enter an invite code below to join an existing space.</p>
   </div>
   <Field>
-    <p slot="label">Invite Link*</p>
+    <p slot="label">Invite code*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="link-round" />
       <input bind:value={url} class="grow" type="text" />
     </label>
+    <p slot="info">
+      You can also directly join any relay by entering its URL here.
+      <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
+    </p>
   </Field>
   <CardButton icon="compass" title="Don't have an invite?" on:click={browse}>
     Browse other spaces on the discover page.

@@ -1,10 +1,10 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
   import CardButton from "@lib/components/CardButton.svelte"
-  import SpaceCreate from "@app/components/SpaceCreate.svelte"
+  import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import {pushModal} from "@app/modal"
 
-  const createSpace = () => pushModal(SpaceCreate)
+  const createSpace = () => pushModal(SpaceCreateExternal)
 
   const browseSpaces = () => goto("/discover")
 </script>
