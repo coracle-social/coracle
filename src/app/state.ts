@@ -24,6 +24,7 @@ import {
   getDefaultAppContext,
   getDefaultNetContext,
   makeRouter,
+  trackerStore,
 } from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
@@ -32,7 +33,7 @@ export const MESSAGE = 209
 
 export const REPLY = 210
 
-export const MEMBERSHIPS = 30209
+export const MEMBERSHIPS = 10209
 
 export const INDEXER_RELAYS = ["wss://purplepag.es/", "wss://relay.damus.io/", "wss://nos.lol/"]
 
@@ -118,22 +119,16 @@ export const {
 // Messages
 
 export type Message = {
-  url: string
-  chat: string
   topic: string
   event: TrustedEvent
 }
 
-export const readMessage = (event: TrustedEvent): Maybe<Message[]> => {
-  const urls = getRelayTagValues(event.tags)
+export const readMessage = (event: TrustedEvent): Maybe<Message> => {
   const topics = getTopicTagValues(event.tags)
 
-  if (topics.length > 1 || urls.length !== 1) return undefined
+  if (topics.length > 1) return undefined
 
-  const topic = topics[0] || ""
-  const url = urls[0]
-
-  return urls.map(url => ({url, topic, chat: makeChatId(url, topic), event}))
+  return {topic: topics[0] || "", event}
 }
 
 export const messages = deriveEventsMapped<Message>(repository, {
@@ -155,12 +150,26 @@ export const makeChatId = (url: string, topic: string) => `${url}'${topic}`
 
 export const splitChatId = (id: string) => id.split("'")
 
-export const chats = derived(messages, $messages =>
-  Array.from(groupBy($message => $message.chat, $messages).values()).map(messages => {
-    const {chat, url, topic} = messages[0]
+export const chats = derived(
+  [trackerStore, messages],
+  ([$tracker, $messages]) => {
+    const messagesByChatId = new Map<string, Message[]>()
 
-    return {id: chat, url, topic, messages}
-  }),
+    for (const message of $messages) {
+      for (const url of $tracker.getRelays(message.event.id)) {
+        const chatId = makeChatId(url, message.topic)
+
+        pushToMapKey(messagesByChatId, chatId, message)
+      }
+    }
+
+    return Array.from(messagesByChatId.entries())
+      .map(([id, messages]) => {
+        const [url, topic] = splitChatId(id)
+
+        return {id, url, topic, messages}
+      })
+  }
 )
 
 export const {

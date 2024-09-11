@@ -19,6 +19,7 @@
     plaintext,
     freshness,
     storageAdapters,
+    tracker,
   } from "@welshman/app"
   import * as app from "@welshman/app"
   import {createEventStore} from "@welshman/store"
@@ -63,7 +64,7 @@
 
     ready = db
       ? Promise.resolve()
-      : initStorage("flotilla", 2, {
+      : initStorage("flotilla", 3, {
           events: {
             keyPath: "id",
             store: createEventStore(repository),
@@ -79,6 +80,7 @@
           publishStatus: storageAdapters.fromObjectStore(publishStatusData),
           freshness: storageAdapters.fromObjectStore(freshness),
           plaintext: storageAdapters.fromObjectStore(plaintext),
+          tracker: storageAdapters.fromTracker(tracker),
         }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 
     dialog.addEventListener("close", () => {

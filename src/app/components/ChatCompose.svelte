@@ -32,7 +32,7 @@
 
     const event = createEvent(MESSAGE, {
       content: $editor.getText(),
-      tags: [["-"], ["relay", url], ...topicTags, ...mentionTags, ...imetaTags],
+      tags: [["-"], ...topicTags, ...mentionTags, ...imetaTags],
     })
 
     publishThunk(makeThunk({event, relays: [url]}))
