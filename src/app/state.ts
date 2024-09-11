@@ -1,7 +1,7 @@
 import type {FuseResult} from "fuse.js"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {max, between, groupBy, pushToMapKey, nthEq, stripProtocol, indexBy} from "@welshman/lib"
+import {setContext, max, between, groupBy, pushToMapKey, nthEq, stripProtocol, indexBy} from "@welshman/lib"
 import {
   getIdFilters,
   getIdentifier,
@@ -16,7 +16,6 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
-  env,
   pubkey,
   repository,
   createSearch,
@@ -28,6 +27,9 @@ import {
   profilesByPubkey,
   loadRelaySelections,
   getWriteRelayUrls,
+  getDefaultAppContext,
+  getDefaultNetContext,
+  makeRouter,
 } from "@welshman/app"
 import type {Relay} from "@welshman/app"
 import type {SubscribeRequest} from "@welshman/net"
@@ -46,7 +48,16 @@ export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
 export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
 
-Object.assign(env, {DUFFLEPUD_URL})
+setContext({
+  net: getDefaultNetContext(),
+  app: getDefaultAppContext({
+    dufflepudUrl: DUFFLEPUD_URL,
+    indexerRelays: INDEXER_RELAYS,
+    requestTimeout: 5000,
+    router: makeRouter(),
+  }),
+})
+
 
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   let attempted = false

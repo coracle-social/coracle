@@ -17,6 +17,7 @@
     publishStatusData,
     plaintext,
     freshness,
+    storageAdapters,
   } from "@welshman/app"
   import type {PublishStatusData, PublishStatusDataByUrlById} from "@welshman/app"
   import {createEventStore, adapter} from "@welshman/store"
@@ -59,7 +60,7 @@
   onMount(() => {
     Object.assign(window, {get, state})
 
-    ready = initStorage(3, {
+    ready = initStorage('flotilla', 3, {
       events: {
         keyPath: "id",
         store: createEventStore(repository),
@@ -72,67 +73,9 @@
         keyPath: "nip05",
         store: handles,
       },
-      publishStatus: {
-        keyPath: "id",
-        store: adapter({
-          store: publishStatusData,
-          forward: ($psd: PublishStatusDataByUrlById) => {
-            const data = []
-
-            for (const itemsByUrl of Object.values($psd)) {
-              for (const item of Object.values(itemsByUrl)) {
-                data.push(item)
-              }
-            }
-
-            return data
-          },
-          backward: (data: PublishStatusData[]) => {
-            const result: PublishStatusDataByUrlById = {}
-
-            for (const item of data) {
-              result[item.id] = result[item.id] || {}
-              result[item.id][item.url] = item
-            }
-
-            return result
-          },
-        }),
-      },
-      freshness: {
-        keyPath: "key",
-        store: adapter({
-          store: freshness,
-          forward: ($freshness: Record<string, number>) =>
-            Object.entries($freshness).map(([key, ts]) => ({key, ts})),
-          backward: (data: any[]) => {
-            const result: Record<string, number> = {}
-
-            for (const {key, ts} of data) {
-              result[key] = ts
-            }
-
-            return result
-          },
-        }),
-      },
-      plaintext: {
-        keyPath: "id",
-        store: adapter({
-          store: plaintext,
-          forward: ($plaintext: Record<string, string>) =>
-            Object.entries($plaintext).map(([id, plaintext]) => ({id, plaintext})),
-          backward: (data: any[]) => {
-            const result: Record<string, string> = {}
-
-            for (const {id, plaintext} of data) {
-              result[id] = plaintext
-            }
-
-            return result
-          },
-        }),
-      },
+      publishStatus: storageAdapters.fromObjectStore(publishStatusData),
+      freshness: storageAdapters.fromObjectStore(freshness),
+      plaintext: storageAdapters.fromObjectStore(plaintext),
     }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 
     dialog.addEventListener("close", () => {

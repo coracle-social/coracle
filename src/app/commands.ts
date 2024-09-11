@@ -11,7 +11,7 @@ import {PublishStatus} from "@welshman/net"
 import {
   pubkey,
   repository,
-  loadOne,
+  load,
   makeThunk,
   publishThunk,
   loadProfile,
@@ -56,26 +56,12 @@ export const makeIMeta = (url: string, data: Record<string, string>) => [
 
 // Loaders
 
-export const loadUserData = async (pubkey: string, hints: string[] = []) => {
-  const relaySelections = await loadRelaySelections(pubkey, INDEXER_RELAYS)
-  const relays = uniq([
-    ...getRelayTagValues(relaySelections?.tags || []),
-    ...INDEXER_RELAYS,
-    ...hints,
+export const loadUserData = (pubkey: string, hints: string[] = []) =>
+  Promise.all([
+    loadProfile(pubkey),
+    loadFollows(pubkey),
+    loadMutes(pubkey),
   ])
-  const membership = await loadGroupMembership(pubkey, relays)
-  const promises = [
-    loadProfile(pubkey, relays),
-    loadFollows(pubkey, relays),
-    loadMutes(pubkey, relays),
-  ]
-
-  for (const [_, nom, url] of getGroupTags(membership?.event.tags || [])) {
-    promises.push(loadGroup(nom, [url]))
-  }
-
-  await Promise.all(promises)
-}
 
 // Updates
 
@@ -110,7 +96,7 @@ export const sendJoinRequest = async (nom: string, url: string): Promise<[boolea
 
   if (message.includes("already a member")) return [true, ""]
   if (status !== PublishStatus.Success) return [false, message]
-  if (await loadOne({filters, relays})) return [true, ""]
+  if (await load({filters, relays})) return [true, ""]
 
   return [
     false,
