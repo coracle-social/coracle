@@ -81,7 +81,6 @@
 
   onMount(() => {
     editor = createEditor(getChatViewOptions(event.content))
-    console.log($editor)
   })
 </script>
 

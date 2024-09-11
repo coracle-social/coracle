@@ -1,8 +1,10 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {page} from "$app/stores"
-  import {sort} from "@welshman/lib"
-  import {displayRelayUrl} from "@welshman/util"
-  import {fly} from "@lib/transition"
+  import {sort, now} from "@welshman/lib"
+  import {displayRelayUrl, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
+  import {subscribe} from "@welshman/app"
+  import {fly, slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -14,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, decodeNRelay} from "@app/state"
+  import {userMembership, topicsByUrl, decodeNRelay, MESSAGE, REPLY} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -32,10 +34,29 @@
 
   const addRoom = () => pushModal(RoomCreate, {url})
 
+  const getDelay = (reset = false) => {
+    if (reset) {
+      delay = 0
+    } else {
+      delay += 50
+    }
+
+    return delay
+  }
+
+  let delay = 0
   let showMenu = false
 
   $: url = decodeNRelay($page.params.nrelay)
   $: rooms = sort($userMembership?.topicsByUrl?.get(url) || [])
+  $: otherRooms = ($topicsByUrl.get(url) || []).filter(t => !rooms.includes(t))
+
+  onMount(() => {
+    const kinds = [MESSAGE, REPLY, EVENT_DATE, EVENT_TIME, CLASSIFIED]
+    const sub = subscribe({filters: [{kinds, since: now() - 30}], relays: [url]})
+
+    return () => sub.close()
+  })
 </script>
 
 {#key url}
@@ -76,41 +97,66 @@
           <Icon icon="chat-round" /> Chat
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: 50}}>
+      <div in:fly|local={{delay: getDelay(true)}}>
         <SecondaryNavItem href={makeSpacePath(url, "threads")}>
           <Icon icon="notes-minimalistic" /> Threads
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: 100}}>
+      <div in:fly|local={{delay: getDelay()}}>
         <SecondaryNavItem href={makeSpacePath(url, "events")}>
           <Icon icon="calendar-minimalistic" /> Calendar
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: 150}}>
+      <div in:fly|local={{delay: getDelay()}}>
         <SecondaryNavItem href={makeSpacePath(url, "listings")}>
           <Icon icon="shop-minimalistic" /> Market
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: 200}}>
-        <div class="h-2" />
-        <SecondaryNavHeader>
-          Rooms
-          <Button on:click={addRoom}>
-            <Icon icon="add-circle" />
-          </Button>
-        </SecondaryNavHeader>
-      </div>
+      {#if rooms.length > 0}
+        <div transition:slide|local={{delay: getDelay()}}>
+          <div class="h-2" />
+          <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+        </div>
+      {/if}
       {#each rooms as topic, i (topic)}
-        <div transition:fly|local={{delay: 250 + i * 50}}>
+        <div transition:slide|local={{delay: getDelay()}}>
           <SecondaryNavItem href={makeSpacePath(url, topic)}>
             <Icon icon="hashtag" />
             {topic}
           </SecondaryNavItem>
         </div>
       {/each}
+      {#if otherRooms.length > 0}
+        <div transition:slide|local={{delay: getDelay()}}>
+          <div class="h-2" />
+          <SecondaryNavHeader>
+            {#if rooms.length > 0}
+              Other Rooms
+            {:else}
+              Rooms
+            {/if}
+          </SecondaryNavHeader>
+        </div>
+      {/if}
+      {#each otherRooms as topic, i (topic)}
+        <div transition:slide|local={{delay: getDelay()}}>
+          <SecondaryNavItem href={makeSpacePath(url, topic)}>
+            <Icon icon="hashtag" />
+            {topic}
+          </SecondaryNavItem>
+        </div>
+      {/each}
+      <div in:fly|local={{delay: getDelay()}}>
+        <SecondaryNavItem on:click={addRoom}>
+          <Icon icon="add-circle" />
+          Create room
+        </SecondaryNavItem>
+      </div>
     </SecondaryNavSection>
   </SecondaryNav>
   <Page>
-    <slot />
+    {#key $page.params.topic}
+      <slot />
+    {/key}
   </Page>
 {/key}

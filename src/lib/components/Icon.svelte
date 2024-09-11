@@ -9,6 +9,7 @@
   import cx from "classnames"
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
+  import ArrowsALogout2 from "@assets/icons/Arrows ALogout 2.svg?dataurl"
   import Code2 from "@assets/icons/Code 2.svg?dataurl"
   import Earth from "@assets/icons/Earth.svg?dataurl"
   import Pen from "@assets/icons/Pen.svg?dataurl"
@@ -68,6 +69,7 @@
 
   const data = switcher(icon, {
     "add-square": AddSquare,
+    "arrows-a-logout-2": ArrowsALogout2,
     "code-2": Code2,
     earth: Earth,
     pen: Pen,

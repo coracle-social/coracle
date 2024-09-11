@@ -28,7 +28,7 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS, topicsByUrl} from "@app/state"
+  import {INDEXER_RELAYS} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
@@ -76,7 +76,6 @@
             keyPath: "nip05",
             store: handles,
           },
-          topicsByUrl: storageAdapters.fromMapStore(topicsByUrl),
           publishStatus: storageAdapters.fromObjectStore(publishStatusData),
           freshness: storageAdapters.fromObjectStore(freshness),
           plaintext: storageAdapters.fromObjectStore(plaintext),

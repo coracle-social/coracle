@@ -69,10 +69,6 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-// Topics
-
-export const topicsByUrl = withGetter(writable(new Map<string, string[]>()))
-
 // Membership
 
 export type Membership = {
@@ -183,6 +179,20 @@ export const {
 
     return load({...request, relays: [url], filters: [{"#t": [topic], since}]})
   },
+})
+
+// Topics
+
+export const topicsByUrl = derived(chats, $chats => {
+  const $topicsByUrl = new Map<string, string[]>()
+
+  for (const chat of $chats) {
+    if (chat.topic) {
+      pushToMapKey($topicsByUrl, chat.url, chat.topic)
+    }
+  }
+
+  return $topicsByUrl
 })
 
 // User stuff

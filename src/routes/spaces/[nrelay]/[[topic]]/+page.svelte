@@ -12,12 +12,14 @@
   import {page} from "$app/stores"
   import {sortBy, now} from "@welshman/lib"
   import type {TrustedEvent, Filter} from "@welshman/util"
-  import {subscribe, formatTimestampAsDate} from "@welshman/app"
+  import {formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {decodeNRelay, makeChatId, deriveChat, MESSAGE, REPLY} from "@app/state"
+  import {userMembership, decodeNRelay, makeChatId, deriveChat, MESSAGE, REPLY} from "@app/state"
+  import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
   const {nrelay, topic = ""} = $page.params
   const url = decodeNRelay(nrelay)
@@ -27,6 +29,8 @@
 
   let loading = true
   let elements: Element[] = []
+
+  $: membership = $userMembership?.topicsByUrl.get(url) || []
 
   $: {
     elements = []
@@ -59,24 +63,28 @@
   setTimeout(() => {
     loading = false
   }, 3000)
-
-  onMount(() => {
-    const since = now() - 30
-    const kinds = [MESSAGE, REPLY]
-    const filter = topic ? {kinds, since, "#t": [topic]} : ({kinds, since} as Filter)
-    const sub = subscribe({filters: [filter], relays: [url]})
-
-    return () => sub.close()
-  })
 </script>
 
 <div class="relative flex h-screen flex-col">
   <div class="relative z-feature mx-2 rounded-xl pt-4">
-    <div class="flex min-h-12 items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
+    <div class="flex min-h-12 justify-between items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
-        <strong>General</strong>
+        <strong>{topic || 'General'}</strong>
       </div>
+      {#if topic}
+        {#if membership.includes(topic)}
+          <Button class="btn btn-sm btn-neutral" on:click={() => removeRoomMembership(url, topic)}>
+            <Icon icon="arrows-a-logout-2" />
+            Leave Room
+          </Button>
+        {:else}
+          <Button class="btn btn-sm btn-neutral" on:click={() => addRoomMembership(url, topic)}>
+            <Icon icon="login-2" />
+            Join Room
+          </Button>
+        {/if}
+      {/if}
     </div>
   </div>
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">

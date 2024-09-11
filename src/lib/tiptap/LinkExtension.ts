@@ -74,7 +74,6 @@ export const LinkExtension = Node.create({
           const matches = []
 
           for (const match of text.matchAll(LINK_REGEX)) {
-            console.log(text, match)
             try {
               matches.push(createPasteRuleMatch(match, {url: match[0]}))
             } catch (e) {

@@ -6,7 +6,7 @@ export const makeSpacePath = (url: string, extra = "") => {
   let path = `/spaces/${nip19.nrelayEncode(url)}`
 
   if (extra) {
-    path += "/" + extra
+    path += "/" + encodeURIComponent(extra)
   }
 
   return path
