@@ -1,9 +1,6 @@
 <script lang="ts">
-  import {displayRelayUrl} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
-  import Icon from "@lib/components/Icon.svelte"
-  import {clip} from "@app/toast"
 </script>
 
 <div class="column gap-4">

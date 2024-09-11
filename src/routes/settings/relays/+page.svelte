@@ -1,9 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {readable} from "svelte/store"
-  import {displayRelayUrl, isShareableRelayUrl} from "@welshman/util"
-  import type {SignedEvent} from "@welshman/util"
-  import {subscribe, loadRelay, relaySearch} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
+  import {relaySearch} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import {INDEXER_RELAYS, discoverRelays} from "@app/state"

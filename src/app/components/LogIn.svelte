@@ -26,7 +26,7 @@
   const onSuccess = async (session: Session, relays: string[] = []) => {
     addSession(session)
 
-    await loadUserData(session.pubkey, relays)
+    await loadUserData(session.pubkey, {relays})
 
     pushToast({message: "Successfully logged in!"})
     clearModal()

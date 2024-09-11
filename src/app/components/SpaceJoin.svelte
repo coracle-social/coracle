@@ -1,17 +1,12 @@
 <script lang="ts">
-  import {append, remove} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
-  import {deriveRelay} from "@welshman/app"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {pushModal, clearModal} from "@app/modal"
-  import {pushToast} from "@app/toast"
+  import {clearModal} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
 
   export let url
-
-  const relay = deriveRelay(url)
 
   const back = () => history.back()
 

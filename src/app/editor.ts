@@ -21,18 +21,16 @@ import {
   FileUploadExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
-import {signer, topicSearch, profileSearch} from "@welshman/app"
+import {signer, profileSearch} from "@welshman/app"
 import {LinkExtension, asInline, createSuggestions} from "@lib/tiptap"
-import GroupComposeMention from "@app/components/GroupComposeMention.svelte"
-import GroupComposeTopic from "@app/components/GroupComposeTopic.svelte"
-import GroupComposeEvent from "@app/components/GroupComposeEvent.svelte"
-import GroupComposeImage from "@app/components/GroupComposeImage.svelte"
-import GroupComposeBolt11 from "@app/components/GroupComposeBolt11.svelte"
-import GroupComposeVideo from "@app/components/GroupComposeVideo.svelte"
-import GroupComposeLink from "@app/components/GroupComposeLink.svelte"
-import GroupComposeSuggestions from "@app/components/GroupComposeSuggestions.svelte"
-import GroupComposeTopicSuggestion from "@app/components/GroupComposeTopicSuggestion.svelte"
-import GroupComposeProfileSuggestion from "@app/components/GroupComposeProfileSuggestion.svelte"
+import ChatComposeMention from "@app/components/ChatComposeMention.svelte"
+import ChatComposeEvent from "@app/components/ChatComposeEvent.svelte"
+import ChatComposeImage from "@app/components/ChatComposeImage.svelte"
+import ChatComposeBolt11 from "@app/components/ChatComposeBolt11.svelte"
+import ChatComposeVideo from "@app/components/ChatComposeVideo.svelte"
+import ChatComposeLink from "@app/components/ChatComposeLink.svelte"
+import ChatComposeSuggestions from "@app/components/ChatComposeSuggestions.svelte"
+import ChatSuggestionProfile from "@app/components/ChatSuggestionProfile.svelte"
 import {getPubkeyHints} from "@app/commands"
 
 export const addFile = (editor: Editor) => editor.chain().selectFiles().run()
@@ -74,13 +72,13 @@ export const getChatEditorOptions = ({uploading, sendMessage}: ChatComposeEditor
       },
     }),
     LinkExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeLink),
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeLink),
     }),
     Bolt11Extension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)}),
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeBolt11)}),
     ),
     NProfileExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeMention),
       addProseMirrorPlugins() {
         return [
           createSuggestions({
@@ -94,21 +92,19 @@ export const getChatEditorOptions = ({uploading, sendMessage}: ChatComposeEditor
 
               return props.command({pubkey, nprofile, relays})
             },
-            suggestionComponent: GroupComposeProfileSuggestion,
-            suggestionsComponent: GroupComposeSuggestions,
+            suggestionComponent: ChatSuggestionProfile,
+            suggestionsComponent: ChatComposeSuggestions,
           }),
         ]
       },
     }),
-    NEventExtension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)}),
-    ),
-    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)})),
+    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
+    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
     ImageExtension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeImage)}),
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeImage)}),
     ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
     VideoExtension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)}),
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeVideo)}),
     ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
     FileUploadExtension.configure({
       immediateUpload: false,
@@ -136,19 +132,17 @@ export const getChatViewOptions = (content: string) => ({
     Paragraph,
     Text,
     LinkExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeLink),
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeLink),
     }),
     Bolt11Extension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeBolt11)}),
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeBolt11)}),
     ),
     NProfileExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeMention),
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeMention),
     }),
-    NEventExtension.extend(
-      asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)}),
-    ),
-    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)})),
-    ImageExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeImage)})),
-    VideoExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)})),
+    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
+    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
+    ImageExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeImage)})),
+    VideoExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeVideo)})),
   ],
 })

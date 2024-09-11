@@ -105,7 +105,7 @@
 }
 
 .link-content {
-  @apply inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral px-1 text-sm text-neutral-content no-underline;
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral px-1 text-neutral-content no-underline;
 }
 
 .link-content.link-content-selected {

@@ -20,8 +20,8 @@
     freshness,
     storageAdapters,
   } from "@welshman/app"
-  import type {PublishStatusData, PublishStatusDataByUrlById} from "@welshman/app"
-  import {createEventStore, adapter} from "@welshman/store"
+  import * as app from "@welshman/app"
+  import {createEventStore} from "@welshman/store"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
   import Landing from "@app/components/Landing.svelte"
@@ -59,7 +59,7 @@
   }
 
   onMount(() => {
-    Object.assign(window, {get, state})
+    Object.assign(window, {get, ...app, ...state})
 
     ready = db
       ? Promise.resolve()

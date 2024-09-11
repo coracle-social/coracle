@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
   import {page} from "$app/stores"
-  import {sort} from '@welshman/lib'
-  import {displayRelayUrl} from '@welshman/util'
+  import {sort} from "@welshman/lib"
+  import {displayRelayUrl} from "@welshman/util"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -104,7 +103,8 @@
       {#each rooms as topic, i (topic)}
         <div transition:fly|local={{delay: 250 + i * 50}}>
           <SecondaryNavItem href={makeSpacePath(url, topic)}>
-            <Icon icon="hashtag" /> {topic}
+            <Icon icon="hashtag" />
+            {topic}
           </SecondaryNavItem>
         </div>
       {/each}

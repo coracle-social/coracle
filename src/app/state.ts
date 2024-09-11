@@ -1,24 +1,10 @@
-import {nip19} from 'nostr-tools'
-import type {FuseResult} from "fuse.js"
+import {nip19} from "nostr-tools"
 import {get, derived, writable} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {
-  setContext,
-  max,
-  between,
-  groupBy,
-  pushToMapKey,
-  nthEq,
-  stripProtocol,
-  indexBy,
-  uniq,
-} from "@welshman/lib"
+import {setContext, max, groupBy, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
-  getIdentifier,
-  normalizeRelayUrl,
   RELAYS,
-  APP_DATA,
   REACTION,
   ZAP_RESPONSE,
   getRelayTagValues,
@@ -29,21 +15,16 @@ import type {TrustedEvent} from "@welshman/util"
 import {
   pubkey,
   repository,
-  createSearch,
   load,
   subscribe,
   collection,
   loadRelay,
-  relaysByPubkey,
   loadProfile,
   profilesByPubkey,
-  loadRelaySelections,
-  getWriteRelayUrls,
   getDefaultAppContext,
   getDefaultNetContext,
   makeRouter,
 } from "@welshman/app"
-import type {Relay} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 

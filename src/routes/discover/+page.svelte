@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import Masonry from "svelte-bricks"
   import {displayRelayUrl} from "@welshman/util"
-  import {load, relaySearch} from "@welshman/app"
+  import {relaySearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
   import {userMembership, discoverRelays} from "@app/state"
@@ -58,7 +58,7 @@
       <div class="card-body">
         <h2 class="card-title justify-center">{displayRelayUrl(relay.url)}</h2>
         {#if relay.profile?.description}
-          <p class="py-4 text-sm text-center">{relay.profile.description}</p>
+          <p class="py-4 text-center text-sm">{relay.profile.description}</p>
         {/if}
       </div>
     </a>

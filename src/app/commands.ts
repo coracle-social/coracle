@@ -1,19 +1,18 @@
-import {uniqBy, equals, uniq, now, choice} from "@welshman/lib"
-import {getRelayTagValues, createEvent, displayProfile} from "@welshman/util"
-import {PublishStatus} from "@welshman/net"
+import {uniqBy, sleep, chunk, equals, choice} from "@welshman/lib"
+import {getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
+import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {
   pubkey,
   repository,
-  load,
   makeThunk,
   publishThunk,
   loadProfile,
   profilesByPubkey,
   relaySelectionsByPubkey,
-  loadRelaySelections,
   getWriteRelayUrls,
   loadFollows,
   loadMutes,
+  followsByPubkey,
 } from "@welshman/app"
 import {MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
@@ -49,8 +48,32 @@ export const makeIMeta = (url: string, data: Record<string, string>) => [
 
 // Loaders
 
-export const loadUserData = (pubkey: string, hints: string[] = []) =>
-  Promise.all([loadProfile(pubkey), loadFollows(pubkey), loadMutes(pubkey)])
+export const loadUserData = (
+  pubkey: string,
+  request: Partial<SubscribeRequestWithHandlers> = {},
+) => {
+  const promise = Promise.all([
+    loadProfile(pubkey, request),
+    loadFollows(pubkey, request),
+    loadMutes(pubkey, request),
+  ])
+
+  // Load followed profiles slowly in the background without clogging other stuff up
+  promise.then(async () => {
+    const followsList = followsByPubkey.get().get(pubkey)
+    const follows = getPubkeyTagValues(followsList?.event.tags || [])
+
+    for (const pubkeys of chunk(50, follows)) {
+      await sleep(300)
+
+      for (const pubkey of pubkeys) {
+        loadProfile(pubkey)
+      }
+    }
+  })
+
+  return promise
+}
 
 // Updates
 
@@ -73,10 +96,14 @@ export const addSpaceMembership = (url: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["r", url]]))
 
 export const addRoomMembership = (url: string, topic: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["t", topic, url]]))
+  updateList(MEMBERSHIPS, (tags: string[][]) =>
+    uniqBy(t => t.join(""), [...tags, ["t", topic, url]]),
+  )
 
 export const removeSpaceMembership = (url: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(["r", url], t) && t[2] !== url))
+  updateList(MEMBERSHIPS, (tags: string[][]) =>
+    tags.filter(t => !equals(["r", url], t) && t[2] !== url),
+  )
 
 export const removeRoomMembership = (url: string, topic: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(["t", topic, url], t)))

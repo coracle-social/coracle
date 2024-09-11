@@ -65,10 +65,10 @@
     data-theme={$theme}
     bind:this={element}
     transition:slide|local={{duration: 100}}
-    class="mt-2 flex max-h-[350px] flex-col overflow-y-auto overflow-x-hidden shadow-xl">
+    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl">
     {#if term && allowCreate}
       <button
-        class="white-space-nowrap min-w-0 cursor-pointer overflow-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
+        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(term)}>
         Use "<svelte:component this={component} value={term} />"
@@ -76,7 +76,7 @@
     {/if}
     {#each items as value, i (value)}
       <button
-        class="white-space-nowrap min-w-0 cursor-pointer overflow-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
+        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
         class:bg-primary={index === i}
         class:text-primary-content={index === i}
         on:mousedown|preventDefault
