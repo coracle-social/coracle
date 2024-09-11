@@ -48,8 +48,9 @@
 <div
   class="shadow-top-xl relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100 p-2">
   <Button
-    on:click={() => addFile($editor)}
-    class="center h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200">
+    data-tip="Add an image"
+    class="center h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200 tooltip"
+    on:click={() => addFile($editor)}>
     {#if $uploading}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}

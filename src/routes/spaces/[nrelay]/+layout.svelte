@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sort, now} from "@welshman/lib"
   import {displayRelayUrl, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
@@ -103,13 +103,8 @@
         </SecondaryNavItem>
       </div>
       <div in:fly|local={{delay: getDelay()}}>
-        <SecondaryNavItem href={makeSpacePath(url, "events")}>
+        <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
           <Icon icon="calendar-minimalistic" /> Calendar
-        </SecondaryNavItem>
-      </div>
-      <div in:fly|local={{delay: getDelay()}}>
-        <SecondaryNavItem href={makeSpacePath(url, "listings")}>
-          <Icon icon="shop-minimalistic" /> Market
         </SecondaryNavItem>
       </div>
       {#if rooms.length > 0}

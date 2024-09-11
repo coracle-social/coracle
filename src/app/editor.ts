@@ -37,12 +37,12 @@ export const addFile = (editor: Editor) => editor.chain().selectFiles().run()
 
 export const uploadFiles = (editor: Editor) => editor.chain().uploadFiles().run()
 
-type ChatComposeEditorOptions = {
+type EditorOptions = {
   uploading: Writable<boolean>
   sendMessage: () => void
 }
 
-export const getChatEditorOptions = ({uploading, sendMessage}: ChatComposeEditorOptions) => ({
+export const getChatEditorOptions = ({uploading, sendMessage}: EditorOptions) => ({
   content: "",
   autofocus: true,
   extensions: [
@@ -144,5 +144,66 @@ export const getChatViewOptions = (content: string) => ({
     NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
     ImageExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeImage)})),
     VideoExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeVideo)})),
+  ],
+})
+
+export const getNoteEditorOptions = ({uploading, sendMessage}: EditorOptions) => ({
+  content: "",
+  autofocus: true,
+  extensions: [
+    Document,
+    Dropcursor,
+    Gapcursor,
+    History,
+    Paragraph,
+    Text,
+    HardBreakExtension,
+    LinkExtension.extend({
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeLink),
+    }),
+    Bolt11Extension.extend(
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeBolt11)}),
+    ),
+    NProfileExtension.extend({
+      addNodeView: () => SvelteNodeViewRenderer(ChatComposeMention),
+      addProseMirrorPlugins() {
+        return [
+          createSuggestions({
+            char: "@",
+            name: "nprofile",
+            editor: this.editor,
+            search: profileSearch,
+            select: (pubkey: string, props: any) => {
+              const relays = getPubkeyHints(pubkey)
+              const nprofile = nprofileEncode({pubkey, relays})
+
+              return props.command({pubkey, nprofile, relays})
+            },
+            suggestionComponent: ChatSuggestionProfile,
+            suggestionsComponent: ChatComposeSuggestions,
+          }),
+        ]
+      },
+    }),
+    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
+    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeEvent)})),
+    ImageExtension.extend(
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeImage)}),
+    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    VideoExtension.extend(
+      asInline({addNodeView: () => SvelteNodeViewRenderer(ChatComposeVideo)}),
+    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    FileUploadExtension.configure({
+      immediateUpload: false,
+      sign: (event: StampedEvent) => {
+        uploading.set(true)
+
+        return signer.get()!.sign(event)
+      },
+      onComplete: () => {
+        uploading.set(false)
+        sendMessage()
+      },
+    }),
   ],
 })

@@ -1,4 +1,4 @@
-import {sleep} from '@welshman/lib'
+import {sleep} from "@welshman/lib"
 
 export const copyToClipboard = (text: string) => {
   const {activeElement} = document

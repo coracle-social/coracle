@@ -1,12 +1,14 @@
 import {nip19} from "nostr-tools"
-import {get, derived, writable} from "svelte/store"
+import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, max, groupBy, pushToMapKey, nthEq} from "@welshman/lib"
+import {setContext, max, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
   RELAYS,
   REACTION,
   ZAP_RESPONSE,
+  EVENT_DATE,
+  EVENT_TIME,
   getRelayTagValues,
   getTopicTagValues,
   isShareableRelayUrl,
@@ -150,27 +152,23 @@ export const makeChatId = (url: string, topic: string) => `${url}'${topic}`
 
 export const splitChatId = (id: string) => id.split("'")
 
-export const chats = derived(
-  [trackerStore, messages],
-  ([$tracker, $messages]) => {
-    const messagesByChatId = new Map<string, Message[]>()
+export const chats = derived([trackerStore, messages], ([$tracker, $messages]) => {
+  const messagesByChatId = new Map<string, Message[]>()
 
-    for (const message of $messages) {
-      for (const url of $tracker.getRelays(message.event.id)) {
-        const chatId = makeChatId(url, message.topic)
+  for (const message of $messages) {
+    for (const url of $tracker.getRelays(message.event.id)) {
+      const chatId = makeChatId(url, message.topic)
 
-        pushToMapKey(messagesByChatId, chatId, message)
-      }
+      pushToMapKey(messagesByChatId, chatId, message)
     }
-
-    return Array.from(messagesByChatId.entries())
-      .map(([id, messages]) => {
-        const [url, topic] = splitChatId(id)
-
-        return {id, url, topic, messages}
-      })
   }
-)
+
+  return Array.from(messagesByChatId.entries()).map(([id, messages]) => {
+    const [url, topic] = splitChatId(id)
+
+    return {id, url, topic, messages}
+  })
+})
 
 export const {
   indexStore: chatsById,
@@ -188,6 +186,22 @@ export const {
 
     return load({...request, relays: [url], filters: [{"#t": [topic], since}]})
   },
+})
+
+// Calendar vents
+
+export const events = deriveEvents(repository, {filters: [{kinds: [EVENT_DATE, EVENT_TIME]}]})
+
+export const eventsByUrl = derived([trackerStore, events], ([$tracker, $events]) => {
+  const eventsByUrl = new Map<string, TrustedEvent[]>()
+
+  for (const event of $events) {
+    for (const url of $tracker.getRelays(event.id)) {
+      pushToMapKey(eventsByUrl, url, event)
+    }
+  }
+
+  return eventsByUrl
 })
 
 // Topics

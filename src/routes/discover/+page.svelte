@@ -3,7 +3,7 @@
   import Masonry from "svelte-bricks"
   import {displayRelayUrl} from "@welshman/util"
   import {relaySearch} from "@welshman/app"
-  import {createScroller} from '@lib/html'
+  import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
   import {userMembership, discoverRelays} from "@app/state"

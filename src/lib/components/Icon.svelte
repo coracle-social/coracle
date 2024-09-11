@@ -11,6 +11,7 @@
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import ArrowsALogout2 from "@assets/icons/Arrows ALogout 2.svg?dataurl"
   import Code2 from "@assets/icons/Code 2.svg?dataurl"
+  import Document from "@assets/icons/Document.svg?dataurl"
   import Earth from "@assets/icons/Earth.svg?dataurl"
   import Pen from "@assets/icons/Pen.svg?dataurl"
   import HeadphonesRound from "@assets/icons/Headphones Round.svg?dataurl"
@@ -44,6 +45,7 @@
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
+  import MapPoint from "@assets/icons/Map Point.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
   import NotesMinimalistic from "@assets/icons/Notes Minimalistic.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
@@ -52,6 +54,7 @@
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
   import Reply from "@assets/icons/Reply.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
+  import TagHorizontal from "@assets/icons/Tag Horizontal.svg?dataurl"
   import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
   import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
@@ -60,6 +63,7 @@
   import UserCircle from "@assets/icons/User Circle.svg?dataurl"
   import UserRounded from "@assets/icons/User Rounded.svg?dataurl"
   import Widget from "@assets/icons/Widget.svg?dataurl"
+  import WidgetAdd from "@assets/icons/Widget Add.svg?dataurl"
   import WiFiRouterRound from "@assets/icons/Wi-Fi Router Round.svg?dataurl"
 
   export let icon
@@ -71,6 +75,7 @@
     "add-square": AddSquare,
     "arrows-a-logout-2": ArrowsALogout2,
     "code-2": Code2,
+    document: Document,
     earth: Earth,
     pen: Pen,
     "headphones-round": HeadphonesRound,
@@ -104,6 +109,7 @@
     login: Login,
     "login-2": Login2,
     magnifer: Magnifer,
+    'map-point': MapPoint,
     "menu-dots": MenuDots,
     "notes-minimalistic": NotesMinimalistic,
     "pallete-2": Pallete2,
@@ -114,12 +120,14 @@
     "shop-minimalistic": ShopMinimalistic,
     "smile-circle": SmileCircle,
     settings: Settings,
+    'tag-horizontal': TagHorizontal,
     "ufo-3": UFO3,
     "square-share-line": SquareShareLine,
     "user-heart": UserHeart,
     "user-circle": UserCircle,
     "user-rounded": UserRounded,
     widget: Widget,
+    'widget-add': WidgetAdd,
     "wifi-router-round": WiFiRouterRound,
   })
 

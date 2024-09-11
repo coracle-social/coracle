@@ -8,17 +8,16 @@
 </script>
 
 <script lang="ts">
-  import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, now} from "@welshman/lib"
-  import type {TrustedEvent, Filter} from "@welshman/util"
+  import {sortBy} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {userMembership, decodeNRelay, makeChatId, deriveChat, MESSAGE, REPLY} from "@app/state"
+  import {userMembership, decodeNRelay, makeChatId, deriveChat} from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
   const {nrelay, topic = ""} = $page.params
@@ -67,19 +66,20 @@
 
 <div class="relative flex h-screen flex-col">
   <div class="relative z-feature mx-2 rounded-xl pt-4">
-    <div class="flex min-h-12 justify-between items-center gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
+    <div
+      class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
-        <strong>{topic || 'General'}</strong>
+        <strong>{topic || "General"}</strong>
       </div>
       {#if topic}
         {#if membership.includes(topic)}
-          <Button class="btn btn-sm btn-neutral" on:click={() => removeRoomMembership(url, topic)}>
+          <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, topic)}>
             <Icon icon="arrows-a-logout-2" />
             Leave Room
           </Button>
         {:else}
-          <Button class="btn btn-sm btn-neutral" on:click={() => addRoomMembership(url, topic)}>
+          <Button class="btn btn-neutral btn-sm" on:click={() => addRoomMembership(url, topic)}>
             <Icon icon="login-2" />
             Join Room
           </Button>
