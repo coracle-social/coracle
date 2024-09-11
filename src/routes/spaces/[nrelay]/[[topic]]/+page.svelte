@@ -11,16 +11,16 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, now} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent, Filter} from "@welshman/util"
   import {subscribe, formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import GroupNote from "@app/components/GroupNote.svelte"
   import GroupCompose from "@app/components/GroupCompose.svelte"
-  import {deriveGroupChat, userRelayUrlsByNom} from "@app/state"
+  import {deriveChat, userMembership, MESSAGE, REPLY} from "@app/state"
 
-  const {nom} = $page.params
-  const chat = deriveGroupChat(nom)
+  const {url, topic} = $page.params
+  const chat = deriveChat(url)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -60,10 +60,10 @@
   }, 3000)
 
   onMount(() => {
-    const sub = subscribe({
-      filters: [{"#h": [nom], since: now() - 30}],
-      relays: $userRelayUrlsByNom.get(nom) || [],
-    })
+    const since = now() - 30
+    const kinds = [MESSAGE, REPLY]
+    const filter = topic ? {kinds, since, "#t": [topic]} : {kinds, since} as Filter
+    const sub = subscribe({filters: [filter], relays: [url]})
 
     return () => sub.close()
   })
@@ -100,5 +100,5 @@
       </Spinner>
     </p>
   </div>
-  <GroupCompose {nom} />
+  <GroupCompose {url} {topic} />
 </div>

@@ -1,12 +1,5 @@
-import {uniqBy, uniq, now, choice} from "@welshman/lib"
-import {
-  GROUPS,
-  GROUP_JOIN,
-  getGroupTags,
-  getRelayTagValues,
-  createEvent,
-  displayProfile,
-} from "@welshman/util"
+import {uniqBy, equals, uniq, now, choice} from "@welshman/lib"
+import {getRelayTagValues, createEvent, displayProfile} from "@welshman/util"
 import {PublishStatus} from "@welshman/net"
 import {
   pubkey,
@@ -22,7 +15,7 @@ import {
   loadFollows,
   loadMutes,
 } from "@welshman/app"
-import {loadGroup, loadGroupMembership, INDEXER_RELAYS} from "@app/state"
+import {MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
 // Utils
 
@@ -57,11 +50,7 @@ export const makeIMeta = (url: string, data: Record<string, string>) => [
 // Loaders
 
 export const loadUserData = (pubkey: string, hints: string[] = []) =>
-  Promise.all([
-    loadProfile(pubkey),
-    loadFollows(pubkey),
-    loadMutes(pubkey),
-  ])
+  Promise.all([loadProfile(pubkey), loadFollows(pubkey), loadMutes(pubkey)])
 
 // Updates
 
@@ -80,26 +69,14 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
   publishThunk(makeThunk({event, relays}))
 }
 
-export const addGroupMemberships = (newTags: string[][]) =>
-  updateList(GROUPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ...newTags]))
+export const addSpaceMembership = (url: string) =>
+  updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["r", url]]))
 
-export const removeGroupMemberships = (noms: string[]) =>
-  updateList(GROUPS, (tags: string[][]) => tags.filter(t => !noms.includes(t[1])))
+export const addRoomMembership = (url: string, topic: string) =>
+  updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["t", topic, url]]))
 
-export const sendJoinRequest = async (nom: string, url: string): Promise<[boolean, string]> => {
-  const relays = [url]
-  const filters = [{kinds: [9000], "#h": [nom], "#p": [pubkey.get()!], since: now() - 30}]
+export const removeSpaceMembership = (url: string) =>
+  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(["r", url], t) && t[2] !== url))
 
-  const event = createEvent(GROUP_JOIN, {tags: [["h", nom]]})
-  const statusData = await publishThunk(makeThunk({event, relays}))
-  const {status, message} = statusData[url]
-
-  if (message.includes("already a member")) return [true, ""]
-  if (status !== PublishStatus.Success) return [false, message]
-  if (await load({filters, relays})) return [true, ""]
-
-  return [
-    false,
-    "Your request was not automatically approved, but may be approved manually later. Please try again later or contact the group admin.",
-  ]
-}
+export const removeRoomMembership = (url: string, topic: string) =>
+  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(["t", topic, url], t)))

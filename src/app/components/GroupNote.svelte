@@ -27,7 +27,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {deriveEvent} from "@app/state"
+  import {deriveEvent, displayReaction} from "@app/state"
   import {getChatViewOptions} from "@app/editor"
 
   export let event: TrustedEvent
@@ -65,12 +65,6 @@
   const parentEvent = parentId ? deriveEvent(parentId, parentHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
-
-  const displayReaction = (content: string) => {
-    if (content === "+") return "❤️"
-    if (content === "-") return "👎"
-    return content
-  }
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))

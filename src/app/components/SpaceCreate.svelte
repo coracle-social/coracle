@@ -3,7 +3,7 @@
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import InfoNip29 from "@app/components/InfoNip29.svelte"
+  import InfoRelay from "@app/components/InfoRelay.svelte"
   import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
   import {pushModal} from "@app/modal"
 
@@ -38,8 +38,8 @@
       <input bind:value={relay} class="grow" type="text" />
     </label>
     <p slot="info">
-      This should be a NIP-29 compatible nostr relay where you'd like to host your space.
-      <Button class="link" on:click={() => pushModal(InfoNip29)}>What is a relay?</Button>
+      This can be any nostr relay where you'd like to host your space.
+      <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
     </p>
   </Field>
   <div class="flex flex-row items-center justify-between gap-4">

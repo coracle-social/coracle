@@ -3,17 +3,17 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {NProfileExtension, TagExtension as TopicExtension, ImageExtension} from "nostr-editor"
+  import {NProfileExtension, ImageExtension} from "nostr-editor"
   import {createEvent, CHAT_MESSAGE} from "@welshman/util"
   import {publishThunk, makeThunk} from "@welshman/app"
   import {findNodes} from "@lib/tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {userRelayUrlsByNom} from "@app/state"
   import {makeMention, makeIMeta} from "@app/commands"
   import {getChatEditorOptions, addFile} from "@app/editor"
 
-  export let nom
+  export let url
+  export let topic = ""
 
   const uploading = writable(false)
 
@@ -21,22 +21,20 @@
 
   const sendMessage = () => {
     const json = $editor.getJSON()
-    const relays = $userRelayUrlsByNom.get(nom)
+    const topicTag = topic ? ["t", topic] : []
+    const mentionTags = findNodes(NProfileExtension.name, json).map(m =>
+      makeMention(m.attrs!.pubkey, m.attrs!.relays),
+    )
+    const imetaTags = findNodes(ImageExtension.name, json).map(({attrs: {src, sha256: x}}: any) =>
+      makeIMeta(src, {x, ox: x}),
+    )
+
     const event = createEvent(CHAT_MESSAGE, {
       content: $editor.getText(),
-      tags: [
-        ["h", nom],
-        ...findNodes(TopicExtension.name, json).map(t => ["t", t.attrs!.name.toLowerCase()]),
-        ...findNodes(NProfileExtension.name, json).map(m =>
-          makeMention(m.attrs!.pubkey, m.attrs!.relays),
-        ),
-        ...findNodes(ImageExtension.name, json).map(({attrs: {src, sha256: x}}: any) =>
-          makeIMeta(src, {x, ox: x}),
-        ),
-      ],
+      tags: [topicTag, ...mentionTags, ...imetaTags],
     })
 
-    publishThunk(makeThunk({event, relays}))
+    publishThunk(makeThunk({event, relays: [url]}))
 
     $editor.chain().clearContent().run()
   }

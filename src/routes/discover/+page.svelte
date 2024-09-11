@@ -1,27 +1,20 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import Masonry from "svelte-bricks"
-  import {GROUP_META, displayRelayUrl} from "@welshman/util"
-  import {load, relays} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
+  import {load, relaySearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {
-    displayGroup,
-    searchGroups,
-    relayUrlsByNom,
-    userMembership,
-    DEFAULT_RELAYS,
-  } from "@app/state"
+  import {userMembership, discoverRelays} from "@app/state"
 
   let term = ""
 
-  $: groups = $searchGroups.searchOptions(term).filter(g => $relayUrlsByNom.get(g.nom)?.length > 0)
+  $: relays = $relaySearch.searchOptions(term)
 
   onMount(() => {
-    load({
-      relays: [...DEFAULT_RELAYS, ...$relays.map(r => r.url)],
-      filters: [{kinds: [GROUP_META]}],
-    })
+    const sub = discoverRelays()
+
+    return () => sub.close()
   })
 </script>
 
@@ -34,26 +27,26 @@
   </label>
   <Masonry
     animate={false}
-    items={groups}
+    items={relays}
     minColWidth={250}
     maxColWidth={800}
     gap={16}
-    idKey="nom"
-    let:item={group}>
+    idKey="url"
+    let:item={relay}>
     <a
-      href={makeSpacePath(group.nom)}
+      href={makeSpacePath(relay.url)}
       class="card bg-base-100 shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
-          {#if group.picture}
-            <img alt="" src={group.picture} />
+          {#if relay.profile?.icon}
+            <img alt="" src={relay.profile.icon} />
           {:else}
             <Icon icon="ghost" size={7} />
           {/if}
         </div>
       </div>
-      {#if $userMembership?.noms.has(group.nom)}
+      {#if $userMembership?.topicsByUrl.has(relay.url)}
         <div class="center absolute flex w-full">
           <div
             class="tooltip relative left-8 top-[38px] h-5 w-5 rounded-full bg-primary"
@@ -63,14 +56,9 @@
         </div>
       {/if}
       <div class="card-body">
-        <h2 class="card-title justify-center">{displayGroup(group)}</h2>
-        <div class="text-center text-sm">
-          {#each $relayUrlsByNom.get(group.nom) || [] as url}
-            <div class="badge badge-neutral">{displayRelayUrl(url)}</div>
-          {/each}
-        </div>
-        {#if group.about}
-          <p class="py-4 text-sm">{group.about}</p>
+        <h2 class="card-title justify-center">{displayRelayUrl(relay.url)}</h2>
+        {#if relay.profile?.description}
+          <p class="py-4 text-sm text-center">{relay.profile.description}</p>
         {/if}
       </div>
     </a>

@@ -60,7 +60,7 @@
     const pubkey = await getNip07()?.getPublicKey()
 
     if (pubkey) {
-      await onSuccess({method: "extension", pubkey})
+      await onSuccess({method: "nip07", pubkey})
     } else {
       pushToast({
         theme: "error",

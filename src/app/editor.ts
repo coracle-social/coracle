@@ -19,7 +19,6 @@ import {
   ImageExtension,
   VideoExtension,
   FileUploadExtension,
-  TagExtension as TopicExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
 import {signer, topicSearch, profileSearch} from "@welshman/app"
@@ -111,35 +110,6 @@ export const getChatEditorOptions = ({uploading, sendMessage}: ChatComposeEditor
     VideoExtension.extend(
       asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)}),
     ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
-    TopicExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeTopic),
-      renderHTML({mark, HTMLAttributes}) {
-        const attrs = {
-          ...mark.attrs,
-          ...HTMLAttributes,
-          target: "_blank",
-          rel: "noopener noreferer",
-          href: `https://coracle.social/topics/${mark.attrs.tag.toLowerCase()}`,
-          class: "underline",
-        }
-
-        return ["a", attrs, 0]
-      },
-      addProseMirrorPlugins() {
-        return [
-          createSuggestions({
-            char: "#",
-            name: "topic",
-            editor: this.editor,
-            search: topicSearch,
-            select: (name: string, props: any) => props.command({name}),
-            allowCreate: true,
-            suggestionComponent: GroupComposeTopicSuggestion,
-            suggestionsComponent: GroupComposeSuggestions,
-          }),
-        ]
-      },
-    }),
     FileUploadExtension.configure({
       immediateUpload: false,
       sign: (event: StampedEvent) => {
@@ -180,8 +150,5 @@ export const getChatViewOptions = (content: string) => ({
     NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeEvent)})),
     ImageExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeImage)})),
     VideoExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(GroupComposeVideo)})),
-    TopicExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(GroupComposeTopic),
-    }),
   ],
 })

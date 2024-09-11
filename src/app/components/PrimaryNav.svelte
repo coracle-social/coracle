@@ -9,13 +9,15 @@
   import {page} from "$app/stores"
   import {tweened} from "svelte/motion"
   import {quintOut} from "svelte/easing"
+  import {displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
-  import {userProfile, displayGroup, userGroupsByNom} from "@app/state"
+  import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
+  import {userProfile, userMembership} from "@app/state"
   import {pushModal} from "@app/modal"
-  import {getPrimaryNavItemIndex} from "@app/routes"
+  import {makeSpacePath, getPrimaryNavItemIndex} from "@app/routes"
 
   const activeOffset = tweened(-44, {
     duration: 300,
@@ -49,15 +51,9 @@
           class="!h-10 !w-10 border border-solid border-base-300"
           size={7} />
       </PrimaryNavItem>
-      {#each $userGroupsByNom.entries() as [nom, qualifiedGroups] (nom)}
-        {@const qualifiedGroup = qualifiedGroups[0]}
-        <PrimaryNavItem title={displayGroup(qualifiedGroup?.group)} href="/spaces/{nom}">
-          <Avatar
-            icon="ghost"
-            class="!h-10 !w-10 border border-solid border-base-300"
-            alt={displayGroup(qualifiedGroup?.group)}
-            src={qualifiedGroup?.group.picture}
-            size={7} />
+      {#each $userMembership?.topicsByUrl.keys() || [] as url (url)}
+        <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)}>
+          <SpaceAvatar {url} />
         </PrimaryNavItem>
       {/each}
       <PrimaryNavItem title="Add Space" on:click={addSpace}>

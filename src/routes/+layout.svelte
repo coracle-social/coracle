@@ -10,6 +10,7 @@
     relays,
     handles,
     loadRelay,
+    db,
     initStorage,
     repository,
     session,
@@ -27,7 +28,7 @@
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
-  import {DEFAULT_RELAYS} from "@app/state"
+  import {INDEXER_RELAYS, topicsByUrl, relaysByMessage} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
@@ -60,23 +61,27 @@
   onMount(() => {
     Object.assign(window, {get, state})
 
-    ready = initStorage('flotilla', 3, {
-      events: {
-        keyPath: "id",
-        store: createEventStore(repository),
-      },
-      relays: {
-        keyPath: "url",
-        store: relays,
-      },
-      handles: {
-        keyPath: "nip05",
-        store: handles,
-      },
-      publishStatus: storageAdapters.fromObjectStore(publishStatusData),
-      freshness: storageAdapters.fromObjectStore(freshness),
-      plaintext: storageAdapters.fromObjectStore(plaintext),
-    }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
+    ready = db
+      ? Promise.resolve()
+      : initStorage("flotilla", 2, {
+          events: {
+            keyPath: "id",
+            store: createEventStore(repository),
+          },
+          relays: {
+            keyPath: "url",
+            store: relays,
+          },
+          handles: {
+            keyPath: "nip05",
+            store: handles,
+          },
+          topicsByUrl: storageAdapters.fromMapStore(topicsByUrl),
+          relaysByMessage: storageAdapters.fromMapStore(relaysByMessage),
+          publishStatus: storageAdapters.fromObjectStore(publishStatusData),
+          freshness: storageAdapters.fromObjectStore(freshness),
+          plaintext: storageAdapters.fromObjectStore(plaintext),
+        }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 
     dialog.addEventListener("close", () => {
       if (modal) {
@@ -85,7 +90,7 @@
     })
 
     ready.then(() => {
-      for (const url of DEFAULT_RELAYS) {
+      for (const url of INDEXER_RELAYS) {
         loadRelay(url)
       }
 

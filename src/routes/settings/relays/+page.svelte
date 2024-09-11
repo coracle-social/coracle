@@ -6,9 +6,9 @@
   import {subscribe, loadRelay, relaySearch} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {DEFAULT_RELAYS, INDEXER_RELAYS} from "@app/state"
+  import {INDEXER_RELAYS, discoverRelays} from "@app/state"
 
-  const relays = readable(DEFAULT_RELAYS)
+  const relays = readable(INDEXER_RELAYS)
 
   const removeRelay = (url: string) => null
 
@@ -17,18 +17,7 @@
   let term = ""
 
   onMount(() => {
-    const sub = subscribe({
-      filters: [{kinds: [30166], "#N": ["29"]}],
-      relays: [...INDEXER_RELAYS, ...DEFAULT_RELAYS],
-    })
-
-    sub.emitter.on("event", (url: string, event: SignedEvent) => {
-      const d = event.tags.find(t => t[0] === "d")?.[1] || ""
-
-      if (isShareableRelayUrl(d)) {
-        loadRelay(d)
-      }
-    })
+    const sub = discoverRelays()
 
     return () => sub.close()
   })

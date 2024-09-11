@@ -1,18 +1,31 @@
+import {nip19} from 'nostr-tools'
 import type {Page} from "@sveltejs/kit"
-import {userGroupsByNom} from "@app/state"
+import {userMembership, decodeNEvent} from "@app/state"
 
-export const makeSpacePath = (nom: string) => `/spaces/${nom}`
+export const makeSpacePath = (url: string, extra = "") => {
+  let path = `/spaces/${nip19.nrelayEncode(url)}`
+
+  if (extra) {
+    path += '/' + extra
+  }
+
+  return path
+}
 
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 
 export const getPrimaryNavItemIndex = ($page: Page) => {
+  const urls = Array.from(userMembership.get()?.topicsByUrl.keys() || [])
+
   switch (getPrimaryNavItem($page)) {
     case "discover":
-      return userGroupsByNom.get().size + 2
+      return urls.length + 2
     case "spaces":
-      return Array.from(userGroupsByNom.get().keys()).findIndex(nom => nom === $page.params.nom) + 1
+      const routeUrl = decodeNEvent($page.params.nrelay)
+
+      return urls.findIndex(url => url === routeUrl) + 1
     case "settings":
-      return userGroupsByNom.get().size + 3
+      return urls.length + 3
     default:
       return 0
   }

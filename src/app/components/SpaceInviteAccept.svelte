@@ -1,5 +1,7 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import {tryCatch} from "@welshman/lib"
+  import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {loadRelay} from "@welshman/app"
   import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -7,43 +9,28 @@
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import {pushToast} from "@app/toast"
-  import {splitGroupId, loadGroup} from "@app/state"
-  import {addGroupMemberships} from "@app/commands"
+  import {addSpaceMembership} from "@app/commands"
+  import {makeSpacePath} from "@app/routes"
 
   const back = () => history.back()
 
   const browse = () => goto("/discover")
 
-  const joinQualifiedGroup = async (id: string) => {
-    const [url, nom] = splitGroupId(id)
+  const joinRelay = async (url: string) => {
+    url = normalizeRelayUrl(url)
+
     const relay = await loadRelay(url)
 
-    if (!relay) {
+    if (!relay?.profile) {
       return pushToast({
         theme: "error",
         message: "Sorry, we weren't able to find that relay.",
       })
     }
 
-    if (!relay.profile?.supported_nips?.includes(29)) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, it looks like that relay doesn't support nostr spaces.",
-      })
-    }
+    await addSpaceMembership(url)
 
-    const group = await loadGroup(nom, [url])
-
-    if (!group) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, we weren't able to find that space.",
-      })
-    }
-
-    await addGroupMemberships([["group", nom, url]])
-
-    goto(`/spaces/${nom}`)
+    goto(makeSpacePath(url))
     pushToast({
       message: "Welcome to the space!",
     })
@@ -53,16 +40,16 @@
     loading = true
 
     try {
-      await joinQualifiedGroup(id)
+      await joinRelay(url)
     } finally {
       loading = false
     }
   }
 
-  let id = ""
+  let url = ""
   let loading = false
 
-  $: linkIsValid = Boolean(id.match(/.+\..+'.+/))
+  $: linkIsValid = Boolean(tryCatch(() => isRelayUrl(normalizeRelayUrl(url))))
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={join}>
@@ -74,7 +61,7 @@
     <p slot="label">Invite Link*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="link-round" />
-      <input bind:value={id} class="grow" type="text" />
+      <input bind:value={url} class="grow" type="text" />
     </label>
   </Field>
   <CardButton icon="compass" title="Don't have an invite?" on:click={browse}>
