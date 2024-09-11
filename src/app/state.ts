@@ -69,10 +69,6 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-// Persist relay/event mappings
-
-export const relaysByMessage = withGetter(writable(new Map<string, string[]>()))
-
 // Topics
 
 export const topicsByUrl = withGetter(writable(new Map<string, string[]>()))
@@ -133,18 +129,19 @@ export type Message = {
 }
 
 export const readMessage = (event: TrustedEvent): Maybe<Message[]> => {
+  const urls = getRelayTagValues(event.tags)
   const topics = getTopicTagValues(event.tags)
 
-  if (topics.length !== 1) return undefined
+  if (topics.length > 1 || urls.length !== 1) return undefined
 
-  const topic = topics[0]
-  const urls = relaysByMessage.get().get(event.id) || []
+  const topic = topics[0] || ""
+  const url = urls[0]
 
-  return urls.map(url => ({url, topic, chat: getChatId(url, topic), event}))
+  return urls.map(url => ({url, topic, chat: makeChatId(url, topic), event}))
 }
 
 export const messages = deriveEventsMapped<Message>(repository, {
-  filters: [{}],
+  filters: [{kinds: [MESSAGE, REPLY]}],
   eventToItem: readMessage,
   itemToEvent: item => item.event,
 })
@@ -158,7 +155,7 @@ export type Chat = {
   messages: Message[]
 }
 
-export const getChatId = (url: string, topic: string) => `${url}'${topic}`
+export const makeChatId = (url: string, topic: string) => `${url}'${topic}`
 
 export const splitChatId = (id: string) => id.split("'")
 
@@ -210,7 +207,7 @@ export const userMembership = withGetter(
 
 // Other utils
 
-export const decodeNEvent = (nevent: string) => nip19.decode(nevent).data as string
+export const decodeNRelay = (nevent: string) => nip19.decode(nevent).data as string
 
 export const displayReaction = (content: string) => {
   if (content === "+") return "❤️"

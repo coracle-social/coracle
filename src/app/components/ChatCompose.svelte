@@ -4,13 +4,14 @@
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {NProfileExtension, ImageExtension} from "nostr-editor"
-  import {createEvent, CHAT_MESSAGE} from "@welshman/util"
+  import {createEvent} from "@welshman/util"
   import {publishThunk, makeThunk} from "@welshman/app"
   import {findNodes} from "@lib/tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {makeMention, makeIMeta} from "@app/commands"
   import {getChatEditorOptions, addFile} from "@app/editor"
+  import {MESSAGE} from "@app/state"
 
   export let url
   export let topic = ""
@@ -21,7 +22,7 @@
 
   const sendMessage = () => {
     const json = $editor.getJSON()
-    const topicTag = topic ? ["t", topic] : []
+    const topicTags = topic ? [["t", topic]] : []
     const mentionTags = findNodes(NProfileExtension.name, json).map(m =>
       makeMention(m.attrs!.pubkey, m.attrs!.relays),
     )
@@ -29,9 +30,9 @@
       makeIMeta(src, {x, ox: x}),
     )
 
-    const event = createEvent(CHAT_MESSAGE, {
+    const event = createEvent(MESSAGE, {
       content: $editor.getText(),
-      tags: [topicTag, ...mentionTags, ...imetaTags],
+      tags: [["-"], ["relay", url], ...topicTags, ...mentionTags, ...imetaTags],
     })
 
     publishThunk(makeThunk({event, relays: [url]}))

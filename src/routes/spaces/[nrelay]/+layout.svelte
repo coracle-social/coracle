@@ -14,7 +14,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, decodeNEvent} from "@app/state"
+  import {userMembership, decodeNRelay} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -34,7 +34,7 @@
 
   let showMenu = false
 
-  $: url = decodeNEvent($page.params.nrelay)
+  $: url = decodeNRelay($page.params.nrelay)
   $: rooms = sort($userMembership?.topicsByUrl?.get(url) || [])
 </script>
 

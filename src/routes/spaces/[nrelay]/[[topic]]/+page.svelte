@@ -17,10 +17,11 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {deriveChat, MESSAGE, REPLY} from "@app/state"
+  import {decodeNRelay, makeChatId, deriveChat, MESSAGE, REPLY} from "@app/state"
 
-  const {url, topic} = $page.params
-  const chat = deriveChat(url)
+  const {nrelay, topic = ""} = $page.params
+  const url = decodeNRelay(nrelay)
+  const chat = deriveChat(makeChatId(url, topic))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
