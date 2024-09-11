@@ -184,7 +184,7 @@ export const env = {
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
 
-export const hasNip44 = writable(false)
+export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 // Base state
 
@@ -1685,17 +1685,6 @@ if (!db) {
 
   userSettings.subscribe($settings => {
     ctx.app.dufflepudUrl = getSetting('dufflepud_url')
-  })
-
-  signer.subscribe($signer => {
-    if ($signer?.nip44) {
-      $signer?.nip44.encrypt(pubkey.get(), "test").then(
-        v => hasNip44.set(true),
-        () => hasNip44.set(false),
-      )
-    } else {
-      hasNip44.set(false)
-    }
   })
 
   ready = initStorage("coracle", 1, {

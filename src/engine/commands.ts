@@ -779,8 +779,6 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   // const relays = ctx.app.router.WriteRelays().getUrls()
   const content = await signer.get().nip44.encrypt(pubkey.get(), json)
 
-  console.log("markAsSeen", tags, prevTags)
-
   await createAndPublish({kind, content, relays: [LOCAL_RELAY_URL]})
 }
 
