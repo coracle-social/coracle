@@ -1684,7 +1684,7 @@ if (!db) {
   })
 
   userSettings.subscribe($settings => {
-    ctx.app.dufflepudUrl = getSetting('dufflepud_url')
+    ctx.app.dufflepudUrl = getSetting("dufflepud_url")
   })
 
   ready = initStorage("coracle", 1, {

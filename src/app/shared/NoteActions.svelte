@@ -3,9 +3,8 @@
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {ctx, last, sortBy} from "@welshman/lib"
-  import {custom} from "@welshman/store"
-  import {repository, signer, tracker} from "@welshman/app"
+  import {ctx, remove, last, sortBy} from "@welshman/lib"
+  import {repository, signer, trackerStore} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -85,19 +84,9 @@
   const handlerId = tags.get("client")?.nth(2)
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const noteActions = getSetting("note_actions")
-
-  const seenOn = custom<string[]>(set => {
-    const update = () =>
-      set(Array.from(tracker.getRelays(note.id)).filter(url => url !== LOCAL_RELAY_URL))
-
-    update()
-
-    tracker.on("update", update)
-
-    return () => {
-      tracker.off("update", update)
-    }
-  })
+  const seenOn = derived(trackerStore, $t =>
+    remove(LOCAL_RELAY_URL, Array.from($t.getRelays(note.id))),
+  )
 
   const setView = v => {
     view = v
