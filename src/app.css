@@ -92,8 +92,21 @@
 
 /* tiptap */
 
+.input-editor, .chat-editor {
+  @apply p-1 -m-1 min-h-12;
+}
+
+
 .tiptap[contenteditable="true"] {
-  @apply max-h-[350px] overflow-y-auto rounded-box bg-base-300 p-2 px-4;
+  @apply max-h-[350px] overflow-y-auto p-2 px-4;
+}
+
+.chat-editor .tiptap[contenteditable="true"] {
+  @apply rounded-box bg-base-300;
+}
+
+.input-editor .tiptap[contenteditable="true"] {
+  @apply input input-bordered p-[.65rem] h-auto;
 }
 
 .tiptap pre code {
@@ -110,4 +123,13 @@
 
 .link-content.link-content-selected {
   @apply bg-primary text-primary-content;
+}
+
+/* date input */
+
+.date-time-field {
+  @apply input input-bordered px-0 rounded;
+}
+.date-time-field input {
+  @apply !bg-inherit !border-none !text-inherit !w-full !h-full;
 }

@@ -10,9 +10,11 @@
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
+  import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {makeMention, makeIMeta} from "@app/commands"
   import {getNoteEditorOptions, addFile} from "@app/editor"
   import {pushModal} from "@app/modal"
+  import {pushToast} from "@app/toast"
 
   export let url
 
@@ -23,6 +25,20 @@
   const uploading = writable(false)
 
   const sendMessage = () => {
+    if (!title) {
+      return pushToast({
+        theme: "error",
+        message: "Please provide a title.",
+      })
+    }
+
+    if (!start || !end) {
+      return pushToast({
+        theme: "error",
+        message: "Please provide start and end times.",
+      })
+    }
+
     const json = $editor.getJSON()
     const kind = isAllDay ? EVENT_DATE : EVENT_TIME
     const mentionTags = findNodes(NProfileExtension.name, json).map(m =>
@@ -47,8 +63,8 @@
   let file: File
   let title = ""
   let location = ""
-  let start = ""
-  let end = ""
+  let start: Date
+  let end: Date
 
   onMount(() => {
     editor = createEditor(getNoteEditorOptions({uploading, sendMessage}))
@@ -71,9 +87,12 @@
     <div
       slot="input"
       class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
+      <div class="flex-grow overflow-hidden input-editor">
+        <EditorContent editor={$editor} />
+      </div>
       <Button
         data-tip="Add an image"
-        class="center h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200 tooltip"
+        class="btn center tooltip"
         on:click={() => addFile($editor)}>
         {#if $uploading}
           <span class="loading loading-spinner loading-xs"></span>
@@ -81,8 +100,17 @@
           <Icon icon="gallery-send" />
         {/if}
       </Button>
-      <div class="flex-grow overflow-hidden">
-        <EditorContent editor={$editor} />
+    </div>
+  </Field>
+  <Field>
+    <div slot="input" class="grid grid-cols-2 gap-2">
+      <div class="flex flex-col gap-1">
+        <strong>Start</strong>
+        <DateTimeInput bind:value={start} />
+      </div>
+      <div class="flex flex-col gap-1">
+        <strong>End</strong>
+        <DateTimeInput bind:value={end} />
       </div>
     </div>
   </Field>

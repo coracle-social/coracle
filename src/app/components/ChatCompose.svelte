@@ -57,7 +57,7 @@
       <Icon icon="gallery-send" />
     {/if}
   </Button>
-  <div class="flex-grow overflow-hidden">
+  <div class="flex-grow overflow-hidden chat-editor">
     <EditorContent editor={$editor} />
   </div>
 </div>

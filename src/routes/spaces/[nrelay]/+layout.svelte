@@ -70,7 +70,7 @@
         {#if showMenu}
           <Popover hideOnClick onClose={toggleMenu}>
             <ul
-              transition:fly|local
+              transition:fly
               class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
               {#if $userMembership?.topicsByUrl.has(url)}
                 <li class="text-error">
@@ -92,29 +92,29 @@
         {/if}
       </div>
       <div class="my-3 h-px bg-base-200" />
-      <div in:fly|local>
+      <div in:fly>
         <SecondaryNavItem href={makeSpacePath(url)}>
           <Icon icon="chat-round" /> Chat
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: getDelay(true)}}>
+      <div in:fly={{delay: getDelay(true)}}>
         <SecondaryNavItem href={makeSpacePath(url, "threads")}>
           <Icon icon="notes-minimalistic" /> Threads
         </SecondaryNavItem>
       </div>
-      <div in:fly|local={{delay: getDelay()}}>
+      <div in:fly={{delay: getDelay()}}>
         <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
           <Icon icon="calendar-minimalistic" /> Calendar
         </SecondaryNavItem>
       </div>
       {#if rooms.length > 0}
-        <div transition:slide|local={{delay: getDelay()}}>
+        <div transition:slide={{delay: getDelay()}}>
           <div class="h-2" />
           <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
         </div>
       {/if}
       {#each rooms as topic, i (topic)}
-        <div transition:slide|local={{delay: getDelay()}}>
+        <div transition:slide={{delay: getDelay()}}>
           <SecondaryNavItem href={makeSpacePath(url, topic)}>
             <Icon icon="hashtag" />
             {topic}
@@ -122,7 +122,7 @@
         </div>
       {/each}
       {#if otherRooms.length > 0}
-        <div transition:slide|local={{delay: getDelay()}}>
+        <div transition:slide={{delay: getDelay()}}>
           <div class="h-2" />
           <SecondaryNavHeader>
             {#if rooms.length > 0}
@@ -134,14 +134,14 @@
         </div>
       {/if}
       {#each otherRooms as topic, i (topic)}
-        <div transition:slide|local={{delay: getDelay()}}>
+        <div transition:slide={{delay: getDelay()}}>
           <SecondaryNavItem href={makeSpacePath(url, topic)}>
             <Icon icon="hashtag" />
             {topic}
           </SecondaryNavItem>
         </div>
       {/each}
-      <div in:fly|local={{delay: getDelay()}}>
+      <div in:fly={{delay: getDelay()}}>
         <SecondaryNavItem on:click={addRoom}>
           <Icon icon="add-circle" />
           Create room

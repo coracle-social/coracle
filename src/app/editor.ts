@@ -149,7 +149,6 @@ export const getChatViewOptions = (content: string) => ({
 
 export const getNoteEditorOptions = ({uploading, sendMessage}: EditorOptions) => ({
   content: "",
-  autofocus: true,
   extensions: [
     Document,
     Dropcursor,
