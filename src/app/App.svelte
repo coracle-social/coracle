@@ -80,7 +80,6 @@
   import ReportCreate from "src/app/views/ReportCreate.svelte"
   import Search from "src/app/views/Search.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
-  import TopicFeed from "src/app/views/TopicFeed.svelte"
   import UserContent from "src/app/views/UserContent.svelte"
   import UserData from "src/app/views/UserData.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
@@ -384,8 +383,6 @@
     requireUser: true,
   })
   router.register("/settings/relays", RelayList)
-
-  router.register("/topics/:topic", TopicFeed)
 
   router.register("/zap", Zap, {
     required: ["splits"],
