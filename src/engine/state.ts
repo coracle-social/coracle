@@ -51,6 +51,7 @@ import {
   SEEN_GENERAL,
   DIRECT_MESSAGE,
   NAMED_BOOKMARKS,
+  REACTION,
   WRAP,
   Address,
   Tags,
@@ -75,20 +76,13 @@ import {Executor, Multi, Plex, Local, Relays, publish as basePublish} from "@wel
 import type {PartialSubscribeRequest} from "@welshman/app"
 import type {PublishRequest} from "@welshman/net"
 import * as Content from "@welshman/content"
-import {
-  withGetter,
-  deriveEvents,
-  deriveEventsMapped,
-  createEventStore,
-  throttled,
-} from "@welshman/store"
+import {withGetter, deriveEvents, deriveEventsMapped, throttled} from "@welshman/store"
 import {
   session,
   getSession,
   getSigner,
   signer,
   repository,
-  events,
   relay,
   tracker,
   pubkey,
@@ -839,19 +833,21 @@ export const isSeen = derived(
 
 // Notifications
 
-export const notifications = derived(
-  [pubkey, events, isEventMuted],
-  ([$pubkey, $events, $isEventMuted]) => {
-    const kinds = [...noteKinds, ...reactionKinds]
+export const eventsThrottled = deriveEvents(repository, {
+  throttle: 800,
+  filters: [{kinds: [...noteKinds, ...reactionKinds]}],
+})
 
-    return Array.from(repository.query([{"#p": [$pubkey]}])).filter(
+export const notifications = derived(
+  [pubkey, isEventMuted, eventsThrottled],
+  ([$pubkey, $isEventMuted, $eventsThrottled]) =>
+    $eventsThrottled.filter(
       e =>
-        kinds.includes(e.kind) &&
         e.pubkey !== $pubkey &&
-        !$isEventMuted(e) &&
-        (e.kind !== 7 || isLike(e)),
-    )
-  },
+        e.tags.find(t => t[0] === "p" && t[1] === $pubkey) &&
+        (e.kind !== REACTION || isLike(e)) &&
+        !$isEventMuted(e),
+    ),
 )
 
 export const mainNotifications = derived(notifications, events =>
@@ -1645,6 +1641,12 @@ deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()
 
+const migrateFreshness = (data: {key: string; value: number}[]) => {
+  const cutoff = now() - seconds(1, "hour")
+
+  return data.filter(({value}) => value < cutoff)
+}
+
 const migrateEvents = (events: TrustedEvent[]) =>
   events.length < 50_000
     ? events
@@ -1687,13 +1689,16 @@ if (!db) {
     ctx.app.dufflepudUrl = getSetting("dufflepud_url")
   })
 
-  ready = initStorage("coracle", 1, {
-    events: {keyPath: "id", store: createEventStore(repository, migrateEvents)},
-    relays: {keyPath: "url", store: relays},
-    handles: {keyPath: "nip05", store: handles},
-    zappers: {keyPath: "lnurl", store: zappers},
-    freshness: storageAdapters.fromObjectStore(freshness),
-    plaintext: storageAdapters.fromObjectStore(plaintext),
+  ready = initStorage("coracle", 2, {
+    relays: {keyPath: "url", store: throttled(1000, relays)},
+    handles: {keyPath: "nip05", store: throttled(1000, handles)},
+    zappers: {keyPath: "lnurl", store: throttled(1000, zappers)},
+    freshness: storageAdapters.fromObjectStore(freshness, {
+      throttle: 1000,
+      migrate: migrateFreshness,
+    }),
+    plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
+    repository: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
     publishStatus: storageAdapters.fromObjectStore(publishStatusData),
     groups: {keyPath: "address", store: groups},
     groupAlerts: {keyPath: "id", store: groupAlerts},

@@ -28,7 +28,7 @@ export const decodeEvent = entity => {
 
   return switcherFn(type, {
     nevent: () => ({...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)}),
-    naddr: () => ({...data, address: Address.fromNaddr(data).toString()}),
+    naddr: () => ({...data, address: Address.fromNaddr(entity).toString()}),
     note: () => annotateEvent(data),
     default: () => annotateEvent(entity),
   })

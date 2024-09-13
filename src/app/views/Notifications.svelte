@@ -11,7 +11,7 @@
     getContextTagValues,
     getAddressTags,
   } from "@welshman/util"
-  import {repository, events, pubkey} from "@welshman/app"
+  import {repository, pubkey} from "@welshman/app"
   import {createScroller, formatTimestampAsDate} from "src/util/misc"
   import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
   import Tabs from "src/partials/Tabs.svelte"
@@ -83,8 +83,8 @@
   )
 
   const groupEventNotifications = derived(
-    [sessionWithMeta, events, isEventMuted],
-    ([$sessionWithMeta, $events, $isEventMuted]) =>
+    [sessionWithMeta, isEventMuted],
+    ([$sessionWithMeta, $isEventMuted]) =>
       repository
         .query([{"#a": getUserCircles($sessionWithMeta)}])
         .map(e => {

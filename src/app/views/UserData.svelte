@@ -1,9 +1,8 @@
 <script lang="ts">
   import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {ctx} from "@welshman/lib"
-  import {events} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -13,7 +12,7 @@
   import {router} from "src/app/util/router"
   import {sortEventsDesc} from "src/engine"
 
-  const sortedEvents = derived(events, sortEventsDesc)
+  const events = sortEventsDesc(repository.dump())
 
   const loadMore = async () => {
     limit += 50
@@ -41,7 +40,7 @@
     <FlexColumn class="py-6 text-center">
       <h3 class="text-xl sm:h-12">Export Database</h3>
       <p class="sm:h-24">
-        Click below to download a backup of all {commaFormat($sortedEvents.length)}
+        Click below to download a backup of all {commaFormat(events.length)}
         events in your database.
       </p>
       <div class="flex justify-center">
@@ -70,7 +69,7 @@
     </tr>
   </thead>
   <tbody>
-    {#each $sortedEvents.slice(0, limit) as event}
+    {#each events.slice(0, limit) as event}
       <tr>
         <td class="py-1 pr-2">
           <Anchor
