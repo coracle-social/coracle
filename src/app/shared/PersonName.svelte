@@ -14,6 +14,7 @@
 
 <script lang="ts">
   import cx from "classnames"
+  import {nip19} from 'nostr-tools'
   import {derived} from "svelte/store"
   import {session, deriveProfileDisplay} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
@@ -28,6 +29,7 @@
 
   const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getWotScore($session?.pubkey, pubkey)
+  const npub = nip19.npubEncode(pubkey)
   const npubDisplay = displayPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const accent = $following || pubkey === $session?.pubkey
@@ -36,14 +38,12 @@
 <div class={cx("flex gap-1", $$props.class)}>
   <div class="flex flex-col overflow-hidden text-ellipsis">
     <span class="cy-person-name">{$profileDisplay}</span>
-    {#if $profileDisplay != npubDisplay}
-      <div class="flex flex-row items-center text-xs">
-        <small>{npubDisplay}</small>
-        {#if displayNpubCopyButton}
-          <CopyValueSimple class="pl-1" value={pubkey} label={npubDisplay} />
-        {/if}
-      </div>
-    {/if}
+    <div class="flex flex-row items-center text-sm">
+      <small>{npubDisplay}</small>
+      {#if displayNpubCopyButton}
+        <CopyValueSimple class="pl-1" value={npub} label="Npub" />
+      {/if}
+    </div>
   </div>
   {#if $session}
     <div class="flex gap-1 font-normal" on:click|stopPropagation>
