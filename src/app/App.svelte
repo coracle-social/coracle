@@ -21,73 +21,72 @@
   import Routes from "src/app/Routes.svelte"
   import Nav from "src/app/Nav.svelte"
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
-
-  const About = lib.memoize(() => import("src/app/views/About.svelte"))
-  const Bech32Entity = lib.memoize(() => import("src/app/views/Bech32Entity.svelte"))
-  const Calendar = lib.memoize(() => import("src/app/views/Calendar.svelte"))
-  const ChannelCreate = lib.memoize(() => import("src/app/views/ChannelCreate.svelte"))
-  const ChannelsDetail = lib.memoize(() => import("src/app/views/ChannelsDetail.svelte"))
-  const ChannelsList = lib.memoize(() => import("src/app/views/ChannelsList.svelte"))
-  const DataExport = lib.memoize(() => import("src/app/views/DataExport.svelte"))
-  const DataImport = lib.memoize(() => import("src/app/views/DataImport.svelte"))
-  const EventDelete = lib.memoize(() => import("src/app/views/EventDelete.svelte"))
-  const EventDetail = lib.memoize(() => import("src/app/views/EventDetail.svelte"))
-  const EventEdit = lib.memoize(() => import("src/app/views/EventEdit.svelte"))
-  const FeedCreate = lib.memoize(() => import("src/app/views/FeedCreate.svelte"))
-  const FeedEdit = lib.memoize(() => import("src/app/views/FeedEdit.svelte"))
-  const FeedList = lib.memoize(() => import("src/app/views/FeedList.svelte"))
-  const GroupCreate = lib.memoize(() => import("src/app/views/GroupCreate.svelte"))
-  const GroupDelete = lib.memoize(() => import("src/app/views/GroupDelete.svelte"))
-  const GroupDetail = lib.memoize(() => import("src/app/views/GroupDetail.svelte"))
-  const GroupEdit = lib.memoize(() => import("src/app/views/GroupEdit.svelte"))
-  const GroupInfo = lib.memoize(() => import("src/app/views/GroupInfo.svelte"))
-  const GroupList = lib.memoize(() => import("src/app/views/GroupList.svelte"))
-  const GroupRotate = lib.memoize(() => import("src/app/views/GroupRotate.svelte"))
-  const Help = lib.memoize(() => import("src/app/views/Help.svelte"))
-  const Home = lib.memoize(() => import("src/app/views/Home.svelte"))
-  const InviteAccept = lib.memoize(() => import("src/app/views/InviteAccept.svelte"))
-  const InviteCreate = lib.memoize(() => import("src/app/views/InviteCreate.svelte"))
-  const LabelCreate = lib.memoize(() => import("src/app/views/LabelCreate.svelte"))
-  const ListCreate = lib.memoize(() => import("src/app/views/ListCreate.svelte"))
-  const ListDetail = lib.memoize(() => import("src/app/views/ListDetail.svelte"))
-  const ListEdit = lib.memoize(() => import("src/app/views/ListEdit.svelte"))
-  const ListList = lib.memoize(() => import("src/app/views/ListList.svelte"))
-  const ListSelect = lib.memoize(() => import("src/app/views/ListSelect.svelte"))
-  const ListingDelete = lib.memoize(() => import("src/app/views/ListingDelete.svelte"))
-  const ListingEdit = lib.memoize(() => import("src/app/views/ListingEdit.svelte"))
-  const Login = lib.memoize(() => import("src/app/views/Login.svelte"))
-  const LoginBunker = lib.memoize(() => import("src/app/views/LoginBunker.svelte"))
-  const LoginConnect = lib.memoize(() => import("src/app/views/LoginConnect.svelte"))
-  const LoginPrivKey = lib.memoize(() => import("src/app/views/LoginPrivKey.svelte"))
-  const LoginPubKey = lib.memoize(() => import("src/app/views/LoginPubKey.svelte"))
-  const Logout = lib.memoize(() => import("src/app/views/Logout.svelte"))
-  const Market = lib.memoize(() => import("src/app/views/Market.svelte"))
-  const MediaDetail = lib.memoize(() => import("src/app/views/MediaDetail.svelte"))
-  const NoteCreate = lib.memoize(() => import("src/app/views/NoteCreate.svelte"))
-  const NoteDelete = lib.memoize(() => import("src/app/views/NoteDelete.svelte"))
-  const NoteDetail = lib.memoize(() => import("src/app/views/NoteDetail.svelte"))
-  const Notifications = lib.memoize(() => import("src/app/views/Notifications.svelte"))
-  const Onboarding = lib.memoize(() => import("src/app/views/Onboarding.svelte"))
-  const PersonDetail = lib.memoize(() => import("src/app/views/PersonDetail.svelte"))
-  const PersonFollowers = lib.memoize(() => import("src/app/views/PersonFollowers.svelte"))
-  const PersonFollows = lib.memoize(() => import("src/app/views/PersonFollows.svelte"))
-  const PersonInfo = lib.memoize(() => import("src/app/views/PersonInfo.svelte"))
-  const PersonList = lib.memoize(() => import("src/app/shared/PersonList.svelte"))
-  const Publishes = lib.memoize(() => import("src/app/views/Publishes.svelte"))
-  const QRCode = lib.memoize(() => import("src/app/views/QRCode.svelte"))
-  const RelayDetail = lib.memoize(() => import("src/app/views/RelayDetail.svelte"))
-  const RelayList = lib.memoize(() => import("src/app/views/RelayList.svelte"))
-  const RelayReview = lib.memoize(() => import("src/app/views/RelayReview.svelte"))
-  const ReportCreate = lib.memoize(() => import("src/app/views/ReportCreate.svelte"))
-  const Search = lib.memoize(() => import("src/app/views/Search.svelte"))
-  const ThreadDetail = lib.memoize(() => import("src/app/views/ThreadDetail.svelte"))
-  const TopicFeed = lib.memoize(() => import("src/app/views/TopicFeed.svelte"))
-  const UserContent = lib.memoize(() => import("src/app/views/UserContent.svelte"))
-  const UserData = lib.memoize(() => import("src/app/views/UserData.svelte"))
-  const UserKeys = lib.memoize(() => import("src/app/views/UserKeys.svelte"))
-  const UserProfile = lib.memoize(() => import("src/app/views/UserProfile.svelte"))
-  const UserSettings = lib.memoize(() => import("src/app/views/UserSettings.svelte"))
-  const Zap = lib.memoize(() => import("src/app/views/Zap.svelte"))
+  import About from "src/app/views/About.svelte"
+  import Bech32Entity from "src/app/views/Bech32Entity.svelte"
+  import Calendar from "src/app/views/Calendar.svelte"
+  import ChannelCreate from "src/app/views/ChannelCreate.svelte"
+  import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
+  import ChannelsList from "src/app/views/ChannelsList.svelte"
+  import DataExport from "src/app/views/DataExport.svelte"
+  import DataImport from "src/app/views/DataImport.svelte"
+  import EventDelete from "src/app/views/EventDelete.svelte"
+  import EventDetail from "src/app/views/EventDetail.svelte"
+  import EventEdit from "src/app/views/EventEdit.svelte"
+  import FeedCreate from "src/app/views/FeedCreate.svelte"
+  import FeedEdit from "src/app/views/FeedEdit.svelte"
+  import FeedList from "src/app/views/FeedList.svelte"
+  import GroupCreate from "src/app/views/GroupCreate.svelte"
+  import GroupDelete from "src/app/views/GroupDelete.svelte"
+  import GroupDetail from "src/app/views/GroupDetail.svelte"
+  import GroupEdit from "src/app/views/GroupEdit.svelte"
+  import GroupInfo from "src/app/views/GroupInfo.svelte"
+  import GroupList from "src/app/views/GroupList.svelte"
+  import GroupRotate from "src/app/views/GroupRotate.svelte"
+  import Help from "src/app/views/Help.svelte"
+  import Home from "src/app/views/Home.svelte"
+  import InviteAccept from "src/app/views/InviteAccept.svelte"
+  import InviteCreate from "src/app/views/InviteCreate.svelte"
+  import LabelCreate from "src/app/views/LabelCreate.svelte"
+  import ListCreate from "src/app/views/ListCreate.svelte"
+  import ListDetail from "src/app/views/ListDetail.svelte"
+  import ListEdit from "src/app/views/ListEdit.svelte"
+  import ListList from "src/app/views/ListList.svelte"
+  import ListSelect from "src/app/views/ListSelect.svelte"
+  import ListingDelete from "src/app/views/ListingDelete.svelte"
+  import ListingEdit from "src/app/views/ListingEdit.svelte"
+  import Login from "src/app/views/Login.svelte"
+  import LoginBunker from "src/app/views/LoginBunker.svelte"
+  import LoginConnect from "src/app/views/LoginConnect.svelte"
+  import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
+  import LoginPubKey from "src/app/views/LoginPubKey.svelte"
+  import Logout from "src/app/views/Logout.svelte"
+  import Market from "src/app/views/Market.svelte"
+  import MediaDetail from "src/app/views/MediaDetail.svelte"
+  import NoteCreate from "src/app/views/NoteCreate.svelte"
+  import NoteDelete from "src/app/views/NoteDelete.svelte"
+  import NoteDetail from "src/app/views/NoteDetail.svelte"
+  import Notifications from "src/app/views/Notifications.svelte"
+  import Onboarding from "src/app/views/Onboarding.svelte"
+  import PersonDetail from "src/app/views/PersonDetail.svelte"
+  import PersonFollowers from "src/app/views/PersonFollowers.svelte"
+  import PersonFollows from "src/app/views/PersonFollows.svelte"
+  import PersonInfo from "src/app/views/PersonInfo.svelte"
+  import PersonList from "src/app/shared/PersonList.svelte"
+  import Publishes from "src/app/views/Publishes.svelte"
+  import QRCode from "src/app/views/QRCode.svelte"
+  import RelayDetail from "src/app/views/RelayDetail.svelte"
+  import RelayList from "src/app/views/RelayList.svelte"
+  import RelayReview from "src/app/views/RelayReview.svelte"
+  import ReportCreate from "src/app/views/ReportCreate.svelte"
+  import Search from "src/app/views/Search.svelte"
+  import ThreadDetail from "src/app/views/ThreadDetail.svelte"
+  import TopicFeed from "src/app/views/TopicFeed.svelte"
+  import UserContent from "src/app/views/UserContent.svelte"
+  import UserData from "src/app/views/UserData.svelte"
+  import UserKeys from "src/app/views/UserKeys.svelte"
+  import UserProfile from "src/app/views/UserProfile.svelte"
+  import UserSettings from "src/app/views/UserSettings.svelte"
+  import Zap from "src/app/views/Zap.svelte"
   import {isNil} from "ramda"
   import {onMount} from "svelte"
   import {logUsage} from "src/app/state"

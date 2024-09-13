@@ -62,14 +62,10 @@
       "pointer-events-none": $menuIsOpen,
     })}>
     {#if $page}
-      {@const promise = router.getMatch($page.path).route.component()}
+      {@const {component} = router.getMatch($page.path).route}
       {#key router.getKey($page)}
         <div class="m-auto flex w-full max-w-2xl flex-grow flex-col gap-4 p-4">
-          {#await promise}
-            <!-- pass -->
-          {:then component}
-            <svelte:component this={component.default || component} {...router.getProps($page)} />
-          {/await}
+          <svelte:component this={component} {...router.getProps($page)} />
         </div>
       {/key}
     {/if}
@@ -77,14 +73,10 @@
 {/key}
 
 {#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
-  {@const promise = router.getMatch(m.path).route.component()}
+  {@const {component} = router.getMatch(m.path).route}
   <Modal virtual={false} canClose={!m.noEscape}>
     {#key $pubkey}
-      {#await promise}
-        <!-- pass -->
-      {:then component}
-        <svelte:component this={component.default || component} {...router.getProps(m)} />
-      {/await}
+      <svelte:component this={component} {...router.getProps(m)} />
     {/key}
   </Modal>
 {/each}
