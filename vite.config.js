@@ -131,6 +131,9 @@ export default defineConfig(async () => {
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 ** 2, // 5 MB or set to something else
+        },
         manifest: {
           name: process.env.VITE_APP_NAME,
           short_name: process.env.VITE_APP_NAME,
