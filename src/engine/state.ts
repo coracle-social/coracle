@@ -1328,6 +1328,12 @@ export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
 }
 
+const shouldTrackPublish = (event: TrustedEvent) => {
+  if ([SEEN_CONTEXT, SEEN_CONVERSATION, SEEN_GENERAL].includes(event.kind)) return false
+
+  return event.pubkey === pubkey.get() || canUnwrap(event)
+}
+
 export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
@@ -1350,7 +1356,7 @@ export const publish = async ({forcePlatform = true, ...request}: MyPublishReque
   const pub = basePublish(request)
 
   // Listen to updates and update our publish queue
-  if (canUnwrap(request.event) || request.event.pubkey === pubkey.get()) {
+  if (shouldTrackPublish(request.event)) {
     const pubInfo = omit(["emitter", "result"], pub)
 
     pub.emitter.on("*", t => publishes.update(assoc(pubInfo.id, pubInfo)))
