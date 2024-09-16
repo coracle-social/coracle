@@ -1683,7 +1683,7 @@ if (!db) {
     app: getDefaultAppContext({
       dufflepudUrl: env.DUFFLEPUD_URL,
       indexerRelays: env.INDEXER_RELAYS,
-      requestTimeout: 5000,
+      requestTimeout: 10000,
       router: makeRouter({
         getRedundancy: () => getSetting("relay_redundancy"),
         getLimit: () => getSetting("relay_limit"),

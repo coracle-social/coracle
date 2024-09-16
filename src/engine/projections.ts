@@ -76,7 +76,7 @@ projections.addHandler(24, (e: TrustedEvent) => {
 
     // Load the group's metadata and posts
     load({
-      delay: 3000,
+      delay: 5000,
       skipCache: true,
       relays: ctx.app.router.fromRelays(relays).getUrls(),
       filters: [
