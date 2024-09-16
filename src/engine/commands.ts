@@ -65,6 +65,7 @@ import {appDataKeys} from "src/util/nostr"
 import {isPublishedProfile, createProfile, editProfile} from "src/domain"
 import type {Profile} from "src/domain"
 import {GroupAccess} from "src/engine/model"
+import {sortEventsDesc} from "src/engine/utils"
 import {
   channels,
   getChannelSeenKey,
@@ -758,7 +759,7 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   const data = indexBy(t => t[1], prevTags || [])
 
   for (const [key, events] of Object.entries(eventsByKey)) {
-    const [newer, older] = splitAt(1, events)
+    const [newer, older] = splitAt(1, sortEventsDesc(events))
     const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
 
     if (ts >= cutoff) {
