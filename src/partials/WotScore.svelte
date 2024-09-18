@@ -24,7 +24,7 @@
   const center = radius + 1
   const pathLength = radius * 2 * Math.PI
 
-  $: normalizedScore = clamp([max / 20, max], score) / max
+  $: normalizedScore = clamp([0, max], score) / max
   $: dashOffset = 100 - 44 * normalizedScore
   $: style = `transform: rotate(${135 - normalizedScore * 180}deg)`
   $: stroke = $themeColors[accent ? 'accent' : 'neutral-200']
