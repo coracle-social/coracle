@@ -11,6 +11,8 @@
 - [x] Add profile picture to DMs
 - [x] Add pubkey to profile name, fix wot info on mobile (zmjohnson)
 - [x] Render highlight comments
+- [x] Improve initial load and search performance
+- [x] Remove web of trust numbers
 
 # 0.4.9
 

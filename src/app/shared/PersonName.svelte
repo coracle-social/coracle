@@ -37,7 +37,22 @@
 
 <div class={cx("flex gap-1", $$props.class)}>
   <div class="flex flex-col overflow-hidden text-ellipsis">
-    <span class="cy-person-name">{$profileDisplay}</span>
+    <div class="flex gap-2 items-center">
+      <span class="cy-person-name">{$profileDisplay}</span>
+      {#if $session}
+        <div on:click|stopPropagation>
+          <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
+            <div slot="trigger">
+              <WotScore score={wotScore} max={$maxWot} {accent} />
+            </div>
+            <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
+              <i class="fa fa-info-circle" />
+              WoT Score
+            </Anchor>
+          </Popover>
+        </div>
+      {/if}
+    </div>
     <div class="flex flex-row items-center text-sm">
       <small>{npubDisplay}</small>
       {#if displayNpubCopyButton}
@@ -45,17 +60,4 @@
       {/if}
     </div>
   </div>
-  {#if $session}
-    <div class="flex gap-1 font-normal" on:click|stopPropagation>
-      <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
-        <div slot="trigger">
-          <WotScore score={wotScore} max={$maxWot} {accent} />
-        </div>
-        <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
-          <i class="fa fa-info-circle" />
-          WoT Score
-        </Anchor>
-      </Popover>
-    </div>
-  {/if}
 </div>

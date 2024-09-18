@@ -3,6 +3,7 @@
   import "tippy.js/dist/tippy.css"
   import "tippy.js/animations/shift-away.css"
   import tippy from "tippy.js"
+  import cx from 'classnames'
   import {onMount} from "svelte"
   import {isMobile} from "src/util/html"
 
@@ -76,7 +77,7 @@
     }
   }} />
 
-<div bind:this={trigger} class={$$props.class}>
+<div bind:this={trigger} class={cx($$props.class, "cursor-pointer")}>
   <slot name="trigger" />
 </div>
 
