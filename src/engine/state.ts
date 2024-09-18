@@ -370,7 +370,7 @@ export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
 }
 
 export const profileSearch = derived(
-  [profiles, handles],
+  [throttled(300, profiles), throttled(300, handles)],
   ([$profiles, $handles]) =>
     new ProfileSearch(
       $profiles
