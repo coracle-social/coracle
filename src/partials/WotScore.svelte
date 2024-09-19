@@ -22,7 +22,6 @@
 
   const radius = 7
   const center = radius + 1
-  const pathLength = radius * 2 * Math.PI
 
   $: normalizedScore = clamp([0, max], score) / max
   $: dashOffset = 100 - 44 * normalizedScore

@@ -10,7 +10,7 @@ import {
   makeRelayFeed,
   makeUnionFeed,
 } from "@welshman/feeds"
-import {ctx, Worker, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
+import {ctx, Worker, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
 import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
 import {
   Tags,
@@ -48,7 +48,7 @@ import {
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import {always, partition, pluck, uniq, without} from "ramda"
+import {partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import type {SessionWithMeta} from "src/engine/model"
 import {
@@ -322,6 +322,7 @@ export const feedLoader = new FeedLoader({
       [Scope.Follows]: () => getFollows($pubkey),
       [Scope.Network]: () => getNetwork($pubkey),
       [Scope.Followers]: () => getFollowers($pubkey),
+      default: always([]),
     })
 
     return pubkeys.length === 0 ? env.DEFAULT_FOLLOWS : pubkeys

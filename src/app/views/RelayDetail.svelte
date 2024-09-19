@@ -54,8 +54,8 @@
     <Rating inert value={rating} />
   </div>
 {/if}
-{#if $relay.profile?.description}
-  <p>{$relay.profile.description}</p>
+{#if $relay?.profile?.description}
+  <p>{$relay?.profile.description}</p>
 {/if}
 <Tabs {tabs} {activeTab} {setActiveTab} />
 {#if activeTab === "reviews"}

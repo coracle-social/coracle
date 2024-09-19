@@ -759,6 +759,10 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
   const data = indexBy(t => t[1], prevTags || [])
 
   for (const [key, events] of Object.entries(eventsByKey)) {
+    if (events.length === 0) {
+      continue
+    }
+
     const [newer, older] = splitAt(1, sortEventsDesc(events))
     const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
 

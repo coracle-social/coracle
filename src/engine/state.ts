@@ -207,7 +207,11 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
     const signer = getSigner(session)
 
     if (signer) {
-      setPlaintext(e, await signer.nip04.decrypt(other, e.content))
+      const result = await signer.nip04.decrypt(other, e.content)
+
+      if (result) {
+        setPlaintext(e, result)
+      }
     }
   }
 
