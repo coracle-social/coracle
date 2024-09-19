@@ -58,7 +58,7 @@
     "@welshman/net": "^0.0.22",
     "@welshman/signer": "^0.0.5",
     "@welshman/store": "^0.0.7",
-    "@welshman/util": "^0.0.31",
+    "@welshman/util": "^0.0.32",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
     "compressorjs": "^1.2.1",
