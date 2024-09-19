@@ -69,6 +69,9 @@ import {
   getPubkeyTagValues,
   getListValues,
   normalizeRelayUrl,
+  isContextAddress,
+  getAddressTagValues,
+  getAncestorTagValues,
 } from "@welshman/util"
 import type {Filter, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
 import {Nip59, Nip01Signer} from "@welshman/signer"
@@ -483,7 +486,7 @@ export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubke
 
 export const userMuteList = derived([mutesByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => new Set(getListValues("p", l)))
+export const userMutes = derived(userMuteList, l => new Set(getListValues(["p", "e"], l)))
 
 // Communities
 
@@ -728,51 +731,24 @@ export const isEventMuted = withGetter(
           : null
 
       return (e: Partial<TrustedEvent>, strict = false) => {
-        if (!$pubkey || e.pubkey === $pubkey) {
-          return false
-        }
+        if (!$pubkey || !e.pubkey) return false
 
-        const tags = Tags.wrap(e.tags || [])
-        const {roots, replies} = tags.ancestors()
+        const {roots, replies} = getAncestorTagValues(e.tags || [])
 
-        if (
-          find(
-            t => $userMutes.has(t),
-            [e.id, e.pubkey, ...roots.values().valueOf(), ...replies.values().valueOf()],
-          )
-        ) {
-          return true
-        }
+        if ([e.id, e.pubkey, ...roots, ...replies].some(x => $userMutes.has(x))) return true
 
         if (regex) {
-          if (e.content?.toLowerCase().match(regex)) {
-            return true
-          }
-
-          if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) {
-            return true
-          }
+          if (e.content?.toLowerCase().match(regex)) return true
+          if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) return true
         }
 
-        if (!strict) {
-          return false
-        }
+        if (strict || $userFollows.has(e.pubkey)) return false
 
-        const isInGroup = tags.groups().values().some($userIsGroupMember)
-        const isInCommunity = tags
-          .communities()
-          .values()
-          .some(a => false)
-        const wotAdjustment = isInCommunity || isInGroup ? 1 : 0
+        const addresses = getAddressTagValues(e.tags || []).filter(isContextAddress)
+        const wotAdjustment = addresses.some($userIsGroupMember) ? 1 : 0
+        const wotScore = getWotScore($pubkey, e.pubkey)
 
-        if (
-          !$userFollows.has(e.pubkey) &&
-          getWotScore($pubkey, e.pubkey) < minWot - wotAdjustment
-        ) {
-          return true
-        }
-
-        return false
+        return wotScore < minWot - wotAdjustment
       }
     },
   ),

@@ -241,9 +241,9 @@
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
       if (muted) {
-        actions.push({label: "Unmute", icon: "microphone", onClick: unmuteNote})
+        actions.push({label: "Unmute", icon: "microphone", onClick: () => unmuteNote(note.id)})
       } else {
-        actions.push({label: "Mute", icon: "microphone-slash", onClick: muteNote})
+        actions.push({label: "Mute", icon: "microphone-slash", onClick: () => muteNote(note.id)})
       }
 
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})

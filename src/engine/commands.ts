@@ -660,10 +660,11 @@ export const mutePerson = (pubkey: string) =>
 
 export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
 
-export const muteNote = (id: string) => updateSingleton(MUTES, tags => append(["e", id], tags))
+export const muteNote = (id: string) =>
+  updateSingleton(MUTES, tags => append(["e", id], tags), {only: "public"})
 
 export const removeFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags), {only: "public"})
+  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags))
 
 export const addFeedFavorite = (address: string) =>
   updateSingleton(FEEDS, tags => append(["a", address], tags), {only: "public"})

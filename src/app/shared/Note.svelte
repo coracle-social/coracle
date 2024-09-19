@@ -113,7 +113,7 @@
   $: root = tags.root()
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
-  $: muted = !showMuted && $isEventMuted(event, true)
+  $: muted = $isEventMuted(event, true)
 
   // Find children in our context
   $: children = context.filter(e => isChildOf(e, event))
@@ -271,7 +271,7 @@
                   </small>
                 {/if}
               </div>
-              {#if muted}
+              {#if muted && !showMuted}
                 <p class="border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
                   You have hidden this note.
                   <Anchor
