@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "pwa-assets-generator && vite build",
+    "build": "cp public/images/logo.png assets/icon-only.png && capacitor-assets generate && rm -rf icons public/manifest.webmanifest && pwa-assets-generator && vite build",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "prettier --check $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
@@ -15,6 +15,7 @@
     "watch": "find src -type f | entr -r"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.1.2",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.4",
