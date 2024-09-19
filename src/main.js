@@ -1,5 +1,6 @@
 import "src/app.css"
 import Bugsnag from "@bugsnag/js"
+import {App as CapacitorApp} from "@capacitor/app"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 
@@ -23,6 +24,15 @@ window.addEventListener("beforeinstallprompt", e => {
 
   // Stash the event so it can be triggered later.
   installPrompt.set(e)
+})
+
+// Handle back button on android
+CapacitorApp.addListener("backButton", ({canGoBack}) => {
+  if (!canGoBack) {
+    CapacitorApp.exitApp()
+  } else {
+    window.history.back()
+  }
 })
 
 export default new App({

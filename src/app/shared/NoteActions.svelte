@@ -63,7 +63,7 @@
   export let note: TrustedEvent
   export let muted
   export let replyCtrl
-  export let showMuted
+  export let showHidden
   export let addToContext
   export let contextAddress
   export let removeFromContext
@@ -212,7 +212,7 @@
   let handlersShown = false
 
   $: disableActions =
-    !$signer || (muted && !showMuted) || (note.wrap && address && !$userIsGroupMember(address))
+    !$signer || (muted && !showHidden) || (note.wrap && address && !$userIsGroupMember(address))
   $: like = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)

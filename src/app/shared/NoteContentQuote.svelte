@@ -13,7 +13,7 @@
   export let value
   export let depth = 0
 
-  let showMuted = false
+  let showHidden = false
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
@@ -43,7 +43,7 @@
   }
 
   const unmute = e => {
-    showMuted = true
+    showHidden = true
   }
 
   $: address = $quote ? getAddress($quote) : ""
@@ -54,7 +54,7 @@
 
 <div class="py-2" on:click|stopPropagation>
   <Card interactive stopPropagation class="my-2" on:click={openQuote}>
-    {#if muted && !showMuted}
+    {#if muted && !showHidden}
       <p class="mb-1 py-24 text-center text-neutral-600">
         You have hidden this note.
         <Anchor underline stopPropagation on:click={unmute}>Show</Anchor>

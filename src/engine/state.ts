@@ -3,7 +3,6 @@ import crypto from "crypto"
 import {get, derived, writable} from "svelte/store"
 import {doPipe, batch, seconds, sleep} from "hurdak"
 import {
-  find,
   defaultTo,
   equals,
   assoc,
@@ -745,7 +744,7 @@ export const isEventMuted = withGetter(
         if (strict || $userFollows.has(e.pubkey)) return false
 
         const addresses = getAddressTagValues(e.tags || []).filter(isContextAddress)
-        const wotAdjustment = addresses.some($userIsGroupMember) ? 1 : 0
+        const wotAdjustment = addresses.some(a => $userIsGroupMember(a)) ? 1 : 0
         const wotScore = getWotScore($pubkey, e.pubkey)
 
         return wotScore < minWot - wotAdjustment
