@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@bugsnag/js": "^8.0.0",
+    "@capacitor/browser": "^6.0.2",
     "@event-calendar/core": "^3.4.0",
     "@event-calendar/day-grid": "^3.4.0",
     "@event-calendar/interaction": "^3.4.0",

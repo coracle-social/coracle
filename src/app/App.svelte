@@ -102,6 +102,7 @@
     asRelay,
     asEntity,
   } from "src/app/util/router"
+  import {initializeDeepLinkHandler} from "../services/deepLinkHandler"
 
   const {session, pubkey} = app
 
@@ -535,6 +536,10 @@
     return () => {
       clearInterval(interval1)
     }
+  })
+
+  onMount(() => {
+    initializeDeepLinkHandler()
   })
 </script>
 

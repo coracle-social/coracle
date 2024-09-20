@@ -1,3 +1,7 @@
+<style>
+  /* Your existing styles */
+</style>
+
 <script lang="ts">
   import cx from "classnames"
   import {onMount} from "svelte"
@@ -67,6 +71,11 @@
     } finally {
       loading = false
     }
+  }
+
+  function handleAmberLogin() {
+    // This will be implemented later with NIP-55
+    console.log("Amber login clicked")
   }
 
   let handlers = [
@@ -157,7 +166,7 @@
     <div
       class={cx(
         "relative grid justify-center gap-2 xs:gap-5",
-        getNip07() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        getNip07() ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4" : "grid-cols-2 sm:grid-cols-3",
       )}>
       <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
@@ -184,6 +193,12 @@
           <i class="fa fa-eye fa-xl" />
         </div>
         <span>Public Key</span>
+      </Tile>
+      <Tile class="cursor-pointer bg-tinted-800" on:click={handleAmberLogin}>
+        <div>
+          <i class="fa fa-bolt fa-xl" />
+        </div>
+        <span>Amber</span>
       </Tile>
     </div>
   </FlexColumn>
