@@ -65,6 +65,14 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 - Customize configuration in `.env` (optional, see below)
 - Start the development server: `npm run dev`
 
+# Building for Android
+
+Make sure you have the android build tools in your path and run:
+
+```
+npm run build:android --keystorepath <path> --keystorepass <password> --keystorealias <alias> --keystorealiaspass <password>
+```
+
 # Customization
 
 Coracle is intended to be fully white-labeled by groups of various kinds. The following environment variables can be set in `.env.local` to customize Coracle's appearance and behavior:

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "pwa-assets-generator && vite build",
+    "build:android": "npm run build && cap sync && cap build android --androidreleasetype APK --signing-type apksigner",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "prettier --check $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
@@ -15,8 +16,12 @@
     "watch": "find src -type f | entr -r"
   },
   "devDependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/app": "^6.0.1",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.4",
     "@types/ramda": "^0.30.2",
@@ -42,10 +47,6 @@
   },
   "dependencies": {
     "@bugsnag/js": "^8.0.0",
-    "@capacitor/android": "^6.1.2",
-    "@capacitor/app": "^6.0.1",
-    "@capacitor/core": "^6.1.2",
-    "@capacitor/ios": "^6.1.2",
     "@event-calendar/core": "^3.4.0",
     "@event-calendar/day-grid": "^3.4.0",
     "@event-calendar/interaction": "^3.4.0",
