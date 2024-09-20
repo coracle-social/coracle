@@ -1,0 +1,9 @@
+coracle:
+  android:
+    identifier: social.coracle.app
+    name: Coracle
+    description: An experimental Nostr client focused on unlocking the full potential of multiple relays. Browse, filter, zap, and create custom feeds to create a curated Nostr experience.
+    repository: https://github.com/coracle-social/coracle
+    artifacts:
+      - app-release-signed.apk
+
