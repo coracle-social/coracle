@@ -43,7 +43,7 @@
 }
 
 .card2 {
-  @apply rounded-box bg-base-100 p-6 text-base-content;
+  @apply rounded-box bg-base-100 p-6 text-base-content overflow-hidden text-ellipsis;
 }
 
 .card2.card2-sm {
@@ -88,6 +88,10 @@
 
 .shadow-top-xl {
   @apply shadow-[0_20px_25px_-5px_rgb(0,0,0,0.1)_0_8px_10px_-6px_rgb(0,0,0,0.1)];
+}
+
+.modal-box .z-feature {
+  @apply z-modal-feature;
 }
 
 /* tiptap */

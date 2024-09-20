@@ -68,7 +68,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
 
           popover = tippy("body", {
             getReferenceClientRect: props.clientRect as any,
-            appendTo: document.body,
+            appendTo: document.querySelector('dialog[open]') || document.body,
             content: target,
             showOnCreate: true,
             interactive: true,

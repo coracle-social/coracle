@@ -6,6 +6,7 @@
   import {goto} from "$app/navigation"
   import {browser} from "$app/environment"
   import {sleep} from "@welshman/lib"
+  import {throttled} from "@welshman/store"
   import {
     relays,
     handles,
@@ -22,7 +23,6 @@
     tracker,
   } from "@welshman/app"
   import * as app from "@welshman/app"
-  import {createEventStore} from "@welshman/store"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Toast from "@app/components/Toast.svelte"
   import Landing from "@app/components/Landing.svelte"
@@ -64,22 +64,13 @@
 
     ready = db
       ? Promise.resolve()
-      : initStorage("flotilla", 3, {
-          events: {
-            keyPath: "id",
-            store: createEventStore(repository),
-          },
-          relays: {
-            keyPath: "url",
-            store: relays,
-          },
-          handles: {
-            keyPath: "nip05",
-            store: handles,
-          },
+      : initStorage("flotilla", 4, {
+          events: storageAdapters.fromRepository(repository, {throttle: 300}),
+          relays: {keyPath: "url", store: throttled(1000, relays)},
+          handles: {keyPath: "nip05", store: throttled(1000, handles)},
           publishStatus: storageAdapters.fromObjectStore(publishStatusData),
-          freshness: storageAdapters.fromObjectStore(freshness),
-          plaintext: storageAdapters.fromObjectStore(plaintext),
+          freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000}),
+          plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
           tracker: storageAdapters.fromTracker(tracker),
         }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 

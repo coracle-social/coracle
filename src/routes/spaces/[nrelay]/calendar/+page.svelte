@@ -1,29 +1,39 @@
 <script lang="ts">
   import {page} from "$app/stores"
+  import {sortBy, last} from '@welshman/lib'
   import type {TrustedEvent} from '@welshman/util'
+  import {formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import Divider from "@lib/components/Divider.svelte"
+  import EventCard from "@app/components/EventCard.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
   import {eventsByUrl, decodeNRelay} from "@app/state"
 
   const url = decodeNRelay($page.params.nrelay)
 
-  const createEvent = () => pushModal(EventCreate)
+  const createEvent = () => pushModal(EventCreate, {url})
 
-  const getDateDisplay = (event: TrustedEvent, reset: boolean) => {
-    if (reset) {
-      prevEvent = undefined
-    }
+  const getStart = (event: TrustedEvent) =>
+    parseInt(event.tags.find(t => t[0] === 'start')?.[1]!)
 
-    return "hi"
-  }
-
-  let prevEvent
   let loading = true
 
-  $: events = $eventsByUrl.get(url) || []
+  type Item = {
+    event: TrustedEvent
+    dateDisplay?: string
+  }
+
+  $: items = sortBy(getStart, $eventsByUrl.get(url) || [])
+    .reduce<Item[]>((r, event) => {
+      const prevDateDisplay = r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
+      const newDateDisplay = formatTimestampAsDate(getStart(event))
+      const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+
+      return [...r, {event, dateDisplay}]
+    }, [])
 
   setTimeout(() => {
     loading = false
@@ -40,19 +50,18 @@
       </div>
     </div>
   </div>
-  <div class="-mt-2 flex flex-grow flex-col overflow-auto py-2">
-    {#each events as event, i (event.id)}
-      {@const dateDisplay = getDateDisplay(event, i === 0)}
+  <div class="flex flex-grow flex-col overflow-auto p-2 gap-2">
+    {#each items as {event, dateDisplay}, i (event.id)}
       {#if dateDisplay}
-        <div>{dateDisplay}</div>
+        <Divider>{dateDisplay}</Divider>
       {/if}
-      <div>{event.id}</div>
+      <EventCard {event} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>
         {#if loading}
           Looking for events...
-        {:else if events.length === 0}
+        {:else if items.length === 0}
           No events found.
         {/if}
       </Spinner>

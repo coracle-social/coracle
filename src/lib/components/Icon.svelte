@@ -26,6 +26,7 @@
   import ChatRound from "@assets/icons/Chat Round.svg?dataurl"
   import CheckCircle from "@assets/icons/Check Circle.svg?dataurl"
   import ClipboardText from "@assets/icons/Clipboard Text.svg?dataurl"
+  import ClockCircle from "@assets/icons/Clock Circle.svg?dataurl"
   import CloseCircle from "@assets/icons/Close Circle.svg?dataurl"
   import Copy from "@assets/icons/Copy.svg?dataurl"
   import Compass from "@assets/icons/Compass.svg?dataurl"
@@ -90,6 +91,7 @@
     "chat-round": ChatRound,
     "check-circle": CheckCircle,
     "clipboard-text": ClipboardText,
+    "clock-circle": ClockCircle,
     "close-circle": CloseCircle,
     copy: Copy,
     compass: Compass,

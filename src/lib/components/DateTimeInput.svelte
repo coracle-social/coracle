@@ -20,17 +20,21 @@
   }
 </script>
 
-<label class="relative">
-  <DateInput format="yyyy-MM-dd HH:mm" placeholder="" bind:value />
+<Button class="relative" on:click={init}>
+  <DateInput
+    format="yyyy-MM-dd HH:mm"
+    timePrecision="minute"
+    placeholder=""
+    bind:value />
   <div class="absolute top-0 h-12 right-2 flex gap-2 items-center cursor-pointer">
     {#if value}
       <Button on:click={clear} class="h-5">
         <Icon icon="close-circle" />
       </Button>
     {:else}
-      <Button on:click={init} class="h-5">
+      <Button class="h-5">
         <Icon icon="calendar-minimalistic" />
       </Button>
     {/if}
   </div>
-</label>
+</Button>

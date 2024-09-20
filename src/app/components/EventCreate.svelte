@@ -4,21 +4,22 @@
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {NProfileExtension, ImageExtension} from "nostr-editor"
+  import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_DATE, EVENT_TIME} from "@welshman/util"
-  import {publishThunk, makeThunk} from "@welshman/app"
+  import {publishThunk, makeThunk, dateToSeconds} from "@welshman/app"
   import {findNodes} from "@lib/tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {makeMention, makeIMeta} from "@app/commands"
-  import {getNoteEditorOptions, addFile} from "@app/editor"
-  import {pushModal} from "@app/modal"
+  import {getNoteEditorOptions, addFile, uploadFiles} from "@app/editor"
+  import {pushModal, clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
 
   export let url
 
-  const next = () => null
+  const submit = () => uploadFiles($editor)
 
   const back = () => history.back()
 
@@ -50,12 +51,20 @@
 
     const event = createEvent(kind, {
       content: $editor.getText(),
-      tags: [["-"], ...mentionTags, ...imetaTags],
+      tags: [
+        ["-"],
+        ["d", randomId()],
+        ["title", title],
+        ["location", location],
+        ["start", dateToSeconds(start).toString()],
+        ["end", dateToSeconds(end).toString()],
+        ...mentionTags,
+        ...imetaTags,
+      ],
     })
 
     publishThunk(makeThunk({event, relays: [url]}))
-
-    $editor.chain().clearContent().run()
+    clearModal()
   }
 
   let editor: Readable<Editor>
@@ -71,7 +80,7 @@
   })
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={next}>
+<form class="column gap-4" on:submit|preventDefault={submit}>
   <div class="py-2">
     <h1 class="heading">Create an Event</h1>
     <p class="text-center">Invite other group members to events online or in real life.</p>
@@ -118,7 +127,7 @@
     <p slot="label">Location (optional)</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="map-point" />
-      <input bind:value={title} class="grow" type="text" />
+      <input bind:value={location} class="grow" type="text" />
     </label>
   </Field>
   <div class="flex flex-row items-center justify-between gap-4">
@@ -127,8 +136,7 @@
       Go back
     </Button>
     <Button type="submit" class="btn btn-primary">
-      Next
-      <Icon icon="alt-arrow-right" class="!bg-base-300" />
+      Create Event
     </Button>
   </div>
 </form>

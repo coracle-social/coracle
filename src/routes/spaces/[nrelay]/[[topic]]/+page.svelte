@@ -15,6 +15,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import Divider from "@lib/components/Divider.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
   import {userMembership, decodeNRelay, makeChatId, deriveChat} from "@app/state"
@@ -90,11 +91,7 @@
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
-        <div class="flex items-center gap-2 p-2 text-xs opacity-50">
-          <div class="h-px flex-grow bg-base-content opacity-25" />
-          <p>{value}</p>
-          <div class="h-px flex-grow bg-base-content opacity-25" />
-        </div>
+        <Divider>{value}</Divider>
       {:else}
         <ChatMessage event={assertEvent(value)} {showPubkey} />
       {/if}
