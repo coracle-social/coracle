@@ -32,7 +32,6 @@ If you then still feel the need to ask a question and need clarification, we rec
 
 We will then take care of the issue as soon as possible.
 
-
 ## I Want To Contribute
 
 > ### Legal Notice
@@ -79,7 +78,11 @@ We welcome pull requests. To ensure your pull request is accepted, please follow
 
 - Base your pull request on an issue that has already been discussed and acknowledged as a problem or desirable enhancement.
 - Set your pull request up to merge into the `dev` branch of the upstream repo.
-- Make sure your pull request passes all checks and follows code style. You can autoformat, lint, and check types using the scripts in package.json. More broadly, code style is generally procedural, with some functional paradigms, using objects mostly as singletons with an initialization step. Try to use (but not over-use) svelte stores, ramda, and hurdak when possible.
+- Make sure your pull request passes all checks and follows code style. You can autoformat, lint, and check types using the scripts in package.json. More broadly, code style is generally procedural, with some functional paradigms, using objects mostly as singletons with an initialization step. Try to use (but not over-use) svelte stores and the welshman library when possible.
+
+#### Bounties
+
+Issues labeled `bounty` are subject to a payout _upon completion_. A bounty's full amount may not be paid out if a PR is not complete, or requires significant cleanup after merge, or if requirements change. Please work on bounties in close communication with the project's maintainers to avoid wasting time. The bounty amount is listed in the issue.
 
 #### Development and Deployment
 
@@ -90,33 +93,20 @@ To create a working copy, please fork the repository and clone it so that all PR
 Coracle is organized into four main parts:
 
 - `util` contains utility functions of various kinds, which should generally be stateless and not coupled or dependent on the rest of the codebase.
-- `engine` contains nostr-specific global application state and functionality. This may be released as an independent library at some point, and so should avoid coupling and dependencies on other parts of the codebase.
+- `engine` contains nostr-specific global application state and functionality.
 - `partials` contains general purpose svelte components, and some shared state. These should avoid depending on other parts of the app other than `util`, and should avoid coupling with app- or nostr-specific use cases.
 - `app` contains application-specific components and state.
 
+Coracle also makes heavy use of the `@welshman` libraries.
+
 #### Engine
 
-`engine` is divided into components and utilities.
-
-Components are intended to be instantiated as a singleton via the `Engine` class, and should address a discrete piece of functionality. Each may have state (usually `writable` or `collection` stores, getters that add logic to state, and actions that update state. Each component may define an `initialize` method that gives it access to the full `engine` object. This is where listeners on other components can be set up. Dependencies between components in a component's methods are discouraged. If many of these occur, logic should be factored out into a utility that combines logic and state from multiple components.
-
-Utilities may be either low-level utilities depended on by components (stores, workers), or wrappers around the engine class to provide enhanced functionality. For example, `Feed` takes the engine class and some configuration and provides an interface supporting an infinite-scroll feed.
+The engine directory where the "backend" of coracle lives - including functions for loading data, keeping track of session state, deriving stuff from the events repository, and hooking things up to storage.
 
 #### App
 
-The app directory is mostly svelte components, with the exception of `engine` and `state` which provide shared state and functionality for the rest of the directory. `App` is the top-level component and contains a bunch of disorganized junk. The rest of the top-level components are for routing or globally available components (navs, buttons).
+The app directory is mostly svelte components. `App` is the top-level component and contains a bunch of disorganized junk. The rest of the top-level components are for routing or globally available components (navs, buttons).
 
-The `shared` directory is similar to `partials` in that they are intended for use in other components, but may freely depend on anything defined in `app/state` or `app/engine`.
+The `shared` directory is similar to `partials` in that they are intended for use in other components, but may freely depend on anything defined in `app/state` or `engine`.
 
 The `views` directory contains components intended to be used either as a route or as a modal. Many views may be used as either in different contexts. Coracle's routing model uses traditional SPA routing in addition with layered modals. In general, clicking a link should open a modal rather than navigating when possible, allowing the user to drill arbitrarily far into the details of a given piece of content without losing their place.
-
-### User Experience Notes
-
-Onboarding is important. A user should be able to land on Coracle and immediately start playing around, including changing user settings. Reasonable defaults are provided, and relays/follows can be edited by an anonymous user. Anonymous settings are carried through the onboarding process if an anonymous user creates an account, but should not disrupt existing settings if a user logs in.
-
-An important goal for the UX is speed without reflow due to late-arriving events. The best approach I've found is to use multiple buffers when fetching and merging events from multiple relays with a slight delay before displaying them. Caches may be used sparingly to accelerate this process, but due to the limitations of indexeddb (performance and capacity), this should be limited to highly relevant of frequently used data like profiles, notifications, joined channels, etc.
-
-I'm still working through the privacy tradeoff. In general, I opt for the public version of any primitive (follows, relays list) so that more sophisticated functionality can be built on top of open social graphs. However, in the case of application-specific settings and usage data, there is no benefit to sharing that information publicly, and so it is encrypted. One of the main goals of Coracle is also to eventually support private groups alongside public notes, which will present a tricky design challenge.
-
-Coracle only has support for DMs because it was added early on and people use it. These are not the priority of the project, and hopefully can be replaced with an embedded micro-app at some point in the future. Insofar as certain NIPs can augment regular social content (public and private) however, they should be supported. This includes things like Data Vending Machines and Client recommendations. Rendering support is included for long-form posts, profile updates, and more, and advanced search and custom feeds are an area of research I'm interested in pushing forward.
-
