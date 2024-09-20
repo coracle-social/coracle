@@ -11,7 +11,7 @@
 
   export let notification: Notification
 
-  const {event: note, interactions, timestamp} = notification
+  const {event: note, interactions} = notification
   const likes = interactions.filter(e => e.kind === 7)
   const zaps = interactions.filter(e => e.kind === 9734)
 
@@ -34,8 +34,8 @@
   actionText={`${actionText} your note`} />
 
 <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
-  <button type="button" on:click|stopPropagation class="flex justify-between">
-    {formatTimestamp(timestamp)}
+  <button type="button" on:click|stopPropagation class="flex justify-between text-sm">
+    {formatTimestamp(note.created_at)}
   </button>
   <div class="break-word overflow-hidden text-neutral-100">
     <NoteContent {note} />
