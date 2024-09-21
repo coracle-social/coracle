@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {getNip07, Nip07Signer} from "@welshman/signer"
+  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -13,7 +13,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, loginWithExtension, loginWithNostrConnect} from "src/engine"
+  import {load, loginWithExtension, loginWithNostrConnect, loginWithSigner} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -26,6 +26,22 @@
     const pubkey = await signer.getPubkey()
 
     loginWithExtension(pubkey)
+    boot()
+  }
+
+  // Define the interface for AppInfo
+  interface AppInfo {
+    name: string
+    packageName: string
+    icon: string // Base64-encoded string of the app icon
+  }
+
+  let signerApps: AppInfo[] = []
+
+  const useSigner = async (app: AppInfo) => {
+    const signer = new Nip55Signer(app.packageName)
+    const pubkey = await signer.getPubkey()
+    loginWithSigner(pubkey, app.packageName)
     boot()
   }
 
@@ -91,7 +107,7 @@
   let handler = handlers[0]
   let username = ""
 
-  onMount(() => {
+  onMount(async () => {
     load({
       filters: [
         {
@@ -119,6 +135,7 @@
         }
       },
     })
+    signerApps = await getNip55()
   })
 
   document.title = "Log In"
@@ -157,7 +174,7 @@
     <div
       class={cx(
         "relative grid justify-center gap-2 xs:gap-5",
-        getNip07() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        getNip07() || signerApps.length > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
       <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
@@ -185,6 +202,20 @@
         </div>
         <span>Public Key</span>
       </Tile>
+      {#if signerApps.length > 0}
+        {#each signerApps as app}
+          <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
+            <div>
+              <img
+                src={`data:image/png;base64,${app.icon}`}
+                alt={app.name}
+                width="48"
+                height="48" />
+            </div>
+            <span>{app.name}</span>
+          </Tile>
+        {/each}
+      {/if}
     </div>
   </FlexColumn>
 </form>
