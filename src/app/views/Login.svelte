@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {getNip07, Nip07Signer} from "@welshman/signer"
+  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -23,6 +23,14 @@
 
   const useExtension = async () => {
     const signer = new Nip07Signer()
+    const pubkey = await signer.getPubkey()
+
+    loginWithExtension(pubkey)
+    boot()
+  }
+
+  const useAmber = async () => {
+    const signer = new Nip55Signer()
     const pubkey = await signer.getPubkey()
 
     loginWithExtension(pubkey)
@@ -184,6 +192,12 @@
           <i class="fa fa-eye fa-xl" />
         </div>
         <span>Public Key</span>
+      </Tile>
+	  <Tile class="cursor-pointer bg-tinted-800" on:click={useAmber}>
+        <div>
+          <i class="fa fa-bolt fa-xl" />
+        </div>
+        <span>Amber</span>
       </Tile>
     </div>
   </FlexColumn>
