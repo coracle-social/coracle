@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest --dir=tests/unit --watch=false",
+    "test:e2e": "cypress run",
     "build": "pwa-assets-generator && vite build",
     "build:android": "npm run build && cap sync && cap build android --androidreleasetype APK --signing-type apksigner",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
@@ -43,7 +46,8 @@
     "vite": "^5.4.2",
     "vite-plugin-html-config": "^2.0.2",
     "vite-plugin-node-polyfills": "^0.22.0",
-    "vite-plugin-pwa": "^0.20.2"
+    "vite-plugin-pwa": "^0.20.2",
+    "vitest": "^2.1.1"
   },
   "dependencies": {
     "@bugsnag/js": "^8.0.0",
