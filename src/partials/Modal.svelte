@@ -111,6 +111,7 @@
               </div>
             </div>
           {/if}
+          <AltColor background class="absolute mt-12 h-full w-[calc(100%-17px)]" />
           <div on:click|stopPropagation>
             <AltColor
               background
