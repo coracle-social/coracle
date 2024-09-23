@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
+  import {getNip07, Nip07Signer, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -30,7 +30,7 @@
   }
 
   const useAmber = async () => {
-    const signer = new Nip55Signer()
+	const signer = new Nip55Signer("com.greenart7c3.nostrsigner")
     const pubkey = await signer.getPubkey()
 
     loginWithExtension(pubkey)
