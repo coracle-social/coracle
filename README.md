@@ -57,13 +57,19 @@ If you like Coracle and want to support its development, you can donate sats via
 
 You can find a more complete changelog [here](./CHANGELOG.md).
 
-# Run  Coracle locally:
+# Run Coracle locally:
 
 - Clone the project repository: `git clone https://github.com/coracle-social/coracle.git`
 - Navigate to the project directory: `cd coracle`
 - Install dependencies: `npm i`
 - Customize configuration in `.env` (optional, see below)
 - Start the development server: `npm run dev`
+
+# Tests
+
+- Run all tests: `npm run test`
+- Run unit tests: `npm run test:unit`
+- Run e2e tests: `npm run test:e2e`
 
 # Building for Android
 
