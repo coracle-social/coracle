@@ -1,9 +1,7 @@
 <script lang="ts">
-  import cx from 'classnames'
   import {DateInput} from "date-picker-svelte"
-  import {formatTimestamp} from '@welshman/app'
-  import Icon from '@lib/components/Icon.svelte'
-  import Button from '@lib/components/Button.svelte'
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
 
   export let initialValue: Date | undefined = undefined
   export let value: Date | undefined = initialValue
@@ -21,12 +19,8 @@
 </script>
 
 <Button class="relative" on:click={init}>
-  <DateInput
-    format="yyyy-MM-dd HH:mm"
-    timePrecision="minute"
-    placeholder=""
-    bind:value />
-  <div class="absolute top-0 h-12 right-2 flex gap-2 items-center cursor-pointer">
+  <DateInput format="yyyy-MM-dd HH:mm" timePrecision="minute" placeholder="" bind:value />
+  <div class="absolute right-2 top-0 flex h-12 cursor-pointer items-center gap-2">
     {#if value}
       <Button on:click={clear} class="h-5">
         <Icon icon="close-circle" />

@@ -15,19 +15,14 @@
     formatTimestampAsTime,
   } from "@welshman/app"
   import type {PublishStatusData} from "@welshman/app"
-  import {
-    REACTION,
-    ZAP_RESPONSE,
-    displayRelayUrl,
-    getAncestorTags,
-  } from "@welshman/util"
+  import {REACTION, ZAP_RESPONSE, displayRelayUrl, getAncestorTags} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import {REPLY, deriveEvent, displayReaction} from "@app/state"
-  import {getChatViewOptions} from "@app/editor"
+  import {getViewOptions} from "@lib/editor"
 
   export let event: TrustedEvent
   export let showPubkey: boolean
@@ -79,7 +74,7 @@
     !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 
   onMount(() => {
-    editor = createEditor(getChatViewOptions(event.content))
+    editor = createEditor(getViewOptions(event))
   })
 </script>
 

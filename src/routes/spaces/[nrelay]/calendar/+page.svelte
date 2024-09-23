@@ -1,7 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import {sortBy, last} from '@welshman/lib'
-  import type {TrustedEvent} from '@welshman/util'
+  import {sortBy, last} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -17,7 +17,7 @@
   const createEvent = () => pushModal(EventCreate, {url})
 
   const getStart = (event: TrustedEvent) =>
-    parseInt(event.tags.find(t => t[0] === 'start')?.[1]!)
+    parseInt(event.tags.find(t => t[0] === "start")?.[1] || "0")
 
   let loading = true
 
@@ -26,14 +26,14 @@
     dateDisplay?: string
   }
 
-  $: items = sortBy(getStart, $eventsByUrl.get(url) || [])
-    .reduce<Item[]>((r, event) => {
-      const prevDateDisplay = r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-      const newDateDisplay = formatTimestampAsDate(getStart(event))
-      const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+  $: items = sortBy(getStart, $eventsByUrl.get(url) || []).reduce<Item[]>((r, event) => {
+    const prevDateDisplay =
+      r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
+    const newDateDisplay = formatTimestampAsDate(getStart(event))
+    const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
 
-      return [...r, {event, dateDisplay}]
-    }, [])
+    return [...r, {event, dateDisplay}]
+  }, [])
 
   setTimeout(() => {
     loading = false
@@ -50,8 +50,8 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-grow flex-col overflow-auto p-2 gap-2">
-    {#each items as {event, dateDisplay}, i (event.id)}
+  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
+    {#each items as { event, dateDisplay }, i (event.id)}
       {#if dateDisplay}
         <Divider>{dateDisplay}</Divider>
       {/if}
@@ -67,8 +67,11 @@
       </Spinner>
     </p>
   </div>
-  <Button class="fixed bottom-4 right-4 tooltip tooltip-left p-1" data-tip="Create an Event" on:click={createEvent}>
-    <div class="w-12 h-12 flex items-center justify-center btn btn-primary btn-circle">
+  <Button
+    class="tooltip tooltip-left fixed bottom-4 right-4 p-1"
+    data-tip="Create an Event"
+    on:click={createEvent}>
+    <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
       <Icon icon="calendar-add" />
     </div>
   </Button>

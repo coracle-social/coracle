@@ -1,12 +1,11 @@
 <script lang="ts">
-  import cx from "classnames"
   import {onMount} from "svelte"
   import type {Readable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {displayPubkey} from '@welshman/util'
+  import {displayPubkey} from "@welshman/util"
   import {deriveProfile, deriveProfileDisplay, formatTimestamp} from "@welshman/app"
-  import Avatar from '@lib/components/Avatar.svelte'
-  import {getChatViewOptions} from '@app/editor'
+  import Avatar from "@lib/components/Avatar.svelte"
+  import {getViewOptions} from "@lib/editor"
 
   export let root
   export let replies
@@ -17,13 +16,13 @@
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getChatViewOptions(root.content))
+    editor = createEditor(getViewOptions(root.content))
   })
 </script>
 
 <div>
   <div class="card2 flex flex-col gap-2">
-    <div class="flex justify-between items-center gap-2">
+    <div class="flex items-center justify-between gap-2">
       <div class="flex gap-2">
         <div class="py-1">
           <Avatar src={$profile?.picture} size={10} />
@@ -40,6 +39,6 @@
     </div>
   </div>
   {#if replies.length > 0}
-    Show {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
+    Show {replies.length} {replies.length === 1 ? "reply" : "replies"}
   {/if}
 </div>

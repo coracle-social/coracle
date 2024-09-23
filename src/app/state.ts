@@ -190,7 +190,7 @@ export const {
     const timestamps = chat?.messages.map(m => m.event.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
 
-    return load({...request, relays: [url], filters: [{'#~': [room], since}]})
+    return load({...request, relays: [url], filters: [{"#~": [room], since}]})
   },
 })
 

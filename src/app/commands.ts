@@ -107,4 +107,3 @@ export const removeSpaceMembership = (url: string) =>
 
 export const removeRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals([ROOM, room, url], t)))
-

@@ -43,7 +43,7 @@
 }
 
 .card2 {
-  @apply rounded-box bg-base-100 p-6 text-base-content overflow-hidden text-ellipsis;
+  @apply overflow-hidden text-ellipsis rounded-box bg-base-100 p-6 text-base-content;
 }
 
 .card2.card2-sm {
@@ -96,10 +96,11 @@
 
 /* tiptap */
 
-.input-editor, .chat-editor, .note-editor {
-  @apply p-1 -m-1 min-h-12;
+.input-editor,
+.chat-editor,
+.note-editor {
+  @apply -m-1 min-h-12 p-1;
 }
-
 
 .tiptap[contenteditable="true"] {
   @apply max-h-[350px] overflow-y-auto p-2 px-4;
@@ -110,11 +111,11 @@
 }
 
 .input-editor .tiptap[contenteditable="true"] {
-  @apply input input-bordered p-[.65rem] h-auto;
+  @apply input input-bordered h-auto p-[.65rem];
 }
 
 .note-editor .tiptap[contenteditable="true"] {
-  @apply input input-bordered p-[.65rem] h-auto min-h-32 pb-6;
+  @apply input input-bordered h-auto min-h-32 p-[.65rem] pb-6;
 }
 
 .tiptap pre code {
@@ -136,8 +137,8 @@
 /* date input */
 
 .date-time-field {
-  @apply input input-bordered px-0 rounded;
+  @apply input input-bordered rounded px-0;
 }
 .date-time-field input {
-  @apply !bg-inherit !border-none !text-inherit !w-full !h-full;
+  @apply !h-full !w-full !border-none !bg-inherit !text-inherit;
 }

@@ -3,35 +3,25 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {NProfileExtension, ImageExtension} from "nostr-editor"
   import {createEvent} from "@welshman/util"
   import {publishThunk, makeThunk} from "@welshman/app"
-  import {findNodes} from "@lib/tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {makeMention, makeIMeta} from "@app/commands"
-  import {getChatEditorOptions, addFile} from "@app/editor"
+  import {getEditorOptions, getEditorTags, addFile} from "@lib/editor"
   import {ROOM, MESSAGE, GENERAL} from "@app/state"
+  import {getPubkeyHints} from "@app/commands"
 
   export let url
   export let room = GENERAL
 
-  const uploading = writable(false)
+  const loading = writable(false)
 
   let editor: Readable<Editor>
 
-  const sendMessage = () => {
-    const json = $editor.getJSON()
-    const mentionTags = findNodes(NProfileExtension.name, json).map(m =>
-      makeMention(m.attrs!.pubkey, m.attrs!.relays),
-    )
-    const imetaTags = findNodes(ImageExtension.name, json).map(({attrs: {src, sha256: x}}: any) =>
-      makeIMeta(src, {x, ox: x}),
-    )
-
+  const submit = () => {
     const event = createEvent(MESSAGE, {
       content: $editor.getText(),
-      tags: [[ROOM, room], ...mentionTags, ...imetaTags],
+      tags: [[ROOM, room], ...getEditorTags($editor)],
     })
 
     publishThunk(makeThunk({event, relays: [url]}))
@@ -40,7 +30,7 @@
   }
 
   onMount(() => {
-    editor = createEditor(getChatEditorOptions({uploading, sendMessage}))
+    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true}))
   })
 </script>
 
@@ -48,15 +38,15 @@
   class="shadow-top-xl relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100 p-2">
   <Button
     data-tip="Add an image"
-    class="center h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200 tooltip"
+    class="center tooltip h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
     on:click={() => addFile($editor)}>
-    {#if $uploading}
+    {#if $loading}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}
       <Icon icon="gallery-send" />
     {/if}
   </Button>
-  <div class="flex-grow overflow-hidden chat-editor">
+  <div class="chat-editor flex-grow overflow-hidden">
     <EditorContent editor={$editor} />
   </div>
 </div>

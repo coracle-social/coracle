@@ -1,12 +1,9 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import {sortBy, last} from '@welshman/lib'
-  import type {TrustedEvent} from '@welshman/util'
-  import {formatTimestampAsDate} from "@welshman/app"
+  import {sortBy} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import Divider from "@lib/components/Divider.svelte"
   import ThreadCard from "@app/components/ThreadCard.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
@@ -35,8 +32,8 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-grow flex-col overflow-auto p-2 gap-2">
-    {#each threads as {root, replies} (root.id)}
+  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
+    {#each threads as { root, replies } (root.id)}
       <ThreadCard {root} {replies} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
@@ -49,8 +46,11 @@
       </Spinner>
     </p>
   </div>
-  <Button class="fixed bottom-4 right-4 tooltip tooltip-left p-1" data-tip="Create an Event" on:click={createThread}>
-    <div class="w-12 h-12 flex items-center justify-center btn btn-primary btn-circle">
+  <Button
+    class="tooltip tooltip-left fixed bottom-4 right-4 p-1"
+    data-tip="Create an Event"
+    on:click={createThread}>
+    <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
       <Icon icon="add-square" />
     </div>
   </Button>
