@@ -69,7 +69,7 @@
   </div>
   <Button class="fixed bottom-4 right-4 tooltip tooltip-left p-1" data-tip="Create an Event" on:click={createEvent}>
     <div class="w-12 h-12 flex items-center justify-center btn btn-primary btn-circle">
-      <Icon icon="widget-add" />
+      <Icon icon="calendar-add" />
     </div>
   </Button>
 </div>

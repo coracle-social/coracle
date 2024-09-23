@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sort, now} from "@welshman/lib"
-  import {displayRelayUrl, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
+  import {displayRelayUrl, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import {fly, slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -16,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, roomsByUrl, decodeNRelay, GENERAL, MESSAGE, REPLY} from "@app/state"
+  import {userMembership, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -52,7 +52,7 @@
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(() => {
-    const kinds = [MESSAGE, REPLY, EVENT_DATE, EVENT_TIME, CLASSIFIED]
+    const kinds = [NOTE, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]
     const sub = subscribe({filters: [{kinds, since: now() - 30}], relays: [url]})
 
     return () => sub.close()

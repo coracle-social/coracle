@@ -1,9 +1,10 @@
 import {nip19} from "nostr-tools"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
+import {setContext, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
+  NOTE,
   RELAYS,
   REACTION,
   ZAP_RESPONSE,
@@ -11,6 +12,8 @@ import {
   EVENT_TIME,
   getRelayTagValues,
   isShareableRelayUrl,
+  getAncestorTags,
+  getAncestorTagValues,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -93,7 +96,7 @@ export const readMembership = (event: TrustedEvent): PublishedMembership => {
     roomsByUrl.set(tag[1], [])
   }
 
-  for (const tag of event.tags.filter(nthEq(0, "t"))) {
+  for (const tag of event.tags.filter(nthEq(0, "~"))) {
     pushToMapKey(roomsByUrl, tag[2], tag[1])
   }
 
@@ -191,7 +194,7 @@ export const {
   },
 })
 
-// Calendar vents
+// Calendar events
 
 export const events = deriveEvents(repository, {filters: [{kinds: [EVENT_DATE, EVENT_TIME]}]})
 
@@ -205,6 +208,43 @@ export const eventsByUrl = derived([trackerStore, events], ([$tracker, $events])
   }
 
   return eventsByUrl
+})
+
+// Threads
+
+export type Thread = {
+  root: TrustedEvent
+  replies: TrustedEvent[]
+}
+
+export const notes = deriveEvents(repository, {filters: [{kinds: [NOTE]}]})
+
+export const threadsByUrl = derived([trackerStore, notes], ([$tracker, $notes]) => {
+  const threadsByUrl = new Map<string, Thread[]>()
+  const [parents, children] = partition(e => getAncestorTags(e.tags).replies.length === 0, $notes)
+
+  for (const event of parents) {
+    for (const url of $tracker.getRelays(event.id)) {
+      pushToMapKey(threadsByUrl, url, {root: event, replies: []})
+    }
+  }
+
+  for (const event of children) {
+    const [id] = getAncestorTagValues(event.tags).replies
+
+    for (const url of $tracker.getRelays(event.id)) {
+      const threads = threadsByUrl.get(url) || []
+      const thread = threads.find(thread => thread.root.id === id)
+
+      if (!thread) {
+        continue
+      }
+
+      thread.replies.push(event)
+    }
+  }
+
+  return threadsByUrl
 })
 
 // Rooms

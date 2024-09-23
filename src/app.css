@@ -96,7 +96,7 @@
 
 /* tiptap */
 
-.input-editor, .chat-editor {
+.input-editor, .chat-editor, .note-editor {
   @apply p-1 -m-1 min-h-12;
 }
 
@@ -111,6 +111,10 @@
 
 .input-editor .tiptap[contenteditable="true"] {
   @apply input input-bordered p-[.65rem] h-auto;
+}
+
+.note-editor .tiptap[contenteditable="true"] {
+  @apply input input-bordered p-[.65rem] h-auto min-h-32 pb-6;
 }
 
 .tiptap pre code {

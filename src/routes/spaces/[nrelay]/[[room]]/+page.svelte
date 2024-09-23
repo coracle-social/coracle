@@ -71,9 +71,9 @@
       class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
-        <strong>{room || "General"}</strong>
+        <strong>{room}</strong>
       </div>
-      {#if room}
+      {#if room !== GENERAL}
         {#if membership.includes(room)}
           <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
             <Icon icon="arrows-a-logout-2" />

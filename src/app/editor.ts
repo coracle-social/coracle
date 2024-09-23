@@ -206,3 +206,4 @@ export const getNoteEditorOptions = ({uploading, sendMessage}: EditorOptions) =>
     }),
   ],
 })
+

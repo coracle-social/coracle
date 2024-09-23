@@ -22,6 +22,7 @@
   import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
   import Bag from "@assets/icons/Bag.svg?dataurl"
   import Bolt from "@assets/icons/Bolt.svg?dataurl"
+  import CalendarAdd from "@assets/icons/Calendar Add.svg?dataurl"
   import CalendarMinimalistic from "@assets/icons/Calendar Minimalistic.svg?dataurl"
   import ChatRound from "@assets/icons/Chat Round.svg?dataurl"
   import CheckCircle from "@assets/icons/Check Circle.svg?dataurl"
@@ -87,6 +88,7 @@
     "arrow-right": ArrowRight,
     bag: Bag,
     bolt: Bolt,
+    "calendar-add": CalendarAdd,
     "calendar-minimalistic": CalendarMinimalistic,
     "chat-round": ChatRound,
     "check-circle": CheckCircle,
