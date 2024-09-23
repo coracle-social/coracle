@@ -16,7 +16,7 @@
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getViewOptions(root.content))
+    editor = createEditor(getViewOptions(root))
   })
 </script>
 

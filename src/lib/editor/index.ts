@@ -78,68 +78,70 @@ export const getEditorOptions = ({
   loading,
   getPubkeyHints,
   submitOnEnter,
-}: EditorOptions) => {
-  return {
-    content: "",
-    autofocus: true,
-    extensions: [
-      Code,
-      CodeBlock,
-      Document,
-      Dropcursor,
-      Gapcursor,
-      History,
-      Paragraph,
-      Text,
-      submitOnEnter ? getModifiedHardBreakExtension() : HardBreakExtension,
-      LinkExtension.extend({
-        addNodeView: () => SvelteNodeViewRenderer(EditLink),
-      }),
-      Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
-      NProfileExtension.extend({
-        addNodeView: () => SvelteNodeViewRenderer(EditMention),
-        addProseMirrorPlugins() {
-          return [
-            createSuggestions({
-              char: "@",
-              name: "nprofile",
-              editor: this.editor,
-              search: profileSearch,
-              select: (pubkey: string, props: any) => {
-                const relays = getPubkeyHints(pubkey)
-                const nprofile = nprofileEncode({pubkey, relays})
+}: EditorOptions) => ({
+  content: "",
+  autofocus: true,
+  extensions: [
+    Code,
+    CodeBlock,
+    Document,
+    Dropcursor,
+    Gapcursor,
+    History,
+    Paragraph,
+    Text,
+    submitOnEnter ? getModifiedHardBreakExtension() : HardBreakExtension,
+    LinkExtension.extend({
+      addNodeView: () => SvelteNodeViewRenderer(EditLink),
+    }),
+    Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
+    NProfileExtension.extend({
+      addNodeView: () => SvelteNodeViewRenderer(EditMention),
+      addProseMirrorPlugins() {
+        return [
+          createSuggestions({
+            char: "@",
+            name: "nprofile",
+            editor: this.editor,
+            search: profileSearch,
+            select: (pubkey: string, props: any) => {
+              const relays = getPubkeyHints(pubkey)
+              const nprofile = nprofileEncode({pubkey, relays})
 
-                return props.command({pubkey, nprofile, relays})
-              },
-              suggestionComponent: SuggestionProfile,
-              suggestionsComponent: Suggestions,
-            }),
-          ]
-        },
-      }),
-      NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-      NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-      ImageExtension.extend(
-        asInline({addNodeView: () => SvelteNodeViewRenderer(EditImage)}),
-      ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
-      VideoExtension.extend(
-        asInline({addNodeView: () => SvelteNodeViewRenderer(EditVideo)}),
-      ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
-      FileUploadExtension.configure({
-        immediateUpload: false,
-        sign: (event: StampedEvent) => {
-          loading.set(true)
+              return props.command({pubkey, nprofile, relays})
+            },
+            suggestionComponent: SuggestionProfile,
+            suggestionsComponent: Suggestions,
+          }),
+        ]
+      },
+    }),
+    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
+    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
+    ImageExtension.extend(
+      asInline({addNodeView: () => SvelteNodeViewRenderer(EditImage)}),
+    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    VideoExtension.extend(
+      asInline({addNodeView: () => SvelteNodeViewRenderer(EditVideo)}),
+    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    FileUploadExtension.configure({
+      immediateUpload: false,
+      sign: (event: StampedEvent) => {
+        loading.set(true)
 
-          return signer.get()!.sign(event)
-        },
-        onComplete: () => {
-          loading.set(false)
-          submit()
-        },
-      }),
-    ],
+        return signer.get()!.sign(event)
+      },
+      onComplete: () => {
+        loading.set(false)
+        submit()
+      },
+    }),
+  ],
+  onTransaction() {
+    // @ts-ignore
+    console.log(this.getJSON())
   }
-}
+})
 
 type ViewOptions = {
   content: string

@@ -1,4 +1,4 @@
-import type {JSONContent, PasteRuleMatch} from "@tiptap/core"
+import type {JSONContent, PasteRuleMatch, InputRuleMatch} from "@tiptap/core"
 import {Editor} from "@tiptap/core"
 import {choice} from "@welshman/lib"
 
@@ -8,10 +8,15 @@ export const asInline = (extend: Record<string, any>) => ({
   ...extend,
 })
 
+export const createInputRuleMatch = <T extends Record<string, unknown>>(
+  match: RegExpMatchArray,
+  data: T,
+): InputRuleMatch => ({index: match.index!, text: match[0], match, data})
+
 export const createPasteRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
   data: T,
-): PasteRuleMatch => ({index: match.index!, replaceWith: match[2], text: match[0], match, data})
+): PasteRuleMatch => ({index: match.index!, text: match[0], match, data})
 
 export const findNodes = (type: string, json: JSONContent) => {
   const results: JSONContent[] = []
