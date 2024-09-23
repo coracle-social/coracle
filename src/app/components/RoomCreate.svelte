@@ -13,9 +13,9 @@
   const back = () => history.back()
 
   const tryCreate = async () => {
-    await addRoomMembership(url, topic)
+    await addRoomMembership(url, room)
 
-    goto(makeSpacePath(url, topic))
+    goto(makeSpacePath(url, room))
   }
 
   const create = async () => {
@@ -28,7 +28,7 @@
     }
   }
 
-  let topic = ""
+  let room = ""
   let loading = false
 </script>
 
@@ -41,7 +41,7 @@
     <p slot="label">Room Name</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="hashtag" />
-      <input bind:value={topic} class="grow" type="text" />
+      <input bind:value={room} class="grow" type="text" />
     </label>
   </Field>
   <div class="flex flex-row items-center justify-between gap-4">
@@ -49,7 +49,7 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={!topic || loading}>
+    <Button type="submit" class="btn btn-primary" disabled={!room || loading}>
       <Spinner {loading}>Create Room</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

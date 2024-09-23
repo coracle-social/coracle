@@ -56,7 +56,7 @@
           {/if}
         </div>
       </div>
-      {#if $userMembership?.topicsByUrl.has(relay.url)}
+      {#if $userMembership?.roomsByUrl.has(relay.url)}
         <div class="center absolute flex w-full">
           <div
             class="tooltip relative left-8 top-[38px] h-5 w-5 rounded-full bg-primary"

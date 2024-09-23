@@ -51,7 +51,7 @@
           class="!h-10 !w-10 border border-solid border-base-300"
           size={7} />
       </PrimaryNavItem>
-      {#each $userMembership?.topicsByUrl.keys() || [] as url (url)}
+      {#each $userMembership?.roomsByUrl.keys() || [] as url (url)}
         <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)}>
           <SpaceAvatar {url} />
         </PrimaryNavItem>

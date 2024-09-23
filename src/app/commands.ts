@@ -14,7 +14,7 @@ import {
   loadMutes,
   followsByPubkey,
 } from "@welshman/app"
-import {MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
+import {ROOM, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
 // Utils
 
@@ -95,9 +95,9 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
 export const addSpaceMembership = (url: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["r", url]]))
 
-export const addRoomMembership = (url: string, topic: string) =>
+export const addRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) =>
-    uniqBy(t => t.join(""), [...tags, ["t", topic, url]]),
+    uniqBy(t => t.join(""), [...tags, [ROOM, room, url]]),
   )
 
 export const removeSpaceMembership = (url: string) =>
@@ -105,5 +105,6 @@ export const removeSpaceMembership = (url: string) =>
     tags.filter(t => !equals(["r", url], t) && t[2] !== url),
   )
 
-export const removeRoomMembership = (url: string, topic: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(["t", topic, url], t)))
+export const removeRoomMembership = (url: string, room: string) =>
+  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals([ROOM, room, url], t)))
+

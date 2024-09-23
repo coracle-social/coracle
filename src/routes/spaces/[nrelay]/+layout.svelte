@@ -16,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, topicsByUrl, decodeNRelay, MESSAGE, REPLY} from "@app/state"
+  import {userMembership, roomsByUrl, decodeNRelay, GENERAL, MESSAGE, REPLY} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -48,8 +48,8 @@
   let showMenu = false
 
   $: url = decodeNRelay($page.params.nrelay)
-  $: rooms = sort($userMembership?.topicsByUrl?.get(url) || [])
-  $: otherRooms = ($topicsByUrl.get(url) || []).filter(t => !rooms.includes(t))
+  $: rooms = sort($userMembership?.roomsByUrl?.get(url) || [])
+  $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(() => {
     const kinds = [MESSAGE, REPLY, EVENT_DATE, EVENT_TIME, CLASSIFIED]
@@ -72,7 +72,7 @@
             <ul
               transition:fly
               class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
-              {#if $userMembership?.topicsByUrl.has(url)}
+              {#if $userMembership?.roomsByUrl.has(url)}
                 <li class="text-error">
                   <Button on:click={leaveSpace}>
                     <Icon icon="exit" />
@@ -113,11 +113,11 @@
           <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
         </div>
       {/if}
-      {#each rooms as topic, i (topic)}
+      {#each rooms as room, i (room)}
         <div transition:slide={{delay: getDelay()}}>
-          <SecondaryNavItem href={makeSpacePath(url, topic)}>
+          <SecondaryNavItem href={makeSpacePath(url, room)}>
             <Icon icon="hashtag" />
-            {topic}
+            {room}
           </SecondaryNavItem>
         </div>
       {/each}
@@ -133,11 +133,11 @@
           </SecondaryNavHeader>
         </div>
       {/if}
-      {#each otherRooms as topic, i (topic)}
+      {#each otherRooms as room, i (room)}
         <div transition:slide={{delay: getDelay()}}>
-          <SecondaryNavItem href={makeSpacePath(url, topic)}>
+          <SecondaryNavItem href={makeSpacePath(url, room)}>
             <Icon icon="hashtag" />
-            {topic}
+            {room}
           </SecondaryNavItem>
         </div>
       {/each}
@@ -150,7 +150,7 @@
     </SecondaryNavSection>
   </SecondaryNav>
   <Page>
-    {#key $page.params.topic}
+    {#key $page.params.room}
       <slot />
     {/key}
   </Page>

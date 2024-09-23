@@ -18,19 +18,19 @@
   import Divider from "@lib/components/Divider.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {userMembership, decodeNRelay, makeChatId, deriveChat} from "@app/state"
+  import {userMembership, decodeNRelay, makeChatId, deriveChat, GENERAL} from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
-  const {nrelay, topic = ""} = $page.params
+  const {nrelay, room = GENERAL} = $page.params
   const url = decodeNRelay(nrelay)
-  const chat = deriveChat(makeChatId(url, topic))
+  const chat = deriveChat(makeChatId(url, room))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
   let loading = true
   let elements: Element[] = []
 
-  $: membership = $userMembership?.topicsByUrl.get(url) || []
+  $: membership = $userMembership?.roomsByUrl.get(url) || []
 
   $: {
     elements = []
@@ -71,16 +71,16 @@
       class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
         <Icon icon="hashtag" />
-        <strong>{topic || "General"}</strong>
+        <strong>{room || "General"}</strong>
       </div>
-      {#if topic}
-        {#if membership.includes(topic)}
-          <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, topic)}>
+      {#if room}
+        {#if membership.includes(room)}
+          <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
             <Icon icon="arrows-a-logout-2" />
             Leave Room
           </Button>
         {:else}
-          <Button class="btn btn-neutral btn-sm" on:click={() => addRoomMembership(url, topic)}>
+          <Button class="btn btn-neutral btn-sm" on:click={() => addRoomMembership(url, room)}>
             <Icon icon="login-2" />
             Join Room
           </Button>
@@ -106,5 +106,5 @@
       </Spinner>
     </p>
   </div>
-  <ChatCompose {url} {topic} />
+  <ChatCompose {url} {room} />
 </div>

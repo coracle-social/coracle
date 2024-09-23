@@ -11,10 +11,10 @@
   import Button from "@lib/components/Button.svelte"
   import {makeMention, makeIMeta} from "@app/commands"
   import {getChatEditorOptions, addFile} from "@app/editor"
-  import {MESSAGE} from "@app/state"
+  import {ROOM, MESSAGE, GENERAL} from "@app/state"
 
   export let url
-  export let topic = ""
+  export let room = GENERAL
 
   const uploading = writable(false)
 
@@ -22,7 +22,6 @@
 
   const sendMessage = () => {
     const json = $editor.getJSON()
-    const topicTags = topic ? [["t", topic]] : []
     const mentionTags = findNodes(NProfileExtension.name, json).map(m =>
       makeMention(m.attrs!.pubkey, m.attrs!.relays),
     )
@@ -32,7 +31,7 @@
 
     const event = createEvent(MESSAGE, {
       content: $editor.getText(),
-      tags: [["-"], ...topicTags, ...mentionTags, ...imetaTags],
+      tags: [[ROOM, room], ...mentionTags, ...imetaTags],
     })
 
     publishThunk(makeThunk({event, relays: [url]}))

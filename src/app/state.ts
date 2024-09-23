@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, max, pushToMapKey, nthEq} from "@welshman/lib"
+import {setContext, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
   RELAYS,
@@ -10,7 +10,6 @@ import {
   EVENT_DATE,
   EVENT_TIME,
   getRelayTagValues,
-  getTopicTagValues,
   isShareableRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
@@ -31,9 +30,13 @@ import {
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 
+export const ROOM = "~"
+
+export const GENERAL = "general"
+
 export const MESSAGE = 209
 
-export const REPLY = 210
+export const REPLY = 1111
 
 export const MEMBERSHIPS = 10209
 
@@ -75,7 +78,7 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
 // Membership
 
 export type Membership = {
-  topicsByUrl: Map<string, string[]>
+  roomsByUrl: Map<string, string[]>
   event?: TrustedEvent
 }
 
@@ -84,17 +87,17 @@ export type PublishedMembership = Omit<Membership, "event"> & {
 }
 
 export const readMembership = (event: TrustedEvent): PublishedMembership => {
-  const topicsByUrl = new Map<string, string[]>()
+  const roomsByUrl = new Map<string, string[]>()
 
   for (const tag of event.tags.filter(nthEq(0, "r"))) {
-    topicsByUrl.set(tag[1], [])
+    roomsByUrl.set(tag[1], [])
   }
 
   for (const tag of event.tags.filter(nthEq(0, "t"))) {
-    pushToMapKey(topicsByUrl, tag[2], tag[1])
+    pushToMapKey(roomsByUrl, tag[2], tag[1])
   }
 
-  return {event, topicsByUrl}
+  return {event, roomsByUrl}
 }
 
 export const memberships = deriveEventsMapped<PublishedMembership>(repository, {
@@ -121,16 +124,16 @@ export const {
 // Messages
 
 export type Message = {
-  topic: string
+  room: string
   event: TrustedEvent
 }
 
 export const readMessage = (event: TrustedEvent): Maybe<Message> => {
-  const topics = getTopicTagValues(event.tags)
+  const rooms = event.tags.filter(nthEq(0, ROOM)).map(nth(1))
 
-  if (topics.length > 1) return undefined
+  if (rooms.length > 1) return undefined
 
-  return {topic: topics[0] || "", event}
+  return {room: rooms[0] || "", event}
 }
 
 export const messages = deriveEventsMapped<Message>(repository, {
@@ -144,11 +147,11 @@ export const messages = deriveEventsMapped<Message>(repository, {
 export type Chat = {
   id: string
   url: string
-  topic: string
+  room: string
   messages: Message[]
 }
 
-export const makeChatId = (url: string, topic: string) => `${url}'${topic}`
+export const makeChatId = (url: string, room: string) => `${url}'${room}`
 
 export const splitChatId = (id: string) => id.split("'")
 
@@ -157,16 +160,16 @@ export const chats = derived([trackerStore, messages], ([$tracker, $messages]) =
 
   for (const message of $messages) {
     for (const url of $tracker.getRelays(message.event.id)) {
-      const chatId = makeChatId(url, message.topic)
+      const chatId = makeChatId(url, message.room)
 
       pushToMapKey(messagesByChatId, chatId, message)
     }
   }
 
   return Array.from(messagesByChatId.entries()).map(([id, messages]) => {
-    const [url, topic] = splitChatId(id)
+    const [url, room] = splitChatId(id)
 
-    return {id, url, topic, messages}
+    return {id, url, room, messages}
   })
 })
 
@@ -179,12 +182,12 @@ export const {
   store: chats,
   getKey: chat => chat.id,
   load: (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
-    const [url, topic] = splitChatId(id)
+    const [url, room] = splitChatId(id)
     const chat = get(chatsById).get(id)
     const timestamps = chat?.messages.map(m => m.event.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
 
-    return load({...request, relays: [url], filters: [{"#t": [topic], since}]})
+    return load({...request, relays: [url], filters: [{'#~': [room], since}]})
   },
 })
 
@@ -204,18 +207,18 @@ export const eventsByUrl = derived([trackerStore, events], ([$tracker, $events])
   return eventsByUrl
 })
 
-// Topics
+// Rooms
 
-export const topicsByUrl = derived(chats, $chats => {
-  const $topicsByUrl = new Map<string, string[]>()
+export const roomsByUrl = derived(chats, $chats => {
+  const $roomsByUrl = new Map<string, string[]>()
 
   for (const chat of $chats) {
-    if (chat.topic) {
-      pushToMapKey($topicsByUrl, chat.url, chat.topic)
+    if (chat.room) {
+      pushToMapKey($roomsByUrl, chat.url, chat.room)
     }
   }
 
-  return $topicsByUrl
+  return $roomsByUrl
 })
 
 // User stuff

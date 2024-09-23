@@ -15,7 +15,7 @@ export const makeSpacePath = (url: string, extra = "") => {
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 
 export const getPrimaryNavItemIndex = ($page: Page) => {
-  const urls = Array.from(userMembership.get()?.topicsByUrl.keys() || [])
+  const urls = Array.from(userMembership.get()?.roomsByUrl.keys() || [])
 
   switch (getPrimaryNavItem($page)) {
     case "discover":

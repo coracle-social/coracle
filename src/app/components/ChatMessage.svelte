@@ -16,7 +16,6 @@
   } from "@welshman/app"
   import type {PublishStatusData} from "@welshman/app"
   import {
-    GROUP_REPLY,
     REACTION,
     ZAP_RESPONSE,
     displayRelayUrl,
@@ -27,7 +26,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {deriveEvent, displayReaction} from "@app/state"
+  import {REPLY, deriveEvent, displayReaction} from "@app/state"
   import {getChatViewOptions} from "@app/editor"
 
   export let event: TrustedEvent
@@ -85,7 +84,7 @@
 </script>
 
 <div in:fly class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300">
-  {#if event.kind === GROUP_REPLY}
+  {#if event.kind === REPLY}
     <div class="flex items-center gap-1 pl-12 text-xs">
       <Icon icon="arrow-right" />
       <Avatar src={$parentProfile?.picture} size={4} />

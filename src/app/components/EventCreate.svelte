@@ -52,7 +52,6 @@
     const event = createEvent(kind, {
       content: $editor.getText(),
       tags: [
-        ["-"],
         ["d", randomId()],
         ["title", title],
         ["location", location],
