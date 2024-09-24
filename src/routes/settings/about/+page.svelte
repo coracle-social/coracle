@@ -2,7 +2,7 @@
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {nostr} from '@app/state'
+  import {entityLink} from '@app/state'
 
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
@@ -34,7 +34,7 @@
         <p class="text-center">
           Built with 💜 by
           <span class="text-primary">
-            @<Link external href={nostr(nprofile)} class="link">hodlbod</Link>
+            @<Link external href={entityLink(nprofile)} class="link">hodlbod</Link>
           </span>
         </p>
         <div class="flex justify-center gap-4">

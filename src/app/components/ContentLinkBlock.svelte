@@ -34,7 +34,9 @@
       class="object-cover object-center max-h-96" />
   {:else}
     {#await loadPreview()}
-      <span class="loading loading-spinner" />
+      <div class="center my-12 w-full">
+        <span class="loading loading-spinner" />
+      </div>
     {:then preview}
       {#if preview.image}
         <img
@@ -42,13 +44,17 @@
           src={imgproxy(preview.image)}
           class="max-h-96 object-contain object-center" />
       {/if}
-      <div class="h-px bg-neutral-600" />
+      <div class="h-px" />
       {#if preview.title}
-        <div class="flex flex-col bg-white px-4 py-2 text-black">
+        <div class="flex flex-col px-4 py-2">
           <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{preview.title}</strong>
           <small>{ellipsize(preview.description, 140)}</small>
         </div>
       {/if}
+    {:catch}
+      <p class="mb-1 p-12 text-center">
+        Unable to load a preview for {url}
+      </p>
     {/await}
   {/if}
 </Link>

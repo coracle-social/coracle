@@ -12,7 +12,7 @@ import {
   getWriteRelayUrls,
   loadFollows,
   loadMutes,
-  followsByPubkey,
+  getFollows,
 } from "@welshman/app"
 import {ROOM, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
@@ -60,14 +60,13 @@ export const loadUserData = (
 
   // Load followed profiles slowly in the background without clogging other stuff up
   promise.then(async () => {
-    const followsList = followsByPubkey.get().get(pubkey)
-    const follows = getPubkeyTagValues(followsList?.event.tags || [])
-
-    for (const pubkeys of chunk(50, follows)) {
+    for (const pubkeys of chunk(50, getFollows(pubkey))) {
       await sleep(300)
 
       for (const pubkey of pubkeys) {
         loadProfile(pubkey)
+        loadFollows(pubkey)
+        loadMutes(pubkey)
       }
     }
   })

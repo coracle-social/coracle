@@ -9,8 +9,9 @@
 </script>
 
 <div
-  class={cx($$props.class, "!flex items-center justify-center overflow-hidden rounded-full")}
-  style={`width: ${size * 4}px; height: ${size * 4}px;`}>
+  class={cx($$props.class, "!flex overflow-hidden rounded-full")}
+  class:center={!src}
+  style={`width: ${size * 4}px; height: ${size * 4}px; min-width: ${size * 4}px;`}>
   {#if src}
     <img {alt} {src} />
   {:else}

@@ -26,7 +26,7 @@
   import ContentQuote from '@app/components/ContentQuote.svelte'
   import ContentTopic from '@app/components/ContentTopic.svelte'
   import ContentMention from '@app/components/ContentMention.svelte'
-  import {nostr} from '@app/state'
+  import {entityLink} from '@app/state'
 
   export let event
   export let minLength = 500
@@ -108,7 +108,7 @@
         <Link
           external
           class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-          href={nostr(parsed.raw)}>
+          href={entityLink(parsed.raw)}>
           {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
         </Link>
       {/if}

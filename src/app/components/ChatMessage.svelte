@@ -20,6 +20,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
+  import Content from "@app/components/Content.svelte"
   import {REPLY, deriveEvent, displayReaction} from "@app/state"
 
   export let event: TrustedEvent
@@ -90,7 +91,7 @@
     {:else}
       <div class="w-10 min-w-10 max-w-10" />
     {/if}
-    <div class="-mt-1">
+    <div class="-mt-1 flex-grow pr-1">
       {#if showPubkey}
         <div class="flex items-center gap-2">
           <strong class="text-sm" style="color: {colorValue}" data-color={colorName}
@@ -98,8 +99,8 @@
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}
-      <p class="text-sm">
-        {event.content}
+      <div class="text-sm">
+        <Content {event} />
         {#if isPending}
           <span class="flex-inline ml-1 gap-1">
             <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
@@ -113,7 +114,7 @@
             <span class="opacity-50">Failed to send!</span>
           </span>
         {/if}
-      </p>
+      </div>
     </div>
   </div>
   {#if $reactions.length > 0 || $zaps.length > 0}

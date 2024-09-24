@@ -43,7 +43,11 @@ export const REPLY = 1111
 
 export const MEMBERSHIPS = 10209
 
-export const INDEXER_RELAYS = ["wss://purplepag.es/", "wss://relay.damus.io/", "wss://nos.lol/"]
+export const INDEXER_RELAYS = [
+  "wss://purplepag.es/",
+  "wss://relay.damus.io/",
+  "wss://relay.nostr.band/",
+]
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
@@ -67,7 +71,7 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   }
 }
 
-export const nostr = (entity: string) => `https://coracle.social/${entity}`
+export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 
 setContext({
   net: getDefaultNetContext(),

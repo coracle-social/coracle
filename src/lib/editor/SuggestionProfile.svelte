@@ -1,9 +1,7 @@
 <script lang="ts">
-  import {deriveProfileDisplay} from "@welshman/app"
+  import Profile from '@app/components/Profile.svelte'
 
   export let value
-
-  const display = deriveProfileDisplay(value)
 </script>
 
-@{$display}
+<Profile pubkey={value} />

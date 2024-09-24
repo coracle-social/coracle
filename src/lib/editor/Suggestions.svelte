@@ -20,7 +20,7 @@
   $: populateItems(term)
 
   const populateItems = throttle(300, term => {
-    items = $search.searchValues(term).slice(0, 30)
+    items = $search.searchValues(term).slice(0, 5)
   })
 
   const setIndex = (newIndex: number, block: any) => {

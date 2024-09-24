@@ -4,7 +4,7 @@
   import {ellipsize} from "@welshman/lib"
   import {type TrustedEvent, fromNostrURI, Address} from "@welshman/util"
   import Link from "@lib/components/Link.svelte"
-  import {deriveEvent, nostr} from "@app/state"
+  import {deriveEvent, entityLink} from "@app/state"
 
   export let node: NodeViewProps["node"]
 
@@ -18,7 +18,7 @@
 </script>
 
 <NodeViewWrapper class="inline">
-  <Link external href={nostr(node.attrs.nevent)} class="link-content">
+  <Link external href={entityLink(node.attrs.nevent)} class="link-content">
     {displayEvent($event)}
   </Link>
 </NodeViewWrapper>
