@@ -4,7 +4,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import ThreadCard from "@app/components/ThreadCard.svelte"
+  import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
   import {threadsByUrl, decodeNRelay} from "@app/state"
@@ -34,7 +34,7 @@
   </div>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each threads as { root, replies } (root.id)}
-      <ThreadCard {root} {replies} />
+      <ThreadItem {root} {replies} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>

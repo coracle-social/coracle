@@ -5,7 +5,7 @@
   import {displayPubkey} from "@welshman/util"
   import {deriveProfile, deriveProfileDisplay, formatTimestamp} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
-  import {getViewOptions} from "@lib/editor"
+  import {getEditorOptions} from "@lib/editor"
 
   export let root
   export let replies
@@ -16,7 +16,9 @@
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getViewOptions(root))
+    editor = createEditor(getEditorOptions({}))
+
+    setTimeout(() => $editor.commands.insertContent(root.content, {applyPasteRules: true}), 100)
   })
 </script>
 

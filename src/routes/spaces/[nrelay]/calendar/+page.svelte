@@ -7,7 +7,7 @@
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import EventCard from "@app/components/EventCard.svelte"
+  import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
   import {eventsByUrl, decodeNRelay} from "@app/state"
@@ -55,7 +55,7 @@
       {#if dateDisplay}
         <Divider>{dateDisplay}</Divider>
       {/if}
-      <EventCard {event} />
+      <EventItem {event} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>

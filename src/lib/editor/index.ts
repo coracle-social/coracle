@@ -52,6 +52,8 @@ type EditorOptions = {
   loading: Writable<boolean>
   getPubkeyHints: (pubkey: string) => string[]
   submitOnEnter?: boolean
+  content?: string
+  autofocus?: boolean
 }
 
 export const getModifiedHardBreakExtension = () =>
@@ -78,9 +80,11 @@ export const getEditorOptions = ({
   loading,
   getPubkeyHints,
   submitOnEnter,
+  content = "",
+  autofocus = false,
 }: EditorOptions) => ({
-  content: "",
-  autofocus: true,
+  content,
+  autofocus,
   extensions: [
     Code,
     CodeBlock,
@@ -137,10 +141,10 @@ export const getEditorOptions = ({
       },
     }),
   ],
-  onTransaction() {
-    // @ts-ignore
-    console.log(this.getJSON())
-  }
+  // onTransaction() {
+  //   // @ts-ignore
+  //   console.log(this.getJSON())
+  // }
 })
 
 type ViewOptions = {
