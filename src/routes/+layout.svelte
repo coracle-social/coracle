@@ -71,7 +71,7 @@
           publishStatus: storageAdapters.fromObjectStore(publishStatusData),
           freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000}),
           plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
-          tracker: storageAdapters.fromTracker(tracker),
+          tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
         }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
 
     dialog.addEventListener("close", () => {

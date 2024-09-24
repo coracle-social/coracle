@@ -17,10 +17,9 @@ export const copyToClipboard = (text: string) => {
 }
 
 type ScrollerOpts = {
-  delay?: number
   threshold?: number
   reverse?: boolean
-  element?: Element
+  delay?: number
 }
 
 export const createScroller = (
@@ -31,7 +30,7 @@ export const createScroller = (
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
-    const {scrollHeight, scrollTop} = document.body
+    const {scrollHeight, scrollTop} = document.querySelector('.max-h-screen')!
     const offset = Math.abs(scrollTop || scrollY)
     const shouldLoad = offset + innerHeight + threshold > scrollHeight
 
