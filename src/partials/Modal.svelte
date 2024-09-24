@@ -82,7 +82,7 @@
   <slot name="wrapper">
     <div transition:fade class="fixed inset-0 z-modal" class:pointer-events-none={closing}>
       <div
-        class="fixed inset-0 cursor-pointer bg-black opacity-50"
+        class="fixed inset-y-0 left-0 right-[17px] cursor-pointer bg-black opacity-50"
         on:click|stopPropagation={tryClose} />
       <div
         class="modal-content h-full overflow-auto"
@@ -111,7 +111,7 @@
               </div>
             </div>
           {/if}
-          <AltColor background class="absolute mt-12 h-full w-full" />
+          <AltColor background class="absolute mt-12 h-full w-[calc(100%-17px)]" />
           <div on:click|stopPropagation>
             <AltColor
               background
