@@ -5,6 +5,7 @@
   import {displayProfile} from "@welshman/util"
   import {deriveProfile} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
+  import {nostr} from '@app/state'
 
   export let node: NodeViewProps["node"]
   export let selected: NodeViewProps["selected"]
@@ -15,7 +16,7 @@
 <NodeViewWrapper class="inline">
   <Link
     external
-    href="https://njump.me/{node.attrs.nprofile}"
+    href={nostr(node.attrs.nprofile)}
     class={cx("link-content", {"link-content-selected": selected})}>
     @{displayProfile($profile)}
   </Link>

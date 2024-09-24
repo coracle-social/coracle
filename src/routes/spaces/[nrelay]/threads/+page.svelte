@@ -51,7 +51,7 @@
     data-tip="Create an Event"
     on:click={createThread}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
-      <Icon icon="add-square" />
+      <Icon icon="notes-minimalistic" />
     </div>
   </Button>
 </div>

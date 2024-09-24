@@ -4,7 +4,7 @@
   import {ellipsize} from "@welshman/lib"
   import {type TrustedEvent, fromNostrURI, Address} from "@welshman/util"
   import Link from "@lib/components/Link.svelte"
-  import {deriveEvent} from "@app/state"
+  import {deriveEvent, nostr} from "@app/state"
 
   export let node: NodeViewProps["node"]
 
@@ -18,7 +18,7 @@
 </script>
 
 <NodeViewWrapper class="inline">
-  <Link external href="https://njump.me/{node.attrs.nevent}" class="link-content">
+  <Link external href={nostr(node.attrs.nevent)} class="link-content">
     {displayEvent($event)}
   </Link>
 </NodeViewWrapper>

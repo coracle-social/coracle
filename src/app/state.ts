@@ -47,7 +47,27 @@ export const INDEXER_RELAYS = ["wss://purplepag.es/", "wss://relay.damus.io/", "
 
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
+export const IMGPROXY_URL = "https://imgproxy.coracle.social"
+
 export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
+
+export const dufflepud = (path: string) => DUFFLEPUD_URL + '/' + path
+
+export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
+  if (!url || url.match("gif$")) {
+    return url
+  }
+
+  url = url.split("?")[0]
+
+  try {
+    return url ? `${IMGPROXY_URL}/x/s:${w}:${h}/${btoa(url)}` : url
+  } catch (e) {
+    return url
+  }
+}
+
+export const nostr = (entity: string) => `https://coracle.social/${entity}`
 
 setContext({
   net: getDefaultNetContext(),
