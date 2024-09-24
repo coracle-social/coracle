@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {getNip07, Nip07Signer, Nip55Signer} from "@welshman/signer"
+  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -165,7 +165,7 @@
     <div
       class={cx(
         "relative grid justify-center gap-2 xs:gap-5",
-        getNip07() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        getNip07() || getNip55() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
       <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
@@ -193,12 +193,14 @@
         </div>
         <span>Public Key</span>
       </Tile>
+      {#if getNip55()}
 	  <Tile class="cursor-pointer bg-tinted-800" on:click={useAmber}>
         <div>
-          <i class="fa fa-bolt fa-xl" />
+          <i class="fa fa-diamond fa-xl" />
         </div>
         <span>Amber</span>
       </Tile>
+      {/if}
     </div>
   </FlexColumn>
 </form>
