@@ -30,7 +30,7 @@
   }
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true}))
+    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true, autofocus: true}))
   })
 </script>
 

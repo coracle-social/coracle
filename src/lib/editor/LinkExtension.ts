@@ -1,8 +1,8 @@
-import {last} from '@welshman/lib'
-import {Node, InputRule, nodePasteRule, type PasteRuleMatch} from "@tiptap/core"
+import {last} from "@welshman/lib"
+import {Node, InputRule, nodePasteRule} from "@tiptap/core"
 import type {Node as ProsemirrorNode} from "@tiptap/pm/model"
 import type {MarkdownSerializerState} from "prosemirror-markdown"
-import {createPasteRuleMatch, createInputRuleMatch} from './util'
+import {createPasteRuleMatch} from "./util"
 
 export const LINK_REGEX =
   /([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s\)\(]*/gi
@@ -87,7 +87,10 @@ export const LinkExtension = Node.create({
             try {
               tr.insert(range.from - 1, this.type.create(match.data))
                 .delete(tr.mapping.map(range.from - 1), tr.mapping.map(range.to))
-                .insert(tr.mapping.map(range.to), this.editor.schema.text(last(Array.from(match.input!))))
+                .insert(
+                  tr.mapping.map(range.to),
+                  this.editor.schema.text(last(Array.from(match.input!))),
+                )
             } catch (e) {
               // If the node was already linkified, the above code breaks for whatever reason
             }

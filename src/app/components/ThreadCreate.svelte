@@ -29,7 +29,7 @@
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints}))
+    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, autofocus: true}))
   })
 </script>
 

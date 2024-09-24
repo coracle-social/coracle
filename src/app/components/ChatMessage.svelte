@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import twColors from "tailwindcss/colors"
   import type {Readable} from "svelte/store"
-  import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {readable, derived} from "svelte/store"
   import {hash, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -22,7 +21,6 @@
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import {REPLY, deriveEvent, displayReaction} from "@app/state"
-  import {getViewOptions} from "@lib/editor"
 
   export let event: TrustedEvent
   export let showPubkey: boolean
@@ -63,8 +61,6 @@
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
 
-  let editor: Readable<Editor>
-
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey || "")
   $: parentProfileDisplay = deriveProfileDisplay(parentPubkey || "")
@@ -72,10 +68,6 @@
   $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
   $: failure =
     !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
-
-  onMount(() => {
-    editor = createEditor(getViewOptions(event))
-  })
 </script>
 
 <div in:fly class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300">
@@ -107,7 +99,7 @@
         </div>
       {/if}
       <p class="text-sm">
-        <EditorContent editor={$editor} />
+        {event.content}
         {#if isPending}
           <span class="flex-inline ml-1 gap-1">
             <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />

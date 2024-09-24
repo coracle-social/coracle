@@ -52,7 +52,6 @@ type EditorOptions = {
   loading: Writable<boolean>
   getPubkeyHints: (pubkey: string) => string[]
   submitOnEnter?: boolean
-  content?: string
   autofocus?: boolean
 }
 
@@ -80,11 +79,10 @@ export const getEditorOptions = ({
   loading,
   getPubkeyHints,
   submitOnEnter,
-  content = "",
   autofocus = false,
 }: EditorOptions) => ({
-  content,
   autofocus,
+  content: "",
   extensions: [
     Code,
     CodeBlock,
@@ -140,37 +138,5 @@ export const getEditorOptions = ({
         submit()
       },
     }),
-  ],
-  // onTransaction() {
-  //   // @ts-ignore
-  //   console.log(this.getJSON())
-  // }
-})
-
-type ViewOptions = {
-  content: string
-}
-
-export const getViewOptions = ({content}: ViewOptions) => ({
-  content,
-  editable: false,
-  shouldRerenderOnTransaction: false,
-  extensions: [
-    Code,
-    CodeBlock,
-    Document,
-    Paragraph,
-    Text,
-    LinkExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(EditLink),
-    }),
-    Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
-    NProfileExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(EditMention),
-    }),
-    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-    ImageExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditImage)})),
-    VideoExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditVideo)})),
   ],
 })

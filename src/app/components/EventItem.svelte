@@ -1,6 +1,5 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
-  import {getAddress} from "@welshman/util"
   import {secondsToDate, getLocale, formatTimestamp, formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
 
