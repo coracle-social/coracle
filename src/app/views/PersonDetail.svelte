@@ -69,8 +69,8 @@
   <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex flex-col">
-      <div class="flex items-center justify-between gap-4">
-        <PersonName class="text-2xl" {pubkey} displayNpubCopyButton />
+      <div class="flex items-center justify-between gap-4 w-full">
+        <PersonName class="text-2xl w-full" {pubkey} displayNpubCopyButton />
         <div class="hidden xs:block">
           <PersonActions {pubkey} />
         </div>
