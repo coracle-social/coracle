@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import type {SvelteComponent} from "svelte"
   import type {NativeEmoji} from 'emoji-picker-element/shared'
   import twColors from "tailwindcss/colors"
   import type {Readable} from "svelte/store"
@@ -26,14 +27,19 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
+  import Drawer from "@lib/components/Drawer.svelte"
   import Content from "@app/components/Content.svelte"
   import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
+  import ChatMessageReplies from "@app/components/ChatMessageReplies.svelte"
+  import ChatMessageReply from "@app/components/ChatMessageReply.svelte"
   import {ROOM, REPLY, deriveEvent, displayReaction} from "@app/state"
+  import {publishDelete, publishReaction} from "@app/commands"
 
   export let url
   export let room
   export let event: TrustedEvent
   export let showPubkey: boolean
+  export let isReply = false
 
   const colors = [
     ["amber", twColors.amber[600]],
@@ -71,33 +77,23 @@
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
 
-  const createReaction = (content: string) => {
-    const reaction = createEvent(REACTION, {
-      content,
-      tags: [
-        [ROOM, room, url],
-        ...tagReactionTo(event),
-      ],
-    })
-
-    publishThunk(makeThunk({event: reaction, relays: [url]}))
-  }
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
 
     if (reaction) {
-      const deleteEvent = createEvent(DELETE, {
-        tags: [["k", String(reaction.kind)], ...tagEvent(reaction)],
-      })
-
-      publishThunk(makeThunk({event: deleteEvent, relays: [url]}))
+      publishDelete({relays: [url], event: reaction})
     } else {
-      createReaction(content)
+      publishReaction({
+        event,
+        content,
+        relays: [url],
+        tags: [[ROOM, room, url]],
+      })
     }
   }
 
-  const onEmoji = (emoji: NativeEmoji) => createReaction(emoji.unicode)
+  let drawer: SvelteComponent
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey || "")
@@ -108,7 +104,11 @@
     !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
-<div in:fly class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300">
+<div
+  in:fly
+  class="group relative flex flex-col gap-1 p-2 transition-colors"
+  class:hover:bg-base-300={!isReply}
+  class:mt-4={isReply}>
   {#if event.kind === REPLY}
     <div class="flex items-center gap-1 pl-12 text-xs">
       <Icon icon="arrow-right" />
@@ -168,12 +168,22 @@
   {/if}
   <div
     class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100">
-    <button class="btn join-item btn-xs">
-      <Icon icon="reply" size={4} />
-    </button>
-    <ChatMessageEmojiButton onEmoji={onEmoji} />
+    {#if !isReply}
+      <button class="btn join-item btn-xs" on:click={() => drawer.open()}>
+        <Icon icon="reply" size={4} />
+      </button>
+    {/if}
+    <ChatMessageEmojiButton {url} {room} {event} />
     <button class="btn join-item btn-xs">
       <Icon icon="menu-dots" size={4} />
     </button>
   </div>
 </div>
+
+{#if !isReply}
+  <Drawer bind:this={drawer}>
+    <svelte:self {...$$props} isReply />
+    <ChatMessageReplies {url} {room} {event} />
+    <ChatMessageReply {url} {room} {event} />
+  </Drawer>
+{/if}

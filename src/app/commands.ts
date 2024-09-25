@@ -1,5 +1,6 @@
 import {uniqBy, sleep, chunk, equals, choice} from "@welshman/lib"
-import {getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
+import {DELETE, REACTION, getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {
   pubkey,
@@ -13,6 +14,8 @@ import {
   loadFollows,
   loadMutes,
   getFollows,
+  tagEvent,
+  tagReactionTo,
 } from "@welshman/app"
 import {ROOM, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
@@ -106,3 +109,30 @@ export const removeSpaceMembership = (url: string) =>
 
 export const removeRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals([ROOM, room, url], t)))
+
+// Actions
+
+export const publishReaction = ({relays, event, content, tags = []}: {
+  relays: string[]
+  event: TrustedEvent,
+  content: string,
+  tags?: string[][]
+}) => {
+  const reaction = createEvent(REACTION, {
+    content,
+    tags: [
+      ...tags,
+      ...tagReactionTo(event),
+    ],
+  })
+
+  publishThunk(makeThunk({event: reaction, relays}))
+}
+
+export const publishDelete = ({relays, event}: {relays: string[], event: TrustedEvent}) => {
+  const deleteEvent = createEvent(DELETE, {
+    tags: [["k", String(event.kind)], ...tagEvent(event)],
+  })
+
+  publishThunk(makeThunk({event: deleteEvent, relays}))
+}

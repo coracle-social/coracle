@@ -1,18 +1,26 @@
 <script lang="ts">
   import tippy, {type Instance} from "tippy.js"
-  import type {Emoji} from 'emoji-picker-element/shared'
+  import type {NativeEmoji} from 'emoji-picker-element/shared'
   import {between} from '@welshman/lib'
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
+  import {ROOM} from '@app/state'
+  import {publishReaction} from '@app/commands'
 
-  export let onEmoji
+  export let url, room, event
 
   const open = () => popover.show()
 
-  const onClick = (emoji: Emoji) => {
-    onEmoji(emoji)
+  const onClick = (emoji: NativeEmoji) => {
+    publishReaction({
+      event,
+      relays: [url],
+      content: emoji.unicode,
+      tags: [[ROOM, room, url]],
+    })
+
     popover.hide()
   }
 
