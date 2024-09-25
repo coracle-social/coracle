@@ -2,8 +2,9 @@ import Fuse from "fuse.js"
 import crypto from "crypto"
 import {get, derived, writable} from "svelte/store"
 import {doPipe, batch, seconds, sleep} from "hurdak"
-import {defaultTo, equals, assoc, sortBy, max, omit, partition, prop, whereEq, without} from "ramda"
+import {defaultTo, equals, assoc, sortBy, omit, partition, prop, whereEq, without} from "ramda"
 import {
+  max,
   ctx,
   setContext,
   Worker,
@@ -18,7 +19,6 @@ import {
   sort,
   groupBy,
   indexBy,
-  pushToKey,
   pushToMapKey,
   tryCatch,
   take,
@@ -50,7 +50,6 @@ import {
   getIdOrAddress,
   getIdFilters,
   LOCAL_RELAY_URL,
-  isReplaceable,
   isGroupAddress,
   isCommunityAddress,
   isHashedEvent,
@@ -78,9 +77,7 @@ import {
   tracker,
   pubkey,
   handles,
-  profiles,
   displayProfileByPubkey,
-  follows,
   mutesByPubkey,
   followsByPubkey,
   makeRouter,
@@ -100,6 +97,9 @@ import {
   getDefaultAppContext,
   loadRelay,
   tagPubkey,
+  wotGraph,
+  getFollows,
+  getUserWotScore,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -108,7 +108,6 @@ import logger from "src/util/logger"
 import type {
   GroupMeta,
   PublishedFeed,
-  PublishedProfile,
   PublishedListFeed,
   PublishedSingleton,
   PublishedList,
@@ -119,7 +118,6 @@ import {
   EDITABLE_LIST_KINDS,
   makeSingleton,
   ListSearch,
-  profileHasName,
   readFeed,
   readList,
   readCollections,
@@ -324,61 +322,7 @@ export const dufflepud = (path: string) => {
   return `${base}/${path}`
 }
 
-// Profiles
-
-export class ProfileSearch extends SearchHelper<PublishedProfile, string> {
-  getSearch = () => {
-    const $pubkey = pubkey.get()
-
-    const options = this.options.map(profile => ({
-      profile,
-      score: getWotScore($pubkey, profile.event.pubkey),
-    }))
-
-    const fuse = new Fuse(options, {
-      keys: [
-        "profile.name",
-        "profile.display_name",
-        {name: "profile.nip05", weight: 0.5},
-        {name: "profile.about", weight: 0.1},
-      ],
-      threshold: 0.3,
-      shouldSort: false,
-      includeScore: true,
-    })
-
-    return (term: string) => {
-      if (!term) {
-        return sortBy(item => -item.score, options).map(item => item.profile)
-      }
-
-      return doPipe(fuse.search(term), [
-        results =>
-          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), results),
-        results => results.map((r: any) => r.item.profile),
-      ])
-    }
-  }
-
-  getValue = (option: PublishedProfile) => option.event.pubkey
-
-  displayValue = (pk: string) => displayProfileByPubkey(pk)
-}
-
-export const profileSearch = derived(
-  [throttled(300, profiles), throttled(300, handles)],
-  ([$profiles, $handles]) =>
-    new ProfileSearch(
-      $profiles
-        .filter(profileHasName)
-        .map($p => ({...$p, nip05: $handles[$p.event.pubkey]?.nip05})),
-    ),
-)
 // Network, followers, wot
-
-export const getFollows = (pubkey: string) => getListValues("p", followsByPubkey.get().get(pubkey))
-
-export const getMutes = (pubkey: string) => getListValues("p", mutesByPubkey.get().get(pubkey))
 
 export const getNetwork = simpleCache(([pk]) => {
   const pubkeys = new Set(getFollows(pk))
@@ -395,72 +339,10 @@ export const getNetwork = simpleCache(([pk]) => {
   return Array.from(network)
 })
 
-export const getFollowers = simpleCache(([pk]) =>
-  follows
-    .get()
-    .filter(l => getListValues("p", l).includes(pk))
-    .map(l => l.event.pubkey),
-)
-
-export const getFollowsWhoFollow = simpleCache(
-  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getFollows(other).includes(tpk))),
-)
-
-export const getFollowsWhoMute = simpleCache(
-  ([pk, tpk]) => new Set(getFollows(pk).filter(other => getMutes(other).includes(tpk))),
-)
-
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
 
-export const getWotScore = (pk, tpk) => {
-  if (!pk) return getFollowers(tpk).length
-
-  const follows = getFollowsWhoFollow(pk, tpk)
-  const mutes = getFollowsWhoMute(pk, tpk)
-
-  return follows.size - mutes.size
-}
-
 export const maxWot = withGetter(
-  derived(
-    [pubkey, throttled(3000, followsByPubkey), throttled(3000, mutesByPubkey)],
-    ([$pubkey, $followsByPubkey, $mutesByPubkey]) => {
-      const userFollows = new Set(getListValues("p", $followsByPubkey.get($pubkey)))
-      const mutes: Record<string, string[]> = {}
-      const follows: Record<string, string[]> = {}
-
-      // Get follows and mutes from the current user's follows list
-      for (const tpk of repository.eventsByAuthor.keys()) {
-        if (userFollows.has(tpk)) {
-          for (const mpk of getListValues("p", $mutesByPubkey.get(tpk))) {
-            pushToKey(mutes, mpk, tpk)
-          }
-
-          for (const fpk of getListValues("p", $followsByPubkey.get(tpk))) {
-            pushToKey(follows, fpk, tpk)
-          }
-        } else {
-          mutes[tpk] = []
-          follows[tpk] = []
-        }
-      }
-
-      // Populate mutes cache
-      for (const [tpk, pubkeys] of Object.entries(mutes)) {
-        getFollowsWhoMute.cache.set(getFollowsWhoMute.getKey([$pubkey, tpk]), new Set(pubkeys))
-      }
-
-      let $maxWot = 10
-
-      // Populate follows cache
-      for (const [tpk, pubkeys] of Object.entries(follows)) {
-        $maxWot = Math.max($maxWot, pubkeys.length)
-        getFollowsWhoFollow.cache.set(getFollowsWhoFollow.getKey([$pubkey, tpk]), new Set(pubkeys))
-      }
-
-      return $maxWot
-    },
-  ),
+  derived(wotGraph, $wotGraph => max(Array.from($wotGraph.values()))),
 )
 
 // User follows/mutes/network
@@ -735,7 +617,7 @@ export const isEventMuted = withGetter(
 
         const addresses = getAddressTagValues(e.tags || []).filter(isContextAddress)
         const wotAdjustment = addresses.some(a => $userIsGroupMember(a)) ? 1 : 0
-        const wotScore = getWotScore($pubkey, e.pubkey)
+        const wotScore = getUserWotScore(e.pubkey)
 
         return wotScore < minWot - wotAdjustment
       }
@@ -893,10 +775,7 @@ export const createNotificationGroups = ($notifications, kinds) => {
     g => -g.timestamp,
     Object.values(groups).map((group: any) => {
       const {event, interactions} = group
-      const timestamp = interactions
-        .map(e => e.created_at)
-        .concat(event?.created_at || 0)
-        .reduce(max, 0)
+      const timestamp = max(interactions.map(e => e.created_at).concat(event?.created_at || 0))
 
       return {...group, timestamp}
     }),

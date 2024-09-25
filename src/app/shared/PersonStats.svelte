@@ -1,10 +1,9 @@
 <script lang="ts">
   import {tweened} from "svelte/motion"
   import {getListValues} from "@welshman/util"
-  import {deriveFollows} from "@welshman/app"
+  import {deriveFollows, getFollowers} from "@welshman/app"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/util/router"
-  import {getFollowers} from "src/engine"
 
   export let pubkey
 

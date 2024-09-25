@@ -14,21 +14,21 @@
 
 <script lang="ts">
   import cx from "classnames"
-  import {nip19} from 'nostr-tools'
+  import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
-  import {session, deriveProfileDisplay} from "@welshman/app"
+  import {session, deriveProfileDisplay, getUserWotScore} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import {displayPubkey} from "src/domain"
-  import {userFollows, maxWot, getWotScore} from "src/engine"
+  import {userFollows, maxWot} from "src/engine"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 
   export let pubkey
   export let displayNpubCopyButton = false
 
   const following = derived(userFollows, $m => $m.has(pubkey))
-  const wotScore = getWotScore($session?.pubkey, pubkey)
+  const wotScore = getUserWotScore(pubkey)
   const npub = nip19.npubEncode(pubkey)
   const npubDisplay = displayPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
@@ -36,9 +36,10 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <div class="flex flex-col w-full">
-    <div class="flex gap-2 items-center w-full">
-      <span class="cy-person-name max-w-[80%] overflow-hidden text-ellipsis">{$profileDisplay}</span>
+  <div class="flex w-full flex-col">
+    <div class="flex w-full items-center gap-2">
+      <span class="cy-person-name max-w-[80%] overflow-hidden text-ellipsis"
+        >{$profileDisplay}</span>
       {#if $session}
         <div on:click|stopPropagation>
           <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>

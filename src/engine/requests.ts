@@ -45,6 +45,9 @@ import {
   loadFollows,
   loadMutes,
   getFilterSelections,
+  getFollowers,
+  getFollows,
+  getUserWotScore,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -56,9 +59,7 @@ import {
   getUserCircles,
   getGroupReqInfo,
   getCommunityReqInfo,
-  getFollowers,
   getUserCommunities,
-  getWotScore,
   isEventMuted,
   load,
   maxWot,
@@ -67,7 +68,6 @@ import {
   subscribe,
   subscribePersistent,
   sessionWithMeta,
-  getFollows,
   type MySubscribeRequest,
 } from "src/engine/state"
 
@@ -329,12 +329,11 @@ export const feedLoader = new FeedLoader({
   },
   getPubkeysForWOTRange: (min, max) => {
     const pubkeys = []
-    const $pubkey = pubkey.get()
     const thresholdMin = maxWot.get() * min
     const thresholdMax = maxWot.get() * max
 
     for (const tpk of repository.eventsByAuthor.keys()) {
-      const score = getWotScore($pubkey, tpk)
+      const score = getUserWotScore(tpk)
 
       if (score >= thresholdMin && score <= thresholdMax) {
         pubkeys.push(tpk)

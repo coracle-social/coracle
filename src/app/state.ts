@@ -12,6 +12,7 @@ import {
   loadProfile,
   loadFollows,
   loadMutes,
+  getFollows,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -29,7 +30,6 @@ import {
   loadNotifications,
   loadFeedsAndLists,
   listenForNotifications,
-  getFollows,
   getSetting,
 } from "src/engine"
 

@@ -4,11 +4,11 @@
   import {createEventDispatcher} from "svelte"
   import {whereEq} from "ramda"
   import {ctx, last, partition} from "@welshman/lib"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {displayProfileByPubkey, profileSearch} from "@welshman/app"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {userFollows, profileSearch, createPeopleLoader} from "src/engine"
+  import {userFollows, createPeopleLoader} from "src/engine"
 
   export let onSubmit
   export let autofocus = false

@@ -1,11 +1,12 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
+  import {profileSearch} from "@welshman/app"
   import {parseAnything} from "src/util/nostr"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
-  import {profileSearch, createPeopleLoader} from "src/engine"
+  import {createPeopleLoader} from "src/engine"
 
   export let value
   export let multiple = false

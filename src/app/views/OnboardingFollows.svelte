@@ -3,7 +3,7 @@
   import {quantify} from "hurdak"
   import {fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress} from "@welshman/util"
-  import {relaySearch} from "@welshman/app"
+  import {relaySearch, profileSearch} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -12,7 +12,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {createPeopleLoader, profileSearch} from "src/engine"
+  import {createPeopleLoader} from "src/engine"
 
   export let relays
   export let follows

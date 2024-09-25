@@ -2,10 +2,10 @@
   import type {Writable} from "svelte/store"
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
-  import {topicSearch} from "@welshman/app"
+  import {topicSearch, profileSearch} from "@welshman/app"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
-  import {profileSearch, createPeopleLoader} from "src/engine"
+  import {createPeopleLoader} from "src/engine"
 
   export let term: Writable<string>
   export let replace = false
