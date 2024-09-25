@@ -54,6 +54,14 @@
 
   const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
+  const isBlock = (i: number) => {
+    const parsed = fullContent[i]
+
+    return isEvent(parsed) || isAddress(parsed) || isLink(parsed)
+  }
+
+  const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
+
   $: shortContent = showEntire
     ? fullContent
     : truncate(
@@ -73,7 +81,7 @@
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
     {#if isNewline(parsed)}
-      <NoteContentNewline value={parsed.value} />
+      <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
       <NoteContentTopic value={parsed.value} />
     {:else if isCode(parsed)}

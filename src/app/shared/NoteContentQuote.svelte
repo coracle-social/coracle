@@ -52,7 +52,7 @@
   $: muted = $quote && $isEventMuted($quote, true)
 </script>
 
-<div class="py-2" on:click|stopPropagation>
+<div class="my-2" on:click|stopPropagation>
   <Card interactive stopPropagation class="my-2" on:click={openQuote}>
     {#if muted && !showHidden}
       <p class="mb-1 py-24 text-center text-neutral-600">

@@ -25,7 +25,7 @@
   }
 </script>
 
-<span>
+<div class="my-2">
   {#if url.match(/\.(wav|mp3|m3u8)$/)}
     {#await import("src/util/audio")}
       <span />
@@ -113,4 +113,4 @@
       {/if}
     </Anchor>
   {/if}
-</span>
+</div>
