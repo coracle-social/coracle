@@ -1,10 +1,10 @@
 <script lang="ts">
   import {writable} from "svelte/store"
-  import {Tags, createEvent} from "@welshman/util"
+  import {Tags, createEvent, uniqTags} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import {join, without, uniq} from "ramda"
   import {ctx} from "@welshman/lib"
-  import {session, displayProfileByPubkey} from "@welshman/app"
+  import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {showPublishInfo} from "src/partials/Toast.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -14,16 +14,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {
-    env,
-    publish,
-    uniqTags,
-    publishToZeroOrMoreGroups,
-    tagsFromContent,
-    getClientTags,
-    getReplyTags,
-    mention,
-  } from "src/engine"
+  import {env, publish, publishToZeroOrMoreGroups, tagsFromContent, getClientTags} from "src/engine"
   import {drafts} from "src/app/state"
 
   export let parent
@@ -96,8 +87,8 @@
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     const tags = uniqTags([
-      ...mentions.map(mention),
-      ...getReplyTags(parent),
+      ...mentions.map(tagPubkey),
+      ...tagReplyTo(parent),
       ...tagsFromContent(content),
       ...getClientTags(),
     ])

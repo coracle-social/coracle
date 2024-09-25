@@ -7,7 +7,7 @@
   import {writable} from "svelte/store"
   import {ctx, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {session} from "@welshman/app"
+  import {session, tagPubkey} from "@welshman/app"
   import {currencyOptions} from "src/util/i18n"
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
@@ -29,7 +29,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {publish, mention} from "src/engine"
+  import {publish} from "src/engine"
   import {router} from "src/app/util/router"
   import {env, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
 
@@ -117,7 +117,7 @@
     }
 
     if (quote) {
-      tags.push(mention(quote.pubkey))
+      tags.push(tagPubkey(quote.pubkey))
 
       // Re-broadcast the note we're quoting
       if (!opts.groups.length) {

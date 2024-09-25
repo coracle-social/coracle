@@ -1,7 +1,14 @@
 <script lang="ts">
   import {identity} from "ramda"
   import {stripProtocol} from "@welshman/lib"
-  import {REACTION, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS, isShareableRelayUrl} from "@welshman/util"
+  import {
+    REACTION,
+    PROFILE,
+    RELAYS,
+    INBOX_RELAYS,
+    FOLLOWS,
+    isShareableRelayUrl,
+  } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
     deriveProfile,
@@ -9,6 +16,7 @@
     displayProfileByPubkey,
     getRelayUrls,
     deriveRelaySelections,
+    tagZapSplit,
   } from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -26,7 +34,7 @@
   import PersonStats from "src/app/shared/PersonStats.svelte"
   import PersonCollections from "src/app/shared/PersonCollections.svelte"
   import {makeFeed} from "src/domain"
-  import {load, makeZapSplit, userMutes, imgproxy} from "src/engine"
+  import {load, userMutes, imgproxy} from "src/engine"
   import {router} from "src/app/util"
 
   export let pubkey
@@ -46,7 +54,7 @@
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
   $: zapLink = router
     .at("zap")
-    .qp({splits: [makeZapSplit(pubkey)]})
+    .qp({splits: [tagZapSplit(pubkey)]})
     .toString()
 
   document.title = displayProfileByPubkey(pubkey)
@@ -69,8 +77,8 @@
   <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
   <div class="flex min-w-0 flex-grow flex-col gap-4">
     <div class="flex flex-col">
-      <div class="flex items-center justify-between gap-4 w-full">
-        <PersonName class="text-2xl w-full" {pubkey} displayNpubCopyButton />
+      <div class="flex w-full items-center justify-between gap-4">
+        <PersonName class="w-full text-2xl" {pubkey} displayNpubCopyButton />
         <div class="hidden xs:block">
           <PersonActions {pubkey} />
         </div>

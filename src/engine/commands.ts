@@ -38,6 +38,7 @@ import {
   editList,
   makeList,
   createList,
+  uniqTags,
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
@@ -55,6 +56,7 @@ import {
   inboxRelaySelectionsByPubkey,
   addNoFallbacks,
   ensurePlaintext,
+  tagPubkey,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -79,7 +81,6 @@ import {
   groupAdminKeys,
   groupSharedKeys,
   groups,
-  mention,
   publish,
   sign,
   hasNip44,
@@ -88,7 +89,6 @@ import {
   mentionGroup,
   userSeenStatusEvents,
   getChannelIdFromEvent,
-  uniqTags,
 } from "src/engine/state"
 
 // Helpers
@@ -448,7 +448,7 @@ export const publishGroupEvictions = async (address, pubkeys) =>
 
 export const publishGroupMembers = async (address, op, pubkeys) => {
   const template = createEvent(27, {
-    tags: [["op", op], mentionGroup(address), ...getClientTags(), ...pubkeys.map(mention)],
+    tags: [["op", op], mentionGroup(address), ...getClientTags(), ...pubkeys.map(tagPubkey)],
   })
 
   return publishAsGroupAdminPrivately(address, template)
@@ -646,9 +646,9 @@ export const unfollowPerson = (pubkey: string) => {
 
 export const followPerson = (pubkey: string) => {
   if (signer.get()) {
-    updateSingleton(FOLLOWS, tags => append(mention(pubkey), tags), {only: "public"})
+    updateSingleton(FOLLOWS, tags => append(tagPubkey(pubkey), tags), {only: "public"})
   } else {
-    anonymous.update($a => ({...$a, follows: append(mention(pubkey), $a.follows)}))
+    anonymous.update($a => ({...$a, follows: append(tagPubkey(pubkey), $a.follows)}))
   }
 }
 
@@ -656,7 +656,7 @@ export const unmutePerson = (pubkey: string) =>
   updateSingleton(MUTES, tags => reject(nthEq(1, pubkey), tags))
 
 export const mutePerson = (pubkey: string) =>
-  updateSingleton(MUTES, tags => append(mention(pubkey), tags), {only: "public"})
+  updateSingleton(MUTES, tags => append(tagPubkey(pubkey), tags), {only: "public"})
 
 export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
 
@@ -802,7 +802,7 @@ export const sendLegacyMessage = async (channelId: string, content: string) => {
 
   return createAndPublish({
     kind: 4,
-    tags: [mention(recipient), ...getClientTags()],
+    tags: [tagPubkey(recipient), ...getClientTags()],
     content: await signer.get().nip04.encrypt(recipient, content),
     relays: ctx.app.router.PublishMessage(recipient).getUrls(),
     forcePlatform: false,
@@ -815,7 +815,7 @@ export const sendMessage = async (channelId: string, content: string) => {
     content,
     kind: 14,
     created_at: now(),
-    tags: [...recipients.map(mention), ...getClientTags()],
+    tags: [...recipients.map(tagPubkey), ...getClientTags()],
   }
 
   for (const recipient of uniq(recipients.concat(pubkey.get()))) {

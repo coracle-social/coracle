@@ -1,17 +1,18 @@
 <script lang="ts">
+  import {tagZapSplit} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {loadPubkeys, makeZapSplit, env} from "src/engine"
+  import {loadPubkeys, env} from "src/engine"
 
   const hash = import.meta.env.VITE_BUILD_HASH
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
-  const splits = [makeZapSplit(env.PLATFORM_PUBKEY)]
+  const splits = [tagZapSplit(env.PLATFORM_PUBKEY)]
 
   loadPubkeys([env.PLATFORM_PUBKEY])
 

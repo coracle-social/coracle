@@ -3,7 +3,7 @@
   import {writable} from "svelte/store"
   import {ctx} from "@welshman/lib"
   import {Tags, createEvent} from "@welshman/util"
-  import {pubkey} from "@welshman/app"
+  import {pubkey, tagReplyTo} from "@welshman/app"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -15,14 +15,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import GroupLink from "src/app/shared/GroupLink.svelte"
-  import {
-    env,
-    publish,
-    getClientTags,
-    tagsFromContent,
-    publishToZeroOrMoreGroups,
-    getReplyTags,
-  } from "src/engine"
+  import {env, publish, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
 
   export let parent = null
   export let group = null
@@ -66,7 +59,7 @@
     const tags = [...tagsFromContent(content), ...getClientTags()]
 
     if (parent) {
-      for (const tag of getReplyTags(parent)) {
+      for (const tag of tagReplyTo(parent)) {
         tags.push(tag)
       }
     }

@@ -8,7 +8,7 @@
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {topicSearch, relaySearch} from "@welshman/app"
+  import {topicSearch, tagPubkey, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -18,7 +18,7 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {mention, createAndPublish, deleteEvent} from "src/engine"
+  import {createAndPublish, deleteEvent} from "src/engine"
   import {KindSearch, createList, displayList, editList} from "src/domain"
 
   export let list
@@ -60,7 +60,7 @@
   }
 
   const onPubkeysChange = pubkeys => {
-    list.tags = pubkeys.map(mention)
+    list.tags = pubkeys.map(tagPubkey)
   }
 
   const onRelaysChange = urls => {

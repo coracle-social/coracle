@@ -4,7 +4,15 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {ctx, remove, last, sortBy} from "@welshman/lib"
-  import {repository, signer, trackerStore} from "@welshman/app"
+  import {
+    repository,
+    signer,
+    trackerStore,
+    tagReactionTo,
+    tagEvent,
+    tagPubkey,
+    tagZapSplit,
+  } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -43,9 +51,6 @@
     env,
     groups,
     publish,
-    makeZapSplit,
-    mention,
-    mentionEvent,
     unmuteNote,
     muteNote,
     deriveHandlersForKind,
@@ -54,7 +59,6 @@
     deleteEvent,
     getSetting,
     loadPubkeys,
-    getReactionTags,
     getClientTags,
     sessionWithMeta,
   } from "src/engine"
@@ -115,7 +119,7 @@
       publish({event: note, relays: ctx.app.router.PublishEvent(note).getUrls()})
     }
 
-    const tags = [...getReactionTags(note), ...getClientTags()]
+    const tags = [...tagReactionTo(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
     const {events} = await publishToZeroOrMoreGroups(addresses, template)
 
@@ -131,7 +135,7 @@
 
   const crossPost = async (address = null) => {
     const content = JSON.stringify(note as SignedEvent)
-    const tags = [...mentionEvent(note), mention(note.pubkey), ...getClientTags()]
+    const tags = [...tagEvent(note), tagPubkey(note.pubkey), ...getClientTags()]
 
     let template
     if (note.kind === 1) {
@@ -149,7 +153,7 @@
 
   const startZap = () => {
     const zapTags = tags.whereKey("zap")
-    const defaultSplit = makeZapSplit(note.pubkey)
+    const defaultSplit = tagZapSplit(note.pubkey)
     const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
 
     router

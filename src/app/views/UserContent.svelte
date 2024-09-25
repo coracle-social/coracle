@@ -2,7 +2,7 @@
   import {equals} from "ramda"
   import {identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
-  import {topicSearch} from "@welshman/app"
+  import {topicSearch, tagPubkey} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -15,13 +15,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {
-    mention,
-    userSettings,
-    publishSettings,
-    userMutes,
-    updateSingleton,
-  } from "src/engine"
+  import {userSettings, publishSettings, userMutes, updateSingleton} from "src/engine"
 
   const values = {...$userSettings}
 
@@ -33,7 +27,7 @@
     }
 
     if (!equals(mutedPubkeys, Array.from($userMutes))) {
-      updateSingleton(MUTES, () => mutedPubkeys.map(mention))
+      updateSingleton(MUTES, () => mutedPubkeys.map(tagPubkey))
     }
 
     showInfo("Your preferences have been saved!")

@@ -3,7 +3,7 @@
   import {ctx, uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
   import {makeSecret} from "@welshman/signer"
-  import {session} from "@welshman/app"
+  import {session, tagPubkey} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
@@ -13,7 +13,6 @@
     env,
     load,
     anonymous,
-    mention,
     loadPubkeys,
     createAndPublish,
     updateSingleton,
@@ -79,7 +78,7 @@
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    updateSingleton(FOLLOWS, () => follows.map(mention), {only: "public"})
+    updateSingleton(FOLLOWS, () => follows.map(tagPubkey), {only: "public"})
 
     // Publish our welcome note
     if (noteContent) {

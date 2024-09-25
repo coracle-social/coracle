@@ -6,13 +6,13 @@
     NAMED_TOPICS,
     getAddress,
   } from "@welshman/util"
+  import {tagPubkey} from "@welshman/app"
   import {isAuthorFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import ListForm from "src/app/shared/ListForm.svelte"
   import {makeList, isTopicFeed, isMentionFeed, isContextFeed} from "src/domain"
-  import {mention} from "src/engine"
 
   export let feed
   export let onChange
@@ -33,9 +33,9 @@
 
   $: list = (() => {
     if (isAuthorFeed(feed)) {
-      return makeList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(mention)})
+      return makeList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(tagPubkey)})
     } else if (isMentionFeed(feed)) {
-      return makeList({kind: NAMED_PEOPLE, tags: feed.slice(2).map(mention)})
+      return makeList({kind: NAMED_PEOPLE, tags: feed.slice(2).map(tagPubkey)})
     } else if (isContextFeed(feed)) {
       return makeList({kind: NAMED_COMMUNITIES, tags: feed.slice(2).map(a => ["a", a])})
     } else if (isRelayFeed(feed)) {
