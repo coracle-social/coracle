@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sort, now} from "@welshman/lib"
-  import {displayRelayUrl, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
+  import {displayRelayUrl, REACTION, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import {fly, slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -52,7 +52,7 @@
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(() => {
-    const kinds = [NOTE, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]
+    const kinds = [NOTE, REACTION, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]
     const sub = subscribe({filters: [{kinds}], relays: [url]})
 
     return () => sub.close()
