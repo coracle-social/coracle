@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import type {Emoji} from 'emoji-picker-element/shared'
+  import type {NativeEmoji} from 'emoji-picker-element/shared'
   import twColors from "tailwindcss/colors"
   import type {Readable} from "svelte/store"
   import {readable, derived} from "svelte/store"
@@ -97,7 +97,7 @@
     }
   }
 
-  const onEmoji = (emoji: Emoji) => createReaction(emoji.unicode)
+  const onEmoji = (emoji: NativeEmoji) => createReaction(emoji.unicode)
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey || "")

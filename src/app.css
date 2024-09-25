@@ -42,6 +42,15 @@
   font-family: Lato;
 }
 
+[data-theme] {
+  --base-100: oklch(var(--b1));
+  --base-200: oklch(var(--b2));
+  --base-300: oklch(var(--b3));
+  --base-content: oklch(var(--bc));
+  --primary: oklch(var(--p));
+  --secondary: oklch(var(--s));
+}
+
 .card2 {
   @apply overflow-hidden text-ellipsis rounded-box bg-base-100 p-6 text-base-content;
 }
@@ -141,4 +150,18 @@
 }
 .date-time-field input {
   @apply !h-full !w-full !border-none !bg-inherit !text-inherit;
+}
+
+/* emoji picker */
+
+emoji-picker {
+  --background: var(--base-100);
+  --border-color: var(--base-100);
+  --border-radius: var(--rounded-box);
+  --button-active-background: var(--base-content);
+  --button-hover-background: var(--base-content);
+  --indicator-color: var(--base-content);
+  --input-border-color: var(--base-100);
+  --input-font-color: var(--base-content);
+  --outline-color: var(--base-100);
 }
