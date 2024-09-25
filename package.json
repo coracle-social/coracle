@@ -57,6 +57,7 @@
     "@welshman/util": "^0.0.33",
     "daisyui": "^4.12.10",
     "date-picker-svelte": "^2.13.0",
+    "emoji-picker-element": "^1.22.8",
     "fuse.js": "^7.0.0",
     "idb": "^8.0.0",
     "nostr-editor": "^0.0.1",

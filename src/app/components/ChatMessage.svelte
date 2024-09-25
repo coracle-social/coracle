@@ -1,9 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import type {Emoji} from 'emoji-picker-element/shared'
   import twColors from "tailwindcss/colors"
   import type {Readable} from "svelte/store"
   import {readable, derived} from "svelte/store"
-  import {hash, groupBy, now} from "@welshman/lib"
+  import {hash, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
@@ -12,17 +13,25 @@
     deriveProfile,
     deriveProfileDisplay,
     formatTimestampAsTime,
+    tagReactionTo,
+    tagEvent,
+    makeThunk,
+    publishThunk,
+    pubkey,
   } from "@welshman/app"
   import type {PublishStatusData} from "@welshman/app"
-  import {REACTION, ZAP_RESPONSE, displayRelayUrl, getAncestorTags} from "@welshman/util"
+  import {REACTION, DELETE, ZAP_RESPONSE, createEvent, displayRelayUrl, getAncestorTags} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
-  import {REPLY, deriveEvent, displayReaction} from "@app/state"
+  import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
+  import {ROOM, REPLY, deriveEvent, displayReaction} from "@app/state"
 
+  export let url
+  export let room
   export let event: TrustedEvent
   export let showPubkey: boolean
 
@@ -61,6 +70,34 @@
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
+
+  const createReaction = (content: string) => {
+    const reaction = createEvent(REACTION, {
+      content,
+      tags: [
+        [ROOM, room, url],
+        ...tagReactionTo(event),
+      ],
+    })
+
+    publishThunk(makeThunk({event: reaction, relays: [url]}))
+  }
+
+  const onReactionClick = (content: string, events: TrustedEvent[]) => {
+    const reaction = events.find(e => e.pubkey === $pubkey)
+
+    if (reaction) {
+      const deleteEvent = createEvent(DELETE, {
+        tags: [["k", String(reaction.kind)], ...tagEvent(reaction)],
+      })
+
+      publishThunk(makeThunk({event: deleteEvent, relays: [url]}))
+    } else {
+      createReaction(content)
+    }
+  }
+
+  const onEmoji = (emoji: Emoji) => createReaction(emoji.unicode)
 
   $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
   $: parentProfile = deriveProfile(parentPubkey || "")
@@ -119,8 +156,8 @@
   </div>
   {#if $reactions.length > 0 || $zaps.length > 0}
     <div class="ml-12 text-xs">
-      {#each groupBy(e => e.content, $reactions).entries() as [content, events]}
-        <Button class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full">
+      {#each groupBy(e => e.content, uniqBy(e => e.pubkey + e.content, $reactions)).entries() as [content, events]}
+        <Button class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full" on:click={() => onReactionClick(content, events)}>
           <span>{displayReaction(content)}</span>
           {#if events.length > 1}
             <span>{events.length}</span>
@@ -134,9 +171,7 @@
     <button class="btn join-item btn-xs">
       <Icon icon="reply" size={4} />
     </button>
-    <button class="btn join-item btn-xs">
-      <Icon icon="smile-circle" size={4} />
-    </button>
+    <ChatMessageEmojiButton onEmoji={onEmoji} />
     <button class="btn join-item btn-xs">
       <Icon icon="menu-dots" size={4} />
     </button>

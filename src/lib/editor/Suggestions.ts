@@ -51,7 +51,6 @@ export const createSuggestions = (options: SuggestionsOptions) =>
     },
     render: () => {
       let popover: Instance[]
-      let target: HTMLElement
       let suggestions: SvelteComponent
 
       const mapProps = (props: any) => ({
@@ -64,7 +63,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
 
       return {
         onStart: props => {
-          target = document.createElement("div")
+          const target = document.createElement("div")
 
           popover = tippy("body", {
             getReferenceClientRect: props.clientRect as any,

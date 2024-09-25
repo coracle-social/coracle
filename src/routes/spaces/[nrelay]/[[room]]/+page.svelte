@@ -93,7 +93,7 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <ChatMessage event={assertEvent(value)} {showPubkey} />
+        <ChatMessage {url} {room} event={assertEvent(value)} {showPubkey} />
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">

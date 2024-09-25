@@ -53,7 +53,7 @@
 
   onMount(() => {
     const kinds = [NOTE, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]
-    const sub = subscribe({filters: [{kinds, since: now() - 30}], relays: [url]})
+    const sub = subscribe({filters: [{kinds}], relays: [url]})
 
     return () => sub.close()
   })
