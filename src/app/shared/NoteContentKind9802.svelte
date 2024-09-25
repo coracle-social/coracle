@@ -19,8 +19,8 @@
     </div>
   </div>
   {#if meta.r}
-    <div class="text-end text-sm text-neutral-400">
-      <i class="fa fa-highlighter fa-xs" />
+    <div class="text-end text-sm text-neutral-400 flex items-center gap-1">
+      <i class="fa fa-highlighter fa-xs mt-1" />
       <NoteContentLink value={{url: meta.r, isMedia: urlIsMedia(meta.r)}} />
     </div>
   {/if}

@@ -36,9 +36,9 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <div class="flex flex-col overflow-hidden text-ellipsis">
-    <div class="flex gap-2 items-center">
-      <span class="cy-person-name">{$profileDisplay}</span>
+  <div class="flex flex-col w-full">
+    <div class="flex gap-2 items-center w-full">
+      <span class="cy-person-name max-w-[80%] overflow-hidden text-ellipsis">{$profileDisplay}</span>
       {#if $session}
         <div on:click|stopPropagation>
           <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>

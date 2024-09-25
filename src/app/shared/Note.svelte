@@ -245,8 +245,8 @@
             </Anchor>
           </div>
           <div class="flex min-w-0 flex-grow flex-col gap-2">
-            <div class="flex min-w-0 flex-col items-start justify-between sm:flex-row">
-              <Anchor type="unstyled" class="mr-4 min-w-0" on:click={showPerson}>
+            <div class="flex min-w-0 flex-shrink flex-col items-start justify-between sm:flex-row">
+              <Anchor type="unstyled" class="mr-4 min-w-0 w-full" on:click={showPerson}>
                 <PersonName pubkey={event.pubkey} />
               </Anchor>
               <div class="flex items-center gap-3">
