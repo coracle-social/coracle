@@ -32,6 +32,8 @@
             token: connectToken,
             handler: connectHandler,
           }
+        } else if (method === "nip55") {
+          newSessions[key] = {method: 'nip55', ...extra}
         } else {
           newSessions[key] = session
         }
