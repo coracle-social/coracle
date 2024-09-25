@@ -3,7 +3,7 @@ include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
 
 include ':nostr-signer-capacitor-plugin'
-project(':nostr-signer-capacitor-plugin').projectDir = new File('../../nostr-signer-plugin/nostr-signer-capacitor-plugin/android')
+project(':nostr-signer-capacitor-plugin').projectDir = new File('../node_modules/nostr-signer-capacitor-plugin/android')
 
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
