@@ -16,6 +16,7 @@
   import {load, loginWithExtension, loginWithNostrConnect, loginWithAmber} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
+  import { nip19 } from "nostr-tools"
 
   const signUp = () => router.at("signup").replaceModal()
 
@@ -30,10 +31,12 @@
   }
 
   const useAmber = async () => {
-	const signer = new Nip55Signer("com.greenart7c3.nostrsigner")
-    const pubkey = await signer.getPubkey()
+	const pkg = "com.greenart7c3.nostrsigner"
+	const signer = new Nip55Signer(pkg)
+    const pk = await signer.getPubkey()
+	const {data} = nip19.decode(pk)
 
-    loginWithAmber(pubkey)
+    loginWithAmber(data, pkg)
     boot()
   }
 
