@@ -482,47 +482,6 @@ export const getRecipientKey = wrap => {
   return null
 }
 
-export const getGroupReqInfo = (address = null) => {
-  let since = sessionWithMeta.get()?.groups_last_synced || 0
-  let $groupSharedKeys = groupSharedKeys.get()
-  let $groupAdminKeys = groupAdminKeys.get()
-
-  if (address) {
-    since = sessionWithMeta.get()?.groups?.[address]?.last_synced || 0
-    $groupSharedKeys = $groupSharedKeys.filter(whereEq({group: address}))
-    $groupAdminKeys = $groupAdminKeys.filter(whereEq({group: address}))
-  }
-
-  // Account for timestamp randomization
-  since = Math.max(0, since - seconds(7, "day"))
-
-  const admins = []
-  const addresses = []
-  const recipients = [pubkey.get()].filter(identity)
-
-  for (const key of [...$groupSharedKeys, ...$groupAdminKeys]) {
-    const {pubkey} = Address.from(key.group)
-
-    admins.push(pubkey)
-    addresses.push(key.group)
-    recipients.push(key.pubkey)
-  }
-
-  const relays = ctx.app.router.WithinMultipleContexts(addresses).getUrls()
-
-  return {admins, recipients, relays, since}
-}
-
-export const getCommunityReqInfo = (address = null) => {
-  const {groups, groups_last_synced} = sessionWithMeta.get() || {}
-  const since = groups?.[address]?.last_synced || groups_last_synced || 0
-
-  return {
-    since: since - seconds(6, "hour"),
-    relays: ctx.app.router.WithinContext(address).getUrls(),
-  }
-}
-
 export const deriveSharedKeyForGroup = (address: string) =>
   groupSharedKeys.derived($keys =>
     last(sortBy(prop("created_at"), $keys.filter(whereEq({group: address})))),
@@ -1408,23 +1367,23 @@ const getScoreEvent = () => {
     const isFollowing = $userFollows.has(e.pubkey)
 
     // No need to keep a record of everyone who follows the current user
-    if (e.kind === FOLLOWS && !isFollowing)        return NEVER_KEEP
+    if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
 
     // Always keep stuff by or tagging a signed in user
-    if ($sessionKeys.has(e.pubkey))                return ALWAYS_KEEP
-    if (e.tags.some(t => $sessionKeys.has(t[1])))  return ALWAYS_KEEP
+    if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
+    if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
 
     // Get rid of irrelevant messages, reactions, and likes
     if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
-    if (repostKinds.includes(e.kind))              return NEVER_KEEP
-    if (reactionKinds.includes(e.kind))            return NEVER_KEEP
+    if (repostKinds.includes(e.kind)) return NEVER_KEEP
+    if (reactionKinds.includes(e.kind)) return NEVER_KEEP
 
     // If the user follows this person, use max wot score
     let score = isFollowing ? $maxWot : getUserWotScore(e.pubkey)
 
     // Demote non-metadata type events, and introduce recency bias
     if (noteKinds.includes(e.kind)) {
-      score = e.created_at / now() * score
+      score = (e.created_at / now()) * score
     }
 
     // Inflate the score for profiles/relays/follows to avoid redundant fetches
@@ -1443,7 +1402,10 @@ const migrateEvents = (events: TrustedEvent[]) => {
 
   const scoreEvent = getScoreEvent()
 
-  return take(30_000, sortBy(e => -scoreEvent(e), events))
+  return take(
+    30_000,
+    sortBy(e => -scoreEvent(e), events),
+  )
 }
 
 // Avoid initializing multiple times on hot reload

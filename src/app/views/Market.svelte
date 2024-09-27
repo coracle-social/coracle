@@ -11,7 +11,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {env, loadGroupMessages} from "src/engine"
+  import {env, loadCircleMessages} from "src/engine"
   import {makeFeed} from "src/domain"
 
   const feed = makeFeed({
@@ -23,7 +23,7 @@
   const createListing = () => router.at("notes/create").qp({type: "listing"}).open()
 
   if (env.FORCE_GROUP) {
-    loadGroupMessages([env.FORCE_GROUP])
+    loadCircleMessages([env.FORCE_GROUP])
   }
 </script>
 

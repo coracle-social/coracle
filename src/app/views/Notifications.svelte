@@ -33,7 +33,7 @@
     notifications,
     createNotificationGroups,
     loadNotifications,
-    loadGroupMessages,
+    loadCircleMessages,
     unwrapRepost,
     groupRequests,
     groupAlerts,
@@ -166,8 +166,8 @@
   document.title = "Notifications"
 
   onMount(() => {
-    loadGroupMessages()
     loadNotifications()
+    loadCircleMessages()
 
     const unsubUnreadMainNotifications = unreadMainNotifications.subscribe(
       throttle(1000, events => {

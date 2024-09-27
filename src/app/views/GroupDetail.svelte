@@ -26,7 +26,6 @@
     userIsGroupMember,
     deriveGroupStatus,
     loadGroups,
-    loadGroupMessages,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
@@ -56,12 +55,6 @@
   let tabs
 
   $: key = $group && $userIsGroupMember(address)
-
-  $: {
-    if (key) {
-      loadGroupMessages([address])
-    }
-  }
 
   $: {
     tabs = ["notes"]

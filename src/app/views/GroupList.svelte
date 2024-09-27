@@ -13,7 +13,6 @@
   import {
     load,
     groups,
-    loadGroupMessages,
     userIsGroupMember,
     communityListsByAddress,
     groupMetaSearch,
@@ -45,10 +44,6 @@
     )
 
     if ($pubkey) {
-      updateSession($pubkey, assoc("groups_last_synced", now()))
-
-      loadGroupMessages()
-
       load({
         skipCache: true,
         forcePlatform: false,

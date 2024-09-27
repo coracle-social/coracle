@@ -2,22 +2,14 @@ import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
 import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
-import {
-  FeedLoader,
-  Scope,
-  feedFromFilter,
-  makeIntersectionFeed,
-  makeRelayFeed,
-  makeUnionFeed,
-} from "@welshman/feeds"
-import {ctx, Worker, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
-import type {Filter, TrustedEvent, SignedEvent} from "@welshman/util"
+import {FeedLoader, Scope} from "@welshman/feeds"
+import {ctx, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
+import type {Filter, TrustedEvent} from "@welshman/util"
 import {
   Tags,
   Address,
   getIdFilters,
   isGroupAddress,
-  isSignedEvent,
   createEvent,
   WRAP,
   EPOCH,
@@ -47,7 +39,6 @@ import {
   getFilterSelections,
   getFollowers,
   getFollows,
-  getUserWotScore,
   pull,
   hasNegentropy,
   wotGraph,
@@ -56,21 +47,19 @@ import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {partition, pluck, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
-import type {SessionWithMeta} from "src/engine/model"
 import {
   env,
   getUserCircles,
-  getGroupReqInfo,
-  getCommunityReqInfo,
   getUserCommunities,
   isEventMuted,
   load,
   maxWot,
   getNetwork,
-  publish,
   subscribe,
   subscribePersistent,
   sessionWithMeta,
+  groupAdminKeys,
+  groupSharedKeys,
   type MySubscribeRequest,
 } from "src/engine/state"
 
@@ -165,41 +154,34 @@ export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = 
   }
 }
 
-export const loadGroupMessages = (addresses?: string[]) => {
-  const promises = []
-  const addrs = addresses || getUserCircles(sessionWithMeta.get())
-  const [groupAddrs, communityAddrs] = partition(isGroupAddress, addrs)
+export const loadGroupMessages = async (addrs: string[]) => {
+  for (const address of addrs) {
+    const keys = [...groupAdminKeys.get(), ...groupSharedKeys.get()]
+    const pubkeys = keys.filter(k => k.group === address).map(k => k.pubkey)
 
-  for (const address of groupAddrs) {
-    const {admins, recipients, relays, since} = getGroupReqInfo(address)
-    const pubkeys = uniq([...admins, ...recipients])
-    const filters = [{kinds: [WRAP], "#p": pubkeys, since}]
-
-    if (pubkeys.length > 0) {
-      promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
-    }
+    await pullConservatively({
+      relays: ctx.app.router.WithinContext(address).getUrls(),
+      filters: [{kinds: [WRAP], "#p": pubkeys}],
+    })
   }
+}
 
-  for (const address of communityAddrs) {
-    const {relays, ...info} = getCommunityReqInfo(address)
-    const kinds = [...noteKinds, ...repostKinds]
-    const since = Math.max(now() - seconds(7, "day"), info.since)
-    const filters = [{kinds, "#a": [address], since}]
-
-    promises.push(load({relays, filters, skipCache: true, forcePlatform: false}))
-  }
-
-  updateSession(pubkey.get(), ($sessionWithMeta: SessionWithMeta) => {
-    for (const address of addrs) {
-      if ($sessionWithMeta.groups?.[address]) {
-        $sessionWithMeta.groups[address].last_synced = now()
-      }
-    }
-
-    return $sessionWithMeta
+export const loadCommunityMessages = async (addrs: string[]) => {
+  await pullConservatively({
+    relays: ctx.app.router.WithinMultipleContexts(addrs).getUrls(),
+    filters: [{kinds: [...noteKinds, ...repostKinds], "#a": addrs}],
   })
+}
 
-  return Promise.all(promises)
+export const loadCircleMessages = async (addrs?: string[]) => {
+  if (!addrs) {
+    addrs = getUserCircles(sessionWithMeta.get())
+  }
+
+  const [groups, communities] = partition(isGroupAddress, addrs)
+
+  loadGroupMessages(groups)
+  loadCommunityMessages(communities)
 }
 
 export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>

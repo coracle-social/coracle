@@ -84,11 +84,9 @@ export type GroupStatus = {
   joined_updated_at: number
   access: GroupAccess
   access_updated_at: number
-  last_synced: number
 }
 
 export type SessionWithMeta = Session & {
-  groups_last_synced?: number
   notifications_last_synced?: number
   groups?: Record<string, GroupStatus>
   onboarding_tasks_completed?: string[]

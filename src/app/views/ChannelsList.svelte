@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {toTitle, Storage} from "hurdak"
-  import {get, derived, readable} from "svelte/store"
+  import {derived} from "svelte/store"
   import {signer} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {createScroller} from "src/util/misc"
@@ -13,12 +13,7 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {
-    channels,
-    hasNip44,
-    hasNewMessages,
-    markAllChannelsRead,
-  } from "src/engine"
+  import {channels, hasNip44, hasNewMessages, markAllChannelsRead} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const accepted = derived(channels, $ch => $ch.filter(c => c.last_sent > 0))
