@@ -1407,20 +1407,17 @@ const getScoreEvent = () => {
   return e => {
     const isFollowing = $userFollows.has(e.pubkey)
 
-    // Drop wraps, since they're redundant with rumors
-    if (e.kind === WRAP)                    return NEVER_KEEP
-
     // No need to keep a record of everyone who follows the current user
-    if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
+    if (e.kind === FOLLOWS && !isFollowing)        return NEVER_KEEP
 
     // Always keep stuff by or tagging a signed in user
-    if ($sessionKeys.has(e.pubkey))               return ALWAYS_KEEP
-    if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
+    if ($sessionKeys.has(e.pubkey))                return ALWAYS_KEEP
+    if (e.tags.some(t => $sessionKeys.has(t[1])))  return ALWAYS_KEEP
 
     // Get rid of irrelevant messages, reactions, and likes
-    if (e.wrap || e.kind === 4)             return NEVER_KEEP
-    if (repostKinds.includes(e.kind))       return NEVER_KEEP
-    if (reactionKinds.includes(e.kind))     return NEVER_KEEP
+    if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
+    if (repostKinds.includes(e.kind))              return NEVER_KEEP
+    if (reactionKinds.includes(e.kind))            return NEVER_KEEP
 
     // If the user follows this person, use max wot score
     let score = isFollowing ? $maxWot : getUserWotScore(e.pubkey)
