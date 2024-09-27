@@ -1395,20 +1395,54 @@ const migrateFreshness = (data: {key: string; value: number}[]) => {
   return data.filter(({value}) => value < cutoff)
 }
 
-const migrateEvents = (events: TrustedEvent[]) =>
-  events.length < 50_000
-    ? events
-    : take(
-        30_000,
-        sortBy(e => {
-          if (e.kind === WRAP) return -Infinity
-          if (getSession(e.pubkey)) return -Infinity
-          if (e.tags.find(t => getSession(t[1]))) return -seconds(90, "day")
-          if (reactionKinds.includes(e.kind)) return 0
-          if (repostKinds.includes(e.kind)) return 0
-          return e.created_at - now()
-        }, events),
-      )
+const getScoreEvent = () => {
+  const ALWAYS_KEEP = Infinity
+  const NEVER_KEEP = 0
+
+  const $userFollows = get(userFollows)
+  const $maxWot = get(maxWot)
+
+  return e => {
+    const isFollowing = $userFollows.has(e.pubkey)
+
+    // Drop wraps, since they're redundant with rumors
+    if (e.kind === WRAP)                    return NEVER_KEEP
+
+    // No need to keep a record of everyone who follows the current user
+    if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
+
+    // Always keep stuff by or tagging a signed in user
+    if (getSession(e.pubkey))               return ALWAYS_KEEP
+    if (e.tags.find(t => getSession(t[1]))) return ALWAYS_KEEP
+
+    // Get rid of irrelevant messages, reactions, and likes
+    if (e.wrap || e.kind === 4)             return NEVER_KEEP
+    if (repostKinds.includes(e.kind))       return NEVER_KEEP
+    if (reactionKinds.includes(e.kind))     return NEVER_KEEP
+
+    // If the user follows this person, use max wot score
+    let score = isFollowing ? $maxWot : getUserWotScore(e.pubkey)
+
+    // Demote non-metadata type events, and introduce recency bias
+    if (noteKinds.includes(e.kind)) {
+      score = e.created_at / now() * score
+    }
+
+    return score
+  }
+}
+
+const migrateEvents = (events: TrustedEvent[]) => {
+  const scoreEvent = getScoreEvent()
+
+  console.log(sortBy(e => -scoreEvent(e), events).map(e => [e, scoreEvent(e)]))
+
+  if (events.length < 50_000) {
+    return events
+  }
+
+  return take(30_000, sortBy(e => -scoreEvent(e), events))
+}
 
 // Avoid initializing multiple times on hot reload
 if (!db) {

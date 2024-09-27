@@ -198,7 +198,7 @@
   <Modal onEscape={closeModal}>
     <Subheading>Add a relay</Subheading>
     <p>Enter a relay url below to add it to your relay selections.</p>
-    <Input bind:value={customRelay} placeholder="wss://...">
+    <Input autofocus bind:value={customRelay} placeholder="wss://...">
       <i slot="before" class="fa fa-server" />
     </Input>
     <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>

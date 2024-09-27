@@ -49,6 +49,8 @@ import {
   getFollows,
   getUserWotScore,
   pull,
+  hasNegentropy,
+  wotGraph,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -326,9 +328,7 @@ export const feedLoader = new FeedLoader({
     const thresholdMin = maxWot.get() * min
     const thresholdMax = maxWot.get() * max
 
-    for (const tpk of repository.eventsByAuthor.keys()) {
-      const score = getUserWotScore(tpk)
-
+    for (const [tpk, score] of wotGraph.get().entries()) {
       if (score >= thresholdMin && score <= thresholdMax) {
         pubkeys.push(tpk)
       }

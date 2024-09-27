@@ -48,7 +48,7 @@
             </div>
             <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
               <i class="fa fa-info-circle" />
-              WoT Score
+              WoT Score: {wotScore}
             </Anchor>
           </Popover>
         </div>
