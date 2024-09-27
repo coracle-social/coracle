@@ -13,10 +13,9 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, loginWithExtension, loginWithNostrConnect, loginWithAmber} from "src/engine"
+  import {load, loginWithExtension, loginWithNostrConnect, loginWithSigner} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
-  import { nip19 } from "nostr-tools"
 
   const signUp = () => router.at("signup").replaceModal()
 
@@ -30,13 +29,19 @@
     boot()
   }
 
-  const useAmber = async () => {
-	const pkg = "com.greenart7c3.nostrsigner"
-	const signer = new Nip55Signer(pkg)
-    const pk = await signer.getPubkey()
-	const {data} = nip19.decode(pk)
+  // Define the interface for AppInfo
+  interface AppInfo {
+    name: string;
+    packageName: string;
+    icon: string; // Base64-encoded string of the app icon
+  }
 
-    loginWithAmber(data, pkg)
+  let signerApps:AppInfo[] = []
+
+  const useSigner = async (app:AppInfo) => {
+    const signer = new Nip55Signer(app.packageName)
+    const pubkey = await signer.getPubkey()
+    loginWithSigner(pubkey, app.packageName)
     boot()
   }
 
@@ -102,7 +107,7 @@
   let handler = handlers[0]
   let username = ""
 
-  onMount(() => {
+  onMount(async () => {
     load({
       filters: [
         {
@@ -130,6 +135,7 @@
         }
       },
     })
+    signerApps = await getNip55()
   })
 
   document.title = "Log In"
@@ -168,7 +174,7 @@
     <div
       class={cx(
         "relative grid justify-center gap-2 xs:gap-5",
-        getNip07() || getNip55() ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        getNip07() || signerApps.length > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
       )}>
       <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
         <div>
@@ -196,13 +202,20 @@
         </div>
         <span>Public Key</span>
       </Tile>
-      {#if getNip55()}
-	  <Tile class="cursor-pointer bg-tinted-800" on:click={useAmber}>
-        <div>
-          <i class="fa fa-diamond fa-xl" />
-        </div>
-        <span>Amber</span>
-      </Tile>
+      {#if signerApps.length > 0}
+        {#each signerApps as app}
+          <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
+            <div>
+				<img
+                src={`data:image/png;base64,${app.icon}`}
+                alt={app.name}
+                width="48"
+                height="48"
+              />
+            </div>
+            <span>{app.name}</span>
+          </Tile>
+        {/each}
       {/if}
     </div>
   </FlexColumn>

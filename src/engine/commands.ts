@@ -872,7 +872,7 @@ export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey
 
 export const loginWithExtension = pubkey => addSession({method: "nip07", pubkey})
 
-export const loginWithAmber = pubkey => addSession({method: "nip55", pubkey})
+export const loginWithSigner = (pubkey, pkg) => addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
 export const loginWithNsecBunker = async (pubkey, token, connectRelay) => {
   const secret = makeSecret()
