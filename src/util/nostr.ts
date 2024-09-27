@@ -14,6 +14,11 @@ import {
   Tags,
   Address,
   LIVE_CHAT_MESSAGE,
+  RELAYS,
+  PROFILE,
+  INBOX_RELAYS,
+  FOLLOWS,
+  MUTES,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
@@ -50,6 +55,7 @@ export const noteKinds = [
 export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
+export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",

@@ -100,10 +100,11 @@ import {
   wotGraph,
   getFollows,
   getUserWotScore,
+  sessions,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
-import {isLike, repostKinds, noteKinds, reactionKinds, appDataKeys} from "src/util/nostr"
+import {isLike, repostKinds, noteKinds, reactionKinds, metaKinds, appDataKeys} from "src/util/nostr"
 import logger from "src/util/logger"
 import type {
   GroupMeta,
@@ -1399,6 +1400,7 @@ const getScoreEvent = () => {
   const ALWAYS_KEEP = Infinity
   const NEVER_KEEP = 0
 
+  const $sessionKeys = new Set(Object.keys(sessions.get()))
   const $userFollows = get(userFollows)
   const $maxWot = get(maxWot)
 
@@ -1412,8 +1414,8 @@ const getScoreEvent = () => {
     if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
 
     // Always keep stuff by or tagging a signed in user
-    if (getSession(e.pubkey))               return ALWAYS_KEEP
-    if (e.tags.find(t => getSession(t[1]))) return ALWAYS_KEEP
+    if ($sessionKeys.has(e.pubkey))               return ALWAYS_KEEP
+    if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
 
     // Get rid of irrelevant messages, reactions, and likes
     if (e.wrap || e.kind === 4)             return NEVER_KEEP
@@ -1428,18 +1430,21 @@ const getScoreEvent = () => {
       score = e.created_at / now() * score
     }
 
+    // Inflate the score for profiles/relays/follows to avoid redundant fetches
+    if (metaKinds.includes(e.kind)) {
+      score *= 2
+    }
+
     return score
   }
 }
 
 const migrateEvents = (events: TrustedEvent[]) => {
-  const scoreEvent = getScoreEvent()
-
-  console.log(sortBy(e => -scoreEvent(e), events).map(e => [e, scoreEvent(e)]))
-
   if (events.length < 50_000) {
     return events
   }
+
+  const scoreEvent = getScoreEvent()
 
   return take(30_000, sortBy(e => -scoreEvent(e), events))
 }
