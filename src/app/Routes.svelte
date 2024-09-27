@@ -44,12 +44,14 @@
 
   // Redirect if we're missing required parameters. This is usually due to a malformed url.
   $: {
-    const props = router.getProps($current)
+    if ($current) {
+      const props = router.getProps($current)
 
-    for (const k of router.getMatch($current.path).route.required || []) {
-      if (!props[k]) {
-        router.go({path: "/", replace: true})
-        break
+      for (const k of router.getMatch($current.path).route.required || []) {
+        if (!props[k]) {
+          router.go({path: "/", replace: true})
+          break
+        }
       }
     }
   }
