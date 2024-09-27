@@ -18,8 +18,6 @@
     hasNip44,
     hasNewMessages,
     markAllChannelsRead,
-    loadLegacyMessages,
-    loadGiftWraps,
   } from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
@@ -42,35 +40,17 @@
     hideNip04Alert = true
   }
 
-  const loadMessages = ({reload = false} = {}) => {
-    loaders.map(loader => loader.stop())
-    loaders = [loadGiftWraps({reload}), loadLegacyMessages({reload})]
-
-    loading = derived(
-      loaders.map(l => l.loading),
-      loading => loading.every(v => v === true),
-    )
-  }
-
   $: tabChannels = activeTab === "conversations" ? $accepted : $requests
 
-  let limit = 20
   let element
-  let loaders = []
-  let loading = readable(false)
+  let limit = 20
   let hideNip04Alert = Storage.getJson("hide_nip04_alert")
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element, delay: 300})
 
-    // Don't load if we just switched tabs
-    if (!get(router.history)[1]?.path.startsWith("/channels")) {
-      loadMessages()
-    }
-
     return () => {
       scroller.stop()
-      loaders.map(loader => loader.stop())
     }
   })
 
@@ -116,21 +96,6 @@
       </div>
     </Tabs>
     <div class="absolute right-5 top-1 hidden items-center gap-6 sm:flex">
-      <Popover triggerType="mouseenter">
-        <div slot="trigger">
-          <i
-            class="fa fa-arrows-rotate cursor-pointer text-neutral-600"
-            class:fa-spin={$loading}
-            on:click={() => loadMessages({reload: true})} />
-        </div>
-        <div slot="tooltip">
-          {#if $loading}
-            Loading conversations...
-          {:else}
-            Reload conversations
-          {/if}
-        </div>
-      </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
           <i

@@ -13,7 +13,6 @@
   import {
     load,
     groups,
-    loadGiftWraps,
     loadGroupMessages,
     userIsGroupMember,
     communityListsByAddress,
@@ -40,7 +39,6 @@
   document.title = "Groups"
 
   onMount(() => {
-    const loader = loadGiftWraps()
     const scroller = createScroller(loadMore, {element})
     const communityAddrs = Array.from($communityListsByAddress.keys()).filter(
       a => !groups.key(a).get()?.meta,
@@ -73,10 +71,7 @@
       filters: getIdFilters(shuffle(communityAddrs).slice(0, 1000)),
     })
 
-    return () => {
-      loader.stop()
-      scroller.stop()
-    }
+    return () => scroller.stop()
   })
 </script>
 

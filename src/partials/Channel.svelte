@@ -32,7 +32,7 @@
   export let initialMessage = ""
   export let messages: TrustedEvent[]
 
-  const loading = sleep(30_000)
+  const loading = sleep(5_000)
   const toggleScale = 0.7
 
   const startScroller = () => {

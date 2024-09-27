@@ -48,6 +48,7 @@ import {
   getFollowers,
   getFollows,
   getUserWotScore,
+  pull,
 } from "@welshman/app"
 import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
@@ -86,24 +87,16 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
   return {...filter, since}
 }
 
-export const attemptedAddrs = new Map()
-
-export const getStaleAddrs = (addrs: string[]) => {
-  const stale = new Set<string>()
-
-  for (const addr of addrs) {
-    const attempts = attemptedAddrs.get(addr) | 0
-
-    if (attempts > 0) {
-      continue
-    }
-
-    stale.add(addr)
-
-    attemptedAddrs.set(addr, attempts + 1)
+const pullConservatively = ({relays, filters}) => {
+  // Since pulling from relays without negentropy is expensive, only do it 30% of the time,
+  // unless we have very few matching events. If that's the case, either we haven't synced
+  // this filter yet, or there are few enough events that we don't really need to worry about
+  // downloading duplicates.
+  if (Math.random() < 0.7 && repository.query(filters).length > 100) {
+    relays = relays.filter(hasNegentropy)
   }
 
-  return Array.from(stale)
+  return pull({relays, filters})
 }
 
 export const loadAll = (feed, opts: LoadOpts = {}) => {
@@ -130,26 +123,27 @@ export const loadAll = (feed, opts: LoadOpts = {}) => {
   return {promise, loading, stop}
 }
 
-export const sync = (fromUrl, toUrl, filters) => {
-  const worker = new Worker<SignedEvent>()
-
-  worker.addGlobalHandler(event => publish({event, relays: [toUrl], forcePlatform: false}))
-
-  const feed = makeIntersectionFeed(
-    makeRelayFeed(fromUrl),
-    makeUnionFeed(...filters.map(feedFromFilter)),
-  )
-
-  return loadAll(feed, {
-    onEvent: e => {
-      if (isSignedEvent(e)) {
-        worker.push(e)
-      }
-    },
-  })
-}
-
 // Groups
+
+export const attemptedAddrs = new Map()
+
+export const getStaleAddrs = (addrs: string[]) => {
+  const stale = new Set<string>()
+
+  for (const addr of addrs) {
+    const attempts = attemptedAddrs.get(addr) | 0
+
+    if (attempts > 0) {
+      continue
+    }
+
+    stale.add(addr)
+
+    attemptedAddrs.set(addr, attempts + 1)
+  }
+
+  return Array.from(stale)
+}
 
 export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = []) => {
   const addrs = getStaleAddrs(rawAddrs)
@@ -468,35 +462,14 @@ export const loadFeedsAndLists = () =>
     ],
   })
 
-export const loadGiftWraps = ({reload = false} = {}) => {
-  let filter = {kinds: [WRAP], "#p": [pubkey.get()]}
-
-  if (!reload) {
-    filter = addSinceToFilter(filter, seconds(7, "day"))
-  }
-
-  return loadAll(
-    makeIntersectionFeed(makeRelayFeed(...ctx.app.router.User().getUrls()), feedFromFilter(filter)),
-  )
-}
-
-export const loadLegacyMessages = ({reload = false} = {}) => {
-  let filters = [
-    {kinds: [4], authors: [pubkey.get()]},
-    {kinds: [4], "#p": [pubkey.get()]},
-  ]
-
-  if (!reload) {
-    filters = filters.map(addSinceToFilter)
-  }
-
-  return loadAll(
-    makeIntersectionFeed(
-      makeRelayFeed(...ctx.app.router.User().getUrls()),
-      makeUnionFeed(...filters.map(feedFromFilter)),
-    ),
-  )
-}
+export const loadMessages = () =>
+  pullConservatively({
+    relays: ctx.app.router.User().getUrls(),
+    filters: [
+      {kinds: [4], authors: [pubkey.get()]},
+      {kinds: [4, WRAP], "#p": [pubkey.get()]},
+    ],
+  })
 
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
@@ -506,9 +479,8 @@ export const listenForMessages = (pubkeys: string[]) => {
     forcePlatform: false,
     relays: ctx.app.router.Messages(pubkeys).getUrls(),
     filters: [
-      addSinceToFilter({kinds: [WRAP], "#p": [pubkey.get()]}, seconds(14, "day")),
-      addSinceToFilter({kinds: [4], authors: allPubkeys}),
-      addSinceToFilter({kinds: [4], "#p": allPubkeys}),
+      {kinds: [4], authors: allPubkeys},
+      {kinds: [4, WRAP], "#p": [pubkey.get()]},
     ],
   })
 }

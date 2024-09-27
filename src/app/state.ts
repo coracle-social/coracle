@@ -24,8 +24,7 @@ import {
   loadGroups,
   loadDeletes,
   loadHandlers,
-  loadGiftWraps,
-  loadLegacyMessages,
+  loadMessages,
   loadGroupMessages,
   loadNotifications,
   loadFeedsAndLists,
@@ -126,8 +125,7 @@ export const loadUserData = async (hints: string[] = []) => {
 
   // Load anything they might need to be notified about
   loadSeen()
-  loadGiftWraps()
-  loadLegacyMessages()
+  loadMessages()
   loadGroupMessages()
   loadNotifications()
   loadFeedsAndLists()
