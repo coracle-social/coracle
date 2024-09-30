@@ -1,10 +1,10 @@
 <script>
   import {onMount} from "svelte"
-  import {filter, reject, assoc} from "ramda"
+  import {filter, reject} from "ramda"
   import {derived} from "svelte/store"
-  import {ctx, now, shuffle} from "@welshman/lib"
+  import {ctx, shuffle} from "@welshman/lib"
   import {GROUP, COMMUNITY, COMMUNITIES, getAddress, getIdFilters} from "@welshman/util"
-  import {pubkey, updateSession} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

@@ -87,7 +87,6 @@ export type GroupStatus = {
 }
 
 export type SessionWithMeta = Session & {
-  notifications_last_synced?: number
   groups?: Record<string, GroupStatus>
   onboarding_tasks_completed?: string[]
 }

@@ -4,7 +4,7 @@ import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {FeedLoader, Scope} from "@welshman/feeds"
 import {ctx, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
-import type {Filter, TrustedEvent} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
   Address,
@@ -31,8 +31,6 @@ import {
   pubkey,
   repository,
   signer,
-  getSession,
-  updateSession,
   loadProfile,
   loadFollows,
   loadMutes,
@@ -43,19 +41,15 @@ import {
   hasNegentropy,
   wotGraph,
 } from "@welshman/app"
-import {updateIn} from "src/util/misc"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-import {partition, pluck, uniq, without} from "ramda"
+import {partition, uniq, without} from "ramda"
 import {LIST_KINDS} from "src/domain"
 import {
   env,
   getUserCircles,
-  getUserCommunities,
-  isEventMuted,
   load,
   maxWot,
   getNetwork,
-  subscribe,
   subscribePersistent,
   sessionWithMeta,
   groupAdminKeys,
@@ -323,24 +317,7 @@ export const feedLoader = new FeedLoader({
 // Notifications
 
 const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
-  const kinds = getNotificationKinds()
-  const $isEventMuted = isEventMuted.get()
-  const events = chunk.filter(e => kinds.includes(e.kind) && !$isEventMuted(e))
   const eventsWithParent = chunk.filter(e => Tags.fromEvent(e).parent())
-  const pubkeys = uniq(pluck("pubkey", events))
-
-  for (const pubkey of pubkeys) {
-    if (getSession(pubkey)) {
-      updateSession(
-        pubkey,
-        updateIn("notifications_last_synced", (t: number) =>
-          pluck("created_at", events)
-            .concat(t || 0)
-            .reduce((a, b) => Math.max(a, b), 0),
-        ),
-      )
-    }
-  }
 
   if (eventsWithParent.length > 0) {
     const relays = ctx.app.router.merge(eventsWithParent.map(ctx.app.router.EventParents)).getUrls()
@@ -351,57 +328,33 @@ const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
 })
 
 export const getNotificationKinds = () =>
-  without(env.ENABLE_ZAPS ? [] : [9735], [
-    ...noteKinds,
-    ...reactionKinds,
-    WRAP,
-    DEPRECATED_DIRECT_MESSAGE,
-  ])
+  without(env.ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds])
 
 export const loadNotifications = () => {
   const kinds = getNotificationKinds()
-  const cutoff = now() - seconds(30, "day")
-  const {pubkey, notifications_last_synced = 0} = sessionWithMeta.get()
-  const since = Math.max(cutoff, notifications_last_synced - seconds(6, "hour"))
+  const since = now() - seconds(30, "day")
 
-  const filters = [
-    {kinds, "#p": [pubkey], since},
-    {kinds, authors: [pubkey], since},
-  ]
-
-  return subscribe({
-    filters,
-    timeout: 15000,
-    skipCache: true,
-    closeOnEose: true,
-    onEvent: onNotificationEvent,
+  return pullConservatively({
+    relays: ctx.app.router.User().getUrls(),
+    filters: [
+      {kinds, "#p": [pubkey.get()], since},
+      {kinds, authors: [pubkey.get()], since},
+    ],
   })
 }
 
 export const listenForNotifications = () => {
-  const since = now() - 30
-  const $sessionWithMeta = sessionWithMeta.get()
-  const addrs = getUserCommunities($sessionWithMeta)
+  const kinds = getNotificationKinds()
 
-  const filters: Filter[] = [
-    // Mentions
-    {kinds: noteKinds, "#p": [$sessionWithMeta.pubkey], limit: 1, since},
-    // Messages/groups
-    {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [$sessionWithMeta.pubkey], limit: 1, since},
-  ]
-
-  // Communities
-  if (addrs.length > 0) {
-    filters.push({kinds: [...noteKinds, ...repostKinds], "#a": addrs, limit: 1, since})
-  }
-
-  // Only grab one event from each category/relay so we have enough to show
-  // the notification badges, but load the details lazily
   subscribePersistent({
-    filters,
     timeout: 30_000,
     skipCache: true,
     onEvent: onNotificationEvent,
+    relays: ctx.app.router.User().getUrls(),
+    filters: [
+      {kinds, "#p": [pubkey.get()], since: now()},
+      {kinds, authors: [pubkey.get()], since: now()},
+    ],
   })
 }
 
@@ -448,8 +401,8 @@ export const loadMessages = () =>
   pullConservatively({
     relays: ctx.app.router.User().getUrls(),
     filters: [
-      {kinds: [4], authors: [pubkey.get()]},
-      {kinds: [4, WRAP], "#p": [pubkey.get()]},
+      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
+      {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
     ],
   })
 
@@ -461,8 +414,8 @@ export const listenForMessages = (pubkeys: string[]) => {
     forcePlatform: false,
     relays: ctx.app.router.Messages(pubkeys).getUrls(),
     filters: [
-      {kinds: [4], authors: allPubkeys},
-      {kinds: [4, WRAP], "#p": [pubkey.get()]},
+      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys},
+      {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
     ],
   })
 }
