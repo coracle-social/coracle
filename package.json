@@ -9,7 +9,7 @@
     "test:unit": "vitest --dir=tests/unit --watch=false",
     "test:e2e": "cypress run",
     "build": "pwa-assets-generator && vite build",
-    "build:android": "npm run build && cap sync && cap build android --androidreleasetype APK --signing-type apksigner",
+    "release:android": "cap build android --androidreleasetype APK --signing-type apksigner",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "prettier --check $(git diff head --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs)",
