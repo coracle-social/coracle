@@ -57,7 +57,9 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
 
-    return isEvent(parsed) || isAddress(parsed) || isLink(parsed)
+    if (isLink(parsed)) return showMedia
+
+    return isEvent(parsed) || isAddress(parsed)
   }
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
