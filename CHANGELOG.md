@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.4.11
+
+- [x] Add NIP 55 support to Android
+- [x] Add negentropy support
+- [x] Simplify sync for messages, groups, and notifications
+- [x] Small UI fixes
+
 # 0.4.10
 
 - [x] Show loading when sending note reply
