@@ -7,6 +7,10 @@
   const createSpace = () => pushModal(SpaceCreateExternal)
 
   const browseSpaces = () => goto("/discover")
+
+  const leaveFeedback = () => goto("/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322")
+
+  const donate = () => window.open('https://geyser.fund/project/flotilla')
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -21,10 +25,10 @@
         <CardButton icon="compass" title="Discover spaces" class="h-24" on:click={browseSpaces}>
           Find a community based on your hobbies or interests.
         </CardButton>
-        <CardButton icon="plain" title="Leave feedback" class="h-24">
+        <CardButton icon="plain" title="Leave feedback" class="h-24" on:click={leaveFeedback}>
           Let us know how we can improve by giving us feedback.
         </CardButton>
-        <CardButton icon="hand-pills" title="Donate to Flotilla" class="h-24">
+        <CardButton icon="hand-pills" title="Donate to Flotilla" class="h-24" on:click={donate}>
           Support the project by donating to the developer.
         </CardButton>
       </div>

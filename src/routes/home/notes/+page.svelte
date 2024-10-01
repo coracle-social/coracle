@@ -1,0 +1,93 @@
+<script lang="ts">
+  import {onMount} from 'svelte'
+  import {derived} from 'svelte/store'
+  import {createScroller} from '@lib/html'
+  import {shuffle, sortBy, sleep, ago, DAY, HOUR, pushToMapKey} from '@welshman/lib'
+  import {getListValues, getAncestorTagValues, NOTE, REACTION} from '@welshman/util'
+  import type {TrustedEvent} from '@welshman/util'
+  import {deriveEvents} from '@welshman/store'
+  import {profileSearch, repository, userFollows, load} from '@welshman/app'
+  import Spinner from '@lib/components/Spinner.svelte'
+  import NoteCard from '@app/components/NoteCard.svelte'
+  import Content from '@app/components/Content.svelte'
+
+  let element: Element
+  let loading = sleep(3000)
+  let events: TrustedEvent[] = []
+
+  const since = ago(DAY)
+  const authors = getListValues("p", $userFollows)
+  const notesFilter = {kinds: [NOTE], authors, since}
+  const notes = deriveEvents(repository, {filters: [notesFilter]})
+  const reactionsFilter = {kinds: [REACTION], '#p': authors, since}
+  const reactions = deriveEvents(repository, {filters: [reactionsFilter]})
+  const reactionsByParent = derived(
+    reactions,
+    $reactions => {
+      const $reactionsByParent = new Map<string, TrustedEvent[]>()
+
+      for (const event of $reactions) {
+        const [parentId] = getAncestorTagValues(event.tags).replies
+
+        if (parentId) {
+          pushToMapKey($reactionsByParent, parentId, event)
+        }
+      }
+
+      return $reactionsByParent
+    }
+  )
+
+  const isLike = (e: TrustedEvent) =>
+    e.kind === REACTION && ["+", ""].includes(e.content)
+
+  const isReplyOf = (e: TrustedEvent, p: TrustedEvent) =>
+    getAncestorTagValues(e.tags).replies.includes(e.id)
+
+  const scoreEvent = (e: TrustedEvent) => {
+    const thisReactions = $reactionsByParent.get(e.id) || []
+    const thisLikes = thisReactions.filter(r => isLike(r))
+    const recency = Math.max(1, e.created_at - since) / HOUR
+    const score = Math.max(1, thisReactions.length) * Math.max(1, thisLikes.length) * recency
+
+    return -score
+  }
+
+  onMount(() => {
+    load({filters: [notesFilter, reactionsFilter]})
+
+    const scroller = createScroller({
+      element: element.closest('.max-h-screen')!,
+      onScroll: () => {
+        const seen = new Set(events.map(e => e.id))
+        const eligible = sortBy(
+          scoreEvent,
+          $notes.filter(e => !seen.has(e.id) && getAncestorTagValues(e.tags).replies.length === 0)
+        )
+
+        events = [...events, ...eligible.slice(0, 10)]
+      },
+    })
+
+    return () => scroller.stop()
+  })
+</script>
+
+
+<div class="content column gap-4" bind:this={element}>
+  {#await loading}
+    <div class="center my-20">
+      <Spinner loading>Loading notes...</Spinner>
+    </div>
+  {:then}
+    <div class="flex flex-col gap-2">
+      {#each events as event (event.id)}
+        <NoteCard {event} class="card2 w-full">
+          <div class="ml-12">
+            <Content {event} />
+          </div>
+        </NoteCard>
+      {/each}
+    </div>
+  {/await}
+</div>

@@ -6,6 +6,7 @@
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
+  import {channels} from '@app/state'
 </script>
 
 <SecondaryNav>
@@ -21,6 +22,11 @@
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: 100}}>
+      <SecondaryNavItem href="/home/notes">
+        <Icon icon="notes-minimalistic" /> Notes
+      </SecondaryNavItem>
+    </div>
+    <div in:fly={{delay: 150}}>
       <SecondaryNavHeader>
         Chats
         <div class="cursor-pointer">
@@ -28,6 +34,13 @@
         </div>
       </SecondaryNavHeader>
     </div>
+    {#each $channels as {id, pubkeys}, i (id)}
+      <div in:fly={{delay: 200 + i * 50}}>
+        <SecondaryNavItem href="/home/{id}">
+          {id}
+        </SecondaryNavItem>
+      </div>
+    {/each}
   </SecondaryNavSection>
 </SecondaryNav>
 

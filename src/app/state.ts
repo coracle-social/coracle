@@ -1,19 +1,22 @@
 import {nip19} from "nostr-tools"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
+import {setContext, sort, uniq, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
   NOTE,
+  WRAP,
   RELAYS,
   REACTION,
   ZAP_RESPONSE,
+  DIRECT_MESSAGE,
   EVENT_DATE,
   EVENT_TIME,
   getRelayTagValues,
   isShareableRelayUrl,
   getAncestorTags,
   getAncestorTagValues,
+  getPubkeyTagValues,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -152,12 +155,12 @@ export const {
 
 // Messages
 
-export type Message = {
+export type ChatMessage = {
   room: string
   event: TrustedEvent
 }
 
-export const readMessage = (event: TrustedEvent): Maybe<Message> => {
+export const readMessage = (event: TrustedEvent): Maybe<ChatMessage> => {
   const rooms = event.tags.filter(nthEq(0, ROOM)).map(nth(1))
 
   if (rooms.length > 1) return undefined
@@ -165,7 +168,7 @@ export const readMessage = (event: TrustedEvent): Maybe<Message> => {
   return {room: rooms[0] || "", event}
 }
 
-export const messages = deriveEventsMapped<Message>(repository, {
+export const chatMessages = deriveEventsMapped<ChatMessage>(repository, {
   filters: [{kinds: [MESSAGE, REPLY]}],
   eventToItem: readMessage,
   itemToEvent: item => item.event,
@@ -177,17 +180,17 @@ export type Chat = {
   id: string
   url: string
   room: string
-  messages: Message[]
+  messages: ChatMessage[]
 }
 
 export const makeChatId = (url: string, room: string) => `${url}'${room}`
 
 export const splitChatId = (id: string) => id.split("'")
 
-export const chats = derived([trackerStore, messages], ([$tracker, $messages]) => {
-  const messagesByChatId = new Map<string, Message[]>()
+export const chats = derived([trackerStore, chatMessages], ([$tracker, $chatMessages]) => {
+  const messagesByChatId = new Map<string, ChatMessage[]>()
 
-  for (const message of $messages) {
+  for (const message of $chatMessages) {
     for (const url of $tracker.getRelays(message.event.id)) {
       const chatId = makeChatId(url, message.room)
 
@@ -217,6 +220,57 @@ export const {
     const since = Math.max(0, max(timestamps) - 3600)
 
     return load({...request, relays: [url], filters: [{"#~": [room], since}]})
+  },
+})
+
+// Channels
+
+export const channelMessages = deriveEvents(repository, {filters: [{kinds: [DIRECT_MESSAGE]}]})
+
+export type Channel = {
+  id: string
+  pubkeys: string[]
+  messages: TrustedEvent[]
+}
+
+export const makeChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+
+export const splitChannelId = (id: string) => id.split(",")
+
+export const channels = derived(channelMessages, $messages => {
+  const messagesByChannelId = new Map<string, TrustedEvent[]>()
+
+  for (const message of $messages) {
+    const channelId = makeChannelId(getPubkeyTagValues(message.tags))
+
+    pushToMapKey(messagesByChannelId, channelId, message)
+  }
+
+  return Array.from(messagesByChannelId.entries()).map(([id, messages]): Channel => {
+    const pubkeys = splitChannelId(id)
+
+    return {id, pubkeys, messages}
+  })
+})
+
+export const {
+  indexStore: channelsById,
+  deriveItem: deriveChannel,
+  loadItem: loadChannel,
+} = collection({
+  name: "channels",
+  store: channels,
+  getKey: channel => channel.id,
+  load: async (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
+    const $pubkey = pubkey.get()
+    const [url, room] = splitChannelId(id)
+    const channel = get(channelsById).get(id)
+    const timestamps = channel?.messages.map(e => e.created_at) || []
+    const since = Math.max(0, max(timestamps) - 3600)
+
+    if ($pubkey) {
+      await load({...request, filters: [{kinds: [WRAP], '#p': [$pubkey], since}]})
+    }
   },
 })
 
@@ -288,14 +342,6 @@ export const roomsByUrl = derived(chats, $chats => {
 })
 
 // User stuff
-
-export const userProfile = derived([pubkey, profilesByPubkey], ([$pubkey, $profilesByPubkey]) => {
-  if (!$pubkey) return null
-
-  loadProfile($pubkey)
-
-  return $profilesByPubkey.get($pubkey)
-})
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {
