@@ -21,11 +21,6 @@
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: 100}}>
-      <SecondaryNavItem href="/home/notes">
-        <Icon icon="clipboard-text" /> Saved Notes
-      </SecondaryNavItem>
-    </div>
-    <div in:fly={{delay: 150}}>
       <SecondaryNavHeader>
         Chats
         <div class="cursor-pointer">

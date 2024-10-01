@@ -10,16 +10,18 @@
 
   let term = ""
   let limit = 20
-
-  const loadMore = async () => {
-    limit += 20
-  }
+  let element: Element
 
   $: relays = $relaySearch.searchOptions(term).slice(0, limit)
 
   onMount(() => {
     const sub = discoverRelays()
-    const scroller = createScroller(loadMore)
+    const scroller = createScroller({
+      element: element.closest('.max-h-screen')!,
+      onScroll: () => {
+        limit += 20
+      },
+    })
 
     return () => {
       sub.close()
@@ -28,7 +30,7 @@
   })
 </script>
 
-<div class="content column gap-4">
+<div class="content column gap-4" bind:this={element}>
   <h1 class="superheading mt-20">Discover Spaces</h1>
   <p class="text-center">Find communities all across the nostr network</p>
   <label class="input input-bordered flex w-full items-center gap-2">

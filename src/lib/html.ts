@@ -17,26 +17,31 @@ export const copyToClipboard = (text: string) => {
 }
 
 type ScrollerOpts = {
+  onScroll: () => any
+  element: Element
   threshold?: number
   reverse?: boolean
   delay?: number
 }
 
-export const createScroller = (
-  loadMore: () => Promise<void>,
-  {delay = 1000, threshold = 2000, reverse = false}: ScrollerOpts = {},
-) => {
+export const createScroller = ({
+  onScroll,
+  element,
+  delay = 1000,
+  threshold = 2000,
+  reverse = false,
+}: ScrollerOpts) => {
   let done = false
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window
-    const {scrollHeight, scrollTop} = document.querySelector('.max-h-screen')!
+    const {scrollHeight, scrollTop} = element
     const offset = Math.abs(scrollTop || scrollY)
     const shouldLoad = offset + innerHeight + threshold > scrollHeight
 
     // Only trigger loading the first time we reach the threshold
     if (shouldLoad) {
-      await loadMore()
+      await onScroll()
     }
 
     // No need to check all that often

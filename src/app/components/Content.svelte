@@ -17,7 +17,6 @@
     isNewline,
   } from "@welshman/content"
   import Link from '@lib/components/Link.svelte'
-  import Button from '@lib/components/Button.svelte'
   import ContentToken from '@app/components/ContentToken.svelte'
   import ContentCode from '@app/components/ContentCode.svelte'
   import ContentLinkInline from '@app/components/ContentLinkInline.svelte'
@@ -32,7 +31,7 @@
   export let minLength = 500
   export let maxLength = 700
   export let showEntire = false
-  export let skipMedia = false
+  export let hideMedia = false
   export let expandable = true
   export let depth = 0
 
@@ -65,14 +64,11 @@
 
   $: shortContent = showEntire
     ? fullContent
-    : truncate(
-        fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
-        {
-          minLength,
-          maxLength,
-          mediaLength: 200,
-        },
-      )
+    : truncate(fullContent, {
+        minLength,
+        maxLength,
+        mediaLength: hideMedia ? 20 : 200,
+      })
 
   $: ellipsize = expandable && shortContent.find(isEllipsis)
 </script>
@@ -90,7 +86,7 @@
     {:else if isCashu(parsed) || isInvoice(parsed)}
       <ContentToken value={parsed.value} />
     {:else if isLink(parsed)}
-      {#if isStartOrEnd(i)}
+      {#if isStartOrEnd(i) && !hideMedia}
         <ContentLinkBlock value={parsed.value} />
       {:else}
         <ContentLinkInline value={parsed.value} />
@@ -98,10 +94,10 @@
     {:else if isProfile(parsed)}
       <ContentMention value={parsed.value} />
     {:else if isEvent(parsed) || isAddress(parsed)}
-      {#if isStartOrEnd(i) && depth < 2}
+      {#if isStartOrEnd(i) && depth < 2 && !hideMedia}
         <ContentQuote value={parsed.value} {depth}>
           <div slot="note-content" let:event>
-            <svelte:self {event} depth={depth + 1} />
+            <svelte:self {hideMedia} {event} depth={depth + 1} />
           </div>
         </ContentQuote>
       {:else}
@@ -120,6 +116,8 @@
 
 {#if ellipsize}
   <div class="z-feature relative -mt-24 mb-0 flex justify-center bg-gradient-to-t from-base-100 pt-12" class:-ml-12={depth > 0}>
-    <Button class="btn" on:click={expand}>See more</Button>
+    <button type="button" class="btn" on:click|stopPropagation|preventDefault={expand}>
+      See more
+    </button>
   </div>
 {/if}
