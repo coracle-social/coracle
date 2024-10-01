@@ -131,7 +131,7 @@
     visibleReplies = []
 
     for (const e of replies) {
-      if ($isEventMuted(e, true)) {
+      if ($isEventMuted(e)) {
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
