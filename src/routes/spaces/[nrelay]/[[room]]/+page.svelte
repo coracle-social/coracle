@@ -9,16 +9,18 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {sortBy} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestampAsDate} from "@welshman/app"
+  import {sortBy, append} from "@welshman/lib"
+  import type {TrustedEvent, EventContent} from "@welshman/util"
+  import {createEvent} from "@welshman/util"
+  import {formatTimestampAsDate, makeThunk, publishThunk} from "@welshman/app"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {userMembership, decodeNRelay, makeChatId, deriveChat, GENERAL} from "@app/state"
+  import {userMembership, decodeNRelay, makeChatId, deriveChat, GENERAL, tagRoom, MESSAGE} from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
   const {nrelay, room = GENERAL} = $page.params
@@ -26,6 +28,12 @@
   const chat = deriveChat(makeChatId(url, room))
 
   const assertEvent = (e: any) => e as TrustedEvent
+
+  const onSubmit = ({content, tags}: EventContent) => {
+    const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
+
+    publishThunk(makeThunk({event, relays: [url]}))
+  }
 
   let loading = true
   let elements: Element[] = []
@@ -93,7 +101,9 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <ChatMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+        <div in:fly>
+          <ChatMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+        </div>
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
@@ -106,5 +116,7 @@
       </Spinner>
     </p>
   </div>
-  <ChatCompose {url} {room} />
+  <div class="shadow-top-xl border-t border-solid border-base-100 bg-base-100">
+    <ChatCompose {onSubmit} />
+  </div>
 </div>

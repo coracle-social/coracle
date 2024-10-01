@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
+  import type {SvelteComponent} from "svelte"
   import {get} from "svelte/store"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
@@ -24,6 +25,7 @@
   } from "@welshman/app"
   import * as app from "@welshman/app"
   import ModalBox from "@lib/components/ModalBox.svelte"
+  import Drawer from "@lib/components/Drawer.svelte"
   import Toast from "@app/components/Toast.svelte"
   import Landing from "@app/components/Landing.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
@@ -35,6 +37,7 @@
 
   let ready: Promise<unknown>
   let dialog: HTMLDialogElement
+  let drawer: SvelteComponent
   let prev: any
 
   $: modalId = $page.url.hash.slice(1)
@@ -52,9 +55,15 @@
 
   $: {
     if (modal) {
-      dialog?.showModal()
       prev = modal
+
+      if (prev.options.drawer) {
+        drawer?.open()
+      } else {
+        dialog?.showModal()
+      }
     } else {
+      drawer?.close()
       dialog?.close()
     }
   }
@@ -101,7 +110,7 @@
       <slot />
     </div>
     <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
-      {#if prev}
+      {#if prev && !prev.options.drawer}
         {#key prev}
           <ModalBox {...prev} />
         {/key}
@@ -113,6 +122,13 @@
         </form>
       {/if}
     </dialog>
+    <Drawer bind:this={drawer}>
+      {#if prev && prev.options.drawer}
+        {#key prev}
+          <svelte:component this={prev.component} {...prev.props} />
+        {/key}
+      {/if}
+    </Drawer>
     <Toast />
   </div>
 {/await}

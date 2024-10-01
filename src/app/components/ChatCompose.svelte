@@ -8,23 +8,20 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {getEditorOptions, getEditorTags, addFile} from "@lib/editor"
-  import {ROOM, MESSAGE, GENERAL} from "@app/state"
+  import {MESSAGE} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
 
-  export let url
-  export let room = GENERAL
+  export let onSubmit
 
   const loading = writable(false)
 
   let editor: Readable<Editor>
 
   const submit = () => {
-    const event = createEvent(MESSAGE, {
+    onSubmit({
       content: $editor.getText(),
-      tags: [[ROOM, room], ...getEditorTags($editor)],
+      tags: getEditorTags($editor),
     })
-
-    publishThunk(makeThunk({event, relays: [url]}))
 
     $editor.chain().clearContent().run()
   }
@@ -34,8 +31,7 @@
   })
 </script>
 
-<div
-  class="shadow-top-xl relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100 p-2">
+<div class="relative z-feature flex gap-2 p-2">
   <Button
     data-tip="Add an image"
     class="center tooltip h-10 w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"

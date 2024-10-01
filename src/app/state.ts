@@ -73,6 +73,8 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 
 export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 
+export const tagRoom = (room: string, url: string) => [ROOM, room, url]
+
 setContext({
   net: getDefaultNetContext(),
   app: getDefaultAppContext({

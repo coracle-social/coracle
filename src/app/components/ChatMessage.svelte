@@ -5,7 +5,7 @@
   import twColors from "tailwindcss/colors"
   import type {Readable} from "svelte/store"
   import {readable, derived} from "svelte/store"
-  import {hash, uniqBy, groupBy, now} from "@welshman/lib"
+  import {hash, ellipsize, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
@@ -23,23 +23,21 @@
   import type {PublishStatusData} from "@welshman/app"
   import {REACTION, DELETE, ZAP_RESPONSE, createEvent, displayRelayUrl, getAncestorTags} from "@welshman/util"
   import {repository} from "@welshman/app"
-  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import Drawer from "@lib/components/Drawer.svelte"
   import Content from "@app/components/Content.svelte"
+  import ChatThread from '@app/components/ChatThread.svelte'
   import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
-  import ChatMessageReplies from "@app/components/ChatMessageReplies.svelte"
-  import ChatMessageReply from "@app/components/ChatMessageReply.svelte"
-  import {ROOM, REPLY, deriveEvent, displayReaction} from "@app/state"
+  import {tagRoom, REPLY, deriveEvent, displayReaction} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
+  import {pushModal} from '@app/modal'
 
   export let url
   export let room
   export let event: TrustedEvent
-  export let showPubkey: boolean
-  export let isReply = false
+  export let showPubkey = false
+  export let hideParent = false
 
   const colors = [
     ["amber", twColors.amber[600]],
@@ -67,16 +65,21 @@
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
-  const {replies} = getAncestorTags(event.tags)
-  const parentId = replies[0]?.[1]
-  const parentHints = [replies[0]?.[2]].filter(Boolean)
-  const parentEvent = parentId ? deriveEvent(parentId, parentHints) : readable(null)
+  const rootTag = event.tags.find(t => t[0].match(/^e$/i))
+  const rootId = rootTag?.[1]
+  const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
+  const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
 
+  const openThread = () => {
+    const root = $rootEvent || event
+
+    pushModal(ChatThread, {url, room, event: root}, {drawer: true})
+  }
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -88,37 +91,32 @@
         event,
         content,
         relays: [url],
-        tags: [[ROOM, room, url]],
+        tags: [tagRoom(room, url)],
       })
     }
   }
 
   let drawer: SvelteComponent
 
-  $: parentPubkey = $parentEvent?.pubkey || replies[0]?.[4]
-  $: parentProfile = deriveProfile(parentPubkey || "")
-  $: parentProfileDisplay = deriveProfileDisplay(parentPubkey || "")
+  $: rootPubkey = $rootEvent?.pubkey || rootTag?.[4]
+  $: rootProfile = deriveProfile(rootPubkey || "")
+  $: rootProfileDisplay = deriveProfileDisplay(rootPubkey || "")
   $: isPublished = findStatus($ps, [PublishStatus.Success])
   $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
   $: failure =
     !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
-<div
-  in:fly
-  class="group relative flex flex-col gap-1 p-2 transition-colors"
-  class:hover:bg-base-300={!isReply}
-  class:mt-4={isReply}>
-  {#if event.kind === REPLY}
+<button type="button" on:click={openThread} class="group relative flex flex-col gap-1 p-2 transition-colors hover:bg-base-300 text-left w-full">
+  {#if $rootEvent && !hideParent}
     <div class="flex items-center gap-1 pl-12 text-xs">
-      <Icon icon="arrow-right" />
-      <Avatar src={$parentProfile?.picture} size={4} />
-      <p class="text-primary">{$parentProfileDisplay}</p>
-      <p></p>
+      <Icon icon="square-share-line" size={3} />
+      <p>In reply to</p>
+      <Avatar src={$rootProfile?.picture} size={4} />
+      <p class="text-primary">{$rootProfileDisplay}</p>
       <p
-        class="flex cursor-pointer items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap opacity-75 hover:underline">
-        <Icon icon="square-share-line" size={3} />
-        {$parentEvent?.content || "View note"}
+        class="flex items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap opacity-75 hover:underline">
+        {ellipsize($rootEvent.content, 30)}
       </p>
     </div>
   {/if}
@@ -157,33 +155,29 @@
   {#if $reactions.length > 0 || $zaps.length > 0}
     <div class="ml-12 text-xs">
       {#each groupBy(e => e.content, uniqBy(e => e.pubkey + e.content, $reactions)).entries() as [content, events]}
-        <Button class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full" on:click={() => onReactionClick(content, events)}>
+        {@const isOwn = events.some(e => e.pubkey === $pubkey)}
+        {@const onClick = () => onReactionClick(content, events)}
+        <button
+          type="button"
+          class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full"
+          class:border={isOwn}
+          class:border-solid={isOwn}
+          class:border-primary={isOwn}
+          on:click|stopPropagation={onClick}>
           <span>{displayReaction(content)}</span>
           {#if events.length > 1}
             <span>{events.length}</span>
           {/if}
-        </Button>
+        </button>
       {/each}
     </div>
   {/if}
-  <div
-    class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100">
-    {#if !isReply}
-      <button class="btn join-item btn-xs" on:click={() => drawer.open()}>
-        <Icon icon="reply" size={4} />
-      </button>
-    {/if}
+  <button
+    class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
+    on:click|stopPropagation>
     <ChatMessageEmojiButton {url} {room} {event} />
     <button class="btn join-item btn-xs">
       <Icon icon="menu-dots" size={4} />
     </button>
-  </div>
-</div>
-
-{#if !isReply}
-  <Drawer bind:this={drawer}>
-    <svelte:self {...$$props} isReply />
-    <ChatMessageReplies {url} {room} {event} />
-    <ChatMessageReply {url} {room} {event} />
-  </Drawer>
-{/if}
+  </button>
+</button>

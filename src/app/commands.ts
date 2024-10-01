@@ -17,7 +17,7 @@ import {
   tagEvent,
   tagReactionTo,
 } from "@welshman/app"
-import {ROOM, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
+import {tagRoom, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
 // Utils
 
@@ -99,7 +99,7 @@ export const addSpaceMembership = (url: string) =>
 
 export const addRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) =>
-    uniqBy(t => t.join(""), [...tags, [ROOM, room, url]]),
+    uniqBy(t => t.join(""), [...tags, tagRoom(room, url)]),
   )
 
 export const removeSpaceMembership = (url: string) =>
@@ -108,7 +108,7 @@ export const removeSpaceMembership = (url: string) =>
   )
 
 export const removeRoomMembership = (url: string, room: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals([ROOM, room, url], t)))
+  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(tagRoom(room, url), t)))
 
 // Actions
 

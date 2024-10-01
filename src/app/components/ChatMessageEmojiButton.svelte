@@ -6,7 +6,7 @@
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
-  import {ROOM} from '@app/state'
+  import {tagRoom} from '@app/state'
   import {publishReaction} from '@app/commands'
 
   export let url, room, event
@@ -18,7 +18,7 @@
       event,
       relays: [url],
       content: emoji.unicode,
-      tags: [[ROOM, room, url]],
+      tags: [tagRoom(room, url)],
     })
 
     popover.hide()
