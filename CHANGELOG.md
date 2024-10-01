@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.4.12
+
+- [x] Fix zap developer button
+- [x] Hide wot muted replies
+- [x] Conserve space on mobile
+
 # 0.4.11
 
 - [x] Add NIP 55 support to Android
