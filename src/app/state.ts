@@ -122,6 +122,9 @@ export const loadUserData = async (hints: string[] = []) => {
   // Load enough to figure out web of trust
   loadPubkeys(getFollows($pubkey))
 
+  // Load our platform pubkey so we can zap it
+  loadPubkeys([env.PLATFORM_PUBKEY])
+
   // Load anything they might need to be notified about
   loadSeen()
   loadMessages()

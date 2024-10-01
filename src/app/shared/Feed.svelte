@@ -112,7 +112,7 @@
         <p class="text-xl">Enjoying Coracle?</p>
         <div class="flex gap-2">
           <Anchor
-            class="text-neutral-400 opacity-0 transition-all group-hover:opacity-100"
+            class="text-neutral-400 opacity-0 transition-all group-hover:opacity-100 hidden sm:visible"
             on:click={() => promptDismissed.set(now())}>
             Dismiss
           </Anchor>
