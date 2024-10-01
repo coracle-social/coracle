@@ -249,16 +249,16 @@
               <Anchor type="unstyled" class="mr-4 min-w-0 w-full" on:click={showPerson}>
                 <PersonName pubkey={event.pubkey} />
               </Anchor>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 text-xs pt-1 sm:pt-0">
                 <Anchor
                   on:click={goToDetail}
-                  class="whitespace-nowrap text-end text-sm text-neutral-100"
+                  class="whitespace-nowrap text-end text-neutral-100"
                   type="unstyled">
                   {formatTimestamp(event.created_at)}
                 </Anchor>
               </div>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 -ml-14 sm:ml-0">
               <div class="flex gap-2">
                 {#if showReply}
                   <small class="text-neutral-100">
