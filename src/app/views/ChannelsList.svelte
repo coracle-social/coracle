@@ -89,9 +89,7 @@
           {(tab === "conversations" ? $accepted : $requests).length}
         </div>
       </div>
-    </Tabs>
-    <div class="absolute right-5 top-1 hidden items-center gap-6 sm:flex">
-      <Popover triggerType="mouseenter">
+      <Popover triggerType="mouseenter" class="-mt-4 px-4">
         <div slot="trigger">
           <i
             class="fa fa-bell cursor-pointer"
@@ -100,7 +98,7 @@
         </div>
         <div slot="tooltip">Mark all as read</div>
       </Popover>
-    </div>
+    </Tabs>
   </div>
   {#each tabChannels.slice(0, limit) as channel (channel.id)}
     <ChannelsListItem {channel} />
