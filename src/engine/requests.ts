@@ -3,7 +3,7 @@ import {get, writable, derived} from "svelte/store"
 import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {FeedLoader, Scope} from "@welshman/feeds"
-import {ctx, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
+import {ctx, assoc, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -56,6 +56,7 @@ import {
   groupSharedKeys,
   type MySubscribeRequest,
 } from "src/engine/state"
+import {sortEventsDesc} from "src/engine/utils"
 
 // Utils
 
@@ -73,15 +74,24 @@ export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
 }
 
 const pullConservatively = ({relays, filters}) => {
+  const [smart, dumb] = partition(hasNegentropy, relays)
+  const promises = [pull({relays: smart, filters})]
+
   // Since pulling from relays without negentropy is expensive, only do it 30% of the time,
   // unless we have very few matching events. If that's the case, either we haven't synced
   // this filter yet, or there are few enough events that we don't really need to worry about
-  // downloading duplicates.
-  if (Math.random() < 0.7 && repository.query(filters).length > 100) {
-    relays = relays.filter(hasNegentropy)
+  // downloading duplicates. Otherwise, add a reasonable since value to make sure we at
+  // least fetch recent events.
+  if (Math.random() > 0.7 || repository.query(filters).length < 100) {
+    promises.push(pull({relays: dumb, filters}))
+  } else {
+    const events = sortEventsDesc(repository.query(filters))
+    const since = events[50]!.created_at
+
+    promises.push(pull({relays: dumb, filters: filters.map(assoc("since", since))}))
   }
 
-  return pull({relays, filters})
+  return Promise.all(promises)
 }
 
 export const loadAll = (feed, opts: LoadOpts = {}) => {
