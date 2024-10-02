@@ -185,6 +185,8 @@
     if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
+        kind: quote.kind,
+        author: quote.pubkey,
         relays: ctx.app.router.Event(quote).getUrls(),
       })
 

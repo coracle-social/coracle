@@ -21,6 +21,7 @@
     isSignedEvent,
     Tags,
     createEvent,
+    getAddress,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {identity, sum, uniqBy, prop, pluck} from "ramda"
@@ -55,6 +56,7 @@
     muteNote,
     deriveHandlersForKind,
     userIsGroupMember,
+    groupMeta,
     publishToZeroOrMoreGroups,
     deleteEvent,
     getSetting,
@@ -78,7 +80,13 @@
   const signedEvent = asSignedEvent(note as any)
   const address = contextAddress || tags.context().values().first()
   const addresses = [address].filter(identity)
-  const nevent = nip19.neventEncode({id: note.id, relays: ctx.app.router.Event(note).getUrls()})
+  const nevent = nip19.neventEncode({
+    id: note.id,
+    kind: note.kind,
+    author: note.pubkey,
+    relays: ctx.app.router.Event(note).getUrls(),
+  })
+
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = tags.values("p").valueOf()
   const likesCount = tweened(0, {interpolate})
@@ -133,7 +141,7 @@
     removeFromContext(e)
   }
 
-  const crossPost = async (address = null) => {
+  const crossPost = async (addresses = []) => {
     const content = JSON.stringify(note as SignedEvent)
     const tags = [...tagEvent(note), tagPubkey(note.pubkey), ...getClientTags()]
 
@@ -188,28 +196,14 @@
       return 0
     }, handler.event.tags)
 
-    const entity =
-      last(templateTag) === "note"
-        ? nip19.noteEncode(note.id)
-        : nip19.neventEncode({id: note.id, relays: ctx.app.router.Event(note).getUrls()})
+    const entity = last(templateTag) === "note" ? nip19.noteEncode(note.id) : nevent
 
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const groupOptions = derived(sessionWithMeta, $sessionWithMeta => {
-    const options = []
-
-    for (const addr of Object.keys($sessionWithMeta?.groups || {})) {
-      const group = groups.key(addr).get()
-      const isMember = $userIsGroupMember(addr)
-
-      if (group && isMember && addr !== address) {
-        options.push(group)
-      }
-    }
-
-    return uniqBy(prop("address"), options)
-  })
+  const groupOptions = derived([groupMeta, userIsGroupMember], ([$gm, $isMember]) =>
+    $gm.filter(g => $isMember(getAddress(g.event), true)),
+  )
 
   let view
   let actions = []
@@ -465,9 +459,9 @@
             </div>
           </Card>
         {/if}
-        {#each $groupOptions as g (g.address)}
-          <Card invertColors interactive on:click={() => crossPost(g.address)}>
-            <GroupSummary address={g.address} />
+        {#each $groupOptions as g (getAddress(g.event))}
+          <Card invertColors interactive on:click={() => crossPost([getAddress(g.event)])}>
+            <GroupSummary address={getAddress(g.event)} />
           </Card>
         {/each}
       </div>

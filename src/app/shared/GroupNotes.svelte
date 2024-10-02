@@ -1,8 +1,8 @@
 <script lang="ts">
   import {ucFirst} from "hurdak"
-  import {ctx, remove} from "@welshman/lib"
+  import {ctx, nth, remove} from "@welshman/lib"
   import {isGroupAddress, getAddress, getIdFilters, Address} from "@welshman/util"
-  import {feedFromFilter} from "@welshman/feeds"
+  import {feedFromFilter, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
   import {signer, repository} from "@welshman/app"
   import {noteKinds} from "src/util/nostr"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -15,7 +15,10 @@
   export let address
 
   const meta = deriveGroupMeta(address)
-  const mainFeed = feedFromFilter({kinds: remove(30402, noteKinds), "#a": [address]})
+  const mainFeed = makeIntersectionFeed(
+    makeRelayFeed(...$meta.relays?.map(nth(1))),
+    feedFromFilter({kinds: remove(30402, noteKinds), "#a": [address]}),
+  )
 
   const setActiveTab = tab => {
     activeTab = tab

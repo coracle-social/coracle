@@ -123,7 +123,5 @@
 </div>
 
 {#if ellipsize}
-  <div class:-ml-12={depth > 0}>
-    <NoteContentEllipsis on:click={expand} />
-  </div>
+  <NoteContentEllipsis on:click={expand} />
 {/if}
