@@ -60,7 +60,7 @@
     "emoji-picker-element": "^1.22.8",
     "fuse.js": "^7.0.0",
     "idb": "^8.0.0",
-    "nostr-editor": "^0.0.1",
+    "nostr-editor": "^0.0.2",
     "nostr-tools": "^2.7.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "svelte-bricks": "^0.2.1",

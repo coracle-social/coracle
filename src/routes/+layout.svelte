@@ -57,7 +57,7 @@
     if (modal) {
       prev = modal
 
-      if (prev.options.drawer) {
+      if (prev.options?.drawer) {
         drawer?.open()
       } else {
         dialog?.showModal()
@@ -110,7 +110,7 @@
       <slot />
     </div>
     <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
-      {#if prev && !prev.options.drawer}
+      {#if prev && !prev.options?.drawer}
         {#key prev}
           <ModalBox {...prev} />
         {/key}
@@ -123,7 +123,7 @@
       {/if}
     </dialog>
     <Drawer bind:this={drawer}>
-      {#if prev && prev.options.drawer}
+      {#if prev && prev.options?.drawer}
         {#key prev}
           <svelte:component this={prev.component} {...prev.props} />
         {/key}

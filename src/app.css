@@ -135,7 +135,7 @@
   @apply link-content;
 }
 
-.link-content {
+.link-content, [tag] {
   @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral px-1 text-neutral-content no-underline;
 }
 

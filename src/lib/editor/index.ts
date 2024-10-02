@@ -17,6 +17,7 @@ import {
   NAddrExtension,
   ImageExtension,
   VideoExtension,
+  TagExtension,
   FileUploadExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
@@ -92,10 +93,9 @@ export const getEditorOptions = ({
     History,
     Paragraph,
     Text,
+    TagExtension,
     submitOnEnter ? getModifiedHardBreakExtension() : HardBreakExtension,
-    LinkExtension.extend({
-      addNodeView: () => SvelteNodeViewRenderer(EditLink),
-    }),
+    LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
