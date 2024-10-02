@@ -14,6 +14,7 @@
   import Document from "@assets/icons/Document.svg?dataurl"
   import Earth from "@assets/icons/Earth.svg?dataurl"
   import Pen from "@assets/icons/Pen.svg?dataurl"
+  import PenNewSquare from "@assets/icons/Pen New Square.svg?dataurl"
   import HeadphonesRound from "@assets/icons/Headphones Round.svg?dataurl"
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
   import AltArrowDown from "@assets/icons/Alt Arrow Down.svg?dataurl"
@@ -80,6 +81,7 @@
     document: Document,
     earth: Earth,
     pen: Pen,
+    'pen-new-square': PenNewSquare,
     "headphones-round": HeadphonesRound,
     "add-circle": AddCircle,
     "alt-arrow-down": AltArrowDown,

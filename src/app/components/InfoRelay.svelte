@@ -8,7 +8,7 @@
     <h1 class="heading">What is a relay?</h1>
   </div>
   <p>
-    Flotilla hosts spaces on the <Link external href="https://nostr.com/">Nostr protocol</Link>.
+    Flotilla hosts spaces on the <Link external href="https://nostr.com/" class="underline">Nostr protocol</Link>.
     Nostr uses "relays" to host data, which are special-purpose servers that speak nostr's language.
     This means that anyone can host their own data, making the web more decentralized and resilient.
   </p>
