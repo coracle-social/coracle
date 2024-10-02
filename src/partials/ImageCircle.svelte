@@ -9,6 +9,4 @@
 
 <div
   class={cx($$props.class, "shrink-0 overflow-hidden rounded-full bg-cover bg-center")}
-  style={`background-image: url(${url}); ${$$props.style || ""}`}>
-  <slot />
-</div>
+  style={`background-image: url(${url}); ${$$props.style || ""}`} />
