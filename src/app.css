@@ -52,7 +52,7 @@
 }
 
 .card2 {
-  @apply overflow-hidden text-ellipsis rounded-box bg-base-100 p-6 text-base-content;
+  @apply text-ellipsis rounded-box bg-base-100 p-6 text-base-content;
 }
 
 .card2.card2-sm {
