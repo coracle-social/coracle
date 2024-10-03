@@ -19,6 +19,7 @@
   import AddCircle from "@assets/icons/Add Circle.svg?dataurl"
   import AltArrowDown from "@assets/icons/Alt Arrow Down.svg?dataurl"
   import AltArrowRight from "@assets/icons/Alt Arrow Right.svg?dataurl"
+  import AltArrowUp from "@assets/icons/Alt Arrow Up.svg?dataurl"
   import AltArrowLeft from "@assets/icons/Alt Arrow Left.svg?dataurl"
   import ArrowRight from "@assets/icons/Arrow Right.svg?dataurl"
   import Bag from "@assets/icons/Bag.svg?dataurl"
@@ -41,6 +42,7 @@
   import Hashtag from "@assets/icons/Hashtag.svg?dataurl"
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
+  import Inbox from "@assets/icons/Inbox.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
   import InfoSquare from "@assets/icons/Info Square.svg?dataurl"
   import Key from "@assets/icons/Key.svg?dataurl"
@@ -48,6 +50,7 @@
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
+  import Mailbox from "@assets/icons/Mailbox.svg?dataurl"
   import MapPoint from "@assets/icons/Map Point.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
   import NotesMinimalistic from "@assets/icons/Notes Minimalistic.svg?dataurl"
@@ -86,6 +89,7 @@
     "add-circle": AddCircle,
     "alt-arrow-down": AltArrowDown,
     "alt-arrow-right": AltArrowRight,
+    "alt-arrow-up": AltArrowUp,
     "alt-arrow-left": AltArrowLeft,
     "arrow-right": ArrowRight,
     bag: Bag,
@@ -108,6 +112,7 @@
     hashtag: Hashtag,
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
+    "inbox": Inbox,
     "info-circle": InfoCircle,
     "info-square": InfoSquare,
     key: Key,
@@ -115,6 +120,7 @@
     login: Login,
     "login-2": Login2,
     magnifer: Magnifer,
+    mailbox: Mailbox,
     "map-point": MapPoint,
     "menu-dots": MenuDots,
     "notes-minimalistic": NotesMinimalistic,

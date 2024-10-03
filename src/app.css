@@ -51,16 +51,20 @@
   --secondary: oklch(var(--s));
 }
 
+.bg-alt, .bg-alt .bg-alt .bg-alt {
+  @apply bg-base-100;
+}
+
+.bg-alt .bg-alt, .bg-alt .bg-alt .bg-alt .bg-alt {
+  @apply bg-base-300;
+}
+
 .card2 {
-  @apply text-ellipsis rounded-box bg-base-100 p-6 text-base-content;
+  @apply text-ellipsis rounded-box p-6 text-base-content;
 }
 
 .card2.card2-sm {
-  @apply rounded-box bg-base-100 p-4 text-base-content;
-}
-
-.card2.card2-alt {
-  @apply bg-base-300;
+  @apply p-4 text-base-content;
 }
 
 .column {

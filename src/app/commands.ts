@@ -1,5 +1,5 @@
-import {uniqBy, sleep, chunk, equals, choice} from "@welshman/lib"
-import {DELETE, REACTION, getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
+import {uniqBy, sleep, chunk, equals, choice, append} from "@welshman/lib"
+import {DELETE, MUTES, FOLLOWS, REACTION, getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {
@@ -15,6 +15,7 @@ import {
   loadMutes,
   getFollows,
   tagEvent,
+  tagPubkey,
   tagReactionTo,
 } from "@welshman/app"
 import {tagRoom, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
@@ -109,6 +110,19 @@ export const removeSpaceMembership = (url: string) =>
 
 export const removeRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(tagRoom(room, url), t)))
+
+
+export const unfollowPerson = (pubkey: string) =>
+  updateList(FOLLOWS, tags => tags.filter(t => t[1] !== pubkey))
+
+export const followPerson = (pubkey: string) =>
+  updateList(FOLLOWS, tags => append(tagPubkey(pubkey), tags))
+
+export const unmutePerson = (pubkey: string) =>
+  updateList(MUTES, tags => tags.filter(t => t[1] !== pubkey))
+
+export const mutePerson = (pubkey: string) =>
+  updateList(MUTES, tags => append(tagPubkey(pubkey), tags))
 
 // Actions
 
