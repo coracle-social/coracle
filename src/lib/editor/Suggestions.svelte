@@ -60,12 +60,12 @@
   }
 </script>
 
-{#if items.length > 0 || (term && allowCreate)}
+{#if term}
   <div
     data-theme={$theme}
     bind:this={element}
-    transition:fly
-    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class}"
+    transition:fly|local={{duration: 200}}
+    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class} bg-alt"
     style={$$props.style}>
     {#if term && allowCreate}
       <button
@@ -81,7 +81,7 @@
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
         {#if index === i}
-          <div transition:slide={{axis: 'x'}} class="pr-2">
+          <div transition:slide|local={{axis: 'x'}} class="pr-2">
             <Icon icon="alt-arrow-right" />
           </div>
         {/if}

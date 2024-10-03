@@ -223,7 +223,7 @@ export const {
   },
 })
 
-// Encrypted Chats
+// Chats
 
 export const chatMessages = deriveEvents(repository, {filters: [{kinds: [DIRECT_MESSAGE]}]})
 
