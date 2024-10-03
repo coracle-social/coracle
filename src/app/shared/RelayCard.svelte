@@ -8,8 +8,8 @@
     getRelayUrls,
     getWriteRelayUrls,
     getReadRelayUrls,
-    deriveRelaySelections,
-    deriveInboxRelaySelections,
+    userRelaySelections,
+    userInboxRelaySelections,
   } from "@welshman/app"
   import {quantify} from "hurdak"
   import {derived} from "svelte/store"
@@ -35,8 +35,6 @@
   export let inert = false
 
   const relay = deriveRelay(url)
-  const userRelaySelections = deriveRelaySelections($pubkey)
-  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
   const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
   const inboxRelayUrls = derived(userInboxRelaySelections, getRelayUrls)

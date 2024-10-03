@@ -57,7 +57,7 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
 
-    if (isLink(parsed)) return showMedia
+    if (isLink(parsed)) return showMedia && !parsed.raw.match('^ws|coracle')
 
     return isEvent(parsed) || isAddress(parsed)
   }

@@ -28,8 +28,6 @@
     href={url.replace(coracleRegexp, '')}>
     {displayUrl(url)}
   </Anchor>
-{:else if showMedia && !hidden}
-  <Media url={url} onClose={close} />
 {:else if isShareableRelayUrl(url)}
   <Anchor
     modal
@@ -39,6 +37,8 @@
     href={router.at("relays").of(url).toString()}>
     {displayUrl(url)}
   </Anchor>
+{:else if showMedia && !hidden}
+  <Media url={url} onClose={close} />
 {:else}
   <Anchor
     modal

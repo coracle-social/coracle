@@ -6,6 +6,7 @@
 - [x] Hide wot muted replies
 - [x] Conserve space on mobile
 - [x] Show mark as read button on mobile
+- [x] Fix reposts to communities
 
 # 0.4.11
 
