@@ -155,12 +155,12 @@ export const {
 
 // Messages
 
-export type ChatMessage = {
+export type ChannelMessage = {
   room: string
   event: TrustedEvent
 }
 
-export const readMessage = (event: TrustedEvent): Maybe<ChatMessage> => {
+export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
   const rooms = event.tags.filter(nthEq(0, ROOM)).map(nth(1))
 
   if (rooms.length > 1) return undefined
@@ -168,88 +168,40 @@ export const readMessage = (event: TrustedEvent): Maybe<ChatMessage> => {
   return {room: rooms[0] || "", event}
 }
 
-export const chatMessages = deriveEventsMapped<ChatMessage>(repository, {
+export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
   filters: [{kinds: [MESSAGE, REPLY]}],
   eventToItem: readMessage,
   itemToEvent: item => item.event,
 })
 
-// Chats
-
-export type Chat = {
-  id: string
-  url: string
-  room: string
-  messages: ChatMessage[]
-}
-
-export const makeChatId = (url: string, room: string) => `${url}'${room}`
-
-export const splitChatId = (id: string) => id.split("'")
-
-export const chats = derived([trackerStore, chatMessages], ([$tracker, $chatMessages]) => {
-  const messagesByChatId = new Map<string, ChatMessage[]>()
-
-  for (const message of $chatMessages) {
-    for (const url of $tracker.getRelays(message.event.id)) {
-      const chatId = makeChatId(url, message.room)
-
-      pushToMapKey(messagesByChatId, chatId, message)
-    }
-  }
-
-  return Array.from(messagesByChatId.entries()).map(([id, messages]) => {
-    const [url, room] = splitChatId(id)
-
-    return {id, url, room, messages}
-  })
-})
-
-export const {
-  indexStore: chatsById,
-  deriveItem: deriveChat,
-  loadItem: loadChat,
-} = collection({
-  name: "chats",
-  store: chats,
-  getKey: chat => chat.id,
-  load: (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
-    const [url, room] = splitChatId(id)
-    const chat = get(chatsById).get(id)
-    const timestamps = chat?.messages.map(m => m.event.created_at) || []
-    const since = Math.max(0, max(timestamps) - 3600)
-
-    return load({...request, relays: [url], filters: [{"#~": [room], since}]})
-  },
-})
-
 // Channels
-
-export const channelMessages = deriveEvents(repository, {filters: [{kinds: [DIRECT_MESSAGE]}]})
 
 export type Channel = {
   id: string
-  pubkeys: string[]
-  messages: TrustedEvent[]
+  url: string
+  room: string
+  messages: ChannelMessage[]
 }
 
-export const makeChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+export const makeChannelId = (url: string, room: string) => `${url}'${room}`
 
-export const splitChannelId = (id: string) => id.split(",")
+export const splitChannelId = (id: string) => id.split("'")
 
-export const channels = derived(channelMessages, $messages => {
-  const messagesByChannelId = new Map<string, TrustedEvent[]>()
+export const channels = derived([trackerStore, channelMessages], ([$tracker, $channelMessages]) => {
+  const messagesByChannelId = new Map<string, ChannelMessage[]>()
 
-  for (const message of $messages) {
-    const channelId = makeChannelId(getPubkeyTagValues(message.tags))
+  for (const message of $channelMessages) {
+    for (const url of $tracker.getRelays(message.event.id)) {
+      const channelId = makeChannelId(url, message.room)
 
-    pushToMapKey(messagesByChannelId, channelId, message)
+      pushToMapKey(messagesByChannelId, channelId, message)
+    }
   }
 
-  return Array.from(messagesByChannelId.entries()).map(([id, messages]): Channel => {
-    const pubkeys = splitChannelId(id)
+  return Array.from(messagesByChannelId.entries()).map(([id, messages]) => {
+    const [url, room] = splitChannelId(id)
 
-    return {id, pubkeys, messages}
+    return {id, url, room, messages}
   })
 })
 
@@ -261,11 +213,59 @@ export const {
   name: "channels",
   store: channels,
   getKey: channel => channel.id,
-  load: async (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
-    const $pubkey = pubkey.get()
+  load: (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
     const [url, room] = splitChannelId(id)
     const channel = get(channelsById).get(id)
-    const timestamps = channel?.messages.map(e => e.created_at) || []
+    const timestamps = channel?.messages.map(m => m.event.created_at) || []
+    const since = Math.max(0, max(timestamps) - 3600)
+
+    return load({...request, relays: [url], filters: [{"#~": [room], since}]})
+  },
+})
+
+// Encrypted Chats
+
+export const chatMessages = deriveEvents(repository, {filters: [{kinds: [DIRECT_MESSAGE]}]})
+
+export type Chat = {
+  id: string
+  pubkeys: string[]
+  messages: TrustedEvent[]
+}
+
+export const makeChatId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+
+export const splitChatId = (id: string) => id.split(",")
+
+export const chats = derived(chatMessages, $messages => {
+  const messagesByChatId = new Map<string, TrustedEvent[]>()
+
+  for (const message of $messages) {
+    const chatId = makeChatId(getPubkeyTagValues(message.tags))
+
+    pushToMapKey(messagesByChatId, chatId, message)
+  }
+
+  return Array.from(messagesByChatId.entries()).map(([id, messages]): Chat => {
+    const pubkeys = splitChatId(id)
+
+    return {id, pubkeys, messages}
+  })
+})
+
+export const {
+  indexStore: chatsById,
+  deriveItem: deriveChat,
+  loadItem: loadChat,
+} = collection({
+  name: "chats",
+  store: chats,
+  getKey: chat => chat.id,
+  load: async (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
+    const $pubkey = pubkey.get()
+    const [url, room] = splitChatId(id)
+    const chat = get(chatsById).get(id)
+    const timestamps = chat?.messages.map(e => e.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
 
     if ($pubkey) {
@@ -329,12 +329,12 @@ export const threadsByUrl = derived([trackerStore, notes], ([$tracker, $notes]) 
 
 // Rooms
 
-export const roomsByUrl = derived(chats, $chats => {
+export const roomsByUrl = derived(channels, $channels => {
   const $roomsByUrl = new Map<string, string[]>()
 
-  for (const chat of $chats) {
-    if (chat.room) {
-      pushToMapKey($roomsByUrl, chat.url, chat.room)
+  for (const channel of $channels) {
+    if (channel.room) {
+      pushToMapKey($roomsByUrl, channel.url, channel.room)
     }
   }
 

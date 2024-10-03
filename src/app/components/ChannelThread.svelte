@@ -4,8 +4,8 @@
   import type {EventContent, TrustedEvent} from '@welshman/util'
   import {repository, makeThunk, publishThunk} from '@welshman/app'
   import {deriveEvents} from '@welshman/store'
-  import ChatMessage from '@app/components/ChatMessage.svelte'
-  import ChatCompose from '@app/components/ChatCompose.svelte'
+  import ChannelMessage from '@app/components/ChannelMessage.svelte'
+  import ChannelCompose from '@app/components/ChannelCompose.svelte'
   import {tagRoom, REPLY} from '@app/state'
 
   export let url, room, event: TrustedEvent
@@ -45,12 +45,12 @@
 
 <div class="fixed flex flex-col max-h-screen w-full gap-2">
   <div class="overflow-auto pt-3">
-    <ChatMessage {url} {room} {event} showPubkey />
+    <ChannelMessage {url} {room} {event} showPubkey />
     {#each sortBy(e => e.created_at, $replies) as reply (reply.id)}
-      <ChatMessage {url} {room} event={reply} showPubkey hideParent />
+      <ChannelMessage {url} {room} event={reply} showPubkey hideParent />
     {/each}
   </div>
   <div class="bottom-0 left-0 right-0">
-    <ChatCompose {onSubmit} />
+    <ChannelCompose {onSubmit} />
   </div>
 </div>

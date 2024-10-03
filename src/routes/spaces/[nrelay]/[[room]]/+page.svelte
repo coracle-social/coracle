@@ -18,14 +18,14 @@
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import ChatMessage from "@app/components/ChatMessage.svelte"
-  import ChatCompose from "@app/components/ChatCompose.svelte"
-  import {userMembership, decodeNRelay, makeChatId, deriveChat, GENERAL, tagRoom, MESSAGE} from "@app/state"
+  import ChannelMessage from "@app/components/ChannelMessage.svelte"
+  import ChannelCompose from "@app/components/ChannelCompose.svelte"
+  import {userMembership, decodeNRelay, makeChannelId, deriveChannel, GENERAL, tagRoom, MESSAGE} from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
   const {nrelay, room = GENERAL} = $page.params
   const url = decodeNRelay(nrelay)
-  const chat = deriveChat(makeChatId(url, room))
+  const channel = deriveChannel(makeChannelId(url, room))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -46,7 +46,7 @@
     let previousDate
     let previousPubkey
 
-    for (const {event} of sortBy(m => m.event.created_at, $chat?.messages || [])) {
+    for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
@@ -102,7 +102,7 @@
         <Divider>{value}</Divider>
       {:else}
         <div in:fly>
-          <ChatMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+          <ChannelMessage {url} {room} event={assertEvent(value)} {showPubkey} />
         </div>
       {/if}
     {/each}
@@ -117,6 +117,6 @@
     </p>
   </div>
   <div class="shadow-top-xl border-t border-solid border-base-100 bg-base-100">
-    <ChatCompose {onSubmit} />
+    <ChannelCompose {onSubmit} />
   </div>
 </div>

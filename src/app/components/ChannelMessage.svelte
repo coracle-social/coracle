@@ -27,8 +27,8 @@
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
-  import ChatThread from '@app/components/ChatThread.svelte'
-  import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
+  import ChannelThread from '@app/components/ChannelThread.svelte'
+  import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import {tagRoom, REPLY, deriveEvent, displayReaction} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from '@app/modal'
@@ -78,7 +78,7 @@
   const openThread = () => {
     const root = $rootEvent || event
 
-    pushModal(ChatThread, {url, room, event: root}, {drawer: true})
+    pushModal(ChannelThread, {url, room, event: root}, {drawer: true})
   }
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
@@ -175,7 +175,7 @@
   <button
     class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
-    <ChatMessageEmojiButton {url} {room} {event} />
+    <ChannelMessageEmojiButton {url} {room} {event} />
     <button class="btn join-item btn-xs">
       <Icon icon="menu-dots" size={4} />
     </button>

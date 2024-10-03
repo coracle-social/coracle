@@ -6,7 +6,7 @@
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
-  import {channels} from '@app/state'
+  import {chats} from '@app/state'
 </script>
 
 <SecondaryNav>
@@ -34,7 +34,7 @@
         </div>
       </SecondaryNavHeader>
     </div>
-    {#each $channels as {id, pubkeys}, i (id)}
+    {#each $chats as {id, pubkeys}, i (id)}
       <div in:fly={{delay: 200 + i * 50}}>
         <SecondaryNavItem href="/home/{id}">
           {id}
