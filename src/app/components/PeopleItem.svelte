@@ -31,26 +31,24 @@
   })
 </script>
 
-<div class="card bg-base-100 shadow-xl">
-  <div class="card-body">
-    <Profile {pubkey} />
-    <ProfileInfo {pubkey} />
-    {#if roots.length > 0}
-      {@const event = first(sortBy(e => -e.created_at, roots))}
-      {@const relays = ctx.app.router.Event(event).getUrls()}
-      {@const nevent = nip19.neventEncode({id: event.id, relays})}
-      {@const following = getListValues("p", $userFollows).includes(pubkey)}
-      <div class="divider" />
-      <Link external class="chat chat-start" href={entityLink(nevent)}>
-        <div class="chat-bubble">
-          <Content hideMedia={!following} {event} />
-          <p class="text-xs text-right">{formatTimestamp(event.created_at)}</p>
-        </div>
-      </Link>
-      <div class="flex gap-2">
-        <div class="badge badge-neutral">{roots.length} recent {roots.length === 1 ? 'note' : 'notes'}</div>
-        <div class="badge badge-neutral">Last posted {formatTimestampRelative(event.created_at)}</div>
+<div class="card2 bg-alt shadow-xl">
+  <Profile {pubkey} />
+  <ProfileInfo {pubkey} />
+  {#if roots.length > 0}
+    {@const event = first(sortBy(e => -e.created_at, roots))}
+    {@const relays = ctx.app.router.Event(event).getUrls()}
+    {@const nevent = nip19.neventEncode({id: event.id, relays})}
+    {@const following = getListValues("p", $userFollows).includes(pubkey)}
+    <div class="divider" />
+    <Link external class="chat chat-start" href={entityLink(nevent)}>
+      <div class="chat-bubble">
+        <Content hideMedia={!following} {event} />
+        <p class="text-xs text-right">{formatTimestamp(event.created_at)}</p>
       </div>
-    {/if}
-  </div>
+    </Link>
+    <div class="flex gap-2">
+      <div class="badge badge-neutral">{roots.length} recent {roots.length === 1 ? 'note' : 'notes'}</div>
+      <div class="badge badge-neutral">Last posted {formatTimestampRelative(event.created_at)}</div>
+    </div>
+  {/if}
 </div>

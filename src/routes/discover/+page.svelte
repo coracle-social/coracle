@@ -47,7 +47,7 @@
     let:item={relay}>
     <a
       href={makeSpacePath(relay.url)}
-      class="card bg-base-100 shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
+      class="card2 bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
@@ -67,12 +67,10 @@
           </div>
         </div>
       {/if}
-      <div class="card-body">
-        <h2 class="card-title justify-center">{displayRelayUrl(relay.url)}</h2>
-        {#if relay.profile?.description}
-          <p class="py-4 text-center text-sm">{relay.profile.description}</p>
-        {/if}
-      </div>
+      <h2 class="text-center">{displayRelayUrl(relay.url)}</h2>
+      {#if relay.profile?.description}
+        <p class="py-4 text-center text-sm">{relay.profile.description}</p>
+      {/if}
     </a>
   </Masonry>
 </div>

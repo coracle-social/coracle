@@ -151,8 +151,6 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) =>
       tags.push(["r", url, "write"])
     }
 
-    console.log(tags)
-
     return tags
   })
 

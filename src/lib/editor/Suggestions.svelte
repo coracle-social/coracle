@@ -2,8 +2,9 @@
 
 <script lang="ts">
   import {throttle} from "throttle-debounce"
-  import {slide} from "svelte/transition"
+  import {fly, slide} from "svelte/transition"
   import {clamp} from "@welshman/lib"
+  import Icon from '@lib/components/Icon.svelte'
   import {theme} from "@app/theme"
 
   export let term
@@ -25,7 +26,6 @@
 
   const setIndex = (newIndex: number, block: any) => {
     index = clamp([0, items.length - 1], newIndex)
-    element.querySelector(`button:nth-child(${index})`)?.scrollIntoView({block})
   }
 
   export const onKeyDown = (e: any) => {
@@ -64,11 +64,12 @@
   <div
     data-theme={$theme}
     bind:this={element}
-    transition:slide|local={{duration: 100}}
-    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl">
+    transition:fly
+    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class}"
+    style={$$props.style}>
     {#if term && allowCreate}
       <button
-        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
+        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(term)}>
         Use "<svelte:component this={component} value={term} />"
@@ -76,17 +77,20 @@
     {/if}
     {#each items as value, i (value)}
       <button
-        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-colors hover:bg-primary hover:text-primary-content"
-        class:bg-primary={index === i}
-        class:text-primary-content={index === i}
+        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150 flex items-center"
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
+        {#if index === i}
+          <div transition:slide={{axis: 'x'}} class="pr-2">
+            <Icon icon="alt-arrow-right" />
+          </div>
+        {/if}
         <svelte:component this={component} {value} />
       </button>
     {/each}
   </div>
   {#if loading}
-    <div transition:slide|local class="bg-tinted-700 flex gap-2 px-4 py-2 text-neutral-200">
+    <div transition:slide|local class="flex gap-2 px-4 py-2">
       <div>
         <i class="fa fa-circle-notch fa-spin" />
       </div>
