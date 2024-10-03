@@ -8,10 +8,8 @@
   import RelayItem from "@app/components/RelayItem.svelte"
   import {discoverRelays} from "@app/state"
 
-  export let mode: string
   export let relays: Readable<string[]>
-
-  const addRelay = (url: string) => null
+  export let addRelay: (url: string) => void
 
   let term = ""
   let limit = 20

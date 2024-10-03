@@ -1,5 +1,5 @@
-import {uniqBy, sleep, chunk, equals, choice, append} from "@welshman/lib"
-import {DELETE, MUTES, FOLLOWS, REACTION, getPubkeyTagValues, createEvent, displayProfile} from "@welshman/util"
+import {uniqBy, sleep, chunk, equals, nthNe, choice, append} from "@welshman/lib"
+import {DELETE, PROFILE, INBOX_RELAYS, RELAYS, MUTES, FOLLOWS, REACTION, isSignedEvent, getPubkeyTagValues, createEvent, displayProfile, normalizeRelayUrl} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {
@@ -17,6 +17,8 @@ import {
   tagEvent,
   tagPubkey,
   tagReactionTo,
+  getRelayUrls,
+  getInboxRelaySelections,
 } from "@welshman/app"
 import {tagRoom, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
@@ -78,7 +80,21 @@ export const loadUserData = (
   return promise
 }
 
-// Updates
+// Synchronization
+
+export const broadcastUserData = async (relays: string[]) => {
+  const authors = [pubkey.get()!]
+  const kinds = [RELAYS, INBOX_RELAYS, FOLLOWS, PROFILE]
+  const events = repository.query([{kinds, authors}])
+
+  for (const event of events) {
+    if (isSignedEvent(event)) {
+      await publishThunk(makeThunk({event, relays}))
+    }
+  }
+}
+
+// List updates
 
 export type ModifyTags = (tags: string[][]) => string[][]
 
@@ -111,7 +127,6 @@ export const removeSpaceMembership = (url: string) =>
 export const removeRoomMembership = (url: string, room: string) =>
   updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(tagRoom(room, url), t)))
 
-
 export const unfollowPerson = (pubkey: string) =>
   updateList(FOLLOWS, tags => tags.filter(t => t[1] !== pubkey))
 
@@ -123,6 +138,54 @@ export const unmutePerson = (pubkey: string) =>
 
 export const mutePerson = (pubkey: string) =>
   updateList(MUTES, tags => append(tagPubkey(pubkey), tags))
+
+export const setRelayPolicy = (url: string, read: boolean, write: boolean) =>
+  updateList(RELAYS, tags => {
+    tags = tags.filter(t => normalizeRelayUrl(t[1]) !== url)
+
+    if (read && write) {
+      tags.push(["r", url])
+    } else if (read) {
+      tags.push(["r", url, "read"])
+    } else if (write) {
+      tags.push(["r", url, "write"])
+    }
+
+    console.log(tags)
+
+    return tags
+  })
+
+export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
+  const urls = getRelayUrls(getInboxRelaySelections(pubkey.get()!))
+
+  // Only update inbox policies if they already exist or we're adding them
+  if (enabled || urls.includes(url)) {
+    updateList(INBOX_RELAYS, tags => {
+      tags = tags.filter(t => normalizeRelayUrl(t[1]) !== url)
+
+      if (enabled) {
+        tags.push(["relay", url])
+      }
+
+      return tags
+    })
+  }
+}
+
+export const joinRelay = async (url: string, claim?: string) => {
+  if (claim) {
+    await publishThunk(
+      makeThunk({
+        event: createEvent(28934, {tags: [["claim", claim]]}),
+        relays: [url],
+      })
+    )
+  }
+
+  await setRelayPolicy(url, true, true)
+  await broadcastUserData([url])
+}
 
 // Actions
 

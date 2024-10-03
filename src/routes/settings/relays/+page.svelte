@@ -8,19 +8,35 @@
   import RelayItem from "@app/components/RelayItem.svelte"
   import RelayAdd from "@app/components/RelayAdd.svelte"
   import {pushModal} from '@app/modal'
+  import {setRelayPolicy, setInboxRelayPolicy} from '@app/commands'
 
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
   const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
   const inboxRelayUrls = derived(userInboxRelaySelections, getRelayUrls)
 
-  const addRelay = (mode: string, relays: Readable<string[]>) =>
-    pushModal(RelayAdd, {mode, relays})
+  const addReadRelay = () =>
+    pushModal(RelayAdd, {
+      relays: readRelayUrls,
+      addRelay: (url: string) => setRelayPolicy(url, true, $writeRelayUrls.includes(url)),
+    })
 
-  const removeReadRelay = (url: string) => null
+  const addWriteRelay = () =>
+    pushModal(RelayAdd, {
+      relays: writeRelayUrls,
+      addRelay: (url: string) => setRelayPolicy(url, $readRelayUrls.includes(url), true),
+    })
 
-  const removeWriteRelay = (url: string) => null
+  const addInboxRelay = () =>
+    pushModal(RelayAdd, {
+      relays: inboxRelayUrls,
+      addRelay: (url: string) => setInboxRelayPolicy(url, true),
+    })
 
-  const removeInboxRelay = (url: string) => null
+  const removeReadRelay = (url: string) => setRelayPolicy(url, false, $writeRelayUrls.includes(url))
+
+  const removeWriteRelay = (url: string) => setRelayPolicy(url, $readRelayUrls.includes(url), false)
+
+  const removeInboxRelay = (url: string) => setInboxRelayPolicy(url, false)
 </script>
 
 <div class="content column gap-4">
@@ -47,7 +63,7 @@
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={() => addRelay('write', writeRelayUrls)}>
+      <Button class="btn btn-primary mt-2" on:click={addWriteRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
@@ -76,7 +92,7 @@
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={() => addRelay('read', readRelayUrls)}>
+      <Button class="btn btn-primary mt-2" on:click={addReadRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
@@ -105,7 +121,7 @@
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={() => addRelay('inbox', inboxRelayUrls)}>
+      <Button class="btn btn-primary mt-2" on:click={addInboxRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
