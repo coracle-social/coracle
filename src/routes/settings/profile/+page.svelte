@@ -20,13 +20,19 @@
   const displayNip05 = (nip05: string) =>
     nip05?.startsWith("_@") ? last(nip05.split("@")) : nip05
 
+  const cloneProfile = () => ({...(getProfile($pubkey!) || makeProfile())})
+
   const toggleEdit = () => {
     editing = !editing
+
+    if (!editing) {
+      profile = cloneProfile()
+    }
   }
 
   const stopEdit = () => {
     editing = false
-    profile = getProfile($pubkey!) || makeProfile()
+    profile = cloneProfile()
   }
 
   const saveEdit = () => {
@@ -41,7 +47,7 @@
 
   let file: File
   let editing = false
-  let profile = getProfile($pubkey!) || makeProfile()
+  let profile = cloneProfile()
 </script>
 
 <div class="content column gap-4">

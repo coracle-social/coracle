@@ -62,7 +62,8 @@
     for={id}
     aria-label="Drag and drop files here."
     style="background-image: url({url});"
-    class="relative flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-base-content bg-base-300 bg-cover bg-center transition-all"
+    class="relative flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-solid border-base-content bg-base-300 bg-cover bg-center transition-all"
+    class:transparent={!url}
     class:border-primary={active}
     on:dragenter|preventDefault|stopPropagation={onDragEnter}
     on:dragover|preventDefault|stopPropagation={onDragOver}
@@ -70,9 +71,9 @@
     on:drop|preventDefault|stopPropagation={onDrop}>
     <div
       class="absolute right-0 top-0 h-5 w-5 overflow-hidden rounded-full bg-primary"
-      class:bg-error={file}
-      class:bg-primary={!file}>
-      {#if file}
+      class:bg-error={url}
+      class:bg-primary={!url}>
+      {#if url}
         <span
           role="button"
           tabindex="-1"
@@ -84,7 +85,7 @@
         <Icon icon="add-circle" class="scale-150 !bg-base-300" />
       {/if}
     </div>
-    {#if !file}
+    {#if !url}
       <Icon icon="gallery-send" size={7} />
     {/if}
   </label>
