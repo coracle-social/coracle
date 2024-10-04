@@ -1,17 +1,41 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
+  import {ellipsize, ctx, ago, remove} from '@welshman/lib'
+  import {WRAP} from '@welshman/util'
+  import {pubkey, subscribe} from '@welshman/app'
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
+  import Name from "@app/components/Name.svelte"
+  import ProfileCircle from "@app/components/ProfileCircle.svelte"
+  import ProfileCircles from "@app/components/ProfileCircles.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
-  import {chats} from '@app/state'
+  import {chatSearch, pullConservatively} from '@app/state'
   import {pushModal} from '@app/modal'
 
   const startChat = () => pushModal(ChatStart)
+
+  let term = ""
+
+  $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
+
+  onMount(() => {
+    const filter = {kinds: [WRAP], '#p': [$pubkey!]}
+    const sub = subscribe({filters: [{...filter, since: ago(30)}]})
+
+    pullConservatively({
+      filters: [filter],
+      relays: ctx.app.router.InboxRelays().getUrls(),
+    })
+
+    return () => sub.close()
+  })
 </script>
 
 <SecondaryNav>
@@ -39,14 +63,36 @@
         </Button>
       </SecondaryNavHeader>
     </div>
-    {#each $chats as {id, pubkeys}, i (id)}
-      <div in:fly={{delay: 200 + i * 50}}>
-        <SecondaryNavItem href="/home/{id}">
-          {id}
-        </SecondaryNavItem>
+  </SecondaryNavSection>
+  <label class="input input-bordered input-sm flex items-center gap-2 mx-6 -mt-4" in:fly={{delay: 200}}>
+    <Icon icon="magnifer" />
+    <input bind:value={term} class="grow" type="text" />
+  </label>
+  <div class="overflow-auto">
+    {#each chats as {id, pubkeys, messages}, i (id)}
+      {@const message = messages[0]}
+      {@const others = remove($pubkey, pubkeys)}
+      <div class="px-6 py-2 border-t border-base-100 border-solid hover:bg-base-100 transition-colors cursor-pointer">
+        <Link class="flex flex-col justify-start gap-1" href="/home/{id}">
+          <div class="flex gap-2 items-center">
+            {#if others.length === 1}
+              <ProfileCircle pubkey={others[0]} size={5} />
+              <Name pubkey={others[0]} />
+            {:else}
+              <ProfileCircles pubkeys={others} size={5} />
+              <p class="whitespace-nowrap overflow-hidden text-ellipsis">
+                <Name pubkey={others[0]} />
+                and {others.length - 1} {others.length > 2 ? 'others' : 'other'}
+              </p>
+            {/if}
+          </div>
+          <p class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+            {message.content}
+          </p>
+        </Link>
       </div>
     {/each}
-  </SecondaryNavSection>
+  </div>
 </SecondaryNav>
 
 <Page>

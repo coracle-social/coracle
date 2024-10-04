@@ -1,7 +1,7 @@
 import {nip19} from "nostr-tools"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, sort, uniq, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
+import {setContext, remove, assoc, sortBy, sort, uniq, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
 import {
   getIdFilters,
   NOTE,
@@ -17,8 +17,11 @@ import {
   getAncestorTags,
   getAncestorTagValues,
   getPubkeyTagValues,
+  isHashedEvent,
+  displayProfile,
 } from "@welshman/util"
-import type {TrustedEvent} from "@welshman/util"
+import type {TrustedEvent, SignedEvent} from "@welshman/util"
+import {Nip59} from "@welshman/signer"
 import {
   pubkey,
   repository,
@@ -32,7 +35,15 @@ import {
   getDefaultNetContext,
   makeRouter,
   trackerStore,
+  tracker,
+  relay,
+  getSession,
+  getSigner,
+  hasNegentropy,
+  pull,
+  createSearch,
 } from "@welshman/app"
+import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 
@@ -78,6 +89,60 @@ export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 
 export const tagRoom = (room: string, url: string) => [ROOM, room, url]
 
+export const ensureUnwrapped = async (event: TrustedEvent) => {
+  if (event.kind !== WRAP) {
+    return event
+  }
+
+  let rumor = repository.eventsByWrap.get(event.id)
+
+  if (rumor) {
+    return rumor
+  }
+
+  for (const recipient of getPubkeyTagValues(event.tags)) {
+    const session = getSession(recipient)
+    const signer = getSigner(session)
+
+    if (signer) {
+      try {
+        rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
+        break
+      } catch (e) {
+        // pass
+      }
+    }
+  }
+
+  if (rumor && isHashedEvent(rumor)) {
+    tracker.copy(event.id, rumor.id)
+    relay.send("EVENT", rumor)
+  }
+
+  return rumor
+}
+
+export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
+  const [smart, dumb] = partition(hasNegentropy, relays)
+  const promises = [pull({relays: smart, filters})]
+
+  // Since pulling from relays without negentropy is expensive, only do it 30% of the time,
+  // unless we have very few matching events. If that's the case, either we haven't synced
+  // this filter yet, or there are few enough events that we don't really need to worry about
+  // downloading duplicates. Otherwise, add a reasonable since value to make sure we at
+  // least fetch recent events.
+  if (Math.random() > 0.7 || repository.query(filters).length < 100) {
+    promises.push(pull({relays: dumb, filters}))
+  } else {
+    const events = sortBy(e => -e.created_at, repository.query(filters))
+    const since = events[50]!.created_at
+
+    promises.push(pull({relays: dumb, filters: filters.map(assoc("since", since))}))
+  }
+
+  return Promise.all(promises)
+}
+
 setContext({
   net: getDefaultNetContext(),
   app: getDefaultAppContext({
@@ -86,6 +151,12 @@ setContext({
     requestTimeout: 5000,
     router: makeRouter(),
   }),
+})
+
+repository.on('update', ({added}) => {
+  for (const event of added) {
+    ensureUnwrapped(event)
+  }
 })
 
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
@@ -231,13 +302,15 @@ export type Chat = {
   id: string
   pubkeys: string[]
   messages: TrustedEvent[]
+  last_activity: number
+  search_text: string
 }
 
 export const makeChatId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 
 export const splitChatId = (id: string) => id.split(",")
 
-export const chats = derived(chatMessages, $messages => {
+export const chats = derived([pubkey, chatMessages, profilesByPubkey], ([$pubkey, $messages, $profilesByPubkey]) => {
   const messagesByChatId = new Map<string, TrustedEvent[]>()
 
   for (const message of $messages) {
@@ -246,11 +319,23 @@ export const chats = derived(chatMessages, $messages => {
     pushToMapKey(messagesByChatId, chatId, message)
   }
 
-  return Array.from(messagesByChatId.entries()).map(([id, messages]): Chat => {
-    const pubkeys = splitChatId(id)
+  return sortBy(
+    c => -c.last_activity,
+    Array.from(messagesByChatId.entries()).map(([id, events]): Chat => {
+      const pubkeys = splitChatId(id)
+      const messages = sortBy(e => -e.created_at, events)
+      const last_activity = messages[0].created_at
+      const search_text = remove($pubkey as string, pubkeys)
+        .map(pubkey => {
+          const profile = $profilesByPubkey.get(pubkey)
 
-    return {id, pubkeys, messages}
-  })
+          return profile ? displayProfile(profile) : ""
+        })
+        .join(' ')
+
+      return {id, pubkeys, messages, last_activity, search_text}
+    })
+  )
 })
 
 export const {
@@ -273,6 +358,13 @@ export const {
     }
   },
 })
+
+export const chatSearch = derived(chats, $chats =>
+  createSearch($chats, {
+    getValue: (chat: Chat) => chat.id,
+    fuseOptions: {keys: ["search_text"]},
+  }),
+)
 
 // Calendar events
 

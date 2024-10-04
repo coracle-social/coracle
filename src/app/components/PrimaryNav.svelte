@@ -49,8 +49,7 @@
       <PrimaryNavItem href="/home">
         <Avatar
           src={$userProfile?.picture}
-          class="!h-10 !w-10 border border-solid border-base-300"
-          size={7} />
+          class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
       {#each $userMembership?.roomsByUrl.keys() || [] as url (url)}
         <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)}>
@@ -58,21 +57,15 @@
         </PrimaryNavItem>
       {/each}
       <PrimaryNavItem title="Add Space" on:click={addSpace}>
-        <div class="!flex w-10 items-center justify-center">
-          <Icon size={7} icon="add-circle" />
-        </div>
+        <Avatar icon="add-circle" class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Discover Spaces" href="/discover">
-        <div class="!flex w-10 items-center justify-center">
-          <Icon size={6} icon="compass-big" />
-        </div>
+        <Avatar icon="compass-big" class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
     </div>
     <div>
       <PrimaryNavItem title="Settings" href="/settings">
-        <div class="!flex w-10 items-center justify-center">
-          <Icon size={7} icon="settings" />
-        </div>
+        <Avatar icon="settings" class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
     </div>
   </div>

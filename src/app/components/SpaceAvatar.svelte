@@ -9,8 +9,7 @@
 </script>
 
 <Avatar
-  icon="ghost"
+  icon="remote-controller-minimalistic"
   class="!h-10 !w-10 border border-solid border-base-300"
   alt={displayRelayUrl(url)}
-  src={$relay?.profile?.icon}
-  size={7} />
+  src={$relay?.profile?.icon} />

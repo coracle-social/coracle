@@ -8,6 +8,7 @@ import {
   makeThunk,
   publishThunk,
   loadProfile,
+  loadInboxRelaySelections,
   profilesByPubkey,
   relaySelectionsByPubkey,
   getWriteRelayUrls,
@@ -59,6 +60,7 @@ export const loadUserData = (
   request: Partial<SubscribeRequestWithHandlers> = {},
 ) => {
   const promise = Promise.all([
+    loadInboxRelaySelections(pubkey, request),
     loadProfile(pubkey, request),
     loadFollows(pubkey, request),
     loadMutes(pubkey, request),
