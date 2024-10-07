@@ -9,7 +9,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
   import {userLists} from "src/engine"
-  import {displayList} from "src/domain"
+  import {displayUserList} from "src/domain"
 
   export let type
   export let value
@@ -39,7 +39,7 @@
           <span class="staatliches flex items-center gap-3 text-xl">
             <i class="fa fa-list" />
             <span class:text-neutral-400={!list.title}>
-              {displayList(list)}
+              {displayUserList(list)}
             </span>
           </span>
         </div>

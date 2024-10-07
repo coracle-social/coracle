@@ -15,7 +15,6 @@
     anonymous,
     loadPubkeys,
     createAndPublish,
-    updateSingleton,
     publishProfile,
     setOutboxPolicies,
     tagsFromContent,
@@ -78,7 +77,11 @@
 
     // Re-save preferences now that we have a key and relays
     publishProfile(profile)
-    updateSingleton(FOLLOWS, () => follows.map(tagPubkey), {only: "public"})
+    createAndPublish({
+      kind: FOLLOWS,
+      tags: follows.map(tagPubkey),
+      relays: ctx.app.router.WriteRelays().getUrls(),
+    })
 
     // Publish our welcome note
     if (noteContent) {

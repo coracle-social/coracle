@@ -1,12 +1,12 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {flatten, partition} from "ramda"
+  import {profileHasName} from "@welshman/util"
   import {profilesByPubkey} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
-  import {profileHasName} from "src/domain"
 
   export let pubkeys
 

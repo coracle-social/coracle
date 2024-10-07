@@ -26,7 +26,7 @@ import {
 } from "@welshman/util"
 import {SearchHelper} from "src/util/misc"
 
-export const LIST_KINDS = [
+export const CUSTOM_LIST_KINDS = [
   FOLLOWS,
   NAMED_PEOPLE,
   NAMED_RELAYS,
@@ -51,7 +51,7 @@ export const LIST_KINDS = [
 
 export const EDITABLE_LIST_KINDS = [NAMED_PEOPLE, NAMED_RELAYS, NAMED_CURATIONS, NAMED_TOPICS]
 
-export type List = {
+export type UserList = {
   kind: number
   title: string
   description: string
@@ -60,11 +60,11 @@ export type List = {
   event?: TrustedEvent
 }
 
-export type PublishedList = Omit<List, "event"> & {
+export type PublishedUserList = Omit<UserList, "event"> & {
   event: TrustedEvent
 }
 
-export const makeList = (list: Partial<List> = {}): List => ({
+export const makeUserList = (list: Partial<UserList> = {}): UserList => ({
   kind: NAMED_PEOPLE,
   title: "",
   description: "",
@@ -73,7 +73,7 @@ export const makeList = (list: Partial<List> = {}): List => ({
   ...list,
 })
 
-export const readList = (event: TrustedEvent) => {
+export const readUserList = (event: TrustedEvent) => {
   const {
     d: identifier = randomId(),
     name = "",
@@ -88,10 +88,10 @@ export const readList = (event: TrustedEvent) => {
     identifier,
     tags: event.tags,
     event,
-  } as PublishedList
+  } as PublishedUserList
 }
 
-export const createList = ({kind, title, description, identifier, tags}: List) => ({
+export const createUserList = ({kind, title, description, identifier, tags}: UserList) => ({
   kind,
   tags: Tags.wrap(tags)
     .setTag("d", identifier)
@@ -101,7 +101,7 @@ export const createList = ({kind, title, description, identifier, tags}: List) =
     .unwrap(),
 })
 
-export const editList = ({kind, title, description, identifier, tags}: List) => ({
+export const editUserList = ({kind, title, description, identifier, tags}: UserList) => ({
   kind: kind,
   tags: Tags.wrap(tags)
     .setTag("d", identifier)
@@ -111,7 +111,7 @@ export const editList = ({kind, title, description, identifier, tags}: List) => 
     .unwrap(),
 })
 
-export const displayList = (list?: List) => {
+export const displayUserList = (list?: UserList) => {
   if (list) {
     if (list.title) return list.title
     if (list.kind === FOLLOWS) return "[follows list]"
@@ -139,8 +139,8 @@ export const displayList = (list?: List) => {
   return "[no name]"
 }
 
-export class ListSearch extends SearchHelper<List, string> {
+export class UserListSearch extends SearchHelper<UserList, string> {
   config = {keys: ["title", "description", "identifier"]}
-  getValue = (option: List) => getAddress(option.event)
-  displayValue = (address: string) => displayList(this.getOption(address))
+  getValue = (option: UserList) => getAddress(option.event)
+  displayValue = (address: string) => displayUserList(this.getOption(address))
 }

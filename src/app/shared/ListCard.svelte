@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
-  import {readList, displayList, mapListToFeed} from "src/domain"
+  import {readUserList, displayUserList, mapListToFeed} from "src/domain"
   import {router} from "src/app/util"
 
   export let address
@@ -23,7 +23,7 @@
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
   const tags = Tags.fromEvent(event)
-  const list = readList(event)
+  const list = readUserList(event)
 
   const loadFeed = () => {
     if (!inert) {
@@ -47,7 +47,7 @@
             class="staatliches text-xl"
             class:text-neutral-400={!list.title}
             class:line-through={deleted}>
-            {displayList(list)}
+            {displayUserList(list)}
           </span>
           {#if deleted}
             <Chip danger small>Deleted</Chip>

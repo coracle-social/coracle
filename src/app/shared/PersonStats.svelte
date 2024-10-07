@@ -1,6 +1,6 @@
 <script lang="ts">
   import {tweened} from "svelte/motion"
-  import {getListValues} from "@welshman/util"
+  import {getListTagValues} from "@welshman/util"
   import {deriveFollows, getFollowers} from "@welshman/app"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/util/router"
@@ -18,7 +18,7 @@
 
   followersCount.set(getFollowers(pubkey).length)
 
-  $: pubkeys = getListValues("p", $follows)
+  $: pubkeys = getListTagValues("p", $follows)
 
   $: {
     followsCount.set(pubkeys.length)

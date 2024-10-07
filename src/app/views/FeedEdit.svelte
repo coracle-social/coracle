@@ -4,7 +4,7 @@
   import {repository} from "@welshman/app"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {readFeed, mapListToFeed, readList} from "src/domain"
+  import {readFeed, mapListToFeed, readUserList} from "src/domain"
 
   export let address
 
@@ -13,7 +13,7 @@
   const exit = () => router.clearModals()
 
   const getFeed = () =>
-    address.startsWith(NAMED_BOOKMARKS) ? mapListToFeed(readList($event)) : readFeed($event)
+    address.startsWith(NAMED_BOOKMARKS) ? mapListToFeed(readUserList($event)) : readFeed($event)
 </script>
 
 {#if $event}

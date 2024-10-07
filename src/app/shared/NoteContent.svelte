@@ -24,7 +24,7 @@
   import NoteContentKind35834 from "src/app/shared/NoteContentKind35834.svelte"
   import NoteContentKindList from "src/app/shared/NoteContentKindList.svelte"
   import {getSetting, env} from "src/engine"
-  import {LIST_KINDS} from "src/domain"
+  import {CUSTOM_LIST_KINDS} from "src/domain"
 
   export let note
   export let depth = 0
@@ -88,7 +88,7 @@
     <NoteContentKind34550 {note} />
   {:else if note.kind === 35834}
     <NoteContentKind35834 {note} />
-  {:else if LIST_KINDS.includes(note.kind)}
+  {:else if CUSTOM_LIST_KINDS.includes(note.kind)}
     <NoteContentKindList {note} />
   {:else}
     <NoteContentKind1 {note} {showEntire} {showMedia} {expandable} {depth}>

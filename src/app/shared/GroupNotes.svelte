@@ -16,7 +16,7 @@
 
   const meta = deriveGroupMeta(address)
   const mainFeed = makeIntersectionFeed(
-    makeRelayFeed(...$meta.relays?.map(nth(1))),
+    makeRelayFeed(...($meta.relays?.map(nth(1)) || [])),
     feedFromFilter({kinds: remove(30402, noteKinds), "#a": [address]}),
   )
 

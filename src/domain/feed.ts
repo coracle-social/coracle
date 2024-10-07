@@ -11,7 +11,7 @@ import {
 } from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
 import {parseJson} from "src/util/misc"
-import type {PublishedList} from "./list"
+import type {PublishedUserList} from "./list"
 
 export type Feed = {
   title: string
@@ -19,7 +19,7 @@ export type Feed = {
   description: string
   definition: IFeed
   event?: TrustedEvent
-  list?: PublishedList
+  list?: PublishedUserList
 }
 
 export type PublishedFeed = Omit<Feed, "event"> & {
@@ -28,7 +28,7 @@ export type PublishedFeed = Omit<Feed, "event"> & {
 
 export type PublishedListFeed = Omit<Feed, "list"> & {
   event: TrustedEvent
-  list: PublishedList
+  list: PublishedUserList
 }
 
 export const normalizeFeedDefinition = feed =>
@@ -42,7 +42,7 @@ export const makeFeed = (feed: Partial<Feed> = {}): Feed => ({
   ...feed,
 })
 
-export const mapListToFeed = (list: PublishedList) =>
+export const mapListToFeed = (list: PublishedUserList) =>
   makeFeed({
     list,
     event: list.event,

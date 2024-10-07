@@ -24,7 +24,7 @@
     getAddress,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
-  import {identity, sum, uniqBy, prop, pluck} from "ramda"
+  import {identity, sum, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
@@ -50,10 +50,9 @@
   import {router} from "src/app/util/router"
   import {
     env,
-    groups,
     publish,
-    unmuteNote,
-    muteNote,
+    unmute,
+    mute,
     deriveHandlersForKind,
     userIsGroupMember,
     groupMeta,
@@ -239,9 +238,9 @@
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
       if (muted) {
-        actions.push({label: "Unmute", icon: "microphone", onClick: () => unmuteNote(note.id)})
+        actions.push({label: "Unmute", icon: "microphone", onClick: () => unmute(note.id)})
       } else {
-        actions.push({label: "Mute", icon: "microphone-slash", onClick: () => muteNote(note.id)})
+        actions.push({label: "Mute", icon: "microphone-slash", onClick: () => mute(["e", note.id])})
       }
 
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})

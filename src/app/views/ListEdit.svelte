@@ -5,7 +5,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import ListForm from "src/app/shared/ListForm.svelte"
   import {router} from "src/app/util"
-  import {readList} from "src/domain"
+  import {readUserList} from "src/domain"
 
   export let address
   export let tags = []
@@ -14,7 +14,10 @@
 
   const exit = () => router.clearModals()
 
-  const getList = () => ({...readList($event), tags: uniqBy(nth(1), [...$event.tags, ...tags])})
+  const getList = () => ({
+    ...readUserList($event),
+    tags: uniqBy(nth(1), [...$event.tags, ...tags]),
+  })
 </script>
 
 {#if $event}

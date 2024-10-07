@@ -16,11 +16,11 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
+  import {displayPubkey} from "@welshman/util"
   import {session, deriveProfileDisplay, getUserWotScore} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
-  import {displayPubkey} from "src/domain"
   import {userFollows, maxWot} from "src/engine"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 

@@ -3,15 +3,15 @@
   import {derived} from "svelte/store"
   import {ctx} from "@welshman/lib"
   import {toNostrURI} from "@welshman/util"
-  import {session, signer} from "@welshman/app"
+  import {session, signer, tagPubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {
     loginWithPublicKey,
-    unfollowPerson,
-    followPerson,
-    unmutePerson,
-    mutePerson,
+    unfollow,
+    follow,
+    unmute,
+    mute,
     userMutes,
     userFollows,
   } from "src/engine"
@@ -30,13 +30,13 @@
     boot()
   }
 
-  const unfollow = () => unfollowPerson(pubkey)
+  const unfollowPerson = () => unfollow(pubkey)
 
-  const follow = () => followPerson(pubkey)
+  const followPerson = () => follow(tagPubkey(pubkey))
 
-  const unmute = () => unmutePerson(pubkey)
+  const unmutePerson = () => unmute(pubkey)
 
-  const mute = () => mutePerson(pubkey)
+  const mutePerson = () => mute(tagPubkey(pubkey))
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
@@ -57,7 +57,7 @@
 
     if (!isSelf && $signer) {
       actions.push({
-        onClick: $muted ? unmute : mute,
+        onClick: $muted ? unmutePerson : mutePerson,
         label: $muted ? "Unmute" : "Mute",
         icon: $muted ? "microphone-slash" : "microphone",
       })
@@ -106,9 +106,9 @@
     <Popover triggerType="mouseenter">
       <div slot="trigger" class="w-6 cursor-pointer text-center">
         {#if $following}
-          <i class="fa fa-user-minus" on:click={unfollow} />
+          <i class="fa fa-user-minus" on:click={unfollowPerson} />
         {:else}
-          <i class="fa fa-user-plus" on:click={follow} />
+          <i class="fa fa-user-plus" on:click={followPerson} />
         {/if}
       </div>
       <div slot="tooltip">{$following ? "Unfollow" : "Follow"}</div>

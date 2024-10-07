@@ -54,13 +54,16 @@ import {
   isCommunityAddress,
   isHashedEvent,
   getPubkeyTagValues,
-  getListValues,
+  getListTagValues,
   normalizeRelayUrl,
   isContextAddress,
   getAddressTagValues,
   getAncestorTagValues,
+  makeList,
+  readList,
+  asDecryptedEvent,
 } from "@welshman/util"
-import type {Filter, TrustedEvent, SignedEvent, EventTemplate} from "@welshman/util"
+import type {Filter, TrustedEvent, SignedEvent, EventTemplate, PublishedList} from "@welshman/util"
 import {Nip59, Nip01Signer} from "@welshman/signer"
 import {Executor, Multi, Plex, Local, Relays, publish as basePublish} from "@welshman/net"
 import type {PartialSubscribeRequest} from "@welshman/app"
@@ -110,24 +113,20 @@ import type {
   GroupMeta,
   PublishedFeed,
   PublishedListFeed,
-  PublishedSingleton,
-  PublishedList,
+  PublishedUserList,
   PublishedGroupMeta,
 } from "src/domain"
 import {
   displayFeed,
   EDITABLE_LIST_KINDS,
-  makeSingleton,
-  ListSearch,
+  UserListSearch,
   readFeed,
-  readList,
+  readUserList,
   readCollections,
   CollectionSearch,
   readHandlers,
   mapListToFeed,
   getHandlerAddress,
-  readSingleton,
-  asDecryptedEvent,
   readGroupMeta,
   displayGroupMeta,
 } from "src/domain"
@@ -349,16 +348,16 @@ export const maxWot = withGetter(
 // User follows/mutes/network
 
 export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m, $pk, $anon]) => {
-  return $pk ? $m.get($pk) : makeSingleton({kind: FOLLOWS, publicTags: $anon.follows})
+  return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})
 })
 
-export const userFollows = derived(userFollowList, l => new Set(getListValues("p", l)))
+export const userFollows = derived(userFollowList, l => new Set(getListTagValues("p", l)))
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
 export const userMuteList = derived([mutesByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => new Set(getListValues(["p", "e"], l)))
+export const userMutes = derived(userMuteList, l => new Set(getListTagValues(["p", "e"], l)))
 
 // Communities
 
@@ -368,7 +367,7 @@ export const communityLists = derived(
   [plaintext, communityListEvents],
   ([$plaintext, $communityListEvents]) =>
     $communityListEvents.map(event =>
-      readSingleton(
+      readList(
         asDecryptedEvent(event, {
           content: $plaintext[event.id],
         }),
@@ -381,10 +380,10 @@ export const communityListsByPubkey = withGetter(
 )
 
 export const communityListsByAddress = derived(communityLists, $communityLists => {
-  const m = new Map<string, PublishedSingleton[]>()
+  const m = new Map<string, PublishedList[]>()
 
   for (const list of $communityLists) {
-    for (const a of getListValues("a", list)) {
+    for (const a of getListTagValues("a", list)) {
       pushToMapKey(m, a, list)
     }
   }
@@ -393,15 +392,15 @@ export const communityListsByAddress = derived(communityLists, $communityLists =
 })
 
 export const getCommunityList = (pk: string) =>
-  communityListsByPubkey.get().get(pk) as PublishedSingleton | undefined
+  communityListsByPubkey.get().get(pk) as PublishedList | undefined
 
 export const deriveCommunityList = (pk: string) =>
-  derived(communityListsByPubkey, m => m.get(pk) as PublishedSingleton | undefined)
+  derived(communityListsByPubkey, m => m.get(pk) as PublishedList | undefined)
 
-export const getCommunities = (pk: string) => new Set(getListValues("a", getCommunityList(pk)))
+export const getCommunities = (pk: string) => new Set(getListTagValues("a", getCommunityList(pk)))
 
 export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => new Set(getListValues("a", m.get(pk))))
+  derived(communityListsByPubkey, m => new Set(getListTagValues("a", m.get(pk))))
 
 // Groups
 
@@ -830,20 +829,22 @@ export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER
 
 // Lists
 
-export const lists = deriveEventsMapped<PublishedList>(repository, {
+export const lists = deriveEventsMapped<PublishedUserList>(repository, {
   filters: [{kinds: EDITABLE_LIST_KINDS}],
-  eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readList(event) : null),
+  eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readUserList(event) : null),
   itemToEvent: prop("event"),
 })
 
-export const userLists = derived([lists, pubkey], ([$lists, $pubkey]: [PublishedList[], string]) =>
-  sortBy(
-    l => l.title.toLowerCase(),
-    $lists.filter(list => list.event.pubkey === $pubkey),
-  ),
+export const userLists = derived(
+  [lists, pubkey],
+  ([$lists, $pubkey]: [PublishedUserList[], string]) =>
+    sortBy(
+      l => l.title.toLowerCase(),
+      $lists.filter(list => list.event.pubkey === $pubkey),
+    ),
 )
 
-export const listSearch = derived(lists, $lists => new ListSearch($lists))
+export const listSearch = derived(lists, $lists => new UserListSearch($lists))
 
 // Feeds
 
@@ -863,7 +864,7 @@ export const feedFavorites = derived(
   [plaintext, feedFavoriteEvents],
   ([$plaintext, $feedFavoriteEvents]) =>
     $feedFavoriteEvents.map(event =>
-      readSingleton(
+      readList(
         asDecryptedEvent(event, {
           content: $plaintext[event.id],
         }),
@@ -873,11 +874,11 @@ export const feedFavorites = derived(
 
 export const feedFavoritesByAddress = withGetter(
   derived(feedFavorites, $feedFavorites => {
-    const $feedFavoritesByAddress = new Map<string, PublishedSingleton[]>()
+    const $feedFavoritesByAddress = new Map<string, PublishedList[]>()
 
-    for (const singleton of $feedFavorites) {
-      for (const address of getListValues("a", singleton)) {
-        pushToMapKey($feedFavoritesByAddress, address, singleton)
+    for (const list of $feedFavorites) {
+      for (const address of getListTagValues("a", list)) {
+        pushToMapKey($feedFavoritesByAddress, address, list)
       }
     }
 
@@ -887,12 +888,12 @@ export const feedFavoritesByAddress = withGetter(
 
 export const userFeedFavorites = derived(
   [feedFavorites, pubkey],
-  ([$singletons, $pubkey]: [PublishedSingleton[], string]) =>
-    $singletons.find(singleton => singleton.event.pubkey === $pubkey),
+  ([$lists, $pubkey]: [PublishedList[], string]) =>
+    $lists.find(list => list.event.pubkey === $pubkey),
 )
 
-export const userFavoritedFeeds = derived(userFeedFavorites, $singleton =>
-  getListValues("a", $singleton).map(repository.getEvent).filter(identity).map(readFeed),
+export const userFavoritedFeeds = derived(userFeedFavorites, $list =>
+  getListTagValues("a", $list).map(repository.getEvent).filter(identity).map(readFeed),
 )
 
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {
@@ -929,7 +930,7 @@ export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
-    event.tags.length > 1 ? mapListToFeed(readList(event)) : undefined,
+    event.tags.length > 1 ? mapListToFeed(readUserList(event)) : undefined,
   itemToEvent: prop("event"),
 })
 

@@ -14,7 +14,7 @@ import {
   groupBy,
   now,
 } from "@welshman/lib"
-import type {TrustedEvent} from "@welshman/util"
+import type {TrustedEvent, List, Profile} from "@welshman/util"
 import {
   getAddress,
   Tags,
@@ -33,12 +33,10 @@ import {
   DIRECT_MESSAGE,
   SEEN_CONVERSATION,
   LOCAL_RELAY_URL,
-  asDecryptedEvent,
-  readList,
-  editList,
   makeList,
-  createList,
-  uniqTags,
+  editProfile,
+  createProfile,
+  isPublishedProfile,
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
@@ -57,6 +55,10 @@ import {
   addNoFallbacks,
   ensurePlaintext,
   tagPubkey,
+  userMutes,
+  userFollows,
+  userRelaySelections,
+  userInboxRelaySelections,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -64,8 +66,6 @@ import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} 
 import {stripExifData, blobToFile} from "src/util/html"
 import {joinPath, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
-import {isPublishedProfile, createProfile, editProfile} from "src/domain"
-import type {Profile} from "src/domain"
 import {GroupAccess} from "src/engine/model"
 import {sortEventsDesc} from "src/engine/utils"
 import {
@@ -89,6 +89,7 @@ import {
   mentionGroup,
   userSeenStatusEvents,
   getChannelIdFromEvent,
+  userFeedFavorites,
 } from "src/engine/state"
 
 // Helpers
@@ -602,72 +603,86 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
 
 // Lists
 
-export type ModifyTags = (tags: string[][]) => string[][]
+export const encryptTagsAsContent = (tags: string[][]) =>
+  signer.get().nip44.encrypt(pubkey.get(), JSON.stringify(tags))
 
-export type UpdateSingletonOpts = {
-  only?: "public" | "private"
+export const removeFromList = async (list: List, value: string) => {
+  const template = {
+    kind: list.kind,
+    content: list.event?.content || "",
+    tags: list.publicTags.filter(nthNe(1, value)),
+  }
+
+  if (list.privateTags.some(nthEq(1, value))) {
+    template.content = await encryptTagsAsContent(list.privateTags.filter(nthNe(1, value)))
+  }
+
+  return template
 }
 
-export const updateSingleton = async (
-  kind: number,
-  modifyTags: ModifyTags,
-  {only}: UpdateSingletonOpts = {},
-) => {
-  const [prev] = repository.query([{kinds: [kind], authors: [pubkey.get()]}])
+export const addToListPublicly = (list: List, tag: string[]) => ({
+  kind: list.kind,
+  content: list.event?.content || "",
+  tags: append(tag, list.publicTags),
+})
 
-  // Preserve content instead of use encrypted tags because kind 3 content is used for
-  // relay selections in many places. Content isn't supported for mutes or relays so this is ok
-  const relays = withIndexers(ctx.app.router.WriteRelays().getUrls())
-  const encrypt = content => signer.get().nip44.encrypt(pubkey.get(), content)
-  const update = list => ({
-    ...list,
-    publicTags: only === "private" ? list.publicTags : uniqTags(modifyTags(list.publicTags)),
-    privateTags: only === "public" ? list.privateTags : uniqTags(modifyTags(list.privateTags)),
+export const addToListPrivately = async (list: List, tag: string[]) => ({
+  kind: list.kind,
+  tags: list.publicTags,
+  content: await encryptTagsAsContent(append(tag, list.privateTags)),
+})
+
+// Follows
+
+export const unfollow = async (value: string) => {
+  if (signer.get()) {
+    return createAndPublish({
+      ...(await removeFromList(get(userFollows) || makeList({kind: FOLLOWS}), value)),
+      relays: ctx.app.router.WriteRelays().getUrls(),
+    })
+  } else {
+    anonymous.update($a => ({...$a, follows: reject(nthEq(1, value), $a.follows)}))
+  }
+}
+
+export const follow = (tag: string[]) => {
+  if (signer.get()) {
+    return createAndPublish({
+      ...addToListPublicly(get(userFollows) || makeList({kind: FOLLOWS}), tag),
+      relays: ctx.app.router.WriteRelays().getUrls(),
+    })
+  } else {
+    anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
+  }
+}
+
+// Mutes
+
+export const unmute = async (value: string) =>
+  createAndPublish({
+    ...(await removeFromList(get(userMutes) || makeList({kind: MUTES}), value)),
+    relays: ctx.app.router.WriteRelays().getUrls(),
   })
 
-  const encryptable = prev
-    ? editList(update(readList(asDecryptedEvent(prev, {content: await ensurePlaintext(prev)}))))
-    : createList(update(makeList({kind})))
+export const mute = (tag: string[]) =>
+  createAndPublish({
+    ...addToListPublicly(get(userMutes) || makeList({kind: MUTES}), tag),
+    relays: ctx.app.router.WriteRelays().getUrls(),
+  })
 
-  const template = await encryptable.reconcile(encrypt)
+// Feed favorites
 
-  await createAndPublish({...template, relays})
-}
-
-// Follows/mutes
-
-export const unfollowPerson = (pubkey: string) => {
-  if (signer.get()) {
-    updateSingleton(FOLLOWS, reject(nthEq(1, pubkey)), {only: "public"})
-  } else {
-    anonymous.update($a => ({...$a, follows: reject(nthEq(1, pubkey), $a.follows)}))
-  }
-}
-
-export const followPerson = (pubkey: string) => {
-  if (signer.get()) {
-    updateSingleton(FOLLOWS, tags => append(tagPubkey(pubkey), tags), {only: "public"})
-  } else {
-    anonymous.update($a => ({...$a, follows: append(tagPubkey(pubkey), $a.follows)}))
-  }
-}
-
-export const unmutePerson = (pubkey: string) =>
-  updateSingleton(MUTES, tags => reject(nthEq(1, pubkey), tags))
-
-export const mutePerson = (pubkey: string) =>
-  updateSingleton(MUTES, tags => append(tagPubkey(pubkey), tags), {only: "public"})
-
-export const unmuteNote = (id: string) => updateSingleton(MUTES, tags => reject(nthEq(1, id), tags))
-
-export const muteNote = (id: string) =>
-  updateSingleton(MUTES, tags => append(["e", id], tags), {only: "public"})
-
-export const removeFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => reject(nthEq(1, address), tags))
+export const removeFeedFavorite = async (address: string) =>
+  createAndPublish({
+    ...(await removeFromList(get(userFeedFavorites) || makeList({kind: FEEDS}), address)),
+    relays: ctx.app.router.WriteRelays().getUrls(),
+  })
 
 export const addFeedFavorite = (address: string) =>
-  updateSingleton(FEEDS, tags => append(["a", address], tags), {only: "public"})
+  createAndPublish({
+    ...addToListPublicly(get(userFeedFavorites) || makeList({kind: FEEDS}), ["a", address]),
+    relays: ctx.app.router.WriteRelays().getUrls(),
+  })
 
 // Relays
 
@@ -680,16 +695,31 @@ export const requestRelayAccess = async (url: string, claim: string, sk?: string
     sk,
   })
 
-export const setOutboxPolicies = async (modifyTags: ModifyTags) => {
+export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
   if (signer.get()) {
-    updateSingleton(RELAYS, modifyTags, {only: "public"})
+    const list = get(userRelaySelections) || makeList({kind: RELAYS})
+
+    createAndPublish({
+      kind: list.kind,
+      content: list.event?.content || "",
+      tags: modifyTags(list.publicTags),
+      relays: withIndexers(ctx.app.router.WriteRelays().getUrls()),
+    })
   } else {
     anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
   }
 }
 
-export const setInboxPolicies = async (modifyTags: ModifyTags) =>
-  updateSingleton(INBOX_RELAYS, modifyTags, {only: "public"})
+export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
+  const list = get(userInboxRelaySelections) || makeList({kind: INBOX_RELAYS})
+
+  createAndPublish({
+    kind: list.kind,
+    content: list.event?.content || "",
+    tags: modifyTags(list.publicTags),
+    relays: withIndexers(ctx.app.router.WriteRelays().getUrls()),
+  })
+}
 
 export const setInboxPolicy = (url: string, enabled: boolean) => {
   const urls = getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))
@@ -872,7 +902,8 @@ export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey
 
 export const loginWithExtension = pubkey => addSession({method: "nip07", pubkey})
 
-export const loginWithSigner = (pubkey, pkg) => addSession({method: "nip55", pubkey: pubkey, signer: pkg})
+export const loginWithSigner = (pubkey, pkg) =>
+  addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
 export const loginWithNsecBunker = async (pubkey, token, connectRelay) => {
   const secret = makeSecret()

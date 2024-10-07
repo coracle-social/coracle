@@ -17,7 +17,7 @@
     getWriteRelayUrls,
     relaySelectionsByPubkey,
   } from "@welshman/app"
-  import {Tags, isShareableRelayUrl, normalizeRelayUrl} from "@welshman/util"
+  import {Tags, isShareableRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -28,7 +28,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {profileHasName} from "src/domain"
   import {load, userFollows, sortEventsDesc, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]

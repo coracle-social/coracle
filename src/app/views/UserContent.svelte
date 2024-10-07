@@ -1,6 +1,6 @@
 <script lang="ts">
   import {equals} from "ramda"
-  import {identity} from "@welshman/lib"
+  import {ctx, identity} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
   import {topicSearch, tagPubkey} from "@welshman/app"
   import {appName} from "src/partials/state"
@@ -15,7 +15,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {userSettings, publishSettings, userMutes, updateSingleton} from "src/engine"
+  import {userSettings, publishSettings, userMutes, createAndPublish} from "src/engine"
 
   const values = {...$userSettings}
 
@@ -27,7 +27,11 @@
     }
 
     if (!equals(mutedPubkeys, Array.from($userMutes))) {
-      updateSingleton(MUTES, () => mutedPubkeys.map(tagPubkey))
+      createAndPublish({
+        kind: MUTES,
+        tags: mutedPubkeys.map(pk => tagPubkey(pk)),
+        relays: ctx.app.router.WriteRelays().getUrls(),
+      })
     }
 
     showInfo("Your preferences have been saved!")

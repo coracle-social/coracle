@@ -19,7 +19,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {createAndPublish, deleteEvent} from "src/engine"
-  import {KindSearch, createList, displayList, editList} from "src/domain"
+  import {KindSearch, createUserList, displayUserList, editUserList} from "src/domain"
 
   export let list
   export let exit
@@ -41,7 +41,7 @@
 
   const submit = async () => {
     const relays = ctx.app.router.WriteRelays().getUrls()
-    const template = list.event ? editList(list) : createList(list)
+    const template = list.event ? editUserList(list) : createUserList(list)
     const pub = await createAndPublish({...template, relays})
 
     showInfo("Your list has been saved!")
@@ -134,7 +134,7 @@
   <Modal onEscape={closeDelete}>
     <Subheading>Confirm deletion</Subheading>
     <p>
-      Are you sure you want to delete your {displayList(list)} list?
+      Are you sure you want to delete your {displayUserList(list)} list?
     </p>
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeDelete}>Cancel</Anchor>

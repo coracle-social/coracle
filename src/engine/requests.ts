@@ -43,7 +43,7 @@ import {
 } from "@welshman/app"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {partition, uniq, without} from "ramda"
-import {LIST_KINDS} from "src/domain"
+import {CUSTOM_LIST_KINDS} from "src/domain"
 import {
   env,
   getUserCircles,
@@ -401,7 +401,7 @@ export const loadFeedsAndLists = () =>
     forcePlatform: false,
     filters: [
       addSinceToFilter({
-        kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...LIST_KINDS],
+        kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...CUSTOM_LIST_KINDS],
         authors: [pubkey.get()],
       }),
     ],
