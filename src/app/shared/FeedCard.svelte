@@ -2,7 +2,13 @@
   import cx from "classnames"
   import {ctx, remove} from "@welshman/lib"
   import {repository, pubkey} from "@welshman/app"
-  import {NAMED_BOOKMARKS, toNostrURI, Address, getListTagValues} from "@welshman/util"
+  import {
+    NAMED_BOOKMARKS,
+    toNostrURI,
+    Address,
+    getListTags,
+    getAddressTagValues,
+  } from "@welshman/util"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -36,7 +42,7 @@
 
   const loadFeed = () => router.at("notes").cx({feed}).push()
 
-  $: isFavorite = getListTagValues("a", $userFeedFavorites).includes(address)
+  $: isFavorite = getAddressTagValues(getListTags($userFeedFavorites)).includes(address)
   $: favoritedPubkeys = remove(
     $pubkey,
     ($feedFavoritesByAddress.get(address) || []).map(s => s.event.pubkey),

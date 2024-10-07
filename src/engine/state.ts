@@ -54,7 +54,8 @@ import {
   isCommunityAddress,
   isHashedEvent,
   getPubkeyTagValues,
-  getListTagValues,
+  getListTags,
+  getTagValues,
   normalizeRelayUrl,
   isContextAddress,
   getAddressTagValues,
@@ -351,13 +352,16 @@ export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m
   return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})
 })
 
-export const userFollows = derived(userFollowList, l => new Set(getListTagValues("p", l)))
+export const userFollows = derived(userFollowList, l => new Set(getPubkeyTagValues(getListTags(l))))
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
 export const userMuteList = derived([mutesByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
-export const userMutes = derived(userMuteList, l => new Set(getListTagValues(["p", "e"], l)))
+export const userMutes = derived(
+  userMuteList,
+  l => new Set(getTagValues(["p", "e"], getListTags(l))),
+)
 
 // Communities
 
@@ -383,7 +387,7 @@ export const communityListsByAddress = derived(communityLists, $communityLists =
   const m = new Map<string, PublishedList[]>()
 
   for (const list of $communityLists) {
-    for (const a of getListTagValues("a", list)) {
+    for (const a of getAddressTagValues(getListTags(list))) {
       pushToMapKey(m, a, list)
     }
   }
@@ -397,10 +401,11 @@ export const getCommunityList = (pk: string) =>
 export const deriveCommunityList = (pk: string) =>
   derived(communityListsByPubkey, m => m.get(pk) as PublishedList | undefined)
 
-export const getCommunities = (pk: string) => new Set(getListTagValues("a", getCommunityList(pk)))
+export const getCommunities = (pk: string) =>
+  new Set(getAddressTagValues(getListTags(getCommunityList(pk))))
 
 export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => new Set(getListTagValues("a", m.get(pk))))
+  derived(communityListsByPubkey, m => new Set(getAddressTagValues(getListTags(m.get(pk)))))
 
 // Groups
 
@@ -877,7 +882,7 @@ export const feedFavoritesByAddress = withGetter(
     const $feedFavoritesByAddress = new Map<string, PublishedList[]>()
 
     for (const list of $feedFavorites) {
-      for (const address of getListTagValues("a", list)) {
+      for (const address of getAddressTagValues(getListTags(list))) {
         pushToMapKey($feedFavoritesByAddress, address, list)
       }
     }
@@ -893,7 +898,7 @@ export const userFeedFavorites = derived(
 )
 
 export const userFavoritedFeeds = derived(userFeedFavorites, $list =>
-  getListTagValues("a", $list).map(repository.getEvent).filter(identity).map(readFeed),
+  getAddressTagValues(getListTags($list)).map(repository.getEvent).filter(identity).map(readFeed),
 )
 
 export class FeedSearch extends SearchHelper<PublishedFeed, string> {
