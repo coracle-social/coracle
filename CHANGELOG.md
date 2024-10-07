@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.13
+
+- [x] Add support for nip05 urls
+
 # 0.4.12
 
 - [x] Fix zap developer button

@@ -1,6 +1,8 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
+  import {loadHandle} from '@welshman/app'
   import Content from "src/partials/Content.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
@@ -29,6 +31,18 @@
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
   <PersonDetail pubkey={data} />
+{:else if entity.includes('@')}
+  {#await loadHandle(entity)}
+    <Spinner />
+  {:then $handle}
+    {#if $handle?.pubkey}
+      <PersonDetail pubkey={$handle.pubkey} />
+    {:else}
+      <Content size="lg" class="text-center">
+        <div>Sorry, we weren't able to find "{entity}".</div>
+      </Content>
+    {/if}
+  {/await}
 {:else}
   <Content size="lg" class="text-center">
     <div>Sorry, we weren't able to find "{entity}".</div>
