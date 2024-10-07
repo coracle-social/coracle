@@ -37,6 +37,8 @@ import {
   editProfile,
   createProfile,
   isPublishedProfile,
+  removeFromList,
+  addToListPublicly,
 } from "@welshman/util"
 import type {Nip46Handler} from "@welshman/signer"
 import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
@@ -114,6 +116,9 @@ export const updateRecord = (record, timestamp, updates) => {
 
 export const updateStore = (store, timestamp, updates) =>
   store.set(updateRecord(store.get(), timestamp, updates))
+
+export const nip44EncryptToSelf = (payload: string) =>
+  signer.get().nip44.encrypt(pubkey.get(), payload)
 
 // Files
 
@@ -601,56 +606,25 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
   return createAndPublish({...addClientTags(template), relays, forcePlatform})
 }
 
-// Lists
-
-export const encryptTagsAsContent = (tags: string[][]) =>
-  signer.get().nip44.encrypt(pubkey.get(), JSON.stringify(tags))
-
-export const removeFromList = async (list: List, value: string) => {
-  const template = {
-    kind: list.kind,
-    content: list.event?.content || "",
-    tags: list.publicTags.filter(nthNe(1, value)),
-  }
-
-  if (list.privateTags.some(nthEq(1, value))) {
-    template.content = await encryptTagsAsContent(list.privateTags.filter(nthNe(1, value)))
-  }
-
-  return template
-}
-
-export const addToListPublicly = (list: List, tag: string[]) => ({
-  kind: list.kind,
-  content: list.event?.content || "",
-  tags: append(tag, list.publicTags),
-})
-
-export const addToListPrivately = async (list: List, tag: string[]) => ({
-  kind: list.kind,
-  tags: list.publicTags,
-  content: await encryptTagsAsContent(append(tag, list.privateTags)),
-})
-
 // Follows
 
 export const unfollow = async (value: string) => {
   if (signer.get()) {
-    return createAndPublish({
-      ...(await removeFromList(get(userFollows) || makeList({kind: FOLLOWS}), value)),
-      relays: ctx.app.router.WriteRelays().getUrls(),
-    })
+    const list = get(userFollows) || makeList({kind: FOLLOWS})
+    const template = await removeFromList(list, value).reconcile(nip44EncryptToSelf)
+
+    return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
   } else {
     anonymous.update($a => ({...$a, follows: reject(nthEq(1, value), $a.follows)}))
   }
 }
 
-export const follow = (tag: string[]) => {
+export const follow = async (tag: string[]) => {
   if (signer.get()) {
-    return createAndPublish({
-      ...addToListPublicly(get(userFollows) || makeList({kind: FOLLOWS}), tag),
-      relays: ctx.app.router.WriteRelays().getUrls(),
-    })
+    const list = get(userFollows) || makeList({kind: FOLLOWS})
+    const template = await addToListPublicly(list, tag).reconcile(nip44EncryptToSelf)
+
+    return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
   } else {
     anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
   }
@@ -658,31 +632,35 @@ export const follow = (tag: string[]) => {
 
 // Mutes
 
-export const unmute = async (value: string) =>
-  createAndPublish({
-    ...(await removeFromList(get(userMutes) || makeList({kind: MUTES}), value)),
-    relays: ctx.app.router.WriteRelays().getUrls(),
-  })
+export const unmute = async (value: string) => {
+  const list = get(userMutes) || makeList({kind: MUTES})
+  const template = await removeFromList(list, value).reconcile(nip44EncryptToSelf)
 
-export const mute = (tag: string[]) =>
-  createAndPublish({
-    ...addToListPublicly(get(userMutes) || makeList({kind: MUTES}), tag),
-    relays: ctx.app.router.WriteRelays().getUrls(),
-  })
+  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
+}
+
+export const mute = async (tag: string[]) => {
+  const list = get(userMutes) || makeList({kind: MUTES})
+  const template = await addToListPublicly(list, tag).reconcile(nip44EncryptToSelf)
+
+  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
+}
 
 // Feed favorites
 
-export const removeFeedFavorite = async (address: string) =>
-  createAndPublish({
-    ...(await removeFromList(get(userFeedFavorites) || makeList({kind: FEEDS}), address)),
-    relays: ctx.app.router.WriteRelays().getUrls(),
-  })
+export const removeFeedFavorite = async (address: string) => {
+  const list = get(userFeedFavorites) || makeList({kind: FEEDS})
+  const template = await removeFromList(list, address).reconcile(nip44EncryptToSelf)
 
-export const addFeedFavorite = (address: string) =>
-  createAndPublish({
-    ...addToListPublicly(get(userFeedFavorites) || makeList({kind: FEEDS}), ["a", address]),
-    relays: ctx.app.router.WriteRelays().getUrls(),
-  })
+  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
+}
+
+export const addFeedFavorite = async (address: string) => {
+  const list = get(userFeedFavorites) || makeList({kind: FEEDS})
+  const template = await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf)
+
+  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
+}
 
 // Relays
 

@@ -7,6 +7,8 @@
 - [x] Conserve space on mobile
 - [x] Show mark as read button on mobile
 - [x] Fix reposts to communities
+- [x] Fix note tag inheritance
+- [x] Fix over-eager list encryption
 
 # 0.4.11
 
