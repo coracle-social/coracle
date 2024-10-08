@@ -3,7 +3,7 @@
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {ctx, remove, last, sortBy} from "@welshman/lib"
+  import {ctx, nth, nthEq, remove, last, sortBy, first} from "@welshman/lib"
   import {
     repository,
     signer,
@@ -19,9 +19,10 @@
     toNostrURI,
     asSignedEvent,
     isSignedEvent,
-    Tags,
     createEvent,
     getAddress,
+    getAddressTagValues,
+    getPubkeyTagValues,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {identity, sum, pluck} from "ramda"
@@ -75,9 +76,8 @@
   export let replies, likes, zaps
   export let zapper
 
-  const tags = Tags.fromEvent(note)
   const signedEvent = asSignedEvent(note as any)
-  const address = contextAddress || tags.context().values().first()
+  const address = contextAddress || first(getAddressTagValues(note.tags))
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({
     id: note.id,
@@ -87,12 +87,12 @@
   })
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const mentions = tags.values("p").valueOf()
+  const mentions = getPubkeyTagValues(note.tags)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const kindHandlers = deriveHandlersForKind(note.kind)
-  const handlerId = tags.get("client")?.nth(2) || ""
+  const handlerId = String(note.tags.find(nthEq(0, "client"))?.[2] || "")
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const noteActions = getSetting("note_actions")
   const seenOn = derived(trackerStore, $t =>
@@ -159,9 +159,9 @@
   }
 
   const startZap = () => {
-    const zapTags = tags.whereKey("zap")
+    const zapTags = note.tags.filter(nthEq(0, "zap"))
     const defaultSplit = tagZapSplit(note.pubkey)
-    const splits = zapTags.exists() ? zapTags.unwrap() : [defaultSplit]
+    const splits = zapTags.length > 0 ? zapTags : [defaultSplit]
 
     router
       .at("zap")
@@ -266,7 +266,7 @@
   }
 
   onMount(() => {
-    loadPubkeys(tags.whereKey("zap").values().valueOf())
+    loadPubkeys(note.tags.filter(nthEq(0, "zap")).map(nth(1)))
   })
 </script>
 

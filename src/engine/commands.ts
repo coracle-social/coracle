@@ -14,7 +14,7 @@ import {
   groupBy,
   now,
 } from "@welshman/lib"
-import type {TrustedEvent, List, Profile} from "@welshman/util"
+import type {TrustedEvent, Profile} from "@welshman/util"
 import {
   getAddress,
   Tags,
