@@ -3,18 +3,10 @@
   import {derived} from "svelte/store"
   import {ctx} from "@welshman/lib"
   import {toNostrURI} from "@welshman/util"
-  import {session, signer, tagPubkey} from "@welshman/app"
+  import {session, signer, tagPubkey, mute, unmute} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import {
-    loginWithPublicKey,
-    unfollow,
-    follow,
-    unmute,
-    mute,
-    userMutes,
-    userFollows,
-  } from "src/engine"
+  import {loginWithPublicKey, unfollow, follow, userMutes, userFollows} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
 

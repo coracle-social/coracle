@@ -12,6 +12,8 @@
     tagEvent,
     tagPubkey,
     tagZapSplit,
+    mute,
+    unmute,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
@@ -52,8 +54,6 @@
   import {
     env,
     publish,
-    unmute,
-    mute,
     deriveHandlersForKind,
     userIsGroupMember,
     groupMeta,

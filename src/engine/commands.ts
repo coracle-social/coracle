@@ -28,7 +28,6 @@ import {
   FOLLOWS,
   RELAYS,
   PROFILE,
-  MUTES,
   INBOX_RELAYS,
   DIRECT_MESSAGE,
   SEEN_CONVERSATION,
@@ -57,10 +56,10 @@ import {
   addNoFallbacks,
   ensurePlaintext,
   tagPubkey,
-  userMutes,
-  userFollows,
   userRelaySelections,
   userInboxRelaySelections,
+  follow as baseFollow,
+  unfollow as baseUnfollow,
 } from "@welshman/app"
 import type {Session} from "@welshman/app"
 import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
@@ -608,43 +607,15 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
 
 // Follows
 
-export const unfollow = async (value: string) => {
-  if (signer.get()) {
-    const list = get(userFollows) || makeList({kind: FOLLOWS})
-    const template = await removeFromList(list, value).reconcile(nip44EncryptToSelf)
+export const unfollow = async (value: string) =>
+  signer.get()
+    ? baseUnfollow(value)
+    : anonymous.update($a => ({...$a, follows: reject(nthEq(1, value), $a.follows)}))
 
-    return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
-  } else {
-    anonymous.update($a => ({...$a, follows: reject(nthEq(1, value), $a.follows)}))
-  }
-}
-
-export const follow = async (tag: string[]) => {
-  if (signer.get()) {
-    const list = get(userFollows) || makeList({kind: FOLLOWS})
-    const template = await addToListPublicly(list, tag).reconcile(nip44EncryptToSelf)
-
-    return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
-  } else {
-    anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
-  }
-}
-
-// Mutes
-
-export const unmute = async (value: string) => {
-  const list = get(userMutes) || makeList({kind: MUTES})
-  const template = await removeFromList(list, value).reconcile(nip44EncryptToSelf)
-
-  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
-}
-
-export const mute = async (tag: string[]) => {
-  const list = get(userMutes) || makeList({kind: MUTES})
-  const template = await addToListPublicly(list, tag).reconcile(nip44EncryptToSelf)
-
-  return createAndPublish({...template, relays: ctx.app.router.WriteRelays().getUrls()})
-}
+export const follow = async (tag: string[]) =>
+  signer.get()
+    ? baseFollow(tag)
+    : anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
 
 // Feed favorites
 
