@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {deriveProfile} from '@welshman/app'
-  import Avatar from '@lib/components/Avatar.svelte'
+  import {deriveProfile} from "@welshman/app"
+  import Avatar from "@lib/components/Avatar.svelte"
 
   export let pubkey
 

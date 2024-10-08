@@ -1,9 +1,9 @@
 <script lang="ts">
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
-  import {displayUrl} from '@welshman/lib'
-  import {displayRelayUrl} from '@welshman/util'
-  import {deriveRelay} from '@welshman/app'
+  import {displayUrl} from "@welshman/lib"
+  import {displayRelayUrl} from "@welshman/util"
+  import {deriveRelay} from "@welshman/app"
 
   export let url
 
@@ -30,11 +30,14 @@
       &bull;
     {/if}
     {#if $relay?.profile?.supported_nips}
-      <span class="cursor-pointer underline tooltip" data-tip="NIPs supported: {$relay.profile.supported_nips.join(", ")}">
+      <span
+        class="tooltip cursor-pointer underline"
+        data-tip="NIPs supported: {$relay.profile.supported_nips.join(', ')}">
         {$relay.profile.supported_nips.length} NIPs
       </span>
       &bull;
     {/if}
-    Connected {connections} {connections === 1 ? 'time' : 'times'}
+    Connected {connections}
+    {connections === 1 ? "time" : "times"}
   </span>
 </div>

@@ -9,44 +9,54 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {sortBy, append} from "@welshman/lib"
+  import {ctx, uniq, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent} from "@welshman/util"
-  import {formatTimestampAsDate, makeThunk, publishThunk} from "@welshman/app"
+  import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
+  import {Nip59} from "@welshman/signer"
+  import {
+    pubkey,
+    signer,
+    formatTimestampAsDate,
+    tagPubkey,
+    makeThunk,
+    publishThunk,
+  } from "@welshman/app"
   import {fly} from "@lib/transition"
-  import Icon from "@lib/components/Icon.svelte"
-  import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import ChannelMessage from "@app/components/ChannelMessage.svelte"
-  import ChannelCompose from "@app/components/ChannelCompose.svelte"
-  import {
-    userMembership,
-    decodeNRelay,
-    makeChannelId,
-    deriveChannel,
-    GENERAL,
-    tagRoom,
-    MESSAGE,
-  } from "@app/state"
-  import {addRoomMembership, removeRoomMembership} from "@app/commands"
+  import Name from "@app/components/Name.svelte"
+  import ProfileCircle from "@app/components/ProfileCircle.svelte"
+  import ProfileCircles from "@app/components/ProfileCircles.svelte"
+  import ChatMessage from "@app/components/ChatMessage.svelte"
+  import ChatCompose from "@app/components/ChannelCompose.svelte"
+  import {deriveChat, splitChatId} from "@app/state"
 
-  const {nrelay, room = GENERAL} = $page.params
-  const url = decodeNRelay(nrelay)
-  const channel = deriveChannel(makeChannelId(url, room))
+  const {chat: id} = $page.params
+  const chat = deriveChat(id)
+  const pubkeys = splitChatId(id)
+  const others = remove($pubkey, pubkeys)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
-  const onSubmit = ({content, tags}: EventContent) => {
-    const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
+  const onSubmit = async ({content, ...params}: EventContent) => {
+    const tags = [...params.tags, ...pubkeys.map(pubkey => tagPubkey(pubkey))]
+    const template = createEvent(DIRECT_MESSAGE, {content, tags})
+    const nip59 = Nip59.fromSigner($signer!)
 
-    publishThunk(makeThunk({event, relays: [url]}))
+    for (const recipient of uniq(pubkeys)) {
+      const rumor = await nip59.wrap(recipient, template)
+
+      publishThunk(
+        makeThunk({
+          event: rumor.wrap,
+          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+        }),
+      )
+    }
   }
 
   let loading = true
   let elements: Element[] = []
-
-  $: membership = $userMembership?.roomsByUrl.get(url) || []
 
   $: {
     elements = []
@@ -54,7 +64,7 @@
     let previousDate
     let previousPubkey
 
-    for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
+    for (const event of sortBy(e => e.created_at, $chat?.messages || [])) {
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
@@ -86,22 +96,18 @@
     <div
       class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
-        <Icon icon="hashtag" />
-        <strong>{room}</strong>
-      </div>
-      {#if room !== GENERAL}
-        {#if membership.includes(room)}
-          <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
-            <Icon icon="arrows-a-logout-2" />
-            Leave Room
-          </Button>
+        {#if others.length === 1}
+          <ProfileCircle pubkey={others[0]} size={5} />
+          <Name pubkey={others[0]} />
         {:else}
-          <Button class="btn btn-neutral btn-sm" on:click={() => addRoomMembership(url, room)}>
-            <Icon icon="login-2" />
-            Join Room
-          </Button>
+          <ProfileCircles pubkeys={others} size={5} />
+          <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+            <Name pubkey={others[0]} />
+            and {others.length - 1}
+            {others.length > 2 ? "others" : "other"}
+          </p>
         {/if}
-      {/if}
+      </div>
     </div>
   </div>
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
@@ -110,7 +116,7 @@
         <Divider>{value}</Divider>
       {:else}
         <div in:fly>
-          <ChannelMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+          <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
         </div>
       {/if}
     {/each}
@@ -125,6 +131,6 @@
     </p>
   </div>
   <div class="shadow-top-xl border-t border-solid border-base-100 bg-base-100">
-    <ChannelCompose {onSubmit} />
+    <ChatCompose {onSubmit} />
   </div>
 </div>

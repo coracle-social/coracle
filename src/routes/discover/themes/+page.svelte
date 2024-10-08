@@ -19,10 +19,9 @@
   </label>
   <div class="grid grid-cols-2 gap-4 md:grid-cols-2">
     {#each searchThemes.searchValues(term) as name}
-      <div class="card2 bg-alt shadow-xl flex flex-col justify-center gap-4" data-theme={name}>
+      <div class="card2 bg-alt flex flex-col justify-center gap-4 shadow-xl" data-theme={name}>
         <h2 class="card2 bg-alt text-center capitalize">{name}</h2>
-        <button class="btn btn-primary w-full" on:click={() => theme.set(name)}
-          >Use Theme</button>
+        <button class="btn btn-primary w-full" on:click={() => theme.set(name)}>Use Theme</button>
       </div>
     {/each}
   </div>

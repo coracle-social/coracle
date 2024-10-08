@@ -1,26 +1,31 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
   import {last, ctx} from "@welshman/lib"
-  import {PROFILE, createEvent, displayPubkey, displayProfile, makeProfile, editProfile, createProfile, isPublishedProfile} from "@welshman/util"
-  import {pubkey, getProfile, displayHandle, makeThunk, publishThunk} from "@welshman/app"
-  import {slide} from '@lib/transition'
+  import {
+    createEvent,
+    displayPubkey,
+    displayProfile,
+    makeProfile,
+    editProfile,
+    createProfile,
+    isPublishedProfile,
+  } from "@welshman/util"
+  import {pubkey, profilesByPubkey, makeThunk, publishThunk} from "@welshman/app"
+  import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
-  import Field from '@lib/components/Field.svelte'
+  import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import InputProfilePicture from "@lib/components/InputProfilePicture.svelte"
-  import Content from '@app/components/Content.svelte'
-  import InfoHandle from '@app/components/InfoHandle.svelte'
+  import Content from "@app/components/Content.svelte"
+  import InfoHandle from "@app/components/InfoHandle.svelte"
   import {pushModal} from "@app/modal"
   import {pushToast} from "@app/toast"
 
-  const npub = nip19.npubEncode($pubkey!)
   const pubkeyDisplay = displayPubkey($pubkey!)
 
-  const displayNip05 = (nip05: string) =>
-    nip05?.startsWith("_@") ? last(nip05.split("@")) : nip05
+  const displayNip05 = (nip05: string) => (nip05?.startsWith("_@") ? last(nip05.split("@")) : nip05)
 
-  const cloneProfile = () => ({...(getProfile($pubkey!) || makeProfile())})
+  const cloneProfile = () => ({...($profilesByPubkey.get($pubkey!) || makeProfile())})
 
   const toggleEdit = () => {
     editing = !editing
@@ -52,23 +57,23 @@
 
 <div class="content column gap-4">
   <div class="card2 bg-alt shadow-xl">
-    <div class="flex gap-2 justify-between">
-      <div class="flex gap-3 max-w-full">
+    <div class="flex justify-between gap-2">
+      <div class="flex max-w-full gap-3">
         <div class="py-1">
           <Avatar src={profile?.picture} size={10} />
         </div>
-        <div class="flex flex-col min-w-0">
-          <div class="flex gap-2 items-center">
-            <div class="text-bold text-ellipsis overflow-hidden">
+        <div class="flex min-w-0 flex-col">
+          <div class="flex items-center gap-2">
+            <div class="text-bold overflow-hidden text-ellipsis">
               {displayProfile(profile, pubkeyDisplay)}
             </div>
           </div>
-          <div class="text-sm opacity-75 text-ellipsis overflow-hidden">
+          <div class="overflow-hidden text-ellipsis text-sm opacity-75">
             {profile?.nip05 ? displayNip05(profile.nip05) : pubkeyDisplay}
           </div>
         </div>
       </div>
-      <Button class="btn btn-neutral btn-circle w-12 h-12 center -mt-4 -mr-4" on:click={toggleEdit}>
+      <Button class="center btn btn-circle btn-neutral -mr-4 -mt-4 h-12 w-12" on:click={toggleEdit}>
         <Icon icon="pen-new-square" />
       </Button>
     </div>
@@ -90,7 +95,11 @@
       </Field>
       <Field>
         <p slot="label">About You</p>
-        <textarea class="textarea textarea-bordered leading-4" rows="3" bind:value={profile.about} slot="input" />
+        <textarea
+          class="textarea textarea-bordered leading-4"
+          rows="3"
+          bind:value={profile.about}
+          slot="input" />
       </Field>
       <Field>
         <p slot="label">Nostr Address</p>
@@ -99,16 +108,13 @@
           <input bind:value={profile.nip05} class="grow" type="text" />
         </label>
         <p slot="info">
-          <Button class="link" on:click={() => pushModal(InfoHandle)}>What is a nostr address?</Button>
+          <Button class="link" on:click={() => pushModal(InfoHandle)}
+            >What is a nostr address?</Button>
         </p>
       </Field>
-      <div class="flex flex-row items-center justify-between gap-4 mt-4">
-        <Button class="btn btn-neutral" on:click={stopEdit}>
-          Discard Changes
-        </Button>
-        <Button type="submit" class="btn btn-primary">
-          Save Changes
-        </Button>
+      <div class="mt-4 flex flex-row items-center justify-between gap-4">
+        <Button class="btn btn-neutral" on:click={stopEdit}>Discard Changes</Button>
+        <Button type="submit" class="btn btn-primary">Save Changes</Button>
       </div>
     </form>
   {/if}

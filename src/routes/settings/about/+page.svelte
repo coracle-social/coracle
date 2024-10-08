@@ -2,7 +2,7 @@
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {entityLink} from '@app/state'
+  import {entityLink} from "@app/state"
 
   const nprofile =
     "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
@@ -22,7 +22,9 @@
         <div class="card2 bg-alt flex flex-col gap-2 text-center shadow-2xl">
           <h3 class="text-2xl sm:h-12">Get in touch</h3>
           <p class="sm:h-16">Having problems? Let us know by filing an issue.</p>
-          <Link class="btn btn-primary" href="/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
+          <Link
+            class="btn btn-primary"
+            href="/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
             Open an Issue
           </Link>
         </div>

@@ -14,7 +14,7 @@
 </style>
 
 <script lang="ts">
-  import {clamp} from '@welshman/lib'
+  import {clamp} from "@welshman/lib"
 
   export let score
   export let max = 100
@@ -26,7 +26,7 @@
   $: normalizedScore = clamp([0, max], score) / max
   $: dashOffset = 100 - 44 * normalizedScore
   $: style = `transform: rotate(${135 - normalizedScore * 180}deg)`
-  $: stroke = active ? 'var(--primary)' : 'var(--base-content)'
+  $: stroke = active ? "var(--primary)" : "var(--base-content)"
 </script>
 
 <div class="relative h-[14px] w-[14px]">

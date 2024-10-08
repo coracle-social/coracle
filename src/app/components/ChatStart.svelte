@@ -1,8 +1,6 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
-  import {displayRelayUrl} from "@welshman/util"
   import Field from "@lib/components/Field.svelte"
-  import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
@@ -19,9 +17,7 @@
 
 <form class="column gap-4" on:submit|preventDefault={onSubmit}>
   <h1 class="heading">Start a Chat</h1>
-  <p class="text-center">
-    Create an encrypted chat room for private conversations.
-  </p>
+  <p class="text-center">Create an encrypted chat room for private conversations.</p>
   <Field>
     <p slot="label">Members</p>
     <div slot="input">

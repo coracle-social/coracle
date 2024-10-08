@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {randomId} from '@welshman/lib'
-  import Icon from '@lib/components/Icon.svelte'
+  import {randomId} from "@welshman/lib"
 
   const id = randomId()
 
@@ -31,8 +30,8 @@
   </div>
   <div class="drawer-side z-modal">
     <label for={id} aria-label="close sidebar" class="drawer-overlay"></label>
-    <div class="menu bg-base-200 text-base-content min-h-full w-80 p-0">
+    <div class="menu min-h-full w-80 bg-base-200 p-0 text-base-content">
       <slot />
-  </div>
+    </div>
   </div>
 </div>

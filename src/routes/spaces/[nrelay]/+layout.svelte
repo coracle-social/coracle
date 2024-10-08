@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sort, now} from "@welshman/lib"
+  import {sort} from "@welshman/lib"
   import {displayRelayUrl, REACTION, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import {fly, slide} from "@lib/transition"

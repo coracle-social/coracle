@@ -1,12 +1,10 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {nip19} from "nostr-tools"
   import {ctx} from "@welshman/lib"
-  import {displayPubkey} from "@welshman/util"
-  import {deriveProfile, deriveProfileDisplay, formatTimestamp} from "@welshman/app"
+  import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
-  import Avatar from "@lib/components/Avatar.svelte"
   import Profile from "@app/components/Profile.svelte"
-  import {entityLink} from '@app/state'
+  import {entityLink} from "@app/state"
 
   export let event
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
-  import {ctx} from '@welshman/lib'
+  import {nip19} from "nostr-tools"
+  import {ctx} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import {entityLink} from '@app/state'
+  import {entityLink} from "@app/state"
 
   export let root
   export let replies
@@ -22,7 +22,7 @@
   </NoteCard>
   <Link
     href={entityLink(nevent)}
-    class="flex items-center gap-2 btn btn-neutral -mt-6 mr-4 rounded-full">
+    class="btn btn-neutral -mt-6 mr-4 flex items-center gap-2 rounded-full">
     <Icon icon="chat-round" />
     <span>{replies.length}</span>
   </Link>

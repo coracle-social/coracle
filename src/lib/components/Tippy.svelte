@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import type {SvelteComponent, ComponentType, ComponentProps} from 'svelte'
+  import {onMount} from "svelte"
+  import type {SvelteComponent, ComponentType, ComponentProps} from "svelte"
   import tippy, {type Instance, type Props} from "tippy.js"
 
   export let component: ComponentType
@@ -14,15 +14,17 @@
   $: instance?.$set(props)
 
   onMount(() => {
-    const target = document.createElement("div")
+    if (element) {
+      const target = document.createElement("div")
 
-    popover = tippy(element, {content: target, ...params})
+      popover = tippy(element, {content: target, ...params})
 
-    instance = new component({target, props})
+      instance = new component({target, props})
 
-    return () => {
-      popover?.destroy()
-      instance?.$destroy()
+      return () => {
+        popover?.destroy()
+        instance?.$destroy()
+      }
     }
   })
 </script>

@@ -3,12 +3,9 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {createEvent} from "@welshman/util"
-  import {publishThunk, makeThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {getEditorOptions, getEditorTags, addFile} from "@lib/editor"
-  import {MESSAGE} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
 
   export let onSubmit
@@ -27,7 +24,9 @@
   }
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true, autofocus: true}))
+    editor = createEditor(
+      getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true, autofocus: true}),
+    )
   })
 </script>
 

@@ -5,6 +5,6 @@
   export let props = {}
 </script>
 
-<div class="modal-box bg-alt overflow-visible" transition:fly={{duration: 100}}>
+<div class="bg-alt modal-box overflow-visible" transition:fly={{duration: 100}}>
   <svelte:component this={component} {...props} />
 </div>

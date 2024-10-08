@@ -16,16 +16,16 @@
     isAddress,
     isNewline,
   } from "@welshman/content"
-  import Link from '@lib/components/Link.svelte'
-  import ContentToken from '@app/components/ContentToken.svelte'
-  import ContentCode from '@app/components/ContentCode.svelte'
-  import ContentLinkInline from '@app/components/ContentLinkInline.svelte'
-  import ContentLinkBlock from '@app/components/ContentLinkBlock.svelte'
-  import ContentNewline from '@app/components/ContentNewline.svelte'
-  import ContentQuote from '@app/components/ContentQuote.svelte'
-  import ContentTopic from '@app/components/ContentTopic.svelte'
-  import ContentMention from '@app/components/ContentMention.svelte'
-  import {entityLink} from '@app/state'
+  import Link from "@lib/components/Link.svelte"
+  import ContentToken from "@app/components/ContentToken.svelte"
+  import ContentCode from "@app/components/ContentCode.svelte"
+  import ContentLinkInline from "@app/components/ContentLinkInline.svelte"
+  import ContentLinkBlock from "@app/components/ContentLinkBlock.svelte"
+  import ContentNewline from "@app/components/ContentNewline.svelte"
+  import ContentQuote from "@app/components/ContentQuote.svelte"
+  import ContentTopic from "@app/components/ContentTopic.svelte"
+  import ContentMention from "@app/components/ContentMention.svelte"
+  import {entityLink} from "@app/state"
 
   export let event
   export let minLength = 500
@@ -49,8 +49,6 @@
 
     return false
   }
-
-  const isStartAndEnd = (i: number) => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
 
   const isStartOrEnd = (i: number) => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
@@ -115,7 +113,7 @@
     {/each}
   </div>
   {#if ellipsize}
-    <div class="z-feature relative flex justify-center bg-gradient-to-t from-base-100 pt-12 -m-6">
+    <div class="relative z-feature -m-6 flex justify-center bg-gradient-to-t from-base-100 pt-12">
       <button type="button" class="btn" on:click|stopPropagation|preventDefault={expand}>
         See more
       </button>

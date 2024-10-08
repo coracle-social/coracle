@@ -1,17 +1,17 @@
 <script lang="ts">
-  import {sortBy, append, range} from '@welshman/lib'
-  import {createEvent} from '@welshman/util'
-  import type {EventContent, TrustedEvent} from '@welshman/util'
-  import {repository, makeThunk, publishThunk} from '@welshman/app'
-  import {deriveEvents} from '@welshman/store'
-  import ChannelMessage from '@app/components/ChannelMessage.svelte'
-  import ChannelCompose from '@app/components/ChannelCompose.svelte'
-  import {tagRoom, REPLY} from '@app/state'
+  import {sortBy, append} from "@welshman/lib"
+  import {createEvent} from "@welshman/util"
+  import type {EventContent, TrustedEvent} from "@welshman/util"
+  import {repository, makeThunk, publishThunk} from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
+  import ChannelMessage from "@app/components/ChannelMessage.svelte"
+  import ChannelCompose from "@app/components/ChannelCompose.svelte"
+  import {tagRoom, REPLY} from "@app/state"
 
   export let url, room, event: TrustedEvent
 
   const replies = deriveEvents(repository, {
-    filters: [{kinds: [REPLY], '#E': [event.id]}],
+    filters: [{kinds: [REPLY], "#E": [event.id]}],
   })
 
   const onSubmit = ({content, tags}: EventContent) => {
@@ -30,11 +30,11 @@
     }
 
     if (seenRoots.size === 0) {
-      tags.push(['K', String(event.kind)])
-      tags.push(['E', event.id])
+      tags.push(["K", String(event.kind)])
+      tags.push(["E", event.id])
     } else {
-      tags.push(['k', String(event.kind)])
-      tags.push(['e', event.id])
+      tags.push(["k", String(event.kind)])
+      tags.push(["e", event.id])
     }
 
     const reply = createEvent(REPLY, {content, tags: append(tagRoom(room, url), tags)})
@@ -43,7 +43,7 @@
   }
 </script>
 
-<div class="fixed flex flex-col max-h-screen w-full gap-2">
+<div class="fixed flex max-h-screen w-full flex-col gap-2">
   <div class="overflow-auto pt-3">
     <ChannelMessage {url} {room} {event} showPubkey />
     {#each sortBy(e => e.created_at, $replies) as reply (reply.id)}

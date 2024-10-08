@@ -107,7 +107,9 @@
   <div data-theme={$theme}>
     <div class="flex h-screen overflow-hidden">
       <PrimaryNav />
-      <slot />
+      {#key $page.params}
+        <slot />
+      {/key}
     </div>
     <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
       {#if prev && !prev.options?.drawer}

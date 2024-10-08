@@ -1,25 +1,23 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {createScroller} from '@lib/html'
-  import Icon from '@lib/components/Icon.svelte'
-  import {shuffle} from '@welshman/lib'
-  import {getListValues} from '@welshman/util'
-  import {profileSearch, userFollows} from '@welshman/app'
-  import PeopleItem from '@app/components/PeopleItem.svelte'
+  import {onMount} from "svelte"
+  import {createScroller} from "@lib/html"
+  import Icon from "@lib/components/Icon.svelte"
+  import {shuffle} from "@welshman/lib"
+  import {getPubkeyTagValues, getListTags} from "@welshman/util"
+  import {profileSearch, userFollows} from "@welshman/app"
+  import PeopleItem from "@app/components/PeopleItem.svelte"
 
-  const defaultPubkeys = shuffle(getListValues("p", $userFollows))
+  const defaultPubkeys = shuffle(getPubkeyTagValues(getListTags($userFollows)))
 
   let term = ""
   let limit = 10
   let element: Element
 
-  $: pubkeys = term
-    ? $profileSearch.searchValues(term)
-    : defaultPubkeys
+  $: pubkeys = term ? $profileSearch.searchValues(term) : defaultPubkeys
 
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest('.max-h-screen')!,
+      element: element.closest(".max-h-screen")!,
       onScroll: () => {
         limit += 10
       },
@@ -28,7 +26,6 @@
     return () => scroller.stop()
   })
 </script>
-
 
 <div class="content column gap-4" bind:this={element}>
   <h1 class="superheading mt-20">People</h1>

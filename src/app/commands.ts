@@ -1,9 +1,24 @@
-import {uniqBy, sleep, chunk, equals, nthNe, choice, append} from "@welshman/lib"
-import {DELETE, PROFILE, INBOX_RELAYS, RELAYS, MUTES, FOLLOWS, REACTION, isSignedEvent, getPubkeyTagValues, createEvent, displayProfile, normalizeRelayUrl} from "@welshman/util"
-import type {TrustedEvent} from "@welshman/util"
+import {get} from "svelte/store"
+import {ctx, uniqBy, uniq, sleep, chunk, equals, choice, append} from "@welshman/lib"
+import {
+  DELETE,
+  PROFILE,
+  INBOX_RELAYS,
+  RELAYS,
+  MUTES,
+  FOLLOWS,
+  REACTION,
+  isSignedEvent,
+  createEvent,
+  displayProfile,
+  normalizeRelayUrl,
+} from "@welshman/util"
+import type {TrustedEvent, EventTemplate} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
+import {Nip59, stamp} from "@welshman/signer"
 import {
   pubkey,
+  signer,
   repository,
   makeThunk,
   publishThunk,
@@ -19,7 +34,7 @@ import {
   tagPubkey,
   tagReactionTo,
   getRelayUrls,
-  getInboxRelaySelections,
+  userInboxRelaySelections,
 } from "@welshman/app"
 import {tagRoom, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
@@ -157,7 +172,7 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) =>
   })
 
 export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
-  const urls = getRelayUrls(getInboxRelaySelections(pubkey.get()!))
+  const urls = getRelayUrls(get(userInboxRelaySelections))
 
   // Only update inbox policies if they already exist or we're adding them
   if (enabled || urls.includes(url)) {
@@ -179,7 +194,7 @@ export const joinRelay = async (url: string, claim?: string) => {
       makeThunk({
         event: createEvent(28934, {tags: [["claim", claim]]}),
         relays: [url],
-      })
+      }),
     )
   }
 
@@ -189,27 +204,56 @@ export const joinRelay = async (url: string, claim?: string) => {
 
 // Actions
 
-export const publishReaction = ({relays, event, content, tags = []}: {
-  relays: string[]
-  event: TrustedEvent,
-  content: string,
-  tags?: string[][]
+export const sendWrapped = async ({
+  template,
+  pubkeys,
+}: {
+  template: EventTemplate
+  pubkeys: string[]
 }) => {
-  const reaction = createEvent(REACTION, {
+  const nip59 = Nip59.fromSigner(signer.get()!)
+
+  await Promise.all(
+    uniq(pubkeys).map(async recipient => {
+      const rumor = await nip59.wrap(recipient, stamp(template))
+      const thunk = makeThunk({
+        event: rumor.wrap,
+        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+      })
+
+      return publishThunk(thunk)
+    }),
+  )
+}
+
+export const makeReaction = ({
+  event,
+  content,
+  tags = [],
+}: {
+  event: TrustedEvent
+  content: string
+  tags?: string[][]
+}) =>
+  createEvent(REACTION, {
     content,
-    tags: [
-      ...tags,
-      ...tagReactionTo(event),
-    ],
+    tags: [...tags, ...tagReactionTo(event)],
   })
 
-  publishThunk(makeThunk({event: reaction, relays}))
-}
+export const publishReaction = ({
+  relays,
+  event,
+  content,
+  tags = [],
+}: {
+  relays: string[]
+  event: TrustedEvent
+  content: string
+  tags?: string[][]
+}) => publishThunk(makeThunk({event: makeReaction({event, content, tags}), relays}))
 
-export const publishDelete = ({relays, event}: {relays: string[], event: TrustedEvent}) => {
-  const deleteEvent = createEvent(DELETE, {
-    tags: [["k", String(event.kind)], ...tagEvent(event)],
-  })
+export const makeDelete = ({event}: {event: TrustedEvent}) =>
+  createEvent(DELETE, {tags: [["k", String(event.kind)], ...tagEvent(event)]})
 
-  publishThunk(makeThunk({event: deleteEvent, relays}))
-}
+export const publishDelete = ({relays, event}: {relays: string[]; event: TrustedEvent}) =>
+  publishThunk(makeThunk({event: makeDelete({event}), relays}))

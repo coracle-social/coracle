@@ -8,9 +8,10 @@
 
   const browseSpaces = () => goto("/discover")
 
-  const leaveFeedback = () => goto("/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322")
+  const leaveFeedback = () =>
+    goto("/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322")
 
-  const donate = () => window.open('https://geyser.fund/project/flotilla')
+  const donate = () => window.open("https://geyser.fund/project/flotilla")
 </script>
 
 <div class="hero min-h-screen bg-base-200">

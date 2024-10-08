@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getAddress, Address} from "@welshman/util"
+  import {Address} from "@welshman/util"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import {deriveEvent} from "@app/state"
@@ -12,18 +12,15 @@
   const event = deriveEvent(idOrAddress, relays)
 
   let element: Element
-
-  $: address = $event ? getAddress($event) : ""
-  $: isGroup = address.match(/^(34550|35834):/)
 </script>
 
-<button class="block text-left my-2 max-w-full" bind:this={element} on:click|stopPropagation>
+<button class="my-2 block max-w-full text-left" bind:this={element} on:click|stopPropagation>
   {#if $event}
-    <NoteCard event={$event} class="p-4 rounded-box bg-alt">
+    <NoteCard event={$event} class="bg-alt rounded-box p-4">
       <slot name="note-content" event={$event} {depth} />
     </NoteCard>
   {:else}
-    <div class="p-4 rounded-box">
+    <div class="rounded-box p-4">
       <Spinner loading>Loading event...</Spinner>
     </div>
   {/if}

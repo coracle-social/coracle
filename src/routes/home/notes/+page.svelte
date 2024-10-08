@@ -1,48 +1,47 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {derived} from 'svelte/store'
-  import {createScroller} from '@lib/html'
-  import {shuffle, sortBy, sleep, ago, DAY, HOUR, pushToMapKey} from '@welshman/lib'
-  import {getListValues, getAncestorTagValues, NOTE, REACTION} from '@welshman/util'
-  import type {TrustedEvent} from '@welshman/util'
-  import {deriveEvents} from '@welshman/store'
-  import {profileSearch, repository, userFollows, load} from '@welshman/app'
-  import Spinner from '@lib/components/Spinner.svelte'
-  import NoteCard from '@app/components/NoteCard.svelte'
-  import Content from '@app/components/Content.svelte'
+  import {onMount} from "svelte"
+  import {derived} from "svelte/store"
+  import {createScroller} from "@lib/html"
+  import {sortBy, sleep, ago, DAY, HOUR, pushToMapKey} from "@welshman/lib"
+  import {
+    getListTags,
+    getPubkeyTagValues,
+    getAncestorTagValues,
+    NOTE,
+    REACTION,
+  } from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
+  import {deriveEvents} from "@welshman/store"
+  import {repository, userFollows, load} from "@welshman/app"
+  import Spinner from "@lib/components/Spinner.svelte"
+  import NoteCard from "@app/components/NoteCard.svelte"
+  import Content from "@app/components/Content.svelte"
 
   let element: Element
-  let loading = sleep(3000)
   let events: TrustedEvent[] = []
 
   const since = ago(DAY)
-  const authors = getListValues("p", $userFollows)
+  const loading = sleep(3000)
+  const authors = getPubkeyTagValues(getListTags($userFollows))
   const notesFilter = {kinds: [NOTE], authors, since}
   const notes = deriveEvents(repository, {filters: [notesFilter]})
-  const reactionsFilter = {kinds: [REACTION], '#p': authors, since}
+  const reactionsFilter = {kinds: [REACTION], "#p": authors, since}
   const reactions = deriveEvents(repository, {filters: [reactionsFilter]})
-  const reactionsByParent = derived(
-    reactions,
-    $reactions => {
-      const $reactionsByParent = new Map<string, TrustedEvent[]>()
+  const reactionsByParent = derived(reactions, $reactions => {
+    const $reactionsByParent = new Map<string, TrustedEvent[]>()
 
-      for (const event of $reactions) {
-        const [parentId] = getAncestorTagValues(event.tags).replies
+    for (const event of $reactions) {
+      const [parentId] = getAncestorTagValues(event.tags).replies
 
-        if (parentId) {
-          pushToMapKey($reactionsByParent, parentId, event)
-        }
+      if (parentId) {
+        pushToMapKey($reactionsByParent, parentId, event)
       }
-
-      return $reactionsByParent
     }
-  )
 
-  const isLike = (e: TrustedEvent) =>
-    e.kind === REACTION && ["+", ""].includes(e.content)
+    return $reactionsByParent
+  })
 
-  const isReplyOf = (e: TrustedEvent, p: TrustedEvent) =>
-    getAncestorTagValues(e.tags).replies.includes(e.id)
+  const isLike = (e: TrustedEvent) => e.kind === REACTION && ["+", ""].includes(e.content)
 
   const scoreEvent = (e: TrustedEvent) => {
     const thisReactions = $reactionsByParent.get(e.id) || []
@@ -57,12 +56,12 @@
     load({filters: [notesFilter, reactionsFilter]})
 
     const scroller = createScroller({
-      element: element.closest('.max-h-screen')!,
+      element: element.closest(".max-h-screen")!,
       onScroll: () => {
         const seen = new Set(events.map(e => e.id))
         const eligible = sortBy(
           scoreEvent,
-          $notes.filter(e => !seen.has(e.id) && getAncestorTagValues(e.tags).replies.length === 0)
+          $notes.filter(e => !seen.has(e.id) && getAncestorTagValues(e.tags).replies.length === 0),
         )
 
         events = [...events, ...eligible.slice(0, 10)]
@@ -72,7 +71,6 @@
     return () => scroller.stop()
   })
 </script>
-
 
 <div class="content column gap-4" bind:this={element}>
   {#await loading}

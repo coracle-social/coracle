@@ -9,7 +9,7 @@ A discord-like nostr client based on the idea of "relays as groups". WIP.
 - [ ] Profile settings
 - [ ] Relay settings
 
-------
+---
 
 - [ ] Add person drawer with info and recent notes, where you can follow/mute them. Maybe same stuff as person search
 - [ ] If the user isn't following anyone, show warning/fallback on people/notes pages

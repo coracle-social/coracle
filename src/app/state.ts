@@ -1,7 +1,20 @@
 import {nip19} from "nostr-tools"
+import twColors from "tailwindcss/colors"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"
-import {setContext, remove, assoc, sortBy, sort, uniq, partition, nth, max, pushToMapKey, nthEq} from "@welshman/lib"
+import {
+  setContext,
+  remove,
+  assoc,
+  sortBy,
+  sort,
+  uniq,
+  partition,
+  nth,
+  max,
+  pushToMapKey,
+  nthEq,
+} from "@welshman/lib"
 import {
   getIdFilters,
   NOTE,
@@ -29,7 +42,6 @@ import {
   subscribe,
   collection,
   loadRelay,
-  loadProfile,
   profilesByPubkey,
   getDefaultAppContext,
   getDefaultNetContext,
@@ -69,7 +81,29 @@ export const IMGPROXY_URL = "https://imgproxy.coracle.social"
 
 export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
 
-export const dufflepud = (path: string) => DUFFLEPUD_URL + '/' + path
+export const colors = [
+  ["amber", twColors.amber[600]],
+  ["blue", twColors.blue[600]],
+  ["cyan", twColors.cyan[600]],
+  ["emerald", twColors.emerald[600]],
+  ["fuchsia", twColors.fuchsia[600]],
+  ["green", twColors.green[600]],
+  ["indigo", twColors.indigo[600]],
+  ["sky", twColors.sky[600]],
+  ["lime", twColors.lime[600]],
+  ["orange", twColors.orange[600]],
+  ["pink", twColors.pink[600]],
+  ["purple", twColors.purple[600]],
+  ["red", twColors.red[600]],
+  ["rose", twColors.rose[600]],
+  ["sky", twColors.sky[600]],
+  ["teal", twColors.teal[600]],
+  ["violet", twColors.violet[600]],
+  ["yellow", twColors.yellow[600]],
+  ["zinc", twColors.zinc[600]],
+]
+
+export const dufflepud = (path: string) => DUFFLEPUD_URL + "/" + path
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   if (!url || url.match("gif$")) {
@@ -153,7 +187,7 @@ setContext({
   }),
 })
 
-repository.on('update', ({added}) => {
+repository.on("update", ({added}) => {
   for (const event of added) {
     ensureUnwrapped(event)
   }
@@ -310,33 +344,36 @@ export const makeChatId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 
 export const splitChatId = (id: string) => id.split(",")
 
-export const chats = derived([pubkey, chatMessages, profilesByPubkey], ([$pubkey, $messages, $profilesByPubkey]) => {
-  const messagesByChatId = new Map<string, TrustedEvent[]>()
+export const chats = derived(
+  [pubkey, chatMessages, profilesByPubkey],
+  ([$pubkey, $messages, $profilesByPubkey]) => {
+    const messagesByChatId = new Map<string, TrustedEvent[]>()
 
-  for (const message of $messages) {
-    const chatId = makeChatId(getPubkeyTagValues(message.tags))
+    for (const message of $messages) {
+      const chatId = makeChatId(getPubkeyTagValues(message.tags))
 
-    pushToMapKey(messagesByChatId, chatId, message)
-  }
+      pushToMapKey(messagesByChatId, chatId, message)
+    }
 
-  return sortBy(
-    c => -c.last_activity,
-    Array.from(messagesByChatId.entries()).map(([id, events]): Chat => {
-      const pubkeys = splitChatId(id)
-      const messages = sortBy(e => -e.created_at, events)
-      const last_activity = messages[0].created_at
-      const search_text = remove($pubkey as string, pubkeys)
-        .map(pubkey => {
-          const profile = $profilesByPubkey.get(pubkey)
+    return sortBy(
+      c => -c.last_activity,
+      Array.from(messagesByChatId.entries()).map(([id, events]): Chat => {
+        const pubkeys = splitChatId(id)
+        const messages = sortBy(e => -e.created_at, events)
+        const last_activity = messages[0].created_at
+        const search_text = remove($pubkey as string, pubkeys)
+          .map(pubkey => {
+            const profile = $profilesByPubkey.get(pubkey)
 
-          return profile ? displayProfile(profile) : ""
-        })
-        .join(' ')
+            return profile ? displayProfile(profile) : ""
+          })
+          .join(" ")
 
-      return {id, pubkeys, messages, last_activity, search_text}
-    })
-  )
-})
+        return {id, pubkeys, messages, last_activity, search_text}
+      }),
+    )
+  },
+)
 
 export const {
   indexStore: chatsById,
@@ -348,13 +385,12 @@ export const {
   getKey: chat => chat.id,
   load: async (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
     const $pubkey = pubkey.get()
-    const [url, room] = splitChatId(id)
     const chat = get(chatsById).get(id)
     const timestamps = chat?.messages.map(e => e.created_at) || []
     const since = Math.max(0, max(timestamps) - 3600)
 
     if ($pubkey) {
-      await load({...request, filters: [{kinds: [WRAP], '#p': [$pubkey], since}]})
+      await load({...request, filters: [{kinds: [WRAP], "#p": [$pubkey], since}]})
     }
   },
 })

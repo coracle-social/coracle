@@ -10,7 +10,11 @@ export type ModalOptions = {
   drawer?: boolean
 }
 
-export const pushModal = (component: ComponentType, props: Record<string, any> = {}, options: ModalOptions = {}) => {
+export const pushModal = (
+  component: ComponentType,
+  props: Record<string, any> = {},
+  options: ModalOptions = {},
+) => {
   const id = randomId()
 
   // TODO: fix memory leak here by listening to history somehow

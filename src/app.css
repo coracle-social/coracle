@@ -51,11 +51,13 @@
   --secondary: oklch(var(--s));
 }
 
-.bg-alt, .bg-alt .bg-alt .bg-alt {
+.bg-alt,
+.bg-alt .bg-alt .bg-alt {
   @apply bg-base-100;
 }
 
-.bg-alt .bg-alt, .bg-alt .bg-alt .bg-alt .bg-alt {
+.bg-alt .bg-alt,
+.bg-alt .bg-alt .bg-alt .bg-alt {
   @apply bg-base-300;
 }
 
@@ -139,7 +141,8 @@
   @apply link-content;
 }
 
-.link-content, [tag] {
+.link-content,
+[tag] {
   @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral px-1 text-neutral-content no-underline;
 }
 

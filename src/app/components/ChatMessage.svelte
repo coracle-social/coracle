@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {readable, derived} from "svelte/store"
-  import {hash, ellipsize, uniqBy, groupBy, now} from "@welshman/lib"
+  import {derived} from "svelte/store"
+  import {hash, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
@@ -17,56 +17,31 @@
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
-  import ChannelThread from "@app/components/ChannelThread.svelte"
-  import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
-  import {colors, tagRoom, deriveEvent, displayReaction} from "@app/state"
-  import {publishDelete, publishReaction} from "@app/commands"
-  import {pushModal} from "@app/modal"
+  import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
+  import {colors, displayReaction} from "@app/state"
+  import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
 
-  export let url
-  export let room
   export let event: TrustedEvent
+  export let pubkeys: string[]
   export let showPubkey = false
-  export let hideParent = false
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
-  const rootTag = event.tags.find(t => t[0].match(/^e$/i))
-  const rootId = rootTag?.[1]
-  const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
-  const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
 
-  const openThread = () => {
-    const root = $rootEvent || event
-
-    pushModal(ChannelThread, {url, room, event: root}, {drawer: true})
-  }
-
-  const onReactionClick = (content: string, events: TrustedEvent[]) => {
+  const onReactionClick = async (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
+    const template = reaction ? makeDelete({event}) : makeReaction({event, content})
 
-    if (reaction) {
-      publishDelete({relays: [url], event: reaction})
-    } else {
-      publishReaction({
-        event,
-        content,
-        relays: [url],
-        tags: [tagRoom(room, url)],
-      })
-    }
+    await sendWrapped({template, pubkeys})
   }
 
-  $: rootPubkey = $rootEvent?.pubkey || rootTag?.[4]
-  $: rootProfile = deriveProfile(rootPubkey || "")
-  $: rootProfileDisplay = deriveProfileDisplay(rootPubkey || "")
   $: isPublished = findStatus($ps, [PublishStatus.Success])
   $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
   $: failure =
@@ -75,20 +50,7 @@
 
 <button
   type="button"
-  on:click={openThread}
   class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
-  {#if $rootEvent && !hideParent}
-    <div class="flex items-center gap-1 pl-12 text-xs">
-      <Icon icon="square-share-line" size={3} />
-      <p>In reply to</p>
-      <Avatar src={$rootProfile?.picture} size={4} />
-      <p class="text-primary">{$rootProfileDisplay}</p>
-      <p
-        class="flex items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap opacity-75 hover:underline">
-        {ellipsize($rootEvent.content, 30)}
-      </p>
-    </div>
-  {/if}
   <div class="flex gap-2">
     {#if showPubkey}
       <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
@@ -104,7 +66,7 @@
         </div>
       {/if}
       <div class="text-sm">
-        <Content {event} />
+        <Content showEntire {event} />
         {#if isPending}
           <span class="flex-inline ml-1 gap-1">
             <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
@@ -144,7 +106,7 @@
   <button
     class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
-    <ChannelMessageEmojiButton {url} {room} {event} />
+    <ChatMessageEmojiButton {event} {pubkeys} />
     <button class="btn join-item btn-xs">
       <Icon icon="menu-dots" size={4} />
     </button>

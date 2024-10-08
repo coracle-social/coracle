@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {ellipsize, ctx, ago, remove} from '@welshman/lib'
-  import {WRAP} from '@welshman/util'
-  import {pubkey, subscribe} from '@welshman/app'
+  import {onMount} from "svelte"
+  import {ctx, ago, remove} from "@welshman/lib"
+  import {WRAP} from "@welshman/util"
+  import {pubkey, subscribe} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -16,8 +16,8 @@
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
-  import {chatSearch, pullConservatively} from '@app/state'
-  import {pushModal} from '@app/modal'
+  import {chatSearch, pullConservatively} from "@app/state"
+  import {pushModal} from "@app/modal"
 
   const startChat = () => pushModal(ChatStart)
 
@@ -26,7 +26,7 @@
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
 
   onMount(() => {
-    const filter = {kinds: [WRAP], '#p': [$pubkey!]}
+    const filter = {kinds: [WRAP], "#p": [$pubkey!]}
     const sub = subscribe({filters: [{...filter, since: ago(30)}]})
 
     pullConservatively({
@@ -64,29 +64,33 @@
       </SecondaryNavHeader>
     </div>
   </SecondaryNavSection>
-  <label class="input input-bordered input-sm flex items-center gap-2 mx-6 -mt-4" in:fly={{delay: 200}}>
+  <label
+    class="input input-sm input-bordered mx-6 -mt-4 flex items-center gap-2"
+    in:fly={{delay: 200}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>
   <div class="overflow-auto">
-    {#each chats as {id, pubkeys, messages}, i (id)}
+    {#each chats as { id, pubkeys, messages }, i (id)}
       {@const message = messages[0]}
       {@const others = remove($pubkey, pubkeys)}
-      <div class="px-6 py-2 border-t border-base-100 border-solid hover:bg-base-100 transition-colors cursor-pointer">
+      <div
+        class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100">
         <Link class="flex flex-col justify-start gap-1" href="/home/{id}">
-          <div class="flex gap-2 items-center">
+          <div class="flex items-center gap-2">
             {#if others.length === 1}
               <ProfileCircle pubkey={others[0]} size={5} />
               <Name pubkey={others[0]} />
             {:else}
               <ProfileCircles pubkeys={others} size={5} />
-              <p class="whitespace-nowrap overflow-hidden text-ellipsis">
+              <p class="overflow-hidden text-ellipsis whitespace-nowrap">
                 <Name pubkey={others[0]} />
-                and {others.length - 1} {others.length > 2 ? 'others' : 'other'}
+                and {others.length - 1}
+                {others.length > 2 ? "others" : "other"}
               </p>
             {/if}
           </div>
-          <p class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+          <p class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
             {message.content}
           </p>
         </Link>

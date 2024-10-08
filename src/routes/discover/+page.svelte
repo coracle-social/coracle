@@ -17,7 +17,7 @@
   onMount(() => {
     const sub = discoverRelays()
     const scroller = createScroller({
-      element: element.closest('.max-h-screen')!,
+      element: element.closest(".max-h-screen")!,
       onScroll: () => {
         limit += 20
       },

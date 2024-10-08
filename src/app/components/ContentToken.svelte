@@ -1,7 +1,4 @@
 <script lang="ts">
-  import cx from "classnames"
-  import type {NodeViewProps} from "@tiptap/core"
-  import {NodeViewWrapper} from "svelte-tiptap"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {clip} from "@app/toast"

@@ -1,26 +1,17 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
-  import type {SvelteComponent} from 'svelte'
-  import tippy, {type Instance} from "tippy.js"
-  import {append, always, remove, uniq} from '@welshman/lib'
-  import {getListValues, MUTES} from '@welshman/util'
-  import {userMutes, profileSearch, tagPubkey} from '@welshman/app'
-  import Icon from '@lib/components/Icon.svelte'
-  import Field from '@lib/components/Field.svelte'
-  import Tippy from '@lib/components/Tippy.svelte'
-  import Link from '@lib/components/Link.svelte'
-  import Button from '@lib/components/Button.svelte'
-  import Suggestions from '@lib/editor/Suggestions.svelte'
-  import SuggestionProfile from '@lib/editor/SuggestionProfile.svelte'
-  import ProfileMultiSelect from '@app/components/ProfileMultiSelect.svelte'
-  import {entityLink} from '@app/state'
-  import {updateList} from '@app/commands'
-  import {pushToast} from '@app/toast'
+  import {always} from "@welshman/lib"
+  import {getListTags, getPubkeyTagValues, MUTES} from "@welshman/util"
+  import {userMutes, tagPubkey} from "@welshman/app"
+  import Field from "@lib/components/Field.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
+  import {updateList} from "@app/commands"
+  import {pushToast} from "@app/toast"
 
-  let mutedPubkeys = getListValues("p", $userMutes)
+  let mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 
   const reset = () => {
-    mutedPubkeys = getListValues("p", $userMutes)
+    mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
   }
 
   const onSubmit = async () => {
@@ -38,13 +29,9 @@
         <ProfileMultiSelect bind:value={mutedPubkeys} />
       </div>
     </Field>
-    <div class="flex flex-row items-center justify-between gap-4 mt-4">
-      <Button class="btn btn-neutral" on:click={reset}>
-        Discard Changes
-      </Button>
-      <Button type="submit" class="btn btn-primary">
-        Save Changes
-      </Button>
+    <div class="mt-4 flex flex-row items-center justify-between gap-4">
+      <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>
+      <Button type="submit" class="btn btn-primary">Save Changes</Button>
     </div>
   </div>
 </form>

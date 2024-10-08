@@ -56,29 +56,37 @@ export const findMarks = (type: string, json: JSONContent) => {
 export const getEditorTags = (editor: Editor) => {
   const json = editor.getJSON()
 
-  const topicTags = findMarks("tag", json).map(
-    ({attrs}: any) => ["t", attrs.tag.replace(/^#/, '').toLowerCase()],
-  )
+  const topicTags = findMarks("tag", json).map(({attrs}: any) => [
+    "t",
+    attrs.tag.replace(/^#/, "").toLowerCase(),
+  ])
 
-  const naddrTags = findNodes("naddr", json).map(
-    ({kind, pubkey, identifier, relays}: any) => {
-      const address = new Address(kind, pubkey, identifier).toString()
+  const naddrTags = findNodes("naddr", json).map(({kind, pubkey, identifier, relays}: any) => {
+    const address = new Address(kind, pubkey, identifier).toString()
 
-      return ["q", address, choice(relays) || "", pubkey]
-    },
-  )
+    return ["q", address, choice(relays) || "", pubkey]
+  })
 
-  const neventTags = findNodes("nevent", json).map(
-    ({id, author, relays}: any) => ["q", id, choice(relays) || "", author || ""],
-  )
+  const neventTags = findNodes("nevent", json).map(({id, author, relays}: any) => [
+    "q",
+    id,
+    choice(relays) || "",
+    author || "",
+  ])
 
-  const mentionTags = findNodes("nprofile", json).map(
-    ({pubkey, relays}: any) => ["p", pubkey, choice(relays) || "", ""],
-  )
+  const mentionTags = findNodes("nprofile", json).map(({pubkey, relays}: any) => [
+    "p",
+    pubkey,
+    choice(relays) || "",
+    "",
+  ])
 
-  const imetaTags = findNodes("image", json).map(
-    ({src, sha256}: any) => ["imeta", `url ${src}`, `x ${sha256}`, `ox ${sha256}`],
-  )
+  const imetaTags = findNodes("image", json).map(({src, sha256}: any) => [
+    "imeta",
+    `url ${src}`,
+    `x ${sha256}`,
+    `ox ${sha256}`,
+  ])
 
   return [...topicTags, ...naddrTags, ...neventTags, ...mentionTags, ...imetaTags]
 }

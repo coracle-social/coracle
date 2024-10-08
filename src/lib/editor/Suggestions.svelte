@@ -4,7 +4,7 @@
   import {throttle} from "throttle-debounce"
   import {fly, slide} from "svelte/transition"
   import {clamp} from "@welshman/lib"
-  import Icon from '@lib/components/Icon.svelte'
+  import Icon from "@lib/components/Icon.svelte"
   import {theme} from "@app/theme"
 
   export let term
@@ -77,11 +77,11 @@
     {/if}
     {#each items as value, i (value)}
       <button
-        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150 flex items-center"
+        class="white-space-nowrap block flex w-full min-w-0 cursor-pointer items-center overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
         {#if index === i}
-          <div transition:slide|local={{axis: 'x'}} class="pr-2">
+          <div transition:slide|local={{axis: "x"}} class="pr-2">
             <Icon icon="alt-arrow-right" />
           </div>
         {/if}

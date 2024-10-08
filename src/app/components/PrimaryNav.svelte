@@ -11,7 +11,6 @@
   import {quintOut} from "svelte/easing"
   import {displayRelayUrl} from "@welshman/util"
   import {userProfile} from "@welshman/app"
-  import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"

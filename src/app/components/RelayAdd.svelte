@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import type {Readable} from 'svelte/store'
+  import {onMount} from "svelte"
+  import type {Readable} from "svelte/store"
   import {relaySearch} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -19,7 +19,7 @@
     const sub = discoverRelays()
     const scroller = createScroller({
       delay: 300,
-      element: element.closest('.modal-box')!,
+      element: element.closest(".modal-box")!,
       onScroll: () => {
         limit += 20
       },
@@ -37,7 +37,10 @@
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for relays..." />
   </label>
-  {#each $relaySearch.searchValues(term).filter(url => !$relays.includes(url)).slice(0, limit) as url (url)}
+  {#each $relaySearch
+    .searchValues(term)
+    .filter(url => !$relays.includes(url))
+    .slice(0, limit) as url (url)}
     <RelayItem {url}>
       <Button class="btn btn-outline btn-sm flex items-center" on:click={() => addRelay(url)}>
         <Icon icon="add-circle" />

@@ -13,7 +13,7 @@
     style={`width: ${size * 4}px; height: ${size * 4}px; min-width: ${size * 4}px; background-image: url(${src}); ${$$props.style || ""}`} />
 {:else}
   <div
-    class={cx($$props.class, "rounded-full !flex center")}
+    class={cx($$props.class, "center !flex rounded-full")}
     style={`width: ${size * 4}px; height: ${size * 4}px; min-width: ${size * 4}px; ${$$props.style || ""}`}>
     <Icon {icon} size={Math.round(size * 0.8)} />
   </div>
