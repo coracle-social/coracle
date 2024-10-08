@@ -68,28 +68,32 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     Object.assign(window, {get, ...app, ...state})
 
-    ready = db
-      ? Promise.resolve()
-      : initStorage("flotilla", 4, {
-          events: storageAdapters.fromRepository(repository, {throttle: 300}),
-          relays: {keyPath: "url", store: throttled(1000, relays)},
-          handles: {keyPath: "nip05", store: throttled(1000, handles)},
-          publishStatus: storageAdapters.fromObjectStore(publishStatusData),
-          freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000}),
-          plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
-          tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
-        }).then(() => sleep(300)) // Wait an extra few ms because of repository throttle
+    if (!db) {
+      await initStorage("flotilla", 4, {
+        events: storageAdapters.fromRepository(repository, {throttle: 300}),
+        relays: {keyPath: "url", store: throttled(1000, relays)},
+        handles: {keyPath: "nip05", store: throttled(1000, handles)},
+        publishStatus: storageAdapters.fromObjectStore(publishStatusData),
+        freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000}),
+        plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
+        tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
+      })
 
-    dialog.addEventListener("close", () => {
-      if (modal) {
-        clearModal()
-      }
-    })
+      repository.on("update", ({added}) => {
+        for (const event of added) {
+          state.ensureUnwrapped(event)
+        }
+      })
 
-    ready.then(() => {
+      dialog.addEventListener("close", () => {
+        if (modal) {
+          clearModal()
+        }
+      })
+
       for (const url of INDEXER_RELAYS) {
         loadRelay(url)
       }
@@ -97,7 +101,7 @@
       if ($pubkey) {
         loadUserData($pubkey)
       }
-    })
+    }
   })
 </script>
 

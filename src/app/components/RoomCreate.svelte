@@ -13,8 +13,7 @@
   const back = () => history.back()
 
   const tryCreate = async () => {
-    await addRoomMembership(url, room)
-
+    addRoomMembership(url, room)
     goto(makeSpacePath(url, room))
   }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {page} from "$app/stores"
   import {ctx, ago, remove} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import {pubkey, subscribe} from "@welshman/app"
@@ -65,7 +66,7 @@
     </div>
   </SecondaryNavSection>
   <label
-    class="input input-sm input-bordered mx-6 -mt-4 flex items-center gap-2"
+    class="input input-sm input-bordered mx-6 -mt-4 flex items-center gap-2 mb-2"
     in:fly={{delay: 200}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
@@ -74,8 +75,10 @@
     {#each chats as { id, pubkeys, messages }, i (id)}
       {@const message = messages[0]}
       {@const others = remove($pubkey, pubkeys)}
+      {@const active = $page.params.chat === id}
       <div
-        class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100">
+        class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100"
+        class:bg-base-100={active}>
         <Link class="flex flex-col justify-start gap-1" href="/home/{id}">
           <div class="flex items-center gap-2">
             {#if others.length === 1}

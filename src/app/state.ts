@@ -149,7 +149,10 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   }
 
   if (rumor && isHashedEvent(rumor)) {
+    // Copy urls over to the rumor
     tracker.copy(event.id, rumor.id)
+
+    // Send the rumor via our relay so listeners get updated
     relay.send("EVENT", rumor)
   }
 
@@ -185,12 +188,6 @@ setContext({
     requestTimeout: 5000,
     router: makeRouter(),
   }),
-})
-
-repository.on("update", ({added}) => {
-  for (const event of added) {
-    ensureUnwrapped(event)
-  }
 })
 
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
@@ -350,7 +347,7 @@ export const chats = derived(
     const messagesByChatId = new Map<string, TrustedEvent[]>()
 
     for (const message of $messages) {
-      const chatId = makeChatId(getPubkeyTagValues(message.tags))
+      const chatId = makeChatId(getPubkeyTagValues(message.tags).concat(message.pubkey))
 
       pushToMapKey(messagesByChatId, chatId, message)
     }
@@ -383,16 +380,6 @@ export const {
   name: "chats",
   store: chats,
   getKey: chat => chat.id,
-  load: async (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
-    const $pubkey = pubkey.get()
-    const chat = get(chatsById).get(id)
-    const timestamps = chat?.messages.map(e => e.created_at) || []
-    const since = Math.max(0, max(timestamps) - 3600)
-
-    if ($pubkey) {
-      await load({...request, filters: [{kinds: [WRAP], "#p": [$pubkey], since}]})
-    }
-  },
 })
 
 export const chatSearch = derived(chats, $chats =>

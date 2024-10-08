@@ -125,7 +125,7 @@ export const updateList = async (kind: number, modifyTags: ModifyTags) => {
     ? {...prev, tags: modifyTags(prev.tags)}
     : createEvent(kind, {tags: modifyTags([])})
 
-  publishThunk(makeThunk({event, relays}))
+  return publishThunk(makeThunk({event, relays}))
 }
 
 export const addSpaceMembership = (url: string) =>
@@ -215,13 +215,12 @@ export const sendWrapped = async ({
 
   await Promise.all(
     uniq(pubkeys).map(async recipient => {
-      const rumor = await nip59.wrap(recipient, stamp(template))
-      const thunk = makeThunk({
-        event: rumor.wrap,
-        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-      })
-
-      return publishThunk(thunk)
+      return publishThunk(
+        makeThunk({
+          event: await nip59.wrap(recipient, stamp(template)),
+          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+        })
+      )
     }),
   )
 }

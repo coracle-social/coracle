@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sort} from "@welshman/lib"
+  import {sort, ago} from "@welshman/lib"
   import {displayRelayUrl, REACTION, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import {fly, slide} from "@lib/transition"
@@ -16,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
+  import {userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -52,8 +52,10 @@
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(() => {
-    const kinds = [NOTE, REACTION, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]
-    const sub = subscribe({filters: [{kinds}], relays: [url]})
+    const filter = {kinds: [NOTE, REACTION, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]}
+    const sub = subscribe({filters: [{...filter, since: ago(30)}]})
+
+    pullConservatively({filters: [filter], relays: [url]})
 
     return () => sub.close()
   })
@@ -99,7 +101,7 @@
       </div>
       <div in:fly={{delay: getDelay(true)}}>
         <SecondaryNavItem href={makeSpacePath(url, "threads")}>
-          <Icon icon="notes-minimalistic" /> Threads
+          <Icon icon="notes-minimalistic" /> Notes
         </SecondaryNavItem>
       </div>
       <div in:fly={{delay: getDelay()}}>

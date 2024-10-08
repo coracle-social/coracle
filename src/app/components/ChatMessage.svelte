@@ -50,65 +50,67 @@
 
 <button
   type="button"
-  class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
-  <div class="flex gap-2">
-    {#if showPubkey}
-      <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
-    {:else}
-      <div class="w-10 min-w-10 max-w-10" />
-    {/if}
-    <div class="-mt-1 flex-grow pr-1">
+  class="group chat relative flex w-full flex-col gap-1 p-2 text-left"
+  class:chat-start={event.pubkey !== $pubkey}
+  class:chat-end={event.pubkey === $pubkey}>
+  <div class="chat-bubble max-w-sm">
+    <div class="flex gap-2">
       {#if showPubkey}
-        <div class="flex items-center gap-2">
-          <strong class="text-sm" style="color: {colorValue}" data-color={colorName}
-            >{$profileDisplay}</strong>
-          <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
-        </div>
+        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
       {/if}
-      <div class="text-sm">
-        <Content showEntire {event} />
-        {#if isPending}
-          <span class="flex-inline ml-1 gap-1">
-            <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
-            <span class="opacity-50">Sending...</span>
-          </span>
-        {:else if failure}
-          <span
-            class="flex-inline tooltip ml-1 cursor-pointer gap-1"
-            data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
-            <Icon icon="danger" class="translate-y-px" size={3} />
-            <span class="opacity-50">Failed to send!</span>
-          </span>
+      <div class="-mt-1 flex-grow pr-1">
+        {#if showPubkey}
+          <div class="flex items-center gap-2">
+            <strong class="text-sm" style="color: {colorValue}" data-color={colorName}
+              >{$profileDisplay}</strong>
+            <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
+          </div>
         {/if}
+        <div class="text-sm">
+          <Content showEntire {event} />
+          {#if isPending}
+            <span class="flex-inline ml-1 gap-1">
+              <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
+              <span class="opacity-50">Sending...</span>
+            </span>
+          {:else if failure}
+            <span
+              class="flex-inline tooltip ml-1 cursor-pointer gap-1"
+              data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
+              <Icon icon="danger" class="translate-y-px" size={3} />
+              <span class="opacity-50">Failed to send!</span>
+            </span>
+          {/if}
+        </div>
       </div>
     </div>
-  </div>
-  {#if $reactions.length > 0 || $zaps.length > 0}
-    <div class="ml-12 text-xs">
-      {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
-        {@const isOwn = events.some(e => e.pubkey === $pubkey)}
-        {@const onClick = () => onReactionClick(content, events)}
-        <button
-          type="button"
-          class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full"
-          class:border={isOwn}
-          class:border-solid={isOwn}
-          class:border-primary={isOwn}
-          on:click|stopPropagation={onClick}>
-          <span>{displayReaction(content)}</span>
-          {#if events.length > 1}
-            <span>{events.length}</span>
-          {/if}
-        </button>
-      {/each}
-    </div>
-  {/if}
-  <button
-    class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
-    on:click|stopPropagation>
-    <ChatMessageEmojiButton {event} {pubkeys} />
-    <button class="btn join-item btn-xs">
-      <Icon icon="menu-dots" size={4} />
+    {#if $reactions.length > 0 || $zaps.length > 0}
+      <div class="ml-12 text-xs">
+        {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
+          {@const isOwn = events.some(e => e.pubkey === $pubkey)}
+          {@const onClick = () => onReactionClick(content, events)}
+          <button
+            type="button"
+            class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full"
+            class:border={isOwn}
+            class:border-solid={isOwn}
+            class:border-primary={isOwn}
+            on:click|stopPropagation={onClick}>
+            <span>{displayReaction(content)}</span>
+            {#if events.length > 1}
+              <span>{events.length}</span>
+            {/if}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    <button
+      class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
+      on:click|stopPropagation>
+      <ChatMessageEmojiButton {event} {pubkeys} />
+      <button class="btn join-item btn-xs">
+        <Icon icon="menu-dots" size={4} />
+      </button>
     </button>
-  </button>
+  </div>
 </button>

@@ -30,6 +30,7 @@
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
   import {deriveChat, splitChatId} from "@app/state"
+  import {sendWrapped} from "@app/commands"
 
   const {chat: id} = $page.params
   const chat = deriveChat(id)
@@ -41,18 +42,8 @@
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...pubkeys.map(pubkey => tagPubkey(pubkey))]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
-    const nip59 = Nip59.fromSigner($signer!)
 
-    for (const recipient of uniq(pubkeys)) {
-      const rumor = await nip59.wrap(recipient, template)
-
-      publishThunk(
-        makeThunk({
-          event: rumor.wrap,
-          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-        }),
-      )
-    }
+    await sendWrapped({template, pubkeys})
   }
 
   let loading = true
