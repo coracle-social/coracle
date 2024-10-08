@@ -15,7 +15,7 @@
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
-  import {userMembership} from "@app/state"
+  import {userMembership, getMembershipUrls} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath, getPrimaryNavItemIndex} from "@app/routes"
 
@@ -50,7 +50,7 @@
           src={$userProfile?.picture}
           class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
-      {#each $userMembership?.roomsByUrl.keys() || [] as url (url)}
+      {#each getMembershipUrls($userMembership) as url (url)}
         <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)}>
           <SpaceAvatar {url} />
         </PrimaryNavItem>

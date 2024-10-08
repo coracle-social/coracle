@@ -32,8 +32,11 @@ import {
   getPubkeyTagValues,
   isHashedEvent,
   displayProfile,
+  readList,
+  getListTags,
+  asDecryptedEvent,
 } from "@welshman/util"
-import type {TrustedEvent, SignedEvent} from "@welshman/util"
+import type {TrustedEvent, SignedEvent, PublishedList, List} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
 import {
   pubkey,
@@ -211,33 +214,17 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
 
 // Membership
 
-export type Membership = {
-  roomsByUrl: Map<string, string[]>
-  event?: TrustedEvent
-}
+export const getMembershipUrls = (list?: List) =>
+  sort(getRelayTagValues(getListTags(list)))
 
-export type PublishedMembership = Omit<Membership, "event"> & {
-  event: TrustedEvent
-}
+export const getMembershipRoomsByUrl = (url: string, list?: List) =>
+  sort(getListTags(list).filter(t => t[0] === '~' && t[2] === url).map(nth(1)))
 
-export const readMembership = (event: TrustedEvent): PublishedMembership => {
-  const roomsByUrl = new Map<string, string[]>()
-
-  for (const tag of event.tags.filter(nthEq(0, "r"))) {
-    roomsByUrl.set(tag[1], [])
-  }
-
-  for (const tag of event.tags.filter(nthEq(0, "~"))) {
-    pushToMapKey(roomsByUrl, tag[2], tag[1])
-  }
-
-  return {event, roomsByUrl}
-}
-
-export const memberships = deriveEventsMapped<PublishedMembership>(repository, {
+export const memberships = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [MEMBERSHIPS]}],
-  eventToItem: readMembership,
   itemToEvent: item => item.event,
+  eventToItem: (event: TrustedEvent) =>
+    readList(asDecryptedEvent(event)),
 })
 
 export const {
@@ -247,7 +234,7 @@ export const {
 } = collection({
   name: "memberships",
   store: memberships,
-  getKey: membership => membership.event.pubkey,
+  getKey: list => list.event.pubkey,
   load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
     load({
       ...request,
@@ -460,7 +447,7 @@ export const roomsByUrl = derived(channels, $channels => {
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {
-    if (!$pubkey) return null
+    if (!$pubkey) return undefined
 
     loadMembership($pubkey)
 

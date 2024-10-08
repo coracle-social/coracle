@@ -28,6 +28,7 @@
     GENERAL,
     tagRoom,
     MESSAGE,
+    getMembershipRoomsByUrl,
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
@@ -45,8 +46,6 @@
 
   let loading = true
   let elements: Element[] = []
-
-  $: membership = $userMembership?.roomsByUrl.get(url) || []
 
   $: {
     elements = []
@@ -90,7 +89,7 @@
         <strong>{room}</strong>
       </div>
       {#if room !== GENERAL}
-        {#if membership.includes(room)}
+        {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}
           <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
             <Icon icon="arrows-a-logout-2" />
             Leave Room

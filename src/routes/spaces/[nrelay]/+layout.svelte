@@ -16,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
+  import {getMembershipRoomsByUrl, userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -48,7 +48,7 @@
   let showMenu = false
 
   $: url = decodeNRelay($page.params.nrelay)
-  $: rooms = sort($userMembership?.roomsByUrl?.get(url) || [])
+  $: rooms = getMembershipRoomsByUrl(url, $userMembership)
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(() => {
@@ -74,7 +74,7 @@
             <ul
               transition:fly
               class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
-              {#if $userMembership?.roomsByUrl.has(url)}
+              {#if getMembershipRoomsByUrl(url, $userMembership)}
                 <li class="text-error">
                   <Button on:click={leaveSpace}>
                     <Icon icon="exit" />

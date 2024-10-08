@@ -72,7 +72,7 @@
     Object.assign(window, {get, ...app, ...state})
 
     if (!db) {
-      await initStorage("flotilla", 4, {
+      ready = initStorage("flotilla", 4, {
         events: storageAdapters.fromRepository(repository, {throttle: 300}),
         relays: {keyPath: "url", store: throttled(1000, relays)},
         handles: {keyPath: "nip05", store: throttled(1000, handles)},
@@ -80,7 +80,7 @@
         freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000}),
         plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
         tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
-      })
+      }).then(() => sleep(300))
 
       repository.on("update", ({added}) => {
         for (const event of added) {

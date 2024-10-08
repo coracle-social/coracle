@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {always} from "@welshman/lib"
-  import {getListTags, getPubkeyTagValues, MUTES} from "@welshman/util"
-  import {userMutes, tagPubkey} from "@welshman/app"
+  import {always, ctx} from "@welshman/lib"
+  import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
+  import {userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
-  import {updateList} from "@app/commands"
   import {pushToast} from "@app/toast"
 
   let mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
@@ -15,7 +14,10 @@
   }
 
   const onSubmit = async () => {
-    await updateList(MUTES, always(mutedPubkeys.map(tagPubkey)))
+    publishThunk({
+      event: createEvent(MUTES, {tags: mutedPubkeys.map(tagPubkey)}),
+      relays: ctx.app.router.WriteRelays().getUrls(),
+    })
 
     pushToast({message: "Your settings have been saved!"})
   }

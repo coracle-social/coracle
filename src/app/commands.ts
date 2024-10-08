@@ -12,6 +12,12 @@ import {
   createEvent,
   displayProfile,
   normalizeRelayUrl,
+  makeList,
+  addToListPublicly,
+  removeFromList,
+  removeFromListByPredicate,
+  getListTags,
+  getRelayTags,
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -34,9 +40,11 @@ import {
   tagPubkey,
   tagReactionTo,
   getRelayUrls,
+  userRelaySelections,
   userInboxRelaySelections,
+  nip44EncryptToSelf,
 } from "@welshman/app"
-import {tagRoom, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
+import {tagRoom, userMembership, MEMBERSHIPS, INDEXER_RELAYS} from "@app/state"
 
 // Utils
 
@@ -113,77 +121,71 @@ export const broadcastUserData = async (relays: string[]) => {
 
 // List updates
 
-export type ModifyTags = (tags: string[][]) => string[][]
+export const addSpaceMembership = async (url: string) => {
+  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
 
-export const updateList = async (kind: number, modifyTags: ModifyTags) => {
-  const $pubkey = pubkey.get()!
-  const [prev] = repository.query([{kinds: [kind], authors: [$pubkey]}])
-  const relays = getWriteRelayUrls(relaySelectionsByPubkey.get().get($pubkey))
-
-  // Preserve content if we have it
-  const event = prev
-    ? {...prev, tags: modifyTags(prev.tags)}
-    : createEvent(kind, {tags: modifyTags([])})
-
-  return publishThunk(makeThunk({event, relays}))
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
 }
 
-export const addSpaceMembership = (url: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => uniqBy(t => t.join(""), [...tags, ["r", url]]))
+export const removeSpaceMembership = async (url: string) => {
+  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const pred = (t: string[]) => equals(["r", url], t) || t[2] !== url
+  const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
 
-export const addRoomMembership = (url: string, room: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) =>
-    uniqBy(t => t.join(""), [...tags, tagRoom(room, url)]),
-  )
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+}
 
-export const removeSpaceMembership = (url: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) =>
-    tags.filter(t => !equals(["r", url], t) && t[2] !== url),
-  )
+export const addRoomMembership = async (url: string, room: string) => {
+  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const event = await addToListPublicly(list, tagRoom(room, url)).reconcile(nip44EncryptToSelf)
 
-export const removeRoomMembership = (url: string, room: string) =>
-  updateList(MEMBERSHIPS, (tags: string[][]) => tags.filter(t => !equals(tagRoom(room, url), t)))
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+}
 
-export const unfollowPerson = (pubkey: string) =>
-  updateList(FOLLOWS, tags => tags.filter(t => t[1] !== pubkey))
+export const removeRoomMembership = async (url: string, room: string) => {
+  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const pred = (t: string[]) => equals(tagRoom(room, url), t)
+  const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
 
-export const followPerson = (pubkey: string) =>
-  updateList(FOLLOWS, tags => append(tagPubkey(pubkey), tags))
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+}
 
-export const unmutePerson = (pubkey: string) =>
-  updateList(MUTES, tags => tags.filter(t => t[1] !== pubkey))
+export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
+  const list = get(userRelaySelections) || makeList({kind: RELAYS})
 
-export const mutePerson = (pubkey: string) =>
-  updateList(MUTES, tags => append(tagPubkey(pubkey), tags))
+  let tags = getRelayTags(getListTags(list))
+    .filter(t => normalizeRelayUrl(t[1]) !== url)
 
-export const setRelayPolicy = (url: string, read: boolean, write: boolean) =>
-  updateList(RELAYS, tags => {
-    tags = tags.filter(t => normalizeRelayUrl(t[1]) !== url)
+  if (read && write) {
+    tags.push(["r", url])
+  } else if (read) {
+    tags.push(["r", url, "read"])
+  } else if (write) {
+    tags.push(["r", url, "write"])
+  }
 
-    if (read && write) {
-      tags.push(["r", url])
-    } else if (read) {
-      tags.push(["r", url, "read"])
-    } else if (write) {
-      tags.push(["r", url, "write"])
-    }
-
-    return tags
+  return publishThunk({
+    event: createEvent(list.kind, {tags}),
+    relays: ctx.app.router.WriteRelays().getUrls(),
   })
+}
 
 export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
-  const urls = getRelayUrls(get(userInboxRelaySelections))
+  const list = get(userInboxRelaySelections) || makeList({kind: INBOX_RELAYS})
 
   // Only update inbox policies if they already exist or we're adding them
-  if (enabled || urls.includes(url)) {
-    updateList(INBOX_RELAYS, tags => {
-      tags = tags.filter(t => normalizeRelayUrl(t[1]) !== url)
+  if (enabled || getRelayUrls(list).includes(url)) {
+    let tags = getRelayTags(getListTags(list))
+      .filter(t => normalizeRelayUrl(t[1]) !== url)
 
-      if (enabled) {
-        tags.push(["relay", url])
-      }
+    if (enabled) {
+      tags.push(["relay", url])
+    }
 
-      return tags
+    return publishThunk({
+      event: createEvent(list.kind, {tags}),
+      relays: ctx.app.router.WriteRelays().getUrls(),
     })
   }
 }

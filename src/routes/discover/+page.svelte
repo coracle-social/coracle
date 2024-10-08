@@ -6,7 +6,7 @@
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {userMembership, discoverRelays} from "@app/state"
+  import {userMembership, discoverRelays, getMembershipRoomsByUrl} from "@app/state"
 
   let term = ""
   let limit = 20
@@ -58,7 +58,7 @@
           {/if}
         </div>
       </div>
-      {#if $userMembership?.roomsByUrl.has(relay.url)}
+      {#if getMembershipRoomsByUrl(relay.url, $userMembership)}
         <div class="center absolute flex w-full">
           <div
             class="tooltip relative left-8 top-[38px] h-5 w-5 rounded-full bg-primary"
