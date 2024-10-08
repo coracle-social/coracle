@@ -92,7 +92,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const kindHandlers = deriveHandlersForKind(note.kind)
-  const handlerId = tags.get("client")?.nth(2)
+  const handlerId = tags.get("client")?.nth(2) || ""
   const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const noteActions = getSetting("note_actions")
   const seenOn = derived(trackerStore, $t =>
