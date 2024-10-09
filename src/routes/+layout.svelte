@@ -111,7 +111,7 @@
   <div data-theme={$theme}>
     <div class="flex h-screen overflow-hidden">
       <PrimaryNav />
-      {#key $page.params}
+      {#key JSON.stringify($page.params)}
         <slot />
       {/key}
     </div>

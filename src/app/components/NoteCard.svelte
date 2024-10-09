@@ -7,6 +7,7 @@
   import {entityLink} from "@app/state"
 
   export let event
+  export let hideProfile = false
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
@@ -14,7 +15,9 @@
 
 <div class="flex flex-col gap-2 {$$props.class}">
   <div class="flex justify-between gap-2">
-    <Profile pubkey={event.pubkey} />
+    {#if !hideProfile}
+      <Profile pubkey={event.pubkey} />
+    {/if}
     <Link external href={entityLink(nevent)} class="text-sm opacity-75">
       {formatTimestamp(event.created_at)}
     </Link>

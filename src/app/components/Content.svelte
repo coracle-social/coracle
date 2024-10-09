@@ -113,7 +113,7 @@
     {/each}
   </div>
   {#if ellipsize}
-    <div class="relative z-feature -m-6 flex justify-center bg-gradient-to-t from-base-100 pt-12">
+    <div class="relative z-feature -m-6 flex justify-center bg-gradient-to-t from-base-100 py-2">
       <button type="button" class="btn" on:click|stopPropagation|preventDefault={expand}>
         See more
       </button>

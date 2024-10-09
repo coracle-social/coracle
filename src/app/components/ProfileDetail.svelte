@@ -1,38 +1,35 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {sleep} from '@welshman/lib'
+  import {sleep, sortBy, flatten} from '@welshman/lib'
   import {feedFromFilter} from '@welshman/feeds'
-  import {NOTE, displayProfile, displayPubkey} from '@welshman/util'
+  import {NOTE, displayProfile, displayPubkey, getAncestorTags} from '@welshman/util'
+  import {deriveEvents} from '@welshman/store'
   import type {TrustedEvent} from '@welshman/util'
-  import {deriveProfile, displayNip05, feedLoader} from '@welshman/app'
+  import {repository, deriveProfile, displayNip05, feedLoader} from '@welshman/app'
   import {createScroller} from "@lib/html"
+  import {fly} from '@lib/transition'
   import Avatar from "@lib/components/Avatar.svelte"
   import Spinner from '@lib/components/Spinner.svelte'
   import Content from "@app/components/Content.svelte"
+  import NoteCard from "@app/components/NoteCard.svelte"
 
   export let pubkey
 
   const profile = deriveProfile(pubkey)
   const pubkeyDisplay = displayPubkey(pubkey)
-
-  const feed = feedFromFilter({kinds: [NOTE], authors: [pubkey]})
-
-  const loader = feedLoader.getLoader(feed, {
-    onEvent: (event: TrustedEvent) => {
-      events = events.concat(event)
-    },
-  })
+  const filter = {kinds: [NOTE], authors: [pubkey]}
+  const events = deriveEvents(repository, {filters: [filter]})
+  const loader = feedLoader.getLoader(feedFromFilter(filter))
 
   let element: Element
-  let events: TrustedEvent[] = []
 
   onMount(() => {
     const scroller = createScroller({
-      element: element,
+      element: element.closest('.menu')!,
       onScroll: async () => {
         const $loader = await loader
 
-        $loader(10)
+        $loader(5)
       },
     })
 
@@ -58,12 +55,19 @@
       </div>
     </div>
     <Content event={{content: $profile.about, tags: []}} hideMedia />
-    <p class="text-xl">Recent notes</p>
     <div class="flex flex-col gap-2">
-      {#each events as event (event.id)}
-        <div class="card2 bg-alt">
-          <Content {event} />
-        </div>
+      {#each sortBy(e => -e.created_at, $events) as event (event.id)}
+        {#if flatten(Object.values(getAncestorTags(event.tags))).length === 0}
+          <div class="card2 bg-alt" in:fly>
+            <NoteCard hideProfile {event}>
+              <Content {event} />
+            </NoteCard>
+          </div>
+        {/if}
+      {:else}
+        <p class="flex center my-12">
+          <Spinner loading />
+        </p>
       {/each}
     </div>
   {:else}

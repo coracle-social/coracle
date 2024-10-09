@@ -6,12 +6,12 @@
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Suggestions from "@lib/editor/Suggestions.svelte"
   import SuggestionProfile from "@lib/editor/SuggestionProfile.svelte"
   import Name from "@app/components/Name.svelte"
-  import {entityLink} from "@app/state"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {pushDrawer} from "@app/modal"
 
   export let value: string[]
 
@@ -19,6 +19,8 @@
   let input: Element
   let popover: Instance
   let instance: SvelteComponent
+
+  const onClick = (pubkey: string) => pushDrawer(ProfileDetail, {pubkey})
 
   const selectPubkey = (pubkey: string) => {
     term = ""
@@ -52,9 +54,9 @@
         <Button class="flex items-center" on:click={() => removePubkey(pubkey)}>
           <Icon icon="close-circle" size={4} class="-ml-1 mt-px" />
         </Button>
-        <Link href={entityLink(nip19.npubEncode(pubkey))}>
+        <Button on:click={() => onClick(pubkey)}>
           <Name {pubkey} />
-        </Link>
+        </Button>
       </div>
     {/each}
   </div>

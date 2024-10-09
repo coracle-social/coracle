@@ -9,10 +9,11 @@
     displayHandle,
     deriveProfileDisplay,
   } from "@welshman/app"
-  import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import WotScore from "@lib/components/WotScore.svelte"
-  import {entityLink} from "@app/state"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {pushDrawer} from "@app/modal"
 
   export let pubkey
 
@@ -22,18 +23,20 @@
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
+  const onClick = () => pushDrawer(ProfileDetail, {pubkey})
+
   $: following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
 </script>
 
 <div class="flex max-w-full gap-3">
-  <Link external href={entityLink(npub)} class="py-1">
+  <Button on:click={onClick} class="py-1">
     <Avatar src={$profile?.picture} size={10} />
-  </Link>
+  </Button>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
-      <Link external class="text-bold overflow-hidden text-ellipsis" href={entityLink(npub)}>
+      <Button class="text-bold overflow-hidden text-ellipsis" on:click={onClick}>
         {$profileDisplay}
-      </Link>
+      </Button>
       <WotScore score={$score} active={following} />
     </div>
     <div class="overflow-hidden text-ellipsis text-sm opacity-75">

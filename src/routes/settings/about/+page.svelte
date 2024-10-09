@@ -2,10 +2,11 @@
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {entityLink} from "@app/state"
+  import ProfileDetail from '@app/components/ProfileDetail.svelte'
+  import {pushDrawer} from '@app/modal'
 
-  const nprofile =
-    "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
+  const openProfile = () =>
+    pushDrawer(ProfileDetail, {pubkey: '97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322'})
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -33,7 +34,7 @@
         <p class="text-center">
           Built with 💜 by
           <span class="text-primary">
-            @<Link external href={entityLink(nprofile)} class="link">hodlbod</Link>
+            @<Button on:click={openProfile} class="link">hodlbod</Button>
           </span>
         </p>
         <div class="flex justify-center gap-4">
@@ -48,12 +49,12 @@
             </Link>
           </div>
           <div class="tooltip" data-tip="Dev Blog">
-            <Link external href={`https://yakihonne.com/users/${nprofile}`}>
+            <Link external href="https://hodlbod.npub.pro/">
               <Icon icon="pen" />
             </Link>
           </div>
           <div class="tooltip" data-tip="Podcast">
-            <Link external href="https://tgfb.com/podcasts/thank-god-for-nostr/">
+            <Link external href="https://fountain.fm/show/vnmoRQQ50siLFRE8k061">
               <Icon icon="headphones-round" />
             </Link>
           </div>

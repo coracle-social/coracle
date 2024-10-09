@@ -13,16 +13,19 @@
     formatTimestamp,
     formatTimestampRelative,
   } from "@welshman/app"
-  import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import Content from "@app/components/Content.svelte"
-  import {entityLink} from "@app/state"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {pushDrawer} from "@app/modal"
 
   export let pubkey
 
   const filters: Filter[] = [{kinds: [NOTE], authors: [pubkey], since: ago(WEEK)}]
   const events = deriveEvents(repository, {filters})
+
+  const onClick = () => pushDrawer(ProfileDetail, {pubkey})
 
   $: roots = $events.filter(e => getAncestorTags(e.tags).replies.length === 0)
 
@@ -47,12 +50,12 @@
     {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
-    <Link external class="chat chat-start" href={entityLink(nevent)}>
+    <Button class="chat chat-start" on:click={onClick}>
       <div class="chat-bubble">
         <Content hideMedia={!following} {event} />
         <p class="text-right text-xs">{formatTimestamp(event.created_at)}</p>
       </div>
-    </Link>
+    </Button>
     <div class="flex gap-2">
       <div class="badge badge-neutral">
         {roots.length} recent {roots.length === 1 ? "note" : "notes"}
