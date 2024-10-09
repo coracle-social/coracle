@@ -6,7 +6,7 @@
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {userMembership, discoverRelays, getMembershipRoomsByUrl} from "@app/state"
+  import {userMembership, discoverRelays, getMembershipUrls} from "@app/state"
 
   let term = ""
   let limit = 20
@@ -47,7 +47,7 @@
     let:item={relay}>
     <a
       href={makeSpacePath(relay.url)}
-      class="card2 bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
+      class="flex flex-col gap-2 card2 bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
@@ -58,12 +58,14 @@
           {/if}
         </div>
       </div>
-      {#if getMembershipRoomsByUrl(relay.url, $userMembership)}
-        <div class="center absolute flex w-full">
-          <div
-            class="tooltip relative left-8 top-[38px] h-5 w-5 rounded-full bg-primary"
-            data-tip="You are already a member of this space.">
-            <Icon icon="check-circle" class="scale-110" />
+      {#if getMembershipUrls($userMembership).includes(relay.url)}
+        <div class="flex justify-center">
+          <div class="relative">
+            <div
+              class="tooltip absolute -top-[88px] left-5 h-5 w-5 rounded-full bg-primary"
+              data-tip="You are already a member of this space.">
+              <Icon icon="check-circle" class="scale-110" />
+            </div>
           </div>
         </div>
       {/if}

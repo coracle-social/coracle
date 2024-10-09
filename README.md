@@ -21,3 +21,4 @@ A discord-like nostr client based on the idea of "relays as groups". WIP.
 - [ ] Sort/migrate repository data to keep important events
   - Get rid of stuff from spaces the user isn't currently a member of
 - [ ] Apply mutes
+- [ ] Add discover > people/content tabs that pull from network rather than follows
