@@ -3,7 +3,7 @@
 </script>
 
 <div class="btn btn-neutral btn-lg h-24 text-left w-full">
-  <div class="flex gap-6 flex-row justify-between items-center w-full {$$props.class}">
+  <div class="flex gap-2 flex-row justify-between items-center w-full {$$props.class}">
     <div class="flex gap-6 items-center">
       <div class="w-12 center">
         <slot name="icon" />

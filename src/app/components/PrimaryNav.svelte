@@ -6,11 +6,20 @@
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
+  import MenuHome from "@app/components/MenuHome.svelte"
+  import MenuSpaces from "@app/components/MenuSpaces.svelte"
+  import MenuSettings from "@app/components/MenuSettings.svelte"
   import {userMembership, getMembershipUrls} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath, getPrimaryNavItemIndex} from "@app/routes"
 
   const addSpace = () => pushModal(SpaceAdd)
+
+  const showHomeMenu = () => pushModal(MenuHome)
+
+  const showSpacesMenu = () => pushModal(MenuSpaces)
+
+  const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
 <div class="relative w-14 flex-shrink-0 bg-base-100 pt-4 hidden sm:block">
@@ -43,13 +52,13 @@
 
 <div class="fixed bottom-0 left-0 right-0 h-14 bg-base-100 sm:hidden z-nav">
   <div class="flex justify-between max-w-sm m-auto px-2">
-    <PrimaryNavItem title="Home" href="/home">
+    <PrimaryNavItem title="Home" on:click={showHomeMenu}>
       <Avatar icon="home-smile" class="!h-10 !w-10" />
     </PrimaryNavItem>
-    <PrimaryNavItem title="Spaces" href="/spaces">
+    <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
       <SpaceAvatar />
     </PrimaryNavItem>
-    <PrimaryNavItem title="Settings" href="/settings/profile">
+    <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
       <Avatar icon="settings" class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>

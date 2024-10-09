@@ -83,26 +83,26 @@
 </script>
 
 <div class="relative flex h-screen flex-col">
-  <div class="relative z-feature mx-2 rounded-xl pt-4">
-    <div
-      class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
-      <div class="flex items-center gap-2">
-        {#if others.length === 0}
-          Your notes
-        {:else if others.length === 1}
-          <ProfileCircle pubkey={others[0]} size={5} />
-          <Name pubkey={others[0]} />
-        {:else}
-          <ProfileCircles pubkeys={others} size={5} />
-          <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+  {#if others.length > 0}
+    <div class="relative z-feature mx-2 rounded-xl pt-4">
+      <div
+        class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
+        <div class="flex items-center gap-2">
+          {#if others.length === 1}
+            <ProfileCircle pubkey={others[0]} size={5} />
             <Name pubkey={others[0]} />
-            and {others.length - 1}
-            {others.length > 2 ? "others" : "other"}
-          </p>
-        {/if}
+          {:else}
+            <ProfileCircles pubkeys={others} size={5} />
+            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+              <Name pubkey={others[0]} />
+              and {others.length - 1}
+              {others.length > 2 ? "others" : "other"}
+            </p>
+          {/if}
+        </div>
       </div>
     </div>
-  </div>
+  {/if}
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
@@ -123,7 +123,5 @@
       </Spinner>
     </p>
   </div>
-  <div class="shadow-top-xl border-t border-solid border-base-100 bg-base-100">
-    <ChatCompose {onSubmit} />
-  </div>
+  <ChatCompose {onSubmit} />
 </div>

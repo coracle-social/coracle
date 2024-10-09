@@ -1,12 +1,13 @@
 <script lang="ts">
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
 </script>
 
 <div class="column gap-4">
-  <div class="py-2">
-    <h1 class="heading">What is Nostr?</h1>
-  </div>
+  <ModalHeader>
+    <div slot="title">What is nostr?</div>
+  </ModalHeader>
   <p>
     <Link external href="https://nostr.com/">Nostr</Link> is way to build social apps that talk to eachother.
     Users own their social identity instead of renting it from a tech company, and can bring it with

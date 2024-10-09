@@ -3,6 +3,7 @@
   import {identity} from "@welshman/lib"
   import {createSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import PageHeader from "@lib/components/PageHeader.svelte"
   import {theme} from "@app/theme"
 
   let term = ""
@@ -11,8 +12,10 @@
 </script>
 
 <div class="content column gap-4">
-  <h1 class="superheading mt-20">Discover Themes</h1>
-  <p class="text-center">Make your community feel like home</p>
+  <PageHeader>
+    <div slot="title">Discover Themes</div>
+    <div slot="info">Make your community feel like home</div>
+  </PageHeader>
   <label class="input input-bordered flex w-full items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for themes..." />

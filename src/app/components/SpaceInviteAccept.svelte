@@ -8,6 +8,7 @@
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import InfoRelay from "@app/components/InfoRelay.svelte"
   import {pushToast} from "@app/toast"
   import {pushModal} from "@app/modal"
@@ -55,10 +56,10 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={join}>
-  <div class="py-2">
-    <h1 class="heading">Join a Space</h1>
-    <p class="text-center">Enter an invite code below to join an existing space.</p>
-  </div>
+  <ModalHeader>
+    <div slot="title">Join a Space</div>
+    <div slot="info">Enter an invite code below to join an existing space.</div>
+  </ModalHeader>
   <Field>
     <p slot="label">Invite code*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">

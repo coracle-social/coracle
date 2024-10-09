@@ -5,6 +5,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import {addRoomMembership} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
 
@@ -32,10 +33,12 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={create}>
-  <h1 class="heading">Create a Room</h1>
-  <p class="text-center">
-    On <span class="text-primary">{displayRelayUrl(url)}</span>
-  </p>
+  <ModalHeader>
+    <div slot="title">Create a Room</div>
+    <div slot="info">
+      On <span class="text-primary">{displayRelayUrl(url)}</span>
+    </div>
+  </ModalHeader>
   <Field>
     <p slot="label">Room Name</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">

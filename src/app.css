@@ -52,13 +52,20 @@
 }
 
 .bg-alt,
-.bg-alt .bg-alt .bg-alt {
-  @apply bg-base-100;
+.bg-alt .bg-alt .bg-alt,
+.hover\:bg-alt:hover,
+.bg-alt .bg-alt .hover\:bg-alt:hover,
+.bg-alt .bg-alt.hover\:bg-alt:hover {
+  @apply bg-base-100 transition-colors;
 }
 
 .bg-alt .bg-alt,
-.bg-alt .bg-alt .bg-alt .bg-alt {
-  @apply bg-base-300;
+.bg-alt .bg-alt .bg-alt .bg-alt,
+.bg-alt .hover\:bg-alt:hover,
+.bg-alt .bg-alt .bg-alt .hover\:bg-alt:hover,
+.bg-alt.hover\:bg-alt:hover,
+.bg-alt .bg-alt .bg-alt.hover\:bg-alt:hover {
+  @apply bg-base-300 transition-colors;
 }
 
 .card2 {
@@ -78,7 +85,7 @@
 }
 
 .content {
-  @apply m-auto w-full max-w-3xl p-12;
+  @apply m-auto w-full max-w-3xl p-4 sm:p-8 md:p-12;
 }
 
 .heading {

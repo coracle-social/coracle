@@ -15,14 +15,14 @@
 </script>
 
 <div class="flex flex-col items-end">
-  <NoteCard event={root} class="card2 w-full">
+  <NoteCard event={root} class="card2 bg-alt w-full">
     <div class="ml-12">
       <Content event={root} />
     </div>
   </NoteCard>
   <Link
     href={entityLink(nevent)}
-    class="btn btn-neutral -mt-6 mr-4 flex items-center gap-2 rounded-full">
+    class="btn btn-neutral -mt-6 mr-4 flex items-center gap-2 rounded-full z-feature">
     <Icon icon="chat-round" />
     <span>{replies.length}</span>
   </Link>

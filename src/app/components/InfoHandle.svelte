@@ -1,12 +1,13 @@
 <script lang="ts">
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
 </script>
 
 <div class="column gap-4">
-  <div class="py-2">
-    <h1 class="heading">What is a nostr address?</h1>
-  </div>
+  <ModalHeader>
+    <div slot="title">What is a nostr address?</div>
+  </ModalHeader>
   <p>
     Flotilla hosts spaces on the <Link external href="https://nostr.com/" class="underline"
       >Nostr protocol</Link

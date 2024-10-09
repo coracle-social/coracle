@@ -16,7 +16,7 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {getMembershipRoomsByUrl, userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
+  import {getMembershipRoomsByUrl, getMembershipUrls, userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -74,7 +74,7 @@
             <ul
               transition:fly
               class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
-              {#if getMembershipRoomsByUrl(url, $userMembership)}
+              {#if getMembershipUrls($userMembership).includes(url)}
                 <li class="text-error">
                   <Button on:click={leaveSpace}>
                     <Icon icon="exit" />
@@ -101,7 +101,7 @@
       </div>
       <div in:fly={{delay: getDelay(true)}}>
         <SecondaryNavItem href={makeSpacePath(url, "threads")}>
-          <Icon icon="notes-minimalistic" /> Notes
+          <Icon icon="notes-minimalistic" /> Threads
         </SecondaryNavItem>
       </div>
       <div in:fly={{delay: getDelay()}}>

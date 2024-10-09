@@ -17,6 +17,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
@@ -81,13 +82,12 @@
 </script>
 
 <div class="relative flex h-full flex-col">
-  <div class="relative z-feature mx-2 rounded-xl pt-4">
-    <div
-      class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
-      <div class="flex items-center gap-2">
-        <Icon icon="hashtag" />
-        <strong>{room}</strong>
-      </div>
+  <PageBar>
+    <div slot="icon" class="center">
+      <Icon icon="hashtag" />
+    </div>
+    <strong slot="title">{room}</strong>
+    <div slot="action">
       {#if room !== GENERAL}
         {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}
           <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
@@ -102,7 +102,7 @@
         {/if}
       {/if}
     </div>
-  </div>
+  </PageBar>
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
@@ -123,7 +123,5 @@
       </Spinner>
     </p>
   </div>
-  <div class="shadow-top-xl border-t border-solid border-base-100 bg-base-100">
-    <ChannelCompose {onSubmit} />
-  </div>
+  <ChannelCompose {onSubmit} />
 </div>

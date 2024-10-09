@@ -3,6 +3,7 @@
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import InfoRelay from "@app/components/InfoRelay.svelte"
   import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
   import {pushModal} from "@app/modal"
@@ -17,10 +18,12 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={next}>
-  <div class="py-2">
-    <h1 class="heading">Customize your Space</h1>
-    <p class="text-center">Give people a few details to go on. You can always change this later.</p>
-  </div>
+  <ModalHeader>
+    <div slot="title">Customize your Space</div>
+    <div slot="info">
+      Give people a few details to go on. You can always change this later.
+    </div>
+  </ModalHeader>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file />
   </div>

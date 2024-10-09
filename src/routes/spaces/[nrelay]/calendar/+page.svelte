@@ -6,6 +6,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
@@ -41,15 +42,12 @@
 </script>
 
 <div class="relative flex h-screen flex-col">
-  <div class="relative z-feature mx-2 rounded-xl pt-4">
-    <div
-      class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
-      <div class="flex items-center gap-2">
-        <Icon icon="calendar-minimalistic" />
-        <strong>Calendar</strong>
-      </div>
+  <PageBar>
+    <div slot="icon" class="center">
+      <Icon icon="calendar-minimalistic" />
     </div>
-  </div>
+    <strong slot="title">Calendar</strong>
+  </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each items as { event, dateDisplay }, i (event.id)}
       {#if dateDisplay}
@@ -68,7 +66,7 @@
     </p>
   </div>
   <Button
-    class="tooltip tooltip-left fixed bottom-4 right-4 p-1"
+    class="tooltip tooltip-left fixed bottom-16 sm:bottom-4 right-2 sm:right-4 p-1 z-feature"
     data-tip="Create an Event"
     on:click={createEvent}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">

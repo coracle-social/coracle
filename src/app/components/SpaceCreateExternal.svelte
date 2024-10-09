@@ -2,6 +2,7 @@
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {pushModal} from "@app/modal"
 
@@ -14,10 +15,12 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={next}>
-  <div class="py-2">
-    <h1 class="heading">Create a Space</h1>
-    <p class="text-center">Host your own space, for your community.</p>
-  </div>
+  <ModalHeader>
+    <div slot="title">Create a Space</div>
+    <div slot="info">
+      Host your own space, for your community.
+    </div>
+  </ModalHeader>
   <p>
     <Link class="text-primary" external href="https://relay.tools">relay.tools</Link> is a third-party
     service that allows anyone to run their own relay for use with Flotilla, or any other nostr-compatible

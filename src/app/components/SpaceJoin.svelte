@@ -3,6 +3,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import {clearModal} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
 
@@ -30,10 +31,14 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={join}>
-  <h1 class="heading">
-    Joining <span class="text-primary">{displayRelayUrl(url)}</span>
-  </h1>
-  <p class="text-center">Are you sure you'd like to join this space?</p>
+  <ModalHeader>
+    <div slot="title">
+      Joining <span class="text-primary">{displayRelayUrl(url)}</span>
+    </div>
+    <div slot="info">
+      Are you sure you'd like to join this space?
+    </div>
+  </ModalHeader>
   <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />

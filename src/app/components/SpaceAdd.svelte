@@ -2,6 +2,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
   import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {pushModal} from "@app/modal"
@@ -12,12 +13,12 @@
 </script>
 
 <div class="column gap-4">
-  <div class="py-2">
-    <h1 class="heading">Add a Space</h1>
-    <p class="text-center">
+  <ModalHeader>
+    <div slot="title">Add a Space</div>
+    <div slot="info">
       Spaces are places where communities come together to work, play, and hang out.
-    </p>
-  </div>
+    </div>
+  </ModalHeader>
   <Button on:click={startCreate}>
     <CardButton>
       <div slot="icon"><Icon icon="add-circle" size={7} /></div>
