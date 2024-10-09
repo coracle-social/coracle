@@ -14,18 +14,18 @@
 <SecondaryNav>
   <SecondaryNavSection>
     <div in:fly|local>
-      <SecondaryNavItem href="/settings">
-        <Icon icon="settings" /> Settings
-      </SecondaryNavItem>
-    </div>
-    <div in:fly|local={{delay: 50}}>
       <SecondaryNavItem href="/settings/profile">
         <Icon icon="user-circle" /> Profile
       </SecondaryNavItem>
     </div>
-    <div in:fly|local={{delay: 100}}>
+    <div in:fly|local={{delay: 50}}>
       <SecondaryNavItem href="/settings/relays">
         <Icon icon="remote-controller-minimalistic" /> Relays
+      </SecondaryNavItem>
+    </div>
+    <div in:fly|local={{delay: 100}}>
+      <SecondaryNavItem href="/settings">
+        <Icon icon="settings" /> Settings
       </SecondaryNavItem>
     </div>
     <div in:fly|local={{delay: 150}}>

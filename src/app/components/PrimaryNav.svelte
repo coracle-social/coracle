@@ -63,7 +63,7 @@
       </PrimaryNavItem>
     </div>
     <div>
-      <PrimaryNavItem title="Settings" href="/settings">
+      <PrimaryNavItem title="Settings" href="/settings/profile">
         <Avatar icon="settings" class="!h-10 !w-10 border border-solid border-base-300" />
       </PrimaryNavItem>
     </div>
