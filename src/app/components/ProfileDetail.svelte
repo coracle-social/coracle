@@ -1,15 +1,14 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {sleep, sortBy, flatten} from '@welshman/lib'
-  import {feedFromFilter} from '@welshman/feeds'
-  import {NOTE, displayProfile, displayPubkey, getAncestorTags} from '@welshman/util'
-  import {deriveEvents} from '@welshman/store'
-  import type {TrustedEvent} from '@welshman/util'
-  import {repository, deriveProfile, displayNip05, feedLoader} from '@welshman/app'
+  import {onMount} from "svelte"
+  import {sleep, sortBy, flatten} from "@welshman/lib"
+  import {feedFromFilter} from "@welshman/feeds"
+  import {NOTE, displayProfile, displayPubkey, getAncestorTags} from "@welshman/util"
+  import {deriveEvents} from "@welshman/store"
+  import {repository, deriveProfile, displayNip05, feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
-  import {fly} from '@lib/transition'
+  import {fly} from "@lib/transition"
   import Avatar from "@lib/components/Avatar.svelte"
-  import Spinner from '@lib/components/Spinner.svelte'
+  import Spinner from "@lib/components/Spinner.svelte"
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
 
@@ -25,7 +24,7 @@
 
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest('.menu')!,
+      element: element.closest(".menu")!,
       onScroll: async () => {
         const $loader = await loader
 
@@ -37,7 +36,7 @@
   })
 </script>
 
-<div class="flex flex-col gap-4 p-4 max-w-full" bind:this={element}>
+<div class="flex max-w-full flex-col gap-4 p-4" bind:this={element}>
   {#if $profile}
     <div class="flex max-w-full gap-3">
       <div class="py-1">
@@ -71,7 +70,7 @@
       {/each}
     </div>
   {:else}
-    <p class="flex center my-12">
+    <p class="center my-12 flex">
       {#await sleep(3000)}
         <Spinner loading />
       {:then}

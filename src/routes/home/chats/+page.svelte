@@ -1,24 +1,15 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {page} from "$app/stores"
   import {ctx, ago, remove} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import {pubkey, subscribe} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
-  import Page from "@lib/components/Page.svelte"
   import Link from "@lib/components/Link.svelte"
-  import Button from "@lib/components/Button.svelte"
-  import SecondaryNav from "@lib/components/SecondaryNav.svelte"
-  import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
-  import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
-  import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import Name from "@app/components/Name.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
-  import ChatStart from "@app/components/ChatStart.svelte"
   import {chatSearch, pullConservatively} from "@app/state"
-  import {pushModal} from "@app/modal"
 
   let term = ""
 
@@ -38,15 +29,15 @@
 </script>
 
 <div class="content column gap-2">
-  <label class="input input-bordered flex items-center gap-2 mb-2" in:fly={{delay: 250}}>
+  <label class="input input-bordered mb-2 flex items-center gap-2" in:fly={{delay: 250}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
   </label>
-  <div class="overflow-auto column gap-2">
+  <div class="column gap-2 overflow-auto">
     {#each chats as { id, pubkeys, messages }, i (id)}
       {@const message = messages[0]}
       {@const others = remove($pubkey, pubkeys)}
-      <div class="cursor-pointer card2 bg-alt hover:bg-alt px-6 py-2 transition-colors">
+      <div class="card2 bg-alt hover:bg-alt cursor-pointer px-6 py-2 transition-colors">
         <Link class="flex flex-col justify-start gap-1" href="/home/{id}">
           <div class="flex items-center gap-2">
             {#if others.length === 1}

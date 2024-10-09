@@ -9,18 +9,10 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {ctx, uniq, sortBy, remove} from "@welshman/lib"
+  import {sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
-  import {Nip59} from "@welshman/signer"
-  import {
-    pubkey,
-    signer,
-    formatTimestampAsDate,
-    tagPubkey,
-    makeThunk,
-    publishThunk,
-  } from "@welshman/app"
+  import {pubkey, formatTimestampAsDate, tagPubkey} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Divider from "@lib/components/Divider.svelte"
@@ -32,7 +24,7 @@
   import {deriveChat, splitChatId} from "@app/state"
   import {sendWrapped} from "@app/commands"
 
-  const id = $page.params.chat === 'notes' ? $pubkey! : $page.params.chat
+  const id = $page.params.chat === "notes" ? $pubkey! : $page.params.chat
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey, pubkeys)

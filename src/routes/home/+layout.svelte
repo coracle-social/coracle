@@ -71,7 +71,7 @@
     </div>
   </SecondaryNavSection>
   <label
-    class="input input-sm input-bordered mx-6 -mt-4 flex items-center gap-2 mb-2"
+    class="input input-sm input-bordered mx-6 -mt-4 mb-2 flex items-center gap-2"
     in:fly={{delay: 250}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />

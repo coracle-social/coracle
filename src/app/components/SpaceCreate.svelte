@@ -20,9 +20,7 @@
 <form class="column gap-4" on:submit|preventDefault={next}>
   <ModalHeader>
     <div slot="title">Customize your Space</div>
-    <div slot="info">
-      Give people a few details to go on. You can always change this later.
-    </div>
+    <div slot="info">Give people a few details to go on. You can always change this later.</div>
   </ModalHeader>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file />

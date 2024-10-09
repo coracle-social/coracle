@@ -17,9 +17,7 @@
 <form class="column gap-4" on:submit|preventDefault={next}>
   <ModalHeader>
     <div slot="title">Create a Space</div>
-    <div slot="info">
-      Host your own space, for your community.
-    </div>
+    <div slot="info">Host your own space, for your community.</div>
   </ModalHeader>
   <p>
     <Link class="text-primary" external href="https://relay.tools">relay.tools</Link> is a third-party

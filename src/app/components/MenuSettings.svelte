@@ -1,18 +1,15 @@
 <script lang="ts">
-  import {goto} from '$app/navigation'
-  import Icon from '@lib/components/Icon.svelte'
-  import Link from '@lib/components/Link.svelte'
-  import Button from '@lib/components/Button.svelte'
-  import CardButton from '@lib/components/CardButton.svelte'
+  import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import CardButton from "@lib/components/CardButton.svelte"
   import LogOut from "@app/components/LogOut.svelte"
   import {pushModal} from "@app/modal"
-
-  const back = () => history.back()
 
   const logout = () => pushModal(LogOut)
 </script>
 
-<div class="menu column gap-2">
+<div class="column menu gap-2">
   <Link href="/settings/profile">
     <CardButton>
       <div slot="icon"><Icon icon="user-circle" size={7} /></div>

@@ -35,9 +35,7 @@
     <div slot="title">
       Joining <span class="text-primary">{displayRelayUrl(url)}</span>
     </div>
-    <div slot="info">
-      Are you sure you'd like to join this space?
-    </div>
+    <div slot="info">Are you sure you'd like to join this space?</div>
   </ModalHeader>
   <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>

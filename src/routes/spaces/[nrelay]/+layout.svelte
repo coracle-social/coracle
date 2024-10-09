@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sort, ago} from "@welshman/lib"
+  import {ago} from "@welshman/lib"
   import {displayRelayUrl, REACTION, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import {fly, slide} from "@lib/transition"
@@ -16,7 +16,16 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {getMembershipRoomsByUrl, getMembershipUrls, userMembership, pullConservatively, roomsByUrl, decodeNRelay, GENERAL, MESSAGE} from "@app/state"
+  import {
+    getMembershipRoomsByUrl,
+    getMembershipUrls,
+    userMembership,
+    pullConservatively,
+    roomsByUrl,
+    decodeNRelay,
+    GENERAL,
+    MESSAGE,
+  } from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 

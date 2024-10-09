@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {deriveRelayDisplay} from '@welshman/app'
+  import {deriveRelayDisplay} from "@welshman/app"
 
   export let url
 

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
   import {ago, append, first, sortBy, WEEK, ctx} from "@welshman/lib"
   import {NOTE, getAncestorTags, getListTags, getPubkeyTagValues} from "@welshman/util"
   import type {Filter} from "@welshman/util"
@@ -46,8 +45,6 @@
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
     {@const event = first(sortBy(e => -e.created_at, roots))}
-    {@const relays = ctx.app.router.Event(event).getUrls()}
-    {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
     <Button class="chat chat-start" on:click={onClick}>

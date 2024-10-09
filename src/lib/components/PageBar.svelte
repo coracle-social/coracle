@@ -1,10 +1,3 @@
-<script lang="ts">
-  import Icon from '@lib/components/Icon.svelte'
-  import Button from '@lib/components/Button.svelte'
-
-  const back = () => history.back()
-</script>
-
 <div class="relative z-feature mx-2 rounded-xl pt-4">
   <div
     class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">

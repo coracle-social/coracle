@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {always, ctx} from "@welshman/lib"
+  import {ctx} from "@welshman/lib"
   import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
   import {userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import Field from "@lib/components/Field.svelte"

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import type {SvelteComponent} from "svelte"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"

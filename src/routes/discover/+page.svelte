@@ -51,7 +51,7 @@
     let:item={relay}>
     <a
       href={makeSpacePath(relay.url)}
-      class="flex flex-col gap-2 card2 text-center bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
+      class="card2 bg-alt flex flex-col gap-2 text-center shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
@@ -77,7 +77,7 @@
         <h2 class="text-center text-xl">
           <RelayName url={relay.url} />
         </h2>
-        <p class="opacity-75 text-sm">{relay.url}</p>
+        <p class="text-sm opacity-75">{relay.url}</p>
       </div>
       <RelayDescription url={relay.url} />
     </a>

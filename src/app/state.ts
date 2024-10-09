@@ -214,17 +214,19 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
 
 // Membership
 
-export const getMembershipUrls = (list?: List) =>
-  sort(getRelayTagValues(getListTags(list)))
+export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getListTags(list)))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
-  sort(getListTags(list).filter(t => t[0] === '~' && t[2] === url).map(nth(1)))
+  sort(
+    getListTags(list)
+      .filter(t => t[0] === "~" && t[2] === url)
+      .map(nth(1)),
+  )
 
 export const memberships = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [MEMBERSHIPS]}],
   itemToEvent: item => item.event,
-  eventToItem: (event: TrustedEvent) =>
-    readList(asDecryptedEvent(event)),
+  eventToItem: (event: TrustedEvent) => readList(asDecryptedEvent(event)),
 })
 
 export const {
@@ -429,7 +431,7 @@ export const threadsByUrl = derived(
     }
 
     return threadsByUrl
-  }
+  },
 )
 
 // Rooms

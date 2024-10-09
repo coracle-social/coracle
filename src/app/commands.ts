@@ -1,11 +1,10 @@
 import {get} from "svelte/store"
-import {ctx, uniqBy, uniq, sleep, chunk, equals, choice, append} from "@welshman/lib"
+import {ctx, uniq, sleep, chunk, equals, choice} from "@welshman/lib"
 import {
   DELETE,
   PROFILE,
   INBOX_RELAYS,
   RELAYS,
-  MUTES,
   FOLLOWS,
   REACTION,
   isSignedEvent,
@@ -14,7 +13,6 @@ import {
   normalizeRelayUrl,
   makeList,
   addToListPublicly,
-  removeFromList,
   removeFromListByPredicate,
   getListTags,
   getRelayTags,
@@ -37,7 +35,6 @@ import {
   loadMutes,
   getFollows,
   tagEvent,
-  tagPubkey,
   tagReactionTo,
   getRelayUrls,
   userRelaySelections,
@@ -155,8 +152,7 @@ export const removeRoomMembership = async (url: string, room: string) => {
 export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
   const list = get(userRelaySelections) || makeList({kind: RELAYS})
 
-  let tags = getRelayTags(getListTags(list))
-    .filter(t => normalizeRelayUrl(t[1]) !== url)
+  const tags = getRelayTags(getListTags(list)).filter(t => normalizeRelayUrl(t[1]) !== url)
 
   if (read && write) {
     tags.push(["r", url])
@@ -177,8 +173,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 
   // Only update inbox policies if they already exist or we're adding them
   if (enabled || getRelayUrls(list).includes(url)) {
-    let tags = getRelayTags(getListTags(list))
-      .filter(t => normalizeRelayUrl(t[1]) !== url)
+    const tags = getRelayTags(getListTags(list)).filter(t => normalizeRelayUrl(t[1]) !== url)
 
     if (enabled) {
       tags.push(["relay", url])
@@ -222,7 +217,7 @@ export const sendWrapped = async ({
         makeThunk({
           event: await nip59.wrap(recipient, stamp(template)),
           relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-        })
+        }),
       )
     }),
   )

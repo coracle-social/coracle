@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last, ctx} from "@welshman/lib"
+  import {ctx} from "@welshman/lib"
   import {
     createEvent,
     displayPubkey,

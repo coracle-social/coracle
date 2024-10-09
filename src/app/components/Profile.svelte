@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
     userFollows,
@@ -17,7 +16,6 @@
 
   export let pubkey
 
-  const npub = nip19.npubEncode(pubkey)
   const profile = deriveProfile(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const handle = deriveHandleForPubkey(pubkey)

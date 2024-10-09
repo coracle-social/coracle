@@ -22,7 +22,7 @@
   </NoteCard>
   <Link
     href={entityLink(nevent)}
-    class="btn btn-neutral -mt-6 mr-4 flex items-center gap-2 rounded-full z-feature">
+    class="btn btn-neutral z-feature -mt-6 mr-4 flex items-center gap-2 rounded-full">
     <Icon icon="chat-round" />
     <span>{replies.length}</span>
   </Link>

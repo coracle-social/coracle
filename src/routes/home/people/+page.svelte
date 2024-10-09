@@ -29,7 +29,7 @@
 
 <div class="content column gap-4" bind:this={element}>
   <h1 class="superheading mt-20 hidden sm:block">People</h1>
-  <p class="text-center hidden sm:block">Get the latest from people in your network</p>
+  <p class="hidden text-center sm:block">Get the latest from people in your network</p>
   <label class="input input-bordered flex w-full items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />

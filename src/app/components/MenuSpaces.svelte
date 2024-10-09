@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {page} from '$app/stores'
-  import {goto} from '$app/navigation'
-  import Icon from '@lib/components/Icon.svelte'
-  import Link from '@lib/components/Link.svelte'
-  import Button from '@lib/components/Button.svelte'
-  import Divider from '@lib/components/Divider.svelte'
-  import CardButton from '@lib/components/CardButton.svelte'
+  import {page} from "$app/stores"
+  import {goto} from "$app/navigation"
+  import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import Divider from "@lib/components/Divider.svelte"
+  import CardButton from "@lib/components/CardButton.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
@@ -13,7 +13,14 @@
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import {GENERAL, userMembership, decodeNRelay, getMembershipRoomsByUrl, getMembershipUrls, roomsByUrl} from "@app/state"
+  import {
+    GENERAL,
+    userMembership,
+    decodeNRelay,
+    getMembershipRoomsByUrl,
+    getMembershipUrls,
+    roomsByUrl,
+  } from "@app/state"
   import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
@@ -51,9 +58,9 @@
   $: otherRooms = allRooms.filter(room => !rooms.concat(GENERAL).includes(room))
 </script>
 
-<div class="menu column gap-2">
+<div class="column menu gap-2">
   {#if showSettings}
-    <Button on:click={closeSettings} class="flex items-center gap-2 text-lg mb-4">
+    <Button on:click={closeSettings} class="mb-4 flex items-center gap-2 text-lg">
       <Icon icon="alt-arrow-left" size={7} />
       Go Back
     </Button>
@@ -69,7 +76,7 @@
       </Button>
     {/if}
   {:else if space}
-    <Button on:click={resetSpace} class="flex items-center gap-2 text-lg mb-4">
+    <Button on:click={resetSpace} class="mb-4 flex items-center gap-2 text-lg">
       <Icon icon="alt-arrow-left" size={7} />
       Back to Spaces
     </Button>

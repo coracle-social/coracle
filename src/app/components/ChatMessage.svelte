@@ -31,7 +31,7 @@
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
-  const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+  const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
 
   const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
@@ -57,17 +57,24 @@
   class="group chat relative flex w-full flex-col gap-1 p-2 text-left"
   class:chat-start={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
-  <div class="chat-bubble max-w-sm mx-1">
-    <div class="flex gap-2 items-start">
+  <div class="chat-bubble mx-1 max-w-sm">
+    <div class="flex items-start gap-2">
       {#if showPubkey}
         <button type="button" on:click|stopPropagation={showProfile}>
-          <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+          <Avatar
+            src={$profile?.picture}
+            class="border border-solid border-base-content"
+            size={10} />
         </button>
       {/if}
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <button type="button" class="text-bold text-sm" style="color: {colorValue}" on:click|stopPropagation={showProfile}>
+            <button
+              type="button"
+              class="text-bold text-sm"
+              style="color: {colorValue}"
+              on:click|stopPropagation={showProfile}>
               {$profileDisplay}
             </button>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {deriveRelay} from '@welshman/app'
+  import {deriveRelay} from "@welshman/app"
 
   export let url
 

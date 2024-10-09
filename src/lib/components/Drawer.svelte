@@ -30,7 +30,7 @@
   </div>
   <div class="drawer-side z-modal">
     <label for={id} aria-label="close sidebar" class="drawer-overlay"></label>
-    <div class="menu overflow-auto h-full w-80 bg-base-200 p-0 text-base-content">
+    <div class="menu h-full w-80 overflow-auto bg-base-200 p-0 text-base-content">
       <slot />
     </div>
   </div>
