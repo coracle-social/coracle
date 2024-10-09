@@ -24,6 +24,12 @@ export const pushModal = (
   return id
 }
 
+export const pushDrawer = (
+  component: ComponentType,
+  props: Record<string, any> = {},
+  options: ModalOptions = {},
+) => pushModal(component, props, {...options, drawer: true})
+
 export const clearModal = () => {
   goto("#")
   emitter.emit("close")

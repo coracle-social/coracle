@@ -9,7 +9,7 @@
     createProfile,
     isPublishedProfile,
   } from "@welshman/util"
-  import {pubkey, profilesByPubkey, makeThunk, publishThunk} from "@welshman/app"
+  import {pubkey, profilesByPubkey, makeThunk, publishThunk, displayNip05} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -22,8 +22,6 @@
   import {pushToast} from "@app/toast"
 
   const pubkeyDisplay = displayPubkey($pubkey!)
-
-  const displayNip05 = (nip05: string) => (nip05?.startsWith("_@") ? last(nip05.split("@")) : nip05)
 
   const cloneProfile = () => ({...($profilesByPubkey.get($pubkey!) || makeProfile())})
 

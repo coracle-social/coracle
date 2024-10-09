@@ -17,8 +17,10 @@
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
   import {colors, displayReaction} from "@app/state"
+  import {pushDrawer} from "@app/modal"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
 
   export let event: TrustedEvent
@@ -31,6 +33,8 @@
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
+
+  const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
@@ -53,16 +57,19 @@
   class="group chat relative flex w-full flex-col gap-1 p-2 text-left"
   class:chat-start={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
-  <div class="chat-bubble max-w-sm">
-    <div class="flex gap-2">
+  <div class="chat-bubble max-w-sm mx-1">
+    <div class="flex gap-2 items-start">
       {#if showPubkey}
-        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+        <button type="button" on:click|stopPropagation={showProfile}>
+          <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+        </button>
       {/if}
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <strong class="text-sm" style="color: {colorValue}" data-color={colorName}
-              >{$profileDisplay}</strong>
+            <button type="button" class="text-bold text-sm" style="color: {colorValue}" on:click|stopPropagation={showProfile}>
+              {$profileDisplay}
+            </button>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
           </div>
         {/if}

@@ -32,7 +32,7 @@
   import {deriveChat, splitChatId} from "@app/state"
   import {sendWrapped} from "@app/commands"
 
-  const {chat: id} = $page.params
+  const id = $page.params.chat === 'notes' ? $pubkey! : $page.params.chat
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey, pubkeys)
@@ -87,7 +87,9 @@
     <div
       class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
       <div class="flex items-center gap-2">
-        {#if others.length === 1}
+        {#if others.length === 0}
+          Your notes
+        {:else if others.length === 1}
           <ProfileCircle pubkey={others[0]} size={5} />
           <Name pubkey={others[0]} />
         {:else}

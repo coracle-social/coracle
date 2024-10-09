@@ -61,6 +61,7 @@
   import Reply from "@assets/icons/Reply.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
   import TagHorizontal from "@assets/icons/Tag Horizontal.svg?dataurl"
+  import ShareCircle from "@assets/icons/Share Circle.svg?dataurl"
   import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
   import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
@@ -129,6 +130,7 @@
     plain: Plain,
     reply: Reply,
     "remote-controller-minimalistic": RemoteControllerMinimalistic,
+    "share-circle": ShareCircle,
     "shop-minimalistic": ShopMinimalistic,
     "smile-circle": SmileCircle,
     settings: Settings,

@@ -52,11 +52,16 @@
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: 100}}>
+      <SecondaryNavItem href="/home/network">
+        <Icon icon="share-circle" /> Network
+      </SecondaryNavItem>
+    </div>
+    <div in:fly={{delay: 150}}>
       <SecondaryNavItem href="/home/notes">
         <Icon icon="notes-minimalistic" /> Notes
       </SecondaryNavItem>
     </div>
-    <div in:fly={{delay: 150}}>
+    <div in:fly={{delay: 200}}>
       <SecondaryNavHeader>
         Chats
         <Button on:click={startChat}>
@@ -67,7 +72,7 @@
   </SecondaryNavSection>
   <label
     class="input input-sm input-bordered mx-6 -mt-4 flex items-center gap-2 mb-2"
-    in:fly={{delay: 200}}>
+    in:fly={{delay: 250}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>

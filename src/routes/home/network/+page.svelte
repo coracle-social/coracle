@@ -53,7 +53,7 @@
   }
 
   onMount(() => {
-    load({filters: [notesFilter, reactionsFilter]})
+    load({filters: [notesFilter, reactionsFilter], timeout: 30_000})
 
     const scroller = createScroller({
       element: element.closest(".max-h-screen")!,
@@ -75,12 +75,12 @@
 <div class="content column gap-4" bind:this={element}>
   {#await loading}
     <div class="center my-20">
-      <Spinner loading>Loading notes...</Spinner>
+      <Spinner loading>Loading posts from people you follow...</Spinner>
     </div>
   {:then}
     <div class="flex flex-col gap-2">
       {#each events as event (event.id)}
-        <NoteCard {event} class="card2 w-full">
+        <NoteCard {event} class="card2 bg-alt w-full">
           <div class="ml-12">
             <Content {event} />
           </div>
