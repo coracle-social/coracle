@@ -30,3 +30,4 @@ Run `npm run dev` to get a dev server, and `npm run check:watch` to watch for ty
   - Get rid of stuff from spaces the user isn't currently a member of
 - [ ] Apply mutes
 - [ ] Add discover > people/content tabs that pull from network rather than follows
+- [ ] Add redirect on successful login to the page they originally were going for

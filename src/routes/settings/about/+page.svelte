@@ -21,11 +21,11 @@
         </div>
         <div class="card2 bg-alt flex flex-col gap-2 text-center shadow-2xl">
           <h3 class="text-2xl sm:h-12">Get in touch</h3>
-          <p class="sm:h-16">Having problems? Let us know by filing an issue.</p>
+          <p class="sm:h-16">Having problems? Let us know by.</p>
           <Link
             class="btn btn-primary"
             href="/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
-            Open an Issue
+            Chat with the Developer
           </Link>
         </div>
       </div>
