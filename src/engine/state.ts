@@ -101,10 +101,10 @@ import {
   getDefaultAppContext,
   loadRelay,
   tagPubkey,
-  wotGraph,
-  getFollows,
+  getNetwork,
   getUserWotScore,
   sessions,
+  maxWot,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -323,30 +323,9 @@ export const dufflepud = (path: string) => {
   return `${base}/${path}`
 }
 
-// Network, followers, wot
-
-export const getNetwork = simpleCache(([pk]) => {
-  const pubkeys = new Set(getFollows(pk))
-  const network = new Set<string>()
-
-  for (const follow of pubkeys) {
-    for (const pubkey of getFollows(follow)) {
-      if (!pubkeys.has(pubkey)) {
-        network.add(pubkey)
-      }
-    }
-  }
-
-  return Array.from(network)
-})
+// User follows/mutes/network
 
 export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
-
-export const maxWot = withGetter(
-  derived(wotGraph, $wotGraph => max(Array.from($wotGraph.values()))),
-)
-
-// User follows/mutes/network
 
 export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m, $pk, $anon]) => {
   return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})

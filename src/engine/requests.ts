@@ -40,6 +40,8 @@ import {
   pull,
   hasNegentropy,
   wotGraph,
+  maxWot,
+  getNetwork,
 } from "@welshman/app"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {partition, uniq, without} from "ramda"
@@ -48,8 +50,6 @@ import {
   env,
   getUserCircles,
   load,
-  maxWot,
-  getNetwork,
   subscribePersistent,
   sessionWithMeta,
   groupAdminKeys,
