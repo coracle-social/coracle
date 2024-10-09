@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
@@ -16,10 +18,18 @@
       Spaces are places where communities come together to work, play, and hang out.
     </p>
   </div>
-  <CardButton icon="add-circle" title="Create a space" on:click={startCreate}>
-    Just a few questions and you'll be on your way.
-  </CardButton>
-  <CardButton icon="login-2" title="Join a space" on:click={startJoin}>
-    Enter an invite code or url to join an existing space.
-  </CardButton>
+  <Button on:click={startCreate}>
+    <CardButton>
+      <div slot="icon"><Icon icon="add-circle" size={7} /></div>
+      <div slot="title">Create a space</div>
+      <div slot="info">Just a few questions and you'll be on your way.</div>
+    </CardButton>
+  </Button>
+  <Button on:click={startJoin}>
+    <CardButton>
+      <div slot="icon"><Icon icon="login-2" size={7} /></div>
+      <div slot="title">Join a space</div>
+      <div slot="info">Enter an invite code or url to join an existing space.</div>
+    </CardButton>
+  </Button>
 </div>

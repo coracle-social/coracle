@@ -1,10 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import Masonry from "svelte-bricks"
-  import {displayRelayUrl} from "@welshman/util"
   import {relaySearch} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
+  import RelayName from "@app/components/RelayName.svelte"
+  import RelayDescription from "@app/components/RelayDescription.svelte"
   import {makeSpacePath} from "@app/routes"
   import {userMembership, discoverRelays, getMembershipUrls} from "@app/state"
 
@@ -47,7 +48,7 @@
     let:item={relay}>
     <a
       href={makeSpacePath(relay.url)}
-      class="flex flex-col gap-2 card2 bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
+      class="flex flex-col gap-2 card2 text-center bg-alt shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
       <div class="center avatar mt-8">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
@@ -69,10 +70,13 @@
           </div>
         </div>
       {/if}
-      <h2 class="text-center">{displayRelayUrl(relay.url)}</h2>
-      {#if relay.profile?.description}
-        <p class="py-4 text-center text-sm">{relay.profile.description}</p>
-      {/if}
+      <div>
+        <h2 class="text-center text-xl">
+          <RelayName url={relay.url} />
+        </h2>
+        <p class="opacity-75 text-sm">{relay.url}</p>
+      </div>
+      <RelayDescription url={relay.url} />
     </a>
   </Masonry>
 </div>

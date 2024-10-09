@@ -1,14 +1,5 @@
-<style>
-  .z-nav-active {
-    -webkit-mask-image: url("/nav-active.svg");
-    mask-image: url("/nav-active.svg");
-  }
-</style>
-
 <script lang="ts">
   import {page} from "$app/stores"
-  import {tweened} from "svelte/motion"
-  import {quintOut} from "svelte/easing"
   import {displayRelayUrl} from "@welshman/util"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -19,53 +10,47 @@
   import {pushModal} from "@app/modal"
   import {makeSpacePath, getPrimaryNavItemIndex} from "@app/routes"
 
-  const activeOffset = tweened(-44, {
-    duration: 300,
-    easing: quintOut,
-  })
-
   const addSpace = () => pushModal(SpaceAdd)
-
-  let element: HTMLElement
-
-  // Set the active highlight element to the offset of the nav item we're focused on
-  $: {
-    if (element) {
-      const index = getPrimaryNavItemIndex($page)
-      const navItems: any = Array.from(element.querySelectorAll(".z-nav-item") || [])
-
-      activeOffset.set(navItems[index].offsetTop - 44)
-    }
-  }
 </script>
 
-<div class="relative w-14 flex-shrink-0 bg-base-100 pt-4" bind:this={element}>
-  <div
-    class="absolute z-nav-active ml-2 h-[144px] w-12 bg-base-300"
-    style={`top: ${$activeOffset}px`} />
+<div class="relative w-14 flex-shrink-0 bg-base-100 pt-4 hidden sm:block">
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem href="/home">
-        <Avatar
-          src={$userProfile?.picture}
-          class="!h-10 !w-10 border border-solid border-base-300" />
+      <PrimaryNavItem href="/home" class="tooltip-right">
+        <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
       {#each getMembershipUrls($userMembership) as url (url)}
-        <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)}>
+        <PrimaryNavItem title={displayRelayUrl(url)} href={makeSpacePath(url)} class="tooltip-right">
           <SpaceAvatar {url} />
         </PrimaryNavItem>
       {/each}
-      <PrimaryNavItem title="Add Space" on:click={addSpace}>
-        <Avatar icon="add-circle" class="!h-10 !w-10 border border-solid border-base-300" />
+      <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
+        <Avatar icon="add-circle" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Discover Spaces" href="/discover">
-        <Avatar icon="compass-big" class="!h-10 !w-10 border border-solid border-base-300" />
+      <PrimaryNavItem title="Discover Spaces" href="/discover" class="tooltip-right">
+        <Avatar icon="compass-big" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
     <div>
-      <PrimaryNavItem title="Settings" href="/settings/profile">
-        <Avatar icon="settings" class="!h-10 !w-10 border border-solid border-base-300" />
+      <PrimaryNavItem title="Settings" href="/settings/profile" class="tooltip-right">
+        <Avatar icon="settings" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
+  </div>
+</div>
+
+<slot />
+
+<div class="fixed bottom-0 left-0 right-0 h-14 bg-base-100 sm:hidden z-nav">
+  <div class="flex justify-between max-w-sm m-auto px-2">
+    <PrimaryNavItem title="Home" href="/home">
+      <Avatar icon="home-smile" class="!h-10 !w-10" />
+    </PrimaryNavItem>
+    <PrimaryNavItem title="Spaces" href="/spaces">
+      <SpaceAvatar />
+    </PrimaryNavItem>
+    <PrimaryNavItem title="Settings" href="/settings/profile">
+      <Avatar icon="settings" class="!h-10 !w-10" />
+    </PrimaryNavItem>
   </div>
 </div>

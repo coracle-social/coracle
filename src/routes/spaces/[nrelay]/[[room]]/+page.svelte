@@ -80,7 +80,7 @@
   }, 3000)
 </script>
 
-<div class="relative flex h-screen flex-col">
+<div class="relative flex h-full flex-col">
   <div class="relative z-feature mx-2 rounded-xl pt-4">
     <div
       class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">

@@ -1,5 +1,7 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import {pushModal} from "@app/modal"
@@ -20,18 +22,34 @@
       <h1 class="text-center text-5xl">Welcome to</h1>
       <h1 class="mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
       <div class="grid gap-3 lg:grid-cols-2">
-        <CardButton icon="add-circle" title="Create a space" class="h-24" on:click={createSpace}>
-          Invite all your friends, do life together.
-        </CardButton>
-        <CardButton icon="compass" title="Discover spaces" class="h-24" on:click={browseSpaces}>
-          Find a community based on your hobbies or interests.
-        </CardButton>
-        <CardButton icon="plain" title="Leave feedback" class="h-24" on:click={leaveFeedback}>
-          Let us know how we can improve by giving us feedback.
-        </CardButton>
-        <CardButton icon="hand-pills" title="Donate to Flotilla" class="h-24" on:click={donate}>
-          Support the project by donating to the developer.
-        </CardButton>
+        <Button on:click={createSpace}>
+          <CardButton>
+            <div slot="icon"><Icon icon="add-circle" size={7} /></div>
+            <div slot="title">Create a space</div>
+            <div slot="info">Invite all your friends, do life together.</div>
+          </CardButton>
+        </Button>
+        <Button on:click={browseSpaces}>
+          <CardButton>
+            <div slot="icon"><Icon icon="compass" size={7} /></div>
+            <div slot="title">Discover spaces</div>
+            <div slot="info">Find a community based on your hobbies or interests.</div>
+          </CardButton>
+        </Button>
+        <Button on:click={leaveFeedback}>
+          <CardButton>
+            <div slot="icon"><Icon icon="plain" size={7} /></div>
+            <div slot="title">Leave feedback</div>
+            <div slot="info">Let us know how we can improve by giving us feedback.</div>
+          </CardButton>
+        </Button>
+        <Button on:click={donate}>
+          <CardButton>
+            <div slot="icon"><Icon icon="hand-pills" size={7} /></div>
+            <div slot="title">Donate to Flotilla</div>
+            <div slot="info">Support the project by donating to the developer.</div>
+          </CardButton>
+        </Button>
       </div>
     </div>
   </div>

@@ -70,9 +70,13 @@
       <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
     </p>
   </Field>
-  <CardButton icon="compass" title="Don't have an invite?" on:click={browse}>
-    Browse other spaces on the discover page.
-  </CardButton>
+  <Button on:click={browse}>
+    <CardButton>
+      <div slot="icon"><Icon icon="compass" size={7} /></div>
+      <div slot="title">Don't have an invite?</div>
+      <div slot="info">Browse other spaces on the discover page.</div>
+    </CardButton>
+  </Button>
   <div class="flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
