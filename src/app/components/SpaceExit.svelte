@@ -4,6 +4,8 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {removeSpaceMembership} from "@app/commands"
 
   export let url
@@ -26,11 +28,13 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={exit}>
-  <h1 class="heading">
-    You are leaving <span class="text-primary">{displayRelayUrl(url)}</span>
-  </h1>
+  <ModalHeader>
+    <div slot="title">
+      You are leaving <span class="text-primary">{displayRelayUrl(url)}</span>
+    </div>
+  </ModalHeader>
   <p class="text-center">Are you sure you want to leave?</p>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -38,5 +42,5 @@
     <Button type="submit" class="btn btn-primary" disabled={loading}>
       <Spinner {loading}>Confirm</Spinner>
     </Button>
-  </div>
+  </ModalFooter>
 </form>

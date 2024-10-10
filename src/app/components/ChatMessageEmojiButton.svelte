@@ -4,7 +4,7 @@
   import {ctx, uniq, between} from "@welshman/lib"
   import {Nip59} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
-  import {makeThunk, signer, publishThunk} from "@welshman/app"
+  import {signer, publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
@@ -23,12 +23,10 @@
     for (const recipient of uniq(pubkeys)) {
       const rumor = await nip59.wrap(recipient, template)
 
-      publishThunk(
-        makeThunk({
-          event: rumor.wrap,
-          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-        }),
-      )
+      publishThunk({
+        event: rumor.wrap,
+        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+      })
     }
 
     popover.hide()

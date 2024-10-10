@@ -6,6 +6,7 @@
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from '@lib/components/ModalFooter.svelte'
   import {addRoomMembership} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
 
@@ -46,7 +47,7 @@
       <input bind:value={room} class="grow" type="text" />
     </label>
   </Field>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -55,5 +56,5 @@
       <Spinner {loading}>Create Room</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

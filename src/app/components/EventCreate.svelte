@@ -5,10 +5,12 @@
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_DATE, EVENT_TIME} from "@welshman/util"
-  import {publishThunk, makeThunk, dateToSeconds} from "@welshman/app"
+  import {publishThunk, dateToSeconds} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
@@ -51,7 +53,7 @@
       ],
     })
 
-    publishThunk(makeThunk({event, relays: [url]}))
+    publishThunk({event, relays: [url]})
     clearModal()
   }
 
@@ -68,10 +70,10 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={startSubmit}>
-  <div class="py-2">
-    <h1 class="heading">Create an Event</h1>
-    <p class="text-center">Invite other group members to events online or in real life.</p>
-  </div>
+  <ModalHeader>
+    <div slot="title">Create an Event</div>
+    <div slot="info">Invite other group members to events online or in real life.</div>
+  </ModalHeader>
   <Field>
     <p slot="label">Title*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
@@ -114,11 +116,11 @@
       <input bind:value={location} class="grow" type="text" />
     </label>
   </Field>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
     <Button type="submit" class="btn btn-primary">Create Event</Button>
-  </div>
+  </ModalFooter>
 </form>

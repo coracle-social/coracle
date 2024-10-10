@@ -12,7 +12,7 @@
   import {sortBy, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
-  import {formatTimestampAsDate, makeThunk, publishThunk} from "@welshman/app"
+  import {formatTimestampAsDate, publishThunk} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -42,7 +42,7 @@
   const onSubmit = ({content, tags}: EventContent) => {
     const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
 
-    publishThunk(makeThunk({event, relays: [url]}))
+    publishThunk({event, relays: [url]})
   }
 
   let loading = true

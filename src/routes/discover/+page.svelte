@@ -4,11 +4,15 @@
   import {relaySearch} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import PageHeader from "@lib/components/PageHeader.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {makeSpacePath} from "@app/routes"
+  import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import {userMembership, discoverRelays, getMembershipUrls} from "@app/state"
+  import {pushModal} from '@app/modal'
+
+  const openSpace = (url: string) => pushModal(SpaceCheck, {url})
 
   let term = ""
   let limit = 20
@@ -49,10 +53,10 @@
     gap={16}
     idKey="url"
     let:item={relay}>
-    <a
-      href={makeSpacePath(relay.url)}
-      class="card2 bg-alt flex flex-col gap-2 text-center shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]">
-      <div class="center avatar mt-8">
+    <Button
+      class="card2 !py-20 center bg-alt flex flex-col gap-2 text-center shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
+      on:click={() => openSpace(relay.url)}>
+      <div class="center avatar">
         <div
           class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
           {#if relay.profile?.icon}
@@ -80,6 +84,6 @@
         <p class="text-sm opacity-75">{relay.url}</p>
       </div>
       <RelayDescription url={relay.url} />
-    </a>
+    </Button>
   </Masonry>
 </div>

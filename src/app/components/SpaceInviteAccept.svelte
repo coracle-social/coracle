@@ -1,6 +1,6 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
-  import {tryCatch} from "@welshman/lib"
+  import {ctx, tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {loadRelay} from "@welshman/app"
   import CardButton from "@lib/components/CardButton.svelte"
@@ -9,26 +9,24 @@
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from '@lib/components/ModalFooter.svelte'
   import InfoRelay from "@app/components/InfoRelay.svelte"
   import {pushToast} from "@app/toast"
   import {pushModal} from "@app/modal"
-  import {addSpaceMembership} from "@app/commands"
+  import {addSpaceMembership, attemptRelayAccess} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
 
   const back = () => history.back()
 
   const browse = () => goto("/discover")
 
-  const joinRelay = async (url: string) => {
-    url = normalizeRelayUrl(url)
+  const joinRelay = async (invite: string) => {
+    const [raw, claim] = invite.split("'")
+    const url = normalizeRelayUrl(raw)
+    const error = await attemptRelayAccess(url, claim)
 
-    const relay = await loadRelay(url)
-
-    if (!relay?.profile) {
-      return pushToast({
-        theme: "error",
-        message: "Sorry, we weren't able to find that relay.",
-      })
+    if (error) {
+      return pushToast({theme: "error", message: error})
     }
 
     await addSpaceMembership(url)
@@ -78,7 +76,7 @@
       <div slot="info">Browse other spaces on the discover page.</div>
     </CardButton>
   </Button>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -87,5 +85,5 @@
       <Spinner {loading}>Join Space</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

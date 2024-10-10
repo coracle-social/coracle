@@ -4,6 +4,7 @@
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {clearModal} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
 
@@ -37,7 +38,7 @@
     </div>
     <div slot="info">Are you sure you'd like to join this space?</div>
   </ModalHeader>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -46,5 +47,5 @@
       <Spinner {loading}>Join Space</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

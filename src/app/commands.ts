@@ -19,12 +19,12 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
+import {PublishStatus, AuthStatus, ConnectionStatus} from "@welshman/net"
 import {Nip59, stamp} from "@welshman/signer"
 import {
   pubkey,
   signer,
   repository,
-  makeThunk,
   publishThunk,
   loadProfile,
   loadInboxRelaySelections,
@@ -40,6 +40,7 @@ import {
   userRelaySelections,
   userInboxRelaySelections,
   nip44EncryptToSelf,
+  loadRelay,
 } from "@welshman/app"
 import {tagRoom, userMembership, MEMBERSHIPS, INDEXER_RELAYS, loadMembership} from "@app/state"
 
@@ -112,7 +113,7 @@ export const broadcastUserData = async (relays: string[]) => {
 
   for (const event of events) {
     if (isSignedEvent(event)) {
-      await publishThunk(makeThunk({event, relays}))
+      await publishThunk({event, relays})
     }
   }
 }
@@ -186,18 +187,46 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
   }
 }
 
-export const joinRelay = async (url: string, claim?: string) => {
-  if (claim) {
-    await publishThunk(
-      makeThunk({
-        event: createEvent(28934, {tags: [["claim", claim]]}),
-        relays: [url],
-      }),
-    )
+// Relay access
+
+export const requestRelayAccess = (url: string, claim = "") =>
+  publishThunk({
+    event: createEvent(28934, {tags: [["claim", claim]]}),
+    relays: [url],
+  })
+
+export const attemptRelayAccess = async (url: string, claim = "") => {
+  const relay = await loadRelay(url)
+
+  // Make sure the relay has a profile
+  if (!relay?.profile) {
+    return "Sorry, we weren't able to find that relay."
   }
 
-  await setRelayPolicy(url, true, true)
-  await broadcastUserData([url])
+  const connection = ctx.net.pool.get(url)
+
+  // Check connection status
+  await connection.ensureConnected()
+
+  if (![ConnectionStatus.Ok, ConnectionStatus.Slow].includes(connection.meta.getStatus())) {
+    return `Failed to connect: "${connection.meta.getDescription()}"`
+  }
+
+  // Attempt to publish a join request
+  const result = await requestRelayAccess(url, claim)
+
+  if (result[url].status !== PublishStatus.Success) {
+    const message = result[url].message?.replace(/^.*: /, '') || "join request rejected"
+
+    return `Failed to join relay: ${message}`
+  }
+
+  // Check auth status
+  await connection.ensureAuth()
+
+  if (![AuthStatus.Ok, AuthStatus.Pending].includes(connection.meta.authStatus)) {
+    return `Failed to authenticate: "${connection.meta.authStatus}"`
+  }
 }
 
 // Actions
@@ -213,12 +242,10 @@ export const sendWrapped = async ({
 
   await Promise.all(
     uniq(pubkeys).map(async recipient => {
-      return publishThunk(
-        makeThunk({
-          event: await nip59.wrap(recipient, stamp(template)),
-          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-        }),
-      )
+      return publishThunk({
+        event: await nip59.wrap(recipient, stamp(template)),
+        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+      })
     }),
   )
 }
@@ -247,10 +274,10 @@ export const publishReaction = ({
   event: TrustedEvent
   content: string
   tags?: string[][]
-}) => publishThunk(makeThunk({event: makeReaction({event, content, tags}), relays}))
+}) => publishThunk({event: makeReaction({event, content, tags}), relays})
 
 export const makeDelete = ({event}: {event: TrustedEvent}) =>
   createEvent(DELETE, {tags: [["k", String(event.kind)], ...tagEvent(event)]})
 
 export const publishDelete = ({relays, event}: {relays: string[]; event: TrustedEvent}) =>
-  publishThunk(makeThunk({event: makeDelete({event}), relays}))
+  publishThunk({event: makeDelete({event}), relays})

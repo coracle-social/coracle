@@ -4,9 +4,11 @@
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {createEvent, NOTE} from "@welshman/util"
-  import {publishThunk, makeThunk} from "@welshman/app"
+  import {publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
   import {clearModal} from "@app/modal"
@@ -22,7 +24,7 @@
   const submit = () => {
     const event = createEvent(NOTE, {content: $editor.getText(), tags: getEditorTags($editor)})
 
-    publishThunk(makeThunk({event, relays: [url]}))
+    publishThunk({event, relays: [url]})
     clearModal()
   }
 
@@ -34,10 +36,10 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={startSubmit}>
-  <div class="py-2">
-    <h1 class="heading">Create a Thread</h1>
-    <p class="text-center">Share your thoughts, or start a discussion.</p>
-  </div>
+  <ModalHeader>
+    <div slot="title">Create a Thread</div>
+    <div slot="info">Share your thoughts, or start a discussion.</div>
+  </ModalHeader>
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">
       <EditorContent editor={$editor} />
@@ -53,11 +55,11 @@
       {/if}
     </Button>
   </div>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
     <Button type="submit" class="btn btn-primary">Create Thread</Button>
-  </div>
+  </ModalFooter>
 </form>

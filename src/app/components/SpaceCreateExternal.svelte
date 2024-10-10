@@ -3,6 +3,7 @@
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {pushModal} from "@app/modal"
 
@@ -27,7 +28,7 @@
   <p>
     Once you've created a relay of your own, come back here to link Flotilla with your new relay.
   </p>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -36,5 +37,5 @@
       Let's go
       <Icon icon="alt-arrow-right" class="!bg-base-300" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

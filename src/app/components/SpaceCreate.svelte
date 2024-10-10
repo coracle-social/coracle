@@ -4,6 +4,7 @@
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoRelay from "@app/components/InfoRelay.svelte"
   import SpaceCreateFinish from "@app/components/SpaceCreateFinish.svelte"
   import {pushModal} from "@app/modal"
@@ -43,7 +44,7 @@
       <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
     </p>
   </Field>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -52,5 +53,5 @@
       Next
       <Icon icon="alt-arrow-right" class="!bg-base-300" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

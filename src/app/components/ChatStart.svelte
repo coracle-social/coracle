@@ -3,6 +3,8 @@
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
   import {makeChatPath} from "@app/routes"
 
@@ -16,15 +18,17 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={onSubmit}>
-  <h1 class="heading">Start a Chat</h1>
-  <p class="text-center">Create an encrypted chat room for private conversations.</p>
+  <ModalHeader>
+    <div slot="title">Start a Chat</div>
+    <div slot="info">Create an encrypted chat room for private conversations.</div>
+  </ModalHeader>
   <Field>
     <p slot="label">Members</p>
     <div slot="input">
       <ProfileMultiSelect bind:value={pubkeys} />
     </div>
   </Field>
-  <div class="flex flex-row items-center justify-between gap-4">
+  <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />
       Go back
@@ -33,5 +37,5 @@
       Create Chat
       <Icon icon="alt-arrow-right" />
     </Button>
-  </div>
+  </ModalFooter>
 </form>

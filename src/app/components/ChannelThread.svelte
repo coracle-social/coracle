@@ -2,7 +2,7 @@
   import {sortBy, append} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import type {EventContent, TrustedEvent} from "@welshman/util"
-  import {repository, makeThunk, publishThunk} from "@welshman/app"
+  import {repository, publishThunk} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
@@ -39,7 +39,7 @@
 
     const reply = createEvent(REPLY, {content, tags: append(tagRoom(room, url), tags)})
 
-    publishThunk(makeThunk({event: reply, relays: [url]}))
+    publishThunk({event: reply, relays: [url]})
   }
 </script>
 

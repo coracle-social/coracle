@@ -9,7 +9,7 @@
     createProfile,
     isPublishedProfile,
   } from "@welshman/util"
-  import {pubkey, profilesByPubkey, makeThunk, publishThunk, displayNip05} from "@welshman/app"
+  import {pubkey, profilesByPubkey, publishThunk, displayNip05} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -43,7 +43,7 @@
     const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
     const event = createEvent(template.kind, template)
 
-    publishThunk(makeThunk({event, relays}))
+    publishThunk({event, relays})
     pushToast({message: "Your profile has been updated!"})
     editing = false
   }
