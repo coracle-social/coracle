@@ -12,7 +12,7 @@
 
   export let event
 
-  const replies = deriveEvents(repository, {filters: getReplyFilters([event])})
+  const replies = deriveEvents(repository, {filters: getReplyFilters([event], {})})
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({...event, relays})
 </script>

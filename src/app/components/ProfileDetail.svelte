@@ -18,7 +18,7 @@
   const pubkeyDisplay = displayPubkey(pubkey)
   const filter = {kinds: [NOTE], authors: [pubkey]}
   const events = deriveEvents(repository, {filters: [filter]})
-  const loader = feedLoader.getLoader(feedFromFilter(filter))
+  const loader = feedLoader.getLoader(feedFromFilter(filter), {})
 
   let element: Element
 
