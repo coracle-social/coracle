@@ -24,7 +24,7 @@
 <div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 sm:block">
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem href="/home" class="tooltip-right">
+      <PrimaryNavItem href="/home/people" class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
       {#each getMembershipUrls($userMembership) as url (url)}
