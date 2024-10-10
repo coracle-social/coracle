@@ -4,9 +4,12 @@
   import Calendar from "src/app/shared/Calendar.svelte"
   import {env, loadCircleMessages, userFollows} from "src/engine"
 
+  const isCalendarForSingleEntity = window.location.pathname.startsWith("/events/people/")
   const filter = env.FORCE_GROUP
     ? {kinds: [31923], "#a": [env.FORCE_GROUP]}
-    : {kinds: [31923], authors: [$pubkey, ...$userFollows].filter(identity)}
+    : isCalendarForSingleEntity
+      ? {kinds: [31923], authors: [$pubkey].filter(identity)}
+      : {kinds: [31923], authors: [$pubkey, ...$userFollows].filter(identity)}
 
   if (env.FORCE_GROUP) {
     loadCircleMessages([env.FORCE_GROUP])
