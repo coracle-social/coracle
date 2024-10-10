@@ -4,7 +4,6 @@ import {get, derived, writable} from "svelte/store"
 import {doPipe, batch, seconds, sleep} from "hurdak"
 import {defaultTo, equals, assoc, sortBy, omit, partition, prop, whereEq, without} from "ramda"
 import {
-  max,
   ctx,
   setContext,
   Worker,
@@ -39,7 +38,6 @@ import {
   SEEN_GENERAL,
   DIRECT_MESSAGE,
   NAMED_BOOKMARKS,
-  REACTION,
   WRAP,
   Address,
   Tags,
@@ -58,8 +56,10 @@ import {
   getTagValues,
   normalizeRelayUrl,
   isContextAddress,
+  getContextTagValues,
   getAddressTagValues,
   getAncestorTagValues,
+  getAddressTags,
   makeList,
   readList,
   asDecryptedEvent,
@@ -105,6 +105,7 @@ import {
   getUserWotScore,
   sessions,
   maxWot,
+  repositoryStore,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -142,7 +143,7 @@ import type {
   SessionWithMeta,
   AnonymousUserState,
 } from "src/engine/model"
-import {sortEventsAsc} from "src/engine/utils"
+import {sortEventsAsc, unwrapRepost} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
 
 export const env = {
@@ -627,38 +628,21 @@ export const isSeen = derived(
 
 // Notifications
 
-export const eventsThrottled = deriveEvents(repository, {
-  throttle: 800,
-  filters: [{kinds: [...noteKinds, ...reactionKinds]}],
-})
+// -- Main Notifications
 
-export const notifications = derived(
-  [pubkey, isEventMuted, eventsThrottled],
-  ([$pubkey, $isEventMuted, $eventsThrottled]) =>
-    $eventsThrottled.filter(
+export const mainNotifications = derived(
+  [pubkey, isEventMuted, deriveEvents(repository, {throttle: 800, filters: [{kinds: noteKinds}]})],
+  ([$pubkey, $isEventMuted, $events]) =>
+    $events.filter(
       e =>
         e.pubkey !== $pubkey &&
-        e.tags.find(t => t[0] === "p" && t[1] === $pubkey) &&
-        (e.kind !== REACTION || isLike(e)) &&
+        e.tags.some(t => t[0] === "p" && t[1] === $pubkey) &&
         !$isEventMuted(e),
     ),
 )
 
-export const mainNotifications = derived(notifications, events =>
-  events.filter(e => noteKinds.includes(e.kind)),
-)
-
-export const reactionNotifications = derived(notifications, events =>
-  events.filter(e => reactionKinds.concat(9734).includes(e.kind)),
-)
-
 export const unreadMainNotifications = derived([isSeen, mainNotifications], ([$isSeen, events]) =>
   events.filter(e => !$isSeen("replies", e) && !$isSeen("mentions", e)),
-)
-
-export const unreadReactionNotifications = derived(
-  [isSeen, reactionNotifications],
-  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
 )
 
 export const hasNewNotifications = derived(
@@ -679,51 +663,86 @@ export const hasNewNotifications = derived(
   },
 )
 
-export const createNotificationGroups = ($notifications, kinds) => {
-  // Convert zaps to zap requests
-  const convertZap = e => {
-    if (e.kind === 9735) {
-      return parseJson(e.tags.find(t => t[0] === "description")?.[1])
-    }
+// -- Reaction Notifications
 
-    return e
-  }
+export const reactionNotifications = derived(
+  [
+    pubkey,
+    isEventMuted,
+    deriveEvents(repository, {throttle: 800, filters: [{kinds: reactionKinds}]}),
+  ],
+  ([$pubkey, $isEventMuted, $events]) =>
+    $events.filter(
+      e =>
+        e.pubkey !== $pubkey &&
+        e.tags.some(t => t[0] === "p" && t[1] === $pubkey) &&
+        !$isEventMuted(e) &&
+        isLike(e),
+    ),
+)
 
-  const $pubkey = pubkey.get()
-  const groups = {}
+export const unreadReactionNotifications = derived(
+  [isSeen, reactionNotifications],
+  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
+)
 
-  // Group notifications by event
-  for (const ix of $notifications) {
-    if (!kinds.includes(ix.kind)) {
-      continue
-    }
+// -- Group Notifications
 
-    const parentId = Tags.fromEvent(ix).whereKey("e").parent()?.value()
-    const event = parentId ? repository.getEvent(parentId) : null
+export const groupNotifications = derived(
+  [
+    sessionWithMeta,
+    isEventMuted,
+    groupRequests,
+    groupAlerts,
+    groupAdminKeys,
+    throttled(3000, repositoryStore),
+  ],
+  ([$session, $isMuted, $requests, $alerts, $adminKeys, $repository]) => {
+    const admins = new Set($adminKeys.map(k => k.pubkey))
+    const addresses = getUserCircles($session)
+    const kinds = [...noteKinds, ...repostKinds]
+    const events = $repository.query([{"#a": addresses, kinds}])
 
-    if (reactionKinds.includes(ix.kind) && event?.pubkey !== $pubkey) {
-      continue
-    }
+    return sortBy(
+      e => -e.created_at,
+      [
+        ...$requests.filter(r => !r.resolved && !$repository.deletes.has(r.group)),
+        ...$alerts.filter(a => !admins.has(a.pubkey) && !$repository.deletes.has(a.group)),
+        ...events
+          .map(e => {
+            // Unwrap reposts, add community tags so we know where stuff was posted to
+            if (repostKinds.includes(e.kind)) {
+              const contextTags = getAddressTags(e.tags)
 
-    // Group and sort by day/event so we can group clustered reactions to the same event
-    const delta = now() - ix.created_at
-    const deltaDisplay = Math.round(delta / seconds(3, "hour")).toString()
-    const key = deltaDisplay + (parentId || `self:${ix.id}`)
+              e = unwrapRepost(e)
 
-    groups[key] = groups[key] || {key, event, interactions: []}
-    groups[key].interactions.push(convertZap(ix))
-  }
+              for (const tag of contextTags) {
+                if (isContextAddress(tag[1])) {
+                  e?.tags.push(tag)
+                }
+              }
+            }
 
-  return sortBy(
-    g => -g.timestamp,
-    Object.values(groups).map((group: any) => {
-      const {event, interactions} = group
-      const timestamp = max(interactions.map(e => e.created_at).concat(event?.created_at || 0))
+            return e
+          })
+          .filter(
+            e =>
+              e &&
+              e.pubkey !== $session.pubkey &&
+              // Skip mentions since they're covered in normal notifications
+              !e.tags.some(t => t[0] === "p" && t[1] === $session.pubkey) &&
+              !$isMuted(e),
+          ),
+      ],
+    ) as (TrustedEvent | GroupRequest | GroupAlert)[]
+  },
+)
 
-      return {...group, timestamp}
-    }),
-  )
-}
+export const unreadGroupNotifications = derived(
+  [isSeen, groupNotifications],
+  ([$isSeen, $groupNotifications]) =>
+    $groupNotifications.filter(e => !getContextTagValues(e.tags).every(a => $isSeen(a, e))),
+)
 
 // Channels
 

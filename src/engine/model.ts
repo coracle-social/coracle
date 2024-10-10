@@ -56,7 +56,8 @@ export type PublishInfo = Omit<Publish, "emitter" | "result">
 
 export type Notification = {
   key: string
-  event: TrustedEvent
+  type: string
+  root: string
   timestamp: number
   interactions: TrustedEvent[]
 }

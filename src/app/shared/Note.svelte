@@ -4,13 +4,13 @@
     isChildOf,
     getReplyFilters,
     getIdOrAddress,
-    Tags,
     getLnUrl,
     matchFilters,
     zapFromEvent,
     NOTE,
     REACTION,
     ZAP_RESPONSE,
+    getAncestorTagValues,
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
@@ -91,7 +91,7 @@
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply.value(), {relays: ctx.app.router.EventParents(event).getUrls()})
+      .of(reply, {relays: ctx.app.router.EventParents(event).getUrls()})
       .open()
 
   const goToThread = () =>
@@ -109,9 +109,9 @@
     context = context.concat(events)
   }
 
-  $: tags = Tags.fromEvent(event)
-  $: reply = tags.parent()
-  $: root = tags.root()
+  $: ancestors = getAncestorTagValues(event.tags || [])
+  $: reply = ancestors.replies[0]
+  $: root = ancestors.roots[0]
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
@@ -210,9 +210,8 @@
 </script>
 
 {#if ready}
-  {@const showReply = reply && !tags.parents().values().has(anchor) && showParent}
-  {@const showRoot =
-    root && !tags.roots().values().has(anchor) && root.value() !== reply?.value() && showParent}
+  {@const showReply = reply && !ancestors.replies.includes(anchor) && showParent}
+  {@const showRoot = root && !ancestors.roots.includes(anchor) && root !== reply && showParent}
   <div>
     <NoteMeta note={event} {showGroup} />
     <div class="note relative">
@@ -246,10 +245,10 @@
           </div>
           <div class="flex min-w-0 flex-grow flex-col gap-2">
             <div class="flex min-w-0 flex-shrink flex-col items-start justify-between sm:flex-row">
-              <Anchor type="unstyled" class="mr-4 min-w-0 w-full" on:click={showPerson}>
+              <Anchor type="unstyled" class="mr-4 w-full min-w-0" on:click={showPerson}>
                 <PersonName pubkey={event.pubkey} />
               </Anchor>
-              <div class="flex items-center gap-3 text-xs pt-1 sm:pt-0">
+              <div class="flex items-center gap-3 pt-1 text-xs sm:pt-0">
                 <Anchor
                   on:click={goToDetail}
                   class="whitespace-nowrap text-end text-neutral-100"
@@ -258,7 +257,7 @@
                 </Anchor>
               </div>
             </div>
-            <div class="flex flex-col gap-2 -ml-14 sm:ml-0">
+            <div class="-ml-14 flex flex-col gap-2 sm:ml-0">
               <div class="flex gap-2">
                 {#if showReply}
                   <small class="text-neutral-100">

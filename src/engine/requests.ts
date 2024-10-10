@@ -1,12 +1,24 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import {batch, noop, seconds, sleep, switcherFn} from "hurdak"
+import {noop, sleep, switcherFn} from "hurdak"
 import type {LoadOpts} from "@welshman/feeds"
 import {FeedLoader, Scope} from "@welshman/feeds"
-import {ctx, assoc, always, chunk, nthEq, nth, now, max, first} from "@welshman/lib"
+import {
+  ctx,
+  assoc,
+  always,
+  chunk,
+  nthEq,
+  nth,
+  now,
+  max,
+  first,
+  int,
+  HOUR,
+  WEEK,
+} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
-  Tags,
   Address,
   getIdFilters,
   isGroupAddress,
@@ -60,7 +72,7 @@ import {sortEventsDesc} from "src/engine/utils"
 
 // Utils
 
-export const addSinceToFilter = (filter, overlap = seconds(1, "hour")) => {
+export const addSinceToFilter = (filter, overlap = int(HOUR)) => {
   const limit = 50
   const events = repository.query([{...filter, limit}])
 
@@ -326,45 +338,26 @@ export const feedLoader = new FeedLoader({
 
 // Notifications
 
-const onNotificationEvent = batch(300, (chunk: TrustedEvent[]) => {
-  const eventsWithParent = chunk.filter(e => Tags.fromEvent(e).parent())
-
-  if (eventsWithParent.length > 0) {
-    const relays = ctx.app.router.merge(eventsWithParent.map(ctx.app.router.EventParents)).getUrls()
-    const ids = eventsWithParent.flatMap(e => Tags.fromEvent(e).replies().values().valueOf())
-
-    load({relays, filters: getIdFilters(ids), skipCache: true})
-  }
-})
-
 export const getNotificationKinds = () =>
   without(env.ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds])
 
 export const loadNotifications = () => {
-  const kinds = getNotificationKinds()
-  const since = now() - seconds(30, "day")
+  const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   return pullConservatively({
     relays: ctx.app.router.User().getUrls(),
-    filters: [
-      {kinds, "#p": [pubkey.get()], since},
-      {kinds, authors: [pubkey.get()], since},
-    ],
+    filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
 
 export const listenForNotifications = () => {
-  const kinds = getNotificationKinds()
+  const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   subscribePersistent({
     timeout: 30_000,
     skipCache: true,
-    onEvent: onNotificationEvent,
     relays: ctx.app.router.User().getUrls(),
-    filters: [
-      {kinds, "#p": [pubkey.get()], since: now()},
-      {kinds, authors: [pubkey.get()], since: now()},
-    ],
+    filters: [addSinceToFilter(filter)],
   })
 }
 
