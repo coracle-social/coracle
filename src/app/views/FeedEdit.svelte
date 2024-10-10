@@ -1,14 +1,13 @@
 <script lang="ts">
-  import {deriveEvent} from "@welshman/store"
   import {NAMED_BOOKMARKS} from "@welshman/util"
-  import {repository} from "@welshman/app"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {readFeed, mapListToFeed, readUserList} from "src/domain"
+  import {deriveEvent} from "src/engine"
 
   export let address
 
-  const event = deriveEvent(repository, address)
+  const event = deriveEvent(address)
 
   const exit = () => router.clearModals()
 

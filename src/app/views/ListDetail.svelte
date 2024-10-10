@@ -1,13 +1,13 @@
 <script lang="ts">
-  import {deriveEvent} from "@welshman/store"
-  import {repository, pubkey} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util"
+  import {deriveEvent} from "src/engine"
 
   export let address
 
-  const event = deriveEvent(repository, address)
+  const event = deriveEvent(address)
 </script>
 
 {#if $event}

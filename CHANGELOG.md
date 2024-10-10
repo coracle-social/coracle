@@ -3,6 +3,7 @@
 # 0.4.13
 
 - [x] Add support for nip05 urls
+- [x] Re-work notification rendering and loading
 
 # 0.4.12
 

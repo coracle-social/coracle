@@ -1,24 +1,26 @@
 <script lang="ts">
   import {pluck, uniq} from "ramda"
   import {closure} from "hurdak"
-  import {tracker} from "@welshman/app"
+  import {pubkey, tracker} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import {router} from "src/app/util/router"
   import type {Notification} from "src/engine"
+  import {deriveEvent} from "src/engine"
 
   export let notification: Notification
 
-  const {event: note, interactions} = notification
+  const {root, interactions} = notification
+  const event = deriveEvent(root)
   const likes = interactions.filter(e => e.kind === 7)
   const zaps = interactions.filter(e => e.kind === 9734)
 
   const goToNote = () =>
     router
       .at("notes")
-      .of(note.id, {relays: tracker.getRelays(note.id)})
+      .of(root, {relays: tracker.getRelays(root)})
       .open()
 
   const actionText = closure(() => {
@@ -29,15 +31,18 @@
   })
 </script>
 
-<PeopleAction
-  pubkeys={uniq(pluck("pubkey", interactions))}
-  actionText={`${actionText} your note`} />
-
-<Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
-  <button type="button" on:click|stopPropagation class="flex justify-between text-sm">
-    {formatTimestamp(note.created_at)}
-  </button>
-  <div class="break-word overflow-hidden text-neutral-100">
-    <NoteContent {note} />
+{#if $event?.pubkey === $pubkey}
+  <div class="flex flex-col gap-4">
+    <PeopleAction
+      pubkeys={uniq(pluck("pubkey", interactions))}
+      actionText={`${actionText} your note`} />
+    <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
+      <button type="button" on:click|stopPropagation class="flex justify-between text-sm">
+        {formatTimestamp($event.created_at)}
+      </button>
+      <div class="break-word overflow-hidden text-neutral-100">
+        <NoteContent note={$event} />
+      </div>
+    </Card>
   </div>
-</Card>
+{/if}
