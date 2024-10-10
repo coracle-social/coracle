@@ -1,7 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy} from "@welshman/lib"
+  import {NOTE} from "@welshman/util"
+  import {nthEq, sortBy} from "@welshman/lib"
+  import {repository, trackerStore} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -10,7 +12,7 @@
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {threadsByUrl, decodeNRelay} from "@app/state"
+  import {decodeNRelay} from "@app/state"
 
   const url = decodeNRelay($page.params.nrelay)
 
@@ -20,7 +22,12 @@
   let loading = true
   let element: Element
 
-  $: threads = sortBy(thread => -thread.root.created_at, $threadsByUrl.get(url) || [])
+  $: events = sortBy(
+    e => -e.created_at,
+    Array.from($trackerStore.getIds(url))
+      .map(id => repository.eventsById.get(id)!)
+      .filter(e => e?.kind === NOTE && !e.tags.some(nthEq(0, "e"))),
+  )
 
   onMount(() => {
     const scroller = createScroller({
@@ -46,14 +53,14 @@
     <strong slot="title">Threads</strong>
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
-    {#each threads.slice(0, limit) as { root, replies } (root.id)}
-      <ThreadItem {root} {replies} />
+    {#each events.slice(0, limit) as event (event.id)}
+      <ThreadItem {event} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>
         {#if loading}
           Looking for threads...
-        {:else if threads.length === 0}
+        {:else if events.length === 0}
           No threads found.
         {/if}
       </Spinner>

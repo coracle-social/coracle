@@ -17,7 +17,6 @@ import {
 } from "@welshman/lib"
 import {
   getIdFilters,
-  NOTE,
   WRAP,
   RELAYS,
   REACTION,
@@ -27,8 +26,6 @@ import {
   EVENT_TIME,
   getRelayTagValues,
   isShareableRelayUrl,
-  getAncestorTags,
-  getAncestorTagValues,
   getPubkeyTagValues,
   isHashedEvent,
   displayProfile,
@@ -60,7 +57,7 @@ import {
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
-import {throttled, deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
+import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 
 export const ROOM = "~"
 
@@ -393,46 +390,6 @@ export const eventsByUrl = derived([trackerStore, events], ([$tracker, $events])
 
   return eventsByUrl
 })
-
-// Threads
-
-export type Thread = {
-  root: TrustedEvent
-  replies: TrustedEvent[]
-}
-
-export const notes = deriveEvents(repository, {filters: [{kinds: [NOTE]}]})
-
-export const threadsByUrl = derived(
-  [throttled(300, trackerStore), throttled(300, notes)],
-  ([$tracker, $notes]) => {
-    const threadsByUrl = new Map<string, Thread[]>()
-    const [parents, children] = partition(e => getAncestorTags(e.tags).replies.length === 0, $notes)
-
-    for (const event of parents) {
-      for (const url of $tracker.getRelays(event.id)) {
-        pushToMapKey(threadsByUrl, url, {root: event, replies: []})
-      }
-    }
-
-    for (const event of children) {
-      const [id] = getAncestorTagValues(event.tags).replies
-
-      for (const url of $tracker.getRelays(event.id)) {
-        const threads = threadsByUrl.get(url) || []
-        const thread = threads.find(thread => thread.root.id === id)
-
-        if (!thread) {
-          continue
-        }
-
-        thread.replies.push(event)
-      }
-    }
-
-    return threadsByUrl
-  },
-)
 
 // Rooms
 

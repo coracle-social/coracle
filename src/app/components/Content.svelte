@@ -50,6 +50,8 @@
     return false
   }
 
+  const isStartAndEnd = (i: number) => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
+
   const isStartOrEnd = (i: number) => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
   const isBlock = (i: number) => {
@@ -81,7 +83,7 @@
       {:else if isTopic(parsed)}
         <ContentTopic value={parsed.value} />
       {:else if isCode(parsed)}
-        <ContentCode value={parsed.value} />
+        <ContentCode value={parsed.value} isBlock={isStartAndEnd(i)} />
       {:else if isCashu(parsed) || isInvoice(parsed)}
         <ContentToken value={parsed.value} />
       {:else if isLink(parsed)}

@@ -1,9 +1,8 @@
 <script lang="ts">
   export let value
+  export let isBlock
 </script>
 
-<pre>
-  <code class="link-content block w-full">
-    {value}
-  </code>
-</pre>
+<code class="link-content w-full" class:block={isBlock}>
+  {value}
+</code>
