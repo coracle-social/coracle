@@ -132,6 +132,12 @@
       address: asNaddr("address"),
     },
   })
+  router.register("/events/people/:entity", Calendar, {
+    required: ["pubkey"],
+    serializers: {
+      entity: asPerson,
+    },
+  })
   router.register("/events/:address/edit", EventEdit, {
     serializers: {
       address: asNaddr("address"),
