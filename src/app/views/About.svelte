@@ -9,8 +9,6 @@
   import {loadPubkeys, env} from "src/engine"
 
   const hash = import.meta.env.VITE_BUILD_HASH
-  const nprofile =
-    "nprofile1qqsf03c2gsmx5ef4c9zmxvlew04gdh7u94afnknp33qvv3c94kvwxgspz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsz9rhwden5te0wfjkcctev93xcefwdaexwtcpzdmhxue69uhhqatjwpkx2urpvuhx2ue0vamm57"
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
   const splits = [tagZapSplit(env.PLATFORM_PUBKEY)]
 
@@ -82,14 +80,14 @@
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href={`https://yakihonne.com/users/${nprofile}`}
+          <Anchor external href="https://hodlbod.npub.pro/"
             ><i class="fa fa-pen-clip" /></Anchor>
         </div>
         <div slot="tooltip">Dev Blog</div>
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://tgfb.com/podcasts/thank-god-for-nostr/">
+          <Anchor external href="https://fountain.fm/show/vnmoRQQ50siLFRE8k061">
             <i class="fa fa-rss" />
           </Anchor>
         </div>
