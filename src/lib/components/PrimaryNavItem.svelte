@@ -1,11 +1,14 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import Button from "@lib/components/Button.svelte"
+  import {getPrimaryNavItem} from '@app/routes'
 
   export let title = ""
   export let href = ""
 
-  $: active = href && $page.route?.id?.startsWith(href)
+  $: itemSegment = href.split('/')[1]
+  $: currentSegment = $page.route?.id?.split('/')[1]
+  $: active = itemSegment === currentSegment
 </script>
 
 {#if href}
