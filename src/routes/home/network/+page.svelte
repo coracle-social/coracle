@@ -13,6 +13,8 @@
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {repository, userFollows, load} from "@welshman/app"
+  import Link from "@lib/components/Link.svelte"
+  import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import Content from "@app/components/Content.svelte"
@@ -85,6 +87,14 @@
             <Content {event} />
           </div>
         </NoteCard>
+      {:else}
+        <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
+          <p>No activity found! Try following a few more people.</p>
+          <Link class="btn btn-primary" href="/home/people">
+            <Icon icon="user-heart" />
+            Browse Profiles
+          </Link>
+        </div>
       {/each}
     </div>
   {/await}

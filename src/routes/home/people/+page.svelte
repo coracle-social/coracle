@@ -1,14 +1,17 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {createScroller} from "@lib/html"
-  import Icon from "@lib/components/Icon.svelte"
-  import {shuffle} from "@welshman/lib"
+  import {uniq, shuffle} from "@welshman/lib"
   import {getPubkeyTagValues, getListTags} from "@welshman/util"
   import {profileSearch, userFollows} from "@welshman/app"
+  import Icon from "@lib/components/Icon.svelte"
   import PageHeader from "@lib/components/PageHeader.svelte"
   import PeopleItem from "@app/components/PeopleItem.svelte"
 
-  const defaultPubkeys = shuffle(getPubkeyTagValues(getListTags($userFollows)))
+  const defaultPubkeys = uniq([
+    ...shuffle(getPubkeyTagValues(getListTags($userFollows))),
+    ...import.meta.env.VITE_DEFAULT_PUBKEYS.split(','),
+  ])
 
   let term = ""
   let limit = 10

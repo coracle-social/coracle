@@ -113,15 +113,14 @@
         {/if}
       </div>
       <div slot="action">
-        {#if $missingInboxes.length > 0}
-          {@const plural = $missingInboxes.length > 0}
+        {#if remove($pubkey, $missingInboxes).length > 0}
+          {@const count = remove($pubkey, $missingInboxes).length}
+          {@const label = count > 0 ? 'inboxes are' : 'inbox is'}
           <div
             class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
-            data-tip="{$missingInboxes.length} {plural
-              ? 'inboxes are'
-              : 'inbox is'} not configured.">
+            data-tip="{count} {label} not configured.">
             <Icon icon="danger" />
-            {$missingInboxes.length}
+            {count}
           </div>
         {/if}
       </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import {pubkey} from '@welshman/app'
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
@@ -10,9 +11,7 @@
 
   const back = () => history.back()
 
-  const onSubmit = async () => {
-    goto(makeChatPath(pubkeys))
-  }
+  const onSubmit = () => goto(makeChatPath([...pubkeys, $pubkey!]))
 
   let pubkeys: string[] = []
 </script>

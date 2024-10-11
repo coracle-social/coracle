@@ -17,9 +17,9 @@ export const pushModal = (
 ) => {
   const id = randomId()
 
-  // TODO: fix memory leak here by listening to history somehow
   modals.set(id, {component, props, options})
-  goto("#" + id)
+
+  setTimeout(() => goto("#" + id))
 
   return id
 }
