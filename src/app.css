@@ -56,7 +56,7 @@
 .hover\:bg-alt:hover,
 .bg-alt .bg-alt .hover\:bg-alt:hover,
 .bg-alt .bg-alt.hover\:bg-alt:hover {
-  @apply bg-base-100 transition-colors;
+  @apply bg-base-100 transition-colors text-base-content;
 }
 
 .bg-alt .bg-alt,
@@ -65,7 +65,7 @@
 .bg-alt .bg-alt .bg-alt .hover\:bg-alt:hover,
 .bg-alt.hover\:bg-alt:hover,
 .bg-alt .bg-alt .bg-alt.hover\:bg-alt:hover {
-  @apply bg-base-300 transition-colors;
+  @apply bg-base-300 transition-colors text-base-content;
 }
 
 .card2 {

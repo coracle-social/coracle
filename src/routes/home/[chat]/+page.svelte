@@ -32,7 +32,7 @@
   const assertEvent = (e: any) => e as TrustedEvent
 
   const onSubmit = async ({content, ...params}: EventContent) => {
-    const tags = [...params.tags, ...pubkeys.map(pubkey => tagPubkey(pubkey))]
+    const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
 
     await sendWrapped({template, pubkeys})
