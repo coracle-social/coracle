@@ -25,6 +25,8 @@
     storageAdapters,
     tracker,
   } from "@welshman/app"
+  import * as lib from "@welshman/lib"
+  import * as util from "@welshman/util"
   import * as app from "@welshman/app"
   import ModalBox from "@lib/components/ModalBox.svelte"
   import Drawer from "@lib/components/Drawer.svelte"
@@ -71,7 +73,7 @@
   }
 
   onMount(async () => {
-    Object.assign(window, {get, ...app, ...state})
+    Object.assign(window, {get, ...lib, ...util, ...app, ...state})
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity

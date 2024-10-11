@@ -189,45 +189,54 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 
 // Relay access
 
-export const requestRelayAccess = (url: string, claim = "") =>
-  publishThunk({
+export const checkRelayAccess = async (url: string, claim = "") => {
+  await ctx.net.pool.get(url).ensureAuth()
+
+  const result = await publishThunk({
     event: createEvent(28934, {tags: [["claim", claim]]}),
     relays: [url],
   })
-
-export const attemptRelayAccess = async (url: string, claim = "") => {
-  const relay = await loadRelay(url)
-
-  // Make sure the relay has a profile
-  if (!relay?.profile) {
-    return "Sorry, we weren't able to find that relay."
-  }
-
-  const connection = ctx.net.pool.get(url)
-
-  // Check connection status
-  await connection.ensureConnected()
-
-  if (![ConnectionStatus.Ok, ConnectionStatus.Slow].includes(connection.meta.getStatus())) {
-    return `Failed to connect: "${connection.meta.getDescription()}"`
-  }
-
-  // Attempt to publish a join request
-  const result = await requestRelayAccess(url, claim)
 
   if (result[url].status !== PublishStatus.Success) {
     const message = result[url].message?.replace(/^.*: /, '') || "join request rejected"
 
     return `Failed to join relay: ${message}`
   }
+}
 
-  // Check auth status
+export const checkRelayProfile = async (url: string) => {
+  const relay = await loadRelay(url)
+
+  if (!relay?.profile) {
+    return "Sorry, we weren't able to find that relay."
+  }
+}
+
+export const checkRelayConnection = async (url: string) => {
+  const connection = ctx.net.pool.get(url)
+
+  await connection.ensureConnected()
+
+  if (![ConnectionStatus.Ok, ConnectionStatus.Slow].includes(connection.meta.getStatus())) {
+    return `Failed to connect: "${connection.meta.getDescription()}"`
+  }
+}
+
+export const checkRelayAuth = async (url: string) => {
+  const connection = ctx.net.pool.get(url)
+
   await connection.ensureAuth()
 
   if (![AuthStatus.Ok, AuthStatus.Pending].includes(connection.meta.authStatus)) {
     return `Failed to authenticate: "${connection.meta.authStatus}"`
   }
 }
+
+export const attemptRelayAccess = async (url: string, claim = "") =>
+  await checkRelayProfile(url) ||
+  await checkRelayConnection(url) ||
+  await checkRelayAccess(url, claim) ||
+  await checkRelayAuth(url)
 
 // Actions
 

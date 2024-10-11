@@ -7,5 +7,5 @@
 </script>
 
 {#if $relay?.profile?.description}
-  <p>{$relay?.profile.description}</p>
+  <p class={$$props.class}>{$relay?.profile.description}</p>
 {/if}

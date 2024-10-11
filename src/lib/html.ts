@@ -32,6 +32,7 @@ export const createScroller = ({
   reverse = false,
 }: ScrollerOpts) => {
   let done = false
+
   const check = async () => {
     // While we have empty space, fill it
     const {scrollY, innerHeight} = window

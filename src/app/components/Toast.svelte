@@ -5,8 +5,8 @@
 
 {#if $toast}
   {@const theme = $toast.theme || "info"}
-  {#key $toast.id}
-    <div transition:fly class="toast z-toast">
+  <div transition:fly class="toast z-toast">
+    {#key $toast.id}
       <div
         role="alert"
         class="alert flex justify-center"
@@ -14,6 +14,6 @@
         class:alert-error={theme === "error"}>
         {$toast.message}
       </div>
-    </div>
-  {/key}
+    {/key}
+  </div>
 {/if}

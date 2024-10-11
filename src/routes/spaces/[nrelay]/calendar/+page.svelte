@@ -1,8 +1,10 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {page} from "$app/stores"
-  import {sortBy, last} from "@welshman/lib"
+  import {sortBy, last, ago} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestampAsDate} from "@welshman/app"
+  import {EVENT_DATE, EVENT_TIME} from "@welshman/util"
+  import {repository, subscribe, formatTimestampAsDate, trackerStore} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -11,9 +13,11 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {eventsByUrl, decodeNRelay} from "@app/state"
+  import {deriveEventsForUrl, pullConservatively, decodeNRelay} from "@app/state"
 
   const url = decodeNRelay($page.params.nrelay)
+  const kinds = [EVENT_DATE, EVENT_TIME]
+  const events = deriveEventsForUrl(url, kinds)
 
   const createEvent = () => pushModal(EventCreate, {url})
 
@@ -27,7 +31,8 @@
     dateDisplay?: string
   }
 
-  $: items = sortBy(getStart, $eventsByUrl.get(url) || []).reduce<Item[]>((r, event) => {
+
+  $: items = sortBy(getStart, $events).reduce<Item[]>((r, event) => {
     const prevDateDisplay =
       r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
     const newDateDisplay = formatTimestampAsDate(getStart(event))
@@ -35,6 +40,14 @@
 
     return [...r, {event, dateDisplay}]
   }, [])
+
+  onMount(() => {
+    const sub = subscribe({filters: [{kinds, since: ago(30)}]})
+
+    pullConservatively({filters: [{kinds}], relays: [url]})
+
+    return () => sub.close()
+  })
 
   setTimeout(() => {
     loading = false

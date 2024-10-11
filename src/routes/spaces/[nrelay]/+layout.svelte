@@ -26,7 +26,9 @@
     GENERAL,
     MESSAGE,
   } from "@app/state"
+  import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {pushModal} from "@app/modal"
+  import {pushToast} from "@app/toast"
   import {makeSpacePath} from "@app/routes"
 
   const openMenu = () => {
@@ -60,13 +62,12 @@
   $: rooms = getMembershipRoomsByUrl(url, $userMembership)
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
-  onMount(() => {
-    const filter = {kinds: [NOTE, REACTION, MESSAGE, EVENT_DATE, EVENT_TIME, CLASSIFIED]}
-    const sub = subscribe({filters: [{...filter, since: ago(30)}]})
+  onMount(async () => {
+    const error = await checkRelayConnection(url) || await checkRelayAuth(url)
 
-    pullConservatively({filters: [filter], relays: [url]})
-
-    return () => sub.close()
+    if (error) {
+      pushToast({theme: "error", message: error})
+    }
   })
 </script>
 

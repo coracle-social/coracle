@@ -23,7 +23,7 @@
   onMount(() => {
     const sub = discoverRelays()
     const scroller = createScroller({
-      element: element.closest(".max-h-screen")!,
+      element: element.closest(".overflow-auto")!,
       onScroll: () => {
         limit += 20
       },
@@ -54,36 +54,37 @@
     idKey="url"
     let:item={relay}>
     <Button
-      class="card2 !py-20 center bg-alt flex flex-col gap-2 text-center shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
+      class="card2 bg-alt text-left flex flex-col gap-2 shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
       on:click={() => openSpace(relay.url)}>
-      <div class="center avatar">
-        <div
-          class="center relative !flex w-20 rounded-full border-2 border-solid border-base-300 bg-base-300">
-          {#if relay.profile?.icon}
-            <img alt="" src={relay.profile.icon} />
-          {:else}
-            <Icon icon="ghost" size={7} />
-          {/if}
-        </div>
-      </div>
-      {#if getMembershipUrls($userMembership).includes(relay.url)}
-        <div class="flex justify-center">
-          <div class="relative">
-            <div
-              class="tooltip absolute -top-[88px] left-5 h-5 w-5 rounded-full bg-primary"
-              data-tip="You are already a member of this space.">
-              <Icon icon="check-circle" class="scale-110" />
-            </div>
+      <div class="flex gap-4">
+        <div class="avatar">
+          <div class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+            {#if relay.profile?.icon}
+              <img alt="" src={relay.profile.icon} />
+            {:else}
+              <Icon icon="ghost" size={5} />
+            {/if}
           </div>
         </div>
-      {/if}
-      <div>
-        <h2 class="text-center text-xl">
-          <RelayName url={relay.url} />
-        </h2>
-        <p class="text-sm opacity-75">{relay.url}</p>
+        {#if getMembershipUrls($userMembership).includes(relay.url)}
+          <div class="flex justify-center">
+            <div class="relative">
+              <div
+                class="tooltip absolute -top-[88px] left-5 h-5 w-5 rounded-full bg-primary"
+                data-tip="You are already a member of this space.">
+                <Icon icon="check-circle" class="scale-110" />
+              </div>
+            </div>
+          </div>
+        {/if}
+        <div>
+          <h2 class="text-xl">
+            <RelayName url={relay.url} />
+          </h2>
+          <p class="text-sm opacity-75">{relay.url}</p>
+        </div>
       </div>
-      <RelayDescription url={relay.url} />
+      <RelayDescription url={relay.url} class="ml-16" />
     </Button>
   </Masonry>
 </div>

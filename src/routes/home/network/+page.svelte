@@ -56,7 +56,7 @@
     load({filters: [notesFilter, reactionsFilter], timeout: 30_000})
 
     const scroller = createScroller({
-      element: element.closest(".max-h-screen")!,
+      element: element.closest(".overflow-auto")!,
       onScroll: () => {
         const seen = new Set(events.map(e => e.id))
         const eligible = sortBy(

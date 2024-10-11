@@ -209,6 +209,16 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
+export const deriveEventsForUrl = (url: string, kinds: number[]) =>
+  derived(trackerStore, $tracker =>
+    sortBy(
+      e => -e.created_at,
+      Array.from($tracker.getIds(url))
+        .map(id => repository.eventsById.get(id)!)
+        .filter(e => kinds.includes(e?.kind)),
+    )
+  )
+
 // Membership
 
 export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getListTags(list)))
@@ -374,22 +384,6 @@ export const chatSearch = derived(chats, $chats =>
     fuseOptions: {keys: ["search_text"]},
   }),
 )
-
-// Calendar events
-
-export const events = deriveEvents(repository, {filters: [{kinds: [EVENT_DATE, EVENT_TIME]}]})
-
-export const eventsByUrl = derived([trackerStore, events], ([$tracker, $events]) => {
-  const eventsByUrl = new Map<string, TrustedEvent[]>()
-
-  for (const event of $events) {
-    for (const url of $tracker.getRelays(event.id)) {
-      pushToMapKey(eventsByUrl, url, event)
-    }
-  }
-
-  return eventsByUrl
-})
 
 // Rooms
 

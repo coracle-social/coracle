@@ -2,8 +2,9 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {NOTE} from "@welshman/util"
-  import {nthEq, sortBy} from "@welshman/lib"
-  import {repository, trackerStore} from "@welshman/app"
+  import {feedFromFilter} from "@welshman/feeds"
+  import {ago, nthEq, sortBy} from "@welshman/lib"
+  import {repository, trackerStore, feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -12,28 +13,27 @@
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {decodeNRelay} from "@app/state"
+  import {pullConservatively, deriveEventsForUrl, decodeNRelay} from "@app/state"
 
   const url = decodeNRelay($page.params.nrelay)
+  const kinds = [NOTE]
+  const events = deriveEventsForUrl(url, kinds)
+  const loader = feedLoader.getLoader(feedFromFilter({kinds}), {})
 
   const createThread = () => pushModal(ThreadCreate, {url})
 
-  let limit = 10
+  let limit = 5
   let loading = true
   let element: Element
 
-  $: events = sortBy(
-    e => -e.created_at,
-    Array.from($trackerStore.getIds(url))
-      .map(id => repository.eventsById.get(id)!)
-      .filter(e => e?.kind === NOTE && !e.tags.some(nthEq(0, "e"))),
-  )
-
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest(".max-h-screen")!,
+      element,
       onScroll: async () => {
-        limit += 10
+        const $loader = await loader
+
+        $loader(5)
+        limit += 5
       },
     })
 
@@ -45,22 +45,24 @@
   }, 3000)
 </script>
 
-<div class="relative flex h-screen flex-col" bind:this={element}>
+<div class="relative flex h-screen flex-col">
   <PageBar>
     <div slot="icon" class="center">
       <Icon icon="notes-minimalistic" />
     </div>
     <strong slot="title">Threads</strong>
   </PageBar>
-  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
-    {#each events.slice(0, limit) as event (event.id)}
-      <ThreadItem {event} />
+  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
+    {#each $events.slice(0, limit) as event (event.id)}
+      {#if !event.tags.some(nthEq(0, "e"))}
+        <ThreadItem {event} />
+      {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>
         {#if loading}
           Looking for threads...
-        {:else if events.length === 0}
+        {:else if $events.length === 0}
           No threads found.
         {/if}
       </Spinner>

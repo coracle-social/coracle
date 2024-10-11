@@ -18,7 +18,7 @@
 
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest(".max-h-screen")!,
+      element: element.closest(".overflow-auto")!,
       onScroll: () => {
         limit += 10
       },

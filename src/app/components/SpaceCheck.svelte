@@ -58,7 +58,7 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary">
+    <Button type="submit" class="btn btn-primary" disabled={loading}>
       Go to Space
       <Icon icon="alt-arrow-right" class="!bg-base-300" />
     </Button>
