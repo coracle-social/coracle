@@ -8,6 +8,7 @@
 <a
   {href}
   {...$$props}
+  on:click|stopPropagation
   class={cx($$props.class, "cursor-pointer")}
   rel={external ? "noopener noreferer" : ""}
   target={external ? "_blank" : ""}>

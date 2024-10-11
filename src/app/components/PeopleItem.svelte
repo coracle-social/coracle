@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {nip19} from 'nostr-tools'
   import {onMount} from "svelte"
   import {ago, append, first, sortBy, WEEK, ctx} from "@welshman/lib"
   import {NOTE, getAncestorTags, getListTags, getPubkeyTagValues} from "@welshman/util"
@@ -12,12 +13,14 @@
     formatTimestamp,
     formatTimestampRelative,
   } from "@welshman/app"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushDrawer} from "@app/modal"
+  import {entityLink} from "@app/state"
 
   export let pubkey
 
@@ -40,24 +43,26 @@
   })
 </script>
 
-<div class="card2 bg-alt shadow-xl">
+<Button class="card2 bg-alt shadow-xl" on:click={onClick}>
   <Profile {pubkey} />
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
     {@const event = first(sortBy(e => -e.created_at, roots))}
+    {@const relays = ctx.app.router.Event(event).getUrls()}
+    {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
-    <Button class="chat chat-start" on:click={onClick}>
+    <Link external href={entityLink(nevent)} class="chat chat-start">
       <div class="bg-alt chat-bubble text-left">
         <Content hideMedia={!following} {event} />
         <p class="text-right text-xs">{formatTimestamp(event.created_at)}</p>
       </div>
-    </Button>
+    </Link>
     <div class="flex gap-2">
-      <div class="badge badge-neutral">
+      <div class="badge badge-neutral bg-alt border-none">
         {roots.length} recent {roots.length === 1 ? "note" : "notes"}
       </div>
-      <div class="badge badge-neutral">Last posted {formatTimestampRelative(event.created_at)}</div>
+      <div class="badge badge-neutral bg-alt border-none">Last posted {formatTimestampRelative(event.created_at)}</div>
     </div>
   {/if}
-</div>
+</Button>

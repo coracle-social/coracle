@@ -1,8 +1,10 @@
 <script lang="ts">
+  import {nip19} from 'nostr-tools'
   import {Address} from "@welshman/util"
+  import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import {deriveEvent} from "@app/state"
+  import {deriveEvent, entityLink} from "@app/state"
 
   export let value
   export let depth = 0
@@ -10,11 +12,10 @@
   const {id, identifier, kind, pubkey, relays} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
   const event = deriveEvent(idOrAddress, relays)
-
-  let element: Element
+  const nevent = nip19.neventEncode({id, relays})
 </script>
 
-<button class="my-2 block max-w-full text-left" bind:this={element} on:click|stopPropagation>
+<Link external href={entityLink(nevent)} class="my-2 block max-w-full text-left">
   {#if $event}
     <NoteCard event={$event} class="bg-alt rounded-box p-4">
       <slot name="note-content" event={$event} {depth} />
@@ -24,4 +25,4 @@
       <Spinner loading>Loading event...</Spinner>
     </div>
   {/if}
-</button>
+</Link>

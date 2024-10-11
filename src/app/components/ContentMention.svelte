@@ -9,7 +9,10 @@
 
   const profile = deriveProfile(value.pubkey)
 
-  const onClick = () => pushDrawer(ProfileDetail, {pubkey: value.pubkey})
+  const onClick = (e: Event) => {
+    e.stopPropagation()
+    pushDrawer(ProfileDetail, {pubkey: value.pubkey})
+  }
 </script>
 
 <Button on:click={onClick} class="link-content">

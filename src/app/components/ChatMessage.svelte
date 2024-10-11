@@ -16,6 +16,7 @@
   import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
@@ -52,31 +53,29 @@
     !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
-<button
-  type="button"
+<div
   class="group chat relative flex w-full flex-col gap-1 p-2 text-left"
   class:chat-start={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
   <div class="chat-bubble mx-1 max-w-sm">
     <div class="flex items-start gap-2">
       {#if showPubkey}
-        <button type="button" on:click|stopPropagation={showProfile}>
+        <Button on:click={showProfile}>
           <Avatar
             src={$profile?.picture}
             class="border border-solid border-base-content"
             size={10} />
-        </button>
+        </Button>
       {/if}
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
               class="text-bold text-sm"
               style="color: {colorValue}"
-              on:click|stopPropagation={showProfile}>
+              on:click={showProfile}>
               {$profileDisplay}
-            </button>
+            </Button>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
           </div>
         {/if}
@@ -118,13 +117,12 @@
         {/each}
       </div>
     {/if}
-    <button
-      class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
-      on:click|stopPropagation>
+    <Button
+      class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100">
       <ChatMessageEmojiButton {event} {pubkeys} />
-      <button class="btn join-item btn-xs">
+      <div class="btn join-item btn-xs">
         <Icon icon="menu-dots" size={4} />
-      </button>
-    </button>
+      </div>
+    </Button>
   </div>
-</button>
+</div>
