@@ -8,13 +8,24 @@
 </script>
 
 <script lang="ts">
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
+  import {derived} from "svelte/store"
   import {sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
-  import {pubkey, formatTimestampAsDate, tagPubkey} from "@welshman/app"
+  import {
+    pubkey,
+    formatTimestampAsDate,
+    inboxRelaySelectionsByPubkey,
+    loadInboxRelaySelections,
+    tagPubkey,
+  } from "@welshman/app"
   import {fly} from "@lib/transition"
+  import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import Name from "@app/components/Name.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
@@ -28,8 +39,13 @@
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey, pubkeys)
+  const missingInboxes = derived(inboxRelaySelectionsByPubkey, $m =>
+    pubkeys.filter(pk => !$m.has(pk)),
+  )
 
   const assertEvent = (e: any) => e as TrustedEvent
+
+  const assertNotNil = <T,>(x: T | undefined) => x!
 
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
@@ -69,33 +85,64 @@
     elements.reverse()
   }
 
+  onMount(() => {
+    for (const pk of others) {
+      loadInboxRelaySelections(pk)
+    }
+  })
+
   setTimeout(() => {
     loading = false
   }, 3000)
 </script>
 
-<div class="relative flex h-screen flex-col">
+<div class="relative flex h-full flex-col">
   {#if others.length > 0}
-    <div class="relative z-feature mx-2 rounded-xl pt-4">
-      <div
-        class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
-        <div class="flex items-center gap-2">
-          {#if others.length === 1}
-            <ProfileCircle pubkey={others[0]} size={5} />
+    <PageBar>
+      <div slot="title" class="row-2">
+        {#if others.length === 1}
+          <ProfileCircle pubkey={others[0]} size={5} />
+          <Name pubkey={others[0]} />
+        {:else}
+          <ProfileCircles pubkeys={others} size={5} />
+          <p class="overflow-hidden text-ellipsis whitespace-nowrap">
             <Name pubkey={others[0]} />
-          {:else}
-            <ProfileCircles pubkeys={others} size={5} />
-            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-              <Name pubkey={others[0]} />
-              and {others.length - 1}
-              {others.length > 2 ? "others" : "other"}
-            </p>
-          {/if}
-        </div>
+            and {others.length - 1}
+            {others.length > 2 ? "others" : "other"}
+          </p>
+        {/if}
       </div>
-    </div>
+      <div slot="action">
+        {#if $missingInboxes.length > 0}
+          {@const plural = $missingInboxes.length > 0}
+          <div
+            class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
+            data-tip="{$missingInboxes.length} {plural
+              ? 'inboxes are'
+              : 'inbox is'} not configured.">
+            <Icon icon="danger" />
+            {$missingInboxes.length}
+          </div>
+        {/if}
+      </div>
+    </PageBar>
   {/if}
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
+    {#if $missingInboxes.includes(assertNotNil($pubkey))}
+      <div class="py-12">
+        <div class="card2 col-2 m-auto max-w-md items-center text-center">
+          <p class="row-2 text-lg text-error">
+            <Icon icon="danger" />
+            Your inbox is not configured.
+          </p>
+          <p>
+            In order to deliver messages, Flotilla needs to know where to send them. Please visit
+            your <Link class="link" href="/settings/relays">relay settings page</Link> to set up your
+            inbox.
+          </p>
+        </div>
+      </div>
+    {/if}
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <Divider>{value}</Divider>

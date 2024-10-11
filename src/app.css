@@ -56,7 +56,7 @@
 .hover\:bg-alt:hover,
 .bg-alt .bg-alt .hover\:bg-alt:hover,
 .bg-alt .bg-alt.hover\:bg-alt:hover {
-  @apply bg-base-100 transition-colors text-base-content;
+  @apply bg-base-100 text-base-content transition-colors;
 }
 
 .bg-alt .bg-alt,
@@ -65,7 +65,7 @@
 .bg-alt .bg-alt .bg-alt .hover\:bg-alt:hover,
 .bg-alt.hover\:bg-alt:hover,
 .bg-alt .bg-alt .bg-alt.hover\:bg-alt:hover {
-  @apply bg-base-300 transition-colors text-base-content;
+  @apply bg-base-300 text-base-content transition-colors;
 }
 
 .card2 {
@@ -82,6 +82,30 @@
 
 .center {
   @apply flex items-center justify-center;
+}
+
+.row-2 {
+  @apply flex items-center gap-2;
+}
+
+.row-3 {
+  @apply flex items-center gap-3;
+}
+
+.row-4 {
+  @apply flex items-center gap-4;
+}
+
+.col-2 {
+  @apply flex flex-col gap-2;
+}
+
+.col-3 {
+  @apply flex flex-col gap-3;
+}
+
+.col-4 {
+  @apply flex flex-col gap-4;
 }
 
 .content {

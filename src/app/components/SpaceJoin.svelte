@@ -23,7 +23,7 @@
 
     try {
       await tryJoin()
-    } finally {
+    } catch (e) {
       loading = false
     }
   }

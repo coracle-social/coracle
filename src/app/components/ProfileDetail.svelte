@@ -1,16 +1,19 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep, sortBy, flatten} from "@welshman/lib"
+  import {nip19} from "nostr-tools"
+  import {ctx, sleep, sortBy, flatten} from "@welshman/lib"
   import {feedFromFilter} from "@welshman/feeds"
   import {NOTE, displayProfile, displayPubkey, getAncestorTags} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {repository, deriveProfile, displayNip05, feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import {fly} from "@lib/transition"
+  import Link from "@lib/components/Link.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
+  import {entityLink} from "@app/state"
 
   export let pubkey
 
@@ -19,6 +22,8 @@
   const filter = {kinds: [NOTE], authors: [pubkey]}
   const events = deriveEvents(repository, {filters: [filter]})
   const loader = feedLoader.getLoader(feedFromFilter(filter), {})
+  const relays = ctx.app.router.FromPubkeys([pubkey]).getUrls()
+  const nprofile = nip19.nprofileEncode({pubkey, relays})
 
   let element: Element
 
@@ -38,7 +43,7 @@
 
 <div class="flex max-w-full flex-col gap-4 p-4" bind:this={element}>
   {#if $profile}
-    <div class="flex max-w-full gap-3">
+    <Link external href={entityLink(nprofile)} class="flex max-w-full gap-3">
       <div class="py-1">
         <Avatar src={$profile?.picture} size={10} />
       </div>
@@ -52,7 +57,7 @@
           {$profile?.nip05 ? displayNip05($profile.nip05) : pubkeyDisplay}
         </div>
       </div>
-    </div>
+    </Link>
     <Content event={{content: $profile.about, tags: []}} hideMedia />
     <div class="flex flex-col gap-2">
       {#each sortBy(e => -e.created_at, $events) as event (event.id)}

@@ -187,9 +187,7 @@
   <div data-theme={$theme}>
     <div class="flex h-screen overflow-hidden">
       <PrimaryNav>
-        {#key JSON.stringify($page.params)}
-          <slot />
-        {/key}
+        <slot />
       </PrimaryNav>
     </div>
     <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
