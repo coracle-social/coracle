@@ -8,7 +8,7 @@
       <div class="center w-12">
         <slot name="icon" />
       </div>
-      <div class="flex flex-grow flex-col gap-1">
+      <div class="flex flex-grow flex-col gap-2">
         <p class="text-bold"><slot name="title" /></p>
         <p class="text-xs"><slot name="info" /></p>
       </div>

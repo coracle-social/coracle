@@ -14,7 +14,7 @@
     try {
       await clearStorage()
       localStorage.clear()
-    } finally {
+    } catch (e) {
       loading = false
     }
 

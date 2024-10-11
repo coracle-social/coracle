@@ -1,19 +1,15 @@
 <script lang="ts">
-  import {goto} from "$app/navigation"
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
-  import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
+  import SpaceAdd from "@app/components/SpaceAdd.svelte"
+  import ChatStart from "@app/components/ChatStart.svelte"
   import {pushModal} from "@app/modal"
 
-  const createSpace = () => pushModal(SpaceCreateExternal)
+  const addSpace = () => pushModal(SpaceAdd)
 
-  const browseSpaces = () => goto("/discover")
-
-  const leaveFeedback = () =>
-    goto("/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322")
-
-  const donate = () => window.open("https://geyser.fund/project/flotilla")
+  const startChat = () => pushModal(ChatStart)
 </script>
 
 <div class="hero min-h-screen bg-base-200">
@@ -22,32 +18,32 @@
       <h1 class="text-center text-5xl">Welcome to</h1>
       <h1 class="mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
       <div class="grid gap-3 lg:grid-cols-2">
-        <Button on:click={createSpace}>
+        <Button on:click={addSpace}>
           <CardButton>
             <div slot="icon"><Icon icon="add-circle" size={7} /></div>
-            <div slot="title">Create a space</div>
-            <div slot="info">Invite all your friends, do life together.</div>
+            <div slot="title">Add a space</div>
+            <div slot="info">Use an invite link, or create your own space.</div>
           </CardButton>
         </Button>
-        <Button on:click={browseSpaces}>
+        <Link href="/discover">
           <CardButton>
-            <div slot="icon"><Icon icon="compass" size={7} /></div>
+            <div slot="icon"><Icon icon="compass-big" size={7} /></div>
             <div slot="title">Discover spaces</div>
             <div slot="info">Find a community based on your hobbies or interests.</div>
           </CardButton>
-        </Button>
-        <Button on:click={leaveFeedback}>
+        </Link>
+        <Link href="/home/people">
           <CardButton>
             <div slot="icon"><Icon icon="plain" size={7} /></div>
-            <div slot="title">Leave feedback</div>
-            <div slot="info">Let us know how we can improve by giving us feedback.</div>
+            <div slot="title">Browse the network</div>
+            <div slot="info">Find your people on the nostr network</div>
           </CardButton>
-        </Button>
-        <Button on:click={donate}>
+        </Link>
+        <Button on:click={startChat}>
           <CardButton>
             <div slot="icon"><Icon icon="hand-pills" size={7} /></div>
-            <div slot="title">Donate to Flotilla</div>
-            <div slot="info">Support the project by donating to the developer.</div>
+            <div slot="title">Start a conversation</div>
+            <div slot="info">Use nostr's encrypted group chats to stay in touch</div>
           </CardButton>
         </Button>
       </div>
