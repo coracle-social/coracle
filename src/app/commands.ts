@@ -214,20 +214,22 @@ export const checkRelayProfile = async (url: string) => {
 
 export const checkRelayConnection = async (url: string) => {
   const connection = ctx.net.pool.get(url)
+  const okStatuses = [ConnectionStatus.Ok, ConnectionStatus.Slow, ConnectionStatus.Unauthorized]
 
   await connection.ensureConnected()
 
-  if (![ConnectionStatus.Ok, ConnectionStatus.Slow].includes(connection.meta.getStatus())) {
+  if (!okStatuses.includes(connection.meta.getStatus())) {
     return `Failed to connect: "${connection.meta.getDescription()}"`
   }
 }
 
 export const checkRelayAuth = async (url: string) => {
   const connection = ctx.net.pool.get(url)
+  const okStatuses = [AuthStatus.Ok, AuthStatus.Pending]
 
   await connection.ensureAuth()
 
-  if (![AuthStatus.Ok, AuthStatus.Pending].includes(connection.meta.authStatus)) {
+  if (!okStatuses.includes(connection.meta.authStatus)) {
     return `Failed to authenticate: "${connection.meta.authStatus}"`
   }
 }

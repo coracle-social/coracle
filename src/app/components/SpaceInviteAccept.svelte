@@ -1,12 +1,13 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
-  import {tryCatch} from "@welshman/lib"
+  import {ctx, tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import Confirm from "@lib/components/Confirm.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoRelay from "@app/components/InfoRelay.svelte"
@@ -19,6 +20,16 @@
 
   const browse = () => goto("/discover")
 
+  const confirm = async (url: string) => {
+    await addSpaceMembership(url)
+
+    goto(makeSpacePath(url), {replaceState: true})
+
+    pushToast({
+      message: "Welcome to the space!",
+    })
+  }
+
   const joinRelay = async (invite: string) => {
     const [raw, claim] = invite.split("'")
     const url = normalizeRelayUrl(raw)
@@ -28,12 +39,17 @@
       return pushToast({theme: "error", message: error})
     }
 
-    await addSpaceMembership(url)
+    const connection = ctx.net.pool.get(url)
 
-    goto(makeSpacePath(url))
-    pushToast({
-      message: "Welcome to the space!",
-    })
+    if (connection.meta.lastAuth === 0) {
+      pushModal(Confirm, {
+        confirm: () => confirm(url),
+        message: `This space does not appear to limit who can post to it. This can result
+                  in a large amount of spam or other objectionable content. Continue?`,
+      })
+    } else {
+      confirm(url)
+    }
   }
 
   const join = async () => {

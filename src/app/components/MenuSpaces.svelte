@@ -9,7 +9,7 @@
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
+  import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
@@ -43,7 +43,7 @@
     showSettings = false
   }
 
-  const createSpace = () => pushModal(SpaceCreateExternal)
+  const addSpace = () => pushModal(SpaceAdd)
 
   const browseSpaces = () => goto("/discover")
 
@@ -125,10 +125,10 @@
     {#if getMembershipUrls($userMembership).length > 0}
       <Divider />
     {/if}
-    <Button on:click={createSpace}>
+    <Button on:click={addSpace}>
       <CardButton>
         <div slot="icon"><Icon icon="add-circle" size={7} /></div>
-        <div slot="title">Create a space</div>
+        <div slot="title">Add a space</div>
         <div slot="info">Invite all your friends, do life together.</div>
       </CardButton>
     </Button>

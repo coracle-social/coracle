@@ -1,21 +1,35 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {goto} from "$app/navigation"
-  import {sleep} from "@welshman/lib"
+  import {ctx, sleep} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import Confirm from "@lib/components/Confirm.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {attemptRelayAccess} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
+  import {pushModal} from "@app/modal"
 
   export let url
 
   const back = () => history.back()
 
-  const next = () => goto(makeSpacePath(url), {replaceState: true})
+  const confirm = () => goto(makeSpacePath(url), {replaceState: true})
+
+  const next = () => {
+    if (!error && ctx.net.pool.get(url).meta.lastAuth === 0) {
+      pushModal(Confirm, {
+        confirm,
+        message: `This space does not appear to limit who can post to it. This can result
+                  in a large amount of spam or other objectionable content. Continue?`,
+      })
+    } else {
+      confirm()
+    }
+  }
 
   let error: string | undefined
   let loading = true
