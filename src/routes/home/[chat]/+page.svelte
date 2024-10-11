@@ -27,12 +27,16 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import Name from "@app/components/Name.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
   import {deriveChat, splitChatId} from "@app/state"
+  import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
   const id = $page.params.chat === "notes" ? $pubkey! : $page.params.chat
@@ -46,6 +50,8 @@
   const assertEvent = (e: any) => e as TrustedEvent
 
   const assertNotNil = <T,>(x: T | undefined) => x!
+
+  const showMembers = () => pushModal(ProfileList, {pubkeys: others})
 
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
@@ -101,14 +107,21 @@
     <PageBar>
       <div slot="title" class="row-2">
         {#if others.length === 1}
-          <ProfileCircle pubkey={others[0]} size={5} />
-          <Name pubkey={others[0]} />
+          {@const pubkey = others[0]}
+          {@const showProfile = () => pushModal(ProfileDetail, {pubkey})}
+          <Button on:click={showProfile}>
+            <ProfileCircle {pubkey} size={5} />
+            <ProfileName {pubkey} />
+          </Button>
         {:else}
           <ProfileCircles pubkeys={others} size={5} />
           <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-            <Name pubkey={others[0]} />
+            <ProfileName pubkey={others[0]} />
             and {others.length - 1}
             {others.length > 2 ? "others" : "other"}
+            <Button on:click={showMembers} class="btn btn-link">
+              Show all members
+            </Button>
           </p>
         {/if}
       </div>

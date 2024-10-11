@@ -7,7 +7,7 @@
   import {pubkey, inboxRelaySelectionsByPubkey, loadInboxRelaySelections} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import Name from "@app/components/Name.svelte"
+  import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
 
@@ -35,11 +35,11 @@
       <div class="flex min-w-0 items-center gap-2">
         {#if others.length === 1}
           <ProfileCircle pubkey={others[0]} size={5} />
-          <Name pubkey={others[0]} />
+          <ProfileName pubkey={others[0]} />
         {:else}
           <ProfileCircles pubkeys={others} size={5} />
           <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-            <Name pubkey={others[0]} />
+            <ProfileName pubkey={others[0]} />
             and {others.length - 1}
             {others.length > 2 ? "others" : "other"}
           </p>
