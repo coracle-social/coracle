@@ -10,7 +10,7 @@
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import {userMembership, discoverRelays, getMembershipUrls} from "@app/state"
-  import {pushModal} from '@app/modal'
+  import {pushModal} from "@app/modal"
 
   const openSpace = (url: string) => pushModal(SpaceCheck, {url})
 
@@ -54,11 +54,12 @@
     idKey="url"
     let:item={relay}>
     <Button
-      class="card2 bg-alt text-left flex flex-col gap-2 shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
+      class="card2 bg-alt flex flex-col gap-2 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
       on:click={() => openSpace(relay.url)}>
       <div class="flex gap-4">
         <div class="avatar">
-          <div class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+          <div
+            class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
             {#if relay.profile?.icon}
               <img alt="" src={relay.profile.icon} />
             {:else}

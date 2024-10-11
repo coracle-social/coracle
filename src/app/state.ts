@@ -22,8 +22,6 @@ import {
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
-  EVENT_DATE,
-  EVENT_TIME,
   getRelayTagValues,
   isShareableRelayUrl,
   getPubkeyTagValues,
@@ -216,7 +214,7 @@ export const deriveEventsForUrl = (url: string, kinds: number[]) =>
       Array.from($tracker.getIds(url))
         .map(id => repository.eventsById.get(id)!)
         .filter(e => kinds.includes(e?.kind)),
-    )
+    ),
   )
 
 // Membership

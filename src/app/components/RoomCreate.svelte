@@ -6,7 +6,7 @@
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
-  import ModalFooter from '@lib/components/ModalFooter.svelte'
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {addRoomMembership} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
 

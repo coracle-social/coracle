@@ -198,7 +198,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
   })
 
   if (result[url].status !== PublishStatus.Success) {
-    const message = result[url].message?.replace(/^.*: /, '') || "join request rejected"
+    const message = result[url].message?.replace(/^.*: /, "") || "join request rejected"
 
     return `Failed to join relay: ${message}`
   }
@@ -233,10 +233,10 @@ export const checkRelayAuth = async (url: string) => {
 }
 
 export const attemptRelayAccess = async (url: string, claim = "") =>
-  await checkRelayProfile(url) ||
-  await checkRelayConnection(url) ||
-  await checkRelayAccess(url, claim) ||
-  await checkRelayAuth(url)
+  (await checkRelayProfile(url)) ||
+  (await checkRelayConnection(url)) ||
+  (await checkRelayAccess(url, claim)) ||
+  (await checkRelayAuth(url))
 
 // Actions
 

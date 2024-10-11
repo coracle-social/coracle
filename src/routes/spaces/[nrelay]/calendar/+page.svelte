@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, last, ago} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {EVENT_DATE, EVENT_TIME} from "@welshman/util"
-  import {repository, subscribe, formatTimestampAsDate, trackerStore} from "@welshman/app"
+  import {subscribe, formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -30,7 +30,6 @@
     event: TrustedEvent
     dateDisplay?: string
   }
-
 
   $: items = sortBy(getStart, $events).reduce<Item[]>((r, event) => {
     const prevDateDisplay =

@@ -1,9 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ago} from "@welshman/lib"
-  import {displayRelayUrl, REACTION, NOTE, EVENT_DATE, EVENT_TIME, CLASSIFIED} from "@welshman/util"
-  import {subscribe} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
   import {fly, slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -20,11 +18,9 @@
     getMembershipRoomsByUrl,
     getMembershipUrls,
     userMembership,
-    pullConservatively,
     roomsByUrl,
     decodeNRelay,
     GENERAL,
-    MESSAGE,
   } from "@app/state"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {pushModal} from "@app/modal"
@@ -63,7 +59,7 @@
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
   onMount(async () => {
-    const error = await checkRelayConnection(url) || await checkRelayAuth(url)
+    const error = (await checkRelayConnection(url)) || (await checkRelayAuth(url))
 
     if (error) {
       pushToast({theme: "error", message: error})

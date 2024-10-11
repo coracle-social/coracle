@@ -8,7 +8,17 @@
   import {browser} from "$app/environment"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {PROFILE, REACTION, ZAP_RESPONSE, FOLLOWS, RELAYS, INBOX_RELAYS, WRAP, getPubkeyTagValues, getListTags} from "@welshman/util"
+  import {
+    PROFILE,
+    REACTION,
+    ZAP_RESPONSE,
+    FOLLOWS,
+    RELAYS,
+    INBOX_RELAYS,
+    WRAP,
+    getPubkeyTagValues,
+    getListTags,
+  } from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {
     relays,
@@ -104,7 +114,7 @@
 
         // Inflate the score for profiles/relays/follows to avoid redundant fetches
         // Demote non-metadata type events, and introduce recency bias
-        score *= metaKinds.includes(e.kind) ? 2 : (e.created_at / now())
+        score *= metaKinds.includes(e.kind) ? 2 : e.created_at / now()
 
         return score
       }
@@ -116,8 +126,7 @@
       return data.filter(({value}) => value < cutoff)
     }
 
-    const migratePlaintext = (data: {key: string; value: number}[]) =>
-      data.slice(0, 10_000)
+    const migratePlaintext = (data: {key: string; value: number}[]) => data.slice(0, 10_000)
 
     const migrateEvents = (events: TrustedEvent[]) => {
       if (events.length < 50_000) {
@@ -126,7 +135,10 @@
 
       const scoreEvent = getScoreEvent()
 
-      return take(30_000, sortBy(e => -scoreEvent(e), events))
+      return take(
+        30_000,
+        sortBy(e => -scoreEvent(e), events),
+      )
     }
 
     if (!db) {
@@ -135,8 +147,14 @@
         relays: {keyPath: "url", store: throttled(1000, relays)},
         handles: {keyPath: "nip05", store: throttled(1000, handles)},
         publishStatus: storageAdapters.fromObjectStore(publishStatusData),
-        freshness: storageAdapters.fromObjectStore(freshness, {throttle: 1000, migrate: migrateFreshness}),
-        plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000, migrate: migratePlaintext}),
+        freshness: storageAdapters.fromObjectStore(freshness, {
+          throttle: 1000,
+          migrate: migrateFreshness,
+        }),
+        plaintext: storageAdapters.fromObjectStore(plaintext, {
+          throttle: 1000,
+          migrate: migratePlaintext,
+        }),
         tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
       }).then(() => sleep(300))
 

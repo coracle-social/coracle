@@ -1,15 +1,14 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
-  import {ctx, tryCatch} from "@welshman/lib"
+  import {tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
-  import {loadRelay} from "@welshman/app"
   import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
-  import ModalFooter from '@lib/components/ModalFooter.svelte'
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoRelay from "@app/components/InfoRelay.svelte"
   import {pushToast} from "@app/toast"
   import {pushModal} from "@app/modal"

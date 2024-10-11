@@ -48,7 +48,7 @@
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
     <Button class="chat chat-start" on:click={onClick}>
-      <div class="chat-bubble text-left bg-alt">
+      <div class="bg-alt chat-bubble text-left">
         <Content hideMedia={!following} {event} />
         <p class="text-right text-xs">{formatTimestamp(event.created_at)}</p>
       </div>

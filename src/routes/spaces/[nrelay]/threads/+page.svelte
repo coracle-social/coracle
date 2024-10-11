@@ -3,8 +3,8 @@
   import {page} from "$app/stores"
   import {NOTE} from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
-  import {ago, nthEq, sortBy} from "@welshman/lib"
-  import {repository, trackerStore, feedLoader} from "@welshman/app"
+  import {nthEq} from "@welshman/lib"
+  import {feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -13,7 +13,7 @@
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {pullConservatively, deriveEventsForUrl, decodeNRelay} from "@app/state"
+  import {deriveEventsForUrl, decodeNRelay} from "@app/state"
 
   const url = decodeNRelay($page.params.nrelay)
   const kinds = [NOTE]
