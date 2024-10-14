@@ -61,27 +61,27 @@ export const getEditorTags = (editor: Editor) => {
     attrs.tag.replace(/^#/, "").toLowerCase(),
   ])
 
-  const naddrTags = findNodes("naddr", json).map(({kind, pubkey, identifier, relays = []}: any) => {
+  const naddrTags = findNodes("naddr", json).map(({attrs: {kind, pubkey, identifier, relays = []}}: any) => {
     const address = new Address(kind, pubkey, identifier).toString()
 
     return ["q", address, ctx.app.router.fromRelays(relays).getUrl(), pubkey]
   })
 
-  const neventTags = findNodes("nevent", json).map(({id, author, relays = []}: any) => [
+  const neventTags = findNodes("nevent", json).map(({attrs: {id, author, relays = []}}: any) => [
     "q",
     id,
     ctx.app.router.fromRelays(relays).getUrl(),
     author || "",
   ])
 
-  const mentionTags = findNodes("nprofile", json).map(({pubkey, relays = []}: any) => [
+  const mentionTags = findNodes("nprofile", json).map(({attrs: {pubkey, relays = []}}: any) => [
     "p",
     pubkey,
     ctx.app.router.fromRelays(relays).getUrl(),
     "",
   ])
 
-  const imetaTags = findNodes("image", json).map(({src, sha256}: any) => [
+  const imetaTags = findNodes("image", json).map(({attrs: {src, sha256}}: any) => [
     "imeta",
     `url ${src}`,
     `x ${sha256}`,

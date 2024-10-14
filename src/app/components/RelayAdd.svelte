@@ -32,11 +32,13 @@
   })
 </script>
 
-<div class="column gap-2" bind:this={element}>
+<div class="fixed left-6 right-6 top-6">
   <label class="input input-bordered flex w-full items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for relays..." />
   </label>
+</div>
+<div class="overflow-auto column gap-2 h-[50vh] mt-16" bind:this={element}>
   {#each $relaySearch
     .searchValues(term)
     .filter(url => !$relays.includes(url))

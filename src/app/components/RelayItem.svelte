@@ -13,19 +13,19 @@
 </script>
 
 <div class="card2 card2-sm bg-alt column gap-2">
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-2">
+  <div class="flex items-center gap-4 justify-between">
+    <div class="flex items-center gap-2 ellipsize">
       <Icon icon="remote-controller-minimalistic" />
-      {displayRelayUrl(url)}
+      <p class="ellipsize">{displayRelayUrl(url)}</p>
     </div>
     <slot />
   </div>
   {#if $relay?.profile?.description}
-    <p>{$relay?.profile.description}</p>
+    <p class="ellipsize">{$relay?.profile.description}</p>
   {/if}
-  <span class="flex items-center gap-1 text-sm">
+  <span class="flex items-center gap-1 text-sm whitespace-nowrap">
     {#if $relay?.profile?.contact}
-      <Link external class="underline" href={$relay.profile.contact}
+      <Link external class="underline ellipsize" href={$relay.profile.contact}
         >{displayUrl($relay.profile.contact)}</Link>
       &bull;
     {/if}
