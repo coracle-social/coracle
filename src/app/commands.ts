@@ -190,7 +190,10 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 // Relay access
 
 export const checkRelayAccess = async (url: string, claim = "") => {
-  await ctx.net.pool.get(url).ensureAuth()
+  const connection =  ctx.net.pool.get(url)
+
+  await connection.auth.attemptIfRequested()
+  await connection.auth.waitIfPending()
 
   const result = await publishThunk({
     event: createEvent(28934, {tags: [["claim", claim]]}),
@@ -214,23 +217,24 @@ export const checkRelayProfile = async (url: string) => {
 
 export const checkRelayConnection = async (url: string) => {
   const connection = ctx.net.pool.get(url)
-  const okStatuses = [ConnectionStatus.Ok, ConnectionStatus.Slow, ConnectionStatus.Unauthorized]
+  const okStatuses = [ConnectionStatus.Ok, ConnectionStatus.Slow]
 
   await connection.ensureConnected()
 
   if (!okStatuses.includes(connection.meta.getStatus())) {
-    return `Failed to connect: "${connection.meta.getDescription()}"`
+    return `Failed to connect`
   }
 }
 
 export const checkRelayAuth = async (url: string) => {
   const connection = ctx.net.pool.get(url)
-  const okStatuses = [AuthStatus.Ok, AuthStatus.Pending]
+  const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.ensureAuth()
+  await connection.auth.attemptIfRequested()
+  await connection.auth.waitIfPending()
 
-  if (!okStatuses.includes(connection.meta.authStatus)) {
-    return `Failed to authenticate: "${connection.meta.authStatus}"`
+  if (!okStatuses.includes(connection.auth.status)) {
+    return `Failed to authenticate: "${connection.auth.message}"`
   }
 }
 
