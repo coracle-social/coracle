@@ -67,7 +67,7 @@
     transition:fly|local={{duration: 200}}
     class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class} bg-alt"
     style={$$props.style}>
-    {#if term && allowCreate}
+    {#if term && allowCreate && !items.includes(term)}
       <button
         class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
         on:mousedown|preventDefault
@@ -81,7 +81,7 @@
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
         {#if index === i}
-          <div transition:slide|local={{axis: "x"}} class="pr-2">
+          <div transition:slide|local={{axis: "x"}} class="pr-2 flex items-center">
             <Icon icon="alt-arrow-right" />
           </div>
         {/if}

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import 'tippy.js/animations/shift-away.css'
+
   import {onMount} from "svelte"
   import type {SvelteComponent, ComponentType, ComponentProps} from "svelte"
   import tippy, {type Instance, type Props} from "tippy.js"
@@ -17,7 +19,7 @@
     if (element) {
       const target = document.createElement("div")
 
-      popover = tippy(element, {content: target, ...params})
+      popover = tippy(element, {content: target, animation: 'shift-away', ...params})
 
       instance = new component({target, props})
 

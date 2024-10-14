@@ -16,7 +16,7 @@
   export let messages: TrustedEvent[]
 
   const message = messages[0]
-  const others = remove($pubkey, pubkeys)
+  const others = remove($pubkey!, pubkeys)
   const active = $page.params.chat === id
   const missingInbox = derived(inboxRelaySelectionsByPubkey, $m => others.some(pk => !$m.has(pk)))
 

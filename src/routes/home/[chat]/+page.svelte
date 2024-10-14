@@ -42,7 +42,7 @@
   const id = $page.params.chat === "notes" ? $pubkey! : $page.params.chat
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
-  const others = remove($pubkey, pubkeys)
+  const others = remove($pubkey!, pubkeys)
   const missingInboxes = derived(inboxRelaySelectionsByPubkey, $m =>
     pubkeys.filter(pk => !$m.has(pk)),
   )

@@ -1,6 +1,6 @@
 import type {JSONContent, PasteRuleMatch, InputRuleMatch} from "@tiptap/core"
 import {Editor} from "@tiptap/core"
-import {choice} from "@welshman/lib"
+import {ctx} from "@welshman/lib"
 import {Address} from "@welshman/util"
 
 export const asInline = (extend: Record<string, any>) => ({
@@ -61,23 +61,23 @@ export const getEditorTags = (editor: Editor) => {
     attrs.tag.replace(/^#/, "").toLowerCase(),
   ])
 
-  const naddrTags = findNodes("naddr", json).map(({kind, pubkey, identifier, relays}: any) => {
+  const naddrTags = findNodes("naddr", json).map(({kind, pubkey, identifier, relays = []}: any) => {
     const address = new Address(kind, pubkey, identifier).toString()
 
-    return ["q", address, choice(relays) || "", pubkey]
+    return ["q", address, ctx.app.router.fromRelays(relays).getUrl(), pubkey]
   })
 
-  const neventTags = findNodes("nevent", json).map(({id, author, relays}: any) => [
+  const neventTags = findNodes("nevent", json).map(({id, author, relays = []}: any) => [
     "q",
     id,
-    choice(relays) || "",
+    ctx.app.router.fromRelays(relays).getUrl(),
     author || "",
   ])
 
-  const mentionTags = findNodes("nprofile", json).map(({pubkey, relays}: any) => [
+  const mentionTags = findNodes("nprofile", json).map(({pubkey, relays = []}: any) => [
     "p",
     pubkey,
-    choice(relays) || "",
+    ctx.app.router.fromRelays(relays).getUrl(),
     "",
   ])
 

@@ -46,6 +46,7 @@
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
   import InfoSquare from "@assets/icons/Info Square.svg?dataurl"
   import Key from "@assets/icons/Key.svg?dataurl"
+  import KeyMinimalisticSquare3 from "@assets/icons/Key Minimalistic Square 3.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
@@ -117,6 +118,7 @@
     "info-circle": InfoCircle,
     "info-square": InfoSquare,
     key: Key,
+    'key-minimalistic-square-3': KeyMinimalisticSquare3,
     "link-round": LinkRound,
     login: Login,
     "login-2": Login2,
