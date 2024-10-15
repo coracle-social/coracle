@@ -14,7 +14,6 @@
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
-  import {clearModal} from "@app/modal"
   import {pushToast} from "@app/toast"
 
   export let url
@@ -54,7 +53,7 @@
     })
 
     publishThunk({event, relays: [url]})
-    clearModal()
+    history.back()
   }
 
   let editor: Readable<Editor>

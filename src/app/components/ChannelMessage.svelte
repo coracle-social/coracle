@@ -14,7 +14,6 @@
   import type {PublishStatusData} from "@welshman/app"
   import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
   import {repository} from "@welshman/app"
-  import {slideAndFade} from '@lib/transition'
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -41,7 +40,10 @@
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = throttled(300, derived(publishStatusData, $m => Object.values($m[event.id] || {})))
+  const ps = throttled(
+    300,
+    derived(publishStatusData, $m => Object.values($m[event.id] || {})),
+  )
 
   const showInfo = () => pushModal(EventInfo, {event})
 
@@ -94,7 +96,7 @@
       </p>
     </div>
   {/if}
-  <div class="flex gap-2 w-full">
+  <div class="flex w-full gap-2">
     {#if showPubkey}
       <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
     {:else}
@@ -128,7 +130,7 @@
   </div>
   {#if $reactions.length > 0 || $zaps.length > 0}
     <div class="ml-12 text-xs">
-      {#each groupBy(e => e.content, uniqBy(e => e.pubkey + e.content, $reactions)).entries() as [content, events]}
+      {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
         {@const isOwn = events.some(e => e.pubkey === $pubkey)}
         {@const onClick = () => onReactionClick(content, events)}
         <button
@@ -147,7 +149,7 @@
     </div>
   {/if}
   <button
-    class="join absolute top-1 right-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
+    class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
     <ChannelMessageEmojiButton {url} {room} {event} />
     <Button class="btn join-item btn-xs" on:click={showInfo}>

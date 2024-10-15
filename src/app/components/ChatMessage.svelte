@@ -35,7 +35,10 @@
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = throttled(300, derived(publishStatusData, $m => Object.values($m[event.wrap!.id] || {})))
+  const ps = throttled(
+    300,
+    derived(publishStatusData, $m => Object.values($m[event.wrap!.id] || {})),
+  )
 
   const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
 
@@ -67,7 +70,7 @@
 </script>
 
 <div
-  class="chat flex gap-1 items-center group justify-end"
+  class="group chat flex items-center justify-end gap-1"
   class:chat-start={event.pubkey !== $pubkey}
   class:flex-row-reverse={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
@@ -85,13 +88,13 @@
         popoverIsVisible = false
       },
     }}>
-    <Button class="group-hover:opacity-100 opacity-0 transition-all" on:click={togglePopover}>
+    <Button class="opacity-0 transition-all group-hover:opacity-100" on:click={togglePopover}>
       <Icon icon="menu-dots" size={4} />
     </Button>
   </Tippy>
   <div class="flex flex-col">
     <div class="chat-bubble mx-1 max-w-sm">
-      <div class="flex items-start gap-2 w-full">
+      <div class="flex w-full items-start gap-2">
         {#if showPubkey}
           <Button on:click={showProfile}>
             <Avatar
@@ -129,7 +132,7 @@
       </div>
     </div>
     {#if $reactions.length > 0 || $zaps.length > 0}
-      <div class="-mt-4 text-xs z-feature relative flex justify-end">
+      <div class="relative z-feature -mt-4 flex justify-end text-xs">
         {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
           {@const isOwn = events.some(e => e.pubkey === $pubkey)}
           {@const onClick = () => onReactionClick(content, events)}

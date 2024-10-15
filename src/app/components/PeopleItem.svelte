@@ -54,9 +54,9 @@
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
     <button type="button" class="chat chat-start cursor-default" on:click|stopPropagation>
-      <div class="bg-alt chat-bubble text-left col-4">
+      <div class="bg-alt col-4 chat-bubble text-left">
         <Content hideMedia={!following} {event} />
-        <Link external href={entityLink(nevent)} class="row-2 justify-end group whitespace-nowrap">
+        <Link external href={entityLink(nevent)} class="row-2 group justify-end whitespace-nowrap">
           <Icon icon="link-round" size={3} />
           <p class="text-xs">{formatTimestamp(event.created_at)}</p>
         </Link>

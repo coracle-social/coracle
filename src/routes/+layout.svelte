@@ -2,9 +2,6 @@
   import "@src/app.css"
   import {onMount} from "svelte"
   import {get} from "svelte/store"
-  import {page} from "$app/stores"
-  import {goto} from "$app/navigation"
-  import {browser} from "$app/environment"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -26,7 +23,6 @@
     db,
     initStorage,
     repository,
-    session,
     pubkey,
     publishStatusData,
     plaintext,
@@ -39,7 +35,6 @@
   import * as app from "@welshman/app"
   import AppContainer from "@app/components/AppContainer.svelte"
   import ModalContainer from "@app/components/ModalContainer.svelte"
-  import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
   import {INDEXER_RELAYS} from "@app/state"
   import {loadUserData} from "@app/commands"

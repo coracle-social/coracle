@@ -9,7 +9,7 @@
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInInfoRemoteSigner from "@app/components/LogInInfoRemoteSigner.svelte"
-  import {pushModal, clearModal} from "@app/modal"
+  import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
   import {loadUserData} from "@app/commands"
 
@@ -31,7 +31,7 @@
     await loadUserData(session.pubkey, {relays})
 
     pushToast({message: "Successfully logged in!"})
-    clearModal()
+    clearModals()
   }
 
   const loginWithNip46 = withLoading(async () => {

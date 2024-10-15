@@ -187,7 +187,7 @@ setContext({
         return false
       }
 
-      const roomTags = event.tags.filter(nthEq(0, '~'))
+      const roomTags = event.tags.filter(nthEq(0, "~"))
 
       if (roomTags.length > 0 && !roomTags.some(nthEq(2, url))) {
         return false
@@ -268,7 +268,7 @@ export const {
 // Messages
 
 export type ChannelMessage = {
-  url: string,
+  url: string
   room: string
   event: TrustedEvent
 }

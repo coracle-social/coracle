@@ -43,7 +43,7 @@
   }
 </script>
 
-<div class="fixed flex max-h-screen w-full flex-col gap-2">
+<div class="col-2">
   <div class="overflow-auto pt-3">
     <ChannelMessage {url} {room} {event} showPubkey />
     {#each sortBy(e => e.created_at, $replies) as reply (reply.id)}

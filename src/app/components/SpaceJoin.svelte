@@ -5,7 +5,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {clearModal} from "@app/modal"
+  import {clearModals} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
 
   export let url
@@ -15,7 +15,7 @@
   const tryJoin = async () => {
     await addSpaceMembership(url)
 
-    clearModal()
+    clearModals()
   }
 
   const join = async () => {

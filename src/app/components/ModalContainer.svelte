@@ -1,56 +1,34 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import type {SvelteComponent} from "svelte"
   import {page} from "$app/stores"
-  import {fly} from "@lib/transition"
   import Drawer from "@lib/components/Drawer.svelte"
-  import {modals} from "@app/modal"
-  import Toast from "@app/components/Toast.svelte"
+  import Dialog from "@lib/components/Dialog.svelte"
+  import {modals, clearModals} from "@app/modal"
 
-  let prev: any
-  let mounted = false
-  let dialog: HTMLDialogElement
-  let drawer: SvelteComponent
-
-  $: hash = $page.url.hash.slice(1)
-  $: modal = modals.get(hash)
-  $: prev = modal || prev
-
-  $: {
-    if (mounted) {
-      if (modal?.options?.drawer) {
-        drawer.open()
-      } else if (modal) {
-        dialog.showModal()
-      } else {
-        drawer.close()
-        dialog.close()
-      }
+  const onKeyDown = (e: any) => {
+    if (e.code === "Escape" && e.target === document.body) {
+      clearModals()
     }
   }
 
-  onMount(() => {
-    mounted = true
-  })
+  let modal: any
+
+  $: hash = $page.url.hash.slice(1)
+  $: hashIsValid = Boolean($modals[hash])
+  $: modal = $modals[hash] || modal
 </script>
 
-<dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
-  {#if modal && !modal.options?.drawer}
-    {#key hash}
-      <div class="bg-alt modal-box overflow-visible overflow-y-auto" transition:fly={{duration: 100}}>
-        <svelte:component this={modal.component} {...modal.props} />
-      </div>
-    {/key}
-    <Toast />
-  {/if}
-  <form method="dialog" class="modal-backdrop">
-    <button />
-  </form>
-</dialog>
-<Drawer bind:this={drawer}>
-  {#if modal && modal.options?.drawer}
-    {#key hash}
+<svelte:window on:keydown={onKeyDown} />
+
+{#if hashIsValid && modal?.options?.drawer}
+  <Drawer onClose={clearModals}>
+    {#key modal.id}
       <svelte:component this={modal.component} {...modal.props} />
     {/key}
-  {/if}
-</Drawer>
+  </Drawer>
+{:else if hashIsValid && modal}
+  <Dialog onClose={clearModals}>
+    {#key modal.id}
+      <svelte:component this={modal.component} {...modal.props} />
+    {/key}
+  </Dialog>
+{/if}

@@ -11,7 +11,6 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
-  import {clearModal} from "@app/modal"
 
   export let url
 
@@ -25,7 +24,7 @@
     const event = createEvent(NOTE, {content: $editor.getText(), tags: getEditorTags($editor)})
 
     publishThunk({event, relays: [url]})
-    clearModal()
+    history.back()
   }
 
   let editor: Readable<Editor>

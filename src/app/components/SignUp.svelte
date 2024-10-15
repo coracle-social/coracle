@@ -7,7 +7,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import LogIn from "@app/components/LogIn.svelte"
   import InfoNostr from "@app/components/LogIn.svelte"
-  import {pushModal, clearModal} from "@app/modal"
+  import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
 
   const login = () => pushModal(LogIn)
@@ -38,7 +38,7 @@
     if (await loginBroker.connect("", nip46Perms)) {
       addSession({method: "nip46", pubkey, secret, handler})
       pushToast({message: "Successfully logged in!"})
-      clearModal()
+      clearModals()
     } else {
       pushToast({
         theme: "error",

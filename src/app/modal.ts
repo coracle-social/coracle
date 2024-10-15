@@ -1,14 +1,22 @@
 import type {ComponentType} from "svelte"
-import {randomId, Emitter} from "@welshman/lib"
+import {writable} from "svelte/store"
+import {randomId, always, assoc, Emitter} from "@welshman/lib"
 import {goto} from "$app/navigation"
-
-export const emitter = new Emitter()
-
-export const modals = new Map()
 
 export type ModalOptions = {
   drawer?: boolean
 }
+
+export type Modal = {
+  id: string
+  component: ComponentType
+  props: Record<string, any>
+  options: ModalOptions
+}
+
+export const emitter = new Emitter()
+
+export const modals = writable<Record<string, Modal>>({})
 
 export const pushModal = (
   component: ComponentType,
@@ -17,7 +25,7 @@ export const pushModal = (
 ) => {
   const id = randomId()
 
-  modals.set(id, {component, props, options})
+  modals.update(assoc(id, {id, component, props, options}))
 
   goto("#" + id)
 
@@ -30,8 +38,7 @@ export const pushDrawer = (
   options: ModalOptions = {},
 ) => pushModal(component, props, {...options, drawer: true})
 
-export const clearModal = () => {
-  goto("#")
-  modals.clear()
+export const clearModals = () => {
+  modals.update(always({}))
   emitter.emit("close")
 }

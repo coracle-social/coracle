@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Icon from '@lib/components/Icon.svelte'
-  import Button from '@lib/components/Button.svelte'
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
-  import EventInfo from '@app/components/EventInfo.svelte'
-  import {pushModal} from '@app/modal'
+  import EventInfo from "@app/components/EventInfo.svelte"
+  import {pushModal} from "@app/modal"
 
   export let event
   export let pubkeys
