@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "module": "esnext",
+    "target": "es2021",
     "paths": {
       "src/*": ["src/*"]
     },
