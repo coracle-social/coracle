@@ -34,7 +34,7 @@
     name: string
     packageName: string
     iconData: string
-	iconUrl: string // the url to the App's icon
+    iconUrl: string // the url to the App's icon
   }
 
   let signerApps: AppInfo[] = []
@@ -207,11 +207,7 @@
         {#each signerApps as app}
           <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
             <div>
-              <img
-                src={app.iconUrl}
-                alt={app.name}
-                width="48"
-                height="48" />
+              <img src={app.iconUrl} alt={app.name} width="48" height="48" />
             </div>
             <span>{app.name}</span>
           </Tile>
