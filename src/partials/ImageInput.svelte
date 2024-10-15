@@ -7,6 +7,7 @@
   import {uploadFiles, getSetting} from "src/engine"
 
   export let compose = null
+  export let textarea = null
 
   export let icon = null
   export let value = null
@@ -26,12 +27,17 @@
         if (inputFiles) {
           let uploadContent = ""
           // if the compose props is passed in, alter the content to show an upload is being processed
-          if (compose) {
+          if (compose || textarea) {
             uploadContent = inputFiles.reduce(
               (acc, cur) => acc + "\n![Uploading " + cur.name + " using " + displayList(urls) + "]",
               "",
             )
+          }
+          if (compose) {
             compose.write(uploadContent)
+          }
+          if (textarea) {
+            textarea.value += uploadContent
           }
           try {
             for (const tags of await uploadFiles(urls, inputFiles, {
@@ -50,11 +56,17 @@
               compose.clear()
               compose.write(content.replace(uploadContent.trim(), ""))
             }
+            if (textarea) {
+              textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
+            }
           } catch (e) {
             if (compose) {
               const content = compose.parse()
               compose.clear()
               compose.write(content.replace(uploadContent.trim(), ""))
+            }
+            if (textarea) {
+              textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
             }
           }
         }
@@ -83,4 +95,4 @@
   </div>
 </div>
 
-<input multiple={multi} type="file" bind:this={input} class="absolute h-0 w-0" />
+<input multiple={multi} type="file" bind:this={input} class="absolute h-0 w-0 opacity-0" />
