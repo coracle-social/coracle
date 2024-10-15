@@ -69,7 +69,7 @@
     <input bind:value={term} class="grow" type="text" />
   </label>
   <div class="overflow-auto">
-    {#each chats as {id, pubkeys, messages} (id)}
+    {#each chats as { id, pubkeys, messages } (id)}
       <ChatItem {id} {pubkeys} {messages} />
     {/each}
   </div>

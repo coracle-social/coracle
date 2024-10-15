@@ -38,7 +38,7 @@
     <input bind:value={term} class="grow" type="text" placeholder="Search for relays..." />
   </label>
 </div>
-<div class="overflow-auto column gap-2 h-[50vh] mt-16" bind:this={element}>
+<div class="column mt-16 h-[50vh] gap-2 overflow-auto" bind:this={element}>
   {#each $relaySearch
     .searchValues(term)
     .filter(url => !$relays.includes(url))

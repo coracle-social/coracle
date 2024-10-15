@@ -190,7 +190,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 // Relay access
 
 export const checkRelayAccess = async (url: string, claim = "") => {
-  const connection =  ctx.net.pool.get(url)
+  const connection = ctx.net.pool.get(url)
 
   await connection.auth.attemptIfRequested()
   await connection.auth.waitIfPending()

@@ -118,7 +118,7 @@
     "info-circle": InfoCircle,
     "info-square": InfoSquare,
     key: Key,
-    'key-minimalistic-square-3': KeyMinimalisticSquare3,
+    "key-minimalistic-square-3": KeyMinimalisticSquare3,
     "link-round": LinkRound,
     login: Login,
     "login-2": Login2,

@@ -61,11 +61,13 @@ export const getEditorTags = (editor: Editor) => {
     attrs.tag.replace(/^#/, "").toLowerCase(),
   ])
 
-  const naddrTags = findNodes("naddr", json).map(({attrs: {kind, pubkey, identifier, relays = []}}: any) => {
-    const address = new Address(kind, pubkey, identifier).toString()
+  const naddrTags = findNodes("naddr", json).map(
+    ({attrs: {kind, pubkey, identifier, relays = []}}: any) => {
+      const address = new Address(kind, pubkey, identifier).toString()
 
-    return ["q", address, ctx.app.router.fromRelays(relays).getUrl(), pubkey]
-  })
+      return ["q", address, ctx.app.router.fromRelays(relays).getUrl(), pubkey]
+    },
+  )
 
   const neventTags = findNodes("nevent", json).map(({attrs: {id, author, relays = []}}: any) => [
     "q",

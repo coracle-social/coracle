@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {ago, append, first, sortBy, WEEK, ctx} from "@welshman/lib"
   import {NOTE, getAncestorTags, getListTags, getPubkeyTagValues} from "@welshman/util"
@@ -59,10 +59,12 @@
       </div>
     </Link>
     <div class="flex gap-2">
-      <div class="badge badge-neutral bg-alt border-none">
+      <div class="bg-alt badge badge-neutral border-none">
         {roots.length} recent {roots.length === 1 ? "note" : "notes"}
       </div>
-      <div class="badge badge-neutral bg-alt border-none">Last posted {formatTimestampRelative(event.created_at)}</div>
+      <div class="bg-alt badge badge-neutral border-none">
+        Last posted {formatTimestampRelative(event.created_at)}
+      </div>
     </div>
   {/if}
 </Button>

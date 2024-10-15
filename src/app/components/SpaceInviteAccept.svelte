@@ -2,7 +2,6 @@
   import {goto} from "$app/navigation"
   import {ctx, tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
-  import CardButton from "@lib/components/CardButton.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -17,8 +16,6 @@
   import {makeSpacePath} from "@app/routes"
 
   const back = () => history.back()
-
-  const browse = () => goto("/discover")
 
   const confirm = async (url: string) => {
     await addSpaceMembership(url)
@@ -84,13 +81,6 @@
       <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
     </p>
   </Field>
-  <Button on:click={browse}>
-    <CardButton>
-      <div slot="icon"><Icon icon="compass" size={7} /></div>
-      <div slot="title">Don't have an invite?</div>
-      <div slot="info">Browse other spaces on the discover page.</div>
-    </CardButton>
-  </Button>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />

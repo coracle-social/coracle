@@ -2,12 +2,10 @@
   import {makeSecret, getNip07, Nip46Broker} from "@welshman/signer"
   import {addSession, loadHandle, nip46Perms, type Session} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
-  import Field from "@lib/components/Field.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import SearchSelect from "@lib/components/SearchSelect.svelte"
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInInfoRemoteSigner from "@app/components/LogInInfoRemoteSigner.svelte"
@@ -47,7 +45,7 @@
     }
 
     const secret = makeSecret()
-    const {pubkey, nip46, relays = []} = await loadHandle(`${username}@${domain}`) || {}
+    const {pubkey, nip46, relays = []} = (await loadHandle(`${username}@${domain}`)) || {}
 
     if (!pubkey) {
       return pushToast({
@@ -88,7 +86,7 @@
   })
 
   let username = ""
-  let domain = 'nsec.app'
+  let domain = "nsec.app"
   let loading = false
 </script>
 
@@ -99,19 +97,24 @@
     <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>
-  <div class="grid grid-cols-3 gap-3 items-center">
+  <div class="grid grid-cols-3 items-center gap-3">
     <p class="font-bold">Username</p>
-    <label class="input input-bordered flex w-full items-center gap-2 col-span-2">
+    <label class="input input-bordered col-span-2 flex w-full items-center gap-2">
       <Icon icon="user-circle" />
-      <input bind:value={username} disabled={loading} class="grow" type="text" placeholder="username" />
+      <input
+        bind:value={username}
+        disabled={loading}
+        class="grow"
+        type="text"
+        placeholder="username" />
     </label>
     <Tippy component={LogInInfoRemoteSigner} params={{interactive: true}}>
-      <p class="font-bold cursor-pointer flex gap-2 items-center">
+      <p class="flex cursor-pointer items-center gap-2 font-bold">
         Remote Signer
         <Icon icon="info-circle" class="opacity-50" />
       </p>
     </Tippy>
-    <label class="input input-bordered flex w-full items-center gap-2 col-span-2">
+    <label class="input input-bordered col-span-2 flex w-full items-center gap-2">
       <Icon icon="key-minimalistic-square-3" />
       <input bind:value={domain} disabled={loading} class="grow" type="text" />
     </label>
@@ -122,7 +125,10 @@
   </Button>
   <Divider>Or</Divider>
   {#if getNip07()}
-    <Button disabled={loading} on:click={loginWithNip07} class="btn {username ? 'btn-neutral' : 'btn-primary'}">
+    <Button
+      disabled={loading}
+      on:click={loginWithNip07}
+      class="btn {username ? 'btn-neutral' : 'btn-primary'}">
       <Icon icon="widget" />
       Log in with Extension
     </Button>

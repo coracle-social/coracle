@@ -109,7 +109,7 @@
         {#if others.length === 1}
           {@const pubkey = others[0]}
           {@const showProfile = () => pushModal(ProfileDetail, {pubkey})}
-          <Button on:click={showProfile}>
+          <Button on:click={showProfile} class="row-2">
             <ProfileCircle {pubkey} size={5} />
             <ProfileName {pubkey} />
           </Button>
@@ -119,16 +119,14 @@
             <ProfileName pubkey={others[0]} />
             and {others.length - 1}
             {others.length > 2 ? "others" : "other"}
-            <Button on:click={showMembers} class="btn btn-link">
-              Show all members
-            </Button>
+            <Button on:click={showMembers} class="btn btn-link">Show all members</Button>
           </p>
         {/if}
       </div>
       <div slot="action">
         {#if remove($pubkey, $missingInboxes).length > 0}
           {@const count = remove($pubkey, $missingInboxes).length}
-          {@const label = count > 0 ? 'inboxes are' : 'inbox is'}
+          {@const label = count > 1 ? "inboxes are" : "inbox is"}
           <div
             class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
             data-tip="{count} {label} not configured.">

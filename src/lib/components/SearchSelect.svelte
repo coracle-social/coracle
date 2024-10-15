@@ -1,12 +1,11 @@
 <script lang="ts">
   import type {SvelteComponent} from "svelte"
-  import {readable} from 'svelte/store'
+  import {readable} from "svelte/store"
   import {type Instance} from "tippy.js"
-  import {append, identity, remove, uniq} from "@welshman/lib"
+  import {identity} from "@welshman/lib"
   import {createSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import Button from "@lib/components/Button.svelte"
   import Suggestions from "@lib/editor/Suggestions.svelte"
   import SuggestionString from "@lib/editor/SuggestionString.svelte"
 
@@ -22,7 +21,7 @@
     createSearch(options, {
       getValue: identity,
       fuseOptions: {keys: [""]},
-    })
+    }),
   )
 
   const select = (newValue: string) => {
@@ -48,7 +47,13 @@
 <div class={$$props.class}>
   <label class="input input-bordered flex w-full items-center gap-3" bind:this={input}>
     <slot name="before" />
-    <input class="grow" type="text" bind:value={value} on:keydown={onKeyDown} on:focus={onFocus} on:blur={onBlur} />
+    <input
+      class="grow"
+      type="text"
+      bind:value
+      on:keydown={onKeyDown}
+      on:focus={onFocus}
+      on:blur={onBlur} />
     <Icon icon="alt-arrow-down" class="cursor-pointer" />
   </label>
   <Tippy

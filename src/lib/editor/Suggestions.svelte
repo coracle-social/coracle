@@ -81,7 +81,7 @@
         on:mousedown|preventDefault
         on:click|preventDefault={() => select(value)}>
         {#if index === i}
-          <div transition:slide|local={{axis: "x"}} class="pr-2 flex items-center">
+          <div transition:slide|local={{axis: "x"}} class="flex items-center pr-2">
             <Icon icon="alt-arrow-right" />
           </div>
         {/if}

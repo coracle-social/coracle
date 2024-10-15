@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
@@ -26,6 +27,13 @@
       <div slot="info">Enter an invite code or url to join an existing space.</div>
     </CardButton>
   </Button>
+  <Link href="/discover">
+    <CardButton>
+      <div slot="icon"><Icon icon="compass" size={7} /></div>
+      <div slot="title">Find a space</div>
+      <div slot="info">Browse spaces on the discover page.</div>
+    </CardButton>
+  </Link>
   <Button on:click={startCreate}>
     <CardButton>
       <div slot="icon"><Icon icon="add-circle" size={7} /></div>

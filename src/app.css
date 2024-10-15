@@ -109,7 +109,7 @@
 }
 
 .ellipsize {
-  @apply text-ellipsis overflow-hidden;
+  @apply overflow-hidden text-ellipsis;
 }
 
 .content {

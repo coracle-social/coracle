@@ -31,7 +31,7 @@
     <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
   </label>
   <div class="column gap-2 overflow-auto">
-    {#each chats as {id, pubkeys, messages} (id)}
+    {#each chats as { id, pubkeys, messages } (id)}
       <ChatItem {id} {pubkeys} {messages} />
     {/each}
   </div>

@@ -13,8 +13,8 @@
 </script>
 
 <div class="card2 card2-sm bg-alt column gap-2">
-  <div class="flex items-center gap-4 justify-between">
-    <div class="flex items-center gap-2 ellipsize">
+  <div class="flex items-center justify-between gap-4">
+    <div class="ellipsize flex items-center gap-2">
       <Icon icon="remote-controller-minimalistic" />
       <p class="ellipsize">{displayRelayUrl(url)}</p>
     </div>
@@ -23,9 +23,9 @@
   {#if $relay?.profile?.description}
     <p class="ellipsize">{$relay?.profile.description}</p>
   {/if}
-  <span class="flex items-center gap-1 text-sm whitespace-nowrap">
+  <span class="flex items-center gap-1 whitespace-nowrap text-sm">
     {#if $relay?.profile?.contact}
-      <Link external class="underline ellipsize" href={$relay.profile.contact}
+      <Link external class="ellipsize underline" href={$relay.profile.contact}
         >{displayUrl($relay.profile.contact)}</Link>
       &bull;
     {/if}

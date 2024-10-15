@@ -10,7 +10,7 @@
 
   const defaultPubkeys = uniq([
     ...shuffle(getPubkeyTagValues(getListTags($userFollows))),
-    ...import.meta.env.VITE_DEFAULT_PUBKEYS.split(','),
+    ...import.meta.env.VITE_DEFAULT_PUBKEYS.split(","),
   ])
 
   let term = ""

@@ -70,10 +70,7 @@
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <Button
-              class="text-bold text-sm"
-              style="color: {colorValue}"
-              on:click={showProfile}>
+            <Button class="text-bold text-sm" style="color: {colorValue}" on:click={showProfile}>
               {$profileDisplay}
             </Button>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
