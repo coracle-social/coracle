@@ -37,7 +37,7 @@
             compose.write(uploadContent)
           }
           if (textarea) {
-            textarea.value += uploadContent
+            textarea.value = textarea.value.concat(uploadContent)
           }
           try {
             for (const tags of await uploadFiles(urls, inputFiles, {
