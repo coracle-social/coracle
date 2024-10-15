@@ -28,16 +28,19 @@
           let uploadContent = ""
           // if the compose props is passed in, alter the content to show an upload is being processed
           if (compose || textarea) {
-            uploadContent = inputFiles.reduce(
-              (acc, cur) => acc + "\n![Uploading " + cur.name + " using " + displayList(urls) + "]",
-              "",
-            )
+            uploadContent = inputFiles
+              .reduce(
+                (acc, cur) =>
+                  acc + "\n![Uploading " + cur.name + " using " + displayList(urls) + "]",
+                "",
+              )
+              .trim()
           }
           if (compose) {
             compose.write(uploadContent)
           }
           if (textarea) {
-            textarea.value = textarea.value.concat(uploadContent)
+            textarea.value = textarea.value.concat(uploadContent).trim()
           }
           try {
             for (const tags of await uploadFiles(urls, inputFiles, {
@@ -54,7 +57,7 @@
             if (compose) {
               const content = compose.parse()
               compose.clear()
-              compose.write(content.replace(uploadContent.trim(), ""))
+              compose.write(content.replace(uploadContent.trim(), "").trim())
             }
             if (textarea) {
               textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
@@ -63,7 +66,7 @@
             if (compose) {
               const content = compose.parse()
               compose.clear()
-              compose.write(content.replace(uploadContent.trim(), ""))
+              compose.write(content.replace(uploadContent.trim(), "").trim())
             }
             if (textarea) {
               textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
