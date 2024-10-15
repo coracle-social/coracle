@@ -32,6 +32,7 @@
   import {publish} from "src/engine"
   import {router} from "src/app/util/router"
   import {env, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
+  import {dropzone, onFileDrop} from "src/util/dropzone"
 
   export let type = "note"
   export let quote = null
@@ -40,6 +41,8 @@
   export let initialValues = {}
 
   const defaultGroups = env.FORCE_GROUP ? [env.FORCE_GROUP] : [group].filter(identity)
+
+  let dragover = false
 
   let images, compose
   let charCount = 0
@@ -257,9 +260,19 @@
       <Field label={type === "note" ? "What do you want to say?" : "Description"}>
         <div
           class="rounded-xl border border-solid border-neutral-600 p-3"
+          class:border-dashed={dragover}
           class:bg-white={!showPreview}
           class:text-black={!showPreview}
-          class:bg-tinted-700={showPreview}>
+          class:bg-tinted-700={showPreview}
+          on:enter={() => (dragover = true)}
+          on:leave={() => (dragover = false)}
+          on:filedrop={async e => {
+            dragover = false
+            for (const tags of await onFileDrop(e.detail.files, 1, compose)) {
+              images.addImage(tags)
+            }
+          }}
+          use:dropzone>
           {#if showPreview}
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
@@ -284,7 +297,8 @@
       <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
-        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
+        <!-- <input multiple={multi} type="file" bind:this={input} /> -->
+        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} {compose} />
       </div>
       {#if !env.FORCE_GROUP}
         <button
