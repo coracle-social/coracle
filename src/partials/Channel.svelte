@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {onMount} from "svelte"
-  import {displayList, pluralize} from "hurdak"
+  import {pluralize} from "hurdak"
   import {derived} from "svelte/store"
   import {sleep, remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -14,7 +14,7 @@
   } from "@welshman/app"
   import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {fly, slide} from "src/util/transition"
-  import {createScroller, formatTimestamp} from "src/util/misc"
+  import {createScroller, displayList, formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {groupBy, sortBy, uniq} from "ramda"
-  import {displayList} from "hurdak"
   import {ctx, pushToMapKey} from "@welshman/lib"
   import {
     pubkey,
@@ -18,7 +17,7 @@
     relaySelectionsByPubkey,
   } from "@welshman/app"
   import {Tags, isShareableRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
-  import {createScroller} from "src/util/misc"
+  import {createScroller, displayList} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"

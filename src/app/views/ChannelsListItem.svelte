@@ -1,12 +1,12 @@
 <script lang="ts">
   import {without} from "ramda"
-  import {displayList} from "hurdak"
   import {derived} from "svelte/store"
   import {pubkey, profiles, displayProfileByPubkey} from "@welshman/app"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
   import {channelHasNewMessages} from "src/engine"
+  import {displayList} from "src/util/misc"
 
   export let channel
 
