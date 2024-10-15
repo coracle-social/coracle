@@ -30,7 +30,7 @@
 <form class="column gap-4" on:submit|preventDefault={exit}>
   <ModalHeader>
     <div slot="title">
-      You are leaving <span class="text-primary">{displayRelayUrl(url)}</span>
+      You are leaving<br /><span class="text-primary">{displayRelayUrl(url)}</span>
     </div>
   </ModalHeader>
   <p class="text-center">Are you sure you want to leave?</p>

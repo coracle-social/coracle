@@ -19,7 +19,7 @@ export const pushModal = (
 
   modals.set(id, {component, props, options})
 
-  setTimeout(() => goto("#" + id))
+  goto("#" + id)
 
   return id
 }

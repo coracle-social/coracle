@@ -48,7 +48,7 @@
                   in a large amount of spam or other objectionable content. Continue?`,
       })
     } else {
-      confirm(url)
+      await confirm(url)
     }
   }
 

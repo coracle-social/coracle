@@ -10,7 +10,8 @@
       <div
         role="alert"
         class="alert flex justify-center"
-        class:alert-info={theme === "info"}
+        class:bg-base-100={theme === "info"}
+        class:text-base-content={theme === "info"}
         class:alert-error={theme === "error"}>
         {$toast.message}
       </div>
