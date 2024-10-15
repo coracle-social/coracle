@@ -17,7 +17,9 @@
   import {slideAndFade} from '@lib/transition'
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
+  import EventInfo from "@app/components/EventInfo.svelte"
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import {colors, tagRoom, deriveEvent, displayReaction} from "@app/state"
@@ -40,6 +42,8 @@
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const ps = throttled(300, derived(publishStatusData, $m => Object.values($m[event.id] || {})))
+
+  const showInfo = () => pushModal(EventInfo, {event})
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
@@ -146,8 +150,8 @@
     class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
     <ChannelMessageEmojiButton {url} {room} {event} />
-    <button class="btn join-item btn-xs">
-      <Icon icon="menu-dots" size={4} />
-    </button>
+    <Button class="btn join-item btn-xs" on:click={showInfo}>
+      <Icon size={4} icon="code-2" />
+    </Button>
   </button>
 </button>

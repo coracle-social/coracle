@@ -19,7 +19,11 @@
     if (element) {
       const target = document.createElement("div")
 
-      popover = tippy(element, {content: target, animation: "shift-away", ...params})
+      popover = tippy(element, {
+        content: target,
+        animation: "shift-away",
+        ...params,
+      })
 
       instance = new component({target, props})
 
