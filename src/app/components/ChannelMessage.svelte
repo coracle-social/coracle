@@ -104,21 +104,20 @@
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}
-      <div class="text-sm col-1">
+      <div class="text-sm">
         <Content {event} />
         {#if isPending}
-          <div class="flex gap-1 justify-end items-center" transition:slideAndFade>
-            <span class="loading loading-spinner mx-1 h-3 w-3" />
+          <span class="flex-inline ml-1 gap-1">
+            <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
             <span class="opacity-50">Sending...</span>
-          </div>
+          </span>
         {:else if failure}
-          <div
-            class="flex tooltip cursor-pointer gap-1 justify-end items-center"
-            data-tip="{failure.message} ({displayRelayUrl(failure.url)})"
-            transition:slideAndFade>
-            <Icon icon="danger" size={3} />
+          <span
+            class="flex-inline tooltip ml-1 cursor-pointer gap-1"
+            data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
+            <Icon icon="danger" class="translate-y-px" size={3} />
             <span class="opacity-50">Failed to send!</span>
-          </div>
+          </span>
         {/if}
       </div>
     </div>

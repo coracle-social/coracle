@@ -2,7 +2,7 @@
   import {derived} from "svelte/store"
   import {hash, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveEvents} from "@welshman/store"
+  import {deriveEvents, throttled} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
   import {
     publishStatusData,
@@ -33,7 +33,7 @@
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
+  const ps = throttled(300, derived(publishStatusData, $m => Object.values($m[event.wrap!.id] || {})))
 
   const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
 
@@ -58,7 +58,7 @@
   class:chat-start={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
   <div class="chat-bubble mx-1 max-w-sm">
-    <div class="flex items-start gap-2">
+    <div class="flex items-start gap-2 w-full">
       {#if showPubkey}
         <Button on:click={showProfile}>
           <Avatar
@@ -115,7 +115,7 @@
       </div>
     {/if}
     <Button
-      class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100">
+      class="join absolute -bottom-5 right-0 border border-solid border-neutral text-xs">
       <ChatMessageEmojiButton {event} {pubkeys} />
       <div class="btn join-item btn-xs">
         <Icon icon="menu-dots" size={4} />
