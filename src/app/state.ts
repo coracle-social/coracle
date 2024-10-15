@@ -13,6 +13,7 @@ import {
   loadFollows,
   loadMutes,
   getFollows,
+  loadInboxRelaySelections,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -99,6 +100,7 @@ export const loadUserData = async (hints: string[] = []) => {
 
   // Load crucial user data
   await Promise.all([
+    loadInboxRelaySelections($pubkey, {relays}),
     loadProfile($pubkey, {relays}),
     loadFollows($pubkey, {relays}),
     loadMutes($pubkey, {relays}),
