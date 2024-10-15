@@ -33,7 +33,8 @@
   interface AppInfo {
     name: string
     packageName: string
-    icon: string // Base64-encoded string of the app icon
+    iconData: string
+	iconUrl: string // the url to the App's icon
   }
 
   let signerApps: AppInfo[] = []
@@ -207,7 +208,7 @@
           <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
             <div>
               <img
-                src={`data:image/png;base64,${app.icon}`}
+                src={app.iconUrl}
                 alt={app.name}
                 width="48"
                 height="48" />
