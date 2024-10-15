@@ -2,7 +2,7 @@
   import {readable, derived} from "svelte/store"
   import {hash, ellipsize, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveEvents} from "@welshman/store"
+  import {deriveEvents, throttled} from "@welshman/store"
   import {PublishStatus} from "@welshman/net"
   import {
     publishStatusData,
@@ -14,6 +14,7 @@
   import type {PublishStatusData} from "@welshman/app"
   import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
   import {repository} from "@welshman/app"
+  import {slideAndFade} from '@lib/transition'
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
@@ -38,7 +39,7 @@
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = derived(publishStatusData, $m => Object.values($m[event.id] || {}))
+  const ps = throttled(300, derived(publishStatusData, $m => Object.values($m[event.id] || {})))
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
@@ -89,7 +90,7 @@
       </p>
     </div>
   {/if}
-  <div class="flex gap-2">
+  <div class="flex gap-2 w-full">
     {#if showPubkey}
       <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
     {:else}
@@ -103,27 +104,28 @@
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}
-      <div class="text-sm">
+      <div class="text-sm col-1">
         <Content {event} />
         {#if isPending}
-          <span class="flex-inline ml-1 gap-1">
-            <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
+          <div class="flex gap-1 justify-end items-center" transition:slideAndFade>
+            <span class="loading loading-spinner mx-1 h-3 w-3" />
             <span class="opacity-50">Sending...</span>
-          </span>
+          </div>
         {:else if failure}
-          <span
-            class="flex-inline tooltip ml-1 cursor-pointer gap-1"
-            data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
-            <Icon icon="danger" class="translate-y-px" size={3} />
+          <div
+            class="flex tooltip cursor-pointer gap-1 justify-end items-center"
+            data-tip="{failure.message} ({displayRelayUrl(failure.url)})"
+            transition:slideAndFade>
+            <Icon icon="danger" size={3} />
             <span class="opacity-50">Failed to send!</span>
-          </span>
+          </div>
         {/if}
       </div>
     </div>
   </div>
   {#if $reactions.length > 0 || $zaps.length > 0}
     <div class="ml-12 text-xs">
-      {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
+      {#each groupBy(e => e.content, uniqBy(e => e.pubkey + e.content, $reactions)).entries() as [content, events]}
         {@const isOwn = events.some(e => e.pubkey === $pubkey)}
         {@const onClick = () => onReactionClick(content, events)}
         <button

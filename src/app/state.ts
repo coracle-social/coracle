@@ -30,6 +30,8 @@ import {
   readList,
   getListTags,
   asDecryptedEvent,
+  isSignedEvent,
+  hasValidSignature,
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
@@ -179,7 +181,21 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
 }
 
 setContext({
-  net: getDefaultNetContext(),
+  net: getDefaultNetContext({
+    isValid: (url: string, event: TrustedEvent) => {
+      if (!isSignedEvent(event) || !hasValidSignature(event)) {
+        return false
+      }
+
+      const roomTags = event.tags.filter(nthEq(0, '~'))
+
+      if (roomTags.length > 0 && !roomTags.some(nthEq(2, url))) {
+        return false
+      }
+
+      return true
+    },
+  }),
   app: getDefaultAppContext({
     dufflepudUrl: DUFFLEPUD_URL,
     indexerRelays: INDEXER_RELAYS,
@@ -252,16 +268,19 @@ export const {
 // Messages
 
 export type ChannelMessage = {
+  url: string,
   room: string
   event: TrustedEvent
 }
 
 export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
-  const rooms = event.tags.filter(nthEq(0, ROOM)).map(nth(1))
+  const roomTags = event.tags.filter(nthEq(0, ROOM))
 
-  if (rooms.length > 1) return undefined
+  if (roomTags.length !== 1) return undefined
 
-  return {room: rooms[0] || "", event}
+  const [_, room, url] = roomTags[0]
+
+  return {url, room, event}
 }
 
 export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
@@ -283,15 +302,11 @@ export const makeChannelId = (url: string, room: string) => `${url}'${room}`
 
 export const splitChannelId = (id: string) => id.split("'")
 
-export const channels = derived([trackerStore, channelMessages], ([$tracker, $channelMessages]) => {
+export const channels = derived(channelMessages, $channelMessages => {
   const messagesByChannelId = new Map<string, ChannelMessage[]>()
 
   for (const message of $channelMessages) {
-    for (const url of $tracker.getRelays(message.event.id)) {
-      const channelId = makeChannelId(url, message.room)
-
-      pushToMapKey(messagesByChannelId, channelId, message)
-    }
+    pushToMapKey(messagesByChannelId, makeChannelId(message.url, message.room), message)
   }
 
   return Array.from(messagesByChannelId.entries()).map(([id, messages]) => {
