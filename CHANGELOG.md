@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.14
+
+- [x] Fix some bugs related to message discovery
+
 # 0.4.13
 
 - [x] Add support for nip05 urls
