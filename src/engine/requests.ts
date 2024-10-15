@@ -417,8 +417,8 @@ export const listenForMessages = (pubkeys: string[]) => {
     forcePlatform: false,
     relays: ctx.app.router.Messages(pubkeys).getUrls(),
     filters: [
-      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys},
-      {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
+      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
+      {kinds: [WRAP], "#p": [pubkey.get()]},
     ],
   })
 }

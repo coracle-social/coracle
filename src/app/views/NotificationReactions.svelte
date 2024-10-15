@@ -1,10 +1,9 @@
 <script lang="ts">
   import {pluck, uniq} from "ramda"
   import {closure} from "hurdak"
-  import {tracker} from "@welshman/app"
+  import {pubkey, tracker} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
-  import Spinner from 'src/partials/Spinner.svelte'
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import {router} from "src/app/util/router"
@@ -32,20 +31,18 @@
   })
 </script>
 
-<div class="flex flex-col gap-4">
-  <PeopleAction
-    pubkeys={uniq(pluck("pubkey", interactions))}
-    actionText={`${actionText} your note`} />
-  <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
-    <button type="button" on:click|stopPropagation class="flex justify-between text-sm">
-      {formatTimestamp($event.created_at)}
-    </button>
-    <div class="break-word overflow-hidden text-neutral-100">
-      {#if $event}
+{#if $event?.pubkey === $pubkey}
+  <div class="my-4 flex flex-col gap-4">
+    <PeopleAction
+      pubkeys={uniq(pluck("pubkey", interactions))}
+      actionText={`${actionText} your note`} />
+    <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
+      <button type="button" on:click|stopPropagation class="flex justify-between text-sm">
+        {formatTimestamp($event.created_at)}
+      </button>
+      <div class="break-word overflow-hidden text-neutral-100">
         <NoteContent note={$event} />
-      {:else}
-        <Spinner />
-      {/if}
-    </div>
-  </Card>
-</div>
+      </div>
+    </Card>
+  </div>
+{/if}

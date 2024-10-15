@@ -78,7 +78,7 @@
         <RelayStatus {url} />
       {/if}
       {#if !showStatus && ratings?.length > 0}
-        <div class="flex hidden items-center gap-1 px-4 text-sm sm:block">
+        <div class="hidden items-center gap-1 px-4 text-sm sm:flex">
           <Rating inert value={getAvgRating(ratings)} />
           {#if !hideRatingsCount}
             <span class="text-neutral-400">({ratings.length} reviews)</span>

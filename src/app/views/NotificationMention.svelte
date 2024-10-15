@@ -16,7 +16,7 @@
   const event = deriveEvent(root)
 </script>
 
-<div>
+<div class="my-4">
   <div class="mb-4 flex justify-between">
     <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} actionText="mentioned you" />
     <small>{formatTimestamp(timestamp)}</small>

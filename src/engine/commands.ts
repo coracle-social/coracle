@@ -12,6 +12,7 @@ import {
   append,
   nthEq,
   groupBy,
+  remove,
   now,
 } from "@welshman/lib"
 import type {TrustedEvent, Profile} from "@welshman/util"
@@ -794,7 +795,7 @@ export const sendMessage = async (channelId: string, content: string) => {
     content,
     kind: 14,
     created_at: now(),
-    tags: [...recipients.map(tagPubkey), ...getClientTags()],
+    tags: [...remove(pubkey.get(), recipients).map(tagPubkey), ...getClientTags()],
   }
 
   for (const recipient of uniq(recipients.concat(pubkey.get()))) {

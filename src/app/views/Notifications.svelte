@@ -78,7 +78,7 @@
   <OnboardingTasks />
 {/if}
 
-<FlexColumn bind:element>
+<div bind:this={element}>
   {#if activeTab === allTabs[0]}
     <NotificationSectionMain {limit} />
   {:else if activeTab === allTabs[1]}
@@ -86,4 +86,4 @@
   {:else if activeTab === allTabs[2]}
     <NotificationSectionGroups {limit} />
   {/if}
-</FlexColumn>
+</div>

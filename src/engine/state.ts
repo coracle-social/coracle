@@ -23,6 +23,7 @@ import {
   take,
 } from "@welshman/lib"
 import {
+  CLIENT_AUTH,
   APP_DATA,
   COMMUNITIES,
   COMMUNITY,
@@ -64,7 +65,14 @@ import {
   readList,
   asDecryptedEvent,
 } from "@welshman/util"
-import type {Filter, TrustedEvent, SignedEvent, EventTemplate, PublishedList} from "@welshman/util"
+import type {
+  Filter,
+  TrustedEvent,
+  SignedEvent,
+  EventTemplate,
+  PublishedList,
+  StampedEvent,
+} from "@welshman/util"
 import {Nip59, Nip01Signer} from "@welshman/signer"
 import {Executor, Multi, Plex, Local, Relays, publish as basePublish} from "@welshman/net"
 import type {PartialSubscribeRequest} from "@welshman/app"
@@ -1048,39 +1056,6 @@ export const getExecutor = (urls: string[]) => {
   return new Executor(target)
 }
 
-const seenChallenges = new Set()
-
-export const onAuth = async (url, challenge) => {
-  const {FORCE_GROUP, PLATFORM_RELAYS} = env
-
-  if (!signer.get()) {
-    return
-  }
-
-  if (seenChallenges.has(challenge)) {
-    return
-  }
-
-  if (!FORCE_GROUP && PLATFORM_RELAYS.length === 0 && !getSetting("auto_authenticate")) {
-    return
-  }
-
-  seenChallenges.add(challenge)
-
-  const event = await signer.get().sign(
-    createEvent(22242, {
-      tags: [
-        ["relay", url],
-        ["challenge", challenge],
-      ],
-    }),
-  )
-
-  ctx.net.pool.get(url).send(["AUTH", event])
-
-  return event
-}
-
 export type MySubscribeRequest = PartialSubscribeRequest & {
   skipCache?: boolean
   forcePlatform?: boolean
@@ -1423,7 +1398,21 @@ if (!db) {
   ]
 
   setContext({
-    net: getDefaultNetContext({onAuth, getExecutor}),
+    net: getDefaultNetContext({
+      getExecutor,
+      signEvent: (event: StampedEvent) => {
+        if (
+          event.kind === CLIENT_AUTH &&
+          !env.FORCE_GROUP &&
+          env.PLATFORM_RELAYS.length === 0 &&
+          !getSetting("auto_authenticate")
+        ) {
+          return
+        }
+
+        return signer.get()?.sign(event)
+      },
+    }),
     app: getDefaultAppContext({
       dufflepudUrl: env.DUFFLEPUD_URL,
       indexerRelays: env.INDEXER_RELAYS,

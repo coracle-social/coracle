@@ -1,9 +1,9 @@
 <script lang="ts">
   import {createEventDispatcher, onMount} from "svelte"
-  import {displayList} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile} from "src/util/html"
+  import {displayList} from "src/util/misc"
   import {uploadFiles, getSetting} from "src/engine"
 
   export let compose = null
