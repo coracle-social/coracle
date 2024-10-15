@@ -32,7 +32,7 @@
 </script>
 
 {#if $event?.pubkey === $pubkey}
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4 my-4">
     <PeopleAction
       pubkeys={uniq(pluck("pubkey", interactions))}
       actionText={`${actionText} your note`} />

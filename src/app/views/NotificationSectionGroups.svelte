@@ -45,13 +45,15 @@
 </script>
 
 {#each $groupNotifications.slice(0, limit) as notification, i (notification.id)}
-  {#if isGroupAlert(notification)}
-    <GroupAlert address={notification.group} alert={notification} />
-  {:else if isGroupRequest(notification)}
-    <GroupRequest showGroup address={notification.group} request={notification} />
-  {:else}
-    <Note showGroup note={notification} />
-  {/if}
+  <div class="mb-2">
+    {#if isGroupAlert(notification)}
+      <GroupAlert address={notification.group} alert={notification} />
+    {:else if isGroupRequest(notification)}
+      <GroupRequest showGroup address={notification.group} request={notification} />
+    {:else}
+      <Note showGroup note={notification} />
+    {/if}
+  </div>
 {:else}
   <p class="py-12 text-center">No notifications found - check back later!</p>
 {/each}

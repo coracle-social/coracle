@@ -14,7 +14,7 @@
   const event = deriveEvent(root)
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4 my-4">
   <div class="flex items-center justify-between">
     <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} actionText="replied to your note" />
     <small>{formatTimestamp(timestamp)}</small>
