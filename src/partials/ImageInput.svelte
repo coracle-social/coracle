@@ -1,12 +1,12 @@
 <script lang="ts">
   import {createEventDispatcher} from "svelte"
-  import {displayList} from "hurdak"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile} from "src/util/html"
   import {uploadFiles, getSetting} from "src/engine"
+  import {displayList} from "src/util/misc"
 
   export let icon = null
   export let value = null
