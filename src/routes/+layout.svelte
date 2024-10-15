@@ -49,40 +49,25 @@
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
+  const subs: any[] = []
+
+  const onDialogClose = (e: Event) => {
+    if (!$session) {
+      e.preventDefault()
+
+      // Prevent default doesn't always work, just re-open when needed
+      setTimeout(() => dialog.showModal())
+    } else if (modal) {
+      clearModal()
+    }
+  }
+
   let ready: Promise<unknown>
   let dialog: HTMLDialogElement
   let drawer: SvelteComponent
-  let prev: any
+  let modal: any
 
-  $: modalId = $page.url.hash.slice(1)
-  $: modal = modals.get(modalId)
-
-  $: {
-    if (!modal && !$session) {
-      modal = {component: Landing}
-
-      if (browser && $page.route?.id !== "/home") {
-        goto("/home")
-      }
-    }
-  }
-
-  $: {
-    if (modal) {
-      prev = modal
-
-      if (prev.options?.drawer) {
-        drawer?.open()
-      } else {
-        dialog?.showModal()
-      }
-    } else {
-      drawer?.close()
-      dialog?.close()
-    }
-  }
-
-  onMount(async () => {
+  onMount(() => {
     Object.assign(window, {get, ...lib, ...util, ...app, ...state})
 
     const getScoreEvent = () => {
@@ -164,18 +149,41 @@
         }
       })
 
-      dialog.addEventListener("close", () => {
-        if (modal) {
-          clearModal()
-        }
-      })
-
       for (const url of INDEXER_RELAYS) {
         loadRelay(url)
       }
 
       if ($pubkey) {
         loadUserData($pubkey)
+      }
+
+      ready.then(async () => {
+        await sleep(1)
+
+        page.subscribe($page => {
+          modal = modals.get($page.url.hash.slice(1))
+
+          if (!$session && !modal) {
+            modal = {component: Landing}
+          }
+
+          if (modal) {
+            if (modal.options?.drawer) {
+              drawer.open()
+            } else {
+              dialog.showModal()
+            }
+          } else if ($session) {
+            drawer?.close()
+            dialog?.close()
+          }
+        })
+      })
+    }
+
+    return () => {
+      for (const unsub of subs) {
+        unsub()
       }
     }
   })
@@ -192,10 +200,13 @@
         {/if}
       </PrimaryNav>
     </div>
-    <dialog bind:this={dialog} class="modal modal-bottom !z-modal sm:modal-middle">
-      {#if prev && !prev.options?.drawer}
-        {#key prev}
-          <ModalBox {...prev} />
+    <dialog
+      bind:this={dialog}
+      on:cancel={onDialogClose}
+      class="modal modal-bottom !z-modal sm:modal-middle">
+      {#if modal && !modal.options?.drawer}
+        {#key modal}
+          <ModalBox {...modal} />
         {/key}
         <Toast />
       {/if}
@@ -206,9 +217,9 @@
       {/if}
     </dialog>
     <Drawer bind:this={drawer}>
-      {#if prev && prev.options?.drawer}
-        {#key prev}
-          <svelte:component this={prev.component} {...prev.props} />
+      {#if modal && modal.options?.drawer}
+        {#key modal}
+          <svelte:component this={modal.component} {...modal.props} />
         {/key}
       {/if}
     </Drawer>
