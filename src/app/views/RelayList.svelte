@@ -184,9 +184,9 @@
       placeholder="Search relays or add a custom url">
       <i slot="before" class="fa-solid fa-search" />
     </Input>
-    {#each $searchRelays(q).slice(0, limit) as { url, profile } (url)}
+    {#each $searchRelays(q).slice(0, limit) as { url, description, profile } (url)}
       <RelayCard {url} ratings={ratings[url]}>
-        <p slot="description">{profile?.description || ""}</p>
+        <p slot="description">{description}</p>
       </RelayCard>
     {/each}
   {/if}

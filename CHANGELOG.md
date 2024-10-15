@@ -5,6 +5,7 @@
 - [x] Add support for nip05 urls
 - [x] Re-work notification rendering and loading
 - [x] Fix slight NIP 17 incompatibility with 0xChat DMs/group chats
+- [x] Use Intl api for list formatting (zmjohnson)
 
 # 0.4.12
 
