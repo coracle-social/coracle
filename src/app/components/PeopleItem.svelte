@@ -14,6 +14,7 @@
     formatTimestampRelative,
   } from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
+  import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
@@ -52,12 +53,15 @@
     {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
-    <Link external href={entityLink(nevent)} class="chat chat-start">
-      <div class="bg-alt chat-bubble text-left">
+    <button type="button" class="chat chat-start cursor-default" on:click|stopPropagation>
+      <div class="bg-alt chat-bubble text-left col-4">
         <Content hideMedia={!following} {event} />
-        <p class="text-right text-xs">{formatTimestamp(event.created_at)}</p>
+        <Link external href={entityLink(nevent)} class="row-2 justify-end group whitespace-nowrap">
+          <Icon icon="link-round" size={3} />
+          <p class="text-xs">{formatTimestamp(event.created_at)}</p>
+        </Link>
       </div>
-    </Link>
+    </button>
     <div class="flex gap-2">
       <div class="bg-alt badge badge-neutral border-none">
         {roots.length} recent {roots.length === 1 ? "note" : "notes"}

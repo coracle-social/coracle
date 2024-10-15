@@ -4,14 +4,20 @@
   export let href
   export let external = false
 
-  const go = () => goto(href)
+  const go = (e: Event) => {
+    if (!external) {
+      e.preventDefault()
+
+      goto(href)
+    }
+  }
 </script>
 
 <a
   {href}
   {...$$props}
+  on:click|stopPropagation={go}
   class="cursor-pointer {$$props.class}"
-  on:click|preventDefault|stopPropagation={go}
   rel={external ? "noopener noreferer" : ""}
   target={external ? "_blank" : ""}>
   <slot />
