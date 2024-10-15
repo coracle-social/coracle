@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
-  import type {SvelteComponent} from "svelte"
   import {get} from "svelte/store"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
@@ -38,40 +37,15 @@
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as app from "@welshman/app"
-  import ModalBox from "@lib/components/ModalBox.svelte"
-  import Drawer from "@lib/components/Drawer.svelte"
-  import Toast from "@app/components/Toast.svelte"
-  import Landing from "@app/components/Landing.svelte"
-  import PrimaryNav from "@app/components/PrimaryNav.svelte"
+  import AppContainer from "@app/components/AppContainer.svelte"
+  import ModalContainer from "@app/components/ModalContainer.svelte"
   import {modals, clearModal} from "@app/modal"
   import {theme} from "@app/theme"
   import {INDEXER_RELAYS} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
-  const subs: any[] = []
-
-  const onDialogClose = (e: Event) => {
-    if (!$session) {
-      e.preventDefault()
-
-      // Prevent default doesn't always work, just re-open when needed
-      setTimeout(() => dialog.showModal())
-    } else if (modal) {
-      clearModal()
-    }
-  }
-
-  const onDrawerClose = (e: any) => {
-    if (!e.target.checked) {
-      clearModal()
-    }
-  }
-
   let ready: Promise<unknown> = Promise.resolve()
-  let dialog: HTMLDialogElement
-  let drawer: SvelteComponent
-  let modal: any
 
   onMount(() => {
     Object.assign(window, {get, ...lib, ...util, ...app, ...state})
@@ -163,37 +137,6 @@
         loadUserData($pubkey)
       }
     }
-
-    ready.then(async () => {
-      await sleep(1)
-
-      subs.push(
-        page.subscribe($page => {
-          modal = modals.get($page.url.hash.slice(1))
-
-          if (!$session && !modal) {
-            modal = {component: Landing}
-          }
-
-          if (modal) {
-            if (modal.options?.drawer) {
-              drawer.open()
-            } else {
-              dialog.showModal()
-            }
-          } else if ($session) {
-            drawer?.close()
-            dialog?.close()
-          }
-        })
-      )
-    })
-
-    return () => {
-      for (const unsub of subs) {
-        unsub()
-      }
-    }
   })
 </script>
 
@@ -201,36 +144,9 @@
   <div data-theme={$theme} />
 {:then}
   <div data-theme={$theme}>
-    <div class="flex h-screen overflow-hidden">
-      <PrimaryNav>
-        {#if $pubkey}
-          <slot />
-        {/if}
-      </PrimaryNav>
-    </div>
-    <dialog
-      bind:this={dialog}
-      on:cancel={onDialogClose}
-      class="modal modal-bottom !z-modal sm:modal-middle">
-      {#if modal && !modal.options?.drawer}
-        {#key modal}
-          <ModalBox {...modal} />
-        {/key}
-        <Toast />
-      {/if}
-      {#if $session}
-        <form method="dialog" class="modal-backdrop">
-          <button />
-        </form>
-      {/if}
-    </dialog>
-    <Drawer bind:this={drawer} on:change={onDrawerClose}>
-      {#if modal && modal.options?.drawer}
-        {#key modal}
-          <svelte:component this={modal.component} {...modal.props} />
-        {/key}
-      {/if}
-    </Drawer>
-    <Toast />
+    <AppContainer>
+      <slot />
+    </AppContainer>
+    <ModalContainer />
   </div>
 {/await}
