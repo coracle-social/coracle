@@ -62,7 +62,13 @@
     }
   }
 
-  let ready: Promise<unknown>
+  const onDrawerClose = (e: any) => {
+    if (!e.target.checked) {
+      clearModal()
+    }
+  }
+
+  let ready: Promise<unknown> = Promise.resolve()
   let dialog: HTMLDialogElement
   let drawer: SvelteComponent
   let modal: any
@@ -156,10 +162,12 @@
       if ($pubkey) {
         loadUserData($pubkey)
       }
+    }
 
-      ready.then(async () => {
-        await sleep(1)
+    ready.then(async () => {
+      await sleep(1)
 
+      subs.push(
         page.subscribe($page => {
           modal = modals.get($page.url.hash.slice(1))
 
@@ -178,8 +186,8 @@
             dialog?.close()
           }
         })
-      })
-    }
+      )
+    })
 
     return () => {
       for (const unsub of subs) {
@@ -216,7 +224,7 @@
         </form>
       {/if}
     </dialog>
-    <Drawer bind:this={drawer}>
+    <Drawer bind:this={drawer} on:change={onDrawerClose}>
       {#if modal && modal.options?.drawer}
         {#key modal}
           <svelte:component this={modal.component} {...modal.props} />

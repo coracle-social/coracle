@@ -147,7 +147,7 @@
     </div>
   {/if}
   <button
-    class="join absolute -top-2 right-0 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
+    class="join absolute top-1 right-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
     <ChannelMessageEmojiButton {url} {room} {event} />
     <Button class="btn join-item btn-xs" on:click={showInfo}>

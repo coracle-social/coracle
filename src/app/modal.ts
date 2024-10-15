@@ -32,5 +32,6 @@ export const pushDrawer = (
 
 export const clearModal = () => {
   goto("#")
+  modals.clear()
   emitter.emit("close")
 }

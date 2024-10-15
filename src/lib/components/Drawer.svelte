@@ -24,7 +24,7 @@
 </script>
 
 <div class="drawer drawer-end">
-  <input {id} type="checkbox" class="drawer-toggle" bind:this={input} />
+  <input {id} type="checkbox" class="drawer-toggle" bind:this={input} on:change />
   <div class="drawer-content">
     <label for={id} bind:this={label} />
   </div>
