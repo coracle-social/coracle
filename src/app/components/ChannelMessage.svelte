@@ -18,9 +18,9 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
-  import EventInfo from "@app/components/EventInfo.svelte"
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
+  import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import {colors, tagRoom, deriveEvent, displayReaction} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
@@ -44,8 +44,6 @@
     300,
     derived(publishStatusData, $m => Object.values($m[event.id] || {})),
   )
-
-  const showInfo = () => pushModal(EventInfo, {event})
 
   const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
     $ps.find(({status}) => statuses.includes(status))
@@ -152,8 +150,6 @@
     class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
     on:click|stopPropagation>
     <ChannelMessageEmojiButton {url} {room} {event} />
-    <Button class="btn join-item btn-xs" on:click={showInfo}>
-      <Icon size={4} icon="code-2" />
-    </Button>
+    <ChannelMessageMenuButton {url} {room} {event} />
   </button>
 </button>

@@ -22,6 +22,7 @@
       popover = tippy(element, {
         content: target,
         animation: "shift-away",
+        appendTo: document.querySelector('.tippy-target')!,
         ...params,
       })
 

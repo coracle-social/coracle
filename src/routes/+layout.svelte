@@ -143,5 +143,6 @@
       <slot />
     </AppContainer>
     <ModalContainer />
+    <div class="tippy-target" />
   </div>
 {/await}

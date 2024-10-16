@@ -66,6 +66,7 @@
   import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
   import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
+  import TrashBin2 from "@assets/icons/Trash Bin 2.svg?dataurl"
   import UFO3 from "@assets/icons/UFO 3.svg?dataurl"
   import UserHeart from "@assets/icons/User Heart.svg?dataurl"
   import UserCircle from "@assets/icons/User Circle.svg?dataurl"
@@ -137,6 +138,7 @@
     "smile-circle": SmileCircle,
     settings: Settings,
     "tag-horizontal": TagHorizontal,
+    "trash-bin-2": TrashBin2,
     "ufo-3": UFO3,
     "square-share-line": SquareShareLine,
     "user-heart": UserHeart,
