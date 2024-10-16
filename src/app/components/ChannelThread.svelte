@@ -1,14 +1,18 @@
 <script lang="ts">
-  import {sortBy, append} from "@welshman/lib"
+  import {writable} from 'svelte/store'
+  import {assoc, sortBy, append} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import type {EventContent, TrustedEvent} from "@welshman/util"
   import {repository, publishThunk} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {tagRoom, REPLY} from "@app/state"
 
   export let url, room, event: TrustedEvent
+
+  const thunks = writable({} as Record<string, Thunk>)
 
   const replies = deriveEvents(repository, {
     filters: [{kinds: [REPLY], "#E": [event.id]}],
@@ -38,16 +42,17 @@
     }
 
     const reply = createEvent(REPLY, {content, tags: append(tagRoom(room, url), tags)})
+    const thunk = publishThunk({event: reply, relays: [url]})
 
-    publishThunk({event: reply, relays: [url]})
+    thunks.update(assoc(thunk.event.id, thunk))
   }
 </script>
 
 <div class="col-2">
   <div class="overflow-auto pt-3">
-    <ChannelMessage {url} {room} {event} showPubkey />
+    <ChannelMessage {url} {room} {event} thunk={$thunks[event.id]} showPubkey />
     {#each sortBy(e => e.created_at, $replies) as reply (reply.id)}
-      <ChannelMessage {url} {room} event={reply} showPubkey hideParent />
+      <ChannelMessage {url} {room} event={reply} thunk={$thunks[reply.id]} showPubkey hideParent />
     {/each}
   </div>
   <div class="bottom-0 left-0 right-0">

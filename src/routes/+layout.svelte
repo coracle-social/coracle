@@ -24,7 +24,6 @@
     initStorage,
     repository,
     pubkey,
-    publishStatusData,
     plaintext,
     freshness,
     storageAdapters,
@@ -106,7 +105,6 @@
         events: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
         relays: {keyPath: "url", store: throttled(1000, relays)},
         handles: {keyPath: "nip05", store: throttled(1000, handles)},
-        publishStatus: storageAdapters.fromObjectStore(publishStatusData),
         freshness: storageAdapters.fromObjectStore(freshness, {
           throttle: 1000,
           migrate: migrateFreshness,

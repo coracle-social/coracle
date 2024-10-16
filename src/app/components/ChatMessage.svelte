@@ -4,15 +4,12 @@
   import {hash, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents, throttled} from "@welshman/store"
-  import {PublishStatus} from "@welshman/net"
   import {
-    publishStatusData,
     deriveProfile,
     deriveProfileDisplay,
     formatTimestampAsTime,
     pubkey,
   } from "@welshman/app"
-  import type {PublishStatusData} from "@welshman/app"
   import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
   import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -35,15 +32,8 @@
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
   const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = throttled(
-    300,
-    derived(publishStatusData, $m => Object.values($m[event.wrap!.id] || {})),
-  )
 
   const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
-
-  const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
-    $ps.find(({status}) => statuses.includes(status))
 
   const onReactionClick = async (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -62,11 +52,6 @@
 
   let popover: Instance
   let popoverIsVisible = false
-
-  $: isPublished = findStatus($ps, [PublishStatus.Success])
-  $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
-  $: failure =
-    !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
 <div
@@ -114,19 +99,6 @@
           {/if}
           <div class="text-sm">
             <Content showEntire {event} />
-            {#if isPending}
-              <span class="flex-inline ml-1 gap-1">
-                <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
-                <span class="opacity-50">Sending...</span>
-              </span>
-            {:else if failure}
-              <span
-                class="flex-inline tooltip ml-1 cursor-pointer gap-1"
-                data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
-                <Icon icon="danger" class="translate-y-px" size={3} />
-                <span class="opacity-50">Failed to send!</span>
-              </span>
-            {/if}
           </div>
         </div>
       </div>

@@ -3,21 +3,20 @@
   import {hash, ellipsize, uniqBy, groupBy, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents, throttled} from "@welshman/store"
-  import {PublishStatus} from "@welshman/net"
   import {
-    publishStatusData,
     deriveProfile,
     deriveProfileDisplay,
     formatTimestampAsTime,
     pubkey,
   } from "@welshman/app"
-  import type {PublishStatusData} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
   import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
+  import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
@@ -28,6 +27,7 @@
   export let url
   export let room
   export let event: TrustedEvent
+  export let thunk: Thunk
   export let showPubkey = false
   export let hideParent = false
 
@@ -40,13 +40,6 @@
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const ps = throttled(
-    300,
-    derived(publishStatusData, $m => Object.values($m[event.id] || {})),
-  )
-
-  const findStatus = ($ps: PublishStatusData[], statuses: PublishStatus[]) =>
-    $ps.find(({status}) => statuses.includes(status))
 
   const openThread = () => {
     const root = $rootEvent || event
@@ -72,10 +65,6 @@
   $: rootPubkey = $rootEvent?.pubkey || rootTag?.[4]
   $: rootProfile = deriveProfile(rootPubkey || "")
   $: rootProfileDisplay = deriveProfileDisplay(rootPubkey || "")
-  $: isPublished = findStatus($ps, [PublishStatus.Success])
-  $: isPending = findStatus($ps, [PublishStatus.Pending]) && event.created_at > now() - 30
-  $: failure =
-    !isPending && !isPublished && findStatus($ps, [PublishStatus.Failure, PublishStatus.Timeout])
 </script>
 
 <button
@@ -110,18 +99,10 @@
       {/if}
       <div class="text-sm">
         <Content {event} />
-        {#if isPending}
-          <span class="flex-inline ml-1 gap-1">
-            <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
-            <span class="opacity-50">Sending...</span>
-          </span>
-        {:else if failure}
-          <span
-            class="flex-inline tooltip ml-1 cursor-pointer gap-1"
-            data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
-            <Icon icon="danger" class="translate-y-px" size={3} />
-            <span class="opacity-50">Failed to send!</span>
-          </span>
+        {#if thunk}
+          <div class="badge">
+            <ThunkStatus {thunk} />
+          </div>
         {/if}
       </div>
     </div>

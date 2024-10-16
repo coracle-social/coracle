@@ -9,10 +9,12 @@
 
 <script lang="ts">
   import {page} from "$app/stores"
-  import {sortBy, append} from "@welshman/lib"
+  import {writable} from 'svelte/store'
+  import {sortBy, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -36,13 +38,15 @@
   const {nrelay, room = GENERAL} = $page.params
   const url = decodeNRelay(nrelay)
   const channel = deriveChannel(makeChannelId(url, room))
+  const thunks = writable({} as Record<string, Thunk>)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
   const onSubmit = ({content, tags}: EventContent) => {
     const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
+    const thunk = publishThunk({event, relays: [url], delay: 60_000})
 
-    publishThunk({event, relays: [url]})
+    thunks.update(assoc(thunk.event.id, thunk))
   }
 
   let loading = true
@@ -108,8 +112,10 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
+        {@const event = assertEvent(value)}
+        {@const thunk = $thunks[event.id]}
         <div in:fly>
-          <ChannelMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+          <ChannelMessage {url} {room} {event} {thunk} {showPubkey} />
         </div>
       {/if}
     {/each}

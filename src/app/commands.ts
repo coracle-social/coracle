@@ -196,10 +196,12 @@ export const checkRelayAccess = async (url: string, claim = "") => {
   await connection.auth.attemptIfRequested()
   await connection.auth.waitIfPending()
 
-  const result = await publishThunk({
+  const thunk = publishThunk({
     event: createEvent(AUTH_JOIN, {tags: [["claim", claim]]}),
     relays: [url],
   })
+
+  const result = await thunk.result
 
   if (result[url].status !== PublishStatus.Success) {
     const message = result[url].message?.replace(/^.*: /, "") || "join request rejected"
@@ -259,10 +261,12 @@ export const sendWrapped = async ({
 
   await Promise.all(
     uniq(pubkeys).map(async recipient => {
-      return publishThunk({
+      const thunk = publishThunk({
         event: await nip59.wrap(recipient, stamp(template)),
         relays: ctx.app.router.PublishMessage(recipient).getUrls(),
       })
+
+      await thunk.result
     }),
   )
 }
