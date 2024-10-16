@@ -22,6 +22,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import {userFollows} from "src/engine"
+  import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 
   export let pubkey
@@ -36,29 +37,31 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <div class="flex w-full flex-col">
-    <div class="flex w-full items-center gap-2">
-      <span class="cy-person-name max-w-[80%] overflow-hidden text-ellipsis"
-        >{$profileDisplay}</span>
-      {#if $session}
-        <div on:click|stopPropagation>
-          <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
-            <div slot="trigger">
-              <WotScore score={wotScore} max={$maxWot} {accent} />
-            </div>
-            <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
-              <i class="fa fa-info-circle" />
-              WoT Score: {wotScore}
-            </Anchor>
-          </Popover>
-        </div>
-      {/if}
+  <div class="flex items-center gap-2">
+    <div class="w-full items-center gap-2">
+      <div class="cy-person-name max-w-[100%] overflow-hidden text-ellipsis whitespace-nowrap">
+        {$profileDisplay}
+      </div>
+      <div class="flex flex-row items-center gap-2">
+        <PersonHandle class="whitespace-nowrap text-xs text-accent" {pubkey} />
+        <small class="whitespace-nowrap">{npubDisplay}</small>
+        {#if displayNpubCopyButton}
+          <CopyValueSimple class="pl-1" value={npub} label="Npub" />
+        {/if}
+      </div>
     </div>
-    <div class="flex flex-row items-center text-sm">
-      <small>{npubDisplay}</small>
-      {#if displayNpubCopyButton}
-        <CopyValueSimple class="pl-1" value={npub} label="Npub" />
-      {/if}
-    </div>
+    {#if $session}
+      <div on:click|stopPropagation>
+        <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
+          <div slot="trigger">
+            <WotScore class="!h-6 !w-6" score={wotScore} max={$maxWot} {accent} />
+          </div>
+          <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
+            <i class="fa fa-info-circle" />
+            WoT Score: {wotScore}
+          </Anchor>
+        </Popover>
+      </div>
+    {/if}
   </div>
 </div>
