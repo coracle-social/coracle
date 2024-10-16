@@ -7,6 +7,7 @@ import {
   RELAYS,
   FOLLOWS,
   REACTION,
+  AUTH_JOIN,
   isSignedEvent,
   createEvent,
   displayProfile,
@@ -196,7 +197,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
   await connection.auth.waitIfPending()
 
   const result = await publishThunk({
-    event: createEvent(28934, {tags: [["claim", claim]]}),
+    event: createEvent(AUTH_JOIN, {tags: [["claim", claim]]}),
     relays: [url],
   })
 
@@ -234,6 +235,7 @@ export const checkRelayAuth = async (url: string) => {
   await connection.auth.waitIfPending()
 
   if (!okStatuses.includes(connection.auth.status)) {
+    console.log(connection.auth.status, connection)
     return `Failed to authenticate: "${connection.auth.message}"`
   }
 }

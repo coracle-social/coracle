@@ -28,7 +28,7 @@
   }
 
   const joinRelay = async (invite: string) => {
-    const [raw, claim] = invite.split("'")
+    const [raw, claim] = invite.split("|")
     const url = normalizeRelayUrl(raw)
     const error = await attemptRelayAccess(url, claim)
 

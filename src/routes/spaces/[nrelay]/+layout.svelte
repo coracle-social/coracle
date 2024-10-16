@@ -11,6 +11,7 @@
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
+  import SpaceInvite from "@app/components/SpaceInvite.svelte"
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
@@ -34,6 +35,8 @@
   const toggleMenu = () => {
     showMenu = !showMenu
   }
+
+  const createInvite = () => pushModal(SpaceInvite, {url})
 
   const leaveSpace = () => pushModal(SpaceExit, {url})
 
@@ -80,21 +83,25 @@
             <ul
               transition:fly
               class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
-              {#if getMembershipUrls($userMembership).includes(url)}
-                <li class="text-error">
-                  <Button on:click={leaveSpace}>
+              <li>
+                <Button on:click={createInvite}>
+                  <Icon icon="link-round" />
+                  Create Invite
+                </Button>
+              </li>
+              <li>
+                {#if getMembershipUrls($userMembership).includes(url)}
+                  <Button on:click={leaveSpace} class="text-error">
                     <Icon icon="exit" />
                     Leave Space
                   </Button>
-                </li>
-              {:else}
-                <li>
+                {:else}
                   <Button on:click={joinSpace}>
                     <Icon icon="login-2" />
                     Join Space
                   </Button>
-                </li>
-              {/if}
+                {/if}
+              </li>
             </ul>
           </Popover>
         {/if}

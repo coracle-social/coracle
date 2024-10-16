@@ -298,9 +298,9 @@ export type Channel = {
   messages: ChannelMessage[]
 }
 
-export const makeChannelId = (url: string, room: string) => `${url}'${room}`
+export const makeChannelId = (url: string, room: string) => `${url}|${room}`
 
-export const splitChannelId = (id: string) => id.split("'")
+export const splitChannelId = (id: string) => id.split("|")
 
 export const channels = derived(channelMessages, $channelMessages => {
   const messagesByChannelId = new Map<string, ChannelMessage[]>()
