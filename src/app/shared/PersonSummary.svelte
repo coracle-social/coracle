@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {tagPubkey} from "@welshman/app"
   import cx from "classnames"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -7,10 +8,17 @@
   import PersonActions from "src/app/shared/PersonActions.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import {router} from "src/app/util/router"
+  import {derived} from "svelte/store"
+  import {unfollow, userFollows, follow} from "src/engine"
 
   export let pubkey
   export let inert = false
   export let hideActions = false
+
+  const following = derived(userFollows, $m => $m.has(pubkey))
+
+  const unfollowPerson = () => unfollow(pubkey)
+  const doFollow = () => follow(tagPubkey(pubkey))
 
   const showDetail = () => router.at("people").of(pubkey).open()
 </script>
@@ -28,9 +36,17 @@
     </Anchor>
     {#if !hideActions}
       <div class="flex items-start justify-end">
-        <slot name="actions" {pubkey}>
-          <PersonActions {pubkey} />
-        </slot>
+        <div class="flex items-center justify-end gap-2">
+          {#if $following}
+            <Anchor button low class="border-none bg-tinted-800-d" on:click={e => unfollow(pubkey)}
+              >Followed</Anchor>
+          {:else}
+            <Anchor button accent on:click={e => follow(tagPubkey(pubkey))}>Follow</Anchor>
+          {/if}
+          <slot name="actions" {pubkey}>
+            <PersonActions {pubkey} />
+          </slot>
+        </div>
       </div>
     {/if}
   </div>
