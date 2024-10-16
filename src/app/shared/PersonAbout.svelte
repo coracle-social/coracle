@@ -10,6 +10,7 @@
 
 <NoteContentKind1
   note={{content: $profile?.about || ""}}
+  class={$$props.class}
   minLength={200}
   maxLength={300}
   expandable={false}

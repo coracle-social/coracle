@@ -13,7 +13,8 @@
 </style>
 
 <script lang="ts">
-  import {clamp} from '@welshman/lib'
+  import cx from "classnames"
+  import {clamp} from "@welshman/lib"
   import {themeColors} from "src/partials/state"
 
   export let score
@@ -26,19 +27,17 @@
   $: normalizedScore = clamp([0, max], score) / max
   $: dashOffset = 100 - 44 * normalizedScore
   $: style = `transform: rotate(${135 - normalizedScore * 180}deg)`
-  $: stroke = $themeColors[accent ? 'accent' : 'neutral-200']
+  $: stroke = $themeColors[accent ? "accent" : "neutral-200"]
 </script>
 
-<div class="relative h-4 w-4">
-  <svg height="16" width="16" class="absolute">
-    <circle class="wot-background" cx={center} cy={center} r={radius} />
-    <circle
-      cx={center}
-      cy={center}
-      r={radius}
-      class="wot-highlight"
-      stroke-dashoffset={dashOffset}
-      {style}
-      {stroke} />
-  </svg>
-</div>
+<svg viewBox="0 0 16 16" class={cx($$props.class, "h-4 w-4")}>
+  <circle class="wot-background" cx={center} cy={center} r={radius} />
+  <circle
+    cx={center}
+    cy={center}
+    r={radius}
+    class="wot-highlight"
+    stroke-dashoffset={dashOffset}
+    {style}
+    {stroke} />
+</svg>

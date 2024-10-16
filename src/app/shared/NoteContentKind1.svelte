@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {fromNostrURI} from "@welshman/util"
   import {
     parse,
@@ -57,7 +58,7 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
 
-    if (isLink(parsed)) return showMedia && !parsed.raw.match('^ws|coracle')
+    if (isLink(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
 
     return isEvent(parsed) || isAddress(parsed)
   }
@@ -79,7 +80,7 @@
 </script>
 
 <div
-  class="note-content overflow-hidden text-ellipsis"
+  class={cx($$props.class, "note-content overflow-hidden text-ellipsis")}
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
     {#if isNewline(parsed)}
