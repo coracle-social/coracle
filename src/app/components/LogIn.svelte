@@ -9,6 +9,7 @@
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInInfoRemoteSigner from "@app/components/LogInInfoRemoteSigner.svelte"
+  import LogInKey from "@app/components/LogInKey.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
   import {loadUserData} from "@app/commands"
@@ -85,6 +86,8 @@
     }
   })
 
+  const loginWithKey = () => pushModal(LogInKey)
+
   let username = ""
   let domain = "nsec.app"
   let loading = false
@@ -133,7 +136,7 @@
       Log in with Extension
     </Button>
   {/if}
-  <Button disabled={loading} on:click={loginWithNip07} class="btn btn-neutral">
+  <Button disabled={loading} on:click={loginWithKey} class="btn btn-neutral">
     <Icon icon="key" />
     Log in with Key
   </Button>

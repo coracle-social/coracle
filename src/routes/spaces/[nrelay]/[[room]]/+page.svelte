@@ -8,14 +8,15 @@
 </script>
 
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {page} from "$app/stores"
   import {writable} from 'svelte/store'
-  import {sortBy, assoc, append} from "@welshman/lib"
+  import {sortBy, now, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
-  import {formatTimestampAsDate, publishThunk} from "@welshman/app"
+  import {formatTimestampAsDate, subscribe, publishThunk} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {fly} from "@lib/transition"
+  import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -24,6 +25,7 @@
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
+    loadChannel,
     userMembership,
     decodeNRelay,
     makeChannelId,
@@ -37,14 +39,15 @@
 
   const {nrelay, room = GENERAL} = $page.params
   const url = decodeNRelay(nrelay)
-  const channel = deriveChannel(makeChannelId(url, room))
+  const id = makeChannelId(url, room)
+  const channel = deriveChannel(id)
   const thunks = writable({} as Record<string, Thunk>)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
   const onSubmit = ({content, tags}: EventContent) => {
     const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
-    const thunk = publishThunk({event, relays: [url], delay: 60_000})
+    const thunk = publishThunk({event, relays: [url], delay: 2000})
 
     thunks.update(assoc(thunk.event.id, thunk))
   }
@@ -80,6 +83,11 @@
     elements.reverse()
   }
 
+  onMount(() => {
+    loadChannel(id)
+    subscribe({filters: [{'#~': [room], since: now()}], relays: [url]})
+  })
+
   setTimeout(() => {
     loading = false
   }, 3000)
@@ -114,7 +122,7 @@
       {:else}
         {@const event = assertEvent(value)}
         {@const thunk = $thunks[event.id]}
-        <div in:fly>
+        <div in:slide>
           <ChannelMessage {url} {room} {event} {thunk} {showPubkey} />
         </div>
       {/if}
