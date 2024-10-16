@@ -6,7 +6,7 @@
   import {session, signer, tagPubkey, mute, unmute} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {loginWithPublicKey, unfollow, follow, userMutes, userFollows} from "src/engine"
+  import {loginWithPublicKey, unfollow, userMutes, userFollows} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
 
