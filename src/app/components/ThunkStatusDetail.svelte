@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {PublishStatus} from '@welshman/net'
-  import {displayRelayUrl} from '@welshman/util'
-  import Button from '@lib/components/Button.svelte'
+  import {PublishStatus} from "@welshman/net"
+  import {displayRelayUrl} from "@welshman/util"
+  import Button from "@lib/components/Button.svelte"
 
   export let url: string
   export let status: string

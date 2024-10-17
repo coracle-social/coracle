@@ -43,7 +43,10 @@
             </span>
           </p>
           <p class="text-xs">
-            Icons by <Link external class="link" href="https://www.figma.com/community/file/1166831539721848736">480 Design</Link>
+            Icons by <Link
+              external
+              class="link"
+              href="https://www.figma.com/community/file/1166831539721848736">480 Design</Link>
           </p>
         </div>
         <div class="flex justify-center gap-4">

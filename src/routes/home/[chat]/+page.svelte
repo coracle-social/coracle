@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {derived, writable} from "svelte/store"
-  import {ctx, assoc, sortBy, now, remove} from "@welshman/lib"
+  import {assoc, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {

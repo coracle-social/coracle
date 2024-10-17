@@ -9,8 +9,8 @@ export const fly = (node: Element, params?: FlyParams | undefined) =>
   baseFly(node, {y: 20, ...params})
 
 export type TranslateParams = {
-  delay?: number,
-  duration?: number,
+  delay?: number
+  duration?: number
   easing?: (t: number) => number
   axis?: "x" | "y"
   reverse?: boolean
@@ -18,7 +18,7 @@ export type TranslateParams = {
 
 export const translate = (
   node: Element,
-  {delay = 0, duration = 400, easing = cubicOut, axis = "y", reverse = false}: TranslateParams = {}
+  {delay = 0, duration = 400, easing = cubicOut, axis = "y", reverse = false}: TranslateParams = {},
 ) => {
   return {
     delay,
@@ -32,7 +32,7 @@ export const translate = (
       } else {
         return `transform: translateY(${p})`
       }
-    }
+    },
   }
 }
 
@@ -75,5 +75,6 @@ export function slideAndFade(
   }
 }
 
-export const conditionalTransition = (condition: any, transition: any) =>
-  (node: any, args?: any) => condition ? transtion(node, args) : null
+export const conditionalTransition =
+  (condition: any, transition: any) => (node: any, args?: any) =>
+    condition ? transtion(node, args) : null

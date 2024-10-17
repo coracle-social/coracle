@@ -1,21 +1,14 @@
 <script lang="ts">
-  import {derived} from "svelte/store"
   import {type Instance} from "tippy.js"
-  import {hash, sleep, uniqBy, groupBy, now} from "@welshman/lib"
+  import {hash, uniqBy, groupBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveEvents, throttled} from "@welshman/store"
-  import {
-    deriveProfile,
-    deriveProfileDisplay,
-    formatTimestampAsTime,
-    pubkey,
-  } from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
+  import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {MergedThunk} from "@welshman/app"
-  import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
+  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
   import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import Delay from "@lib/components/Delay.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
@@ -95,7 +88,7 @@
         <div class="-mt-1 flex-grow pr-1">
           {#if showPubkey}
             <div class="flex items-center gap-2">
-              <Button class="font-bold text-sm" style="color: {colorValue}" on:click={showProfile}>
+              <Button class="text-sm font-bold" style="color: {colorValue}" on:click={showProfile}>
                 {$profileDisplay}
               </Button>
               <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>

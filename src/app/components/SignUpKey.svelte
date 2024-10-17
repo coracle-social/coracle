@@ -1,17 +1,15 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
-  import {goto} from '$app/navigation'
-  import {hexToBytes} from '@noble/hashes/utils'
+  import {nip19} from "nostr-tools"
+  import {goto} from "$app/navigation"
+  import {hexToBytes} from "@noble/hashes/utils"
   import {getPubkey, makeSecret} from "@welshman/signer"
   import {addSession} from "@welshman/app"
-  import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
-  import {loadUserData} from "@app/commands"
   import {pushModal, clearModals} from "@app/modal"
   import {clip} from "@app/toast"
 

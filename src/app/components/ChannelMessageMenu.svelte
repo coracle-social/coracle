@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {pubkey} from '@welshman/app'
+  import {pubkey} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Confirm from "@lib/components/Confirm.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import {publishDelete} from '@app/commands'
-  import {pushModal} from '@app/modal'
+  import {publishDelete} from "@app/commands"
+  import {pushModal} from "@app/modal"
 
   export let url
   export let event
@@ -33,7 +33,7 @@
   }
 </script>
 
-<ul class="menu rounded-box bg-base-100 p-2 shadow-xl whitespace-nowrap">
+<ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl">
   <li>
     <Button on:click={showInfo}>
       <Icon size={4} icon="code-2" />

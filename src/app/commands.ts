@@ -45,7 +45,14 @@ import {
   nip44EncryptToSelf,
   loadRelay,
 } from "@welshman/app"
-import {tagRoom, userMembership, MEMBERSHIPS, INDEXER_RELAYS, loadMembership, loadSettings} from "@app/state"
+import {
+  tagRoom,
+  userMembership,
+  MEMBERSHIPS,
+  INDEXER_RELAYS,
+  loadMembership,
+  loadSettings,
+} from "@app/state"
 
 // Utils
 
@@ -98,7 +105,7 @@ export const loadUserData = (
       await sleep(300)
 
       for (const pubkey of pubkeys) {
-        loadMembership(pubkey),
+        loadMembership(pubkey)
         loadProfile(pubkey)
         loadFollows(pubkey)
         loadMutes(pubkey)
@@ -284,9 +291,9 @@ export const sendWrapped = async ({
           event: await nip59.wrap(recipient, stamp(template)),
           relays: ctx.app.router.PublishMessage(recipient).getUrls(),
           delay,
-        })
+        }),
       ),
-    )
+    ),
   )
 }
 

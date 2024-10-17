@@ -34,7 +34,7 @@ export const createScroller = ({
   let done = false
 
   const check = async () => {
-    const container = element.closest('.scroll-container')
+    const container = element.closest(".scroll-container")
 
     if (container) {
       // While we have empty space, fill it

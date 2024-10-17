@@ -1,13 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {createScroller} from "@lib/html"
-  import {uniq, shuffle} from "@welshman/lib"
-  import {getPubkeyTagValues, getListTags} from "@welshman/util"
-  import {profileSearch, userFollows} from "@welshman/app"
+  import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
-  import PageHeader from "@lib/components/PageHeader.svelte"
   import PeopleItem from "@app/components/PeopleItem.svelte"
-  import {getDefaultPubkeys} from '@app/state'
+  import {getDefaultPubkeys} from "@app/state"
 
   const defaultPubkeys = getDefaultPubkeys()
 

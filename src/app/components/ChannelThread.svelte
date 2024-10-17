@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {writable} from 'svelte/store'
+  import {writable} from "svelte/store"
   import {assoc, sortBy, append} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import type {EventContent, TrustedEvent} from "@welshman/util"

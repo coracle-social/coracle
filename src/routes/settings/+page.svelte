@@ -9,6 +9,8 @@
   import {pushToast} from "@app/toast"
   import {SETTINGS, userSettings} from "@app/state"
 
+  const settings = {...$userSettings?.values}
+
   const reset = () => {
     mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
   }
@@ -29,12 +31,11 @@
     pushToast({message: "Your settings have been saved!"})
   }
 
-  let settings = {...$userSettings?.values}
   let mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 </script>
 
 <form class="content column gap-4" on:submit|preventDefault={onSubmit}>
-  <div class="card2 bg-alt shadow-xl col-4">
+  <div class="card2 bg-alt col-4 shadow-xl">
     <Field>
       <p slot="label">Muted Accounts</p>
       <div slot="input">
@@ -43,8 +44,14 @@
     </Field>
     <FieldInline>
       <p slot="label">Hide sensitive content?</p>
-      <input slot="input" type="checkbox" class="toggle toggle-primary" bind:checked={settings.hide_sensitive} />
-      <p slot="info">If content is marked by the author as sensitive, flotilla will hide it by default.</p>
+      <input
+        slot="input"
+        type="checkbox"
+        class="toggle toggle-primary"
+        bind:checked={settings.hide_sensitive} />
+      <p slot="info">
+        If content is marked by the author as sensitive, flotilla will hide it by default.
+      </p>
     </FieldInline>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
       <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>

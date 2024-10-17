@@ -10,8 +10,6 @@
   } from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
   import WotScore from "@lib/components/WotScore.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
-  import {pushDrawer} from "@app/modal"
 
   export let value
 

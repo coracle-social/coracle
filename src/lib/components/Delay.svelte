@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {sleep} from '@welshman/lib'
+  import {sleep} from "@welshman/lib"
 
   export let delay = 1
 </script>

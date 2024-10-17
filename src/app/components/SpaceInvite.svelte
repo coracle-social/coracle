@@ -1,19 +1,16 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {goto} from "$app/navigation"
+  import {onMount} from "svelte"
   import {sleep, identity, nthEq} from "@welshman/lib"
   import {load} from "@welshman/app"
   import {displayRelayUrl, AUTH_INVITE} from "@welshman/util"
-  import type {TrustedEvent} from "@welshman/util"
-  import {slide} from '@lib/transition'
+  import {slide} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {pushModal} from '@app/modal'
-  import {clip} from '@app/toast'
+  import {clip} from "@app/toast"
 
   export let url
 
@@ -32,16 +29,14 @@
       sleep(2000),
     ])
 
-    claim = event?.tags.find(nthEq(0, 'claim'))?.[1] || ""
+    claim = event?.tags.find(nthEq(0, "claim"))?.[1] || ""
     loading = false
   })
 </script>
 
 <div class="col-4">
   <ModalHeader>
-    <div slot="title">
-      Create an Invite
-    </div>
+    <div slot="title">Create an Invite</div>
     <div slot="info">
       Get a link that you can use to invite people to
       <span class="text-primary">{displayRelayUrl(url)}</span>
@@ -65,8 +60,8 @@
           <p slot="info">
             This invite link can be used by clicking "Add Space" and pasting it there.
             {#if !claim}
-              This space did not issue a claim for this link, so additional steps might be
-              required for people using this invite link.
+              This space did not issue a claim for this link, so additional steps might be required
+              for people using this invite link.
             {/if}
           </p>
         </Field>

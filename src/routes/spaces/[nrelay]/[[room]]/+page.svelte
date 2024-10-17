@@ -8,9 +8,9 @@
 </script>
 
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {writable} from 'svelte/store'
+  import {writable} from "svelte/store"
   import {sortBy, now, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
@@ -82,7 +82,7 @@
   }
 
   onMount(() => {
-    subscribe({filters: [{'#~': [room], since: now()}], relays: [url]})
+    subscribe({filters: [{"#~": [room], since: now()}], relays: [url]})
   })
 
   setTimeout(() => {

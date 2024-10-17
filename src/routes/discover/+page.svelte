@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from 'svelte/store'
-  import {addToMapKey, dec, gt, inc} from "@welshman/lib"
+  import {derived} from "svelte/store"
+  import {addToMapKey, dec, gt} from "@welshman/lib"
   import type {Relay} from "@welshman/app"
   import {relays, createSearch, relaySelections} from "@welshman/app"
   import {createScroller} from "@lib/html"
@@ -12,24 +12,27 @@
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
-  import {userMembership, memberships, membershipByPubkey, getMembershipUrls, getDefaultPubkeys} from "@app/state"
+  import {
+    userMembership,
+    memberships,
+    membershipByPubkey,
+    getMembershipUrls,
+    getDefaultPubkeys,
+  } from "@app/state"
   import {discoverRelays} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  const wotGraph = derived(
-    membershipByPubkey,
-    $m => {
-      const scores = new Map<string, Set<string>>()
+  const wotGraph = derived(membershipByPubkey, $m => {
+    const scores = new Map<string, Set<string>>()
 
-      for (const pubkey of getDefaultPubkeys()) {
-        for (const url of getMembershipUrls($m.get(pubkey))) {
-          addToMapKey(scores, url, pubkey)
-        }
+    for (const pubkey of getDefaultPubkeys()) {
+      for (const url of getMembershipUrls($m.get(pubkey))) {
+        addToMapKey(scores, url, pubkey)
       }
-
-      return scores
     }
-  )
+
+    return scores
+  })
 
   const openSpace = (url: string) => pushModal(SpaceCheck, {url})
 
@@ -83,7 +86,7 @@
       class="card2 bg-alt col-4 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
       on:click={() => openSpace(relay.url)}>
       <div class="col-2">
-        <div class="flex gap-4 relative">
+        <div class="relative flex gap-4">
           <div class="relative">
             <div class="avatar relative">
               <div
@@ -97,14 +100,14 @@
             </div>
             {#if getMembershipUrls($userMembership).includes(relay.url)}
               <div
-                class="absolute -right-1 -top-1 tooltip h-5 w-5 rounded-full bg-primary"
+                class="tooltip absolute -right-1 -top-1 h-5 w-5 rounded-full bg-primary"
                 data-tip="You are already a member of this space.">
                 <Icon icon="check-circle" class="scale-110" />
               </div>
             {/if}
           </div>
           <div>
-            <h2 class="text-xl ellipsize whitespace-nowrap">
+            <h2 class="ellipsize whitespace-nowrap text-xl">
               <RelayName url={relay.url} />
             </h2>
             <p class="text-sm opacity-75">{relay.url}</p>

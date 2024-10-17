@@ -1,10 +1,8 @@
 <script lang="ts">
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
-  import {ctx, uniq, between} from "@welshman/lib"
-  import {Nip59} from "@welshman/signer"
+  import {between} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {signer, publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"

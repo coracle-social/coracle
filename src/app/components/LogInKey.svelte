@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {nip19} from "nostr-tools"
   import {getPubkey} from "@welshman/signer"
   import {addSession} from "@welshman/app"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -18,7 +18,7 @@
   const onSubmit = async () => {
     let secret = key
 
-    if (secret.startsWith('nsec')) {
+    if (secret.startsWith("nsec")) {
       secret = nip19.decode(secret).data as string
     }
 

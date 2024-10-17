@@ -24,10 +24,10 @@
 
 <div class="flex flex-col gap-2 {$$props.class}">
   {#if muted}
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <div class="row-2 relative">
         <Icon icon="danger" class="mt-1" />
-        <p>You have muted this person.<p>
+        <p>You have muted this person.</p>
       </div>
       <Button class="link ml-8" on:click={ignoreMute}>Show anyway</Button>
     </div>

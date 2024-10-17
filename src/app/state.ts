@@ -11,7 +11,6 @@ import {
   uniq,
   partition,
   nth,
-  max,
   pushToMapKey,
   nthEq,
   shuffle,
@@ -20,12 +19,10 @@ import {
 import {
   getIdFilters,
   WRAP,
-  RELAYS,
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
   getRelayTagValues,
-  isShareableRelayUrl,
   getPubkeyTagValues,
   isHashedEvent,
   displayProfile,
@@ -41,9 +38,7 @@ import {
   pubkey,
   repository,
   load,
-  subscribe,
   collection,
-  loadRelay,
   profilesByPubkey,
   getDefaultAppContext,
   getDefaultNetContext,
@@ -180,7 +175,7 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
     const events = sortBy(e => -e.created_at, repository.query(filters))
 
     if (events.length > 100) {
-      filters = filters.map(assoc('since', events[100]!.created_at))
+      filters = filters.map(assoc("since", events[100]!.created_at))
     }
 
     promises.push(pull({relays: dumb, filters}))
@@ -247,10 +242,10 @@ export const deriveEventsForUrl = (url: string, kinds: number[]) =>
 export const SETTINGS = 38489
 
 export type Settings = {
-  event: TrustedEvent,
+  event: TrustedEvent
   values: {
     hide_sensitive: boolean
-  },
+  }
 }
 
 export const defaultSettings = {
@@ -260,8 +255,10 @@ export const defaultSettings = {
 export const settings = deriveEventsMapped<Settings>(repository, {
   filters: [{kinds: [SETTINGS]}],
   itemToEvent: item => item.event,
-  eventToItem: async (event: TrustedEvent) =>
-    ({event, values: {...defaultSettings, ...parseJson(await ensurePlaintext(event))}})
+  eventToItem: async (event: TrustedEvent) => ({
+    event,
+    values: {...defaultSettings, ...parseJson(await ensurePlaintext(event))},
+  }),
 })
 
 export const {
@@ -275,8 +272,6 @@ export const {
   load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
     load({...request, filters: [{kinds: [SETTINGS], authors: [pubkey]}]}),
 })
-
-
 
 // Membership
 

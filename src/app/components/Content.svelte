@@ -70,8 +70,7 @@
   }
 
   let warning =
-    $userSettings?.values.hide_sensitive &&
-    event.tags.find(nthEq(0, "content-warning"))?.[1]
+    $userSettings?.values.hide_sensitive && event.tags.find(nthEq(0, "content-warning"))?.[1]
 
   $: shortContent = showEntire
     ? fullContent

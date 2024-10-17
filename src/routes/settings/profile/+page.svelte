@@ -9,7 +9,7 @@
     createProfile,
     isPublishedProfile,
   } from "@welshman/util"
-  import {pubkey, profilesByPubkey, publishThunk, displayNip05, deriveProfile} from "@welshman/app"
+  import {pubkey, publishThunk, displayNip05, deriveProfile} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"

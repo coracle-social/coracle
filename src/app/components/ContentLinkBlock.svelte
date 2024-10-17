@@ -1,10 +1,9 @@
 <script lang="ts">
   import {ellipsize, postJson} from "@welshman/lib"
-  import {fade} from '@lib/transition'
   import {dufflepud, imgproxy} from "@app/state"
   import Link from "@lib/components/Link.svelte"
-  import ContentLinkDetail from '@app/components/ContentLinkDetail.svelte'
-  import {pushModal} from '@app/modal'
+  import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
+  import {pushModal} from "@app/modal"
 
   export let value
 

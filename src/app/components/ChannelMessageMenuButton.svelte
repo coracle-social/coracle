@@ -5,8 +5,6 @@
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import ChannelMessageMenu from "@app/components/ChannelMessageMenu.svelte"
-  import {tagRoom} from "@app/state"
-  import {publishReaction} from "@app/commands"
 
   export let url, room, event
 

@@ -1,18 +1,13 @@
 <script lang="ts">
-  import {readable, derived} from "svelte/store"
-  import {hash, sleep, ellipsize, uniqBy, groupBy, now} from "@welshman/lib"
+  import {readable} from "svelte/store"
+  import {hash, ellipsize, uniqBy, groupBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveEvents, throttled} from "@welshman/store"
-  import {
-    deriveProfile,
-    deriveProfileDisplay,
-    formatTimestampAsTime,
-    pubkey,
-  } from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
+  import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {REACTION, ZAP_RESPONSE, displayRelayUrl} from "@welshman/util"
+  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
   import {repository} from "@welshman/app"
-  import {slideAndFade, conditionalTransition} from '@lib/transition'
+  import {slideAndFade, conditionalTransition} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Delay from "@lib/components/Delay.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -42,7 +37,7 @@
   const rootId = rootTag?.[1]
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
-  const [colorName, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+  const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
   const transition = conditionalTransition(thunk, slideAndFade)
 
@@ -95,7 +90,10 @@
     <div class="flex w-full gap-3">
       {#if showPubkey}
         <Button on:click={showProfile}>
-          <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+          <Avatar
+            src={$profile?.picture}
+            class="border border-solid border-base-content"
+            size={10} />
         </Button>
       {:else}
         <div class="w-10 min-w-10 max-w-10" />
@@ -103,7 +101,7 @@
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <Button class="font-bold text-sm" style="color: {colorValue}" on:click={showProfile}>
+            <Button class="text-sm font-bold" style="color: {colorValue}" on:click={showProfile}>
               {$profileDisplay}
             </Button>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>

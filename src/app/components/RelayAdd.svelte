@@ -33,7 +33,7 @@
   <Icon icon="magnifer" />
   <input bind:value={term} class="grow" type="text" placeholder="Search for relays..." />
 </label>
-<div class="column -m-6 mt-0 p-6 pt-2 h-[50vh] gap-2 overflow-auto" bind:this={element}>
+<div class="column -m-6 mt-0 h-[50vh] gap-2 overflow-auto p-6 pt-2" bind:this={element}>
   {#each $relaySearch
     .searchValues(term)
     .filter(url => !$relays.includes(url))
