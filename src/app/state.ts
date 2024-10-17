@@ -15,11 +15,13 @@ import {
   pushToMapKey,
   nthEq,
   shuffle,
+  parseJson,
 } from "@welshman/lib"
 import {
   getIdFilters,
   WRAP,
   RELAYS,
+  APP_DATA,
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
@@ -56,6 +58,7 @@ import {
   pull,
   createSearch,
   userFollows,
+  ensurePlaintext,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -240,6 +243,42 @@ export const deriveEventsForUrl = (url: string, kinds: number[]) =>
     ),
   )
 
+// Settings
+
+export const SETTINGS =  "nostr-engine/User/settings/v1"
+
+export type Settings = {
+  event: TrustedEvent,
+  values: {
+    hide_sensitive: boolean
+  },
+}
+
+export const defaultSettings = {
+  hide_sensitive: true,
+}
+
+export const settings = deriveEventsMapped<Settings>(repository, {
+  filters: [{kinds: [APP_DATA], '#d': [SETTINGS]}],
+  itemToEvent: item => item.event,
+  eventToItem: async (event: TrustedEvent) =>
+    ({event, values: {...defaultSettings, ...parseJson(await ensurePlaintext(event))}})
+})
+
+export const {
+  indexStore: settingsByPubkey,
+  deriveItem: deriveSettings,
+  loadItem: loadSettings,
+} = collection({
+  name: "settings",
+  store: settings,
+  getKey: settings => settings.event.pubkey,
+  load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
+    load({...request, filters: [{kinds: [APP_DATA], '#d': [SETTINGS], authors: [pubkey]}]}),
+})
+
+
+
 // Membership
 
 export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getListTags(list)))
@@ -417,6 +456,16 @@ export const roomsByUrl = derived(channels, $channels => {
 })
 
 // User stuff
+
+export const userSettings = withGetter(
+  derived([pubkey, settingsByPubkey], ([$pubkey, $settingsByPubkey]) => {
+    if (!$pubkey) return undefined
+
+    loadSettings($pubkey)
+
+    return $settingsByPubkey.get($pubkey)
+  }),
+)
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {

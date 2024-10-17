@@ -45,7 +45,7 @@ import {
   nip44EncryptToSelf,
   loadRelay,
 } from "@welshman/app"
-import {tagRoom, userMembership, MEMBERSHIPS, INDEXER_RELAYS, loadMembership} from "@app/state"
+import {tagRoom, userMembership, MEMBERSHIPS, INDEXER_RELAYS, loadMembership, loadSettings} from "@app/state"
 
 // Utils
 
@@ -86,6 +86,7 @@ export const loadUserData = (
   const promise = Promise.all([
     loadInboxRelaySelections(pubkey, request),
     loadMembership(pubkey, request),
+    loadSettings(pubkey, request),
     loadProfile(pubkey, request),
     loadFollows(pubkey, request),
     loadMutes(pubkey, request),

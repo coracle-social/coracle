@@ -28,7 +28,7 @@
   import ContentQuote from "@app/components/ContentQuote.svelte"
   import ContentTopic from "@app/components/ContentTopic.svelte"
   import ContentMention from "@app/components/ContentMention.svelte"
-  import {entityLink} from "@app/state"
+  import {entityLink, userSettings} from "@app/state"
 
   export let event
   export let minLength = 500
@@ -69,7 +69,9 @@
     warning = null
   }
 
-  let warning = event.tags.find(nthEq(0, "content-warning"))?.[1]
+  let warning =
+    $userSettings?.values.hide_sensitive &&
+    event.tags.find(nthEq(0, "content-warning"))?.[1]
 
   $: shortContent = showEntire
     ? fullContent
