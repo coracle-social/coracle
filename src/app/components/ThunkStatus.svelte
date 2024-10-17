@@ -17,7 +17,7 @@
   $: isPending = ps.some(s => s.status === Pending)
   $: isSuccess = ps.some(s => s.status === Success)
   $: isFailure = !canUndo && ps.every(s => [Failure, Timeout].includes(s.status))
-  $: failure = ps.find(s => [Failure, Timeout].includes(s.status))
+  $: failure = Object.entries($status).find(([url, s]) => [Failure, Timeout].includes(s.status))
 </script>
 
 {#if canUndo || isPending}
@@ -29,9 +29,10 @@
     {/if}
   </span>
 {:else if isFailure && failure}
+  {@const [url, {message}] = failure}
   <span
     class="flex tooltip cursor-pointer gap-1"
-    data-tip="{failure.message} ({displayRelayUrl(failure.url)})">
+    data-tip="{message} ({displayRelayUrl(url)})">
     <Icon icon="danger" class="translate-y-px" size={3} />
     <span class="opacity-50">Failed to send!</span>
   </span>
