@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fade, slide} from "@lib/transition"
+  import {fade, translate} from "@lib/transition"
 
   export let onClose
 </script>
@@ -10,8 +10,8 @@
     transition:fade
     on:click={onClose} />
   <div
-    class="absolute bottom-0 right-0 top-0 w-80 overflow-auto bg-base-200 text-base-content lg:w-96"
-    transition:slide={{axis: "x", duration: 300}}>
+    class="scroll-container absolute bottom-0 right-0 top-0 w-80 overflow-auto bg-base-200 text-base-content lg:w-96"
+    transition:translate={{axis: "x", duration: 300}}>
     <slot />
   </div>
 </div>

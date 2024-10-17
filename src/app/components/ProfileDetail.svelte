@@ -29,7 +29,7 @@
 
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest(".menu")!,
+      element,
       onScroll: async () => {
         const $loader = await loader
 

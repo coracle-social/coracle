@@ -19,7 +19,7 @@
 
   onMount(() => {
     const scroller = createScroller({
-      element: element.closest(".overflow-auto")!,
+      element,
       onScroll: () => {
         limit += 10
       },

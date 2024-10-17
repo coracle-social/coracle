@@ -34,15 +34,19 @@ export const createScroller = ({
   let done = false
 
   const check = async () => {
-    // While we have empty space, fill it
-    const {scrollY, innerHeight} = window
-    const {scrollHeight, scrollTop} = element
-    const offset = Math.abs(scrollTop || scrollY)
-    const shouldLoad = offset + innerHeight + threshold > scrollHeight
+    const container = element.closest('.scroll-container')
 
-    // Only trigger loading the first time we reach the threshold
-    if (shouldLoad) {
-      await onScroll()
+    if (container) {
+      // While we have empty space, fill it
+      const {scrollY, innerHeight} = window
+      const {scrollHeight, scrollTop} = container
+      const offset = Math.abs(scrollTop || scrollY)
+      const shouldLoad = offset + innerHeight + threshold > scrollHeight
+
+      // Only trigger loading the first time we reach the threshold
+      if (shouldLoad) {
+        await onScroll()
+      }
     }
 
     // No need to check all that often

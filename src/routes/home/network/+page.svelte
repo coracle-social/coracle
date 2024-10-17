@@ -58,7 +58,7 @@
     load({filters: [notesFilter, reactionsFilter], timeout: 30_000})
 
     const scroller = createScroller({
-      element: element.closest(".overflow-auto")!,
+      element,
       onScroll: () => {
         const seen = new Set(events.map(e => e.id))
         const eligible = sortBy(

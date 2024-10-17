@@ -8,6 +8,34 @@ export {fade, slide} from "svelte/transition"
 export const fly = (node: Element, params?: FlyParams | undefined) =>
   baseFly(node, {y: 20, ...params})
 
+export type TranslateParams = {
+  delay?: number,
+  duration?: number,
+  easing?: (t: number) => number
+  axis?: "x" | "y"
+  reverse?: boolean
+}
+
+export const translate = (
+  node: Element,
+  {delay = 0, duration = 400, easing = cubicOut, axis = "y", reverse = false}: TranslateParams = {}
+) => {
+  return {
+    delay,
+    duration,
+    easing,
+    css: (t: number) => {
+      const p = reverse ? `${t * 100}%` : `${100 - t * 100}%`
+
+      if (axis === "x") {
+        return `transform: translateX(${p})`
+      } else {
+        return `transform: translateY(${p})`
+      }
+    }
+  }
+}
+
 // Copy-pasted and tweaked from slide source code
 export function slideAndFade(
   node: any,

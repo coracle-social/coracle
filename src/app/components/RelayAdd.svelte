@@ -16,8 +16,8 @@
 
   onMount(() => {
     const scroller = createScroller({
+      element,
       delay: 300,
-      element: element.closest(".modal-box")!,
       onScroll: () => {
         limit += 20
       },
