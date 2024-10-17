@@ -85,7 +85,7 @@
             <Avatar
               src={$profile?.picture}
               class="border border-solid border-base-content"
-              size={10} />
+              size={8} />
           </Button>
         {/if}
         <div class="-mt-1 flex-grow pr-1">

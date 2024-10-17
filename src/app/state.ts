@@ -163,18 +163,16 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   const [smart, dumb] = partition(hasNegentropy, relays)
   const promises = [pull({relays: smart, filters})]
 
-  // Since pulling from relays without negentropy is expensive, only do it 30% of the time,
-  // unless we have very few matching events. If that's the case, either we haven't synced
-  // this filter yet, or there are few enough events that we don't really need to worry about
-  // downloading duplicates. Otherwise, add a reasonable since value to make sure we at
-  // least fetch recent events.
-  if (Math.random() > 0.7 || repository.query(filters).length < 100) {
-    promises.push(pull({relays: dumb, filters}))
-  } else {
+  // Since pulling from relays without negentropy is expensive, limit how many
+  // duplicates we repeatedly download
+  if (dumb.length > 0) {
     const events = sortBy(e => -e.created_at, repository.query(filters))
-    const since = events[50]!.created_at
 
-    promises.push(pull({relays: dumb, filters: filters.map(assoc("since", since))}))
+    if (events.length > 100) {
+      filters = filters.map(assoc('since', events[100]!.created_at))
+    }
+
+    promises.push(pull({relays: dumb, filters}))
   }
 
   return Promise.all(promises)
@@ -326,11 +324,8 @@ export const {
   getKey: channel => channel.id,
   load: (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
     const [url, room] = splitChannelId(id)
-    const channel = get(channelsById).get(id)
-    const timestamps = channel?.messages.map(m => m.event.created_at) || []
-    const since = Math.max(0, max(timestamps) - 3600)
 
-    return load({...request, relays: [url], filters: [{"#~": [room], since}]})
+    return load({...request, relays: [url], filters: [{"#~": [room]}]})
   },
 })
 

@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {derived} from "svelte/store"
-  import {sortBy, remove} from "@welshman/lib"
+  import {ctx, sortBy, now, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {
@@ -91,10 +91,8 @@
     elements.reverse()
   }
 
-  onMount(() => {
-    for (const pk of others) {
-      loadInboxRelaySelections(pk)
-    }
+  onMount(async () => {
+    await Promise.all(others.map(pk => loadInboxRelaySelections(pk)))
   })
 
   setTimeout(() => {

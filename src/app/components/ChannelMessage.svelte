@@ -83,9 +83,9 @@
       </p>
     </div>
   {/if}
-  <div class="flex w-full gap-2">
+  <div class="flex w-full gap-3">
     {#if showPubkey}
-      <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+      <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
     {:else}
       <div class="w-10 min-w-10 max-w-10" />
     {/if}
@@ -100,7 +100,7 @@
       <div class="text-sm">
         <Content {event} />
         {#if thunk}
-          <div class="badge">
+          <div class="badge badge-neutral">
             <ThunkStatus {thunk} />
           </div>
         {/if}

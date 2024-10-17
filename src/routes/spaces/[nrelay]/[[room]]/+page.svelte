@@ -25,7 +25,6 @@
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
-    loadChannel,
     userMembership,
     decodeNRelay,
     makeChannelId,
@@ -39,8 +38,7 @@
 
   const {nrelay, room = GENERAL} = $page.params
   const url = decodeNRelay(nrelay)
-  const id = makeChannelId(url, room)
-  const channel = deriveChannel(id)
+  const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)
 
   const assertEvent = (e: any) => e as TrustedEvent
@@ -84,7 +82,6 @@
   }
 
   onMount(() => {
-    loadChannel(id)
     subscribe({filters: [{'#~': [room], since: now()}], relays: [url]})
   })
 

@@ -25,12 +25,10 @@
 
   onMount(() => {
     const filter = {kinds: [WRAP], "#p": [$pubkey!]}
-    const sub = subscribe({filters: [{...filter, since: ago(30)}]})
+    const relays = ctx.app.router.InboxRelays().getUrls()
+    const sub = subscribe({filters: [{...filter, since: ago(30)}], relays})
 
-    pullConservatively({
-      filters: [filter],
-      relays: ctx.app.router.InboxRelays().getUrls(),
-    })
+    pullConservatively({filters: [filter], relays})
 
     return () => sub.close()
   })
@@ -68,11 +66,13 @@
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>
-  <div class="overflow-auto">
-    {#each chats as { id, pubkeys, messages } (id)}
-      <ChatItem {id} {pubkeys} {messages} />
-    {/each}
-  </div>
+  {#key $page.params.chat}
+    <div class="overflow-auto">
+      {#each chats as { id, pubkeys, messages } (id)}
+        <ChatItem {id} {pubkeys} {messages} />
+      {/each}
+    </div>
+  {/key}
 </SecondaryNav>
 
 <Page>
