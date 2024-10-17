@@ -126,7 +126,7 @@ export const addSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
 }
 
 export const removeSpaceMembership = async (url: string) => {
@@ -134,14 +134,14 @@ export const removeSpaceMembership = async (url: string) => {
   const pred = (t: string[]) => equals(["r", url], t) || t[2] !== url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
 }
 
 export const addRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const event = await addToListPublicly(list, tagRoom(room, url)).reconcile(nip44EncryptToSelf)
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
 }
 
 export const removeRoomMembership = async (url: string, room: string) => {
@@ -149,7 +149,7 @@ export const removeRoomMembership = async (url: string, room: string) => {
   const pred = (t: string[]) => equals(tagRoom(room, url), t)
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()})
+  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
 }
 
 export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
@@ -168,7 +168,7 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
   return publishThunk({
     event: createEvent(list.kind, {tags}),
     relays: ctx.app.router.WriteRelays().getUrls(),
-  })
+  }).result
 }
 
 export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
@@ -185,7 +185,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
     return publishThunk({
       event: createEvent(list.kind, {tags}),
       relays: ctx.app.router.WriteRelays().getUrls(),
-    })
+    }).result
   }
 }
 

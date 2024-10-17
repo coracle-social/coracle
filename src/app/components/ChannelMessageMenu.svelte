@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {pubkey, publishThunk} from '@welshman/app'
+  import {pubkey} from '@welshman/app'
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Confirm from "@lib/components/Confirm.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import {makeDelete} from '@app/commands'
+  import {publishDelete} from '@app/commands'
   import {pushModal} from '@app/modal'
 
   export let url
@@ -25,7 +25,8 @@
         This will send a request to delete this message.
         Be aware that not all relays may honor this request.`,
       confirm: async () => {
-        await publishThunk({event: makeDelete({event}), relays: [url]})
+        await publishDelete({event, relays: [url]})
+
         history.back()
       },
     })

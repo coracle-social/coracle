@@ -9,7 +9,7 @@
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
-  import {makeReaction} from "@app/commands"
+  import {makeReaction, sendWrapped} from "@app/commands"
 
   export let event: TrustedEvent
   export let pubkeys: string[]
@@ -18,17 +18,8 @@
 
   const onClick = async (emoji: NativeEmoji) => {
     const template = makeReaction({event, content: emoji.unicode})
-    const nip59 = Nip59.fromSigner($signer!)
 
-    for (const recipient of uniq(pubkeys)) {
-      const rumor = await nip59.wrap(recipient, template)
-
-      publishThunk({
-        event: rumor.wrap,
-        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-      })
-    }
-
+    sendWrapped({template, pubkeys})
     popover.hide()
   }
 
