@@ -1,12 +1,13 @@
 <script lang="ts">
-  import {createEventDispatcher} from "svelte"
+  import {createEventDispatcher, onMount} from "svelte"
   import Input from "src/partials/Input.svelte"
-  import Modal from "src/partials/Modal.svelte"
-  import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile} from "src/util/html"
-  import {uploadFiles, getSetting} from "src/engine"
   import {displayList} from "src/util/misc"
+  import {uploadFiles, getSetting} from "src/engine"
+
+  export let compose = null
+  export let textarea = null
 
   export let icon = null
   export let value = null
@@ -18,15 +19,29 @@
   const urls = getSetting("nip96_urls").slice(0, hostLimit)
   const dispatch = createEventDispatcher()
 
-  let input, loading
-  let isOpen = false
+  let input
 
-  $: {
+  onMount(() => {
     if (input) {
       listenForFile(input, async inputFiles => {
         if (inputFiles) {
-          loading = true
-
+          let uploadContent = ""
+          // if the compose props is passed in, alter the content to show an upload is being processed
+          if (compose || textarea) {
+            uploadContent = inputFiles
+              .reduce(
+                (acc, cur) =>
+                  acc + "\n![Uploading " + cur.name + " using " + displayList(urls) + "]",
+                "",
+              )
+              .trim()
+          }
+          if (compose) {
+            compose.write(uploadContent)
+          }
+          if (textarea) {
+            textarea.value = textarea.value.concat(uploadContent).trim()
+          }
           try {
             for (const tags of await uploadFiles(urls, inputFiles, {
               maxWidth,
@@ -39,18 +54,28 @@
                 dispatch("change", tags)
               }
             }
-          } finally {
-            isOpen = false
-            loading = false
+            if (compose) {
+              const content = compose.parse()
+              compose.clear()
+              compose.write(content.replace(uploadContent.trim(), "").trim())
+            }
+            if (textarea) {
+              textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
+            }
+          } catch (e) {
+            if (compose) {
+              const content = compose.parse()
+              compose.clear()
+              compose.write(content.replace(uploadContent.trim(), "").trim())
+            }
+            if (textarea) {
+              textarea.value = textarea.value.replace(uploadContent.trim(), "").trim()
+            }
           }
         }
       })
     }
-  }
-
-  const decline = () => {
-    isOpen = false
-  }
+  })
 </script>
 
 <div class="flex gap-2">
@@ -61,7 +86,7 @@
   {/if}
   <div
     on:click={() => {
-      isOpen = true
+      input.click()
     }}>
     <slot name="button">
       <div class="flex">
@@ -73,20 +98,4 @@
   </div>
 </div>
 
-{#if isOpen}
-  <Modal mini onEscape={decline}>
-    {#if loading}
-      <Spinner delay={0}>Uploading files using: {displayList(urls)}</Spinner>
-    {:else}
-      <h1 class="staatliches text-2xl">Upload a File</h1>
-      <div class="flex flex-col gap-2">
-        <p>Click below to select a file to upload.</p>
-        <p class="text-gray-3 text-sm">
-          <i class="fa fa-warning" />
-          Note that images are stored unencrypted and publicly accessible.
-        </p>
-      </div>
-      <input multiple={multi} type="file" bind:this={input} />
-    {/if}
-  </Modal>
-{/if}
+<input multiple={multi} type="file" bind:this={input} class="absolute h-0 w-0 opacity-0" />

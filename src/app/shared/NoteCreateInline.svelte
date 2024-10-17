@@ -98,7 +98,7 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-end gap-3">
           <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
-          <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
+          <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)} {compose}>
             <i slot="button" class="fa fa-paperclip cursor-pointer" />
           </ImageInput>
           {#if group}

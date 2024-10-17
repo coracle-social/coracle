@@ -169,7 +169,7 @@
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
-              <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
+              <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)} {compose}>
                 <i slot="button" class="fa fa-paperclip" />
               </ImageInput>
               {#if !env.FORCE_GROUP}

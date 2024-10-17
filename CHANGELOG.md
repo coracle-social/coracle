@@ -143,7 +143,6 @@
 - [x] Improve hashtag regex (@zen)
 - [x] Add rendering support for cashu tokens
 
-
 # 0.4.3
 
 - [x] Add follow all to onboarding topics
