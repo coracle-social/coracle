@@ -205,7 +205,10 @@ export const checkRelayAccess = async (url: string, claim = "") => {
   const result = await thunk.result
 
   if (result[url].status !== PublishStatus.Success) {
-    const message = result[url].message?.replace(/^.*: /, "") || "join request rejected"
+    const message =
+      connection.auth.message?.replace(/^.*: /, "") ||
+      result[url].message?.replace(/^.*: /, "") ||
+      "join request rejected"
 
     return `Failed to join relay: ${message}`
   }
@@ -238,7 +241,6 @@ export const checkRelayAuth = async (url: string) => {
   await connection.auth.waitIfPending()
 
   if (!okStatuses.includes(connection.auth.status)) {
-    console.log(connection.auth.status, connection)
     return `Failed to authenticate: "${connection.auth.message}"`
   }
 }
