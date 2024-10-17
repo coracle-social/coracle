@@ -1,10 +1,10 @@
 <div class="flex flex-col gap-2 {$$props.class}">
-  {#if $$slots.label}
+  <div class="flex justify-between">
     <label class="flex items-center gap-2 font-bold">
       <slot name="label" />
     </label>
-  {/if}
-  <slot name="input" />
+    <slot name="input" />
+  </div>
   {#if $$slots.info}
     <p class="text-sm">
       <slot name="info" />
