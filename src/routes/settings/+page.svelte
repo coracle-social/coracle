@@ -1,6 +1,6 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
-  import {getListTags, createEvent, getPubkeyTagValues, MUTES, APP_DATA} from "@welshman/util"
+  import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
   import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
@@ -15,9 +15,8 @@
 
   const onSubmit = async () => {
     publishThunk({
-      event: createEvent(APP_DATA, {
+      event: createEvent(SETTINGS, {
         content: await $signer!.nip04.encrypt($pubkey!, JSON.stringify(settings)),
-        tags: [["d", SETTINGS]]
       }),
       relays: ctx.app.router.WriteRelays().getUrls(),
     })

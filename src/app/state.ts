@@ -21,7 +21,6 @@ import {
   getIdFilters,
   WRAP,
   RELAYS,
-  APP_DATA,
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
@@ -245,7 +244,7 @@ export const deriveEventsForUrl = (url: string, kinds: number[]) =>
 
 // Settings
 
-export const SETTINGS =  "nostr-engine/User/settings/v1"
+export const SETTINGS = 38489
 
 export type Settings = {
   event: TrustedEvent,
@@ -259,7 +258,7 @@ export const defaultSettings = {
 }
 
 export const settings = deriveEventsMapped<Settings>(repository, {
-  filters: [{kinds: [APP_DATA], '#d': [SETTINGS]}],
+  filters: [{kinds: [SETTINGS]}],
   itemToEvent: item => item.event,
   eventToItem: async (event: TrustedEvent) =>
     ({event, values: {...defaultSettings, ...parseJson(await ensurePlaintext(event))}})
@@ -274,7 +273,7 @@ export const {
   store: settings,
   getKey: settings => settings.event.pubkey,
   load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
-    load({...request, filters: [{kinds: [APP_DATA], '#d': [SETTINGS], authors: [pubkey]}]}),
+    load({...request, filters: [{kinds: [SETTINGS], authors: [pubkey]}]}),
 })
 
 
