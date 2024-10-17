@@ -27,6 +27,7 @@ import {
   signer,
   repository,
   publishThunk,
+  mergeThunks,
   loadProfile,
   loadInboxRelaySelections,
   profilesByPubkey,
@@ -253,21 +254,24 @@ export const attemptRelayAccess = async (url: string, claim = "") =>
 export const sendWrapped = async ({
   template,
   pubkeys,
+  delay,
 }: {
   template: EventTemplate
   pubkeys: string[]
+  delay?: number
 }) => {
   const nip59 = Nip59.fromSigner(signer.get()!)
 
-  await Promise.all(
-    uniq(pubkeys).map(async recipient => {
-      const thunk = publishThunk({
-        event: await nip59.wrap(recipient, stamp(template)),
-        relays: ctx.app.router.PublishMessage(recipient).getUrls(),
-      })
-
-      await thunk.result
-    }),
+  return mergeThunks(
+    await Promise.all(
+      uniq(pubkeys).map(async recipient =>
+        publishThunk({
+          event: await nip59.wrap(recipient, stamp(template)),
+          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+          delay,
+        })
+      ),
+    )
   )
 }
 

@@ -13,7 +13,6 @@ export function slideAndFade(
   node: any,
   {delay = 0, duration = 400, easing = cubicOut, axis = "y"} = {},
 ) {
-  console.log('slideAndFade')
   const style = getComputedStyle(node)
   const primary_property = axis === "y" ? "height" : "width"
   const primary_property_value = parseFloat(style[primary_property])

@@ -10,8 +10,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {derived} from "svelte/store"
-  import {ctx, sortBy, now, remove} from "@welshman/lib"
+  import {derived, writable} from "svelte/store"
+  import {ctx, assoc, sortBy, now, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {
@@ -21,6 +21,7 @@
     loadInboxRelaySelections,
     tagPubkey,
   } from "@welshman/app"
+  import type {MergedThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -42,6 +43,7 @@
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey!, pubkeys)
+  const thunks = writable({} as Record<string, MergedThunk>)
   const missingInboxes = derived(inboxRelaySelectionsByPubkey, $m =>
     pubkeys.filter(pk => !$m.has(pk)),
   )
@@ -55,8 +57,9 @@
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
+    const thunk = await sendWrapped({template, pubkeys, delay: 60000})
 
-    await sendWrapped({template, pubkeys})
+    thunks.update(assoc(thunk.thunks[0].event.id, thunk))
   }
 
   let loading = true
@@ -154,7 +157,9 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
+        {@const event = assertEvent(value)}
+        {@const thunk = $thunks[event.id]}
+        <ChatMessage {event} {thunk} {pubkeys} {showPubkey} />
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
