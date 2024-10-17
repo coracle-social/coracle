@@ -36,6 +36,7 @@
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
   import Danger from "@assets/icons/Danger.svg?dataurl"
   import Exit from "@assets/icons/Exit.svg?dataurl"
+  import File from "@assets/icons/File.svg?dataurl"
   import FireMinimalistic from "@assets/icons/Fire Minimalistic.svg?dataurl"
   import GallerySend from "@assets/icons/Gallery Send.svg?dataurl"
   import Ghost from "@assets/icons/Ghost.svg?dataurl"
@@ -109,6 +110,7 @@
     "compass-big": CompassBig,
     danger: Danger,
     exit: Exit,
+    file: File,
     "fire-minimalistic": FireMinimalistic,
     "gallery-send": GallerySend,
     ghost: Ghost,
