@@ -20,13 +20,13 @@
 <svelte:window on:keydown={onKeyDown} />
 
 {#if hashIsValid && modal?.options?.drawer}
-  <Drawer onClose={clearModals}>
+  <Drawer onClose={clearModals} {...modal.options}>
     {#key modal.id}
       <svelte:component this={modal.component} {...modal.props} />
     {/key}
   </Drawer>
 {:else if hashIsValid && modal}
-  <Dialog onClose={clearModals}>
+  <Dialog onClose={clearModals} {...modal.options}>
     {#key modal.id}
       <svelte:component this={modal.component} {...modal.props} />
     {/key}

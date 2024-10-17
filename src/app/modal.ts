@@ -5,6 +5,7 @@ import {goto} from "$app/navigation"
 
 export type ModalOptions = {
   drawer?: boolean
+  fullscreen?: boolean
 }
 
 export type Modal = {

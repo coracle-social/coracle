@@ -30,10 +30,6 @@
 </script>
 
 <div class="content column gap-4" bind:this={element}>
-  <PageHeader>
-    <div slot="title">People</div>
-    <div slot="info">Get the latest from people in your network</div>
-  </PageHeader>
   <label class="input input-bordered flex w-full items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />

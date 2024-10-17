@@ -1,7 +1,10 @@
 <script lang="ts">
   import {ellipsize, postJson} from "@welshman/lib"
+  import {fade} from '@lib/transition'
   import {dufflepud, imgproxy} from "@app/state"
   import Link from "@lib/components/Link.svelte"
+  import ContentLinkDetail from '@app/components/ContentLinkDetail.svelte'
+  import {pushModal} from '@app/modal'
 
   export let value
 
@@ -16,6 +19,8 @@
 
     return json
   }
+
+  const expand = () => pushModal(ContentLinkDetail, {url}, {fullscreen: true})
 </script>
 
 <Link
@@ -28,7 +33,9 @@
       <track kind="captions" />
     </video>
   {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
-    <img alt="Link preview" src={imgproxy(url)} class="max-h-96 object-cover object-center" />
+    <button type="button" on:click|stopPropagation|preventDefault={expand}>
+      <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96" />
+    </button>
   {:else}
     {#await loadPreview()}
       <div class="center my-12 w-full">
