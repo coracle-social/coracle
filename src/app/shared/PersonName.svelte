@@ -38,30 +38,36 @@
 
 <div class={cx("flex gap-1", $$props.class)}>
   <div class="flex items-center gap-2">
-    <div class="w-full items-center gap-2">
-      <div class="cy-person-name max-w-[100%] overflow-hidden text-ellipsis whitespace-nowrap">
+    <div class="w-full gap-2">
+      <div
+        class="cy-person-name flex max-w-[100%] items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
         {$profileDisplay}
+        {#if $session}
+          <div on:click|stopPropagation>
+            <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
+              <div slot="trigger">
+                <WotScore score={wotScore} max={$maxWot} {accent} />
+              </div>
+              <Anchor
+                modal
+                slot="tooltip"
+                class="flex items-center gap-1"
+                href="/help/web-of-trust">
+                <i class="fa fa-info-circle" />
+                WoT Score: {wotScore}
+              </Anchor>
+            </Popover>
+          </div>
+        {/if}
       </div>
       <div class="flex flex-row items-center gap-2">
         <PersonHandle class="whitespace-nowrap text-xs text-accent" {pubkey} />
+        <span class="text-xs opacity-75">•</span>
         <small class="whitespace-nowrap">{npubDisplay}</small>
         {#if displayNpubCopyButton}
           <CopyValueSimple class="pl-1" value={npub} label="Npub" />
         {/if}
       </div>
     </div>
-    {#if $session}
-      <div on:click|stopPropagation>
-        <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
-          <div slot="trigger">
-            <WotScore class="!h-6 !w-6" score={wotScore} max={$maxWot} {accent} />
-          </div>
-          <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/help/web-of-trust">
-            <i class="fa fa-info-circle" />
-            WoT Score: {wotScore}
-          </Anchor>
-        </Popover>
-      </div>
-    {/if}
   </div>
 </div>

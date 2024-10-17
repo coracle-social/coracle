@@ -38,10 +38,10 @@
       <div class="flex items-start justify-end">
         <div class="flex items-center justify-end gap-2">
           {#if $following}
-            <Anchor button low class="border-none bg-tinted-800-d" on:click={e => unfollow(pubkey)}
+            <Anchor button low class="border-none bg-tinted-800-d" on:click={unfollowPerson}
               >Followed</Anchor>
           {:else}
-            <Anchor button accent on:click={e => follow(tagPubkey(pubkey))}>Follow</Anchor>
+            <Anchor button accent on:click={doFollow}>Follow</Anchor>
           {/if}
           <slot name="actions" {pubkey}>
             <PersonActions {pubkey} />
