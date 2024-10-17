@@ -57,7 +57,7 @@
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
-    const thunk = await sendWrapped({template, pubkeys, delay: 60000})
+    const thunk = await sendWrapped({template, pubkeys, delay: 2000})
 
     thunks.update(assoc(thunk.thunks[0].event.id, thunk))
   }

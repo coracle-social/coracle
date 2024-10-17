@@ -1,17 +1,26 @@
 <script lang="ts">
   import {displayRelayUrl} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
+  import {mergeThunks, publishThunk} from "@welshman/app"
   import type {Thunk, MergedThunk} from "@welshman/app"
   import Icon from '@lib/components/Icon.svelte'
+  import Tippy from "@lib/components/Tippy.svelte"
   import Button from '@lib/components/Button.svelte'
+  import ThunkStatusDetail from '@app/components/ThunkStatusDetail.svelte'
 
   export let thunk: Thunk | MergedThunk
 
-  const {status} = thunk
   const {Pending, Success, Failure, Timeout} = PublishStatus
 
   const abort = () => thunk.controller.abort()
 
+  const retry = () => {
+    thunk = (thunk as any).thunks
+      ? mergeThunks((thunk as MergedThunk).thunks.map(t => publishThunk(t.request)))
+      : publishThunk((thunk as Thunk).request)
+  }
+
+  $: status = thunk.status
   $: ps = Object.values($status)
   $: canCancel = ps.length === 0
   $: isPending = ps.some(s => s.status === Pending)
@@ -29,11 +38,14 @@
     {/if}
   </span>
 {:else if isFailure && failure}
-  {@const [url, {message}] = failure}
-  <span
-    class="flex tooltip cursor-pointer gap-1 mt-2"
-    data-tip="{message} ({displayRelayUrl(url)})">
-    <Icon icon="danger" class="translate-y-px" size={3} />
-    <span class="opacity-50">Failed to send!</span>
-  </span>
+  {@const [url, {message, status}] = failure}
+  <Tippy
+    component={ThunkStatusDetail}
+    props={{url, message, status, retry}}
+    params={{interactive: true}}>
+    <span class="flex tooltip cursor-pointer gap-1 mt-2 items-center">
+      <Icon icon="danger" size={3} />
+      <span class="opacity-50">Failed to send!</span>
+    </span>
+  </Tippy>
 {/if}

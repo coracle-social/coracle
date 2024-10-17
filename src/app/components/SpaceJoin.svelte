@@ -13,7 +13,7 @@
   const back = () => history.back()
 
   const tryJoin = async () => {
-    await addSpaceMembership(url)
+    await addSpaceMembership(url).result
 
     clearModals()
   }

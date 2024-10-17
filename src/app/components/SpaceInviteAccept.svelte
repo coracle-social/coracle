@@ -18,7 +18,7 @@
   const back = () => history.back()
 
   const confirm = async (url: string) => {
-    await addSpaceMembership(url)
+    await addSpaceMembership(url).result
 
     goto(makeSpacePath(url), {replaceState: true})
 

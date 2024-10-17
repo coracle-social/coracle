@@ -115,7 +115,7 @@ export const broadcastUserData = async (relays: string[]) => {
 
   for (const event of events) {
     if (isSignedEvent(event)) {
-      await publishThunk({event, relays})
+      await publishThunk({event, relays}).result
     }
   }
 }
