@@ -52,6 +52,7 @@ import {
   INDEXER_RELAYS,
   loadMembership,
   loadSettings,
+  getDefaultPubkeys,
 } from "@app/state"
 
 // Utils
@@ -101,7 +102,7 @@ export const loadUserData = (
 
   // Load followed profiles slowly in the background without clogging other stuff up
   promise.then(async () => {
-    for (const pubkeys of chunk(50, getFollows(pubkey))) {
+    for (const pubkeys of chunk(50, getDefaultPubkeys())) {
       await sleep(300)
 
       for (const pubkey of pubkeys) {
@@ -174,7 +175,6 @@ export const removeRoomMembership = async (url: string, room: string) => {
 
 export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
   const list = get(userRelaySelections) || makeList({kind: RELAYS})
-
   const tags = getRelayTags(getListTags(list)).filter(t => normalizeRelayUrl(t[1]) !== url)
 
   if (read && write) {

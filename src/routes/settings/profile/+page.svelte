@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {nip19} from 'nostr-tools'
+  import {hexToBytes} from "@noble/hashes/utils"
   import {ctx} from "@welshman/lib"
   import {
     createEvent,
@@ -9,21 +11,26 @@
     createProfile,
     isPublishedProfile,
   } from "@welshman/util"
-  import {pubkey, publishThunk, displayNip05, deriveProfile} from "@welshman/app"
+  import {pubkey, session, publishThunk, displayNip05, deriveProfile} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
+  import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import InputProfilePicture from "@lib/components/InputProfilePicture.svelte"
   import Content from "@app/components/Content.svelte"
   import InfoHandle from "@app/components/InfoHandle.svelte"
   import {pushModal} from "@app/modal"
-  import {pushToast} from "@app/toast"
+  import {pushToast, clip} from "@app/toast"
 
   const profile = deriveProfile($pubkey!)
 
   const pubkeyDisplay = displayPubkey($pubkey!)
+
+  const copyNpub = () => clip(nip19.npubEncode($session!.pubkey))
+
+  const copyNsec = () => clip(nip19.nsecEncode(hexToBytes($session!.secret!)))
 
   const cloneProfile = () => ({...($profile || makeProfile())})
 
@@ -84,7 +91,7 @@
     {/key}
   </div>
   {#if editing}
-    <form class="card2 bg-alt shadow-xl" transition:slide on:submit|preventDefault={saveEdit}>
+    <form class="card2 bg-alt shadow-xl col-4" transition:slide on:submit|preventDefault={saveEdit}>
       <div class="flex justify-center py-2">
         <InputProfilePicture bind:file bind:url={values.picture} />
       </div>
@@ -119,5 +126,36 @@
         <Button type="submit" class="btn btn-primary">Save Changes</Button>
       </div>
     </form>
+  {/if}
+  {#if $session?.method === "nip01"}
+    <div class="card2 bg-alt shadow-xl col-4" transition:slide>
+      <FieldInline>
+        <p slot="label">Public Key</p>
+        <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+          <Icon icon="link-round" />
+          <input value={$session.pubkey} class="grow" type="text" />
+          <Button class="flex items-center" on:click={copyNpub}>
+            <Icon icon="copy" />
+          </Button>
+        </label>
+        <p slot="info">
+          Your public key is your nostr user identifier. It also allows other people to
+          authenticate your messages.
+        <p>
+      </FieldInline>
+      <FieldInline>
+        <p slot="label">Private Key</p>
+        <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+          <Icon icon="link-round" />
+          <input value={$session.secret} class="grow" type="password" />
+          <Button class="flex items-center" on:click={copyNsec}>
+            <Icon icon="copy" />
+          </Button>
+        </label>
+        <p slot="info">
+          Your private key is your nostr password. Keep this somewhere safe!
+        <p>
+      </FieldInline>
+    </div>
   {/if}
 </div>

@@ -55,7 +55,7 @@
     <div class="divider" />
     <button type="button" class="chat chat-start cursor-default" on:click|stopPropagation>
       <div class="bg-alt col-4 chat-bubble text-left">
-        <Content hideMedia={!following} {event} />
+        <Content showEntire hideMedia={!following} {event} />
         <Link external href={entityLink(nevent)} class="row-2 group justify-end whitespace-nowrap">
           <Icon icon="link-round" size={3} />
           <p class="text-xs">{formatTimestamp(event.created_at)}</p>
