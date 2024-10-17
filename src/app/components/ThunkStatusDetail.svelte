@@ -3,13 +3,19 @@
   import {displayRelayUrl} from '@welshman/util'
   import Button from '@lib/components/Button.svelte'
 
-  export let url
-  export let status
-  export let message
-  export let retry
+  export let url: string
+  export let status: string
+  export let message: string
+  export let retry: () => void
 
-  if (!message && status === PublishStatus.Timeout) {
-    message = "request timed out"
+  $: {
+    if (!message && status === PublishStatus.Timeout) {
+      message = "request timed out"
+    }
+
+    if (!message) {
+      message = "no details recieved"
+    }
   }
 </script>
 

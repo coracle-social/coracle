@@ -3,6 +3,7 @@
   import {PublishStatus} from "@welshman/net"
   import {mergeThunks, publishThunk} from "@welshman/app"
   import type {Thunk, MergedThunk} from "@welshman/app"
+  import {throttled} from "@welshman/store"
   import Icon from '@lib/components/Icon.svelte'
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from '@lib/components/Button.svelte'
@@ -20,12 +21,11 @@
       : publishThunk((thunk as Thunk).request)
   }
 
-  $: status = thunk.status
+  $: status = throttled(300, thunk.status)
   $: ps = Object.values($status)
   $: canCancel = ps.length === 0
-  $: isPending = ps.some(s => s.status === Pending)
-  $: isSuccess = ps.some(s => s.status === Success)
   $: isFailure = !canCancel && ps.every(s => [Failure, Timeout].includes(s.status))
+  $: isPending = !isFailure && ps.some(s => s.status === Pending)
   $: failure = Object.entries($status).find(([url, s]) => [Failure, Timeout].includes(s.status))
 </script>
 
