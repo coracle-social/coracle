@@ -7,11 +7,9 @@
   import Icon from "@lib/components/Icon.svelte"
   import PageHeader from "@lib/components/PageHeader.svelte"
   import PeopleItem from "@app/components/PeopleItem.svelte"
+  import {getDefaultPubkeys} from '@app/state'
 
-  const defaultPubkeys = uniq([
-    ...shuffle(getPubkeyTagValues(getListTags($userFollows))),
-    ...import.meta.env.VITE_DEFAULT_PUBKEYS.split(","),
-  ])
+  const defaultPubkeys = getDefaultPubkeys()
 
   let term = ""
   let limit = 10

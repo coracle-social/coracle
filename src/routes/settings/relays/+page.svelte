@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {derived} from "svelte/store"
   import {
     getRelayUrls,
@@ -6,6 +7,8 @@
     userInboxRelaySelections,
     getReadRelayUrls,
     getWriteRelayUrls,
+    relaySelections,
+    inboxRelaySelections,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -13,7 +16,7 @@
   import RelayItem from "@app/components/RelayItem.svelte"
   import RelayAdd from "@app/components/RelayAdd.svelte"
   import {pushModal} from "@app/modal"
-  import {setRelayPolicy, setInboxRelayPolicy} from "@app/commands"
+  import {setRelayPolicy, discoverRelays, setInboxRelayPolicy} from "@app/commands"
 
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
   const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
@@ -42,6 +45,10 @@
   const removeWriteRelay = (url: string) => setRelayPolicy(url, $readRelayUrls.includes(url), false)
 
   const removeInboxRelay = (url: string) => setInboxRelayPolicy(url, false)
+
+  onMount(() => {
+    discoverRelays([...$relaySelections, ...$inboxRelaySelections])
+  })
 </script>
 
 <div class="content column gap-4">

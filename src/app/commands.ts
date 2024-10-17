@@ -17,8 +17,9 @@ import {
   removeFromListByPredicate,
   getListTags,
   getRelayTags,
+  isShareableRelayUrl,
 } from "@welshman/util"
-import type {TrustedEvent, EventTemplate} from "@welshman/util"
+import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {PublishStatus, AuthStatus, ConnectionStatus} from "@welshman/net"
 import {Nip59, stamp} from "@welshman/signer"
@@ -96,6 +97,7 @@ export const loadUserData = (
       await sleep(300)
 
       for (const pubkey of pubkeys) {
+        loadMembership(pubkey),
         loadProfile(pubkey)
         loadFollows(pubkey)
         loadMutes(pubkey)
@@ -104,6 +106,16 @@ export const loadUserData = (
   })
 
   return promise
+}
+
+export const discoverRelays = (lists: List[]) => {
+  const urls = uniq(lists.flatMap(getRelayUrls))
+
+  for (const url of urls) {
+    if (isShareableRelayUrl(url)) {
+      loadRelay(url)
+    }
+  }
 }
 
 // Synchronization

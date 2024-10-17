@@ -6,7 +6,6 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import RelayItem from "@app/components/RelayItem.svelte"
-  import {discoverRelays} from "@app/state"
 
   export let relays: Readable<string[]>
   export let addRelay: (url: string) => void
@@ -16,7 +15,6 @@
   let element: Element
 
   onMount(() => {
-    const sub = discoverRelays()
     const scroller = createScroller({
       delay: 300,
       element: element.closest(".modal-box")!,
@@ -26,7 +24,6 @@
     })
 
     return () => {
-      sub.close()
       scroller.stop()
     }
   })

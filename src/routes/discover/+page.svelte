@@ -1,7 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {derived} from 'svelte/store'
   import Masonry from "svelte-bricks"
-  import {relaySearch} from "@welshman/app"
+  import {addToMapKey, dec, gt, inc} from "@welshman/lib"
+  import type {Relay} from "@welshman/app"
+  import {relays, createSearch} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -9,8 +12,25 @@
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
-  import {userMembership, discoverRelays, getMembershipUrls} from "@app/state"
+  import ProfileCircles from "@app/components/ProfileCircles.svelte"
+  import {userMembership, memberships, membershipByPubkey, getMembershipUrls, getDefaultPubkeys} from "@app/state"
+  import {discoverRelays} from "@app/commands"
   import {pushModal} from "@app/modal"
+
+  const wotGraph = derived(
+    membershipByPubkey,
+    $m => {
+      const scores = new Map<string, Set<string>>()
+
+      for (const pubkey of getDefaultPubkeys()) {
+        for (const url of getMembershipUrls($m.get(pubkey))) {
+          addToMapKey(scores, url, pubkey)
+        }
+      }
+
+      return scores
+    }
+  )
 
   const openSpace = (url: string) => pushModal(SpaceCheck, {url})
 
@@ -18,10 +38,26 @@
   let limit = 20
   let element: Element
 
-  $: relays = $relaySearch.searchOptions(term).slice(0, limit)
+  $: relaySearch = createSearch($relays, {
+    getValue: (relay: Relay) => relay.url,
+    sortFn: ({score, item}) => {
+      if (score && score > 0.1) return -score!
+
+      const wotScore = $wotGraph.get(item.url)?.size || 0
+
+      return score ? dec(score) * wotScore : -wotScore
+    },
+    fuseOptions: {
+      keys: ["url", "name", {name: "description", weight: 0.3}],
+      shouldSort: false,
+    },
+  })
+
+  $: results = relaySearch.searchOptions(term).slice(0, limit)
 
   onMount(() => {
-    const sub = discoverRelays()
+    discoverRelays($memberships)
+
     const scroller = createScroller({
       element: element.closest(".overflow-auto")!,
       onScroll: () => {
@@ -30,7 +66,6 @@
     })
 
     return () => {
-      sub.close()
       scroller.stop()
     }
   })
@@ -47,8 +82,8 @@
   </label>
   <Masonry
     animate={false}
-    items={relays}
-    minColWidth={250}
+    items={results}
+    minColWidth={300}
     maxColWidth={800}
     gap={16}
     idKey="url"
@@ -56,36 +91,40 @@
     <Button
       class="card2 bg-alt flex flex-col gap-2 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
       on:click={() => openSpace(relay.url)}>
-      <div class="flex gap-4">
-        <div class="avatar">
-          <div
-            class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
-            {#if relay.profile?.icon}
-              <img alt="" src={relay.profile.icon} />
-            {:else}
-              <Icon icon="ghost" size={5} />
-            {/if}
-          </div>
-        </div>
-        {#if getMembershipUrls($userMembership).includes(relay.url)}
-          <div class="flex justify-center">
-            <div class="relative">
-              <div
-                class="tooltip absolute -top-[88px] left-5 h-5 w-5 rounded-full bg-primary"
-                data-tip="You are already a member of this space.">
-                <Icon icon="check-circle" class="scale-110" />
-              </div>
+      <div class="flex gap-4 relative">
+        <div class="relative">
+          <div class="avatar relative">
+            <div
+              class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+              {#if relay.profile?.icon}
+                <img alt="" src={relay.profile.icon} />
+              {:else}
+                <Icon icon="ghost" size={5} />
+              {/if}
             </div>
           </div>
-        {/if}
+          {#if getMembershipUrls($userMembership).includes(relay.url)}
+            <div
+              class="absolute -right-1 -top-1 tooltip h-5 w-5 rounded-full bg-primary"
+              data-tip="You are already a member of this space.">
+              <Icon icon="check-circle" class="scale-110" />
+            </div>
+          {/if}
+        </div>
         <div>
-          <h2 class="text-xl">
+          <h2 class="text-xl ellipsize whitespace-nowrap">
             <RelayName url={relay.url} />
           </h2>
           <p class="text-sm opacity-75">{relay.url}</p>
         </div>
       </div>
-      <RelayDescription url={relay.url} class="ml-16" />
+      <RelayDescription url={relay.url} />
+      {#if gt($wotGraph.get(relay.url)?.size, 0)}
+        <div class="row-2 card2 card2-sm bg-alt">
+          Members:
+          <ProfileCircles pubkeys={Array.from($wotGraph.get(relay.url) || [])} />
+        </div>
+      {/if}
     </Button>
   </Masonry>
 </div>

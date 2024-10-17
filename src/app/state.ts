@@ -14,6 +14,7 @@ import {
   max,
   pushToMapKey,
   nthEq,
+  shuffle,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -54,6 +55,7 @@ import {
   hasNegentropy,
   pull,
   createSearch,
+  userFollows,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -122,6 +124,13 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 
 export const tagRoom = (room: string, url: string) => [ROOM, room, url]
+
+export const getDefaultPubkeys = () => {
+  const appPubkeys = import.meta.env.VITE_DEFAULT_PUBKEYS.split(",")
+  const userPubkeys = shuffle(getPubkeyTagValues(getListTags(get(userFollows))))
+
+  return userPubkeys.length > 5 ? userPubkeys : [...userPubkeys, ...appPubkeys]
+}
 
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
@@ -428,15 +437,3 @@ export const displayReaction = (content: string) => {
   if (content === "-") return "👎"
   return content
 }
-
-export const discoverRelays = () =>
-  subscribe({
-    filters: [{kinds: [RELAYS]}],
-    onEvent: (event: TrustedEvent) => {
-      for (const url of getRelayTagValues(event.tags)) {
-        if (isShareableRelayUrl(url)) {
-          loadRelay(url)
-        }
-      }
-    },
-  })
