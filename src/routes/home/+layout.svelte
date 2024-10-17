@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ctx, ago} from "@welshman/lib"
+  import {WEEK, ctx, ago} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import {pubkey, subscribe} from "@welshman/app"
   import {fly} from "@lib/transition"
@@ -26,7 +26,7 @@
   onMount(() => {
     const filter = {kinds: [WRAP], "#p": [$pubkey!]}
     const relays = ctx.app.router.InboxRelays().getUrls()
-    const sub = subscribe({filters: [{...filter, since: ago(30)}], relays})
+    const sub = subscribe({filters: [{...filter, since: ago(WEEK)}], relays})
 
     pullConservatively({filters: [filter], relays})
 

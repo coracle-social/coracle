@@ -11,7 +11,7 @@
     transition:fade
     on:click={onClose} />
   <div
-    class="card2 bg-alt absolute max-h-[90vh] w-[90vw] overflow-auto text-base-content sm:w-[520px]"
+    class="relative card2 bg-alt absolute max-h-[90vh] w-[90vw] overflow-auto text-base-content sm:w-[520px]"
     transition:fly={{duration: 300}}>
     <slot />
   </div>

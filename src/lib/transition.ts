@@ -13,6 +13,7 @@ export function slideAndFade(
   node: any,
   {delay = 0, duration = 400, easing = cubicOut, axis = "y"} = {},
 ) {
+  console.log('slideAndFade')
   const style = getComputedStyle(node)
   const primary_property = axis === "y" ? "height" : "width"
   const primary_property_value = parseFloat(style[primary_property])
@@ -46,3 +47,6 @@ export function slideAndFade(
       `border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;`,
   }
 }
+
+export const conditionalTransition = (condition: any, transition: any) =>
+  (node: any, args?: any) => condition ? transtion(node, args) : null

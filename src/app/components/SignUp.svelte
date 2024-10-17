@@ -4,13 +4,17 @@
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Divider from "@lib/components/Divider.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import LogIn from "@app/components/LogIn.svelte"
-  import InfoNostr from "@app/components/LogIn.svelte"
+  import InfoNostr from "@app/components/InfoNostr.svelte"
+  import SignUpKey from "@app/components/SignUpKey.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
 
   const login = () => pushModal(LogIn)
+
+  const signUpWithKey = () => pushModal(SignUpKey)
 
   const trySignup = async () => {
     const secret = makeSecret()
@@ -83,14 +87,17 @@
       @{handler.domain}
     </div>
   </Field>
-  <div class="flex flex-col gap-2">
-    <Button type="submit" class="btn btn-primary" disabled={!username || loading}>
-      <Spinner {loading}>Sign Up</Spinner>
-      <Icon icon="alt-arrow-right" />
-    </Button>
-    <div class="text-sm">
-      Already have an account?
-      <Button class="link" on:click={login}>Log in instead</Button>
-    </div>
+  <Button type="submit" class="btn btn-primary" disabled={!username || loading}>
+    <Spinner {loading}>Sign Up</Spinner>
+    <Icon icon="alt-arrow-right" />
+  </Button>
+  <Divider>Or</Divider>
+  <Button disabled={loading} on:click={signUpWithKey} class="btn btn-neutral">
+    <Icon icon="key" />
+    Sign up with Key
+  </Button>
+  <div class="text-sm">
+    Already have an account?
+    <Button class="link" on:click={login}>Log in instead</Button>
   </div>
 </form>

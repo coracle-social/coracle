@@ -22,7 +22,6 @@
     <div slot="info">Create an encrypted chat room for private conversations.</div>
   </ModalHeader>
   <Field>
-    <p slot="label">Members</p>
     <div slot="input">
       <ProfileMultiSelect bind:value={pubkeys} />
     </div>

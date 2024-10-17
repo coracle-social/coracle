@@ -21,7 +21,6 @@
     loadInboxRelaySelections,
     tagPubkey,
   } from "@welshman/app"
-  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -155,9 +154,7 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <div in:fly>
-          <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
-        </div>
+        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
