@@ -24,7 +24,7 @@
         </div>
         <div class="card2 bg-alt flex flex-col gap-2 text-center shadow-2xl">
           <h3 class="text-2xl sm:h-12">Get in touch</h3>
-          <p class="sm:h-16">Having problems? Let us know by.</p>
+          <p class="sm:h-16">Having problems? Let us know.</p>
           <Link
             class="btn btn-primary"
             href="/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
@@ -33,12 +33,17 @@
         </div>
       </div>
       <div class="flex flex-col gap-4">
-        <p class="text-center">
-          Built with 💜 by
-          <span class="text-primary">
-            @<Button on:click={openProfile} class="link">hodlbod</Button>
-          </span>
-        </p>
+        <div class="col-2 items-center text-center">
+          <p class="text-sm">
+            Built with 💜 by
+            <span class="text-primary">
+              @<Button on:click={openProfile} class="link">hodlbod</Button>
+            </span>
+          </p>
+          <p class="text-xs">
+            Icons by <Link external class="link" href="https://www.figma.com/community/file/1166831539721848736">480 Design</Link>
+          </p>
+        </div>
         <div class="flex justify-center gap-4">
           <div class="tooltip" data-tip="Source Code">
             <Link external href="https://github.com/coracle-social/flotilla">

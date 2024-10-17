@@ -21,7 +21,7 @@
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
-<div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 sm:block">
+<div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem href="/home/people" class="tooltip-right">
@@ -52,7 +52,7 @@
 
 <slot />
 
-<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 sm:hidden">
+<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden">
   <div class="m-auto flex max-w-sm justify-between px-2">
     <PrimaryNavItem title="Home" on:click={showHomeMenu}>
       <Avatar icon="home-smile" class="!h-10 !w-10" />
