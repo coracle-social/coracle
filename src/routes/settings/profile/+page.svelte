@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from 'nostr-tools'
+  import {nip19} from "nostr-tools"
   import {hexToBytes} from "@noble/hashes/utils"
   import {ctx} from "@welshman/lib"
   import {
@@ -91,7 +91,7 @@
     {/key}
   </div>
   {#if editing}
-    <form class="card2 bg-alt shadow-xl col-4" transition:slide on:submit|preventDefault={saveEdit}>
+    <form class="card2 bg-alt col-4 shadow-xl" transition:slide on:submit|preventDefault={saveEdit}>
       <div class="flex justify-center py-2">
         <InputProfilePicture bind:file bind:url={values.picture} />
       </div>
@@ -128,7 +128,7 @@
     </form>
   {/if}
   {#if $session?.method === "nip01"}
-    <div class="card2 bg-alt shadow-xl col-4" transition:slide>
+    <div class="card2 bg-alt col-4 shadow-xl" transition:slide>
       <FieldInline>
         <p slot="label">Public Key</p>
         <label class="input input-bordered flex w-full items-center gap-2" slot="input">
@@ -139,10 +139,10 @@
           </Button>
         </label>
         <p slot="info">
-          Your public key is your nostr user identifier. It also allows other people to
-          authenticate your messages.
-        <p>
-      </FieldInline>
+          Your public key is your nostr user identifier. It also allows other people to authenticate
+          your messages.
+        </p>
+        <p></p></FieldInline>
       <FieldInline>
         <p slot="label">Private Key</p>
         <label class="input input-bordered flex w-full items-center gap-2" slot="input">
@@ -152,10 +152,8 @@
             <Icon icon="copy" />
           </Button>
         </label>
-        <p slot="info">
-          Your private key is your nostr password. Keep this somewhere safe!
-        <p>
-      </FieldInline>
+        <p slot="info">Your private key is your nostr password. Keep this somewhere safe!</p>
+        <p></p></FieldInline>
     </div>
   {/if}
 </div>

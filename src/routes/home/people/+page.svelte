@@ -26,8 +26,8 @@
   })
 </script>
 
-<div class="column max-h-full content-t" bind:this={element}>
-  <div class="flex-grow content-x">
+<div class="column content-t max-h-full" bind:this={element}>
+  <div class="content-x flex-grow">
     <label class="input input-bordered flex w-full items-center gap-2">
       <Icon icon="magnifer" />
       <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />

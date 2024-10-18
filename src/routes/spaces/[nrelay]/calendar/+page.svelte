@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, tryCatch, last, ago} from "@welshman/lib"
+  import {sortBy, last, ago} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {EVENT_DATE, EVENT_TIME} from "@welshman/util"
   import {subscribe, formatTimestampAsDate} from "@welshman/app"
@@ -21,8 +21,7 @@
 
   const createEvent = () => pushModal(EventCreate, {url})
 
-  const getEnd = (event: TrustedEvent) =>
-    parseInt(event.tags.find(t => t[0] === "end")?.[1] || "")
+  const getEnd = (event: TrustedEvent) => parseInt(event.tags.find(t => t[0] === "end")?.[1] || "")
 
   const getStart = (event: TrustedEvent) =>
     parseInt(event.tags.find(t => t[0] === "start")?.[1] || "")
@@ -35,19 +34,21 @@
     dateDisplay?: string
   }
 
-  $: items = sortBy(e => -getStart(e), $events).reduce<Item[]>((r, event) => {
-    const end = getEnd(event)
-    const start = getStart(event)
+  $: items = sortBy(e => -getStart(e), $events)
+    .reduce<Item[]>((r, event) => {
+      const end = getEnd(event)
+      const start = getStart(event)
 
-    if (isNaN(start) || isNaN(end)) return r
+      if (isNaN(start) || isNaN(end)) return r
 
-    const prevDateDisplay =
-      r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-    const newDateDisplay = formatTimestampAsDate(start)
-    const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+      const prevDateDisplay =
+        r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
+      const newDateDisplay = formatTimestampAsDate(start)
+      const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
 
-    return [...r, {event, dateDisplay}]
-  }, []).slice(0, limit)
+      return [...r, {event, dateDisplay}]
+    }, [])
+    .slice(0, limit)
 
   onMount(() => {
     const sub = subscribe({filters: [{kinds, since: ago(30)}]})

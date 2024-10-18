@@ -44,7 +44,7 @@
   })
 </script>
 
-<Button class="card2 bg-alt shadow-xl flex flex-col" on:click={onClick}>
+<Button class="card2 bg-alt flex flex-col shadow-xl" on:click={onClick}>
   <Profile {pubkey} />
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
@@ -53,7 +53,7 @@
     {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
-    <button type="button" class="chat chat-start cursor-default flex" on:click|stopPropagation>
+    <button type="button" class="chat chat-start flex cursor-default" on:click|stopPropagation>
       <div class="bg-alt col-4 chat-bubble text-left">
         <Content showEntire hideMedia={!following} {event} />
         <Link external href={entityLink(nevent)} class="row-2 group justify-end whitespace-nowrap">

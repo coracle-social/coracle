@@ -1,7 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
-  import {displayRelayUrl} from '@welshman/util'
+  import {displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -28,7 +28,7 @@
   let space = $page.params?.nrelay ? decodeNRelay($page.params?.nrelay) : undefined
   let showSettings = false
 
-  const assertNotNil = <T>(x: T) => x!
+  const assertNotNil = <T,>(x: T) => x!
 
   const resetSpace = () => {
     space = ""
@@ -63,7 +63,7 @@
 
 <div class="column menu gap-2">
   {#if showSettings}
-    <p class="mb-4 text-2xl text-center">
+    <p class="mb-4 text-center text-2xl">
       Settings for <span class="text-primary">{displayRelayUrl(assertNotNil(space))}</span>
     </p>
     {#if getMembershipUrls($userMembership).includes(space || "")}
@@ -82,7 +82,7 @@
       Go Back
     </Button>
   {:else if space}
-    <p class="mb-4 text-2xl text-center">
+    <p class="mb-4 text-center text-2xl">
       Actions for <span class="text-primary">{displayRelayUrl(space)}</span>
     </p>
     <div class="grid grid-cols-3 gap-2">

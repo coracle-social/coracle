@@ -36,7 +36,6 @@ import {
   getWriteRelayUrls,
   loadFollows,
   loadMutes,
-  getFollows,
   tagEvent,
   tagReactionTo,
   getRelayUrls,
