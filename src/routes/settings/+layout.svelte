@@ -20,7 +20,7 @@
     </div>
     <div in:fly|local={{delay: 50}}>
       <SecondaryNavItem href="/settings/relays">
-        <Icon icon="remote-controller-minimalistic" /> Relays
+        <Icon icon="server" /> Relays
       </SecondaryNavItem>
     </div>
     <div in:fly|local={{delay: 100}}>

@@ -4,10 +4,11 @@
 
   export let title = ""
   export let href = ""
+  export let noActive = false
 
   $: itemSegment = href.split("/")[1]
   $: currentSegment = $page.route?.id?.split("/")[1]
-  $: active = itemSegment === currentSegment
+  $: active = itemSegment === currentSegment && !noActive
 </script>
 
 {#if href}

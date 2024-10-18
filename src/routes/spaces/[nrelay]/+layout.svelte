@@ -5,6 +5,7 @@
   import {fly, slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
+  import Delay from "@lib/components/Delay.svelte"
   import Button from "@lib/components/Button.svelte"
   import Popover from "@lib/components/Popover.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
@@ -71,102 +72,106 @@
 </script>
 
 {#key url}
-  <SecondaryNav>
-    <SecondaryNavSection>
-      <div>
-        <SecondaryNavItem class="w-full !justify-between" on:click={openMenu}>
-          <strong>{displayRelayUrl(url)}</strong>
-          <Icon icon="alt-arrow-down" />
-        </SecondaryNavItem>
-        {#if showMenu}
-          <Popover hideOnClick onClose={toggleMenu}>
-            <ul
-              transition:fly
-              class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
-              <li>
-                <Button on:click={createInvite}>
-                  <Icon icon="link-round" />
-                  Create Invite
-                </Button>
-              </li>
-              <li>
-                {#if getMembershipUrls($userMembership).includes(url)}
-                  <Button on:click={leaveSpace} class="text-error">
-                    <Icon icon="exit" />
-                    Leave Space
+  <Delay>
+    <SecondaryNav>
+      <SecondaryNavSection>
+        <div>
+          <SecondaryNavItem class="w-full !justify-between" on:click={openMenu}>
+            <strong>{displayRelayUrl(url)}</strong>
+            <Icon icon="alt-arrow-down" />
+          </SecondaryNavItem>
+          {#if showMenu}
+            <Popover hideOnClick onClose={toggleMenu}>
+              <ul
+                transition:fly
+                class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
+                <li>
+                  <Button on:click={createInvite}>
+                    <Icon icon="link-round" />
+                    Create Invite
                   </Button>
-                {:else}
-                  <Button on:click={joinSpace}>
-                    <Icon icon="login-2" />
-                    Join Space
-                  </Button>
+                </li>
+                {#if !import.meta.env.VITE_PLATFORM_RELAY}
+                  <li>
+                    {#if getMembershipUrls($userMembership).includes(url)}
+                      <Button on:click={leaveSpace} class="text-error">
+                        <Icon icon="exit" />
+                        Leave Space
+                      </Button>
+                    {:else}
+                      <Button on:click={joinSpace}>
+                        <Icon icon="login-2" />
+                        Join Space
+                      </Button>
+                    {/if}
+                  </li>
                 {/if}
-              </li>
-            </ul>
-          </Popover>
+              </ul>
+            </Popover>
+          {/if}
+        </div>
+        <div class="my-3 h-px bg-base-200" />
+        <div in:fly>
+          <SecondaryNavItem href={makeSpacePath(url)}>
+            <Icon icon="chat-round" /> Chat
+          </SecondaryNavItem>
+        </div>
+        <div in:fly={{delay: getDelay(true)}}>
+          <SecondaryNavItem href={makeSpacePath(url, "threads")}>
+            <Icon icon="notes-minimalistic" /> Threads
+          </SecondaryNavItem>
+        </div>
+        <div in:fly={{delay: getDelay()}}>
+          <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
+            <Icon icon="calendar-minimalistic" /> Calendar
+          </SecondaryNavItem>
+        </div>
+        {#if rooms.length > 0}
+          <div transition:slide={{delay: getDelay()}}>
+            <div class="h-2" />
+            <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+          </div>
         {/if}
-      </div>
-      <div class="my-3 h-px bg-base-200" />
-      <div in:fly>
-        <SecondaryNavItem href={makeSpacePath(url)}>
-          <Icon icon="chat-round" /> Chat
-        </SecondaryNavItem>
-      </div>
-      <div in:fly={{delay: getDelay(true)}}>
-        <SecondaryNavItem href={makeSpacePath(url, "threads")}>
-          <Icon icon="notes-minimalistic" /> Threads
-        </SecondaryNavItem>
-      </div>
-      <div in:fly={{delay: getDelay()}}>
-        <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
-          <Icon icon="calendar-minimalistic" /> Calendar
-        </SecondaryNavItem>
-      </div>
-      {#if rooms.length > 0}
-        <div transition:slide={{delay: getDelay()}}>
-          <div class="h-2" />
-          <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-        </div>
-      {/if}
-      {#each rooms as room, i (room)}
-        <div transition:slide={{delay: getDelay()}}>
-          <SecondaryNavItem href={makeSpacePath(url, room)}>
-            <Icon icon="hashtag" />
-            {room}
+        {#each rooms as room, i (room)}
+          <div transition:slide={{delay: getDelay()}}>
+            <SecondaryNavItem href={makeSpacePath(url, room)}>
+              <Icon icon="hashtag" />
+              {room}
+            </SecondaryNavItem>
+          </div>
+        {/each}
+        {#if otherRooms.length > 0}
+          <div transition:slide={{delay: getDelay()}}>
+            <div class="h-2" />
+            <SecondaryNavHeader>
+              {#if rooms.length > 0}
+                Other Rooms
+              {:else}
+                Rooms
+              {/if}
+            </SecondaryNavHeader>
+          </div>
+        {/if}
+        {#each otherRooms as room, i (room)}
+          <div transition:slide={{delay: getDelay()}}>
+            <SecondaryNavItem href={makeSpacePath(url, room)}>
+              <Icon icon="hashtag" />
+              {room}
+            </SecondaryNavItem>
+          </div>
+        {/each}
+        <div in:fly={{delay: getDelay()}}>
+          <SecondaryNavItem on:click={addRoom}>
+            <Icon icon="add-circle" />
+            Create room
           </SecondaryNavItem>
         </div>
-      {/each}
-      {#if otherRooms.length > 0}
-        <div transition:slide={{delay: getDelay()}}>
-          <div class="h-2" />
-          <SecondaryNavHeader>
-            {#if rooms.length > 0}
-              Other Rooms
-            {:else}
-              Rooms
-            {/if}
-          </SecondaryNavHeader>
-        </div>
-      {/if}
-      {#each otherRooms as room, i (room)}
-        <div transition:slide={{delay: getDelay()}}>
-          <SecondaryNavItem href={makeSpacePath(url, room)}>
-            <Icon icon="hashtag" />
-            {room}
-          </SecondaryNavItem>
-        </div>
-      {/each}
-      <div in:fly={{delay: getDelay()}}>
-        <SecondaryNavItem on:click={addRoom}>
-          <Icon icon="add-circle" />
-          Create room
-        </SecondaryNavItem>
-      </div>
-    </SecondaryNavSection>
-  </SecondaryNav>
-  <Page>
-    {#key $page.params.room}
-      <slot />
-    {/key}
-  </Page>
+      </SecondaryNavSection>
+    </SecondaryNav>
+    <Page>
+      {#key $page.params.room}
+        <slot />
+      {/key}
+    </Page>
+  </Delay>
 {/key}

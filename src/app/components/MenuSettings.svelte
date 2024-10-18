@@ -12,7 +12,7 @@
 <div class="column menu gap-2">
   <Link href="/settings/relays">
     <CardButton>
-      <div slot="icon"><Icon icon="remote-controller-minimalistic" size={7} /></div>
+      <div slot="icon"><Icon icon="server" size={7} /></div>
       <div slot="title">Relays</div>
       <div slot="info">Control how Flotilla talks to the network</div>
     </CardButton>

@@ -21,37 +21,63 @@
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
-<div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
-  <div class="flex h-full flex-col justify-between">
-    <div>
-      <PrimaryNavItem href="/home/people" class="tooltip-right">
-        <Avatar icon="home-smile" class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      {#each getMembershipUrls($userMembership) as url (url)}
-        <PrimaryNavItem
-          title={displayRelayUrl(url)}
-          href={makeSpacePath(url)}
-          class="tooltip-right">
-          <SpaceAvatar {url} />
+{#if import.meta.env.VITE_PLATFORM_RELAY}
+  <div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
+    <div class="flex h-full flex-col justify-between">
+      <div>
+        <PrimaryNavItem href="/home/people" class="tooltip-right">
+          <Avatar icon="home-smile" class="!h-10 !w-10" />
         </PrimaryNavItem>
-      {/each}
-      <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
-        <Avatar icon="add-circle" class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="Discover Spaces" href="/discover" class="tooltip-right">
-        <Avatar icon="compass-big" class="!h-10 !w-10" />
-      </PrimaryNavItem>
-    </div>
-    <div>
-      <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
-        <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
-        <Avatar icon="settings" class="!h-10 !w-10" />
-      </PrimaryNavItem>
+        <PrimaryNavItem
+          title={displayRelayUrl(import.meta.env.VITE_PLATFORM_RELAY)}
+          href={makeSpacePath(import.meta.env.VITE_PLATFORM_RELAY)}
+          class="tooltip-right">
+          <SpaceAvatar url={import.meta.env.VITE_PLATFORM_RELAY} />
+        </PrimaryNavItem>
+      </div>
+      <div>
+        <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
+          <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+        </PrimaryNavItem>
+        <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
+          <Avatar icon="settings" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+      </div>
     </div>
   </div>
-</div>
+{:else}
+  <div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
+    <div class="flex h-full flex-col justify-between">
+      <div>
+        <PrimaryNavItem href="/home/people" class="tooltip-right">
+          <Avatar icon="home-smile" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+        {#each getMembershipUrls($userMembership) as url (url)}
+          <PrimaryNavItem
+            title={displayRelayUrl(url)}
+            href={makeSpacePath(url)}
+            class="tooltip-right">
+            <SpaceAvatar {url} />
+          </PrimaryNavItem>
+        {/each}
+        <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
+          <Avatar icon="add-circle" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+        <PrimaryNavItem title="Discover Spaces" href="/discover" class="tooltip-right">
+          <Avatar icon="compass-big" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+      </div>
+      <div>
+        <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
+          <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+        </PrimaryNavItem>
+        <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
+          <Avatar icon="settings" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <slot />
 
@@ -68,7 +94,7 @@
         <Avatar icon="settings" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
-    <PrimaryNavItem title="Settings" href="/settings/profile">
+    <PrimaryNavItem noActive title="Settings" href="/settings/profile">
       <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>

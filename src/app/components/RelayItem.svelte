@@ -15,7 +15,7 @@
 <div class="card2 card2-sm bg-alt column gap-2">
   <div class="flex items-center justify-between gap-4">
     <div class="ellipsize flex items-center gap-2">
-      <Icon icon="remote-controller-minimalistic" />
+      <Icon icon="server" />
       <p class="ellipsize">{displayRelayUrl(url)}</p>
     </div>
     <slot />

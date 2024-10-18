@@ -10,12 +10,13 @@
   export let depth = 0
 
   const {id, identifier, kind, pubkey, relays} = value
-  const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
+  const addr = new Address(kind, pubkey, identifier)
+  const idOrAddress = id || addr.toString()
   const event = deriveEvent(idOrAddress, relays)
-  const nevent = nip19.neventEncode({id, relays})
+  const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
 </script>
 
-<Link external href={entityLink(nevent)} class="my-2 block max-w-full text-left">
+<Link external href={entityLink(entity)} class="my-2 block max-w-full text-left">
   {#if $event}
     <NoteCard event={$event} class="bg-alt rounded-box p-4">
       <slot name="note-content" event={$event} {depth} />

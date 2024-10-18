@@ -36,7 +36,7 @@
   <Field>
     <p slot="label">Relay</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="remote-controller-minimalistic" />
+      <Icon icon="server" />
       <input bind:value={relay} class="grow" type="text" />
     </label>
     <p slot="info">

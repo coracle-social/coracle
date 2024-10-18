@@ -113,7 +113,7 @@
       <Field>
         <p slot="label">Nostr Address</p>
         <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-          <Icon icon="remote-controller-minimalistic" />
+          <Icon icon="map-point" />
           <input bind:value={values.nip05} class="grow" type="text" />
         </label>
         <p slot="info">
