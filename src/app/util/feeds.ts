@@ -16,7 +16,7 @@ import {
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
-import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
+import {walkFeed, FeedLoader as CoreFeedLoader, isIntersectionFeed, isRelayFeed} from "@welshman/feeds"
 import {repository, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
@@ -114,7 +114,8 @@ export const createFeed = (opts: FeedOpts) => {
   const welshman = createFeedLoader(opts, controller.signal)
   const appendEvent = onEvent(appendToFeed)
   const prependEvent = onEvent(prependToFeed)
-  const loaderOpts = {useWindowing: true, onEvent: appendEvent, onExhausted}
+  const useWindowing = !(isIntersectionFeed(opts.feed) && opts.feed.length === 2 && isRelayFeed(opts.feed[1]))
+  const loaderOpts = {useWindowing, onEvent: appendEvent, onExhausted}
 
   let filters, delta, loader
   Promise.resolve(tryFunc(() => welshman.compiler.compile(opts.feed))).then(async reqs => {
@@ -168,7 +169,7 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function deferAncient(events: TrustedEvent[]) {
-    if (opts.shouldDefer === false) {
+    if (opts.shouldDefer === false || !useWindowing) {
       return events
     }
 
@@ -376,6 +377,6 @@ export const createFeed = (opts: FeedOpts) => {
     getFilters: () => filters,
     stop: () => controller.abort(),
     subscribe: f => store.subscribe(f),
-    loadMore: (limit: number) => loader?.(limit),
+    loadMore: (limit: number) => loader?.(useWindowing ? limit : 1000),
   }
 }
