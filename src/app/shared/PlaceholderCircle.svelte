@@ -13,11 +13,11 @@
 <div
   class={cx(
     $$props.class,
-    `relative inline-block shrink-0 overflow-hidden rounded-full border border-solid border-neutral-100 bg-cover bg-center`,
+    `relative inline-block shrink-0 overflow-hidden rounded-full border border-solid
+     border-neutral-100 bg-cover bg-center`,
   )}
-  s}
-  style="--logo-color: {primary}; --}; --logo-bg-color: {secondary}; ba}; background-color: var(--logo-bg-color);">
+  style="--logo-color: {primary}; --logo-bg-color: {secondary}; background-color: var(--logo-bg-color);">
   <LogoSvg
     class="logo absolute left-2/4 top-2/4 -translate-x-1/2 -translate-y-1/2"
-    style="height: 85%; width: 85%;"></LogoSvg>
+    style="height: 85%; width: 85%;" />
 </div>
