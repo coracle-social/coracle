@@ -10,13 +10,6 @@
 </script>
 
 <div class="column menu gap-2">
-  <Link href="/settings/profile">
-    <CardButton>
-      <div slot="icon"><Icon icon="user-circle" size={7} /></div>
-      <div slot="title">Profile</div>
-      <div slot="info">Customize your profile</div>
-    </CardButton>
-  </Link>
   <Link href="/settings/relays">
     <CardButton>
       <div slot="icon"><Icon icon="remote-controller-minimalistic" size={7} /></div>
@@ -26,7 +19,7 @@
   </Link>
   <Link href="/settings">
     <CardButton>
-      <div slot="icon"><Icon icon="notes-minimalistic" size={7} /></div>
+      <div slot="icon"><Icon icon="settings" size={7} /></div>
       <div slot="title">Settings</div>
       <div slot="info">Get into the details about how Flotilla works</div>
     </CardButton>

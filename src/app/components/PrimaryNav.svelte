@@ -25,7 +25,7 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem href="/home/people" class="tooltip-right">
-        <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+        <Avatar icon="home-smile" class="!h-10 !w-10" />
       </PrimaryNavItem>
       {#each getMembershipUrls($userMembership) as url (url)}
         <PrimaryNavItem
@@ -43,7 +43,10 @@
       </PrimaryNavItem>
     </div>
     <div>
-      <PrimaryNavItem title="Settings" href="/settings/profile" class="tooltip-right">
+      <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
+        <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
         <Avatar icon="settings" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
@@ -53,15 +56,20 @@
 <slot />
 
 <div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden border border-top border-base-200">
-  <div class="m-auto flex max-w-sm justify-between px-2">
-    <PrimaryNavItem title="Home" on:click={showHomeMenu}>
-      <Avatar icon="home-smile" class="!h-10 !w-10" />
-    </PrimaryNavItem>
-    <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
-      <SpaceAvatar />
-    </PrimaryNavItem>
-    <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
-      <Avatar icon="settings" class="!h-10 !w-10" />
+  <div class="m-auto flex max-w-md justify-between px-2">
+    <div class="flex gap-4 sm:gap-8">
+      <PrimaryNavItem title="Home" on:click={showHomeMenu}>
+        <Avatar icon="home-smile" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
+        <SpaceAvatar />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
+        <Avatar icon="settings" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+    </div>
+    <PrimaryNavItem title="Settings" href="/settings/profile">
+      <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>
 </div>
