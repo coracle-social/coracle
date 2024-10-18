@@ -69,7 +69,7 @@
     </p>
   </div>
   <Button
-    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 sm:bottom-4 sm:right-4"
+    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"
     data-tip="Create an Event"
     on:click={createThread}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">

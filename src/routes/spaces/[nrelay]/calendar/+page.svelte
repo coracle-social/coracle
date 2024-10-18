@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, last, ago} from "@welshman/lib"
+  import {sortBy, tryCatch, last, ago} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {EVENT_DATE, EVENT_TIME} from "@welshman/util"
   import {subscribe, formatTimestampAsDate} from "@welshman/app"
@@ -21,9 +21,13 @@
 
   const createEvent = () => pushModal(EventCreate, {url})
 
-  const getStart = (event: TrustedEvent) =>
-    parseInt(event.tags.find(t => t[0] === "start")?.[1] || "0")
+  const getEnd = (event: TrustedEvent) =>
+    parseInt(event.tags.find(t => t[0] === "end")?.[1] || "")
 
+  const getStart = (event: TrustedEvent) =>
+    parseInt(event.tags.find(t => t[0] === "start")?.[1] || "")
+
+  let limit = 5
   let loading = true
 
   type Item = {
@@ -31,14 +35,19 @@
     dateDisplay?: string
   }
 
-  $: items = sortBy(getStart, $events).reduce<Item[]>((r, event) => {
+  $: items = sortBy(e => -getStart(e), $events).reduce<Item[]>((r, event) => {
+    const end = getEnd(event)
+    const start = getStart(event)
+
+    if (isNaN(start) || isNaN(end)) return r
+
     const prevDateDisplay =
       r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-    const newDateDisplay = formatTimestampAsDate(getStart(event))
+    const newDateDisplay = formatTimestampAsDate(start)
     const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
 
     return [...r, {event, dateDisplay}]
-  }, [])
+  }, []).slice(0, limit)
 
   onMount(() => {
     const sub = subscribe({filters: [{kinds, since: ago(30)}]})
@@ -78,7 +87,7 @@
     </p>
   </div>
   <Button
-    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 sm:bottom-4 sm:right-4"
+    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"
     data-tip="Create an Event"
     on:click={createEvent}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
+  import {displayRelayUrl} from '@welshman/util'
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -26,6 +27,8 @@
 
   let space = $page.params?.nrelay ? decodeNRelay($page.params?.nrelay) : undefined
   let showSettings = false
+
+  const assertNotNil = <T>(x: T) => x!
 
   const resetSpace = () => {
     space = ""
@@ -60,10 +63,9 @@
 
 <div class="column menu gap-2">
   {#if showSettings}
-    <Button on:click={closeSettings} class="mb-4 flex items-center gap-2 text-lg">
-      <Icon icon="alt-arrow-left" size={7} />
-      Go Back
-    </Button>
+    <p class="mb-4 text-2xl text-center">
+      Settings for <span class="text-primary">{displayRelayUrl(assertNotNil(space))}</span>
+    </p>
     {#if getMembershipUrls($userMembership).includes(space || "")}
       <Button on:click={leaveSpace} class="btn btn-error">
         <Icon icon="exit" />
@@ -75,11 +77,14 @@
         Join Space
       </Button>
     {/if}
-  {:else if space}
-    <Button on:click={resetSpace} class="mb-4 flex items-center gap-2 text-lg">
+    <Button on:click={closeSettings} class="mt-4 flex items-center gap-2 text-lg">
       <Icon icon="alt-arrow-left" size={7} />
-      Back to Spaces
+      Go Back
     </Button>
+  {:else if space}
+    <p class="mb-4 text-2xl text-center">
+      Actions for <span class="text-primary">{displayRelayUrl(space)}</span>
+    </p>
     <div class="grid grid-cols-3 gap-2">
       <Link href={makeSpacePath(space)} class="btn btn-neutral">
         <Icon icon="chat-round" /> Chat
@@ -112,6 +117,10 @@
         <Icon icon="settings" /> Space Settings
       </Button>
     </div>
+    <Button on:click={resetSpace} class="mt-4 flex items-center gap-2 text-lg">
+      <Icon icon="alt-arrow-left" size={7} />
+      Back to Spaces
+    </Button>
   {:else}
     {#each getMembershipUrls($userMembership) as url (url)}
       <Button on:click={() => setSpace(url)}>
