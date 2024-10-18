@@ -56,6 +56,7 @@ import {
   maxWot,
   getNetwork,
 } from "@welshman/app"
+import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {partition, uniq, without} from "ramda"
 import {CUSTOM_LIST_KINDS} from "src/domain"
