@@ -26,14 +26,14 @@
   })
 </script>
 
-<div class="fixed flex bg-base-200 pt-8 left-8 top-0 right-8 z-feature">
-  <label class="input input-bordered flex w-full items-center gap-2">
-    <Icon icon="magnifer" />
-    <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />
-  </label>
-</div>
-<div class="content column gap-4 !mt-14" bind:this={element}>
-  <div class="flex flex-col gap-2">
+<div class="column max-h-full content-t" bind:this={element}>
+  <div class="flex-grow content-x">
+    <label class="input input-bordered flex w-full items-center gap-2">
+      <Icon icon="magnifer" />
+      <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />
+    </label>
+  </div>
+  <div class="content-b content-x flex flex-col gap-2 overflow-auto pt-2">
     {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
       <PeopleItem {pubkey} />
     {/each}
