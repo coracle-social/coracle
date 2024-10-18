@@ -121,11 +121,13 @@
             <Icon icon="notes-minimalistic" /> Threads
           </SecondaryNavItem>
         </div>
+        <!--
         <div in:fly={{delay: getDelay()}}>
           <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
             <Icon icon="calendar-minimalistic" /> Calendar
           </SecondaryNavItem>
         </div>
+        -->
         {#if rooms.length > 0}
           <div transition:slide={{delay: getDelay()}}>
             <div class="h-2" />
