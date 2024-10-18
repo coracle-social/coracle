@@ -8,14 +8,16 @@
 {#if actions.length > 0}
   {#if actions.length === 1}
     <Popover triggerType="mouseenter">
-      <div slot="trigger" class="w-6 text-center cursor-pointer">
+      <div slot="trigger" class="w-6 cursor-pointer text-center">
         <i class={`fa fa-${actions[0].icon} cursor-pointer`} on:click={actions[0].onClick} />
       </div>
       <p slot="tooltip">{actions[0].label}</p>
     </Popover>
   {:else}
     <Popover theme="transparent">
-      <div slot="trigger" class="w-6 text-center cursor-pointer bg-neutral-800 text-neutral-50 rounded hover:bg-neutral-700">
+      <div
+        slot="trigger"
+        class="w-6 cursor-pointer rounded bg-neutral-800 text-center text-neutral-50 hover:bg-neutral-700">
         <i class="fa fa-sm fa-ellipsis-v" />
       </div>
       <div

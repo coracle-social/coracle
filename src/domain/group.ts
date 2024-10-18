@@ -1,4 +1,4 @@
-import {fromPairs, nthEq} from '@welshman/lib'
+import {fromPairs, nthEq} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {isSignedEvent} from "@welshman/util"
 
@@ -26,9 +26,9 @@ export const readGroupMeta = (event: TrustedEvent) => {
   return {
     event,
     kind: event.kind,
-    feeds: event.tags.filter(nthEq(0, 'feed')),
-    relays: event.tags.filter(nthEq(0, 'relay')),
-    moderators: event.tags.filter(nthEq(0, 'p')),
+    feeds: event.tags.filter(nthEq(0, "feed")),
+    relays: event.tags.filter(nthEq(0, "relay")),
+    moderators: event.tags.filter(nthEq(0, "p")),
     identifier: meta.d,
     name: meta.name || "",
     banner: meta.banner || "",

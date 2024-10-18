@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {Tags} from '@welshman/util'
+  import {Tags} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
@@ -18,7 +18,8 @@
     <h3 class="staatliches text-2xl">{title || subject}</h3>
     <Chips items={categories}>
       <div slot="item" let:item>
-        <i class="fa fa-tag" /> {item}
+        <i class="fa fa-tag" />
+        {item}
       </div>
     </Chips>
   </div>

@@ -19,12 +19,7 @@
   import Heading from "src/partials/Heading.svelte"
   import GroupCircle from "src/app/shared/GroupCircle.svelte"
   import GroupName from "src/app/shared/GroupName.svelte"
-  import {
-    groupSharedKeys,
-    userIsGroupMember,
-    groupAdminKeys,
-    subscribe,
-  } from "src/engine"
+  import {groupSharedKeys, userIsGroupMember, groupAdminKeys, subscribe} from "src/engine"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {whereEq} from "ramda"
   import GroupRequest from "src/app/shared/GroupRequest.svelte"
-  import {groupRequests} from 'src/engine'
+  import {groupRequests} from "src/engine"
 
   export let address
 

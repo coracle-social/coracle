@@ -25,7 +25,7 @@
     underline
     stopPropagation
     class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-    href={url.replace(coracleRegexp, '')}>
+    href={url.replace(coracleRegexp, "")}>
     {displayUrl(url)}
   </Anchor>
 {:else if isShareableRelayUrl(url)}
@@ -38,7 +38,7 @@
     {displayUrl(url)}
   </Anchor>
 {:else if showMedia && !hidden}
-  <Media url={url} onClose={close} />
+  <Media {url} onClose={close} />
 {:else}
   <Anchor
     modal

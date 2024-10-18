@@ -16,7 +16,12 @@ import {
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
-import {walkFeed, FeedLoader as CoreFeedLoader, isIntersectionFeed, isRelayFeed} from "@welshman/feeds"
+import {
+  walkFeed,
+  FeedLoader as CoreFeedLoader,
+  isIntersectionFeed,
+  isRelayFeed,
+} from "@welshman/feeds"
 import {repository, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
@@ -147,8 +152,7 @@ export const createFeed = (opts: FeedOpts) => {
     }
   })
 
-  const sortEvents = (events: TrustedEvent[]) =>
-    useWindowing ? sortEventsDesc(events) : events
+  const sortEvents = (events: TrustedEvent[]) => (useWindowing ? sortEventsDesc(events) : events)
 
   function deferOrphans(events: TrustedEvent[]) {
     if (!opts.shouldLoadParents || opts.shouldDefer === false) {

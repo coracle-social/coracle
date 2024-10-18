@@ -72,7 +72,10 @@ export class Writable<T> implements IWritable<T> {
     f(this.value)
 
     return () => {
-      this.subs.splice(this.subs.findIndex(x => x === f), 1)
+      this.subs.splice(
+        this.subs.findIndex(x => x === f),
+        1,
+      )
     }
   }
 
@@ -135,7 +138,10 @@ export class Derived<T> implements IReadable<T> {
     f(this.get())
 
     return () => {
-      this.callerSubs.splice(this.callerSubs.findIndex(x => x === f), 1)
+      this.callerSubs.splice(
+        this.callerSubs.findIndex(x => x === f),
+        1,
+      )
 
       if (this.callerSubs.length === 0) {
         for (const unsub of this.mySubs.splice(0)) {

@@ -206,10 +206,11 @@
   </Card>
   <FlexColumn>
     {#if formType === FormType.Global && feed.length === 2}
-      <Card class="flex gap-4 items-center">
-        <i class="fa fa-triangle-exclamation text-warning fa-xl" />
+      <Card class="flex items-center gap-4">
+        <i class="fa fa-triangle-exclamation fa-xl text-warning" />
         <p>
-          Be aware that feeds with no filters can result in obscene or otherwise objectionable content being displayed.
+          Be aware that feeds with no filters can result in obscene or otherwise objectionable
+          content being displayed.
         </p>
       </Card>
     {/if}

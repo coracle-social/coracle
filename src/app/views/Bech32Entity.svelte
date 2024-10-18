@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {loadHandle} from '@welshman/app'
+  import {loadHandle} from "@welshman/app"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -29,7 +29,7 @@
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
   <PersonDetail pubkey={data} />
-{:else if entity.includes('@')}
+{:else if entity.includes("@")}
   {#await loadHandle(entity)}
     <Spinner />
   {:then $handle}

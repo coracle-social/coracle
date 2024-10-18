@@ -9,4 +9,4 @@
   $: display = displayGroupMeta($meta)
 </script>
 
-<span class={$$props.class} class:text-neutral-400={display === '[no name]'}>{display}</span>
+<span class={$$props.class} class:text-neutral-400={display === "[no name]"}>{display}</span>

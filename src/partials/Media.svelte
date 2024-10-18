@@ -54,8 +54,8 @@
           loading="lazy" />
       {:else if url.match(/tidal.com/)}
         {@const {pathname} = new URL(url)}
-        {@const id = last(pathname.split('/'))}
-        {@const name = pathname.includes('album') ? 'albums' : 'tracks'}
+        {@const id = last(pathname.split("/"))}
+        {@const name = pathname.includes("album") ? "albums" : "tracks"}
         {@const src = `https://embed.tidal.com/${name}/${id}`}
         <iframe
           {src}

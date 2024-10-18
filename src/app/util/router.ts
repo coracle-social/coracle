@@ -81,7 +81,7 @@ export const asPerson = {
 
 export const asRelay = {
   encode: encodeURIComponent,
-  decode: decodeAs('url', decodeURIComponent)
+  decode: decodeAs("url", decodeURIComponent),
 }
 
 export const asChannelId = {

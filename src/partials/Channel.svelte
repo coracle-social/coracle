@@ -182,7 +182,7 @@
     {#each groupedMessages as message (message.id)}
       <div in:fly={{y: 20}} class="grid gap-2 py-1">
         <div
-          class={cx("max-w-xl rounded-2xl px-4 py-2 flex flex-col gap-2", {
+          class={cx("flex max-w-xl flex-col gap-2 rounded-2xl px-4 py-2", {
             "ml-12 justify-self-end rounded-br-none bg-neutral-100 text-neutral-800":
               message.pubkey === $session.pubkey,
             "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
@@ -206,8 +206,10 @@
               <Popover triggerType="mouseenter">
                 <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
                 <p slot="tooltip">
-                  This message was sent using nostr's legacy DMs, which have a number of shortcomings.
-                  Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
+                  This message was sent using nostr's legacy DMs, which have a number of
+                  shortcomings. Read more <Anchor underline modal href="/help/nip-44-dms"
+                    >here</Anchor
+                  >.
                 </p>
               </Popover>
             {:else}
@@ -224,8 +226,8 @@
                   </p>
                   {#if message.pubkey === $session.pubkey}
                     <p>
-                      Note that these messages are not yet universally supported. Make sure the person
-                      you're chatting with is using a compatible nostr client.
+                      Note that these messages are not yet universally supported. Make sure the
+                      person you're chatting with is using a compatible nostr client.
                     </p>
                   {/if}
                 </div>

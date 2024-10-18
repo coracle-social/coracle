@@ -13,7 +13,7 @@
 </style>
 
 <script lang="ts">
-  import {clamp} from '@welshman/lib'
+  import {clamp} from "@welshman/lib"
   import {themeColors} from "src/partials/state"
 
   export let score
@@ -26,7 +26,7 @@
   $: normalizedScore = clamp([0, max], score) / max
   $: dashOffset = 100 - 44 * normalizedScore
   $: style = `transform: rotate(${135 - normalizedScore * 180}deg)`
-  $: stroke = $themeColors[accent ? 'accent' : 'neutral-200']
+  $: stroke = $themeColors[accent ? "accent" : "neutral-200"]
 </script>
 
 <div class="relative h-4 w-4">
