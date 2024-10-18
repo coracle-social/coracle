@@ -148,7 +148,12 @@
       on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
-          <Compose autofocus bind:this={compose} onSubmit={() => send()} style="min-height: 4rem">
+          <Compose
+            autofocus
+            hostLimit={3}
+            bind:this={compose}
+            onSubmit={() => send()}
+            style="min-height: 4rem">
             <div class="flex flex-col justify-start" slot="addon">
               <button
                 on:click={() => send()}
@@ -162,16 +167,19 @@
             </div>
           </Compose>
         </div>
-        <div class="p-2">
+        <!-- <div class="p-2">
           <NoteImages bind:this={images} bind:compose includeInContent />
-        </div>
+        </div> -->
         <div class="h-px" />
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
-              <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
-                <i slot="button" class="fa fa-paperclip" />
-              </ImageInput>
+              <button
+                class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+                on:click|preventDefault={compose.selectFiles}>
+                <!-- <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}> -->
+                <i class="fa fa-paperclip" />
+              </button>
               {#if !env.FORCE_GROUP}
                 <i class="fa fa-cog" on:click={() => options.setView("settings")} />
               {/if}

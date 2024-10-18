@@ -91,16 +91,23 @@
   <AltColor background class="z-feature flex gap-4 overflow-hidden rounded p-3 text-neutral-100">
     <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
     <div class="w-full min-w-0">
-      <Compose placeholder="What's up?" bind:this={compose} {onSubmit} style="min-height: 3em;" />
-      <div class="p-2">
+      <Compose
+        placeholder="What's up?"
+        hostLimit={3}
+        bind:this={compose}
+        {onSubmit}
+        style="min-height: 3em;" />
+      <!-- <div class="p-2">
         <NoteImages bind:this={images} bind:compose includeInContent />
-      </div>
+      </div> -->
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-end gap-3">
           <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
-          <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
-            <i slot="button" class="fa fa-paperclip cursor-pointer" />
-          </ImageInput>
+          <button
+            class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+            on:click|preventDefault={compose.selectFiles}>
+            <i class="fa fa-paperclip cursor-pointer" />
+          </button>
           {#if group}
             <Popover triggerType="mouseenter">
               <i slot="trigger" class="fa fa-circle-nodes cursor-pointer" />

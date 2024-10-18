@@ -12,7 +12,6 @@
   import {dateToSeconds} from "src/util/misc"
   import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
@@ -264,7 +263,12 @@
             <NoteContent note={{content: compose.parse(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose autofocus on:keyup={updateCounts} bind:this={compose} {onSubmit} />
+            <Compose
+              hostLimit={3}
+              autofocus
+              on:keyup={updateCounts}
+              bind:this={compose}
+              {onSubmit} />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-neutral-200">
@@ -281,10 +285,15 @@
           </button>
         </div>
       </Field>
-      <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
+      <!-- <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} /> -->
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
-        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
+        <button
+          class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+          on:click|preventDefault={compose.selectFiles}>
+          <i class="fa fa-upload" />
+        </button>
+        <!-- <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} /> -->
       </div>
       {#if !env.FORCE_GROUP}
         <button

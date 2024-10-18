@@ -1,16 +1,30 @@
 <script lang="ts">
   import {makeTagFeed} from "@welshman/feeds"
+  import {NodeViewWrapper, NodeViewContent} from "svelte-tiptap"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
-  import {makeFeed} from 'src/domain'
+  import {makeFeed} from "src/domain"
+  import type {NodeViewProps} from "@tiptap/core"
 
-  export let value
+  export let node: NodeViewProps["node"] = undefined
+  export let value: string
 
-  const feed = makeFeed({definition: makeTagFeed("#t", value)})
+  $: attrs = node?.attrs as NProfileAttributes
+  $: console.log(node, node?.attrs)
 
-  const onClick = () => router.at('notes').cx({feed}).push()
+  $: feed = makeFeed({definition: makeTagFeed("#t", value)})
+
+  const onClick = () => router.at("notes").cx({feed}).push()
 </script>
 
-<Anchor modal underline on:click={onClick}>
-  #{value}
-</Anchor>
+{#if node}
+  <NodeViewWrapper data-type="tag" as="span">
+    <Anchor modal underline on:click={onClick}>
+      #{value}
+    </Anchor>
+  </NodeViewWrapper>
+{:else}
+  <Anchor modal underline on:click={onClick}>
+    #{value}
+  </Anchor>
+{/if}

@@ -1,26 +1,105 @@
+<style>
+  :global(.lazy-image) {
+    animation: blurPulse 1.5s infinite;
+  }
+
+  :global(a[data-type="tag"]) {
+    text-decoration: underline;
+  }
+
+  @keyframes blurPulse {
+    0% {
+      filter: blur(0px);
+    }
+    50% {
+      filter: blur(15px);
+    }
+    100% {
+      filter: blur(0px);
+    }
+  }
+</style>
+
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {throttle} from "throttle-debounce"
-  import {createEventDispatcher} from "svelte"
-  import {whereEq} from "ramda"
+  import {createEventDispatcher, onMount} from "svelte"
   import {ctx, last, partition} from "@welshman/lib"
-  import {displayProfileByPubkey, profileSearch} from "@welshman/app"
+  import {profileSearch} from "@welshman/app"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {userFollows, createPeopleLoader} from "src/engine"
+  import {userFollows, createPeopleLoader, getSetting} from "src/engine"
+  import type {Readable} from "svelte/store"
+  import {createEditor, Editor, SvelteNodeViewRenderer} from "svelte-tiptap"
+  import StarterKit from "@tiptap/starter-kit"
+  import {NostrExtension} from "nostr-editor"
+  import {signer} from "@welshman/app"
+  import PersonLink from "src/app/shared/PersonLink.svelte"
 
   export let onSubmit
   export let autofocus = false
   export let placeholder = null
+  export let hostLimit = 1
 
-  let contenteditable, suggestions
+  let editor: Readable<Editor>
+
+  let suggestions
+
+  let element: HTMLDivElement
+
+  $: textBeforeCursor = $editor?.state?.selection?.$anchor?.nodeBefore?.text || ""
+
+  onMount(() => {
+    const urls = getSetting("nip96_urls").slice(0, hostLimit)
+    editor = createEditor({
+      autofocus,
+
+      element: element,
+      editorProps: {
+        attributes: {
+          placeholder,
+        },
+      },
+
+      extensions: [
+        StarterKit,
+        NostrExtension.configure({
+          extend: {
+            nprofile: {addNodeView: () => SvelteNodeViewRenderer(PersonLink)},
+          },
+          tag: true,
+          image: {
+            defaultUploadUrl: urls[0],
+            defaultUploadType: "nip96",
+          },
+          video: {
+            defaultUploadUrl: urls[0],
+            defaultUploadType: "nip96",
+          },
+          fileUpload: {
+            immediateUpload: true,
+            sign: async event => {
+              return $signer.sign(event)
+            },
+            onDrop() {
+              const imgElements = element.querySelectorAll('img[uploading="true"]')
+              for (const img of imgElements) {
+                img.classList.add("lazy-image")
+              }
+            },
+          },
+          link: {autolink: true},
+        }),
+      ],
+      content: "",
+    })
+  })
 
   const dispatch = createEventDispatcher()
 
   const {loading: loadingPeople, load: loadPeople} = createPeopleLoader({
     shouldLoad: (term: string) => term.startsWith("@"),
-    onEvent: () => applySearch(getInfo().word),
+    onEvent: () => applySearch(getLastWord()),
   })
 
   const pubkeyEncoder = {
@@ -36,7 +115,7 @@
     },
   }
 
-  const applySearch = throttle(300, word => {
+  const applySearch = throttle(300, (word: string) => {
     let results = []
     if (word.length > 1 && word.startsWith("@")) {
       const [followed, notFollowed] = partition(
@@ -50,64 +129,12 @@
     suggestions.setData(results)
   })
 
-  const getInfo = () => {
-    const selection = window.getSelection()
-    const {focusNode: node, focusOffset: offset} = selection
-    const textBeforeCursor = node.textContent.slice(0, offset)
+  const getLastWord = () => {
     const word = last(textBeforeCursor.trim().split(/\s+/))
-
-    return {selection, node, offset, word}
+    return word || ""
   }
 
-  const autocomplete = ({pubkey = null, force = false} = {}) => {
-    let completed = false
-
-    const {selection, node, offset, word} = getInfo()
-
-    const annotate = (prefix, text, value) => {
-      const adjustedOffset = offset - word.length + prefix.length
-
-      // Space includes a zero-width space to avoid having the cursor end up inside
-      // mention span on backspace, and a space for convenience in composition.
-      const space = document.createTextNode("\u200B\u00A0")
-      const spaceSpan = document.createElement("span")
-      const span = document.createElement("span")
-
-      spaceSpan.append(space)
-
-      span.classList.add("underline")
-      span.dataset.coracle = JSON.stringify({prefix, value})
-      span.innerText = text
-
-      // Remove our partial mention text
-      selection.setBaseAndExtent(node, adjustedOffset, node, offset)
-      selection.deleteFromDocument()
-
-      // Add the span and space
-      selection.getRangeAt(0).insertNode(span)
-      selection.collapse(span.nextSibling, 0)
-      span.insertAdjacentElement("afterend", spaceSpan)
-      selection.collapse(spaceSpan.nextSibling, 0)
-
-      completed = true
-    }
-
-    // Mentions
-    if ((force || word.length > 1) && word.startsWith("@") && pubkey) {
-      annotate("@", displayProfileByPubkey(pubkey).trim(), pubkeyEncoder.encode(pubkey))
-    }
-
-    // Topics
-    if ((force || word.length > 1) && word.startsWith("#")) {
-      annotate("#", word.slice(1), word.slice(1))
-    }
-
-    suggestions.setData([])
-
-    return completed
-  }
-
-  const onKeyDown = e => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (e.code === "Enter" && (e.ctrlKey || e.metaKey)) {
       return onSubmit()
     }
@@ -124,27 +151,38 @@
     }
 
     // Enter adds a newline, so do it on key down
-    if (["Enter"].includes(e.code)) {
-      autocomplete({pubkey: suggestions.get()})
-    }
-
-    // Only autocomplete topics on space
-    if (["Space"].includes(e.code)) {
-      if (autocomplete()) {
-        e.preventDefault()
+    if (["Enter"].includes(e.code) && suggestions.get()) {
+      e.preventDefault()
+      const pubkey = suggestions.get()
+      if (pubkey) {
+        const content = $editor.getHTML()
+        // only replace the last occurence
+        const replacedContent = content.replace(/(.*)@\w+/, "$1")
+        $editor.commands.setContent(replacedContent, true)
+        $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
+        suggestions.setData([])
       }
     }
   }
 
   const onKeyUp = e => {
-    const {word} = getInfo()
+    const word = getLastWord()
 
     // Populate search data
     loadPeople(word)
     applySearch(word)
 
-    if (["Tab"].includes(e.code)) {
-      autocomplete({pubkey: suggestions.get()})
+    if (["Tab"].includes(e.code) && suggestions.get()) {
+      e.preventDefault()
+      const pubkey = suggestions.get()
+      if (pubkey) {
+        const content = $editor.getHTML()
+        // only replace the last occurence
+        const replacedContent = content.replace(/(.*)@\w+/, "$1")
+        $editor.commands.setContent(replacedContent, true)
+        $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
+        suggestions.setData([])
+      }
     }
 
     if (["Escape", "Space"].includes(e.code)) {
@@ -163,100 +201,33 @@
   }
 
   export const mention = pubkey => {
-    const input = contenteditable.getInput()
-    const selection = window.getSelection()
-    const textNode = document.createTextNode("@")
-    const spaceNode = document.createTextNode(" ")
-
-    // Insert the text node, then an extra node so we don't break stuff in annotate
-    selection.getRangeAt(0).insertNode(textNode)
-    selection.collapse(input, 1)
-    selection.getRangeAt(0).insertNode(spaceNode)
-    selection.collapse(input, 1)
-
-    autocomplete({pubkey, force: true})
+    $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
   }
 
-  const createNewLines = (n = 1) => {
-    const div = document.createElement("div")
-
-    div.innerHTML = "<br>".repeat(n)
-
-    return div
-  }
-
-  export const clear = () => {
-    const input = contenteditable.getInput()
-
-    input.innerHTML = ""
-
-    contenteditable.onInput()
-  }
+  export const clear = () => {}
 
   export const nevent = text => {
-    const input = contenteditable.getInput()
-    const selection = window.getSelection()
-    const textNode = document.createTextNode(text)
-    const newLines = createNewLines(2)
-
-    selection.getRangeAt(0).insertNode(newLines)
-    selection.collapse(input, 1)
-    selection.getRangeAt(0).insertNode(textNode)
-    selection.collapse(input, 0)
-
-    contenteditable.onInput()
+    $editor.commands.insertNEvent(text)
   }
 
   export const write = text => {
-    const input = contenteditable.getInput()
-
-    input.focus()
-
-    const selection = window.getSelection()
-    const textNode = document.createTextNode(text)
-    const target = (last(input.childNodes) || input) as unknown as Node
-    const offset = target instanceof Text ? target.textContent.length : target.childNodes.length
-
-    selection.collapse(target, offset)
-    selection.getRangeAt(0).insertNode(textNode)
-    selection.collapse(textNode, text.length)
-
-    autocomplete()
-    contenteditable.onInput()
+    $editor.commands.insertContent(text)
   }
 
-  export const newlines = n => {
-    const selection = window.getSelection()
-    const newLines = createNewLines(2)
-
-    selection.getRangeAt(0).insertNode(newLines)
-    selection.collapse(newLines, 2)
-
-    contenteditable.onInput()
+  export const selectFiles = () => {
+    $editor.commands.selectFiles()
   }
 
   export const parse = () => {
-    let {content, annotations} = contenteditable.parse()
-
-    // Remove zero-width and non-breaking spaces
-    content = content.replace(/[\u200B\u00A0]/g, " ").trim()
-
-    // Strip the @ sign in mentions
-    annotations.filter(whereEq({prefix: "@"})).forEach(({prefix, value}, index) => {
-      content = content.replace(prefix + value, value)
-    })
-
-    return content
+    return $editor.getText()
   }
 </script>
 
 <div class="flex w-full">
-  <ContentEditable
-    {autofocus}
-    {placeholder}
+  <div
+    bind:this={element}
     style={$$props.style}
-    class={$$props.class}
-    bind:this={contenteditable}
+    class="w-full"
     on:keydown={onKeyDown}
     on:keyup={onKeyUp} />
   <slot name="addon" />
@@ -264,7 +235,14 @@
 
 <Suggestions
   bind:this={suggestions}
-  select={pubkey => autocomplete({pubkey})}
+  select={pubkey => {
+    const content = $editor.getHTML()
+    // only replace the last occurence
+    const replacedContent = content.replace(/(.*)@\w+/, "$1")
+    $editor.commands.setContent(replacedContent, true)
+    $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
+    suggestions.setData([])
+  }}
   loading={$loadingPeople}>
   <div slot="item" let:item>
     <PersonBadge inert pubkey={item} />
