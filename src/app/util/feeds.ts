@@ -114,7 +114,9 @@ export const createFeed = (opts: FeedOpts) => {
   const welshman = createFeedLoader(opts, controller.signal)
   const appendEvent = onEvent(appendToFeed)
   const prependEvent = onEvent(prependToFeed)
-  const useWindowing = !(isIntersectionFeed(opts.feed) && opts.feed.length === 2 && isRelayFeed(opts.feed[1]))
+  const useWindowing =
+    !isRelayFeed(opts.feed) &&
+    !(isIntersectionFeed(opts.feed) && opts.feed.length === 2 && isRelayFeed(opts.feed[1]))
   const loaderOpts = {useWindowing, onEvent: appendEvent, onExhausted}
 
   let filters, delta, loader
@@ -144,6 +146,9 @@ export const createFeed = (opts: FeedOpts) => {
       }
     }
   })
+
+  const sortEvents = (events: TrustedEvent[]) =>
+    useWindowing ? sortEventsDesc(events) : events
 
   function deferOrphans(events: TrustedEvent[]) {
     if (!opts.shouldLoadParents || opts.shouldDefer === false) {
@@ -191,7 +196,7 @@ export const createFeed = (opts: FeedOpts) => {
               !controller.signal.aborted &&
               get(notes).length === feed.length + i
             ) {
-              const [event, ...events] = sortEventsDesc(buffer)
+              const [event, ...events] = sortEvents(buffer)
 
               buffer.splice(0, Infinity, ...events)
               appendToFeed([event])
@@ -221,10 +226,10 @@ export const createFeed = (opts: FeedOpts) => {
 
     // Sort first to make sure we get the latest version of replaceable events, then
     // after to make sure notes replaced by their parents are in order.
-    return sortEventsDesc(
+    return sortEvents(
       uniqBy(
         prop("id"),
-        sortEventsDesc(events)
+        sortEvents(events)
           .map((e: TrustedEvent) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
