@@ -52,7 +52,7 @@
 
 <slot />
 
-<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden">
+<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden border border-top border-base-200">
   <div class="m-auto flex max-w-sm justify-between px-2">
     <PrimaryNavItem title="Home" on:click={showHomeMenu}>
       <Avatar icon="home-smile" class="!h-10 !w-10" />
