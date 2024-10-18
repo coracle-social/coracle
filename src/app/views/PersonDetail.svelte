@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {identity} from "ramda"
-  import {stripProtocol} from "@welshman/lib"
+  import cx from 'classnames'
+  import {stripProtocol, identity} from "@welshman/lib"
   import {
     REACTION,
     PROFILE,
@@ -14,6 +14,7 @@
   import {feedFromFilter} from "@welshman/feeds"
   import {
     deriveProfile,
+    deriveHandleForPubkey,
     deriveZapperForPubkey,
     displayProfileByPubkey,
     getRelayUrls,
@@ -57,6 +58,7 @@
   export let pubkey
   export let relays = []
 
+  const handle = deriveHandleForPubkey(pubkey)
   const profile = deriveProfile(pubkey, {relays})
   const zapper = deriveZapperForPubkey(pubkey, {relays})
   const relaySelections = deriveRelaySelections(pubkey, {relays})
@@ -170,35 +172,37 @@
           </div>
         </div>
       </div>
-      <div class="flex max-w-[80%] justify-between gap-4">
-        <div class="flex items-center gap-2">
-          <i class="fa fa-check-circle" />
-          <PersonHandle class="text-accent" {pubkey} />
-        </div>
+      <div class="flex flex-col sm:flex-row max-w-[80%] gap-4 justify-between">
+        {#if $handle}
+          <div class="flex items-center gap-2 text-accent">
+            <i class="fa fa-at" />
+            <PersonHandle {pubkey} />
+          </div>
+        {/if}
         {#if $zapper && zapDisplay}
           <Anchor modal class="flex items-center gap-2 opacity-75" href={zapLink}>
             <i class="fa fa-bolt" />
             {zapDisplay}
           </Anchor>
         {/if}
+        {#if $profile?.website}
+          <Anchor
+            external
+            class="flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
+            href={ensureProto($profile.website)}>
+            <i class="fa fa-link text-accent" />
+            {stripProtocol($profile.website)}
+          </Anchor>
+        {/if}
       </div>
       <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
       </div>
-      {#if $profile?.website}
-        <Anchor
-          external
-          class="flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
-          href={ensureProto($profile.website)}>
-          <i class="fa fa-link text-accent" />
-          {stripProtocol($profile.website)}
-        </Anchor>
-      {/if}
     </div>
   </AltColor>
   <div class="bg-tinted-800-d pt-3">
     <Tabs {tabs} {activeTab} {setActiveTab}>
-      <div slot="tab" let:tab class="flex gap-2">
+      <div slot="tab" let:tab class="flex gap-2 px-2">
         {toTitle(tab)}
         {#if tab == "following" && $followsCount > 0}
           <div class="h-6 rounded-full bg-neutral-700 px-2">

@@ -18,7 +18,7 @@
   const following = derived(userFollows, $m => $m.has(pubkey))
 
   const unfollowPerson = () => unfollow(pubkey)
-  const doFollow = () => follow(tagPubkey(pubkey))
+  const followPerson = () => follow(tagPubkey(pubkey))
 
   const showDetail = () => router.at("people").of(pubkey).open()
 </script>
@@ -41,7 +41,7 @@
             <Anchor button low class="border-none bg-tinted-800-d" on:click={unfollowPerson}
               >Followed</Anchor>
           {:else}
-            <Anchor button accent on:click={doFollow}>Follow</Anchor>
+            <Anchor button accent on:click={followPerson}>Follow</Anchor>
           {/if}
           <slot name="actions" {pubkey}>
             <PersonActions {pubkey} />

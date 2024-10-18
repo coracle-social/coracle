@@ -25,12 +25,10 @@
   const publishToPlatform = () => {
     publishProfile(values, {forcePlatform: true})
     router.pop()
-    router.pop()
   }
 
   const publishToNetwork = () => {
     publishProfile(values, {forcePlatform: false})
-    router.pop()
     router.pop()
   }
 

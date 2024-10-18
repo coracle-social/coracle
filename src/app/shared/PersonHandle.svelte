@@ -11,4 +11,5 @@
   <div class={cx($$props.class, "overflow-hidden overflow-ellipsis")}>
     {displayHandle($handle)}
   </div>
+  <slot />
 {/if}
