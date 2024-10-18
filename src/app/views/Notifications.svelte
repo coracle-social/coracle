@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingTasks from "src/app/shared/OnboardingTasks.svelte"
   import NotificationSectionMain from "src/app/views/NotificationSectionMain.svelte"
   import NotificationSectionReactions from "src/app/views/NotificationSectionReactions.svelte"

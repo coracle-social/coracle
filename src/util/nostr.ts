@@ -1,6 +1,3 @@
-import {utils} from "nostr-tools"
-import {bech32} from "@scure/base"
-import {concatBytes} from "@noble/hashes/utils"
 import {
   fromNostrURI,
   AUDIO,

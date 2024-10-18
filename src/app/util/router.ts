@@ -1,5 +1,5 @@
 import {last, identity} from "ramda"
-import {Address, fromNostrURI} from "@welshman/util"
+import {Address} from "@welshman/util"
 import {ctx} from "@welshman/lib"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"

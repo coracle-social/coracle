@@ -50,8 +50,6 @@
     return false
   }
 
-  const isStartAndEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
-
   const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
   const isBlock = (i: number) => {

@@ -70,7 +70,6 @@ import {
   groupSharedKeys,
   type MySubscribeRequest,
 } from "src/engine/state"
-import {sortEventsDesc} from "src/engine/utils"
 
 // Utils
 

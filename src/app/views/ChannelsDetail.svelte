@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
-  import {pubkey, repository, displayProfileByPubkey, loadInboxRelaySelections} from "@welshman/app"
+  import {repository, displayProfileByPubkey, loadInboxRelaySelections} from "@welshman/app"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"

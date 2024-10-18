@@ -4,7 +4,6 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
-  import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
