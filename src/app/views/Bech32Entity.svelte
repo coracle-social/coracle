@@ -25,8 +25,6 @@
   {:else}
     <NoteDetail {address} relays={data.relays} />
   {/if}
-{:else if type === "nrelay"}
-  <RelayDetail url={data} />
 {:else if type === "nprofile"}
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}

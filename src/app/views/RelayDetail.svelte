@@ -12,6 +12,7 @@
   import {makeFeed} from "src/domain"
 
   export let url
+  console.log(url)
 
   const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]

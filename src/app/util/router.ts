@@ -80,16 +80,8 @@ export const asPerson = {
 }
 
 export const asRelay = {
-  encode: nip19.nrelayEncode,
-  decode: entity => {
-    entity = fromNostrURI(entity)
-
-    try {
-      return {url: nip19.decode(entity).data}
-    } catch (e) {
-      return {url: entity}
-    }
-  },
+  encode: encodeURIComponent,
+  decode: decodeAs('url', decodeURIComponent)
 }
 
 export const asChannelId = {
@@ -108,7 +100,7 @@ export const router = new Router()
 
 router.extend("qrcode", encodeURIComponent)
 router.extend("media", encodeURIComponent)
-router.extend("relays", nip19.nrelayEncode)
+router.extend("relays", encodeURIComponent)
 router.extend("channels", getChannelId)
 router.extend("groups", encodeNaddr)
 router.extend("events", encodeNaddr)

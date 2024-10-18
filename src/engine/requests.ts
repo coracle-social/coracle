@@ -96,7 +96,7 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
     const events = sortBy(e => -e.created_at, repository.query(filters))
 
     if (events.length > 100) {
-      filters = filters.map(assoc('since', events[100]!.created_at))
+      filters = filters.map(assoc("since", events[100]!.created_at))
     }
 
     promises.push(pull({relays: dumb, filters}))
@@ -344,7 +344,7 @@ export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   return pullConservatively({
-    relays: ctx.app.router.User().getUrls(),
+    relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
