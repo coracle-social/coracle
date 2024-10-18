@@ -1,13 +1,16 @@
 # Changelog
 
-# 0.4.14
+# 0.4.15
 
-- [x] Fix some bugs related to message discovery
 - [x] Hack in accommodation of algorithmic relay feeds
 - [x] Fix some bugs related to auth and data storage
 - [x] Downgrade typescript to save my sanity
 - [x] Show links/images as blocks when at the end of a paragraph
 - [x] Implement new profile page and summary designs
+
+# 0.4.14
+
+- [x] Fix some bugs related to message discovery
 
 # 0.4.13
 
