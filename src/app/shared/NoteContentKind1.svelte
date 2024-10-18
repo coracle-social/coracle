@@ -97,7 +97,7 @@
         <QRCode copyOnClick code={parsed.value} />
       </div>
     {:else if isLink(parsed)}
-      <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
+      <NoteContentLink value={parsed.value} showMedia={showMedia && isStartOrEnd(i)} />
     {:else if isProfile(parsed)}
       <PersonLink pubkey={parsed.value.pubkey} />
     {:else if isEvent(parsed) || isAddress(parsed)}
