@@ -26,7 +26,7 @@
   })
 </script>
 
-<div class="column content-t max-h-full" bind:this={element}>
+<div class="m-auto w-full max-w-3xl column content-t" bind:this={element}>
   <div class="content-x flex-grow">
     <label class="input input-bordered flex w-full items-center gap-2">
       <Icon icon="magnifer" />
