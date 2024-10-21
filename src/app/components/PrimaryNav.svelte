@@ -53,9 +53,6 @@
         class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Threads" href="/network" class="tooltip-right">
-        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
-      </PrimaryNavItem>
       <PrimaryNavItem title="Messages" href="/chat" class="tooltip-right">
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
