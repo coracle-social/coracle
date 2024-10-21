@@ -26,7 +26,7 @@
   </Link>
   <Link href="/settings/about">
     <CardButton>
-      <div slot="icon"><Icon icon="chat-round" size={7} /></div>
+      <div slot="icon"><Icon icon="code-2" size={7} /></div>
       <div slot="title">About</div>
       <div slot="info">Learn about Flotilla and support the developer</div>
     </CardButton>
