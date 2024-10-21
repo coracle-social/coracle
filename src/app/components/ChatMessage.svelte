@@ -52,7 +52,7 @@
 </script>
 
 <div
-  class="group chat flex items-center justify-end gap-1"
+  class="group chat flex items-center justify-end gap-1 px-2"
   class:chat-start={event.pubkey !== $pubkey}
   class:flex-row-reverse={event.pubkey !== $pubkey}
   class:chat-end={event.pubkey === $pubkey}>
