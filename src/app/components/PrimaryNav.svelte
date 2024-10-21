@@ -2,6 +2,7 @@
   import {displayRelayUrl} from "@welshman/util"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
+  import Divider from "@lib/components/Divider.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
@@ -21,6 +22,10 @@
 <div class="relative hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
+      <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
+        <Avatar src="/flotilla.png" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <Divider />
       {#if import.meta.env.VITE_PLATFORM_RELAY}
         <PrimaryNavItem
           title={displayRelayUrl(import.meta.env.VITE_PLATFORM_RELAY)}

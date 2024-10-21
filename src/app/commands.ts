@@ -151,7 +151,7 @@ export const addSpaceMembership = async (url: string) => {
 
 export const removeSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
-  const pred = (t: string[]) => equals(["r", url], t) || t[2] !== url
+  const pred = (t: string[]) => t[t[0] === "r" ? 1 : 2] === url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
 
   return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
