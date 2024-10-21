@@ -1,8 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {groupBy, sortBy, uniq} from "ramda"
-  import {ctx, pushToMapKey} from "@welshman/lib"
+  import {ctx, nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {
     pubkey,
     relays,
@@ -16,7 +15,7 @@
     getWriteRelayUrls,
     relaySelectionsByPubkey,
   } from "@welshman/app"
-  import {Tags, isShareableRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
+  import {isShareableRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller, displayList} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -113,7 +112,7 @@
 
   $: ratings = groupBy(e => {
     try {
-      return normalizeRelayUrl(Tags.fromEvent(e).get("r")?.value())
+      return normalizeRelayUrl(e.tags.find(nthEq(0, "r"))?.[1])
     } catch (e) {
       return ""
     }
@@ -123,7 +122,7 @@
     relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
     onEvent: event => {
-      if (isShareableRelayUrl(Tags.fromEvent(event).get("r")?.value())) {
+      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1])) {
         reviews = sortEventsDesc(reviews.concat(event))
       }
     },
