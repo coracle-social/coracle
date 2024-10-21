@@ -26,7 +26,7 @@
   const getStart = (event: TrustedEvent) =>
     parseInt(event.tags.find(t => t[0] === "start")?.[1] || "")
 
-  let limit = 5
+  const limit = 5
   let loading = true
 
   type Item = {

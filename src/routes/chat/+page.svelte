@@ -46,7 +46,8 @@
   <div class="row-2 min-w-0 flex-grow items-center">
     <label class="input input-bordered flex flex-grow items-center gap-2">
       <Icon icon="magnifer" />
-      <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
+      <!-- svelte-ignore a11y-autofocus -->
+      <input autofocus bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
     </label>
     <Button class="btn btn-primary" on:click={startChat}>
       <Icon icon="add-circle" />

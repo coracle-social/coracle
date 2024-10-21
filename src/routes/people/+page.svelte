@@ -31,7 +31,8 @@
   <div class="content col-2" bind:this={element}>
     <label class="input input-bordered flex w-full items-center gap-2">
       <Icon icon="magnifer" />
-      <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />
+      <!-- svelte-ignore a11y-autofocus -->
+      <input autofocus bind:value={term} class="grow" type="text" placeholder="Search for people..." />
     </label>
     {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
       <PeopleItem {pubkey} />
