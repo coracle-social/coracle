@@ -46,14 +46,14 @@
     const parsed = fullContent[i]
 
     if (!parsed || isNewline(parsed)) return true
-    if (isText(parsed)) return parsed.value.match(/^\s+$/)
+    if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
 
     return false
   }
 
   const isEnd = i => isBoundary(i + 1)
 
-  const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
+  const isStartOrEnd = i => isBoundary(i - 1) || isBoundary(i + 1)
 
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
