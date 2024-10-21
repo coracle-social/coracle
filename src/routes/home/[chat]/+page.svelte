@@ -108,7 +108,7 @@
       <div slot="title" class="row-2">
         {#if others.length === 1}
           {@const pubkey = others[0]}
-          {@const showProfile = () => pushModal(ProfileDetail, {pubkey})}
+          {@const showProfile = () => pushModal(ProfileDetail, {pubkey}, {drawer: true})}
           <Button on:click={showProfile} class="row-2">
             <ProfileCircle {pubkey} size={5} />
             <ProfileName {pubkey} />

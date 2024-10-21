@@ -3,9 +3,9 @@
   import {nip19} from "nostr-tools"
   import {ctx, sleep, sortBy, flatten} from "@welshman/lib"
   import {feedFromFilter} from "@welshman/feeds"
-  import {NOTE, displayProfile, displayPubkey, getAncestorTags} from "@welshman/util"
+  import {NOTE, displayProfile, getListTags, getPubkeyTagValues, displayPubkey, getAncestorTags} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {repository, deriveProfile, displayNip05, feedLoader} from "@welshman/app"
+  import {repository, userFollows, tagPubkey, follow, unfollow, deriveProfile, displayNip05, feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import {fly} from "@lib/transition"
   import Link from "@lib/components/Link.svelte"
@@ -43,20 +43,31 @@
 
 <div class="flex max-w-full flex-col gap-4 p-4" bind:this={element}>
   {#if $profile}
-    <Link external href={entityLink(nprofile)} class="flex max-w-full gap-3">
-      <div class="py-1">
-        <Avatar src={$profile?.picture} size={10} />
-      </div>
-      <div class="flex min-w-0 flex-col">
-        <div class="flex items-center gap-2">
-          <div class="text-bold overflow-hidden text-ellipsis">
-            {displayProfile($profile, pubkeyDisplay)}
+    <Link external href={entityLink(nprofile)} class="row-3 max-w-full justify-between">
+      <div class="row-3 min-w-0">
+        <div class="py-1">
+          <Avatar src={$profile?.picture} size={10} />
+        </div>
+        <div class="flex min-w-0 flex-col">
+          <div class="flex items-center gap-2">
+            <div class="text-bold overflow-hidden text-ellipsis">
+              {displayProfile($profile, pubkeyDisplay)}
+            </div>
+          </div>
+          <div class="overflow-hidden text-ellipsis text-sm opacity-75">
+            {$profile?.nip05 ? displayNip05($profile.nip05) : pubkeyDisplay}
           </div>
         </div>
-        <div class="overflow-hidden text-ellipsis text-sm opacity-75">
-          {$profile?.nip05 ? displayNip05($profile.nip05) : pubkeyDisplay}
-        </div>
       </div>
+      {#if getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
+        <button type="button" class="btn btn-neutral" on:click|preventDefault={() => unfollow(pubkey)}>
+          Unfollow
+        </button>
+      {:else}
+        <button type="button" class="btn btn-primary" on:click|preventDefault={() => follow(tagPubkey(pubkey))}>
+          Follow
+        </button>
+      {/if}
     </Link>
     <Content event={{content: $profile.about, tags: []}} hideMedia />
     <div class="flex flex-col gap-2">
