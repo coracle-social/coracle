@@ -4,11 +4,9 @@
 
   export let title = ""
   export let href = ""
-  export let noActive = false
+  export let prefix = ""
 
-  $: itemSegment = href.split("/")[1]
-  $: currentSegment = $page.route?.id?.split("/")[1]
-  $: active = itemSegment === currentSegment && !noActive
+  $: active = $page.url?.pathname?.startsWith(prefix || href || "bogus")
 </script>
 
 {#if href}

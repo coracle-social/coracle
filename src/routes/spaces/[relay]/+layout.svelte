@@ -110,30 +110,20 @@
             </Popover>
           {/if}
         </div>
-        <div class="my-3 h-px bg-base-200" />
-        <div in:fly>
-          <SecondaryNavItem href={makeSpacePath(url)}>
-            <Icon icon="chat-round" /> Chat
-          </SecondaryNavItem>
-        </div>
         <div in:fly={{delay: getDelay(true)}}>
           <SecondaryNavItem href={makeSpacePath(url, "threads")}>
             <Icon icon="notes-minimalistic" /> Threads
           </SecondaryNavItem>
         </div>
-        <!--
-        <div in:fly={{delay: getDelay()}}>
-          <SecondaryNavItem href={makeSpacePath(url, "calendar")}>
-            <Icon icon="calendar-minimalistic" /> Calendar
+        <div transition:slide={{delay: getDelay()}}>
+          <div class="h-2" />
+          <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+        </div>
+        <div transition:slide={{delay: getDelay()}}>
+          <SecondaryNavItem href={makeSpacePath(url)}>
+            <Icon icon="hashtag" /> {GENERAL}
           </SecondaryNavItem>
         </div>
-        -->
-        {#if rooms.length > 0}
-          <div transition:slide={{delay: getDelay()}}>
-            <div class="h-2" />
-            <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-          </div>
-        {/if}
         {#each rooms as room, i (room)}
           <div transition:slide={{delay: getDelay()}}>
             <SecondaryNavItem href={makeSpacePath(url, room)}>

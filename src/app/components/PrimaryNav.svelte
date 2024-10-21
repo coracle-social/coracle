@@ -5,7 +5,6 @@
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
-  import MenuHome from "@app/components/MenuHome.svelte"
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
   import {userMembership, getMembershipUrls} from "@app/state"
@@ -13,8 +12,6 @@
   import {makeSpacePath} from "@app/routes"
 
   const addSpace = () => pushModal(SpaceAdd)
-
-  const showHomeMenu = () => pushModal(MenuHome)
 
   const showSpacesMenu = () => pushModal(MenuSpaces)
 
@@ -49,17 +46,17 @@
       {/if}
     </div>
     <div>
-      <PrimaryNavItem title="Settings" href="/settings/profile" class="tooltip-right">
+      <PrimaryNavItem title="Settings" href="/settings/profile" prefix="/settings" class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="People" href="/people" class="tooltip-right">
-        <Avatar icon="user-heart" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Threads" href="/network" class="tooltip-right">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Messages" href="/chat" class="tooltip-right">
         <Avatar icon="letter" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Search" href="/people" class="tooltip-right">
+        <Avatar icon="magnifer" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
   </div>
@@ -71,17 +68,17 @@
   class="border-top fixed bottom-0 left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="m-auto flex max-w-md justify-between px-2">
     <div class="flex gap-4 sm:gap-8">
-      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
-        <SpaceAvatar />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="People" href="/people">
-        <Avatar icon="user-heart" class="!h-10 !w-10" />
+      <PrimaryNavItem title="Search" href="/people">
+        <Avatar icon="magnifer" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Messages" href="/chat">
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
+      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
+        <SpaceAvatar />
+      </PrimaryNavItem>
     </div>
-    <PrimaryNavItem noActive title="Settings" on:click={showSettingsMenu}>
+    <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
       <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>

@@ -90,14 +90,11 @@
       <span class="text-primary">{displayRelayUrl(space)}</span>
     </p>
     <div class="grid sm:grid-cols-3 gap-2">
-      <Link href={makeSpacePath(space)} class="btn btn-neutral">
-        <Icon icon="chat-round" /> Chat
-      </Link>
       <Link href={makeSpacePath(space, "threads")} class="btn btn-neutral">
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
-      <Link href={makeSpacePath(space, "calendar")} class="btn btn-neutral">
-        <Icon icon="calendar-minimalistic" /> Calendar
+      <Link href={makeSpacePath(space)} class="btn btn-neutral">
+        <Icon icon="hashtag" /> {GENERAL}
       </Link>
       {#each rooms as room, i (room)}
         <Link href={makeSpacePath(space, room)} class="btn btn-neutral">
