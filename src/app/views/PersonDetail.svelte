@@ -131,7 +131,7 @@
         <Anchor
           button
           low
-          class="mt-4 border-none bg-tinted-800-d"
+          class="mt-4"
           on:click={router.at("channels").of([$session.pubkey, pubkey]).push}>Message</Anchor>
       {/if}
     </div>
@@ -166,7 +166,7 @@
               <CopyValueSimple class="!inline-flex pl-1" value={npub} label="Npub" />
             </div>
           </div>
-          <div class="absolute right-4 top-4 hidden xs:block">
+          <div class="absolute right-4 top-4">
             <PersonActions {pubkey} />
           </div>
         </div>
