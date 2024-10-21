@@ -12,7 +12,7 @@
   const startChat = () => pushModal(ChatStart)
 </script>
 
-<div class="hero min-h-screen bg-base-200">
+<div class="hero min-h-screen">
   <div class="hero-content">
     <div class="column content gap-4">
       <h1 class="text-center text-5xl">Welcome to</h1>
@@ -32,7 +32,7 @@
             <div slot="info">Find a community based on your hobbies or interests.</div>
           </CardButton>
         </Link>
-        <Link href="/home/people">
+        <Link href="/people">
           <CardButton>
             <div slot="icon"><Icon icon="plain" size={7} /></div>
             <div slot="title">Browse the network</div>

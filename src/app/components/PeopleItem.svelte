@@ -28,8 +28,6 @@
   const filters: Filter[] = [{kinds: [NOTE], authors: [pubkey], since: ago(WEEK)}]
   const events = deriveEvents(repository, {filters})
 
-  const onClick = () => pushDrawer(ProfileDetail, {pubkey})
-
   $: roots = $events.filter(e => getAncestorTags(e.tags).replies.length === 0)
 
   onMount(async () => {
@@ -44,7 +42,7 @@
   })
 </script>
 
-<Button class="card2 bg-alt flex flex-col shadow-xl" on:click={onClick}>
+<div class="card2 bg-alt flex flex-col shadow-xl">
   <Profile {pubkey} />
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
@@ -53,7 +51,7 @@
     {@const nevent = nip19.neventEncode({id: event.id, relays})}
     {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
     <div class="divider" />
-    <button type="button" class="chat chat-start flex cursor-default" on:click|stopPropagation>
+    <button type="button" class="chat chat-start flex cursor-default max-w-full ml-2" on:click|stopPropagation>
       <div class="bg-alt col-4 chat-bubble text-left">
         <Content showEntire hideMedia={!following} {event} />
         <Link external href={entityLink(nevent)} class="row-2 group justify-end whitespace-nowrap">
@@ -71,4 +69,4 @@
       </div>
     </div>
   {/if}
-</Button>
+</div>

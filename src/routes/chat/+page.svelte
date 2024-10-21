@@ -3,7 +3,6 @@
   import {ctx, ago} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import {pubkey, subscribe} from "@welshman/app"
-  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
@@ -30,9 +29,20 @@
   })
 </script>
 
-<div class="content column gap-2">
-  <div class="row-2 min-w-0 items-center">
-    <label class="input input-bordered flex flex-grow items-center gap-2" in:fly={{delay: 250}}>
+<div class="min-h-screen hidden md:hero">
+  <div class="hero-content col-2 text-center">
+    <p class="row-2 text-lg">
+      <Icon icon="info-circle" />
+      No conversation selected.
+    </p>
+    <p>
+      Click on a conversation in the sidebar, or <Button class="link" on:click={startChat}>start a new one</Button>.
+    </p>
+  </div>
+</div>
+<div class="content col-2">
+  <div class="row-2 min-w-0 items-center flex-grow">
+    <label class="input input-bordered flex flex-grow items-center gap-2">
       <Icon icon="magnifer" />
       <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
     </label>
@@ -40,17 +50,15 @@
       <Icon icon="add-circle" />
     </Button>
   </div>
-  <div class="column gap-2 overflow-auto">
-    {#each chats as { id, pubkeys, messages } (id)}
-      <ChatItem {id} {pubkeys} {messages} />
-    {:else}
-      <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
-        <p>No chats found! Try starting one up.</p>
-        <Button class="btn btn-primary" on:click={startChat}>
-          <Icon icon="add-circle" />
-          Start a Chat
-        </Button>
-      </div>
-    {/each}
-  </div>
+  {#each chats as { id, pubkeys, messages } (id)}
+    <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
+  {:else}
+    <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
+      <p>No chats found! Try starting one up.</p>
+      <Button class="btn btn-primary" on:click={startChat}>
+        <Icon icon="add-circle" />
+        Start a Chat
+      </Button>
+    </div>
+  {/each}
 </div>

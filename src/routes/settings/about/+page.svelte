@@ -29,7 +29,7 @@
           <p class="sm:h-16">Having problems? Let us know.</p>
           <Link
             class="btn btn-primary"
-            href="/home/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
+            href="/chat/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322">
             Chat with the Developer
           </Link>
         </div>

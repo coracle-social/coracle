@@ -3,6 +3,7 @@
   import {createScroller} from "@lib/html"
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import Page from "@lib/components/Page.svelte"
   import PeopleItem from "@app/components/PeopleItem.svelte"
   import {getDefaultPubkeys} from "@app/state"
 
@@ -26,16 +27,14 @@
   })
 </script>
 
-<div class="m-auto w-full max-w-3xl column content-t" bind:this={element}>
-  <div class="content-x flex-grow">
+<Page>
+  <div class="content col-2" bind:this={element}>
     <label class="input input-bordered flex w-full items-center gap-2">
       <Icon icon="magnifer" />
       <input bind:value={term} class="grow" type="text" placeholder="Search for people..." />
     </label>
-  </div>
-  <div class="content-b content-x flex flex-col gap-2 overflow-auto pt-2">
     {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
       <PeopleItem {pubkey} />
     {/each}
   </div>
-</div>
+</Page>

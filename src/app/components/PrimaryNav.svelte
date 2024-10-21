@@ -21,12 +21,9 @@
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
-<div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
+<div class="relative hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem href="/home/people" class="tooltip-right">
-        <Avatar icon="home-smile" class="!h-10 !w-10" />
-      </PrimaryNavItem>
       {#if import.meta.env.VITE_PLATFORM_RELAY}
         <PrimaryNavItem
           title={displayRelayUrl(import.meta.env.VITE_PLATFORM_RELAY)}
@@ -52,11 +49,17 @@
       {/if}
     </div>
     <div>
-      <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
+      <PrimaryNavItem title="Settings" href="/settings/profile" class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
-        <Avatar icon="settings" class="!h-10 !w-10" />
+      <PrimaryNavItem title="People" href="/people" class="tooltip-right">
+        <Avatar icon="user-heart" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Threads" href="/network" class="tooltip-right">
+        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Messages" href="/chat" class="tooltip-right">
+        <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
   </div>
@@ -68,17 +71,17 @@
   class="border-top fixed bottom-0 left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="m-auto flex max-w-md justify-between px-2">
     <div class="flex gap-4 sm:gap-8">
-      <PrimaryNavItem title="Home" on:click={showHomeMenu}>
-        <Avatar icon="home-smile" class="!h-10 !w-10" />
-      </PrimaryNavItem>
       <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
         <SpaceAvatar />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
-        <Avatar icon="settings" class="!h-10 !w-10" />
+      <PrimaryNavItem title="People" href="/people">
+        <Avatar icon="user-heart" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Messages" href="/chat">
+        <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
-    <PrimaryNavItem noActive title="Settings" href="/settings/profile">
+    <PrimaryNavItem noActive title="Settings" on:click={showSettingsMenu}>
       <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>

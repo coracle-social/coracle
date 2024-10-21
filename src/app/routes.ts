@@ -12,7 +12,7 @@ export const makeSpacePath = (url: string, extra = "") => {
   return path
 }
 
-export const makeChatPath = (pubkeys: string[]) => `/home/${makeChatId(pubkeys)}`
+export const makeChatPath = (pubkeys: string[]) => `/chat/${makeChatId(pubkeys)}`
 
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 

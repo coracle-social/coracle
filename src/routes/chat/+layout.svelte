@@ -15,6 +15,7 @@
   import ChatStart from "@app/components/ChatStart.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
   import {chatSearch, pullConservatively} from "@app/state"
+  import {makeChatPath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   const startChat = () => pushModal(ChatStart)
@@ -22,6 +23,7 @@
   let term = ""
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
+  $: notesPath = makeChatPath([$pubkey!])
 
   onMount(() => {
     const filter = {kinds: [WRAP], "#p": [$pubkey!]}
@@ -37,21 +39,11 @@
 <SecondaryNav>
   <SecondaryNavSection>
     <div in:fly>
-      <SecondaryNavItem href="/home/people">
-        <Icon icon="user-heart" /> People
-      </SecondaryNavItem>
-    </div>
-    <div in:fly={{delay: 50}}>
-      <SecondaryNavItem href="/home/network">
-        <Icon icon="share-circle" /> Network
-      </SecondaryNavItem>
-    </div>
-    <div in:fly={{delay: 100}}>
-      <SecondaryNavItem href="/home/notes">
+      <SecondaryNavItem href={notesPath}>
         <Icon icon="notes-minimalistic" /> Your Notes
       </SecondaryNavItem>
     </div>
-    <div in:fly={{delay: 150}}>
+    <div in:fly={{delay: 50}}>
       <SecondaryNavHeader>
         Chats
         <Button on:click={startChat}>
@@ -62,7 +54,7 @@
   </SecondaryNavSection>
   <label
     class="input input-sm input-bordered mx-6 -mt-4 mb-2 flex items-center gap-2"
-    in:fly={{delay: 200}}>
+    in:fly={{delay: 100}}>
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>

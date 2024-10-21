@@ -10,6 +10,7 @@
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
+  import {makeChatPath} from '@app/routes'
 
   export let id: string
   export let pubkeys: string[]
@@ -28,9 +29,9 @@
 </script>
 
 <div
-  class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100"
+  class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100 {$$props.class}"
   class:bg-base-100={active}>
-  <Link class="flex flex-col justify-start gap-1" href="/home/{id}">
+  <Link class="flex flex-col justify-start gap-1" href={makeChatPath(pubkeys)}>
     <div class="flex justify-between gap-2">
       <div class="flex min-w-0 items-center gap-2">
         {#if others.length === 1}

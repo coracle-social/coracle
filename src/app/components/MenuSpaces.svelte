@@ -10,10 +10,11 @@
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
+  import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
+  import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
   import {
     GENERAL,
     userMembership,
@@ -30,6 +31,10 @@
 
   const assertNotNil = <T,>(x: T) => x!
 
+  const startCreate = () => pushModal(SpaceCreateExternal)
+
+  const startJoin = () => pushModal(SpaceInviteAccept)
+
   const resetSpace = () => {
     space = ""
   }
@@ -45,8 +50,6 @@
   const closeSettings = () => {
     showSettings = false
   }
-
-  const addSpace = () => pushModal(SpaceAdd)
 
   const browseSpaces = () => goto("/discover")
 
@@ -82,10 +85,11 @@
       Go Back
     </Button>
   {:else if space}
-    <p class="mb-4 text-center text-2xl">
-      Actions for <span class="text-primary">{displayRelayUrl(space)}</span>
+    <p class="mb-4 text-2xl center gap-2">
+      <Icon icon="remote-controller-minimalistic" size={7} />
+      <span class="text-primary">{displayRelayUrl(space)}</span>
     </p>
-    <div class="grid grid-cols-3 gap-2">
+    <div class="grid sm:grid-cols-3 gap-2">
       <Link href={makeSpacePath(space)} class="btn btn-neutral">
         <Icon icon="chat-round" /> Chat
       </Link>
@@ -108,7 +112,7 @@
         </Link>
       {/each}
     </div>
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid sm:grid-cols-2 gap-2">
       <Button on:click={addRoom} class="btn btn-primary">
         <Icon icon="add-circle" />
         Create Room
@@ -134,18 +138,25 @@
     {#if getMembershipUrls($userMembership).length > 0}
       <Divider />
     {/if}
-    <Button on:click={addSpace}>
+    <Button on:click={startJoin}>
       <CardButton>
-        <div slot="icon"><Icon icon="add-circle" size={7} /></div>
-        <div slot="title">Add a space</div>
-        <div slot="info">Invite all your friends, do life together.</div>
+        <div slot="icon"><Icon icon="login-2" size={7} /></div>
+        <div slot="title">Join a space</div>
+        <div slot="info">Enter an invite code or url to join an existing space.</div>
       </CardButton>
     </Button>
-    <Button on:click={browseSpaces}>
+    <Link href="/discover">
       <CardButton>
         <div slot="icon"><Icon icon="compass" size={7} /></div>
-        <div slot="title">Discover spaces</div>
-        <div slot="info">Find a community based on your hobbies or interests.</div>
+        <div slot="title">Find a space</div>
+        <div slot="info">Browse spaces on the discover page.</div>
+      </CardButton>
+    </Link>
+    <Button on:click={startCreate}>
+      <CardButton>
+        <div slot="icon"><Icon icon="add-circle" size={7} /></div>
+        <div slot="title">Create a space</div>
+        <div slot="info">Just a few questions and you'll be on your way.</div>
       </CardButton>
     </Button>
   {/if}

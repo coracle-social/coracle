@@ -14,6 +14,7 @@
   import {deriveEvents} from "@welshman/store"
   import {repository, userFollows, load} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
+  import Page from "@lib/components/Page.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
@@ -59,7 +60,7 @@
 
     const scroller = createScroller({
       element,
-      onScroll: () => {
+      onScroll: async () => {
         const seen = new Set(events.map(e => e.id))
         const eligible = sortBy(
           scoreEvent,
@@ -74,28 +75,30 @@
   })
 </script>
 
-<div class="content column gap-4" bind:this={element}>
-  {#await loading}
-    <div class="center my-20">
-      <Spinner loading>Loading posts from people you follow...</Spinner>
-    </div>
-  {:then}
-    <div class="flex flex-col gap-2">
-      {#each events as event (event.id)}
-        <NoteCard {event} class="card2 bg-alt w-full">
-          <div class="ml-12">
-            <Content {event} />
+<Page>
+  <div class="content column gap-4" bind:this={element}>
+    {#await loading}
+      <div class="center my-20">
+        <Spinner loading>Loading posts from people you follow...</Spinner>
+      </div>
+    {:then}
+      <div class="flex flex-col gap-2">
+        {#each events as event (event.id)}
+          <NoteCard {event} class="card2 bg-alt w-full">
+            <div class="ml-12">
+              <Content {event} />
+            </div>
+          </NoteCard>
+        {:else}
+          <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
+            <p>No activity found! Try following a few more people.</p>
+            <Link class="btn btn-primary" href="/people">
+              <Icon icon="user-heart" />
+              Browse Profiles
+            </Link>
           </div>
-        </NoteCard>
-      {:else}
-        <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
-          <p>No activity found! Try following a few more people.</p>
-          <Link class="btn btn-primary" href="/home/people">
-            <Icon icon="user-heart" />
-            Browse Profiles
-          </Link>
-        </div>
-      {/each}
-    </div>
-  {/await}
-</div>
+        {/each}
+      </div>
+    {/await}
+  </div>
+</Page>
