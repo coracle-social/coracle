@@ -15,7 +15,7 @@
     getWriteRelayUrls,
     relaySelectionsByPubkey,
   } from "@welshman/app"
-  import {isShareableRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
+  import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller, displayList} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -82,7 +82,7 @@
   const confirmAddCustomRelay = () => {
     const url = normalizeRelayUrl(customRelay)
 
-    if (!isShareableRelayUrl(url)) {
+    if (!isRelayUrl(url)) {
       showWarning("Please provide a valid relay url")
     } else {
       joinRelay(url)
@@ -122,7 +122,7 @@
     relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
     onEvent: event => {
-      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1])) {
+      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
         reviews = sortEventsDesc(reviews.concat(event))
       }
     },
