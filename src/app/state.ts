@@ -31,6 +31,7 @@ import {
   asDecryptedEvent,
   isSignedEvent,
   hasValidSignature,
+  normalizeRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
@@ -473,7 +474,9 @@ export const userMembership = withGetter(
 
 // Other utils
 
-export const decodeNRelay = (nevent: string) => nip19.decode(nevent).data as string
+export const encodeRelay = (url: string) => encodeURIComponent(normalizeRelayUrl(url))
+
+export const decodeRelay = (url: string) => normalizeRelayUrl(decodeURIComponent(url))
 
 export const displayReaction = (content: string) => {
   if (content === "+") return "❤️"

@@ -77,4 +77,5 @@ export function slideAndFade(
 
 export const conditionalTransition =
   (condition: any, transition: any) => (node: any, args?: any) =>
-    condition ? transtion(node, args) : null
+    condition ? transition(node, args) : null
+

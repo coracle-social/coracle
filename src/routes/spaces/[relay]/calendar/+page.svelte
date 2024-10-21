@@ -13,9 +13,9 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveEventsForUrl, pullConservatively, decodeNRelay} from "@app/state"
+  import {deriveEventsForUrl, pullConservatively, decodeRelay} from "@app/state"
 
-  const url = decodeNRelay($page.params.nrelay)
+  const url = decodeRelay($page.params.relay)
   const kinds = [EVENT_DATE, EVENT_TIME]
   const events = deriveEventsForUrl(url, kinds)
 

@@ -17,7 +17,7 @@
   import {
     GENERAL,
     userMembership,
-    decodeNRelay,
+    decodeRelay,
     getMembershipRoomsByUrl,
     getMembershipUrls,
     roomsByUrl,
@@ -25,7 +25,7 @@
   import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
-  let space = $page.params?.nrelay ? decodeNRelay($page.params?.nrelay) : undefined
+  let space = $page.params?.relay ? decodeRelay($page.params?.relay) : undefined
   let showSettings = false
 
   const assertNotNil = <T,>(x: T) => x!

@@ -1,9 +1,9 @@
 import {nip19} from "nostr-tools"
 import type {Page} from "@sveltejs/kit"
-import {userMembership, makeChatId, decodeNRelay, getMembershipUrls} from "@app/state"
+import {userMembership, makeChatId, decodeRelay, encodeRelay, getMembershipUrls} from "@app/state"
 
 export const makeSpacePath = (url: string, extra = "") => {
-  let path = `/spaces/${nip19.nrelayEncode(url)}`
+  let path = `/spaces/${encodeRelay(url)}`
 
   if (extra) {
     path += "/" + encodeURIComponent(extra)
@@ -23,7 +23,7 @@ export const getPrimaryNavItemIndex = ($page: Page) => {
     case "discover":
       return urls.length + 2
     case "spaces": {
-      const routeUrl = decodeNRelay($page.params.nrelay)
+      const routeUrl = decodeRelay($page.params.relay)
 
       return urls.findIndex(url => url === routeUrl) + 1
     }

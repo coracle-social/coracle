@@ -26,7 +26,7 @@
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
     userMembership,
-    decodeNRelay,
+    decodeRelay,
     makeChannelId,
     deriveChannel,
     GENERAL,
@@ -36,8 +36,8 @@
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
 
-  const {nrelay, room = GENERAL} = $page.params
-  const url = decodeNRelay(nrelay)
+  const {room = GENERAL} = $page.params
+  const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)
 

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {NOTE} from "@welshman/util"
-  import {feedFromFilter} from "@welshman/feeds"
+  import {feedFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
   import {feedLoader} from "@welshman/app"
   import {createScroller} from "@lib/html"
@@ -13,12 +13,13 @@
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveEventsForUrl, decodeNRelay} from "@app/state"
+  import {deriveEventsForUrl, decodeRelay} from "@app/state"
 
-  const url = decodeNRelay($page.params.nrelay)
+  const url = decodeRelay($page.params.relay)
   const kinds = [NOTE]
+  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds}))
   const events = deriveEventsForUrl(url, kinds)
-  const loader = feedLoader.getLoader(feedFromFilter({kinds}), {})
+  const loader = feedLoader.getLoader(feed, {})
 
   const createThread = () => pushModal(ThreadCreate, {url})
 
@@ -32,7 +33,7 @@
       onScroll: async () => {
         const $loader = await loader
 
-        $loader(5)
+        await $loader(5)
         limit += 5
       },
     })

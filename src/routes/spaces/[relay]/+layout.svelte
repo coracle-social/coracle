@@ -21,7 +21,7 @@
     getMembershipUrls,
     userMembership,
     roomsByUrl,
-    decodeNRelay,
+    decodeRelay,
     GENERAL,
   } from "@app/state"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
@@ -58,7 +58,7 @@
   let delay = 0
   let showMenu = false
 
-  $: url = decodeNRelay($page.params.nrelay)
+  $: url = decodeRelay($page.params.relay)
   $: rooms = getMembershipRoomsByUrl(url, $userMembership)
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
 
