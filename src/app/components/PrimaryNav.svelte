@@ -21,37 +21,20 @@
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
-{#if import.meta.env.VITE_PLATFORM_RELAY}
-  <div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
-    <div class="flex h-full flex-col justify-between">
-      <div>
-        <PrimaryNavItem href="/home/people" class="tooltip-right">
-          <Avatar icon="home-smile" class="!h-10 !w-10" />
-        </PrimaryNavItem>
+<div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
+  <div class="flex h-full flex-col justify-between">
+    <div>
+      <PrimaryNavItem href="/home/people" class="tooltip-right">
+        <Avatar icon="home-smile" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      {#if import.meta.env.VITE_PLATFORM_RELAY}
         <PrimaryNavItem
           title={displayRelayUrl(import.meta.env.VITE_PLATFORM_RELAY)}
           href={makeSpacePath(import.meta.env.VITE_PLATFORM_RELAY)}
           class="tooltip-right">
           <SpaceAvatar url={import.meta.env.VITE_PLATFORM_RELAY} />
         </PrimaryNavItem>
-      </div>
-      <div>
-        <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
-          <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
-        </PrimaryNavItem>
-        <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
-          <Avatar icon="settings" class="!h-10 !w-10" />
-        </PrimaryNavItem>
-      </div>
-    </div>
-  </div>
-{:else}
-  <div class="relative hidden w-14 flex-shrink-0 bg-base-100 pt-4 md:block">
-    <div class="flex h-full flex-col justify-between">
-      <div>
-        <PrimaryNavItem href="/home/people" class="tooltip-right">
-          <Avatar icon="home-smile" class="!h-10 !w-10" />
-        </PrimaryNavItem>
+      {:else}
         {#each getMembershipUrls($userMembership) as url (url)}
           <PrimaryNavItem
             title={displayRelayUrl(url)}
@@ -66,18 +49,18 @@
         <PrimaryNavItem title="Discover Spaces" href="/discover" class="tooltip-right">
           <Avatar icon="compass-big" class="!h-10 !w-10" />
         </PrimaryNavItem>
-      </div>
-      <div>
-        <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
-          <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
-        </PrimaryNavItem>
-        <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
-          <Avatar icon="settings" class="!h-10 !w-10" />
-        </PrimaryNavItem>
-      </div>
+      {/if}
+    </div>
+    <div>
+      <PrimaryNavItem title="Profile" href="/settings/profile" class="tooltip-right">
+        <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Settings" href="/settings/relays" class="tooltip-right">
+        <Avatar icon="settings" class="!h-10 !w-10" />
+      </PrimaryNavItem>
     </div>
   </div>
-{/if}
+</div>
 
 <slot />
 

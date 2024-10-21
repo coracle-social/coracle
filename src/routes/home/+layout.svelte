@@ -48,7 +48,7 @@
     </div>
     <div in:fly={{delay: 100}}>
       <SecondaryNavItem href="/home/notes">
-        <Icon icon="notes-minimalistic" /> Notes
+        <Icon icon="notes-minimalistic" /> Your Notes
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: 150}}>
