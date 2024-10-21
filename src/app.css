@@ -112,8 +112,28 @@
   @apply overflow-hidden text-ellipsis;
 }
 
+.content-padding-x {
+  @apply px-4 sm:px-8 md:px-12;
+}
+
+.content-padding-t {
+  @apply pt-4 sm:pt-8 md:pt-12;
+}
+
+.content-padding-b {
+  @apply pb-4 sm:pb-8 md:pb-12;
+}
+
+.content-padding-y {
+  @apply content-padding-t content-padding-b;
+}
+
+.content-sizing {
+  @apply m-auto w-full max-w-3xl;
+}
+
 .content {
-  @apply m-auto w-full max-w-3xl p-4 sm:p-8 md:p-12;
+  @apply content-sizing content-padding-x content-padding-y;
 }
 
 .heading {

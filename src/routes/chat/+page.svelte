@@ -5,6 +5,7 @@
   import {pubkey, subscribe} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import ContentSearch from "@lib/components/ContentSearch.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import {chatSearch, pullConservatively} from "@app/state"
@@ -42,8 +43,9 @@
     </p>
   </div>
 </div>
-<div class="content col-2">
-  <div class="row-2 min-w-0 flex-grow items-center">
+
+<ContentSearch class="md:hidden">
+  <div slot="input" class="row-2 min-w-0 flex-grow items-center">
     <label class="input input-bordered flex flex-grow items-center gap-2">
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
@@ -53,6 +55,7 @@
       <Icon icon="add-circle" />
     </Button>
   </div>
+  <div slot="content" class="col-2">
   {#each chats as { id, pubkeys, messages } (id)}
     <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
   {:else}
@@ -64,4 +67,5 @@
       </Button>
     </div>
   {/each}
-</div>
+  </div>
+</ContentSearch>

@@ -4,6 +4,7 @@
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
+  import ContentSearch from "@lib/components/ContentSearch.svelte"
   import PeopleItem from "@app/components/PeopleItem.svelte"
   import {getDefaultPubkeys} from "@app/state"
 
@@ -16,6 +17,7 @@
   $: pubkeys = term ? $profileSearch.searchValues(term) : defaultPubkeys
 
   onMount(() => {
+    console.log(element)
     const scroller = createScroller({
       element,
       onScroll: () => {
@@ -28,14 +30,16 @@
 </script>
 
 <Page>
-  <div class="content col-2" bind:this={element}>
-    <label class="input input-bordered flex w-full items-center gap-2">
+  <ContentSearch>
+    <label slot="input" class="input input-bordered row-2">
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
       <input autofocus bind:value={term} class="grow" type="text" placeholder="Search for people..." />
     </label>
-    {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
-      <PeopleItem {pubkey} />
-    {/each}
-  </div>
+    <div slot="content" class="col-2" bind:this={element}>
+      {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
+        <PeopleItem {pubkey} />
+      {/each}
+    </div>
+  </ContentSearch>
 </Page>
