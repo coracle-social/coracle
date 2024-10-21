@@ -86,7 +86,7 @@
     </Button>
   {:else if space}
     <p class="mb-4 text-2xl center gap-2">
-      <Icon icon="remote-controller-minimalistic" size={7} />
+      <Icon icon="compass-big" size={7} />
       <span class="text-primary">{displayRelayUrl(space)}</span>
     </p>
     <div class="grid sm:grid-cols-3 gap-2">

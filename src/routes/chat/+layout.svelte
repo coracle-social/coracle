@@ -4,7 +4,6 @@
   import {WEEK, ctx, ago} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import {pubkey, subscribe} from "@welshman/app"
-  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -38,23 +37,17 @@
 
 <SecondaryNav>
   <SecondaryNavSection>
-    <div in:fly>
-      <SecondaryNavItem href={notesPath}>
-        <Icon icon="notes-minimalistic" /> Your Notes
-      </SecondaryNavItem>
-    </div>
-    <div in:fly={{delay: 50}}>
-      <SecondaryNavHeader>
-        Chats
-        <Button on:click={startChat}>
-          <Icon icon="add-circle" />
-        </Button>
-      </SecondaryNavHeader>
-    </div>
+    <SecondaryNavItem href={notesPath}>
+      <Icon icon="notes-minimalistic" /> Your Notes
+    </SecondaryNavItem>
+    <SecondaryNavHeader>
+      Chats
+      <Button on:click={startChat}>
+        <Icon icon="add-circle" />
+      </Button>
+    </SecondaryNavHeader>
   </SecondaryNavSection>
-  <label
-    class="input input-sm input-bordered mx-6 -mt-4 mb-2 flex items-center gap-2"
-    in:fly={{delay: 100}}>
+  <label class="input input-sm input-bordered mx-6 -mt-4 mb-2 flex items-center gap-2">
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>

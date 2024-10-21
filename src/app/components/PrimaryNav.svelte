@@ -75,7 +75,7 @@
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
-        <SpaceAvatar />
+        <Avatar icon="add-circle" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
     <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>

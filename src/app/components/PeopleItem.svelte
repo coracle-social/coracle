@@ -42,24 +42,11 @@
   })
 </script>
 
-<div class="card2 bg-alt flex flex-col shadow-xl">
+<div class="card2 bg-alt col-2 shadow-xl">
   <Profile {pubkey} />
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
     {@const event = first(sortBy(e => -e.created_at, roots))}
-    {@const relays = ctx.app.router.Event(event).getUrls()}
-    {@const nevent = nip19.neventEncode({id: event.id, relays})}
-    {@const following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
-    <div class="divider" />
-    <button type="button" class="chat chat-start flex cursor-default max-w-full ml-2" on:click|stopPropagation>
-      <div class="bg-alt col-4 chat-bubble text-left">
-        <Content showEntire hideMedia={!following} {event} />
-        <Link external href={entityLink(nevent)} class="row-2 group justify-end whitespace-nowrap">
-          <Icon icon="link-round" size={3} />
-          <p class="text-xs">{formatTimestamp(event.created_at)}</p>
-        </Link>
-      </div>
-    </button>
     <div class="flex gap-2">
       <div class="bg-alt badge badge-neutral border-none">
         {roots.length} recent {roots.length === 1 ? "note" : "notes"}
