@@ -1,6 +1,5 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {ctx} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"

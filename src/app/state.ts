@@ -1,4 +1,3 @@
-import {nip19} from "nostr-tools"
 import twColors from "tailwindcss/colors"
 import {get, derived} from "svelte/store"
 import type {Maybe} from "@welshman/lib"

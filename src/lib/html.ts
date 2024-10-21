@@ -34,7 +34,7 @@ export const createScroller = ({
   let done = false
 
   const check = async () => {
-    const container = element.classList.contains('scroll-container')
+    const container = element.classList.contains("scroll-container")
       ? element
       : element.closest(".scroll-container")
 

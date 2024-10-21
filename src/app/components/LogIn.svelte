@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {makeSecret, getNip07, Nip46Broker} from "@welshman/signer"
+  import {onMount} from "svelte"
+  import {makeSecret, getNip07, Nip46Broker, getNip55, Nip55Signer} from "@welshman/signer"
   import {addSession, loadHandle, nip46Perms, type Session} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
@@ -86,11 +87,30 @@
     }
   })
 
+  const loginWithSigner = async (app: any) => {
+    const signer = new Nip55Signer(app.packageName)
+    const pubkey = await signer.getPubkey()
+
+    if (pubkey) {
+      await onSuccess({method: "nip55", pubkey, signer: app.packageName})
+    } else {
+      pushToast({
+        theme: "error",
+        message: "Something went wrong! Please try again.",
+      })
+    }
+  }
+
   const loginWithKey = () => pushModal(LogInKey)
 
   let username = ""
   let domain = "nsec.app"
   let loading = false
+  let signers: any[] = []
+
+  onMount(async () => {
+    signers = await getNip55()
+  })
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={loginWithNip46}>
@@ -136,6 +156,12 @@
       Log in with Extension
     </Button>
   {/if}
+  {#each signers as app}
+    <Button disabled={loading} class="btn btn-neutral" on:click={() => loginWithSigner(app)}>
+      <img src={app.iconUrl} alt={app.name} width="48" height="48" />
+      Log in with {app.name}
+    </Button>
+  {/each}
   <Button disabled={loading} on:click={loginWithKey} class="btn btn-neutral">
     <Icon icon="key" />
     Log in with Key

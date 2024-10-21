@@ -1,4 +1,3 @@
-import {nip19} from "nostr-tools"
 import type {Page} from "@sveltejs/kit"
 import {userMembership, makeChatId, decodeRelay, encodeRelay, getMembershipUrls} from "@app/state"
 

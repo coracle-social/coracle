@@ -10,7 +10,7 @@
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
-  import {makeChatPath} from '@app/routes'
+  import {makeChatPath} from "@app/routes"
 
   export let id: string
   export let pubkeys: string[]

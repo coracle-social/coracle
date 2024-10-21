@@ -1,6 +1,5 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import {goto} from "$app/navigation"
   import {displayRelayUrl} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -51,8 +50,6 @@
     showSettings = false
   }
 
-  const browseSpaces = () => goto("/discover")
-
   const leaveSpace = () => pushModal(SpaceExit, {url: space})
 
   const joinSpace = () => pushModal(SpaceJoin, {url: space})
@@ -85,16 +82,17 @@
       Go Back
     </Button>
   {:else if space}
-    <p class="mb-4 text-2xl center gap-2">
+    <p class="center mb-4 gap-2 text-2xl">
       <Icon icon="compass-big" size={7} />
       <span class="text-primary">{displayRelayUrl(space)}</span>
     </p>
-    <div class="grid sm:grid-cols-3 gap-2">
+    <div class="grid gap-2 sm:grid-cols-3">
       <Link href={makeSpacePath(space, "threads")} class="btn btn-neutral">
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
       <Link href={makeSpacePath(space)} class="btn btn-neutral">
-        <Icon icon="hashtag" /> {GENERAL}
+        <Icon icon="hashtag" />
+        {GENERAL}
       </Link>
       {#each rooms as room, i (room)}
         <Link href={makeSpacePath(space, room)} class="btn btn-neutral">
@@ -109,7 +107,7 @@
         </Link>
       {/each}
     </div>
-    <div class="grid sm:grid-cols-2 gap-2">
+    <div class="grid gap-2 sm:grid-cols-2">
       <Button on:click={addRoom} class="btn btn-primary">
         <Icon icon="add-circle" />
         Create Room

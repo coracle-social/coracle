@@ -1,27 +1,12 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {ago, append, first, sortBy, WEEK, ctx} from "@welshman/lib"
-  import {NOTE, getAncestorTags, getListTags, getPubkeyTagValues} from "@welshman/util"
+  import {NOTE, getAncestorTags} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {
-    repository,
-    load,
-    loadRelaySelections,
-    userFollows,
-    formatTimestamp,
-    formatTimestampRelative,
-  } from "@welshman/app"
-  import Link from "@lib/components/Link.svelte"
-  import Icon from "@lib/components/Icon.svelte"
-  import Button from "@lib/components/Button.svelte"
+  import {repository, load, loadRelaySelections, formatTimestampRelative} from "@welshman/app"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
-  import Content from "@app/components/Content.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
-  import {pushDrawer} from "@app/modal"
-  import {entityLink} from "@app/state"
 
   export let pubkey
 

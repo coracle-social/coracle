@@ -3,9 +3,25 @@
   import {nip19} from "nostr-tools"
   import {ctx, sleep, sortBy, flatten} from "@welshman/lib"
   import {feedFromFilter} from "@welshman/feeds"
-  import {NOTE, displayProfile, getListTags, getPubkeyTagValues, displayPubkey, getAncestorTags} from "@welshman/util"
+  import {
+    NOTE,
+    displayProfile,
+    getListTags,
+    getPubkeyTagValues,
+    displayPubkey,
+    getAncestorTags,
+  } from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {repository, userFollows, tagPubkey, follow, unfollow, deriveProfile, displayNip05, feedLoader} from "@welshman/app"
+  import {
+    repository,
+    userFollows,
+    tagPubkey,
+    follow,
+    unfollow,
+    deriveProfile,
+    displayNip05,
+    feedLoader,
+  } from "@welshman/app"
   import {createScroller} from "@lib/html"
   import {fly} from "@lib/transition"
   import Link from "@lib/components/Link.svelte"
@@ -60,11 +76,17 @@
         </div>
       </div>
       {#if getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)}
-        <button type="button" class="btn btn-neutral" on:click|preventDefault={() => unfollow(pubkey)}>
+        <button
+          type="button"
+          class="btn btn-neutral"
+          on:click|preventDefault={() => unfollow(pubkey)}>
           Unfollow
         </button>
       {:else}
-        <button type="button" class="btn btn-primary" on:click|preventDefault={() => follow(tagPubkey(pubkey))}>
+        <button
+          type="button"
+          class="btn btn-primary"
+          on:click|preventDefault={() => follow(tagPubkey(pubkey))}>
           Follow
         </button>
       {/if}

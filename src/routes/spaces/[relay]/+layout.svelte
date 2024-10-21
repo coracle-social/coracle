@@ -121,7 +121,8 @@
         </div>
         <div transition:slide={{delay: getDelay()}}>
           <SecondaryNavItem href={makeSpacePath(url)}>
-            <Icon icon="hashtag" /> {GENERAL}
+            <Icon icon="hashtag" />
+            {GENERAL}
           </SecondaryNavItem>
         </div>
         {#each rooms as room, i (room)}
