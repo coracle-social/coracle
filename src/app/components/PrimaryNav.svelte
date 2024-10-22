@@ -8,7 +8,7 @@
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
-  import {userMembership, getMembershipUrls} from "@app/state"
+  import {userMembership, getMembershipUrls, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -23,15 +23,15 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
-        <Avatar src={import.meta.env.VITE_PLATFORM_LOGO} class="!h-10 !w-10" />
+        <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
       </PrimaryNavItem>
       <Divider />
-      {#if import.meta.env.VITE_PLATFORM_RELAY}
+      {#if PLATFORM_RELAY}
         <PrimaryNavItem
-          title={displayRelayUrl(import.meta.env.VITE_PLATFORM_RELAY)}
-          href={makeSpacePath(import.meta.env.VITE_PLATFORM_RELAY)}
+          title={displayRelayUrl(PLATFORM_RELAY)}
+          href={makeSpacePath(PLATFORM_RELAY)}
           class="tooltip-right">
-          <SpaceAvatar url={import.meta.env.VITE_PLATFORM_RELAY} />
+          <SpaceAvatar url={PLATFORM_RELAY} />
         </PrimaryNavItem>
       {:else}
         {#each getMembershipUrls($userMembership) as url (url)}

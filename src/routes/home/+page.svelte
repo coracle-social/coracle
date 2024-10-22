@@ -6,6 +6,7 @@
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import {pushModal} from "@app/modal"
+  import {PLATFORM_NAME} from "@app/state"
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -16,7 +17,7 @@
   <div class="hero-content">
     <div class="column content gap-4">
       <h1 class="text-center text-5xl">Welcome to</h1>
-      <h1 class="mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
+      <h1 class="mb-4 text-center text-5xl font-bold uppercase">{PLATFORM_NAME}</h1>
       <div class="grid gap-3 lg:grid-cols-2">
         <Button on:click={addSpace}>
           <CardButton>

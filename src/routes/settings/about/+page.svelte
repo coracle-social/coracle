@@ -4,6 +4,7 @@
   import Button from "@lib/components/Button.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushDrawer} from "@app/modal"
+  import {PLATFORM_NAME} from "@app/state"
 
   const openProfile = () =>
     pushDrawer(ProfileDetail, {
@@ -15,7 +16,7 @@
   <div class="hero-content">
     <div class="column content gap-6">
       <p class="text-center text-2xl">Thanks for using</p>
-      <h1 class="mb-4 text-center text-5xl font-bold uppercase">Flotilla</h1>
+      <h1 class="mb-4 text-center text-5xl font-bold uppercase">{PLATFORM_NAME}</h1>
       <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div class="card2 bg-alt flex flex-col gap-2 text-center shadow-2xl">
           <h3 class="text-2xl sm:h-12">Donate</h3>

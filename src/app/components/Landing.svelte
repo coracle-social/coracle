@@ -5,6 +5,7 @@
   import CardButton from "@lib/components/CardButton.svelte"
   import LogIn from "@app/components/LogIn.svelte"
   import SignUp from "@app/components/SignUp.svelte"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const logIn = () => pushModal(LogIn)
@@ -15,7 +16,7 @@
 <Dialog>
   <div class="column gap-4">
     <div class="py-2">
-      <h1 class="heading">Welcome to Flotilla!</h1>
+      <h1 class="heading">Welcome to {PLATFORM_NAME}!</h1>
       <p class="text-center">The chat app built for sovereign communities.</p>
     </div>
     <Button on:click={logIn}>

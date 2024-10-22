@@ -74,6 +74,14 @@ export const INDEXER_RELAYS = [
   "wss://relay.nostr.band/",
 ]
 
+export const PLATFORM_LOGO = import.meta.env.VITE_PLATFORM_LOGO
+
+export const PLATFORM_NAME = import.meta.env.VITE_PLATFORM_NAME
+
+export const PLATFORM_RELAY = import.meta.env.VITE_PLATFORM_RELAY
+
+export const DEFAULT_PUBKEYS = import.meta.env.VITE_DEFAULT_PUBKEYS
+
 export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 
 export const IMGPROXY_URL = "https://imgproxy.coracle.social"
@@ -123,7 +131,7 @@ export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 export const tagRoom = (room: string, url: string) => [ROOM, room, url]
 
 export const getDefaultPubkeys = () => {
-  const appPubkeys = import.meta.env.VITE_DEFAULT_PUBKEYS.split(",")
+  const appPubkeys = DEFAULT_PUBKEYS.split(",")
   const userPubkeys = shuffle(getPubkeyTagValues(getListTags(get(userFollows))))
 
   return userPubkeys.length > 5 ? userPubkeys : [...userPubkeys, ...appPubkeys]

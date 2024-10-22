@@ -2,6 +2,7 @@
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import {PLATFORM_NAME} from "@app/state"
 </script>
 
 <div class="column gap-4">
@@ -22,8 +23,8 @@
   </p>
   <p>
     It's very important to keep private keys safe, but this can sometimes be confusing for
-    newcomers. This is why flotilla supports <strong>remote signer</strong> login. These services can
-    store your keys securely for you, giving you access using a username and password.
+    newcomers. This is why {PLATFORM_NAME} supports <strong>remote signer</strong> login. These services
+    can store your keys securely for you, giving you access using a username and password.
   </p>
   <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
 </div>

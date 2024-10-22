@@ -10,6 +10,7 @@
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import SignUpKey from "@app/components/SignUpKey.svelte"
   import {pushModal, clearModals} from "@app/modal"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
 
   const login = () => pushModal(LogIn)
@@ -74,7 +75,7 @@
 <form class="column gap-4" on:submit|preventDefault={signup}>
   <h1 class="heading">Sign up with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
-    Flotilla is built using the
+    {PLATFORM_NAME} is built using the
     <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>

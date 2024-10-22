@@ -4,6 +4,7 @@
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import LogOut from "@app/components/LogOut.svelte"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const logout = () => pushModal(LogOut)
@@ -14,21 +15,21 @@
     <CardButton>
       <div slot="icon"><Icon icon="server" size={7} /></div>
       <div slot="title">Relays</div>
-      <div slot="info">Control how Flotilla talks to the network</div>
+      <div slot="info">Control how {PLATFORM_NAME} talks to the network</div>
     </CardButton>
   </Link>
   <Link href="/settings">
     <CardButton>
       <div slot="icon"><Icon icon="settings" size={7} /></div>
       <div slot="title">Settings</div>
-      <div slot="info">Get into the details about how Flotilla works</div>
+      <div slot="info">Get into the details about how {PLATFORM_NAME} works</div>
     </CardButton>
   </Link>
   <Link href="/settings/about">
     <CardButton>
       <div slot="icon"><Icon icon="code-2" size={7} /></div>
       <div slot="title">About</div>
-      <div slot="info">Learn about Flotilla and support the developer</div>
+      <div slot="info">Learn about {PLATFORM_NAME} and support the developer</div>
     </CardButton>
   </Link>
   <Button on:click={logout} class="btn btn-error">

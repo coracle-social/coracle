@@ -12,6 +12,7 @@
   import LogInInfoRemoteSigner from "@app/components/LogInInfoRemoteSigner.svelte"
   import LogInKey from "@app/components/LogInKey.svelte"
   import {pushModal, clearModals} from "@app/modal"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
   import {loadUserData} from "@app/commands"
 
@@ -116,7 +117,7 @@
 <form class="column gap-4" on:submit|preventDefault={loginWithNip46}>
   <h1 class="heading">Log in with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
-    Flotilla is built using the
+    {PLATFORM_NAME} is built using the
     <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>

@@ -35,7 +35,7 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import {deriveChat, splitChatId} from "@app/state"
+  import {deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
@@ -147,7 +147,7 @@
             Your inbox is not configured.
           </p>
           <p>
-            In order to deliver messages, Flotilla needs to know where to send them. Please visit
+            In order to deliver messages, {PLATFORM_NAME} needs to know where to send them. Please visit
             your <Link class="link" href="/settings/relays">relay settings page</Link> to set up your
             inbox.
           </p>

@@ -1,8 +1,6 @@
 import daisyui from "daisyui"
 import themes from "daisyui/src/theming/themes"
 
-console.log(themes["dark"])
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.{html,js,svelte,ts}"],
@@ -26,7 +24,7 @@ export default {
       {
         dark: {
           ...themes["dark"],
-          "primary": "#7161FF",
+          primary: "#7161FF",
         },
       },
     ],

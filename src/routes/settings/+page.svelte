@@ -7,7 +7,7 @@
   import Button from "@lib/components/Button.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
   import {pushToast} from "@app/toast"
-  import {SETTINGS, userSettings} from "@app/state"
+  import {SETTINGS, PLATFORM_NAME, userSettings} from "@app/state"
 
   const settings = {...$userSettings?.values}
 
@@ -50,7 +50,7 @@
         class="toggle toggle-primary"
         bind:checked={settings.hide_sensitive} />
       <p slot="info">
-        If content is marked by the author as sensitive, flotilla will hide it by default.
+        If content is marked by the author as sensitive, {PLATFORM_NAME} will hide it by default.
       </p>
     </FieldInline>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">

@@ -5,6 +5,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const back = () => history.back()
@@ -23,11 +24,11 @@
   </ModalHeader>
   <p>
     <Link class="text-primary" external href="https://relay.tools">relay.tools</Link> is a third-party
-    service that allows anyone to run their own relay for use with Flotilla, or any other nostr-compatible
-    app.
+    service that allows anyone to run their own relay for use with {PLATFORM_NAME}, or any other
+    nostr-compatible app.
   </p>
   <p>
-    Once you've created a relay of your own, come back here to link Flotilla with your new relay.
+    Once you've created a relay of your own, come back here to link {PLATFORM_NAME} with your new relay.
   </p>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

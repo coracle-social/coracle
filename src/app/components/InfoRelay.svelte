@@ -2,6 +2,7 @@
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import {PLATFORM_NAME} from "@app/state"
 </script>
 
 <div class="column gap-4">
@@ -9,7 +10,7 @@
     <div slot="title">What is a relay?</div>
   </ModalHeader>
   <p>
-    Flotilla hosts spaces on the <Link external href="https://nostr.com/" class="underline"
+    {PLATFORM_NAME} hosts spaces on the <Link external href="https://nostr.com/" class="underline"
       >Nostr protocol</Link
     >. Nostr uses "relays" to host data, which are special-purpose servers that speak nostr's
     language. This means that anyone can host their own data, making the web more decentralized and
