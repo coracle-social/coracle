@@ -26,6 +26,7 @@ export default {
       {
         dark: {
           ...themes["dark"],
+          "primary": "#7161FF",
         },
       },
     ],
