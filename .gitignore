@@ -16,3 +16,12 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated assets
+static/favicons
+static/apple-touch-icon-180x180.png
+static/favicon.ico
+static/maskable-icon-512x512.png
+static/pwa-64x64.png
+static/pwa-192x192.png
+static/pwa-512x512.png

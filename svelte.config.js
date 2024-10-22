@@ -14,5 +14,15 @@ export default {
       "@lib": "src/lib",
       "@assets": "src/assets",
     },
+    csp: {
+      directives: {
+        'script-src': ['self', 'plausible.io'],
+        'worker-src': ['self', 'blob:'],
+        'style-src': ['self', 'unsafe-inline'],
+        'frame-src': ['open.spotify.com', 'embed.tidal.com'],
+        'child-src': ['none'],
+        'form-action': ['none'],
+      },
+    },
   },
 }

@@ -74,7 +74,7 @@ export const INDEXER_RELAYS = [
   "wss://relay.nostr.band/",
 ]
 
-export const PLATFORM_LOGO = import.meta.env.VITE_PLATFORM_LOGO
+export const PLATFORM_LOGO = "/pwa-192x192.png"
 
 export const PLATFORM_NAME = import.meta.env.VITE_PLATFORM_NAME
 

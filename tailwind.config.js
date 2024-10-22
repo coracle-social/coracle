@@ -1,5 +1,9 @@
+import dotenv from "dotenv"
 import daisyui from "daisyui"
 import themes from "daisyui/src/theming/themes"
+
+dotenv.config({path: ".env.local"})
+dotenv.config({path: ".env"})
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -24,7 +28,7 @@ export default {
       {
         dark: {
           ...themes["dark"],
-          primary: "#7161FF",
+          primary: process.env.VITE_PLATFORM_ACCENT,
         },
       },
     ],
