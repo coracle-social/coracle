@@ -6,6 +6,7 @@
   import {relays, createSearch, relaySelections} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
+  import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageHeader from "@lib/components/PageHeader.svelte"
   import RelayName from "@app/components/RelayName.svelte"
@@ -72,55 +73,57 @@
   })
 </script>
 
-<div class="content column gap-4" bind:this={element}>
-  <PageHeader>
-    <div slot="title">Discover Spaces</div>
-    <div slot="info">Find communities all across the nostr network</div>
-  </PageHeader>
-  <label class="input input-bordered flex w-full items-center gap-2">
-    <Icon icon="magnifer" />
-    <input bind:value={term} class="grow" type="text" placeholder="Search for spaces..." />
-  </label>
-  {#each relaySearch.searchOptions(term).slice(0, limit) as relay (relay.url)}
-    <Button
-      class="card2 bg-alt col-4 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
-      on:click={() => openSpace(relay.url)}>
-      <div class="col-2">
-        <div class="relative flex gap-4">
-          <div class="relative">
-            <div class="avatar relative">
-              <div
-                class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
-                {#if relay.profile?.icon}
-                  <img alt="" src={relay.profile.icon} />
-                {:else}
-                  <Icon icon="ghost" size={5} />
-                {/if}
+<Page>
+  <div class="content column gap-4" bind:this={element}>
+    <PageHeader>
+      <div slot="title">Discover Spaces</div>
+      <div slot="info">Find communities all across the nostr network</div>
+    </PageHeader>
+    <label class="input input-bordered flex w-full items-center gap-2">
+      <Icon icon="magnifer" />
+      <input bind:value={term} class="grow" type="text" placeholder="Search for spaces..." />
+    </label>
+    {#each relaySearch.searchOptions(term).slice(0, limit) as relay (relay.url)}
+      <Button
+        class="card2 bg-alt col-4 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
+        on:click={() => openSpace(relay.url)}>
+        <div class="col-2">
+          <div class="relative flex gap-4">
+            <div class="relative">
+              <div class="avatar relative">
+                <div
+                  class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+                  {#if relay.profile?.icon}
+                    <img alt="" src={relay.profile.icon} />
+                  {:else}
+                    <Icon icon="ghost" size={5} />
+                  {/if}
+                </div>
               </div>
+              {#if getMembershipUrls($userMembership).includes(relay.url)}
+                <div
+                  class="tooltip absolute -right-1 -top-1 h-5 w-5 rounded-full bg-primary"
+                  data-tip="You are already a member of this space.">
+                  <Icon icon="check-circle" class="scale-110" />
+                </div>
+              {/if}
             </div>
-            {#if getMembershipUrls($userMembership).includes(relay.url)}
-              <div
-                class="tooltip absolute -right-1 -top-1 h-5 w-5 rounded-full bg-primary"
-                data-tip="You are already a member of this space.">
-                <Icon icon="check-circle" class="scale-110" />
-              </div>
-            {/if}
+            <div>
+              <h2 class="ellipsize whitespace-nowrap text-xl">
+                <RelayName url={relay.url} />
+              </h2>
+              <p class="text-sm opacity-75">{relay.url}</p>
+            </div>
           </div>
-          <div>
-            <h2 class="ellipsize whitespace-nowrap text-xl">
-              <RelayName url={relay.url} />
-            </h2>
-            <p class="text-sm opacity-75">{relay.url}</p>
+          <RelayDescription url={relay.url} />
+        </div>
+        {#if gt($wotGraph.get(relay.url)?.size, 0)}
+          <div class="row-2 card2 card2-sm bg-alt">
+            Members:
+            <ProfileCircles pubkeys={Array.from($wotGraph.get(relay.url) || [])} />
           </div>
-        </div>
-        <RelayDescription url={relay.url} />
-      </div>
-      {#if gt($wotGraph.get(relay.url)?.size, 0)}
-        <div class="row-2 card2 card2-sm bg-alt">
-          Members:
-          <ProfileCircles pubkeys={Array.from($wotGraph.get(relay.url) || [])} />
-        </div>
-      {/if}
-    </Button>
-  {/each}
-</div>
+        {/if}
+      </Button>
+    {/each}
+  </div>
+</Page>

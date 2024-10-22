@@ -11,7 +11,8 @@
 
   const next = () => {
     window.open("https://relay.tools/signup")
-    pushModal(SpaceInviteAccept)
+
+    setTimeout(() => pushModal(SpaceInviteAccept), 300)
   }
 </script>
 
