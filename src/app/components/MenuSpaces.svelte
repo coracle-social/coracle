@@ -9,7 +9,7 @@
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceCreateExternal from "@app/components/SpaceCreateExternal.svelte"
   import SpaceInviteAccept from "@app/components/SpaceInviteAccept.svelte"
-  import {userMembership, getMembershipUrls} from "@app/state"
+  import {userMembership, getMembershipUrls, PLATFORM_RELAY} from "@app/state"
   import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
@@ -19,17 +19,28 @@
 </script>
 
 <div class="column menu gap-2">
-  {#each getMembershipUrls($userMembership) as url (url)}
-    <Link href={makeSpacePath(url)}>
+  {#if PLATFORM_RELAY}
+    <Link href={makeSpacePath(PLATFORM_RELAY)}>
       <CardButton>
-        <div slot="icon"><SpaceAvatar {url} /></div>
-        <div slot="title"><RelayName {url} /></div>
-        <div slot="info"><RelayDescription {url} /></div>
+        <div slot="icon"><SpaceAvatar url={PLATFORM_RELAY} /></div>
+        <div slot="title"><RelayName url={PLATFORM_RELAY} /></div>
+        <div slot="info"><RelayDescription url={PLATFORM_RELAY} /></div>
       </CardButton>
     </Link>
-  {/each}
-  {#if getMembershipUrls($userMembership).length > 0}
     <Divider />
+  {:else}
+    {#each getMembershipUrls($userMembership) as url (url)}
+      <Link href={makeSpacePath(url)}>
+        <CardButton>
+          <div slot="icon"><SpaceAvatar {url} /></div>
+          <div slot="title"><RelayName {url} /></div>
+          <div slot="info"><RelayDescription {url} /></div>
+        </CardButton>
+      </Link>
+    {/each}
+    {#if getMembershipUrls($userMembership).length > 0}
+      <Divider />
+    {/if}
   {/if}
   <Button on:click={startJoin}>
     <CardButton>

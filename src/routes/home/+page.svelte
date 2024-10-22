@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {goto} from "$app/navigation"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"

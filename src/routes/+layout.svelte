@@ -35,7 +35,7 @@
   import AppContainer from "@app/components/AppContainer.svelte"
   import ModalContainer from "@app/components/ModalContainer.svelte"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS} from "@app/state"
+  import {INDEXER_RELAYS, PLATFORM_LOGO} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
@@ -132,6 +132,10 @@
     }
   })
 </script>
+
+<svelte:head>
+  <link rel="icon" href={PLATFORM_LOGO} />
+</svelte:head>
 
 {#await ready}
   <div data-theme={$theme} />
