@@ -22,10 +22,6 @@
 <div class="relative hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
-      <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
-        <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <Divider />
       {#if PLATFORM_RELAY}
         <PrimaryNavItem
           title={displayRelayUrl(PLATFORM_RELAY)}
@@ -34,6 +30,10 @@
           <SpaceAvatar url={PLATFORM_RELAY} />
         </PrimaryNavItem>
       {:else}
+        <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
+          <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
+        </PrimaryNavItem>
+        <Divider />
         {#each getMembershipUrls($userMembership) as url (url)}
           <PrimaryNavItem
             title={displayRelayUrl(url)}
