@@ -27,13 +27,6 @@
       <div slot="info">Enter an invite code or url to join an existing space.</div>
     </CardButton>
   </Button>
-  <Link href="/discover">
-    <CardButton>
-      <div slot="icon"><Icon icon="compass" size={7} /></div>
-      <div slot="title">Find a space</div>
-      <div slot="info">Browse spaces on the discover page.</div>
-    </CardButton>
-  </Link>
   <Button on:click={startCreate}>
     <CardButton>
       <div slot="icon"><Icon icon="add-circle" size={7} /></div>
@@ -41,4 +34,11 @@
       <div slot="info">Just a few questions and you'll be on your way.</div>
     </CardButton>
   </Button>
+  <Link href="/discover">
+    <CardButton>
+      <div slot="icon"><Icon icon="compass" size={7} /></div>
+      <div slot="title">Discover spaces</div>
+      <div slot="info">Browse spaces on the discover page.</div>
+    </CardButton>
+  </Link>
 </div>
