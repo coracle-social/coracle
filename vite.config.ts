@@ -2,9 +2,9 @@ import fs from "fs"
 import dotenv from "dotenv"
 import * as path from "path"
 import {defineConfig} from "vite"
-import {VitePWA} from "vite-plugin-pwa"
 import {favicons} from "favicons"
 import htmlPlugin from "vite-plugin-html-config"
+import {SvelteKitPWA} from '@vite-pwa/sveltekit'
 import {sveltekit} from "@sveltejs/kit/vite"
 import svg from "@poppanator/sveltekit-svg"
 
@@ -36,6 +36,31 @@ export default defineConfig(async () => {
     },
     plugins: [
       sveltekit(),
+      SvelteKitPWA({
+        registerType: "autoUpdate",
+        injectRegister: "auto",
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 ** 2, // 5 MB or set to something else
+        },
+        manifest: {
+          name: name,
+          short_name: name,
+          description: description,
+          theme_color: accent,
+          permissions: ["clipboardRead", "clipboardWrite", "unlimitedStorage"],
+          icons: [
+            {src: "pwa-64x64.png", sizes: "64x64", type: "image/png"},
+            {src: "pwa-192x192.png", sizes: "192x192", type: "image/png"},
+            {src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any"},
+            {
+              src: "maskable-icon-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
+          ],
+        },
+      }),
       svg({
         svgoOptions: {
           multipass: true,
@@ -128,32 +153,6 @@ export default defineConfig(async () => {
           {rel: "icon", type: "image/png", sizes: "72x72", href: "/favicons/android-chrome-72x72.png"},
           {rel: "icon", type: "image/png", sizes: "96x96", href: "/favicons/android-chrome-96x96.png"},
         ],
-      }),
-      VitePWA({
-        registerType: "autoUpdate",
-        injectRegister: "auto",
-        workbox: {
-          maximumFileSizeToCacheInBytes: 5 * 1024 ** 2, // 5 MB or set to something else
-        },
-        manifest: {
-          name: name,
-          short_name: name,
-          description: description,
-          theme_color: accent,
-          protocol_handlers: [{protocol: "web+nostr", url: "/%s"}],
-          permissions: ["clipboardRead", "clipboardWrite", "unlimitedStorage"],
-          icons: [
-            {src: "pwa-64x64.png", sizes: "64x64", type: "image/png"},
-            {src: "pwa-192x192.png", sizes: "192x192", type: "image/png"},
-            {src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any"},
-            {
-              src: "maskable-icon-512x512.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "maskable",
-            },
-          ],
-        },
       }),
     ],
   }

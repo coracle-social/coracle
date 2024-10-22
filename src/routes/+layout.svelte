@@ -1,5 +1,7 @@
 <script lang="ts">
   import "@src/app.css"
+  import {pwaInfo} from 'virtual:pwa-info';
+  import {pwaAssetsHead} from 'virtual:pwa-assets/head';
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
@@ -134,7 +136,13 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href={PLATFORM_LOGO} />
+  {@html pwaInfo ? pwaInfo.webManifest.linkTag : ''}
+  {#if pwaAssetsHead.themeColor}
+    <meta name="theme-color" content={pwaAssetsHead.themeColor.content} />
+  {/if}
+  {#each pwaAssetsHead.links as link}
+    <link {...link} />
+  {/each}
 </svelte:head>
 
 {#await ready}
