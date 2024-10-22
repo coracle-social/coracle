@@ -37,7 +37,7 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2 overflow-hidden">
     <div class="w-full gap-2">
       <div
         class="cy-person-name flex max-w-[100%] items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -61,8 +61,8 @@
         {/if}
       </div>
       <div class="flex flex-row items-center gap-1 text-xs">
-        <PersonHandle class="whitespace-nowrap text-accent" {pubkey}>
-          <span class="opacity-50">-</span>
+        <PersonHandle class="whitespace-nowrap text-accent hidden xs:block" {pubkey}>
+          <span class="opacity-50 hidden xs:block">-</span>
         </PersonHandle>
         <p class="whitespace-nowrap opacity-50">{npubDisplay}</p>
         {#if displayNpubCopyButton}
