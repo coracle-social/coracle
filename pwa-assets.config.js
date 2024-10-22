@@ -4,7 +4,12 @@ import {defineConfig, minimalPreset as preset} from '@vite-pwa/assets-generator/
 dotenv.config({path: '.env.local'})
 dotenv.config({path: '.env'})
 
+let logoPath = process.env.VITE_PLATFORM_LOGO
+
+if (logoPath.startsWith('https://')) {
+}
+
 export default defineConfig({
   preset,
-  images: [process.env.VITE_PLATFORM_LOGO],
+  images: [logoPath],
 })

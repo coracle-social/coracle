@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@src/app.css"
   import {pwaInfo} from 'virtual:pwa-info';
-  import {pwaAssetsHead} from 'virtual:pwa-assets/head';
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
@@ -37,7 +36,7 @@
   import AppContainer from "@app/components/AppContainer.svelte"
   import ModalContainer from "@app/components/ModalContainer.svelte"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS, PLATFORM_LOGO} from "@app/state"
+  import {INDEXER_RELAYS, PLATFORM_LOGO, PLATFORM_ACCENT} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
@@ -137,12 +136,8 @@
 
 <svelte:head>
   {@html pwaInfo ? pwaInfo.webManifest.linkTag : ''}
-  {#if pwaAssetsHead.themeColor}
-    <meta name="theme-color" content={pwaAssetsHead.themeColor.content} />
-  {/if}
-  {#each pwaAssetsHead.links as link}
-    <link {...link} />
-  {/each}
+  <meta name="theme-color" content={PLATFORM_ACCENT} />
+  <link rel="icon" href={PLATFORM_LOGO} />
 </svelte:head>
 
 {#await ready}
