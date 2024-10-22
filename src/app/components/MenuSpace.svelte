@@ -21,7 +21,6 @@
     memberships,
     roomsByUrl,
     GENERAL,
-    PLATFORM_RELAY,
   } from "@app/state"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {pushModal} from "@app/modal"
@@ -98,21 +97,19 @@
               Create Invite
             </Button>
           </li>
-          {#if !PLATFORM_RELAY}
-            <li>
-              {#if getMembershipUrls($userMembership).includes(url)}
-                <Button on:click={leaveSpace} class="text-error">
-                  <Icon icon="exit" />
-                  Leave Space
-                </Button>
-              {:else}
-                <Button on:click={joinSpace}>
-                  <Icon icon="login-2" />
-                  Join Space
-                </Button>
-              {/if}
-            </li>
-          {/if}
+          <li>
+            {#if getMembershipUrls($userMembership).includes(url)}
+              <Button on:click={leaveSpace} class="text-error">
+                <Icon icon="exit" />
+                Leave Space
+              </Button>
+            {:else}
+              <Button on:click={joinSpace}>
+                <Icon icon="login-2" />
+                Join Space
+              </Button>
+            {/if}
+          </li>
         </ul>
       </Popover>
     {/if}
