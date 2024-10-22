@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
+  import {goto} from "$app/navigation"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -6,11 +8,18 @@
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import {pushModal} from "@app/modal"
-  import {PLATFORM_NAME} from "@app/state"
+  import {makeSpacePath} from "@app/routes"
+  import {PLATFORM_NAME, PLATFORM_RELAY} from "@app/state"
 
   const addSpace = () => pushModal(SpaceAdd)
 
   const startChat = () => pushModal(ChatStart)
+
+  onMount(() => {
+    if (PLATFORM_RELAY) {
+      goto(makeSpacePath(PLATFORM_RELAY))
+    }
+  })
 </script>
 
 <div class="hero min-h-screen">
