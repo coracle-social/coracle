@@ -56,7 +56,7 @@
     "@welshman/net": "~0.0.29",
     "@welshman/signer": "~0.0.9",
     "@welshman/store": "~0.0.11",
-    "@welshman/util": "~0.0.41",
+    "@welshman/util": "~0.0.42",
     "daisyui": "^4.12.10",
     "date-picker-svelte": "^2.13.0",
     "emoji-picker-element": "^1.22.8",
