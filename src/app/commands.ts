@@ -18,6 +18,7 @@ import {
   getListTags,
   getRelayTags,
   isShareableRelayUrl,
+  getRelayTagValues,
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -145,31 +146,35 @@ export const broadcastUserData = async (relays: string[]) => {
 export const addSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
+  const relays = [...ctx.app.router.WriteRelays().getUrls(), ...getRelayTagValues(event.tags)]
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
+  return publishThunk({event, relays}).result
 }
 
 export const removeSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const pred = (t: string[]) => t[t[0] === "r" ? 1 : 2] === url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
+  const relays = [...ctx.app.router.WriteRelays().getUrls(), ...getRelayTagValues(event.tags)]
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
+  return publishThunk({event, relays}).result
 }
 
 export const addRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const event = await addToListPublicly(list, tagRoom(room, url)).reconcile(nip44EncryptToSelf)
+  const relays = [...ctx.app.router.WriteRelays().getUrls(), ...getRelayTagValues(event.tags)]
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
+  return publishThunk({event, relays}).result
 }
 
 export const removeRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const pred = (t: string[]) => equals(tagRoom(room, url), t)
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
+  const relays = [...ctx.app.router.WriteRelays().getUrls(), ...getRelayTagValues(event.tags)]
 
-  return publishThunk({event, relays: ctx.app.router.WriteRelays().getUrls()}).result
+  return publishThunk({event, relays}).result
 }
 
 export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {

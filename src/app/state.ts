@@ -275,7 +275,20 @@ export const {
 
 // Membership
 
+export const hasMembershipUrl = (list: List | undefined, url: string) =>
+  getListTags(list).some(t => {
+    if (t[0] === "r") return t[1] === url
+    if (t[0] === "~") return t[2] === url
+
+    return false
+  })
+
 export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getListTags(list)))
+
+export const getMembershipRooms = (list?: List) =>
+  getListTags(list)
+    .filter(t => t[0] === "~")
+    .map(t => ({url: t[2], room: t[1]}))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
   sort(
@@ -320,7 +333,9 @@ export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
 
   const [_, room, url] = roomTags[0]
 
-  return {url, room, event}
+  if (!url || !room) return undefined
+
+  return {url: normalizeRelayUrl(url), room, event}
 }
 
 export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
@@ -342,19 +357,30 @@ export const makeChannelId = (url: string, room: string) => `${url}|${room}`
 
 export const splitChannelId = (id: string) => id.split("|")
 
-export const channels = derived(channelMessages, $channelMessages => {
-  const messagesByChannelId = new Map<string, ChannelMessage[]>()
+export const channels = derived(
+  [memberships, channelMessages],
+  ([$memberships, $channelMessages]) => {
+    const messagesByChannelId = new Map<string, ChannelMessage[]>()
 
-  for (const message of $channelMessages) {
-    pushToMapKey(messagesByChannelId, makeChannelId(message.url, message.room), message)
-  }
+    // Add known rooms by membership so we don't have to scan messages to load all rooms
+    for (const membership of $memberships) {
+      for (const {url, room} of getMembershipRooms(membership)) {
+        messagesByChannelId.set(makeChannelId(url, room), [])
+      }
+    }
 
-  return Array.from(messagesByChannelId.entries()).map(([id, messages]) => {
-    const [url, room] = splitChannelId(id)
+    // Add messages/rooms without memberships
+    for (const message of $channelMessages) {
+      pushToMapKey(messagesByChannelId, makeChannelId(message.url, message.room), message)
+    }
 
-    return {id, url, room, messages}
-  })
-})
+    return Array.from(messagesByChannelId.entries()).map(([id, messages]) => {
+      const [url, room] = splitChannelId(id)
+
+      return {id, url, room, messages}
+    })
+  },
+)
 
 export const {
   indexStore: channelsById,

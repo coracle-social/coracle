@@ -49,23 +49,28 @@
     <label class="input input-bordered flex flex-grow items-center gap-2">
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
-      <input autofocus bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
+      <input
+        autofocus
+        bind:value={term}
+        class="grow"
+        type="text"
+        placeholder="Search for conversations..." />
     </label>
     <Button class="btn btn-primary" on:click={startChat}>
       <Icon icon="add-circle" />
     </Button>
   </div>
   <div slot="content" class="col-2">
-  {#each chats as { id, pubkeys, messages } (id)}
-    <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
-  {:else}
-    <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
-      <p>No chats found! Try starting one up.</p>
-      <Button class="btn btn-primary" on:click={startChat}>
-        <Icon icon="add-circle" />
-        Start a Chat
-      </Button>
-    </div>
-  {/each}
+    {#each chats as { id, pubkeys, messages } (id)}
+      <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
+    {:else}
+      <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
+        <p>No chats found! Try starting one up.</p>
+        <Button class="btn btn-primary" on:click={startChat}>
+          <Icon icon="add-circle" />
+          Start a Chat
+        </Button>
+      </div>
+    {/each}
   </div>
 </ContentSearch>

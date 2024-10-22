@@ -11,11 +11,14 @@
   import SpaceInvite from "@app/components/SpaceInvite.svelte"
   import SpaceExit from "@app/components/SpaceExit.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
+  import ProfileList from "@app/components/ProfileList.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
   import {
     getMembershipRoomsByUrl,
     getMembershipUrls,
+    hasMembershipUrl,
     userMembership,
+    memberships,
     roomsByUrl,
     GENERAL,
   } from "@app/state"
@@ -33,6 +36,9 @@
   const toggleMenu = () => {
     showMenu = !showMenu
   }
+
+  const showMembers = () =>
+    pushModal(ProfileList, {pubkeys: members, title: `Members of`, subtitle: displayRelayUrl(url)})
 
   const createInvite = () => pushModal(SpaceInvite, {url})
 
@@ -57,6 +63,7 @@
 
   $: rooms = getMembershipRoomsByUrl(url, $userMembership)
   $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
+  $: members = $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey)
 
   onMount(async () => {
     const error = (await checkRelayConnection(url)) || (await checkRelayAuth(url))
@@ -78,6 +85,12 @@
         <ul
           transition:fly
           class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
+          <li>
+            <Button on:click={showMembers}>
+              <Icon icon="user-rounded" />
+              View Members ({members.length})
+            </Button>
+          </li>
           <li>
             <Button on:click={createInvite}>
               <Icon icon="link-round" />

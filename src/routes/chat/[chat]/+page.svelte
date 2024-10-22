@@ -52,7 +52,8 @@
 
   const assertNotNil = <T,>(x: T | undefined) => x!
 
-  const showMembers = () => pushModal(ProfileList, {pubkeys: others})
+  const showMembers = () =>
+    pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]

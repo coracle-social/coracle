@@ -31,10 +31,15 @@
 
 <Page>
   <ContentSearch>
-    <label slot="input" class="input input-bordered row-2">
+    <label slot="input" class="row-2 input input-bordered">
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
-      <input autofocus bind:value={term} class="grow" type="text" placeholder="Search for people..." />
+      <input
+        autofocus
+        bind:value={term}
+        class="grow"
+        type="text"
+        placeholder="Search for people..." />
     </label>
     <div slot="content" class="col-2" bind:this={element}>
       {#each pubkeys.slice(0, limit) as pubkey (pubkey)}

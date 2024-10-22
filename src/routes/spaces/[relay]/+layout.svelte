@@ -1,17 +1,26 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
+  import {load} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Delay from "@lib/components/Delay.svelte"
   import Button from "@lib/components/Button.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
-  import {decodeRelay} from "@app/state"
+  import {decodeRelay, MEMBERSHIPS} from "@app/state"
   import {pushDrawer} from "@app/modal"
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
   $: url = decodeRelay($page.params.relay)
+
+  onMount(() => {
+    load({
+      filters: [{kinds: [MEMBERSHIPS], "#r": [url]}],
+      relays: [url],
+    })
+  })
 </script>
 
 {#key url}
