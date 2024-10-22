@@ -22,41 +22,43 @@
   })
 </script>
 
-<div class="hero min-h-screen">
-  <div class="hero-content">
-    <div class="column content gap-4">
-      <h1 class="text-center text-5xl">Welcome to</h1>
-      <h1 class="mb-4 text-center text-5xl font-bold uppercase">{PLATFORM_NAME}</h1>
-      <div class="grid gap-3 lg:grid-cols-2">
-        <Button on:click={addSpace}>
-          <CardButton>
-            <div slot="icon"><Icon icon="add-circle" size={7} /></div>
-            <div slot="title">Add a space</div>
-            <div slot="info">Use an invite link, or create your own space.</div>
-          </CardButton>
-        </Button>
-        <Link href="/discover">
-          <CardButton>
-            <div slot="icon"><Icon icon="compass-big" size={7} /></div>
-            <div slot="title">Discover spaces</div>
-            <div slot="info">Find a community based on your hobbies or interests.</div>
-          </CardButton>
-        </Link>
-        <Link href="/people">
-          <CardButton>
-            <div slot="icon"><Icon icon="plain" size={7} /></div>
-            <div slot="title">Browse the network</div>
-            <div slot="info">Find your people on the nostr network</div>
-          </CardButton>
-        </Link>
-        <Button on:click={startChat}>
-          <CardButton>
-            <div slot="icon"><Icon icon="hand-pills" size={7} /></div>
-            <div slot="title">Start a conversation</div>
-            <div slot="info">Use nostr's encrypted group chats to stay in touch</div>
-          </CardButton>
-        </Button>
+{#if !PLATFORM_RELAY}
+  <div class="hero min-h-screen">
+    <div class="hero-content">
+      <div class="column content gap-4">
+        <h1 class="text-center text-5xl">Welcome to</h1>
+        <h1 class="mb-4 text-center text-5xl font-bold uppercase">{PLATFORM_NAME}</h1>
+        <div class="grid gap-3 lg:grid-cols-2">
+          <Button on:click={addSpace}>
+            <CardButton>
+              <div slot="icon"><Icon icon="add-circle" size={7} /></div>
+              <div slot="title">Add a space</div>
+              <div slot="info">Use an invite link, or create your own space.</div>
+            </CardButton>
+          </Button>
+          <Link href="/discover">
+            <CardButton>
+              <div slot="icon"><Icon icon="compass-big" size={7} /></div>
+              <div slot="title">Discover spaces</div>
+              <div slot="info">Find a community based on your hobbies or interests.</div>
+            </CardButton>
+          </Link>
+          <Link href="/people">
+            <CardButton>
+              <div slot="icon"><Icon icon="plain" size={7} /></div>
+              <div slot="title">Browse the network</div>
+              <div slot="info">Find your people on the nostr network</div>
+            </CardButton>
+          </Link>
+          <Button on:click={startChat}>
+            <CardButton>
+              <div slot="icon"><Icon icon="hand-pills" size={7} /></div>
+              <div slot="title">Start a conversation</div>
+              <div slot="info">Use nostr's encrypted group chats to stay in touch</div>
+            </CardButton>
+          </Button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+{/if}
