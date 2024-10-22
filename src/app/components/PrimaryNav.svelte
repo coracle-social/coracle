@@ -23,7 +23,7 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
-        <Avatar src="/flotilla.png" class="!h-10 !w-10" />
+        <Avatar src={import.meta.env.VITE_PLATFORM_LOGO} class="!h-10 !w-10" />
       </PrimaryNavItem>
       <Divider />
       {#if import.meta.env.VITE_PLATFORM_RELAY}
