@@ -26,6 +26,9 @@ export default defineConfig({
     SvelteKitPWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 ** 2, // 5 MB or set to something else
+      },
       manifest: {
         name: name,
         short_name: name,
