@@ -24,7 +24,8 @@
 
   const onClick = () => pushDrawer(ProfileDetail, {pubkey})
 
-  $: following = pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
+  $: following =
+    pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
 </script>
 
 <div class="flex max-w-full gap-3">

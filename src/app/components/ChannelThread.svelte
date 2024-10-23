@@ -1,9 +1,8 @@
 <script lang="ts">
   import {writable} from "svelte/store"
   import {assoc, sortBy, append} from "@welshman/lib"
-  import {createEvent} from "@welshman/util"
   import type {EventContent, TrustedEvent} from "@welshman/util"
-  import {repository, publishThunk} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
