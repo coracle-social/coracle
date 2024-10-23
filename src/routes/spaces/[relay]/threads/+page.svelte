@@ -78,8 +78,8 @@
     </p>
   </div>
   <Button
-    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"
-    data-tip="Create an Event"
+    class="tooltip tooltip-left fixed bottom-16 right-4 z-feature p-1 sm:right-8 md:bottom-4 md:right-4"
+    data-tip="Create a Thread"
     on:click={createThread}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
       <Icon icon="notes-minimalistic" />

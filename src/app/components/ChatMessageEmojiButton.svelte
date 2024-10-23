@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {throttle} from "throttle-debounce"
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import {between} from "@welshman/lib"
@@ -21,13 +22,13 @@
     popover.hide()
   }
 
-  const onMouseMove = ({clientX, clientY}: any) => {
+  const onMouseMove = throttle(300, ({clientX, clientY}: any) => {
     const {x, y, width, height} = popover.popper.getBoundingClientRect()
 
-    if (!between([x, x + width], clientX) || !between([y, y + height + 30], clientY)) {
+    if (!between([x, x + width], clientX) || !between([y - 30, y + height + 30], clientY)) {
       popover.hide()
     }
-  }
+  })
 
   let popover: Instance
 </script>

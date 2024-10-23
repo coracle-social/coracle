@@ -1,11 +1,11 @@
 <script lang="ts">
   import {readable} from "svelte/store"
-  import {hash, ellipsize, uniqBy, groupBy} from "@welshman/lib"
+  import {hash, uniqBy, groupBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
+  import {REACTION} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {slideAndFade, conditionalTransition} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -18,7 +18,7 @@
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
-  import {colors, tagRoom, deriveEvent, displayReaction} from "@app/state"
+  import {REPLY, colors, tagRoom, deriveEvent, displayReaction} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal, pushDrawer} from "@app/modal"
 
@@ -27,12 +27,12 @@
   export let event: TrustedEvent
   export let thunk: Thunk
   export let showPubkey = false
-  export let hideParent = false
+  export let isThread = false
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
-  const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
+  const replies = deriveEvents(repository, {filters: [{kinds: [REPLY], "#E": [event.id]}]})
   const rootTag = event.tags.find(t => t[0].match(/^e$/i))
   const rootId = rootTag?.[1]
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
@@ -63,10 +63,6 @@
       })
     }
   }
-
-  $: rootPubkey = $rootEvent?.pubkey || rootTag?.[4]
-  $: rootProfile = deriveProfile(rootPubkey || "")
-  $: rootProfileDisplay = deriveProfileDisplay(rootPubkey || "")
 </script>
 
 <Delay>
@@ -75,18 +71,6 @@
     on:click={openThread}
     type="button"
     class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
-    {#if $rootEvent && !hideParent}
-      <div class="flex items-center gap-1 pl-12 text-xs">
-        <Icon icon="square-share-line" size={3} />
-        <p>In reply to</p>
-        <Avatar src={$rootProfile?.picture} size={4} />
-        <p class="text-primary">{$rootProfileDisplay}</p>
-        <p
-          class="flex items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap opacity-75 hover:underline">
-          {ellipsize($rootEvent.content, 30)}
-        </p>
-      </div>
-    {/if}
     <div class="flex w-full gap-3">
       {#if showPubkey}
         <Button on:click={showProfile}>
@@ -115,14 +99,20 @@
         </div>
       </div>
     </div>
-    {#if $reactions.length > 0 || $zaps.length > 0}
-      <div class="ml-12 text-xs">
+    {#if $reactions.length > 0 || $replies.length > 0}
+      <div class="ml-12 flex flex-wrap gap-2 text-xs">
+        {#if $replies.length > 0 && !isThread}
+          <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
+            <Icon icon="reply" />
+            {$replies.length}
+          </div>
+        {/if}
         {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
           {@const isOwn = events.some(e => e.pubkey === $pubkey)}
           {@const onClick = () => onReactionClick(content, events)}
           <button
             type="button"
-            class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full"
+            class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full"
             class:border={isOwn}
             class:border-solid={isOwn}
             class:border-primary={isOwn}

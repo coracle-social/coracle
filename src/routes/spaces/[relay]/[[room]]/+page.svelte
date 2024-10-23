@@ -33,6 +33,7 @@
     GENERAL,
     tagRoom,
     MESSAGE,
+    REPLY,
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
@@ -64,6 +65,10 @@
     let previousPubkey
 
     for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
+      if (event.kind === REPLY) {
+        continue
+      }
+
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
