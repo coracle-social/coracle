@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {writable} from "svelte/store"
-  import {sortBy, now, assoc, append} from "@welshman/lib"
+  import {sortBy, fromPairs, now, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, subscribe, publishThunk} from "@welshman/app"
@@ -40,6 +40,7 @@
   import {pushDrawer} from "@app/modal"
 
   const {room = GENERAL} = $page.params
+  const {content = ""} = fromPairs(Array.from($page.url.searchParams))
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)
@@ -146,5 +147,5 @@
       </Spinner>
     </p>
   </div>
-  <ChannelCompose {onSubmit} />
+  <ChannelCompose {content} {onSubmit} />
 </div>

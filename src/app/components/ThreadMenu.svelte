@@ -4,6 +4,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Confirm from "@lib/components/Confirm.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
+  import ThreadShare from "@app/components/ThreadShare.svelte"
   import {publishDelete} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -14,6 +15,11 @@
   const showInfo = () => {
     onClick()
     pushModal(EventInfo, {event})
+  }
+
+  const share = () => {
+    onClick()
+    pushModal(ThreadShare, {url, event})
   }
 
   const showDelete = () => {
@@ -34,6 +40,12 @@
 </script>
 
 <ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl">
+  <li>
+    <Button on:click={share}>
+      <Icon size={4} icon="share-circle" />
+      Share to Chat
+    </Button>
+  </li>
   <li>
     <Button on:click={showInfo}>
       <Icon size={4} icon="code-2" />

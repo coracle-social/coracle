@@ -9,6 +9,7 @@
   import {getPubkeyHints} from "@app/commands"
 
   export let onSubmit
+  export let content = ""
 
   const loading = writable(false)
 
@@ -27,6 +28,9 @@
     editor = createEditor(
       getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true, autofocus: true}),
     )
+
+    console.log($editor, content)
+    $editor.commands.setContent(content)
   })
 </script>
 
