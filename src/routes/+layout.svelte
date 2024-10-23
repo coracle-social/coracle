@@ -29,6 +29,9 @@
     freshness,
     storageAdapters,
     tracker,
+    session,
+    signer,
+    dropSession,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -39,6 +42,11 @@
   import {INDEXER_RELAYS, PLATFORM_LOGO, PLATFORM_ACCENT} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
+
+  // Migration: old nostrtalk instance used different sessions
+  if ($session && !$signer) {
+    dropSession($session.pubkey)
+  }
 
   let ready: Promise<unknown> = Promise.resolve()
 
