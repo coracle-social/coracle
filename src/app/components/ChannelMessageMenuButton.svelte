@@ -6,7 +6,7 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import ChannelMessageMenu from "@app/components/ChannelMessageMenu.svelte"
 
-  export let url, room, event
+  export let url, event
 
   const open = () => popover.show()
 
@@ -32,6 +32,6 @@
   <Tippy
     bind:popover
     component={ChannelMessageMenu}
-    props={{url, room, event, onClick}}
+    props={{url, event, onClick}}
     params={{trigger: "manual", interactive: true}} />
 </div>

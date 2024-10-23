@@ -1,6 +1,7 @@
 <script lang="ts">
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
+    session,
     userFollows,
     deriveUserWotScore,
     deriveProfile,
@@ -23,7 +24,7 @@
 
   const onClick = () => pushDrawer(ProfileDetail, {pubkey})
 
-  $: following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
+  $: following = pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
 </script>
 
 <div class="flex max-w-full gap-3">

@@ -46,6 +46,7 @@ import {
   loadRelay,
 } from "@welshman/app"
 import {
+  REPLY,
   tagRoom,
   userMembership,
   MEMBERSHIPS,
@@ -301,31 +302,52 @@ export const sendWrapped = async ({
   )
 }
 
-export const makeReaction = ({
-  event,
-  content,
-  tags = [],
-}: {
+export type ReactionParams = {
   event: TrustedEvent
   content: string
   tags?: string[][]
-}) =>
-  createEvent(REACTION, {
-    content,
-    tags: [...tags, ...tagReactionTo(event)],
-  })
+}
 
-export const publishReaction = ({
-  relays,
-  event,
-  content,
-  tags = [],
-}: {
-  relays: string[]
+export const makeReaction = ({event, content, tags = []}: ReactionParams) =>
+  createEvent(REACTION, {content, tags: [...tags, ...tagReactionTo(event)]})
+
+export const publishReaction = ({relays, ...params}: ReactionParams & {relays: string[]}) =>
+  publishThunk({event: makeReaction(params), relays})
+
+export type ReplyParams = {
   event: TrustedEvent
   content: string
   tags?: string[][]
-}) => publishThunk({event: makeReaction({event, content, tags}), relays})
+}
+
+export const makeReply = ({event, content, tags = []}: ReplyParams) => {
+  const seenRoots = new Set<string>()
+
+  for (const [raw, ...tag] of event.tags.filter(t => t[0].match(/^K|E|A|I$/i))) {
+    const T = raw.toUpperCase()
+    const t = raw.toLowerCase()
+
+    if (seenRoots.has(T)) {
+      tags.push([t, ...tag])
+    } else {
+      tags.push([T, ...tag])
+      seenRoots.add(T)
+    }
+  }
+
+  if (seenRoots.size === 0) {
+    tags.push(["K", String(event.kind)])
+    tags.push(["E", event.id])
+  } else {
+    tags.push(["k", String(event.kind)])
+    tags.push(["e", event.id])
+  }
+
+  return createEvent(REPLY, {content, tags})
+}
+
+export const publishReply = ({relays, ...params}: ReplyParams & {relays: string[]}) =>
+  publishThunk({event: makeReply(params), relays})
 
 export const makeDelete = ({event}: {event: TrustedEvent}) =>
   createEvent(DELETE, {tags: [["k", String(event.kind)], ...tagEvent(event)]})

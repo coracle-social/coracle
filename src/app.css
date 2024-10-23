@@ -181,7 +181,7 @@
 }
 
 .note-editor .tiptap[contenteditable="true"] {
-  @apply input input-bordered h-auto min-h-32 p-[.65rem] pb-6;
+  @apply input input-bordered h-auto min-h-32 p-[.65rem] pb-6 rounded-box;
 }
 
 .tiptap pre code {

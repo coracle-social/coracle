@@ -1,21 +1,19 @@
 <script lang="ts">
   import {type Instance} from "tippy.js"
-  import {hash, uniqBy, groupBy} from "@welshman/lib"
+  import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveEvents} from "@welshman/store"
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {MergedThunk} from "@welshman/app"
-  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
-  import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
+  import Reactions from "@app/components/Reactions.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
-  import {colors, displayReaction} from "@app/state"
+  import {colors} from "@app/state"
   import {pushDrawer} from "@app/modal"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
 
@@ -26,8 +24,6 @@
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
-  const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
-  const zaps = deriveEvents(repository, {filters: [{kinds: [ZAP_RESPONSE], "#e": [event.id]}]})
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
   const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
@@ -103,25 +99,6 @@
         </div>
       </div>
     </div>
-    {#if $reactions.length > 0 || $zaps.length > 0}
-      <div class="relative z-feature -mt-4 flex justify-end text-xs">
-        {#each groupBy( e => e.content, uniqBy(e => e.pubkey + e.content, $reactions), ).entries() as [content, events]}
-          {@const isOwn = events.some(e => e.pubkey === $pubkey)}
-          {@const onClick = () => onReactionClick(content, events)}
-          <button
-            type="button"
-            class="flex-inline btn btn-neutral btn-xs mr-2 gap-1 rounded-full"
-            class:border={isOwn}
-            class:border-solid={isOwn}
-            class:border-primary={isOwn}
-            on:click|stopPropagation={onClick}>
-            <span>{displayReaction(content)}</span>
-            {#if events.length > 1}
-              <span>{events.length}</span>
-            {/if}
-          </button>
-        {/each}
-      </div>
-    {/if}
+    <Reactions {event} {onReactionClick} />
   </div>
 </div>

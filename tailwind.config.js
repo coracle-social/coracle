@@ -29,6 +29,7 @@ export default {
         dark: {
           ...themes["dark"],
           primary: process.env.VITE_PLATFORM_ACCENT,
+          "primary-content": "#EAE7FF",
         },
       },
     ],

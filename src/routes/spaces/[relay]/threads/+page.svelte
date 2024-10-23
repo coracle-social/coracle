@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {NOTE} from "@welshman/util"
+  import {NOTE, getListTags, getPubkeyTagValues} from "@welshman/util"
   import {feedFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
-  import {feedLoader} from "@welshman/app"
+  import {feedLoader, userMutes} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -21,6 +21,7 @@
   const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds}))
   const events = deriveEventsForUrl(url, kinds)
   const loader = feedLoader.getLoader(feed, {})
+  const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
@@ -55,16 +56,20 @@
       <Icon icon="notes-minimalistic" />
     </div>
     <strong slot="title">Threads</strong>
-    <div slot="action" class="md:hidden">
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm">
+    <div slot="action" class="row-2">
+      <Button class="btn btn-primary btn-sm" on:click={createThread}>
+        <Icon icon="notes-minimalistic" />
+        Create a Thread
+      </Button>
+      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
         <Icon icon="menu-dots" />
       </Button>
     </div>
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
     {#each $events.slice(0, limit) as event (event.id)}
-      {#if !event.tags.some(nthEq(0, "e"))}
-        <ThreadItem {event} />
+      {#if !event.tags.some(nthEq(0, "e")) && !mutedPubkeys.includes(event.pubkey)}
+        <ThreadItem {url} {event} />
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
@@ -77,12 +82,4 @@
       </Spinner>
     </p>
   </div>
-  <Button
-    class="tooltip tooltip-left fixed bottom-16 right-4 z-feature p-1 sm:right-8 md:bottom-4 md:right-4"
-    data-tip="Create a Thread"
-    on:click={createThread}>
-    <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
-      <Icon icon="notes-minimalistic" />
-    </div>
-  </Button>
 </div>

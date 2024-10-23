@@ -37,7 +37,7 @@
 <form class="column gap-4" on:submit|preventDefault={startSubmit}>
   <ModalHeader>
     <div slot="title">Create a Thread</div>
-    <div slot="info">Share your thoughts, or start a discussion.</div>
+    <div slot="info">Share a link, or start a discussion.</div>
   </ModalHeader>
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">

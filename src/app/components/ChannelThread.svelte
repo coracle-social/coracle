@@ -9,6 +9,7 @@
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {tagRoom, REPLY} from "@app/state"
+  import {publishReply} from "@app/commands"
 
   export let url, room, event: TrustedEvent
 
@@ -19,30 +20,12 @@
   })
 
   const onSubmit = ({content, tags}: EventContent) => {
-    const seenRoots = new Set<string>()
-
-    for (const [raw, ...tag] of event.tags.filter(t => t[0].match(/^K|E|A|I$/i))) {
-      const T = raw.toUpperCase()
-      const t = raw.toLowerCase()
-
-      if (seenRoots.has(T)) {
-        tags.push([t, ...tag])
-      } else {
-        tags.push([T, ...tag])
-        seenRoots.add(T)
-      }
-    }
-
-    if (seenRoots.size === 0) {
-      tags.push(["K", String(event.kind)])
-      tags.push(["E", event.id])
-    } else {
-      tags.push(["k", String(event.kind)])
-      tags.push(["e", event.id])
-    }
-
-    const reply = createEvent(REPLY, {content, tags: append(tagRoom(room, url), tags)})
-    const thunk = publishThunk({event: reply, relays: [url]})
+    const thunk = publishReply({
+      event,
+      content,
+      tags: append(tagRoom(room, url), tags),
+      relays: [url],
+    })
 
     thunks.update(assoc(thunk.event.id, thunk))
   }
