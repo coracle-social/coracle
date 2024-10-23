@@ -14,7 +14,8 @@
 
   const addSpace = () => pushModal(SpaceAdd)
 
-  const showSpacesMenu = () => pushModal(MenuSpaces)
+  const showSpacesMenu = () =>
+    getMembershipUrls($userMembership).length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd)
 
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
@@ -58,6 +59,9 @@
         class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
+      <PrimaryNavItem title="Notes" href="/notes" class="tooltip-right">
+        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
+      </PrimaryNavItem>
       <PrimaryNavItem title="Messages" href="/chat" class="tooltip-right">
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
@@ -73,9 +77,12 @@
 <div
   class="border-top fixed bottom-0 left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="content-padding-x content-sizing flex justify-between px-2">
-    <div class="flex gap-4 sm:gap-8">
+    <div class="flex gap-2 sm:gap-8">
       <PrimaryNavItem title="Search" href="/people">
         <Avatar icon="magnifer" class="!h-10 !w-10" />
+      </PrimaryNavItem>
+      <PrimaryNavItem title="Notes" href="/notes">
+        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Messages" href="/chat">
         <Avatar icon="letter" class="!h-10 !w-10" />

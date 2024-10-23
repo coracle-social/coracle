@@ -1,8 +1,6 @@
-import fs from "fs"
 import dotenv from "dotenv"
-import * as path from "path"
 import {defineConfig} from "vite"
-import {SvelteKitPWA} from '@vite-pwa/sveltekit'
+import {SvelteKitPWA} from "@vite-pwa/sveltekit"
 import {sveltekit} from "@sveltejs/kit/vite"
 import svg from "@poppanator/sveltekit-svg"
 
@@ -29,6 +27,7 @@ export default defineConfig({
         short_name: process.env.VITE_PLATFORM_NAME,
         theme_color: process.env.VITE_PLATFORM_ACCENT,
         description: process.env.VITE_PLATFORM_DESCRIPTION,
+        // @ts-ignore
         permissions: ["clipboardRead", "clipboardWrite", "unlimitedStorage"],
         icons: [
           {src: "pwa-64x64.png", sizes: "64x64", type: "image/png"},

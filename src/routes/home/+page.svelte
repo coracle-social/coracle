@@ -36,13 +36,6 @@
               <div slot="info">Use an invite link, or create your own space.</div>
             </CardButton>
           </Button>
-          <Link href="/discover">
-            <CardButton>
-              <div slot="icon"><Icon icon="compass-big" size={7} /></div>
-              <div slot="title">Discover spaces</div>
-              <div slot="info">Find a community based on your hobbies or interests.</div>
-            </CardButton>
-          </Link>
           <Link href="/people">
             <CardButton>
               <div slot="icon"><Icon icon="plain" size={7} /></div>

@@ -2,6 +2,7 @@
   import "@src/app.css"
   import {onMount} from "svelte"
   import {get} from "svelte/store"
+  import {dev} from "$app/environment"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -38,7 +39,7 @@
   import AppContainer from "@app/components/AppContainer.svelte"
   import ModalContainer from "@app/components/ModalContainer.svelte"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS, PLATFORM_LOGO, PLATFORM_ACCENT} from "@app/state"
+  import {INDEXER_RELAYS} from "@app/state"
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
@@ -140,6 +141,12 @@
     }
   })
 </script>
+
+<svelte:head>
+  {#if !dev}
+    <link rel="manifest" href="/manifest.webmanifest" />
+  {/if}
+</svelte:head>
 
 {#await ready}
   <div data-theme={$theme} />

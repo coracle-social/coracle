@@ -1,6 +1,8 @@
 <script lang="ts">
-  import {page} from "$app/stores"
+  import {pubkey} from "@welshman/app"
   import Chat from "@app/components/Chat.svelte"
+
+  $: id = $pubkey!
 </script>
 
-<Chat id={$page.params.chat} />
+<Chat {id} />

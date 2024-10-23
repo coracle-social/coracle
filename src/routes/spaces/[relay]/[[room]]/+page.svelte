@@ -22,6 +22,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
+  import MenuSpace from "@app/components/MenuSpace.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
@@ -35,11 +36,14 @@
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
+  import {pushDrawer} from "@app/modal"
 
   const {room = GENERAL} = $page.params
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)
+
+  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -96,7 +100,7 @@
       <Icon icon="hashtag" />
     </div>
     <strong slot="title">{room}</strong>
-    <div slot="action">
+    <div slot="action" class="row-2">
       {#if room !== GENERAL}
         {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}
           <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
@@ -110,6 +114,9 @@
           </Button>
         {/if}
       {/if}
+      <Button on:click={openMenu} class="btn btn-neutral btn-sm">
+        <Icon icon="menu-dots" />
+      </Button>
     </div>
   </PageBar>
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">

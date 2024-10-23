@@ -16,12 +16,12 @@ export default {
     },
     csp: {
       directives: {
-        'script-src': ['self', 'plausible.io'],
-        'worker-src': ['self', 'blob:'],
-        'style-src': ['self', 'unsafe-inline'],
-        'frame-src': ['open.spotify.com', 'embed.tidal.com'],
-        'child-src': ['none'],
-        'form-action': ['none'],
+        "script-src": ["self", "plausible.io"],
+        "worker-src": ["self", "blob:"],
+        "style-src": ["self", "unsafe-inline"],
+        "frame-src": ["open.spotify.com", "embed.tidal.com"],
+        "child-src": ["none"],
+        "form-action": ["none"],
       },
     },
   },

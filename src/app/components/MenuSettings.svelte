@@ -11,6 +11,13 @@
 </script>
 
 <div class="column menu gap-2">
+  <Link href="/settings/profile">
+    <CardButton>
+      <div slot="icon"><Icon icon="user-rounded" size={7} /></div>
+      <div slot="title">Profile</div>
+      <div slot="info">Customize your user profile</div>
+    </CardButton>
+  </Link>
   <Link href="/settings/relays">
     <CardButton>
       <div slot="icon"><Icon icon="server" size={7} /></div>

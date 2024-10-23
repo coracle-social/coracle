@@ -51,6 +51,9 @@
   let popoverIsVisible = false
 </script>
 
+{#if thunk}
+  <ThunkStatus {thunk} />
+{/if}
 <div
   class="group chat flex items-center justify-end gap-1 px-2"
   class:chat-start={event.pubkey !== $pubkey}
@@ -96,9 +99,6 @@
           {/if}
           <div class="text-sm">
             <Content showEntire {event} />
-            {#if thunk}
-              <ThunkStatus {thunk} />
-            {/if}
           </div>
         </div>
       </div>

@@ -10,16 +10,19 @@
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
+  import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {pushModal} from "@app/modal"
   import {deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const kinds = [NOTE]
   const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds}))
   const events = deriveEventsForUrl(url, kinds)
   const loader = feedLoader.getLoader(feed, {})
+
+  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const createThread = () => pushModal(ThreadCreate, {url})
 
@@ -52,6 +55,11 @@
       <Icon icon="notes-minimalistic" />
     </div>
     <strong slot="title">Threads</strong>
+    <div slot="action" class="md:hidden">
+      <Button on:click={openMenu} class="btn btn-neutral btn-sm">
+        <Icon icon="menu-dots" />
+      </Button>
+    </div>
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
     {#each $events.slice(0, limit) as event (event.id)}
