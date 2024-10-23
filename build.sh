@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-temp_env=$(env)
+temp_env=$(declare -p -x)
 
 if [ -f .env ]; then
   source .env
