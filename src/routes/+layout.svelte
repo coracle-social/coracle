@@ -143,9 +143,9 @@
 </script>
 
 <svelte:head>
-  {@html pwaInfo ? pwaInfo.webManifest.linkTag : ''}
   <meta name="theme-color" content={PLATFORM_ACCENT} />
   <link rel="icon" href={PLATFORM_LOGO} />
+  <link rel="manifest" href="/manifest.webmanifest" />
 </svelte:head>
 
 {#await ready}
