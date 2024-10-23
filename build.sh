@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+temp_env=$(env)
+
 if [ -f .env ]; then
   source .env
 fi
@@ -7,6 +9,10 @@ fi
 if [ -f .env.local ]; then
   source .env.local
 fi
+
+# Avoid overwriting env vars provided directly
+# https://stackoverflow.com/a/69127685/1467342
+eval "$temp_env"
 
 if [[ $VITE_PLATFORM_LOGO =~ ^https://* ]]; then
   curl $VITE_PLATFORM_LOGO > static/logo.png
