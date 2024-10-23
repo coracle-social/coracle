@@ -21,3 +21,4 @@ fi
 
 npx pwa-assets-generator
 npx vite build
+mv build/manifest.{webmanifest,json}
