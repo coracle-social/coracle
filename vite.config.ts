@@ -9,11 +9,6 @@ import svg from "@poppanator/sveltekit-svg"
 dotenv.config({path: ".env.local"})
 dotenv.config({path: ".env"})
 
-const FAVICONS_DIR = "static/favicons"
-const name = process.env.VITE_PLATFORM_NAME
-const accent = process.env.VITE_PLATFORM_ACCENT
-const description = process.env.VITE_PLATFORM_DESCRIPTION
-
 export default defineConfig({
   server: {
     port: 1847,
@@ -30,10 +25,10 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 ** 2, // 5 MB or set to something else
       },
       manifest: {
-        name: name,
-        short_name: name,
-        theme_color: accent,
-        description: description,
+        name: process.env.VITE_PLATFORM_NAME,
+        short_name: process.env.VITE_PLATFORM_NAME,
+        theme_color: process.env.VITE_PLATFORM_ACCENT,
+        description: process.env.VITE_PLATFORM_DESCRIPTION,
         permissions: ["clipboardRead", "clipboardWrite", "unlimitedStorage"],
         icons: [
           {src: "pwa-64x64.png", sizes: "64x64", type: "image/png"},

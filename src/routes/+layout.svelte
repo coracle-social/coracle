@@ -1,6 +1,5 @@
 <script lang="ts">
   import "@src/app.css"
-  import {pwaInfo} from 'virtual:pwa-info';
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
@@ -141,12 +140,6 @@
     }
   })
 </script>
-
-<svelte:head>
-  <meta name="theme-color" content={PLATFORM_ACCENT} />
-  <link rel="icon" href={PLATFORM_LOGO} />
-  <link rel="manifest" href="/manifest.webmanifest" />
-</svelte:head>
 
 {#await ready}
   <div data-theme={$theme} />

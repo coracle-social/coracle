@@ -21,3 +21,9 @@ fi
 
 npx pwa-assets-generator
 npx vite build
+
+# Replace index.html variables with stuff from our env
+perl -i -pe"s|{DESCRIPTION}|$VITE_PLATFORM_DESCRIPTION|g" build/index.html
+perl -i -pe"s|{ACCENT}|$VITE_PLATFORM_ACCENT|g" build/index.html
+perl -i -pe"s|{NAME}|$VITE_PLATFORM_NAME|g" build/index.html
+perl -i -pe"s|{URL}|$VITE_PLATFORM_URL|g" build/index.html
