@@ -39,6 +39,8 @@
     if (element) {
       const scroller = createScroller({
         element,
+        delay: 300,
+        threshold: 3000,
         onScroll: async () => {
           const $loader = await loader
 
