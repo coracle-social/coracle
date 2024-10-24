@@ -43,17 +43,17 @@
   }
 
   const isBoundary = i => {
-    const parsed = shortContent[i]
+    const parsed = fullContent[i]
 
     if (!parsed || isNewline(parsed)) return true
-    if (isText(parsed)) return parsed.value.match(/^\s+$/)
+    if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
 
     return false
   }
 
-  const isStartAndEnd = i => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
+  const isEnd = i => isBoundary(i + 1)
 
-  const isStartOrEnd = i => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
+  const isStartOrEnd = i => isBoundary(i - 1) || isBoundary(i + 1)
 
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
@@ -98,7 +98,7 @@
         <QRCode copyOnClick code={parsed.value} />
       </div>
     {:else if isLink(parsed)}
-      <NoteContentLink value={parsed.value} showMedia={showMedia && isStartAndEnd(i)} />
+      <NoteContentLink value={parsed.value} showMedia={showMedia && isEnd(i)} />
     {:else if isProfile(parsed)}
       <PersonLink pubkey={parsed.value.pubkey} />
     {:else if isEvent(parsed) || isAddress(parsed)}

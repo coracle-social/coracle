@@ -37,7 +37,7 @@
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2 overflow-hidden">
     <div class="w-full gap-2">
       <div
         class="cy-person-name flex max-w-[100%] items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">

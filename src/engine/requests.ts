@@ -16,6 +16,7 @@ import {
   int,
   HOUR,
   WEEK,
+  sortBy,
 } from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -55,6 +56,7 @@ import {
   maxWot,
   getNetwork,
 } from "@welshman/app"
+import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {partition, uniq, without} from "ramda"
 import {CUSTOM_LIST_KINDS} from "src/domain"
@@ -68,7 +70,6 @@ import {
   groupSharedKeys,
   type MySubscribeRequest,
 } from "src/engine/state"
-import {sortEventsDesc} from "src/engine/utils"
 
 // Utils
 
@@ -85,22 +86,20 @@ export const addSinceToFilter = (filter, overlap = int(HOUR)) => {
   return {...filter, since}
 }
 
-const pullConservatively = ({relays, filters}) => {
+export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   const [smart, dumb] = partition(hasNegentropy, relays)
   const promises = [pull({relays: smart, filters})]
 
-  // Since pulling from relays without negentropy is expensive, only do it 30% of the time,
-  // unless we have very few matching events. If that's the case, either we haven't synced
-  // this filter yet, or there are few enough events that we don't really need to worry about
-  // downloading duplicates. Otherwise, add a reasonable since value to make sure we at
-  // least fetch recent events.
-  if (Math.random() > 0.7 || repository.query(filters).length < 100) {
-    promises.push(pull({relays: dumb, filters}))
-  } else {
-    const events = sortEventsDesc(repository.query(filters))
-    const since = events[50]!.created_at
+  // Since pulling from relays without negentropy is expensive, limit how many
+  // duplicates we repeatedly download
+  if (dumb.length > 0) {
+    const events = sortBy(e => -e.created_at, repository.query(filters))
 
-    promises.push(pull({relays: dumb, filters: filters.map(assoc("since", since))}))
+    if (events.length > 100) {
+      filters = filters.map(assoc("since", events[100]!.created_at))
+    }
+
+    promises.push(pull({relays: dumb, filters}))
   }
 
   return Promise.all(promises)
@@ -345,7 +344,7 @@ export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   return pullConservatively({
-    relays: ctx.app.router.User().getUrls(),
+    relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }

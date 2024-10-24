@@ -16,7 +16,12 @@ import {
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
-import {walkFeed, FeedLoader as CoreFeedLoader} from "@welshman/feeds"
+import {
+  walkFeed,
+  FeedLoader as CoreFeedLoader,
+  isIntersectionFeed,
+  isRelayFeed,
+} from "@welshman/feeds"
 import {repository, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
 import {isAddressFeed} from "src/domain"
@@ -114,7 +119,10 @@ export const createFeed = (opts: FeedOpts) => {
   const welshman = createFeedLoader(opts, controller.signal)
   const appendEvent = onEvent(appendToFeed)
   const prependEvent = onEvent(prependToFeed)
-  const loaderOpts = {useWindowing: true, onEvent: appendEvent, onExhausted}
+  const useWindowing =
+    !isRelayFeed(opts.feed) &&
+    !(isIntersectionFeed(opts.feed) && opts.feed.length === 2 && isRelayFeed(opts.feed[1]))
+  const loaderOpts = {useWindowing, onEvent: appendEvent, onExhausted}
 
   let filters, delta, loader
   Promise.resolve(tryFunc(() => welshman.compiler.compile(opts.feed))).then(async reqs => {
@@ -144,6 +152,8 @@ export const createFeed = (opts: FeedOpts) => {
     }
   })
 
+  const sortEvents = (events: TrustedEvent[]) => (useWindowing ? sortEventsDesc(events) : events)
+
   function deferOrphans(events: TrustedEvent[]) {
     if (!opts.shouldLoadParents || opts.shouldDefer === false) {
       return events
@@ -168,7 +178,7 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function deferAncient(events: TrustedEvent[]) {
-    if (opts.shouldDefer === false) {
+    if (opts.shouldDefer === false || !useWindowing) {
       return events
     }
 
@@ -190,7 +200,7 @@ export const createFeed = (opts: FeedOpts) => {
               !controller.signal.aborted &&
               get(notes).length === feed.length + i
             ) {
-              const [event, ...events] = sortEventsDesc(buffer)
+              const [event, ...events] = sortEvents(buffer)
 
               buffer.splice(0, Infinity, ...events)
               appendToFeed([event])
@@ -220,10 +230,10 @@ export const createFeed = (opts: FeedOpts) => {
 
     // Sort first to make sure we get the latest version of replaceable events, then
     // after to make sure notes replaced by their parents are in order.
-    return sortEventsDesc(
+    return sortEvents(
       uniqBy(
         prop("id"),
-        sortEventsDesc(events)
+        sortEvents(events)
           .map((e: TrustedEvent) => {
             // If we have a repost, use its contents instead
             if (repostKinds.includes(e.kind)) {
@@ -376,6 +386,6 @@ export const createFeed = (opts: FeedOpts) => {
     getFilters: () => filters,
     stop: () => controller.abort(),
     subscribe: f => store.subscribe(f),
-    loadMore: (limit: number) => loader?.(limit),
+    loadMore: (limit: number) => loader?.(useWindowing ? limit : 1000),
   }
 }

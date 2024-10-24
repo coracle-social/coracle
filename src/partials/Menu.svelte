@@ -3,6 +3,8 @@
   import Card from "src/partials/Card.svelte"
 </script>
 
-<Card noPad class={cx($$props.class, "overflow-hidden border border-solid border-neutral-600 shadow-lg")}>
+<Card
+  noPad
+  class={cx($$props.class, "overflow-hidden border border-solid border-neutral-600 shadow-lg")}>
   <slot />
 </Card>

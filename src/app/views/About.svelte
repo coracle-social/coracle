@@ -80,8 +80,7 @@
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://hodlbod.npub.pro/"
-            ><i class="fa fa-pen-clip" /></Anchor>
+          <Anchor external href="https://hodlbod.npub.pro/"><i class="fa fa-pen-clip" /></Anchor>
         </div>
         <div slot="tooltip">Dev Blog</div>
       </Popover>

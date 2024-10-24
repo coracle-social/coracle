@@ -399,7 +399,7 @@
       {/if}
       {#if mentions.length > 0}
         <h1 class="staatliches text-2xl">In this conversation</h1>
-        <p>{quantify(mentions.length, "person", "people")} are tagged in this note.</p>
+        <p>{quantify(mentions.length, "person is", "people are")} tagged in this note.</p>
         <div class="grid grid-cols-2 gap-2">
           {#each mentions as pubkey}
             <PersonBadge {pubkey} />

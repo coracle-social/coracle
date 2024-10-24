@@ -1,10 +1,9 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {loadHandle} from '@welshman/app'
+  import {loadHandle} from "@welshman/app"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
-  import RelayDetail from "src/app/views/RelayDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import GroupDetail from "src/app/views/GroupDetail.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
@@ -25,13 +24,11 @@
   {:else}
     <NoteDetail {address} relays={data.relays} />
   {/if}
-{:else if type === "nrelay"}
-  <RelayDetail url={data} />
 {:else if type === "nprofile"}
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
   <PersonDetail pubkey={data} />
-{:else if entity.includes('@')}
+{:else if entity.includes("@")}
   {#await loadHandle(entity)}
     <Spinner />
   {:then $handle}

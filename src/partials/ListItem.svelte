@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {createEventDispatcher} from 'svelte'
+  import {createEventDispatcher} from "svelte"
 
   const dispatch = createEventDispatcher()
 
-  const onRemove = () => dispatch('remove')
+  const onRemove = () => dispatch("remove")
 </script>
 
 <button type="button" class="flex items-center justify-between">

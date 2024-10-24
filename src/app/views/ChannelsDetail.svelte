@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
-  import {repository, displayProfileByPubkey} from "@welshman/app"
+  import {repository, displayProfileByPubkey, loadInboxRelaySelections} from "@welshman/app"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
@@ -23,9 +23,7 @@
   export let initialMessage = null
 
   const messages = derived(
-    deriveEvents(repository, {
-      filters: [{kinds: [4, DIRECT_MESSAGE], authors: pubkeys, "#p": pubkeys}],
-    }),
+    deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]}),
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
@@ -42,6 +40,7 @@
 
   onMount(() => {
     markChannelRead(channelId)
+    loadInboxRelaySelections(pubkeys)
 
     return listenForMessages(pubkeys)
   })

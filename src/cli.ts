@@ -12,13 +12,13 @@ const getFunctionBody = f => {
 
     // Needed because the RegExp doesn't handle the last '}'.
     return (body.match(/{/g) || []).length === (body.match(/}/g) || []).length - 1
-      ? body.slice(0, body.lastIndexOf('}'))
+      ? body.slice(0, body.lastIndexOf("}"))
       : body
   }
 }
 
 const api = {
-  x: 1
+  x: 1,
 }
 
 export const cli = (f: () => void) =>

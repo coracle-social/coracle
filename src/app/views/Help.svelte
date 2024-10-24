@@ -19,9 +19,9 @@
     </p>
     <p>
       In {appName}, this number is equal to how many people you follow that also follow a given
-      person, minus how many people you follow who have muted this person. This allows
-      you to see at a glance if someone is accepted in your network. This helps reduce spam, impostors,
-      and objectionable content.
+      person, minus how many people you follow who have muted this person. This allows you to see at
+      a glance if someone is accepted in your network. This helps reduce spam, impostors, and
+      objectionable content.
     </p>
     <p>
       You can set a minimum web of trust score on your content settings page, which will

@@ -7,7 +7,7 @@
   import Note from "src/app/shared/Note.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
-  import {deriveEvent} from 'src/engine'
+  import {deriveEvent} from "src/engine"
 
   export let notification: Notification
 

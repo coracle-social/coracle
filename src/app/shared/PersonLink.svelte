@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {deriveProfileDisplay} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
