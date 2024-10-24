@@ -8,6 +8,7 @@
 
   export let url
   export let event
+  export let hideActions = false
 </script>
 
 <Link class="col-2 card2 bg-alt w-full cursor-pointer" href={makeThreadPath(url, event.id)}>
@@ -19,6 +20,8 @@
   </div>
   <div class="col-4 w-full pl-12">
     <Content {event} />
-    <ThreadActions showActivity {url} {event} />
+    {#if !hideActions}
+      <ThreadActions showActivity {url} {event} />
+    {/if}
   </div>
 </Link>

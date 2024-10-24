@@ -30,8 +30,6 @@
     showReply = false
   }
 
-  const onReplySubmit = (thunk: Thunk) => {}
-
   let showReply = false
 
   onMount(() => {
@@ -79,5 +77,5 @@
   </Button>
 </div>
 {#if showReply}
-  <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={onReplySubmit} />
+  <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
 {/if}
