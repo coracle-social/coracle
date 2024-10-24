@@ -1,6 +1,5 @@
 <script lang="ts">
   import "@src/app.css"
-  import 'long-press-event'
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {dev} from "$app/environment"

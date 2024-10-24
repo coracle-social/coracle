@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
   import {type Instance} from "tippy.js"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -11,7 +10,6 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
@@ -33,13 +31,12 @@
 
   const onReactionClick = async (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
-    const template = reaction ? makeDelete({event}) : makeReaction({event, content})
+    const template = reaction ? makeDelete({event: reaction}) : makeReaction({event, content})
 
     await sendWrapped({template, pubkeys})
   }
 
-  const showMobileMenu = () =>
-    pushModal(ChatMessageMenuMobile, {event})
+  const showMobileMenu = () => pushModal(ChatMessageMenuMobile, {event, pubkeys})
 
   const togglePopover = () => {
     if (popoverIsVisible) {
@@ -84,7 +81,7 @@
     </button>
   </Tippy>
   <div class="flex flex-col">
-    <LongPress class="text-left chat-bubble mx-1 max-w-sm" onLongPress={showMobileMenu}>
+    <LongPress class="chat-bubble mx-1 max-w-sm text-left" onLongPress={showMobileMenu}>
       <div class="flex w-full items-start gap-2">
         {#if showPubkey}
           <Link external href={pubkeyLink(event.pubkey)}>
@@ -113,7 +110,7 @@
         </div>
       </div>
     </LongPress>
-    <div class="row-2 ml-4 -mt-1 z-feature">
+    <div class="row-2 z-feature -mt-1 ml-4">
       <ReplySummary {event} />
       <ReactionSummary {event} {onReactionClick} />
     </div>

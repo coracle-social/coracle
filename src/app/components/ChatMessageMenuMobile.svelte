@@ -3,7 +3,6 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
-  import ChatMessageEmojiButton from "@app/components/ChatMessageEmojiButton.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
   import {makeReaction, sendWrapped} from "@app/commands"
   import {pushModal} from "@app/modal"

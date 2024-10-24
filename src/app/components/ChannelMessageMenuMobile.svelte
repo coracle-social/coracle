@@ -27,7 +27,8 @@
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
-  const showConversation = () => pushDrawer(ChannelConversation, {url, room, event}, {replaceState: true})
+  const showConversation = () =>
+    pushDrawer(ChannelConversation, {url, room, event}, {replaceState: true})
 
   const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
 
