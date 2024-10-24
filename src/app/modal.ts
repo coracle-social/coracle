@@ -6,6 +6,7 @@ import {goto} from "$app/navigation"
 export type ModalOptions = {
   drawer?: boolean
   fullscreen?: boolean
+  replaceState?: boolean
 }
 
 export type Modal = {
@@ -28,7 +29,7 @@ export const pushModal = (
 
   modals.update(assoc(id, {id, component, props, options}))
 
-  goto("#" + id)
+  goto("#" + id, {replaceState: options.replaceState})
 
   return id
 }

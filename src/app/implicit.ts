@@ -8,7 +8,8 @@ export const getKey = <T>(key: string) => state.get(key) as T | undefined
 export const popKey = <T>(key: string) => {
   const value: T | undefined = state.get(key)
 
-  state.delete(key)
+  // Goofy hack due to sveltekit's double-rendering
+  setTimeout(() => state.delete(key), 300)
 
   return value
 }
