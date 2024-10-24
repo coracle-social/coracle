@@ -9,6 +9,7 @@
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import {pushToast} from '@app/toast'
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
 
@@ -21,9 +22,21 @@
   const loading = writable(false)
 
   const submit = () => {
-    const event = createEvent(NOTE, {content: $editor.getText(), tags: getEditorTags($editor)})
+    const content = $editor.getText()
+    const tags = getEditorTags($editor)
 
-    publishThunk({event, relays: [url]})
+    if (!content.trim()) {
+      return pushToast({
+        theme: 'error',
+        message: "Please provide a message for your thread.",
+      })
+    }
+
+    publishThunk({
+      event: createEvent(NOTE, {content, tags}),
+      relays: [url],
+    })
+
     history.back()
   }
 

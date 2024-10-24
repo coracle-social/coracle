@@ -9,6 +9,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {getPubkeyHints, publishReply} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
+  import {pushToast} from '@app/toast'
 
   export let url
   export let event
@@ -20,14 +21,17 @@
   const loading = writable(false)
 
   const submit = () => {
-    onSubmit(
-      publishReply({
-        event,
-        content: $editor.getText(),
-        tags: getEditorTags($editor),
-        relays: [url],
-      }),
-    )
+    const content = $editor.getText()
+    const tags = getEditorTags($editor)
+
+    if (!content.trim()) {
+      return pushToast({
+        theme: 'error',
+        message: "Please provide a message for your reply.",
+      })
+    }
+
+    onSubmit(publishReply({event, content, tags, relays: [url]}))
   }
 
   let editor: Readable<Editor>
@@ -38,9 +42,9 @@
 </script>
 
 <form
-  on:submit|preventDefault={startSubmit}
   in:fly
   out:slideAndFade
+  on:submit|preventDefault={startSubmit}
   class="card2 sticky bottom-2 z-feature mx-2 mt-2 bg-neutral">
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">
