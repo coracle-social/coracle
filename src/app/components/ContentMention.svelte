@@ -1,20 +1,14 @@
 <script lang="ts">
   import {displayProfile} from "@welshman/util"
   import {deriveProfile} from "@welshman/app"
-  import Button from "@lib/components/Button.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
-  import {pushDrawer} from "@app/modal"
+  import Link from "@lib/components/Link.svelte"
+  import {pubkeyLink} from "@app/state"
 
   export let value
 
   const profile = deriveProfile(value.pubkey)
-
-  const onClick = (e: Event) => {
-    e.stopPropagation()
-    pushDrawer(ProfileDetail, {pubkey: value.pubkey})
-  }
 </script>
 
-<Button on:click={onClick} class="link-content">
+<Link external href={pubkeyLink(value.pubkey)} class="link-content">
   @{displayProfile($profile)}
-</Button>
+</Link>

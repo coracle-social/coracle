@@ -5,12 +5,12 @@
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Suggestions from "@lib/editor/Suggestions.svelte"
   import SuggestionProfile from "@lib/editor/SuggestionProfile.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
-  import {pushDrawer} from "@app/modal"
+  import {pubkeyLink} from "@app/state"
 
   export let value: string[]
 
@@ -18,8 +18,6 @@
   let input: Element
   let popover: Instance
   let instance: SvelteComponent
-
-  const onClick = (pubkey: string) => pushDrawer(ProfileDetail, {pubkey})
 
   const selectPubkey = (pubkey: string) => {
     term = ""
@@ -53,9 +51,9 @@
         <Button class="flex items-center" on:click={() => removePubkey(pubkey)}>
           <Icon icon="close-circle" size={4} class="-ml-1 mt-px" />
         </Button>
-        <Button on:click={() => onClick(pubkey)}>
+        <Link external href={pubkeyLink(pubkey)}>
           <ProfileName {pubkey} />
-        </Button>
+        </Link>
       </div>
     {/each}
   </div>

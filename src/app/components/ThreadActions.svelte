@@ -50,9 +50,7 @@
   </Button>
   <div class="flex flex-grow justify-end gap-2">
     {#if $deleted}
-      <div class="btn btn-error btn-xs rounded-full">
-        Deleted
-      </div>
+      <div class="btn btn-error btn-xs rounded-full">Deleted</div>
     {/if}
     {#if showActivity}
       <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">

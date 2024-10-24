@@ -1,15 +1,9 @@
 <script lang="ts">
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import Button from "@lib/components/Button.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
-  import {pushDrawer} from "@app/modal"
-  import {PLATFORM_NAME} from "@app/state"
+  import {PLATFORM_NAME, pubkeyLink} from "@app/state"
 
-  const openProfile = () =>
-    pushDrawer(ProfileDetail, {
-      pubkey: "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322",
-    })
+  const pubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
 </script>
 
 <div class="mt-8 min-h-screen bg-base-200 sm:hero">
@@ -40,7 +34,7 @@
           <p class="text-sm">
             Built with 💜 by
             <span class="text-primary">
-              @<Button on:click={openProfile} class="link">hodlbod</Button>
+              @<Link external href={pubkeyLink(pubkey)} class="link">hodlbod</Link>
             </span>
           </p>
           <p class="text-xs">

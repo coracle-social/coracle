@@ -6,7 +6,7 @@
     <slot name="input" />
   </div>
   {#if $$slots.info}
-    <p class="col-span-2 text-sm flex-end">
+    <p class="flex-end col-span-2 text-sm">
       <slot name="info" />
     </p>
   {/if}

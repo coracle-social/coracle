@@ -54,9 +54,7 @@
         type="checkbox"
         class="toggle toggle-primary"
         bind:checked={settings.show_media} />
-      <p slot="info">
-        Use this to disable link previews and image rendering.
-      </p>
+      <p slot="info">Use this to disable link previews and image rendering.</p>
     </FieldInline>
     <Field>
       <p slot="label">Muted Accounts</p>

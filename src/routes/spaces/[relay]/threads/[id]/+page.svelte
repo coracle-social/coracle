@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
+  import {onMount} from "svelte"
   import {sortBy, displayUrl, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
   import {repository, subscribe} from "@welshman/app"
-  import type {Thunk} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"

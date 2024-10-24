@@ -7,16 +7,15 @@
   import {slideAndFade, conditionalTransition} from "@lib/transition"
   import Delay from "@lib/components/Delay.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import Button from "@lib/components/Button.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
-  import {colors, tagRoom, deriveEvent} from "@app/state"
+  import {colors, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushDrawer} from "@app/modal"
 
@@ -35,8 +34,6 @@
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
   const transition = conditionalTransition(thunk, slideAndFade)
-
-  const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
 
   const openThread = () => {
     const root = $rootEvent || event
@@ -68,21 +65,25 @@
     class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
     <div class="flex w-full gap-3">
       {#if showPubkey}
-        <Button on:click={showProfile} class="flex items-start">
+        <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
           <Avatar
             src={$profile?.picture}
             class="border border-solid border-base-content"
             size={10} />
-        </Button>
+        </Link>
       {:else}
         <div class="w-10 min-w-10 max-w-10" />
       {/if}
       <div class="-mt-1 flex-grow pr-1">
         {#if showPubkey}
           <div class="flex items-center gap-2">
-            <Button class="text-sm font-bold" style="color: {colorValue}" on:click={showProfile}>
+            <Link
+              external
+              href={pubkeyLink(event.pubkey)}
+              class="text-sm font-bold"
+              style="color: {colorValue}">
               {$profileDisplay}
-            </Button>
+            </Link>
             <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
           </div>
         {/if}

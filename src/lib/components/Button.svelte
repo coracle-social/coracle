@@ -4,7 +4,7 @@
   $: className = `text-left ${$$props.class}`
 </script>
 
-{#if type === 'submit'}
+{#if type === "submit"}
   <button {...$$props} {type} class={className}>
     <slot />
   </button>

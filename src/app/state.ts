@@ -1,7 +1,9 @@
 import twColors from "tailwindcss/colors"
 import {get, derived} from "svelte/store"
+import {nip19} from "nostr-tools"
 import type {Maybe} from "@welshman/lib"
 import {
+  ctx,
   setContext,
   remove,
   assoc,
@@ -131,6 +133,11 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 }
 
 export const entityLink = (entity: string) => `https://coracle.social/${entity}`
+
+export const pubkeyLink = (
+  pubkey: string,
+  relays = ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+) => entityLink(nip19.nprofileEncode({pubkey, relays}))
 
 export const tagRoom = (room: string, url: string) => [ROOM, room, url]
 

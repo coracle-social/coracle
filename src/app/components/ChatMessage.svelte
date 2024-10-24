@@ -5,6 +5,7 @@
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {MergedThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -12,10 +13,8 @@
   import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
-  import {colors} from "@app/state"
-  import {pushDrawer} from "@app/modal"
+  import {colors, pubkeyLink} from "@app/state"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
 
   export let event: TrustedEvent
@@ -26,8 +25,6 @@
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-
-  const showProfile = () => pushDrawer(ProfileDetail, {pubkey: event.pubkey})
 
   const onReactionClick = async (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -78,19 +75,23 @@
     <div class="chat-bubble mx-1 max-w-sm">
       <div class="flex w-full items-start gap-2">
         {#if showPubkey}
-          <Button on:click={showProfile}>
+          <Link external href={pubkeyLink(event.pubkey)}>
             <Avatar
               src={$profile?.picture}
               class="border border-solid border-base-content"
               size={8} />
-          </Button>
+          </Link>
         {/if}
         <div class="-mt-1 flex-grow pr-1">
           {#if showPubkey}
             <div class="flex items-center gap-2">
-              <Button class="text-sm font-bold" style="color: {colorValue}" on:click={showProfile}>
+              <Link
+                external
+                href={pubkeyLink(event.pubkey)}
+                class="text-sm font-bold"
+                style="color: {colorValue}">
                 {$profileDisplay}
-              </Button>
+              </Link>
               <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
             </div>
           {/if}

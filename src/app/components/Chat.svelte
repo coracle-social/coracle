@@ -30,11 +30,10 @@
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
-  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import {deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
+  import {deriveChat, splitChatId, PLATFORM_NAME, pubkeyLink} from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
@@ -109,11 +108,10 @@
       <div slot="title" class="row-2">
         {#if others.length === 1}
           {@const pubkey = others[0]}
-          {@const showProfile = () => pushModal(ProfileDetail, {pubkey}, {drawer: true})}
-          <Button on:click={showProfile} class="row-2">
+          <Link external href={pubkeyLink(pubkey)} class="row-2">
             <ProfileCircle {pubkey} size={5} />
             <ProfileName {pubkey} />
-          </Button>
+          </Link>
         {:else}
           <ProfileCircles pubkeys={others} size={5} />
           <p class="overflow-hidden text-ellipsis whitespace-nowrap">
