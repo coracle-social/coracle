@@ -43,9 +43,9 @@
 </script>
 
 <div class="flex flex-wrap items-center justify-between gap-2">
-  <div class="flex gap-2">
+  <Button class="flex gap-2">
     <ReactionSummary {event} {onReactionClick} />
-  </div>
+  </Button>
   <div class="flex flex-grow justify-end gap-2">
     {#if showActivity}
       <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
@@ -56,7 +56,7 @@
         Active {formatTimestampRelative(lastActive)}
       </div>
     {/if}
-    <button type="button" class="join rounded-full" on:click|stopPropagation>
+    <Button class="join rounded-full">
       <EmojiButton {onEmoji} class="join-item btn-neutral" />
       <Tippy
         bind:popover
@@ -67,6 +67,6 @@
           <Icon icon="menu-dots" size={4} />
         </Button>
       </Tippy>
-    </button>
+    </Button>
   </div>
 </div>

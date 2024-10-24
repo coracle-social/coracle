@@ -25,7 +25,7 @@
     class:border={isOwn}
     class:border-solid={isOwn}
     class:border-primary={isOwn}
-    on:click|stopPropagation|preventDefault={onClick}>
+    on:click={onClick}>
     <span>{displayReaction(content)}</span>
     {#if events.length > 1}
       <span>{events.length}</span>
