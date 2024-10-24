@@ -6,13 +6,16 @@
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
+  import PageBar from "@lib/components/PageBar.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
+  import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
+  import {pushDrawer} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
   const {relay, id} = $page.params
@@ -22,6 +25,8 @@
   const replies = deriveEvents(repository, {filters})
 
   const back = () => history.back()
+
+  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const openReply = () => {
     showReply = true
@@ -40,7 +45,7 @@
   })
 </script>
 
-<div class="relative flex flex-col-reverse gap-3 p-2">
+<div class="relative flex flex-col-reverse gap-3 px-2">
   <div class="absolute left-[51px] top-20 h-[calc(100%-200px)] w-[2px] bg-neutral" />
   {#if $event}
     {#if !showReply}
@@ -72,15 +77,19 @@
       <p>Failed to load thread.</p>
     {/await}
   {/if}
-  <div class="flex items-center justify-between">
-    <Button class="mb-2 mt-5 flex items-center gap-2" on:click={back}>
-      <Icon icon="alt-arrow-left" />
-      Go back
-    </Button>
-    <Link href={makeSpacePath(url)}>
-      @<span class="text-primary">{displayUrl(url)}</span>
-    </Link>
-  </div>
+  <PageBar>
+    <div slot="icon">
+      <Button class="btn btn-neutral btn-sm" on:click={back}>
+        <Icon icon="alt-arrow-left" />
+        Go back
+      </Button>
+    </div>
+    <div slot="action">
+      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
+        <Icon icon="menu-dots" />
+      </Button>
+    </div>
+  </PageBar>
 </div>
 {#if showReply}
   <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />

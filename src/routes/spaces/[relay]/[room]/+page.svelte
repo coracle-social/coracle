@@ -38,9 +38,10 @@
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
+  import {popKey} from "@app/implicit"
 
   const {room = GENERAL} = $page.params
-  const {content = ""} = fromPairs(Array.from($page.url.searchParams))
+  const content = popKey<string>('content') || ""
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)
