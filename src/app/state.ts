@@ -256,11 +256,13 @@ export const SETTINGS = 38489
 export type Settings = {
   event: TrustedEvent
   values: {
+    show_media: boolean
     hide_sensitive: boolean
   }
 }
 
 export const defaultSettings = {
+  show_media: true,
   hide_sensitive: true,
 }
 
@@ -498,6 +500,8 @@ export const userSettings = withGetter(
     return $settingsByPubkey.get($pubkey)
   }),
 )
+
+export const userSettingValues = derived(userSettings, $s => $s?.values || defaultSettings)
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {

@@ -28,7 +28,7 @@
   import ContentQuote from "@app/components/ContentQuote.svelte"
   import ContentTopic from "@app/components/ContentTopic.svelte"
   import ContentMention from "@app/components/ContentMention.svelte"
-  import {entityLink, userSettings} from "@app/state"
+  import {entityLink, userSettingValues} from "@app/state"
 
   export let event
   export let minLength = 500
@@ -70,7 +70,7 @@
   }
 
   let warning =
-    $userSettings?.values.hide_sensitive && event.tags.find(nthEq(0, "content-warning"))?.[1]
+    $userSettingValues.hide_sensitive && event.tags.find(nthEq(0, "content-warning"))?.[1]
 
   $: shortContent = showEntire
     ? fullContent
@@ -106,7 +106,7 @@
         {:else if isCashu(parsed) || isInvoice(parsed)}
           <ContentToken value={parsed.value} />
         {:else if isLink(parsed)}
-          {#if isStartOrEnd(i) && !hideMedia}
+          {#if isStartOrEnd(i) && !hideMedia && $userSettingValues.show_media}
             <ContentLinkBlock value={parsed.value} />
           {:else}
             <ContentLinkInline value={parsed.value} />

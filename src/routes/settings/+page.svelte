@@ -7,12 +7,11 @@
   import Button from "@lib/components/Button.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
   import {pushToast} from "@app/toast"
-  import {SETTINGS, PLATFORM_NAME, userSettings} from "@app/state"
-
-  const settings = {...$userSettings?.values}
+  import {SETTINGS, PLATFORM_NAME, userSettingValues} from "@app/state"
 
   const reset = () => {
     mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
+    settings = {...$userSettingValues}
   }
 
   const onSubmit = async () => {
@@ -31,17 +30,12 @@
     pushToast({message: "Your settings have been saved!"})
   }
 
+  let settings = {...$userSettingValues}
   let mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 </script>
 
 <form class="content column gap-4" on:submit|preventDefault={onSubmit}>
   <div class="card2 bg-alt col-4 shadow-xl">
-    <Field>
-      <p slot="label">Muted Accounts</p>
-      <div slot="input">
-        <ProfileMultiSelect bind:value={mutedPubkeys} />
-      </div>
-    </Field>
     <FieldInline>
       <p slot="label">Hide sensitive content?</p>
       <input
@@ -53,6 +47,23 @@
         If content is marked by the author as sensitive, {PLATFORM_NAME} will hide it by default.
       </p>
     </FieldInline>
+    <FieldInline>
+      <p slot="label">Show media?</p>
+      <input
+        slot="input"
+        type="checkbox"
+        class="toggle toggle-primary"
+        bind:checked={settings.show_media} />
+      <p slot="info">
+        Use this to disable link previews and image rendering.
+      </p>
+    </FieldInline>
+    <Field>
+      <p slot="label">Muted Accounts</p>
+      <div slot="input">
+        <ProfileMultiSelect bind:value={mutedPubkeys} />
+      </div>
+    </Field>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
       <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>
       <Button type="submit" class="btn btn-primary">Save Changes</Button>
