@@ -1,12 +1,10 @@
 <script lang="ts">
-  import {formatTimestamp, formatTimestampRelative} from "@welshman/app"
-  import Icon from "@lib/components/Icon.svelte"
+  import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import {makeThreadPath} from "@app/routes"
-  import {REPLY} from "@app/state"
 
   export let url
   export let event

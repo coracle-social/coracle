@@ -94,7 +94,7 @@
         </div>
       </div>
     </div>
-    <div class="ml-12 row-2">
+    <div class="row-2 ml-12">
       {#if !isThread}
         <ReplySummary {event} />
       {/if}

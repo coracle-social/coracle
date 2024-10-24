@@ -1,8 +1,6 @@
 <script lang="ts">
-  import {groupBy, uniqBy} from "@welshman/lib"
-  import {REACTION} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {pubkey, repository} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {REPLY} from "@app/state"
 

@@ -10,7 +10,10 @@
 
   const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
 
-  $: groupedReactions = groupBy(e => e.content, uniqBy(e => e.pubkey + e.content, $reactions))
+  $: groupedReactions = groupBy(
+    e => e.content,
+    uniqBy(e => e.pubkey + e.content, $reactions),
+  )
 </script>
 
 {#each groupedReactions.entries() as [content, events]}

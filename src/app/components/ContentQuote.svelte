@@ -20,7 +20,7 @@
 
   // If we found this event on a relay that the user is a member of, redirect internally
   $: url = getMembershipUrls($userMembership).find(url => $trackerStore.hasRelay($event?.id, url))
-  $: root = $event?.kind === REPLY ? $event.tags.find(nthEq(0, 'E'))?.[1] : $event?.id
+  $: root = $event?.kind === REPLY ? $event.tags.find(nthEq(0, "E"))?.[1] : $event?.id
   $: href = url && root ? makeThreadPath(url, root) : entityLink(entity)
 </script>
 

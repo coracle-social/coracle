@@ -42,17 +42,17 @@
   $: lastActive = max([...$replies, event].map(e => e.created_at))
 </script>
 
-<div class="flex items-center justify-between flex-wrap gap-2">
+<div class="flex flex-wrap items-center justify-between gap-2">
   <div class="flex gap-2">
     <ReactionSummary {event} {onReactionClick} />
   </div>
-  <div class="flex gap-2 flex-grow justify-end">
+  <div class="flex flex-grow justify-end gap-2">
     {#if showActivity}
       <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
         <Icon icon="reply" />
         <span>{$replies.length} {$replies.length === 1 ? "reply" : "replies"}</span>
       </div>
-      <div class="btn btn-neutral btn-xs rounded-full hidden sm:flex">
+      <div class="btn btn-neutral btn-xs hidden rounded-full sm:flex">
         Active {formatTimestampRelative(lastActive)}
       </div>
     {/if}
@@ -63,7 +63,7 @@
         component={ThreadMenu}
         props={{url, event, onClick: hidePopover}}
         params={{trigger: "manual", interactive: true}}>
-        <Button class="btn btn-neutral btn-xs join-item" on:click={showPopover}>
+        <Button class="btn join-item btn-neutral btn-xs" on:click={showPopover}>
           <Icon icon="menu-dots" size={4} />
         </Button>
       </Tippy>

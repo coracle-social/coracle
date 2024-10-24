@@ -13,8 +13,7 @@ export const makeSpacePath = (url: string, extra = "") => {
 
 export const makeChatPath = (pubkeys: string[]) => `/chat/${makeChatId(pubkeys)}`
 
-export const makeRoomPath = (url: string, room: string) =>
-  `/spaces/${encodeRelay(url)}/${room}`
+export const makeRoomPath = (url: string, room: string) => `/spaces/${encodeRelay(url)}/${room}`
 
 export const makeThreadPath = (url: string, eventId: string) =>
   `/spaces/${encodeRelay(url)}/threads/${eventId}`

@@ -1,9 +1,8 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {goto} from '$app/navigation'
-  import {ctx} from '@welshman/lib'
+  import {goto} from "$app/navigation"
+  import {ctx} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
-  import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
@@ -18,8 +17,7 @@
 
   const back = () => history.back()
 
-  const onSubmit = () =>
-    goto(makeRoomPath(url, selection) + '?content=nostr:' + nevent)
+  const onSubmit = () => goto(makeRoomPath(url, selection) + "?content=nostr:" + nevent)
 
   const toggleRoom = (room: string) => {
     selection = room === selection ? "" : room
