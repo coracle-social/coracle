@@ -66,7 +66,7 @@ export const GENERAL = "general"
 
 export const MESSAGE = 209
 
-export const REPLY = 1111
+export const COMMENT = 1111
 
 export const MEMBERSHIPS = 10209
 
@@ -360,7 +360,7 @@ export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
 }
 
 export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
-  filters: [{kinds: [MESSAGE, REPLY]}],
+  filters: [{kinds: [MESSAGE, COMMENT]}],
   eventToItem: readMessage,
   itemToEvent: item => item.event,
 })

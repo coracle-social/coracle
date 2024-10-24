@@ -7,7 +7,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {getPubkeyHints, publishReply} from "@app/commands"
+  import {getPubkeyHints, publishComment} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
   import {pushToast} from '@app/toast'
 
@@ -31,7 +31,7 @@
       })
     }
 
-    onSubmit(publishReply({event, content, tags, relays: [url]}))
+    onSubmit(publishComment({event, content, tags, relays: [url]}))
   }
 
   let editor: Readable<Editor>

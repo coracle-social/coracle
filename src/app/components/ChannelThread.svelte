@@ -7,19 +7,19 @@
   import {deriveEvents} from "@welshman/store"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
-  import {tagRoom, REPLY} from "@app/state"
-  import {publishReply} from "@app/commands"
+  import {tagRoom, COMMENT} from "@app/state"
+  import {publishComment} from "@app/commands"
 
   export let url, room, event: TrustedEvent
 
   const thunks = writable({} as Record<string, Thunk>)
 
   const replies = deriveEvents(repository, {
-    filters: [{kinds: [REPLY], "#E": [event.id]}],
+    filters: [{kinds: [COMMENT], "#E": [event.id]}],
   })
 
   const onSubmit = ({content, tags}: EventContent) => {
-    const thunk = publishReply({
+    const thunk = publishComment({
       event,
       content,
       tags: append(tagRoom(room, url), tags),

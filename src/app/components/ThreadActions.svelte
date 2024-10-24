@@ -12,7 +12,7 @@
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThreadMenu from "@app/components/ThreadMenu.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
-  import {REPLY} from "@app/state"
+  import {COMMENT} from "@app/state"
 
   export let url
   export let event
@@ -20,7 +20,7 @@
 
   const deleted = deriveIsDeleted(repository, event)
 
-  const replies = deriveEvents(repository, {filters: [{kinds: [REPLY], "#E": [event.id]}]})
+  const replies = deriveEvents(repository, {filters: [{kinds: [COMMENT], "#E": [event.id]}]})
 
   const showPopover = () => popover.show()
 

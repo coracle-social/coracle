@@ -7,13 +7,13 @@
   import ThreadShare from "@app/components/ThreadShare.svelte"
   import {publishDelete} from "@app/commands"
   import {pushModal} from "@app/modal"
-  import {REPLY} from "@app/state"
+  import {COMMENT} from "@app/state"
 
   export let url
   export let event
   export let onClick
 
-  const isRoot = event.kind !== REPLY
+  const isRoot = event.kind !== COMMENT
 
   const showInfo = () => {
     onClick()

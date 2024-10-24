@@ -6,7 +6,7 @@
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import {deriveEvent, entityLink, userMembership, getMembershipUrls, REPLY} from "@app/state"
+  import {deriveEvent, entityLink, userMembership, getMembershipUrls, COMMENT} from "@app/state"
   import {makeThreadPath} from "@app/routes"
 
   export let value
@@ -20,7 +20,7 @@
 
   // If we found this event on a relay that the user is a member of, redirect internally
   $: url = getMembershipUrls($userMembership).find(url => $trackerStore.hasRelay($event?.id, url))
-  $: root = $event?.kind === REPLY ? $event.tags.find(nthEq(0, "E"))?.[1] : $event?.id
+  $: root = $event?.kind === COMMENT ? $event.tags.find(nthEq(0, "E"))?.[1] : $event?.id
   $: href = url && root ? makeThreadPath(url, root) : entityLink(entity)
 </script>
 

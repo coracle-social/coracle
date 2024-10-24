@@ -33,7 +33,7 @@
     GENERAL,
     tagRoom,
     MESSAGE,
-    REPLY,
+    COMMENT,
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
@@ -66,7 +66,7 @@
     let previousPubkey
 
     for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
-      if (event.kind === REPLY) {
+      if (event.kind === COMMENT) {
         continue
       }
 

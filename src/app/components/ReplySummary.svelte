@@ -2,11 +2,11 @@
   import {deriveEvents} from "@welshman/store"
   import {repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
-  import {REPLY} from "@app/state"
+  import {COMMENT} from "@app/state"
 
   export let event
 
-  const replies = deriveEvents(repository, {filters: [{kinds: [REPLY], "#E": [event.id]}]})
+  const replies = deriveEvents(repository, {filters: [{kinds: [COMMENT], "#E": [event.id]}]})
 </script>
 
 {#if $replies.length > 0}

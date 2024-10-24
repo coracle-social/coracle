@@ -12,13 +12,13 @@
   import NoteCard from "@app/components/NoteCard.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
-  import {REPLY, deriveEvent, decodeRelay} from "@app/state"
+  import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
   import {makeSpacePath} from "@app/routes"
 
   const {relay, id} = $page.params
   const url = decodeRelay(relay)
   const event = deriveEvent(id)
-  const filters = [{kinds: [REPLY], "#E": [id]}]
+  const filters = [{kinds: [COMMENT], "#E": [id]}]
   const replies = deriveEvents(repository, {filters})
 
   const back = () => history.back()

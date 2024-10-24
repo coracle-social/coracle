@@ -13,13 +13,13 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {REPLY, deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const events = deriveEventsForUrl(url, [NOTE])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds: [NOTE, REPLY]}))
+  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds: [NOTE, COMMENT]}))
   const loader = feedLoader.getLoader(feed, {
     onExhausted: () => {
       loading = false

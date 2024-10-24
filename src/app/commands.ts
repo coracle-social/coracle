@@ -46,7 +46,7 @@ import {
   loadRelay,
 } from "@welshman/app"
 import {
-  REPLY,
+  COMMENT,
   tagRoom,
   userMembership,
   MEMBERSHIPS,
@@ -320,7 +320,7 @@ export type ReplyParams = {
   tags?: string[][]
 }
 
-export const makeReply = ({event, content, tags = []}: ReplyParams) => {
+export const makeComment = ({event, content, tags = []}: ReplyParams) => {
   const seenRoots = new Set<string>()
 
   for (const [raw, ...tag] of event.tags.filter(t => t[0].match(/^K|E|A|I$/i))) {
@@ -343,11 +343,11 @@ export const makeReply = ({event, content, tags = []}: ReplyParams) => {
     tags.push(["e", event.id])
   }
 
-  return createEvent(REPLY, {content, tags})
+  return createEvent(COMMENT, {content, tags})
 }
 
-export const publishReply = ({relays, ...params}: ReplyParams & {relays: string[]}) =>
-  publishThunk({event: makeReply(params), relays})
+export const publishComment = ({relays, ...params}: ReplyParams & {relays: string[]}) =>
+  publishThunk({event: makeComment(params), relays})
 
 export const makeDelete = ({event}: {event: TrustedEvent}) =>
   createEvent(DELETE, {tags: [["k", String(event.kind)], ...tagEvent(event)]})
