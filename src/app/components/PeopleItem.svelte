@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ago, append, first, sortBy, WEEK, ctx} from "@welshman/lib"
-  import {NOTE, getAncestorTags} from "@welshman/util"
+  import {first, sortBy, ctx} from "@welshman/lib"
+  import {getAncestorTags} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {repository, load, loadRelaySelections, formatTimestampRelative} from "@welshman/app"
@@ -10,7 +10,7 @@
 
   export let pubkey
 
-  const filters: Filter[] = [{kinds: [NOTE], authors: [pubkey], since: ago(WEEK)}]
+  const filters: Filter[] = [{authors: [pubkey]}]
   const events = deriveEvents(repository, {filters})
 
   $: roots = $events.filter(e => getAncestorTags(e.tags).replies.length === 0)
@@ -21,7 +21,7 @@
 
     // Load at least one note, regardless of time frame
     load({
-      filters: append({kinds: [NOTE], authors: [pubkey], limit: 1}, filters),
+      filters: [{authors: [pubkey], limit: 1}],
       relays: ctx.app.router.FromPubkeys([pubkey]).getUrls(),
     })
   })
@@ -32,13 +32,8 @@
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
     {@const event = first(sortBy(e => -e.created_at, roots))}
-    <div class="flex gap-2">
-      <div class="bg-alt badge badge-neutral border-none">
-        {roots.length} recent {roots.length === 1 ? "note" : "notes"}
-      </div>
-      <div class="bg-alt badge badge-neutral border-none">
-        Last posted {formatTimestampRelative(event.created_at)}
-      </div>
+    <div class="bg-alt badge badge-neutral border-none">
+      Last active {formatTimestampRelative(event.created_at)}
     </div>
   {/if}
 </div>
