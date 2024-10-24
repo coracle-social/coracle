@@ -9,7 +9,8 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
-  import Reactions from "@app/components/Reactions.svelte"
+  import ReplySummary from "@app/components/ReplySummary.svelte"
+  import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
@@ -99,6 +100,9 @@
         </div>
       </div>
     </div>
-    <Reactions {event} {onReactionClick} />
+    <div class="ml-12 row-2">
+      <ReplySummary {event} />
+      <ReactionSummary {event} {onReactionClick} />
+    </div>
   </div>
 </div>

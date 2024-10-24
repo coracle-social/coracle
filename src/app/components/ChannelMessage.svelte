@@ -10,7 +10,8 @@
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
-  import Reactions from "@app/components/Reactions.svelte"
+  import ReplySummary from "@app/components/ReplySummary.svelte"
+  import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
@@ -67,7 +68,7 @@
     class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
     <div class="flex w-full gap-3">
       {#if showPubkey}
-        <Button on:click={showProfile}>
+        <Button on:click={showProfile} class="flex items-start">
           <Avatar
             src={$profile?.picture}
             class="border border-solid border-base-content"
@@ -93,7 +94,12 @@
         </div>
       </div>
     </div>
-    <Reactions {event} {onReactionClick} showReplies={!isThread} />
+    <div class="ml-12 row-2">
+      {#if !isThread}
+        <ReplySummary {event} />
+      {/if}
+      <ReactionSummary {event} {onReactionClick} />
+    </div>
     <button
       class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
       on:click|stopPropagation>

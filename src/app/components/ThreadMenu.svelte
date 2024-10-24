@@ -7,10 +7,13 @@
   import ThreadShare from "@app/components/ThreadShare.svelte"
   import {publishDelete} from "@app/commands"
   import {pushModal} from "@app/modal"
+  import {REPLY} from "@app/state"
 
   export let url
   export let event
   export let onClick
+
+  const isRoot = event.kind !== REPLY
 
   const showInfo = () => {
     onClick()
@@ -40,12 +43,14 @@
 </script>
 
 <ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl">
-  <li>
-    <Button on:click={share}>
-      <Icon size={4} icon="share-circle" />
-      Share to Chat
-    </Button>
-  </li>
+  {#if isRoot}
+    <li>
+      <Button on:click={share}>
+        <Icon size={4} icon="share-circle" />
+        Share to Chat
+      </Button>
+    </li>
+  {/if}
   <li>
     <Button on:click={showInfo}>
       <Icon size={4} icon="code-2" />
