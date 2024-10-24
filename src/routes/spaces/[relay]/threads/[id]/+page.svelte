@@ -58,7 +58,7 @@
   </NoteCard>
   <Button class="mb-2 mt-5 flex items-center gap-2" on:click={back}>
     <Icon icon="alt-arrow-left" />
-    Back to threads
+    Go back
   </Button>
 </div>
 {#if showReply}

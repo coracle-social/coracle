@@ -120,7 +120,7 @@
           </Button>
         {/if}
       {/if}
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm">
+      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
         <Icon icon="menu-dots" />
       </Button>
     </div>
