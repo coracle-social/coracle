@@ -5,7 +5,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import ChannelThread from "@app/components/ChannelThread.svelte"
+  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {publishReaction} from "@app/commands"
   import {pushModal, pushDrawer} from "@app/modal"
@@ -27,7 +27,7 @@
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
-  const showConversation = () => pushDrawer(ChannelThread, {url, room, event}, {replaceState: true})
+  const showConversation = () => pushDrawer(ChannelConversation, {url, room, event}, {replaceState: true})
 
   const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
 

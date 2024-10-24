@@ -32,7 +32,7 @@
 
 <div class="col-2">
   <div class="overflow-auto pt-3">
-    <ChannelMessage {url} {room} {event} thunk={$thunks[event.id]} showPubkey isThread />
+    <ChannelMessage {url} {room} {event} thunk={$thunks[event.id]} showPubkey isHead />
     {#each sortBy(e => e.created_at, $replies) as reply (reply.id)}
       <ChannelMessage {url} {room} event={reply} thunk={$thunks[reply.id]} showPubkey />
     {/each}

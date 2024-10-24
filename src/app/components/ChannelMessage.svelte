@@ -13,7 +13,7 @@
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
-  import ChannelThread from "@app/components/ChannelThread.svelte"
+  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
@@ -25,7 +25,7 @@
   export let event: TrustedEvent
   export let thunk: Thunk
   export let showPubkey = false
-  export let isThread = false
+  export let isHead = false
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
@@ -43,7 +43,7 @@
     } else {
       const root = $rootEvent || event
 
-      pushDrawer(ChannelThread, {url, room, event: root})
+      pushDrawer(ChannelConversation, {url, room, event: root})
     }
   }
 
@@ -102,7 +102,7 @@
       </div>
     </div>
     <div class="row-2 ml-12">
-      {#if !isThread}
+      {#if !isHead}
         <ReplySummary {event} />
       {/if}
       <ReactionSummary {event} {onReactionClick} />
