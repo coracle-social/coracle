@@ -19,7 +19,7 @@
   const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
 
   // If we found this event on a relay that the user is a member of, redirect internally
-  $: url = getMembershipUrls($userMembership).find(url => $trackerStore.hasRelay($event.id, url))
+  $: url = getMembershipUrls($userMembership).find(url => $trackerStore.hasRelay($event?.id, url))
   $: root = $event?.kind === REPLY ? $event.tags.find(nthEq(0, 'E'))?.[1] : $event?.id
   $: href = url && root ? makeThreadPath(url, root) : entityLink(entity)
 </script>

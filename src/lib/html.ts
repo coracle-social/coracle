@@ -33,11 +33,11 @@ export const createScroller = ({
 }: ScrollerOpts) => {
   let done = false
 
-  const check = async () => {
-    const container = element.classList.contains("scroll-container")
-      ? element
-      : element.closest(".scroll-container")
+  const container = element.classList.contains("scroll-container")
+    ? element
+    : element.closest(".scroll-container")
 
+  const check = async () => {
     if (container) {
       // While we have empty space, fill it
       const {scrollY, innerHeight} = window

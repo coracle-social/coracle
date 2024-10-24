@@ -115,7 +115,7 @@
     {/if}
   </div>
   <div in:fly={{delay: getDelay(true)}}>
-    <SecondaryNavItem href={makeSpacePath(url, "threads")}>
+    <SecondaryNavItem href={makeSpacePath(url)}>
       <Icon icon="notes-minimalistic" /> Threads
     </SecondaryNavItem>
   </div>
@@ -124,7 +124,7 @@
     <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
   </div>
   <div transition:slide={{delay: getDelay()}}>
-    <SecondaryNavItem href={makeSpacePath(url)}>
+    <SecondaryNavItem href={makeSpacePath(url, GENERAL)}>
       <Icon icon="hashtag" />
       {GENERAL}
     </SecondaryNavItem>
