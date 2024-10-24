@@ -1,11 +1,12 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {sortBy, sleep} from "@welshman/lib"
+  import {sortBy, displayUrl, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
   import {repository, subscribe} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
@@ -13,6 +14,7 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {REPLY, deriveEvent, decodeRelay} from "@app/state"
+  import {makeSpacePath} from "@app/routes"
 
   const {relay, id} = $page.params
   const url = decodeRelay(relay)
@@ -71,10 +73,15 @@
       <p>Failed to load thread.</p>
     {/await}
   {/if}
-  <Button class="mb-2 mt-5 flex items-center gap-2" on:click={back}>
-    <Icon icon="alt-arrow-left" />
-    Go back
-  </Button>
+  <div class="flex items-center justify-between">
+    <Button class="mb-2 mt-5 flex items-center gap-2" on:click={back}>
+      <Icon icon="alt-arrow-left" />
+      Go back
+    </Button>
+    <Link href={makeSpacePath(url)}>
+      @<span class="text-primary">{displayUrl(url)}</span>
+    </Link>
+  </div>
 </div>
 {#if showReply}
   <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
