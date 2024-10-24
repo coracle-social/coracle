@@ -14,6 +14,7 @@
   import {derived} from "svelte/store"
   import {stringToHue, displayUrl, hsl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
+  import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Rating from "src/partials/Rating.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -26,7 +27,7 @@
   export let url
   export let claim = null
   export let ratings = null
-  export let showStatus = false
+  export let showStatus = true
   export let hideDescription = false
   export let hideRatingsCount = false
   export let hideActions = false
@@ -55,25 +56,38 @@
       setInboxPolicy(url, !inbox)
     }
   }
+  let details = false
 </script>
 
-<div
-  class="flex flex-col justify-between gap-3 rounded-xl border border-l-2 border-solid border-neutral-600 bg-neutral-800 px-6 py-3 shadow"
-  style={`border-left-color: ${hsl(stringToHue(url))}`}>
+<AltColor background class="flex flex-col justify-between gap-3 rounded-md px-6 py-3 shadow">
   <div class="flex items-center justify-between gap-2">
-    <div class="flex min-w-0 items-center gap-2 text-xl">
-      {#if inert}
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {displayRelayUrl(url)}
+    <div class="flex min-w-0 items-center gap-2">
+      <div class="h-9 w-9 rounded-full" style={`background-color: ${hsl(stringToHue(url))};`} />
+      <div>
+        {#if inert}
+          <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
+            {displayRelayUrl(url)}
+          </div>
+        {:else}
+          <Anchor
+            modal
+            href={router.at("relays").of(url).toString()}
+            class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
+            {displayRelayUrl(url)}
+          </Anchor>
+        {/if}
+        <div class="flex gap-4 text-xs text-neutral-400">
+          {#if $relay?.profile?.supported_nips}
+            <span class="cursor-pointer">
+              {$relay.profile.supported_nips.length} NIPs
+            </span>
+
+            <!-- <span>&bull;</span> -->
+          {/if}
+          Connected {quantify($relay.stats.connect_count, "time")}
         </div>
-      {:else}
-        <Anchor
-          modal
-          href={router.at("relays").of(url).toString()}
-          class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {displayRelayUrl(url)}
-        </Anchor>
-      {/if}
+      </div>
+
       {#if showStatus && !getSetting("multiplextr_url")}
         <RelayStatus {url} />
       {/if}
@@ -88,38 +102,34 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
+        <button
+          class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d text-white"
+          on:click={_ => (details = !details)}>
+          INFO
+        </button>
         <RelayCardActions {url} {claim} />
       </slot>
     {/if}
   </div>
-  {#if !hideDescription}
-    <slot name="description">
+  {#if !details}
+    {#if $relay?.stats}
+      <span class="flex items-center gap-1 text-sm">
+        {#if $relay?.profile?.contact}
+          <span class="opacity-75">Contact: </span>
+          <Anchor external underline href={$relay.profile.contact}>
+            {displayUrl($relay.profile.contact)}</Anchor>
+        {/if}
+      </span>
+    {/if}<slot name="description">
       {#if $relay?.profile?.description}
-        <p>{$relay?.profile.description}</p>
+        <p class="text-sm">{$relay?.profile.description}</p>
       {/if}
     </slot>
-    {#if $relay?.stats}
-      <span class="flex items-center gap-1 text-sm text-neutral-400">
-        {#if $relay?.profile?.contact}
-          <Anchor external underline href={$relay.profile.contact}
-            >{displayUrl($relay.profile.contact)}</Anchor>
-          &bull;
-        {/if}
-        {#if $relay?.profile?.supported_nips}
-          <Popover>
-            <span slot="trigger" class="cursor-pointer underline">
-              {$relay.profile.supported_nips.length} NIPs
-            </span>
-            <span slot="tooltip">
-              NIPs supported: {$relay.profile.supported_nips.join(", ")}
-            </span>
-          </Popover>
-          &bull;
-        {/if}
-        Connected {quantify($relay.stats.connect_count, "time")}
-      </span>
-    {/if}
+    <div class="text-sm">
+      <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
+    </div>
   {/if}
+
   {#if showControls && $signer}
     <div class="-mx-6 my-1 h-px bg-tinted-700" />
     <div>
@@ -174,4 +184,4 @@
       {/if}
     </div>
   {/if}
-</div>
+</AltColor>
