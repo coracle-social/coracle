@@ -13,15 +13,18 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {REPLY, deriveEventsForUrl, decodeRelay} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const kinds = [NOTE]
-  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds}))
-  const events = deriveEventsForUrl(url, kinds)
-  const loader = feedLoader.getLoader(feed, {})
+  const events = deriveEventsForUrl(url, [NOTE])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
+  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds: [NOTE, REPLY]}))
+  const loader = feedLoader.getLoader(feed, {
+    onExhausted: () => {
+      loading = false
+    },
+  })
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
@@ -32,22 +35,21 @@
   let element: Element
 
   onMount(() => {
-    const scroller = createScroller({
-      element,
-      onScroll: async () => {
-        const $loader = await loader
+    // Why is element not defined sometimes? SVELTEKIT
+    if (element) {
+      const scroller = createScroller({
+        element,
+        onScroll: async () => {
+          const $loader = await loader
 
-        await $loader(5)
-        limit += 5
-      },
-    })
+          await $loader(5)
+          limit += 5
+        },
+      })
 
-    return () => scroller.stop()
+      return () => scroller.stop()
+    }
   })
-
-  setTimeout(() => {
-    loading = false
-  }, 3000)
 </script>
 
 <div class="relative flex h-screen flex-col">

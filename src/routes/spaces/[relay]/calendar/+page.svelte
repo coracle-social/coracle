@@ -63,7 +63,7 @@
 
   setTimeout(() => {
     loading = false
-  }, 3000)
+  }, 5000)
 </script>
 
 <div class="relative flex h-screen flex-col">

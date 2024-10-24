@@ -1,20 +1,26 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {load} from "@welshman/app"
+  import {subscribe} from "@welshman/app"
+  import {DELETE, NOTE} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import Delay from "@lib/components/Delay.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
-  import {decodeRelay, MEMBERSHIPS} from "@app/state"
+  import {decodeRelay, MEMBERSHIPS, MESSAGE, REPLY} from "@app/state"
 
   $: url = decodeRelay($page.params.relay)
 
   onMount(() => {
-    load({
-      filters: [{kinds: [MEMBERSHIPS], "#r": [url]}],
+    const sub = subscribe({
+      filters: [
+        {kinds: [DELETE], "#k": [NOTE, REPLY, MESSAGE].map(String)},
+        {kinds: [MEMBERSHIPS], "#r": [url]},
+      ],
       relays: [url],
     })
+
+    return () => sub.close()
   })
 </script>
 

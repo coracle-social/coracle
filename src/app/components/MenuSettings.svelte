@@ -11,28 +11,28 @@
 </script>
 
 <div class="column menu gap-2">
-  <Link href="/settings/profile">
+  <Link replaceState href="/settings/profile">
     <CardButton>
       <div slot="icon"><Icon icon="user-rounded" size={7} /></div>
       <div slot="title">Profile</div>
       <div slot="info">Customize your user profile</div>
     </CardButton>
   </Link>
-  <Link href="/settings/relays">
+  <Link replaceState href="/settings/relays">
     <CardButton>
       <div slot="icon"><Icon icon="server" size={7} /></div>
       <div slot="title">Relays</div>
       <div slot="info">Control how {PLATFORM_NAME} talks to the network</div>
     </CardButton>
   </Link>
-  <Link href="/settings">
+  <Link replaceState href="/settings">
     <CardButton>
       <div slot="icon"><Icon icon="settings" size={7} /></div>
       <div slot="title">Settings</div>
       <div slot="info">Get into the details about how {PLATFORM_NAME} works</div>
     </CardButton>
   </Link>
-  <Link href="/settings/about">
+  <Link replaceState href="/settings/about">
     <CardButton>
       <div slot="icon"><Icon icon="code-2" size={7} /></div>
       <div slot="title">About</div>

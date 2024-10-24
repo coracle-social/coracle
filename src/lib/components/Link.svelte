@@ -3,12 +3,13 @@
 
   export let href
   export let external = false
+  export let replaceState = false
 
   const go = (e: Event) => {
     if (!external) {
       e.preventDefault()
 
-      goto(href)
+      goto(href, {replaceState})
     }
   }
 </script>

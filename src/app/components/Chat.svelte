@@ -100,7 +100,7 @@
 
   setTimeout(() => {
     loading = false
-  }, 3000)
+  }, 5000)
 </script>
 
 <div class="relative flex h-full w-full flex-col">

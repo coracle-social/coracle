@@ -17,7 +17,7 @@
 
 <div class="column menu gap-2">
   {#if PLATFORM_RELAY}
-    <Link href={makeSpacePath(PLATFORM_RELAY)}>
+    <Link replaceState href={makeSpacePath(PLATFORM_RELAY)}>
       <CardButton>
         <div slot="icon"><SpaceAvatar url={PLATFORM_RELAY} /></div>
         <div slot="title"><RelayName url={PLATFORM_RELAY} /></div>
@@ -27,7 +27,7 @@
     <Divider />
   {:else if getMembershipUrls($userMembership).length > 0}
     {#each getMembershipUrls($userMembership) as url (url)}
-      <Link href={makeSpacePath(url)}>
+      <Link replaceState href={makeSpacePath(url)}>
         <CardButton>
           <div slot="icon"><SpaceAvatar {url} /></div>
           <div slot="title"><RelayName {url} /></div>

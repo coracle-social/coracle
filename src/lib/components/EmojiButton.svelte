@@ -18,10 +18,12 @@
   }
 
   const onMouseMove = throttle(300, ({clientX, clientY}: any) => {
-    const {x, y, width, height} = popover.popper.getBoundingClientRect()
+    if (popover) {
+      const {x, y, width, height} = popover.popper.getBoundingClientRect()
 
-    if (!between([x, x + width], clientX) || !between([y - 30, y + height + 30], clientY)) {
-      popover.hide()
+      if (!between([x, x + width], clientX) || !between([y - 30, y + height + 30], clientY)) {
+        popover.hide()
+      }
     }
   })
 

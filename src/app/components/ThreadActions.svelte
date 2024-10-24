@@ -2,7 +2,7 @@
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import {max} from "@welshman/lib"
-  import {deriveEvents} from "@welshman/store"
+  import {deriveEvents, deriveIsDeleted} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
   import {pubkey, repository, formatTimestampRelative} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -17,6 +17,8 @@
   export let url
   export let event
   export let showActivity = false
+
+  const deleted = deriveIsDeleted(repository, event)
 
   const replies = deriveEvents(repository, {filters: [{kinds: [REPLY], "#E": [event.id]}]})
 
@@ -47,6 +49,11 @@
     <ReactionSummary {event} {onReactionClick} />
   </Button>
   <div class="flex flex-grow justify-end gap-2">
+    {#if $deleted}
+      <div class="btn btn-error btn-xs rounded-full">
+        Deleted
+      </div>
+    {/if}
     {#if showActivity}
       <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
         <Icon icon="reply" />
