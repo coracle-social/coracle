@@ -4,7 +4,7 @@
   export let onClose
 </script>
 
-<div class="fixed inset-0 z-modal drawer">
+<div class="drawer fixed inset-0 z-modal">
   <button
     class="absolute inset-0 cursor-pointer bg-black opacity-50"
     transition:fade

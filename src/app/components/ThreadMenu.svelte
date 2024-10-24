@@ -2,10 +2,9 @@
   import {pubkey} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import Confirm from "@lib/components/Confirm.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
   import ThreadShare from "@app/components/ThreadShare.svelte"
-  import {publishDelete} from "@app/commands"
+  import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {pushModal} from "@app/modal"
   import {COMMENT} from "@app/state"
 
@@ -27,18 +26,7 @@
 
   const showDelete = () => {
     onClick()
-    pushModal(Confirm, {
-      title: "Delete Message",
-      subtitle: "Are you sure you want to delete this message?",
-      message: `
-        This will send a request to delete this message.
-        Be aware that not all relays may honor this request.`,
-      confirm: async () => {
-        await publishDelete({event, relays: [url]})
-
-        history.back()
-      },
-    })
+    pushModal(ConfirmDelete, {url, event})
   }
 </script>
 

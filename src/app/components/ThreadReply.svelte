@@ -3,13 +3,15 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {append} from "@welshman/lib"
   import {fly, slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {getPubkeyHints, publishComment} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
-  import {pushToast} from '@app/toast'
+  import {getPubkeyHints, publishComment} from "@app/commands"
+  import {tagRoom, GENERAL} from "@app/state"
+  import {pushToast} from "@app/toast"
 
   export let url
   export let event
@@ -22,11 +24,11 @@
 
   const submit = () => {
     const content = $editor.getText()
-    const tags = getEditorTags($editor)
+    const tags = append(tagRoom(GENERAL, url), getEditorTags($editor))
 
     if (!content.trim()) {
       return pushToast({
-        theme: 'error',
+        theme: "error",
         message: "Please provide a message for your reply.",
       })
     }

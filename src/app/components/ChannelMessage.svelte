@@ -4,6 +4,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
+  import {isMobile} from "@lib/html"
   import {slideAndFade, conditionalTransition} from "@lib/transition"
   import Delay from "@lib/components/Delay.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -15,9 +16,10 @@
   import ChannelThread from "@app/components/ChannelThread.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
+  import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
   import {colors, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
-  import {pushDrawer} from "@app/modal"
+  import {pushDrawer, pushModal} from "@app/modal"
 
   export let url, room
   export let event: TrustedEvent
@@ -35,10 +37,14 @@
 
   const transition = conditionalTransition(thunk, slideAndFade)
 
-  const openThread = () => {
-    const root = $rootEvent || event
+  const onClick = () => {
+    if (isMobile) {
+      pushModal(ChannelMessageMenuMobile, {url, event})
+    } else {
+      const root = $rootEvent || event
 
-    pushDrawer(ChannelThread, {url, room, event: root})
+      pushDrawer(ChannelThread, {url, room, event: root})
+    }
   }
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
@@ -60,7 +66,7 @@
 <Delay>
   <button
     in:transition
-    on:click={openThread}
+    on:click={onClick}
     type="button"
     class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
     <div class="flex w-full gap-3">
@@ -102,7 +108,8 @@
       <ReactionSummary {event} {onReactionClick} />
     </div>
     <button
-      class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all group-hover:opacity-100"
+      class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
+      class:group-hover:opacity-100={!isMobile}
       on:click|stopPropagation>
       <ChannelMessageEmojiButton {url} {room} {event} />
       <ChannelMessageMenuButton {url} {event} />

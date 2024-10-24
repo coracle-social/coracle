@@ -1,11 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy, displayUrl, sleep} from "@welshman/lib"
+  import {sortBy, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
   import {repository, subscribe} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
-  import Link from "@lib/components/Link.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -16,7 +15,6 @@
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
   import {pushDrawer} from "@app/modal"
-  import {makeSpacePath} from "@app/routes"
 
   const {relay, id} = $page.params
   const url = decodeRelay(relay)

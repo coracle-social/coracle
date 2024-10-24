@@ -3,14 +3,16 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {append} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {pushToast} from '@app/toast'
-  import {THREAD} from "@app/state"
+  import {pushToast} from "@app/toast"
+  import {THREAD, GENERAL, tagRoom} from "@app/state"
+
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
 
@@ -24,11 +26,11 @@
 
   const submit = () => {
     const content = $editor.getText()
-    const tags = getEditorTags($editor)
+    const tags = append(tagRoom(GENERAL, url), getEditorTags($editor))
 
     if (!content.trim()) {
       return pushToast({
-        theme: 'error',
+        theme: "error",
         message: "Please provide a message for your thread.",
       })
     }

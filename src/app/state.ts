@@ -34,7 +34,7 @@ import {
   hasValidSignature,
   normalizeRelayUrl,
 } from "@welshman/util"
-import type {TrustedEvent, SignedEvent, PublishedList, List} from "@welshman/util"
+import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
 import {
   pubkey,
@@ -45,7 +45,6 @@ import {
   getDefaultAppContext,
   getDefaultNetContext,
   makeRouter,
-  trackerStore,
   tracker,
   relay,
   getSession,
@@ -248,13 +247,11 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-export const deriveEventsForUrl = (url: string, kinds: number[]) =>
-  derived(trackerStore, $tracker =>
+export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
+  derived(deriveEvents(repository, {filters}), $events =>
     sortBy(
       e => -e.created_at,
-      Array.from($tracker.getIds(url))
-        .map(id => repository.eventsById.get(id)!)
-        .filter(e => kinds.includes(e?.kind)),
+      $events.filter(e => e.tags.find(nthEq(0, "~"))?.[2] === url),
     ),
   )
 

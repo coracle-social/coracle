@@ -20,7 +20,7 @@
   const back = () => history.back()
 
   const onSubmit = () => {
-    setKey('content', toNostrURI(nevent))
+    setKey("content", toNostrURI(nevent))
     goto(makeRoomPath(url, selection), {replaceState: true})
   }
 

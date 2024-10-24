@@ -3,7 +3,6 @@
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import {between} from "@welshman/lib"
-  import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
@@ -37,7 +36,7 @@
   component={EmojiPicker}
   props={{onClick}}
   params={{trigger: "manual", interactive: true}}>
-  <Button class="btn btn-xs {$$props.class}" on:click={open}>
-    <Icon icon="smile-circle" size={4} />
+  <Button on:click={open} class={$$props.class}>
+    <slot />
   </Button>
 </Tippy>

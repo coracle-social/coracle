@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {writable} from "svelte/store"
-  import {sortBy, fromPairs, now, assoc, append} from "@welshman/lib"
+  import {sortBy, now, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, subscribe, publishThunk} from "@welshman/app"
@@ -41,7 +41,7 @@
   import {popKey} from "@app/implicit"
 
   const {room = GENERAL} = $page.params
-  const content = popKey<string>('content') || ""
+  const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
   const thunks = writable({} as Record<string, Thunk>)

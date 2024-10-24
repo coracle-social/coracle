@@ -18,9 +18,9 @@
   import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const events = deriveEventsForUrl(url, [THREAD])
+  const events = deriveEventsForUrl(url, [{kinds: [THREAD]}])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], '#k': [String(THREAD)]}]
+  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#k": [String(THREAD)]}]
   const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
   const loader = feedLoader.getLoader(feed, {
     onExhausted: () => {

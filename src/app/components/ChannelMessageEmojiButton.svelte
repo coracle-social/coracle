@@ -1,6 +1,7 @@
 <script lang="ts">
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
+  import Icon from "@lib/components/Icon.svelte"
   import {tagRoom} from "@app/state"
   import {publishReaction} from "@app/commands"
 
@@ -15,4 +16,6 @@
     })
 </script>
 
-<EmojiButton {onEmoji} class="join-item" />
+<EmojiButton {onEmoji} class="btn join-item btn-xs">
+  <Icon icon="smile-circle" size={4} />
+</EmojiButton>

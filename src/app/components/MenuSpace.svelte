@@ -41,7 +41,7 @@
     pushModal(
       ProfileList,
       {pubkeys: members, title: `Members of`, subtitle: displayRelayUrl(url)},
-      {replaceState}
+      {replaceState},
     )
 
   const createInvite = () => pushModal(SpaceInvite, {url}, {replaceState})
@@ -72,7 +72,7 @@
   $: members = $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey)
 
   onMount(async () => {
-    replaceState = Boolean(element.closest('.drawer'))
+    replaceState = Boolean(element.closest(".drawer"))
 
     const error = (await checkRelayConnection(url)) || (await checkRelayAuth(url))
 

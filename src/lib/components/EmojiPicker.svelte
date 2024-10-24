@@ -1,3 +1,13 @@
+<style>
+  @media (max-width: 450px) {
+    emoji-picker {
+      max-width: 100%;
+      --num-columns: 6;
+      --category-emoji-size: 1.125rem;
+    }
+  }
+</style>
+
 <script lang="ts">
   import "emoji-picker-element"
   import type {Emoji} from "emoji-picker-element/shared"

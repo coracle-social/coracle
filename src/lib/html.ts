@@ -68,3 +68,5 @@ export const createScroller = ({
     },
   }
 }
+
+export const isMobile = "ontouchstart" in document.documentElement

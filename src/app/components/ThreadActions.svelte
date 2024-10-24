@@ -62,7 +62,9 @@
       </div>
     {/if}
     <Button class="join rounded-full">
-      <EmojiButton {onEmoji} class="join-item btn-neutral" />
+      <EmojiButton {onEmoji} class="btn join-item btn-neutral btn-xs">
+        <Icon icon="smile-circle" size={4} />
+      </EmojiButton>
       <Tippy
         bind:popover
         component={ThreadMenu}

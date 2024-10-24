@@ -18,7 +18,7 @@
 
   const url = decodeRelay($page.params.relay)
   const kinds = [EVENT_DATE, EVENT_TIME]
-  const events = deriveEventsForUrl(url, kinds)
+  const events = deriveEventsForUrl(url, [{kinds}])
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
