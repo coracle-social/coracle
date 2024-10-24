@@ -66,6 +66,8 @@ export const GENERAL = "general"
 
 export const MESSAGE = 209
 
+export const THREAD = 309
+
 export const COMMENT = 1111
 
 export const MEMBERSHIPS = 10209

@@ -3,13 +3,14 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {createEvent, NOTE} from "@welshman/util"
+  import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from '@app/toast'
+  import {THREAD} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
 
@@ -33,7 +34,7 @@
     }
 
     publishThunk({
-      event: createEvent(NOTE, {content, tags}),
+      event: createEvent(THREAD, {content, tags}),
       relays: [url],
     })
 

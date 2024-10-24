@@ -1,8 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {NOTE, getListTags, getPubkeyTagValues} from "@welshman/util"
-  import {feedFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
+  import {getListTags, getPubkeyTagValues} from "@welshman/util"
+  import type {Filter} from "@welshman/util"
+  import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
   import {feedLoader, userMutes} from "@welshman/app"
   import {createScroller} from "@lib/html"
@@ -13,13 +14,14 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {THREAD, COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const events = deriveEventsForUrl(url, [NOTE])
+  const events = deriveEventsForUrl(url, [THREAD])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const feed = makeIntersectionFeed(makeRelayFeed(url), feedFromFilter({kinds: [NOTE, COMMENT]}))
+  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], '#k': [String(THREAD)]}]
+  const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
   const loader = feedLoader.getLoader(feed, {
     onExhausted: () => {
       loading = false
