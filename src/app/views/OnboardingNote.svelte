@@ -2,18 +2,29 @@
   import {onMount} from "svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {Editor} from "svelte-tiptap"
+  import {getEditorOptions} from "src/app/editor"
 
   export let signup
   export let setStage
 
-  let compose = null
+  let editor: Editor
+  let element: HTMLElement
 
   const prev = () => setStage("follows")
-  const next = () => signup(compose.parse())
+  const next = () => signup(editor.getText())
   const skip = () => signup()
 
   onMount(() => {
-    compose.write("Hello world! #introductions")
+    editor = new Editor(
+      getEditorOptions({
+        submit: next,
+        element,
+        submitOnEnter: false,
+        autofocus: true,
+        content: "Hello world! #introductions",
+      }),
+    )
   })
 </script>
 
@@ -30,7 +41,7 @@
 </p>
 <p>Now is a great time to introduce yourself to the Nostr network!</p>
 <div class="border-l-2 border-solid border-neutral-600 pl-4">
-  <Compose autofocus bind:this={compose} onSubmit={next} />
+  <Compose bind:element {editor} class="min-h-24" />
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>

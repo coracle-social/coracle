@@ -4,9 +4,9 @@
   import {router} from "src/app/util/router"
   import {makeFeed} from "src/domain"
 
-  export let value
+  export let value: string
 
-  const feed = makeFeed({definition: makeTagFeed("#t", value)})
+  $: feed = makeFeed({definition: makeTagFeed("#t", value)})
 
   const onClick = () => router.at("notes").cx({feed}).push()
 </script>

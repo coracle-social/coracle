@@ -1323,6 +1323,7 @@ export class ThreadLoader {
 
 // Remove the old database. TODO remove this
 import {deleteDB} from "idb"
+import type {EditorImage} from "src/app/editor"
 deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Tags, asStampedEvent} from "@welshman/util"
-  import {sleep, ucFirst} from "hurdak"
+  import {ucFirst} from "hurdak"
   import {inc} from "ramda"
   import {getCurrencyOption} from "src/util/i18n"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,30 +12,35 @@
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
-  import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/util/router"
   import {deriveEvent, publishToZeroOrMoreGroups} from "src/engine"
+  import {Editor} from "svelte-tiptap"
+  import {getEditorOptions} from "src/app/editor"
 
   export let address
+
+  let editor: Editor
+  let editorElement: HTMLElement
 
   const event = deriveEvent(address)
 
   const onSubmit = async () => {
+    if (editor.storage.fileUpload.loading) return
+
     const tags = Tags.fromEvent($event)
       .setTag("title", values.title)
       .setTag("summary", values.summary)
       .setTag("location", values.location)
       .setTag("price", values.price.toString(), values.currency.code)
       .setTag("status", values.status)
-      .setImages(images.getValue())
+      // .setImages(images.getValue())
       .removeContext()
 
     const template = asStampedEvent({
       ...$event,
-      tags: tags.unwrap(),
-      content: compose.parse(),
+      tags: [...tags.unwrap(), ...editor.commands.getMetaTags()],
+      content: editor.getText(),
       created_at: inc($event.created_at),
     })
 
@@ -44,36 +49,37 @@
   }
 
   let loading = true
-  let images, compose
   let values: any = {}
 
-  $: {
-    if ($event && loading) {
-      const tags = Tags.fromEvent($event)
-      const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
+  function edit() {
+    console.log(edit)
+    const tags = Tags.fromEvent($event)
+    const [price, code] = tags.whereKey("price").first().slice(1).valueOf()
 
-      loading = false
-
-      values = {
-        groups: tags.context().values().valueOf(),
-        title: tags.get("title")?.value() || "",
-        summary: tags.get("summary")?.value() || "",
-        location: tags.get("location")?.value() || "",
-        status: tags.get("status")?.value() || "active",
-        price: parseInt(price || "0"),
-        currency: getCurrencyOption(code),
-      }
-
-      // Wait for components to mount
-      sleep(10).then(() => {
-        compose.write($event.content)
-
-        for (const url of tags.values("image").valueOf()) {
-          images.addImage(Tags.wrap([["url", url]]))
-        }
-      })
+    values = {
+      groups: tags.context().values().valueOf(),
+      title: tags.get("title")?.value() || "",
+      summary: tags.get("summary")?.value() || "",
+      location: tags.get("location")?.value() || "",
+      status: tags.get("status")?.value() || "active",
+      price: parseInt(price || "0"),
+      currency: getCurrencyOption(code),
     }
+
+    editor = new Editor(
+      getEditorOptions({
+        submit: onSubmit,
+        element: editorElement,
+        content: $event.content || "",
+        submitOnEnter: true,
+        autofocus: true,
+      }),
+    )
   }
+
+  $: loading = !$event
+
+  $: editorElement && edit()
 </script>
 
 {#if loading}
@@ -106,10 +112,9 @@
       </Field>
       <Field label="Description">
         <div class="rounded-xl border border-solid border-neutral-600 bg-white p-3 text-black">
-          <Compose autofocus bind:this={compose} {onSubmit} />
+          <Compose bind:element={editorElement} {editor} class="min-h-24" />
         </div>
       </Field>
-      <NoteImages bind:this={images} bind:compose />
       <FieldInline label="Status">
         <SelectButton
           bind:value={values.status}
@@ -118,7 +123,11 @@
       </FieldInline>
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Save</Anchor>
-        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
+        <button
+          class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+          on:click|preventDefault={editor.commands.selectFiles}>
+          <i class="fa fa-paperclip" />
+        </button>
       </div>
     </FlexColumn>
   </form>
