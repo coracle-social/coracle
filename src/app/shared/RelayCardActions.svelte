@@ -25,11 +25,15 @@
 </script>
 
 {#if !userRelayUrls.includes(url)}
-  <button class="flex items-center gap-3 text-neutral-100" on:click={join}>
-    <i class="fa fa-right-to-bracket" /> Join
+  <button
+    class="flex items-center rounded-md bg-accent px-6 py-1 text-sm font-bold capitalize text-white"
+    on:click={join}>
+    JOIN
   </button>
 {:else if userRelayUrls.length > 1}
-  <button class="flex items-center gap-3 text-neutral-100" on:click={leave}>
-    <i class="fa fa-right-from-bracket" /> Leave
+  <button
+    class="flex items-center rounded-md bg-tinted-700-d px-6 py-1 text-sm font-bold capitalize text-neutral-100"
+    on:click={leave}>
+    LEAVE
   </button>
 {/if}
