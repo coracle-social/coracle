@@ -1,12 +1,15 @@
 <script lang="ts">
+  import {onMount} from 'svelte'
   import {type Instance} from "tippy.js"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {MergedThunk} from "@welshman/app"
+  import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
+  import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
@@ -14,8 +17,10 @@
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
+  import ChatMessageMenuMobile from "@app/components/ChatMessageMenuMobile.svelte"
   import {colors, pubkeyLink} from "@app/state"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
+  import {pushModal} from "@app/modal"
 
   export let event: TrustedEvent
   export let thunk: MergedThunk
@@ -32,6 +37,9 @@
 
     await sendWrapped({template, pubkeys})
   }
+
+  const showMobileMenu = () =>
+    pushModal(ChatMessageMenuMobile, {event})
 
   const togglePopover = () => {
     if (popoverIsVisible) {
@@ -67,12 +75,16 @@
         popoverIsVisible = false
       },
     }}>
-    <Button class="opacity-0 transition-all group-hover:opacity-100" on:click={togglePopover}>
+    <button
+      type="button"
+      class="opacity-0 transition-all"
+      class:group-hover:opacity-100={!isMobile}
+      on:click={togglePopover}>
       <Icon icon="menu-dots" size={4} />
-    </Button>
+    </button>
   </Tippy>
   <div class="flex flex-col">
-    <div class="chat-bubble mx-1 max-w-sm">
+    <LongPress class="text-left chat-bubble mx-1 max-w-sm" onLongPress={showMobileMenu}>
       <div class="flex w-full items-start gap-2">
         {#if showPubkey}
           <Link external href={pubkeyLink(event.pubkey)}>
@@ -100,8 +112,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="row-2 ml-12">
+    </LongPress>
+    <div class="row-2 ml-4 -mt-1 z-feature">
       <ReplySummary {event} />
       <ReactionSummary {event} {onReactionClick} />
     </div>

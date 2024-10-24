@@ -25,7 +25,7 @@
     <p slot="label">Event ID</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="file" />
-      <input type="text" class="ellipsize grow" value={note1} />
+      <input type="text" class="ellipsize min-w-0 grow" value={note1} />
       <Button on:click={copyId} class="flex items-center">
         <Icon icon="copy" />
       </Button>
@@ -35,14 +35,14 @@
     <p slot="label">Author Pubkey</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="user-circle" />
-      <input type="text" class="ellipsize grow" value={npub1} />
+      <input type="text" class="ellipsize min-w-0 grow" value={npub1} />
       <Button on:click={copyPubkey} class="flex items-center">
         <Icon icon="copy" />
       </Button>
     </label>
   </FieldInline>
   <div class="relative">
-    <pre class="card2 card2-sm bg-alt overflow-auto"><code>{json}</code></pre>
+    <pre class="card2 card2-sm bg-alt overflow-auto text-xs"><code>{json}</code></pre>
     <p class="absolute right-2 top-2 flex flex-grow items-center justify-between">
       <Button on:click={copyJson} class="btn btn-neutral btn-sm flex items-center">
         <Icon icon="copy" /> Copy
