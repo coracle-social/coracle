@@ -171,7 +171,7 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col sm:flex-row max-w-[80%] gap-4 justify-between">
+      <div class="flex max-w-[80%] flex-col justify-between gap-4 sm:flex-row">
         {#if $handle}
           <div class="flex items-center gap-2 text-accent">
             <i class="fa fa-at" />
@@ -197,6 +197,18 @@
       <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
       </div>
+      <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
+        <PersonAbout class="font-thin opacity-75" {pubkey} />
+      </div>
+      {#if $profile?.website}
+        <Anchor
+          external
+          class="flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
+          href={ensureProto($profile.website)}>
+          <i class="fa fa-link text-accent" />
+          {stripProtocol($profile.website)}
+        </Anchor>
+      {/if}
     </div>
   </AltColor>
   <div class="bg-tinted-800-d pt-3">

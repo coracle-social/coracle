@@ -6,6 +6,9 @@
   import {loginWithPublicKey, userMutes} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
+  import {toNostrURI} from "@welshman/util"
+  import {nip19} from "nostr-tools"
+  import {ctx} from "@welshman/lib"
 
   export let pubkey
 
@@ -23,6 +26,16 @@
   const mutePerson = () => mute(tagPubkey(pubkey))
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
+
+  const share = () =>
+    router
+      .at("qrcode")
+      .of(
+        toNostrURI(
+          nip19.nprofileEncode({pubkey, relays: ctx.app.router.FromPubkeys([pubkey]).getUrls()}),
+        ),
+      )
+      .open()
 
   let actions = []
 
@@ -56,6 +69,8 @@
     if (!isSelf) {
       actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
+
+    actions.push({onClick: share, label: "Share", icon: "qrcode"})
 
     actions.push({onClick: openProfileInfo, label: "Details", icon: "info"})
   }
