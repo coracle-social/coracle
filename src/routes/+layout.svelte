@@ -1,5 +1,6 @@
 <script lang="ts">
   import "@src/app.css"
+  import Bugsnag from "@bugsnag/js"
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {dev} from "$app/environment"
@@ -43,6 +44,32 @@
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
+  const setupBugsnag = () => {
+    // Redact long strings, especially hex and bech32 keys which are 64 and 63
+    // characters long, respectively. Put the threshold a little lower in case
+    // someone accidentally enters a key with the last few digits missing
+    const redactErrorInfo = (info: any) =>
+      JSON.parse(
+        JSON.stringify(info || null)
+          .replace(/\d+:{60}\w+:\w+/g, "[REDACTED]")
+          .replace(/\w{60}\w+/g, "[REDACTED]"),
+      )
+
+    // Wait for bugsnag to be started in main
+    setTimeout(() => {
+      Bugsnag.addOnError((event: any) => {
+        // Redact individual properties since the event needs to be
+        // mutated, and we don't want to lose the prototype
+        event.context = redactErrorInfo(event.context)
+        event.request = redactErrorInfo(event.request)
+        event.exceptions = redactErrorInfo(event.exceptions)
+        event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
+
+        return true
+      })
+    })
+  }
+
   // Migration: old nostrtalk instance used different sessions
   if ($session && !$signer) {
     dropSession($session.pubkey)
@@ -52,6 +79,15 @@
 
   onMount(() => {
     Object.assign(window, {get, ...lib, ...util, ...app, ...state})
+
+    if (import.meta.env.VITE_BUGSNAG_API_KEY) {
+      Bugsnag.start({
+        apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
+        collectUserIp: false,
+      })
+    }
+
+    setupBugsnag()
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity
