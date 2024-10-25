@@ -1,4 +1,3 @@
-import Bugsnag from "@bugsnag/js"
 import {writable} from "svelte/store"
 import {uniq} from "@welshman/lib"
 import {COMMUNITIES, FEEDS, APP_DATA} from "@welshman/util"
@@ -36,38 +35,6 @@ export const drafts = new Map<string, string>()
 export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")
-
-// Redact long strings, especially hex and bech32 keys which are 64 and 63
-// characters long, respectively. Put the threshold a little lower in case
-// someone accidentally enters a key with the last few digits missing
-const redactErrorInfo = (info: any) =>
-  JSON.parse(
-    JSON.stringify(info || null)
-      .replace(/\d+:{60}\w+:\w+/g, "[REDACTED]")
-      .replace(/\w{60}\w+/g, "[REDACTED]"),
-  )
-
-// Wait for bugsnag to be started in main
-setTimeout(() => {
-  Bugsnag.addOnError((event: any) => {
-    if (window.location.host.startsWith("localhost")) {
-      return false
-    }
-
-    if (!getSetting("report_analytics")) {
-      return false
-    }
-
-    // Redact individual properties since the event needs to be
-    // mutated, and we don't want to lose the prototype
-    event.context = redactErrorInfo(event.context)
-    event.request = redactErrorInfo(event.request)
-    event.exceptions = redactErrorInfo(event.exceptions)
-    event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
-
-    return true
-  })
-})
 
 export const logUsage = async (path: string) => {
   if (getSetting("report_analytics")) {

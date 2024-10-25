@@ -19,7 +19,6 @@
     "watch": "find src -type f | entr -r"
   },
   "dependencies": {
-    "@bugsnag/js": "^8.0.0",
     "@capacitor/android": "^6.1.2",
     "@capacitor/app": "^6.0.1",
     "@capacitor/assets": "^3.0.5",
@@ -32,6 +31,7 @@
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@getalby/bitcoin-connect": "^3.6.2",
     "@scure/base": "^1.1.9",
+    "@sentry/browser": "^8.35.0",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.4",
     "@types/ramda": "^0.30.2",

@@ -1,13 +1,13 @@
 import "src/app.css"
-import Bugsnag from "@bugsnag/js"
+import * as Sentry from '@sentry/browser'
 import {App as CapacitorApp} from "@capacitor/app"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 
-if (import.meta.env.VITE_BUGSNAG_API_KEY) {
-  Bugsnag.start({
-    apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
-    collectUserIp: false,
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    tracesSampleRate: 0.01,
   })
 }
 
