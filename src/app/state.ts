@@ -4,7 +4,6 @@ import {uniq} from "@welshman/lib"
 import {COMMUNITIES, FEEDS, APP_DATA} from "@welshman/util"
 import {
   pubkey,
-  session,
   loadZapper,
   loadHandle,
   loadRelaySelections,
