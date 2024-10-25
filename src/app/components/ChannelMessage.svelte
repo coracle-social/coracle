@@ -6,7 +6,7 @@
   import type {Thunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import {slideAndFade, conditionalTransition} from "@lib/transition"
-  import Delay from "@lib/components/Delay.svelte"
+  import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
@@ -39,18 +39,13 @@
   const transition = conditionalTransition(thunk, slideAndFade)
 
   const onClick = () => {
-    if (inert) {
-      return
-    }
+    const root = $rootEvent || event
 
-    if (isMobile) {
-      pushModal(ChannelMessageMenuMobile, {url, event})
-    } else {
-      const root = $rootEvent || event
-
-      pushDrawer(ChannelConversation, {url, room, event: root})
-    }
+    pushDrawer(ChannelConversation, {url, room, event: root})
   }
+
+  const onLongPress = () =>
+    pushModal(ChannelMessageMenuMobile, {url, event})
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -68,57 +63,53 @@
   }
 </script>
 
-<Delay>
-  <button
-    type="button"
-    in:transition
-    on:click={onClick}
-    class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors"
-    class:hover:bg-base-300={!inert}>
-    <div class="flex w-full gap-3">
+<LongPress
+  on:click={isMobile || inert ? null : onClick}
+  onLongPress={inert ? null : onLongPress}
+  class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert ? 'hover:bg-base-300' : ''}">
+  <div class="flex w-full gap-3">
+    {#if showPubkey}
+      <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
+        <Avatar
+          src={$profile?.picture}
+          class="border border-solid border-base-content"
+          size={10} />
+      </Link>
+    {:else}
+      <div class="w-10 min-w-10 max-w-10" />
+    {/if}
+    <div class="-mt-1 flex-grow pr-1">
       {#if showPubkey}
-        <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
-          <Avatar
-            src={$profile?.picture}
-            class="border border-solid border-base-content"
-            size={10} />
-        </Link>
-      {:else}
-        <div class="w-10 min-w-10 max-w-10" />
-      {/if}
-      <div class="-mt-1 flex-grow pr-1">
-        {#if showPubkey}
-          <div class="flex items-center gap-2">
-            <Link
-              external
-              href={pubkeyLink(event.pubkey)}
-              class="text-sm font-bold"
-              style="color: {colorValue}">
-              {$profileDisplay}
-            </Link>
-            <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
-          </div>
-        {/if}
-        <div class="text-sm">
-          <Content {event} />
-          {#if thunk}
-            <ThunkStatus {thunk} />
-          {/if}
+        <div class="flex items-center gap-2">
+          <Link
+            external
+            href={pubkeyLink(event.pubkey)}
+            class="text-sm font-bold"
+            style="color: {colorValue}">
+            {$profileDisplay}
+          </Link>
+          <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
+      {/if}
+      <div class="text-sm">
+        <Content {event} />
+        {#if thunk}
+          <ThunkStatus {thunk} />
+        {/if}
       </div>
     </div>
-    <div class="row-2 ml-12">
-      {#if !isHead}
-        <ReplySummary {event} />
-      {/if}
-      <ReactionSummary {event} {onReactionClick} />
-    </div>
-    <button
-      class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
-      class:group-hover:opacity-100={!isMobile}
-      on:click|stopPropagation>
-      <ChannelMessageEmojiButton {url} {room} {event} />
-      <ChannelMessageMenuButton {url} {event} />
-    </button>
+  </div>
+  <div class="row-2 ml-12">
+    {#if !isHead}
+      <ReplySummary {event} />
+    {/if}
+    <ReactionSummary {event} {onReactionClick} />
+  </div>
+  <button
+    class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
+    class:group-hover:opacity-100={!isMobile}
+    on:click|stopPropagation>
+    <ChannelMessageEmojiButton {url} {room} {event} />
+    <ChannelMessageMenuButton {url} {event} />
   </button>
-</Delay>
+</LongPress>

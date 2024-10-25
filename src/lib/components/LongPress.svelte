@@ -10,6 +10,6 @@
   let timeout: number
 </script>
 
-<div on:touchstart={onTouchStart} on:touchend={onTouchEnd} {...$$props}>
+<div role="button" tabindex="0" on:click on:touchstart={onTouchStart} on:touchend={onTouchEnd} {...$$props}>
   <slot />
 </div>
