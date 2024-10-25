@@ -4,6 +4,7 @@
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {dev} from "$app/environment"
+  import {page} from "$app/stores"
   import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -44,7 +45,15 @@
   import {loadUserData} from "@app/commands"
   import * as state from "@app/state"
 
-  const setupBugsnag = () => {
+  const setupErrorTracking = () => {
+    if (!import.meta.env.VITE_BUGSNAG_API_KEY) return
+
+    // Initialize
+    Bugsnag.start({
+      apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
+      collectUserIp: false,
+    })
+
     // Redact long strings, especially hex and bech32 keys which are 64 and 63
     // characters long, respectively. Put the threshold a little lower in case
     // someone accidentally enters a key with the last few digits missing
@@ -55,18 +64,25 @@
           .replace(/\w{60}\w+/g, "[REDACTED]"),
       )
 
-    // Wait for bugsnag to be started in main
-    setTimeout(() => {
-      Bugsnag.addOnError((event: any) => {
-        // Redact individual properties since the event needs to be
-        // mutated, and we don't want to lose the prototype
-        event.context = redactErrorInfo(event.context)
-        event.request = redactErrorInfo(event.request)
-        event.exceptions = redactErrorInfo(event.exceptions)
-        event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
+    Bugsnag.addOnError((event: any) => {
+      // Redact individual properties since the event needs to be
+      // mutated, and we don't want to lose the prototype
+      event.context = redactErrorInfo(event.context)
+      event.request = redactErrorInfo(event.request)
+      event.exceptions = redactErrorInfo(event.exceptions)
+      event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
 
-        return true
-      })
+      return true
+    })
+  }
+
+  const setupAnalytics = () => {
+    (window as any).plausible.q = []
+
+    page.subscribe($page => {
+      if ($page.route) {
+        (window as any).plausible.q.push(["pageview", {u: $page.route.id}])
+      }
     })
   }
 
@@ -79,15 +95,6 @@
 
   onMount(() => {
     Object.assign(window, {get, ...lib, ...util, ...app, ...state})
-
-    if (import.meta.env.VITE_BUGSNAG_API_KEY) {
-      Bugsnag.start({
-        apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
-        collectUserIp: false,
-      })
-    }
-
-    setupBugsnag()
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity
@@ -146,6 +153,9 @@
     }
 
     if (!db) {
+      setupErrorTracking()
+      setupAnalytics()
+
       ready = initStorage("flotilla", 4, {
         events: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
         relays: {keyPath: "url", store: throttled(1000, relays)},

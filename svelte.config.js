@@ -16,10 +16,10 @@ export default {
     },
     csp: {
       directives: {
-        "script-src": ["self", "plausible.io"],
+        "script-src": ["self", "plausible.coracle.social"],
         "worker-src": ["self", "blob:"],
         "style-src": ["self", "unsafe-inline"],
-        "frame-src": ["open.spotify.com", "embed.tidal.com"],
+        "frame-src": ["none"],
         "child-src": ["none"],
         "form-action": ["none"],
       },
