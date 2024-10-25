@@ -103,6 +103,8 @@
   const setActiveTab = tab => {
     activeTab = tab
   }
+
+  $: console.log($profile.website)
 </script>
 
 <div
@@ -197,18 +199,6 @@
       <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
       </div>
-      <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
-        <PersonAbout class="font-thin opacity-75" {pubkey} />
-      </div>
-      {#if $profile?.website}
-        <Anchor
-          external
-          class="flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
-          href={ensureProto($profile.website)}>
-          <i class="fa fa-link text-accent" />
-          {stripProtocol($profile.website)}
-        </Anchor>
-      {/if}
     </div>
   </AltColor>
   <div class="bg-tinted-800-d pt-3">
