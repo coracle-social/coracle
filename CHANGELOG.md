@@ -7,6 +7,7 @@
 - [x] Downgrade typescript to save my sanity
 - [x] Show links/images as blocks when at the end of a paragraph
 - [x] Implement new profile page and summary designs
+- [x] Stop sending user to bugsnag
 
 # 0.4.14
 
