@@ -3,6 +3,7 @@
 # 0.4.16
 
 - [x] Switch to self-hosted analytics
+- [x] Update profile detail page (@thibaut)
 
 # 0.4.15
 
