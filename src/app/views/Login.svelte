@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
+  import {Capacitor} from "@capacitor/core"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
@@ -136,7 +137,10 @@
         }
       },
     })
-    signerApps = await getNip55()
+
+    if (Capacitor.isNativePlatform()) {
+      signerApps = await getNip55()
+    }
   })
 
   document.title = "Log In"
@@ -203,16 +207,14 @@
         </div>
         <span>Public Key</span>
       </Tile>
-      {#if signerApps.length > 0}
-        {#each signerApps as app}
-          <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
-            <div>
-              <img src={app.iconUrl} alt={app.name} width="48" height="48" />
-            </div>
-            <span>{app.name}</span>
-          </Tile>
-        {/each}
-      {/if}
+      {#each signerApps as app}
+        <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
+          <div>
+            <img src={app.iconUrl} alt={app.name} width="48" height="48" />
+          </div>
+          <span>{app.name}</span>
+        </Tile>
+      {/each}
     </div>
   </FlexColumn>
 </form>
