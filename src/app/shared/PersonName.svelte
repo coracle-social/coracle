@@ -61,8 +61,8 @@
         {/if}
       </div>
       <div class="flex flex-row items-center gap-1 text-xs">
-        <PersonHandle class="hidden whitespace-nowrap text-accent xs:block" {pubkey}>
-          <span class="hidden opacity-50 xs:block">-</span>
+        <PersonHandle class="whitespace-nowrap text-accent hidden xs:block" {pubkey}>
+          <span class="opacity-50 hidden xs:block">-</span>
         </PersonHandle>
         <p class="whitespace-nowrap opacity-50">{npubDisplay}</p>
         {#if displayNpubCopyButton}

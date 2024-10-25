@@ -3,7 +3,7 @@
   import "@fortawesome/fontawesome-free/css/solid.css"
 
   import {nip19} from "nostr-tools"
-  import * as store from "svelte/store"
+  import {get} from "svelte/store"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as network from "@welshman/net"
@@ -408,20 +408,19 @@
   router.init()
 
   // Globals
-  ;(window as any).g = {
-    ...domain,
-    ...engine,
+  Object.assign(window, {
+    get,
     nip19,
-    store,
     logger,
     router,
-    nostr,
-    misc,
-    network,
-    util,
-    lib,
-    app,
-  }
+    ...nostr,
+    ...misc,
+    ...lib,
+    ...util,
+    ...app,
+    ...domain,
+    ...engine,
+  })
 
   // Theme
 

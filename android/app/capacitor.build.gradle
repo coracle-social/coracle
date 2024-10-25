@@ -9,8 +9,8 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
-    implementation project(':nostr-signer-capacitor-plugin')
     implementation project(':capacitor-app')
+    implementation project(':nostr-signer-capacitor-plugin')
 
 }
 
