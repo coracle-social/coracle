@@ -8,7 +8,7 @@
       <slot name="icon" />
     </div>
     <div class="flex flex-col gap-1">
-      <p class="text-bold pt-2 text-lg">
+      <p class="text-bold text-lg">
         <slot name="title" />
       </p>
       <p class="text-sm">

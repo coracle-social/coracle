@@ -20,6 +20,13 @@
       Spaces are places where communities come together to work, play, and hang out.
     </div>
   </ModalHeader>
+  <Link href="/discover">
+    <CardButton class="!btn-primary">
+      <div slot="icon"><Icon icon="compass" size={7} /></div>
+      <div slot="title">Discover spaces</div>
+      <div slot="info">Browse spaces on the discover page.</div>
+    </CardButton>
+  </Link>
   <Button on:click={startJoin}>
     <CardButton>
       <div slot="icon"><Icon icon="login-2" size={7} /></div>
@@ -34,11 +41,4 @@
       <div slot="info">Just a few questions and you'll be on your way.</div>
     </CardButton>
   </Button>
-  <Link href="/discover">
-    <CardButton>
-      <div slot="icon"><Icon icon="compass" size={7} /></div>
-      <div slot="title">Discover spaces</div>
-      <div slot="info">Browse spaces on the discover page.</div>
-    </CardButton>
-  </Link>
 </div>

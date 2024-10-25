@@ -17,7 +17,6 @@
   $: pubkeys = term ? $profileSearch.searchValues(term) : defaultPubkeys
 
   onMount(() => {
-    console.log(element)
     const scroller = createScroller({
       element,
       onScroll: () => {

@@ -20,7 +20,6 @@
 
   const getLocalHref = (e: TrustedEvent) => {
     const url = e.tags.find(nthEq(0, "~"))?.[2]
-    console.log(e, url)
 
     if (!url) return
     if ([MESSAGE, THREAD].includes(e.kind)) return makeThreadPath(url, e.id)

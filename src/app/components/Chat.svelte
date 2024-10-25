@@ -57,7 +57,7 @@
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
-    const thunk = await sendWrapped({template, pubkeys, delay: 2000})
+    const thunk = await sendWrapped({template, pubkeys, delay: 3000})
 
     thunks.update(assoc(thunk.thunks[0].event.id, thunk))
   }
@@ -161,7 +161,7 @@
         <ChatMessage {event} {thunk} {pubkeys} {showPubkey} />
       {/if}
     {/each}
-    <p class="flex h-10 items-center justify-center py-20">
+    <p class="flex flex-col gap-4 max-w-sm m-auto text-center h-10 items-center justify-center py-20">
       <Spinner {loading}>
         {#if loading}
           Looking for messages...
@@ -169,6 +169,7 @@
           End of message history
         {/if}
       </Spinner>
+      <slot name="info" />
     </p>
   </div>
   <ChatCompose {onSubmit} />

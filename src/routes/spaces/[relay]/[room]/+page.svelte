@@ -52,7 +52,7 @@
 
   const onSubmit = ({content, tags}: EventContent) => {
     const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
-    const thunk = publishThunk({event, relays: [url], delay: 2000})
+    const thunk = publishThunk({event, relays: [url], delay: 3000})
 
     thunks.update(assoc(thunk.event.id, thunk))
   }

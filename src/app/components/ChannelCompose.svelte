@@ -36,7 +36,7 @@
 <div class="relative z-feature flex gap-2 p-2">
   <Button
     data-tip="Add an image"
-    class="center tooltip h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
+    class="center tooltip tooltip-right h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
     on:click={() => addFile($editor)}>
     {#if $loading}
       <span class="loading loading-spinner loading-xs"></span>

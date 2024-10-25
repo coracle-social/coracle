@@ -323,7 +323,7 @@ export type ReplyParams = {
 export const makeComment = ({event, content, tags = []}: ReplyParams) => {
   const seenRoots = new Set<string>()
 
-  for (const [raw, ...tag] of event.tags.filter(t => t[0].match(/^K|E|A|I$/i))) {
+  for (const [raw, ...tag] of event.tags.filter(t => t[0].match(/^(k|e|a|i)$/i))) {
     const T = raw.toUpperCase()
     const t = raw.toLowerCase()
 

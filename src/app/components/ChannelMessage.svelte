@@ -26,6 +26,7 @@
   export let thunk: Thunk
   export let showPubkey = false
   export let isHead = false
+  export let inert = false
 
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
@@ -38,6 +39,10 @@
   const transition = conditionalTransition(thunk, slideAndFade)
 
   const onClick = () => {
+    if (inert) {
+      return
+    }
+
     if (isMobile) {
       pushModal(ChannelMessageMenuMobile, {url, event})
     } else {
@@ -65,10 +70,11 @@
 
 <Delay>
   <button
+    type="button"
     in:transition
     on:click={onClick}
-    type="button"
-    class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors hover:bg-base-300">
+    class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors"
+    class:hover:bg-base-300={!inert}>
     <div class="flex w-full gap-3">
       {#if showPubkey}
         <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">

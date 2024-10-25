@@ -28,7 +28,7 @@
   $: failure = Object.entries($status).find(([url, s]) => [Failure, Timeout].includes(s.status))
 </script>
 
-<div class="flex justify-end text-xs">
+<div class="flex justify-end text-xs px-1">
   {#if canCancel || isPending}
     <span class="mt-2 flex items-center gap-1">
       <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
