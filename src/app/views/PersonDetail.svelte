@@ -103,8 +103,6 @@
   const setActiveTab = tab => {
     activeTab = tab
   }
-
-  $: console.log($profile.website)
 </script>
 
 <div
@@ -115,25 +113,23 @@
 
 <div>
   <AltColor background class="relative flex gap-4 p-6 text-neutral-100">
-    <div>
+    <div class="flex flex-col gap-4 items-center">
       <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
       {#if pubkey === $session?.pubkey}
         <Anchor
           button
-          class="mt-4 !bg-neutral-800 dark:!bg-white"
+          class="!bg-neutral-800 dark:!bg-white"
           on:click={router.at("/settings/profile").open}>Edit</Anchor>
       {:else}
         <Anchor
           button
           accent={!$following}
           low={$following}
-          class="mt-4"
           on:click={() => ($following ? unfollow(pubkey) : follow(tagPubkey(pubkey)))}
           >{$following ? "Unfollow" : "Follow"}</Anchor>
         <Anchor
           button
           low
-          class="mt-4"
           on:click={router.at("channels").of([$session.pubkey, pubkey]).push}>Message</Anchor>
       {/if}
     </div>
@@ -196,7 +192,7 @@
           </Anchor>
         {/if}
       </div>
-      <div class="-ml-16 flex flex-grow flex-col gap-4 xs:ml-0">
+      <div class="flex flex-grow flex-col gap-4">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
       </div>
     </div>
