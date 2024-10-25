@@ -6,7 +6,6 @@
   import {get} from "svelte/store"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
-  import * as network from "@welshman/net"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
