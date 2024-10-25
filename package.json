@@ -32,10 +32,10 @@
   },
   "type": "module",
   "dependencies": {
-    "@bugsnag/js": "^8.1.2",
     "@noble/curves": "^1.5.0",
     "@noble/hashes": "^1.4.0",
     "@poppanator/sveltekit-svg": "^4.2.1",
+    "@sentry/browser": "^8.35.0",
     "@sveltejs/adapter-static": "^3.0.4",
     "@tiptap/extension-code": "^2.6.6",
     "@tiptap/extension-code-block": "^2.6.6",
