@@ -66,8 +66,6 @@ setTimeout(() => {
     event.exceptions = redactErrorInfo(event.exceptions)
     event.breadcrumbs = redactErrorInfo(event.breadcrumbs)
 
-    event.setUser(session.get())
-
     return true
   })
 })
