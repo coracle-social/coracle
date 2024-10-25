@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.4.16
+
+- [x] Switch to self-hosted analytics
+
 # 0.4.15
 
 - [x] Hack in accommodation of algorithmic relay feeds
