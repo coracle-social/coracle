@@ -56,14 +56,14 @@
     {/if}
     {#each sortBy(e => -e.created_at, $replies) as reply (reply.id)}
       <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
-        <div class="ml-12 col-3">
+        <div class="col-3 ml-12">
           <Content event={reply} />
           <ThreadActions event={reply} {url} />
         </div>
       </NoteCard>
     {/each}
     <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
-      <div class="ml-12 col-3">
+      <div class="col-3 ml-12">
         <Content event={$event} />
         <ThreadActions event={$event} {url} />
       </div>

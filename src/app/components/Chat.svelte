@@ -161,7 +161,8 @@
         <ChatMessage {event} {thunk} {pubkeys} {showPubkey} />
       {/if}
     {/each}
-    <p class="flex flex-col gap-4 max-w-sm m-auto text-center h-10 items-center justify-center py-20">
+    <p
+      class="m-auto flex h-10 max-w-sm flex-col items-center justify-center gap-4 py-20 text-center">
       <Spinner {loading}>
         {#if loading}
           Looking for messages...
