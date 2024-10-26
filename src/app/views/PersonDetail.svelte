@@ -112,9 +112,9 @@
        background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
 <div>
-  <AltColor background class="relative flex gap-4 p-6 text-neutral-100">
+  <AltColor background class="relative flex flex-col sm:flex-row gap-8 sm:gap-4 p-6 text-neutral-100">
     <div class="flex flex-col gap-4 items-center">
-      <PersonCircle {pubkey} class="mt-1 h-12 w-12 sm:h-32 sm:w-32" />
+      <PersonCircle {pubkey} class="mt-1 h-32 w-32" />
       {#if pubkey === $session?.pubkey}
         <Anchor
           button
