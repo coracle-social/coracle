@@ -10,8 +10,8 @@
 </script>
 
 {#if $replies.length > 0}
-  <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
+  <button type="button" on:click class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
     <Icon icon="reply" />
     {$replies.length}
-  </div>
+  </button>
 {/if}

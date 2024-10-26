@@ -101,7 +101,7 @@
   </div>
   <div class="row-2 ml-12">
     {#if !isHead}
-      <ReplySummary {event} />
+      <ReplySummary {event} on:click={onClick} />
     {/if}
     <ReactionSummary {event} {onReactionClick} />
   </div>
