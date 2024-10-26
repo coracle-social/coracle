@@ -855,11 +855,13 @@ export const loginWithExtension = pubkey => addSession({method: "nip07", pubkey}
 export const loginWithSigner = (pubkey, pkg) =>
   addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
-export const loginWithNsecBunker = async (pubkey, token, connectRelay) => {
+export const loginWithBunker = async (pubkey, token, relays) => {
   const secret = makeSecret()
-  const handler = {relays: [connectRelay]}
+  const handler = {relays}
   const broker = Nip46Broker.get(pubkey, secret, handler)
   const result = await broker.connect(token, nip46Perms)
+
+  console.log(result)
 
   if (result) {
     addSession({method: "nip46", pubkey, secret, token, handler})

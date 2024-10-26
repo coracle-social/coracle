@@ -17,7 +17,7 @@
   export let termIsValid = null
   export let getKey: (x: any) => any = identity
   export let displayItem = getKey
-  export let autofocus = false
+  export let autofocus = undefined
   export let multiple = false
   export let loading = false
   export let defaultOptions = []
@@ -115,6 +115,7 @@
       onFocus()
     }
   })
+
 </script>
 
 {#if multiple}

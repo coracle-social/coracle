@@ -7,9 +7,10 @@
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
+  import {appName} from "src/partials/state.ts"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Tile from "src/partials/Tile.svelte"
+  import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -151,70 +152,61 @@
     <div class="text-center">
       <Heading>Welcome!</Heading>
       <p class="text-lg text-neutral-100">
-        Don't have an account yet?
-        <Anchor underline on:click={signUp} class="ml-1 text-neutral-100">Sign up</Anchor>
+        {appName} is built using the
+        <Anchor external underline href="https://nostr.com/">nostr protocol</Anchor>, which allows
+        you to own your social identity.
       </p>
     </div>
-    <div class="flex">
-      <Input bind:value={username} class="flex-grow rounded-r-none" placeholder="Username">
-        <i slot="before" class="fa fa-user-astronaut" />
-      </Input>
-      <SearchSelect
-        bind:value={handler}
-        defaultOptions={handlers}
-        getKey={prop("domain")}
-        termToItem={objOf("domain")}
-        inputClass="rounded-l-none border-l-0 flex-grow"
-        search={() => handlers}>
-        <i slot="before" class="fa fa-at relative top-[2px]" />
-        <span slot="item" let:item>{item.domain}</span>
-      </SearchSelect>
+    <div class="flex flex-col gap-2">
+      <Field label="Username">
+        <Input bind:value={username} placeholder="Username">
+          <i slot="before" class="fa fa-user-astronaut" />
+        </Input>
+      </Field>
+      <Field label="Remote Signer">
+        <SearchSelect
+          bind:value={handler}
+          defaultOptions={handlers}
+          getKey={prop("domain")}
+          termToItem={objOf("domain")}
+          search={() => handlers}>
+          <i slot="before" class="fa fa-at relative top-[2px]" />
+          <span slot="item" let:item>{item.domain}</span>
+        </SearchSelect>
+      </Field>
+      <Anchor button accent tall disabled={!username} {loading} on:click={onSubmit}>Log In</Anchor>
     </div>
-    <Anchor button accent {loading} on:click={onSubmit}>Log In</Anchor>
     <div class="relative flex items-center gap-4">
       <div class="h-px flex-grow bg-neutral-600" />
       <div class="staatliches text-xl">Or</div>
       <div class="h-px flex-grow bg-neutral-600" />
     </div>
     <div
-      class={cx(
-        "relative grid justify-center gap-2 xs:gap-5",
-        getNip07() || signerApps.length > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
-      )}>
-      <Tile class="cursor-pointer bg-tinted-800" on:click={useBunker}>
-        <div>
-          <i class="fa fa-box fa-xl" />
-        </div>
-        <span>Bunker URL</span>
-      </Tile>
+      class="relative flex flex-col gap-4">
       {#if getNip07()}
-        <Tile class="cursor-pointer bg-tinted-800" on:click={useExtension}>
-          <div>
-            <i class="fa fa-puzzle-piece fa-xl" />
-          </div>
-          <span>Extension</span>
-        </Tile>
+        <Anchor button tall accent={!username} low={username} class="cursor-pointer" on:click={useExtension}>
+          <i class="fa fa-puzzle-piece" /> Browser Extension
+        </Anchor>
       {/if}
-      <Tile class="cursor-pointer bg-tinted-800" on:click={usePrivateKey}>
-        <div>
-          <i class="fa fa-key fa-xl" />
-        </div>
-        <span>Private Key</span>
-      </Tile>
-      <Tile class="cursor-pointer bg-tinted-800" on:click={usePublicKey}>
-        <div>
-          <i class="fa fa-eye fa-xl" />
-        </div>
-        <span>Public Key</span>
-      </Tile>
       {#each signerApps as app}
-        <Tile class="cursor-pointer bg-tinted-800" on:click={() => useSigner(app)}>
-          <div>
-            <img src={app.iconUrl} alt={app.name} width="48" height="48" />
-          </div>
-          <span>{app.name}</span>
-        </Tile>
+        <Anchor button tall accent class="cursor-pointer" on:click={() => useSigner(app)}>
+          <img src={app.iconUrl} alt={app.name} width="20" height="20" />
+          {app.name}
+        </Anchor>
       {/each}
+      <Anchor button low tall class="cursor-pointer" on:click={useBunker}>
+        <i class="fa fa-box" /> Bunker URL
+      </Anchor>
+      <Anchor button low tall class="cursor-pointer" on:click={usePrivateKey}>
+        <i class="fa fa-key" /> Private Key
+      </Anchor>
+      <Anchor button low tall class="cursor-pointer" on:click={usePublicKey}>
+        <i class="fa fa-eye" /> Public Key
+      </Anchor>
     </div>
+    <span>
+      Need an account?
+      <Anchor underline on:click={signUp}>Register instead</Anchor>
+    </span>
   </FlexColumn>
 </form>
