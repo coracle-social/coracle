@@ -61,25 +61,29 @@
 
 <AltColor background class="flex flex-col justify-between gap-3 rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
-    <div class="flex min-w-0 items-center gap-2">
+    <div class="flex min-w-0 shrink-0 items-center gap-2">
       <div class="h-9 w-9 rounded-full" style={`background-color: ${hsl(stringToHue(url))};`} />
       <div>
-        <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
-          {displayRelayUrl(url)}
+        <div class="flex items-center gap-2">
+          <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
+            {displayRelayUrl(url)}
+          </div>
+          {#if showStatus && !getSetting("multiplextr_url")}
+            <RelayStatus {url} />
+          {/if}
         </div>
         <div class="flex gap-4 text-xs text-neutral-400">
           {#if $relay?.profile?.supported_nips}
-            <span class="cursor-pointer">
+            <span>
               {$relay.profile.supported_nips.length} NIPs
             </span>
           {/if}
-          Connected {quantify($relay.stats.connect_count, "time")}
+          <span>
+            Connected {quantify($relay.stats?.connect_count || 0, "time")}
+          </span>
         </div>
       </div>
 
-      {#if showStatus && !getSetting("multiplextr_url")}
-        <RelayStatus {url} />
-      {/if}
       {#if !showStatus && ratings?.length > 0}
         <div class="hidden items-center gap-1 px-4 text-sm sm:flex">
           <Rating inert value={getAvgRating(ratings)} />
@@ -91,24 +95,7 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
-        <div class="flex gap-4">
-          <button
-            class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
-            class:bg-tinted-600-d={details}
-            class:text-tinted-100-l={details}
-            on:click={_ => (details = !details)}>
-            INFO
-          </button>
-          <button
-            class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
-            on:click={() =>
-              router
-                .at(router.at("relays").of(encodeURIComponent(url)).toString())
-                .push({modal: true})}>
-            EXPLORE
-          </button>
-          <RelayCardActions {url} {claim} />
-        </div>
+        <RelayCardActions {url} {claim} bind:details />
       </slot>
     {/if}
   </div>

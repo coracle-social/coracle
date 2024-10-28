@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {ConnectionStatus, AuthStatus} from "@welshman/net"
+  import Popover from "src/partials/Popover.svelte"
 
   export let url
 
@@ -49,17 +50,9 @@
   })
 </script>
 
-<span
-  class="h-2 w-2 cursor-pointer rounded-full {className}"
-  on:mouseout={() => {
-    statusHover = false
-  }}
-  on:mouseover={() => {
-    statusHover = true
-  }} />
-<p
-  class="hidden text-sm text-neutral-100 transition-all sm:block"
-  class:opacity-0={!statusHover}
-  class:opacity-1={statusHover}>
-  {description}
-</p>
+<Popover triggerType="mouseenter">
+  <div slot="trigger" class="h-2 w-2 cursor-pointer rounded-full {className}" />
+  <div slot="tooltip" class="transition-all sm:block">
+    {description}
+  </div>
+</Popover>
