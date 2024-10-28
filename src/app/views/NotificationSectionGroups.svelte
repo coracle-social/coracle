@@ -40,8 +40,6 @@
 
     return unsub
   })
-
-  $: console.log(groupNotifications)
 </script>
 
 {#each $groupNotifications.slice(0, limit) as notification, i (notification.id)}

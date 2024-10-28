@@ -52,11 +52,11 @@
   <p>To log in remotely, enter your connection string below.</p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input bind:value={input} placeholder="bunker://..." class="rounded-full">
+      <Input bind:value={input} placeholder="bunker://...">
         <i slot="before" class="fa fa-key" />
       </Input>
     </div>
-    <Anchor circle button tall accent on:click={logIn}>
+    <Anchor button accent on:click={logIn}>
       <i class="fa fa-right-to-bracket" />
     </Anchor>
   </div>

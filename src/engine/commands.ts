@@ -861,8 +861,6 @@ export const loginWithBunker = async (pubkey, token, relays) => {
   const broker = Nip46Broker.get(pubkey, secret, handler)
   const result = await broker.connect(token, nip46Perms)
 
-  console.log(result)
-
   if (result) {
     addSession({method: "nip46", pubkey, secret, token, handler})
   }
