@@ -11,14 +11,15 @@
   import {nip05} from "nostr-tools"
 
   let input = ""
+  let loading = false
 
-  const parse = async uri => {
+  const parse = async (uri: string) => {
     const r = {pubkey: "", relay: "", token: ""}
 
     try {
       const url = new URL(uri)
 
-      r.pubkey = url.hostname
+      r.pubkey = url.hostname || url.pathname.replace(/\//g, '')
       r.relays = url.searchParams.getAll("relay") || []
       r.token = url.searchParams.get("secret") || ""
     } catch {
@@ -29,34 +30,40 @@
   }
 
   const logIn = async () => {
-    const {pubkey, token, relays} = await parse(input)
+    loading = true
 
-    if (!isKeyValid(pubkey)) {
-      return showWarning("Sorry, but that's an invalid public key.")
-    }
+    try {
+      const {pubkey, token, relays} = await parse(input)
 
-    if (relays.length === 0) {
-      return showWarning("That connection string doesn't have any relays.")
-    }
+      if (!isKeyValid(pubkey)) {
+        return showWarning("Sorry, but that's an invalid public key.")
+      }
 
-    const success = await loginWithBunker(pubkey, token, relays)
+      if (relays.length === 0) {
+        return showWarning("That connection string doesn't have any relays.")
+      }
 
-    if (success) {
-      boot()
+      const success = await loginWithBunker(pubkey, token, relays)
+
+      if (success) {
+        boot()
+      }
+    } finally {
+      loading = false
     }
   }
 </script>
 
 <Content size="lg" class="text-center">
-  <Heading>Login with Bunker</Heading>
-  <p>To log in remotely, enter your connection string below.</p>
+  <Heading>Login with Signer</Heading>
+  <p>To log in using a signer app, enter your connection string.</p>
   <div class="flex gap-2">
     <div class="flex-grow">
-      <Input bind:value={input} placeholder="bunker://...">
-        <i slot="before" class="fa fa-key" />
+      <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
+        <i slot="before" class="fa fa-box" />
       </Input>
     </div>
-    <Anchor button accent on:click={logIn}>
+    <Anchor button accent on:click={logIn} {loading}>
       <i class="fa fa-right-to-bracket" />
     </Anchor>
   </div>

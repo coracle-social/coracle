@@ -163,7 +163,7 @@
           <i slot="before" class="fa fa-user-astronaut" />
         </Input>
       </Field>
-      <Field label="Remote Signer">
+      <Field label="Signer App">
         <SearchSelect
           bind:value={handler}
           defaultOptions={handlers}
@@ -194,13 +194,13 @@
           {app.name}
         </Anchor>
       {/each}
-      <Anchor button low tall class="cursor-pointer" on:click={useBunker}>
+      <Anchor button tall class="cursor-pointer" on:click={useBunker}>
         <i class="fa fa-box" /> Bunker URL
       </Anchor>
-      <Anchor button low tall class="cursor-pointer" on:click={usePrivateKey}>
+      <Anchor button tall class="cursor-pointer" on:click={usePrivateKey}>
         <i class="fa fa-key" /> Private Key
       </Anchor>
-      <Anchor button low tall class="cursor-pointer" on:click={usePublicKey}>
+      <Anchor button tall class="cursor-pointer" on:click={usePublicKey}>
         <i class="fa fa-eye" /> Public Key
       </Anchor>
     </div>
