@@ -15,25 +15,18 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {derived} from "svelte/store"
   import {displayPubkey} from "@welshman/util"
-  import {session, maxWot, deriveProfileDisplay, getUserWotScore} from "@welshman/app"
-  import Popover from "src/partials/Popover.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import WotScore from "src/partials/WotScore.svelte"
-  import {userFollows} from "src/engine"
+  import {session, deriveProfileDisplay} from "@welshman/app"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
+  import WotPopover from "./WotPopover.svelte"
 
   export let pubkey
   export let displayNpubCopyButton = false
 
-  const following = derived(userFollows, $m => $m.has(pubkey))
-  const wotScore = getUserWotScore(pubkey)
   const npub = nip19.npubEncode(pubkey)
   const npubDisplay = displayPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
-  const accent = $following || pubkey === $session?.pubkey
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>
@@ -43,26 +36,12 @@
         class="cy-person-name flex max-w-[100%] items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
         {$profileDisplay}
         {#if $session}
-          <div on:click|stopPropagation>
-            <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
-              <div slot="trigger">
-                <WotScore score={wotScore} max={$maxWot} {accent} />
-              </div>
-              <Anchor
-                modal
-                slot="tooltip"
-                class="flex items-center gap-1"
-                href="/help/web-of-trust">
-                <i class="fa fa-info-circle" />
-                WoT Score: {wotScore}
-              </Anchor>
-            </Popover>
-          </div>
+          <WotPopover {pubkey} />
         {/if}
       </div>
       <div class="flex flex-row items-center gap-1 text-xs">
-        <PersonHandle class="whitespace-nowrap text-accent hidden xs:block" {pubkey}>
-          <span class="opacity-50 hidden xs:block">-</span>
+        <PersonHandle class="hidden whitespace-nowrap text-accent xs:block" {pubkey}>
+          <span class="hidden opacity-50 xs:block">-</span>
         </PersonHandle>
         <p class="whitespace-nowrap opacity-50">{npubDisplay}</p>
         {#if displayNpubCopyButton}
