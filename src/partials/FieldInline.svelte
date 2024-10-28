@@ -5,7 +5,7 @@
 
 <div class="flex flex-col gap-2">
   <slot name="label">
-    <div class="flex items-center justify-between">
+    <div class="grid grid-cols-2 gap-2">
       <label class="font-bold">
         {#if icon}
           <i class={`fa ${icon}`} />

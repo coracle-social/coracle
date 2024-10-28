@@ -10,7 +10,7 @@
   import {appName} from "src/partials/state.ts"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Field from "src/partials/Field.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -151,19 +151,19 @@
   <FlexColumn narrow large>
     <div class="text-center">
       <Heading>Welcome!</Heading>
-      <p class="text-lg text-neutral-100">
+      <p>
         {appName} is built using the
         <Anchor external underline href="https://nostr.com/">nostr protocol</Anchor>, which allows
         you to own your social identity.
       </p>
     </div>
     <div class="flex flex-col gap-2">
-      <Field label="Username">
+      <FieldInline label="Username">
         <Input bind:value={username} placeholder="Username">
           <i slot="before" class="fa fa-user-astronaut" />
         </Input>
-      </Field>
-      <Field label="Signer App">
+      </FieldInline>
+      <FieldInline label="Signer App">
         <SearchSelect
           bind:value={handler}
           defaultOptions={handlers}
@@ -173,7 +173,7 @@
           <i slot="before" class="fa fa-at relative top-[2px]" />
           <span slot="item" let:item>{item.domain}</span>
         </SearchSelect>
-      </Field>
+      </FieldInline>
       <Anchor button accent tall disabled={!username} {loading} on:click={onSubmit}>Log In</Anchor>
     </div>
     <div class="relative flex items-center gap-4">
@@ -184,7 +184,7 @@
     <div
       class="relative flex flex-col gap-4">
       {#if getNip07()}
-        <Anchor button tall accent={!username} low={username} class="cursor-pointer" on:click={useExtension}>
+        <Anchor button tall accent={!username} class="cursor-pointer" on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Browser Extension
         </Anchor>
       {/if}
@@ -204,7 +204,7 @@
         <i class="fa fa-eye" /> Public Key
       </Anchor>
     </div>
-    <span>
+    <span class="text-center">
       Need an account?
       <Anchor underline on:click={signUp}>Register instead</Anchor>
     </span>
