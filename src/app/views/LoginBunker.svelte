@@ -1,25 +1,23 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
-  import {isKeyValid, toHex} from "src/util/nostr"
+  import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {loginWithBunker} from "src/engine"
+  import {loginWithNip46} from "src/engine"
   import {boot} from "src/app/state"
-  import {nip05} from "nostr-tools"
 
   let input = ""
   let loading = false
 
   const parse = async (uri: string) => {
-    const r = {pubkey: "", relay: "", token: ""}
+    const r = {pubkey: "", relays: [], token: ""}
 
     try {
       const url = new URL(uri)
 
-      r.pubkey = url.hostname || url.pathname.replace(/\//g, '')
+      r.pubkey = url.hostname || url.pathname.replace(/\//g, "")
       r.relays = url.searchParams.getAll("relay") || []
       r.token = url.searchParams.get("secret") || ""
     } catch {
@@ -43,7 +41,7 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      const success = await loginWithBunker(pubkey, token, relays)
+      const success = await loginWithNip46(token, {pubkey, relays})
 
       if (success) {
         boot()

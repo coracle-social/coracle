@@ -50,7 +50,6 @@ import {
   signer,
   sessions,
   session,
-  loadHandle,
   getRelayUrls,
   displayProfileByPubkey,
   inboxRelaySelectionsByPubkey,
@@ -850,47 +849,25 @@ export const loginWithPrivateKey = (secret, extra = {}) =>
 
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
-export const loginWithExtension = pubkey => addSession({method: "nip07", pubkey})
+export const loginWithNip07 = pubkey => addSession({method: "nip07", pubkey})
 
-export const loginWithSigner = (pubkey, pkg) =>
+export const loginWithNip55 = (pubkey, pkg) =>
   addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
-export const loginWithBunker = async (pubkey, token, relays) => {
+export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
   const secret = makeSecret()
-  const handler = {relays}
-  const broker = Nip46Broker.get(pubkey, secret, handler)
+  const broker = Nip46Broker.get({secret, handler})
   const result = await broker.connect(token, nip46Perms)
 
-  if (result) {
-    addSession({method: "nip46", pubkey, secret, token, handler})
-  }
+  if (!result) return false
 
-  return result
-}
+  const pubkey = await broker.getPublicKey()
 
-export const loginWithNostrConnect = async (username, handler: Nip46Handler) => {
-  const secret = makeSecret()
-  const {pubkey} = (await loadHandle(`${username}@${handler.domain}`)) || {}
+  if (!pubkey) return false
 
-  let broker = Nip46Broker.get(pubkey, secret, handler)
+  addSession({method: "nip46", pubkey, secret, handler})
 
-  if (!pubkey) {
-    const pubkey = await broker.createAccount(username, nip46Perms)
-
-    if (!pubkey) {
-      return null
-    }
-
-    broker = Nip46Broker.get(pubkey, secret, handler)
-  }
-
-  const result = await broker.connect("", nip46Perms)
-
-  if (result) {
-    addSession({method: "nip46", pubkey: broker.pubkey, secret, handler})
-  }
-
-  return result
+  return true
 }
 
 export const logoutPubkey = pubkey => {

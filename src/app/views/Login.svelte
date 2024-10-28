@@ -1,13 +1,19 @@
 <script lang="ts">
-  import cx from "classnames"
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {Capacitor} from "@capacitor/core"
   import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
-  import {loadHandle} from "@welshman/app"
+  import {
+    getNip07,
+    Nip07Signer,
+    getNip55,
+    Nip55Signer,
+    Nip46Broker,
+    makeSecret,
+  } from "@welshman/signer"
+  import {loadHandle, nip46Perms} from "@welshman/app"
   import {parseJson} from "src/util/misc"
-  import {appName} from "src/partials/state.ts"
+  import {appName} from "src/partials/state"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -15,11 +21,13 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, loginWithExtension, loginWithNostrConnect, loginWithSigner} from "src/engine"
+  import {load, loginWithNip07, loginWithNip46, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
-  const signUp = () => router.at("signup").replaceModal()
+  const signUp = () => {
+    router.at("signup").replaceModal()
+  }
 
   const useBunker = () => router.at("login/bunker").replaceModal()
 
@@ -27,7 +35,7 @@
     const signer = new Nip07Signer()
     const pubkey = await signer.getPubkey()
 
-    loginWithExtension(pubkey)
+    loginWithNip07(pubkey)
     boot()
   }
 
@@ -44,7 +52,7 @@
   const useSigner = async (app: AppInfo) => {
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
-    loginWithSigner(pubkey, app.packageName)
+    loginWithNip55(pubkey, app.packageName)
     boot()
   }
 
@@ -76,7 +84,26 @@
         return showWarning("Sorry, we weren't able to find that provider.")
       }
 
-      const success = await loginWithNostrConnect(username, handler)
+      // Find out whether this user exists, and if so what their pubkey is
+      const handle = await loadHandle(`${username}@${handler.domain}`)
+
+      // If the user doesn't exist, use the handler's pubkey to ask the broker to create one.
+      // This flow may be going away. It will usually open the signer in another window/app
+      // In either case, update the handler to use the user's pubkey. This wacky legacy stuff,
+      // Hopefully it will be replaced by specifying the user's pubkey somewhere in the payload.
+      if (!handle?.pubkey) {
+        const broker = Nip46Broker.get({secret: makeSecret(), handler})
+        const pubkey = await broker.createAccount(username, nip46Perms)
+
+        if (!pubkey) return false
+
+        handler = {...handler, pubkey}
+      } else {
+        handler = {...handler, pubkey: handle.pubkey}
+      }
+
+      // Now we can log in
+      const success = await loginWithNip46("", handler)
 
       if (success) {
         boot()
@@ -181,8 +208,7 @@
       <div class="staatliches text-xl">Or</div>
       <div class="h-px flex-grow bg-neutral-600" />
     </div>
-    <div
-      class="relative flex flex-col gap-4">
+    <div class="relative flex flex-col gap-4">
       {#if getNip07()}
         <Anchor button tall accent={!username} class="cursor-pointer" on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Browser Extension
