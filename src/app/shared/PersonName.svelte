@@ -15,10 +15,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {derived} from "svelte/store"
   import {displayPubkey} from "@welshman/util"
-  import {session, deriveProfileDisplay, getUserWotScore} from "@welshman/app"
-  import {userFollows} from "src/engine"
+  import {session, deriveProfileDisplay} from "@welshman/app"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import WotPopover from "./WotPopover.svelte"
@@ -26,7 +24,6 @@
   export let pubkey
   export let displayNpubCopyButton = false
 
-  const following = derived(userFollows, $m => $m.has(pubkey))
   const npub = nip19.npubEncode(pubkey)
   const npubDisplay = displayPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
