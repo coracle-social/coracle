@@ -23,16 +23,16 @@
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
   import {router} from "src/app/util/router"
   import {getSetting, setInboxPolicy, setOutboxPolicy} from "src/engine"
+  import {slide} from "svelte/transition"
 
   export let url
   export let claim = null
   export let ratings = null
-  export let showStatus = true
+  export let showStatus = false
   export let hideDescription = false
   export let hideRatingsCount = false
   export let hideActions = false
   export let showControls = false
-  export let inert = false
 
   const relay = deriveRelay(url)
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
@@ -59,30 +59,19 @@
   let details = false
 </script>
 
-<AltColor background class="flex flex-col justify-between gap-3 rounded-md px-6 py-3 shadow">
+<AltColor background class="flex flex-col justify-between gap-3 rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 items-center gap-2">
       <div class="h-9 w-9 rounded-full" style={`background-color: ${hsl(stringToHue(url))};`} />
       <div>
-        {#if inert}
-          <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
-            {displayRelayUrl(url)}
-          </div>
-        {:else}
-          <Anchor
-            modal
-            href={router.at("relays").of(url).toString()}
-            class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
-            {displayRelayUrl(url)}
-          </Anchor>
-        {/if}
+        <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
+          {displayRelayUrl(url)}
+        </div>
         <div class="flex gap-4 text-xs text-neutral-400">
           {#if $relay?.profile?.supported_nips}
             <span class="cursor-pointer">
               {$relay.profile.supported_nips.length} NIPs
             </span>
-
-            <!-- <span>&bull;</span> -->
           {/if}
           Connected {quantify($relay.stats.connect_count, "time")}
         </div>
@@ -102,31 +91,45 @@
     </div>
     {#if !hideActions}
       <slot name="actions">
-        <button
-          class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d text-white"
-          on:click={_ => (details = !details)}>
-          INFO
-        </button>
-        <RelayCardActions {url} {claim} />
+        <div class="flex gap-4">
+          <button
+            class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
+            class:bg-tinted-600-d={details}
+            class:text-tinted-100-l={details}
+            on:click={_ => (details = !details)}>
+            INFO
+          </button>
+          <button
+            class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
+            on:click={() =>
+              router
+                .at(router.at("relays").of(encodeURIComponent(url)).toString())
+                .push({modal: true})}>
+            EXPLORE
+          </button>
+          <RelayCardActions {url} {claim} />
+        </div>
       </slot>
     {/if}
   </div>
-  {#if !details}
-    {#if $relay?.stats}
-      <span class="flex items-center gap-1 text-sm">
-        {#if $relay?.profile?.contact}
-          <span class="opacity-75">Contact: </span>
-          <Anchor external underline href={$relay.profile.contact}>
-            {displayUrl($relay.profile.contact)}</Anchor>
+  {#if details}
+    <div transition:slide>
+      {#if $relay?.stats}
+        <span class="flex items-center gap-1 text-sm">
+          {#if $relay?.profile?.contact}
+            <span class="opacity-75">Contact: </span>
+            <Anchor external underline href={$relay.profile.contact}>
+              {displayUrl($relay.profile.contact)}</Anchor>
+          {/if}
+        </span>
+      {/if}<slot name="description">
+        {#if $relay?.profile?.description}
+          <p class="py-3 text-sm">{$relay?.profile.description}</p>
         {/if}
-      </span>
-    {/if}<slot name="description">
-      {#if $relay?.profile?.description}
-        <p class="text-sm">{$relay?.profile.description}</p>
-      {/if}
-    </slot>
-    <div class="text-sm">
-      <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
+      </slot>
+      <div class="text-sm">
+        <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
+      </div>
     </div>
   {/if}
 
