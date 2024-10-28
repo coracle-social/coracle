@@ -34,6 +34,6 @@
   <button
     class="flex items-center rounded-md bg-tinted-700-d px-6 py-1 text-sm font-bold capitalize text-neutral-100"
     on:click={leave}>
-    LEAVE
+    JOINED
   </button>
 {/if}
