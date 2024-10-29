@@ -17,7 +17,7 @@
     next({skipNsecWarning: true})
   }
 
-  const prev = () => setStage("intro")
+  const prev = () => setStage("keys")
 
   const next = ({skipNsecWarning = false} = {}) => {
     if (

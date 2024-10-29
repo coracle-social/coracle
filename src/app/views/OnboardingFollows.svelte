@@ -157,7 +157,7 @@
     </div>
     <p class="pb-5 text-lg">{description}</p>
     {#each listPubkeys as pubkey (pubkey)}
-      <PersonSummary {pubkey}>
+      <PersonSummary hideFollowActions {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if follows.includes(pubkey)}
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>

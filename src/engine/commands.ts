@@ -635,13 +635,12 @@ export const addFeedFavorite = async (address: string) => {
 
 // Relays
 
-export const requestRelayAccess = async (url: string, claim: string, sk?: string) =>
+export const requestRelayAccess = async (url: string, claim: string) =>
   createAndPublish({
     kind: 28934,
     forcePlatform: false,
     tags: [["claim", claim]],
     relays: [url],
-    sk,
   })
 
 export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {

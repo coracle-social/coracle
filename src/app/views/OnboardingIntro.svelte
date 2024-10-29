@@ -8,7 +8,7 @@
 
   let media
 
-  const next = () => setStage("profile")
+  const next = () => setStage("keys")
 
   const openMedia = url => {
     media = url

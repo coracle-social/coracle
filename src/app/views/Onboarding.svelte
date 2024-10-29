@@ -2,10 +2,10 @@
   import {onMount} from "svelte"
   import {ctx, uniq, nth, concat} from "@welshman/lib"
   import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
-  import {makeSecret} from "@welshman/signer"
   import {session, tagPubkey} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
+  import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
   import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
@@ -19,15 +19,12 @@
     setOutboxPolicies,
     tagsFromContent,
     requestRelayAccess,
-    loginWithPrivateKey,
     listenForNotifications,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
   export let stage = "intro"
   export let invite = null
-
-  const privkey = makeSecret()
 
   const profile = {}
 
@@ -54,8 +51,6 @@
   }
 
   const signup = async noteContent => {
-    loginWithPrivateKey(privkey, {onboarding_tasks_completed: []})
-
     if (invite?.groups) {
       router.at("invite").qp({groups: invite.groups}).push()
     } else {
@@ -66,7 +61,7 @@
     // profile information it doesn't get rejected
     for (const {url, claim} of invite?.parsedRelays || []) {
       if (claim) {
-        const pub = await requestRelayAccess(url, claim, privkey)
+        const pub = await requestRelayAccess(url, claim)
 
         await pub.result
       }
@@ -121,6 +116,8 @@
   {#key stage}
     {#if stage === "intro"}
       <OnboardingIntro {setStage} />
+    {:else if stage === "keys"}
+      <OnboardingKeys {setStage} />
     {:else if stage === "profile"}
       <OnboardingProfile {setStage} {profile} />
     {:else if stage === "follows"}
