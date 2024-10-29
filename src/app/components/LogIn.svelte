@@ -63,10 +63,11 @@
       relays: rootHandle.nip46 || rootHandle.relays || nip46 || relays,
     }
 
-    const broker = Nip46Broker.get(pubkey, secret, handler)
+    // Gotta use user pubkey as the handler pubkey for historical reasons
+    const broker = Nip46Broker.get({secret, handler: {...handler, pubkey}})
 
     if (await broker.connect("", nip46Perms)) {
-      await onSuccess({method: "nip46", pubkey, secret, handler}, relays)
+      await onSuccess({method: "nip46", pubkey, secret, handler: {...handler, pubkey}}, relays)
     } else {
       pushToast({
         theme: "error",

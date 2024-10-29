@@ -1,6 +1,7 @@
 <script lang="ts">
   import Confirm from "@lib/components/Confirm.svelte"
   import {publishDelete} from "@app/commands"
+  import {clearModals} from '@app/modal'
 
   export let url
   export let event
@@ -8,7 +9,7 @@
   const confirm = async () => {
     await publishDelete({event, relays: [url]})
 
-    history.back()
+    clearModals()
   }
 </script>
 

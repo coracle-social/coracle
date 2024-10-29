@@ -108,6 +108,10 @@
   @apply flex flex-col gap-4;
 }
 
+.col-8 {
+  @apply flex flex-col gap-8;
+}
+
 .ellipsize {
   @apply overflow-hidden text-ellipsis;
 }

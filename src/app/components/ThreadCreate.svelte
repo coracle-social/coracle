@@ -7,6 +7,7 @@
   import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
@@ -25,8 +26,15 @@
   const loading = writable(false)
 
   const submit = () => {
+
+    if (!title) {
+      return pushToast({
+        theme: "error",
+        message: "Please provide a title for your thread.",
+      })
+    }
+
     const content = $editor.getText()
-    const tags = append(tagRoom(GENERAL, url), getEditorTags($editor))
 
     if (!content.trim()) {
       return pushToast({
@@ -34,6 +42,12 @@
         message: "Please provide a message for your thread.",
       })
     }
+
+    const tags = [
+      ["title", title],
+      tagRoom(GENERAL, url),
+      ...getEditorTags($editor),
+    ]
 
     publishThunk({
       event: createEvent(THREAD, {content, tags}),
@@ -43,10 +57,19 @@
     history.back()
   }
 
+  let title: string
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, autofocus: true}))
+    editor = createEditor(
+      getEditorOptions({
+        submit,
+        loading,
+        getPubkeyHints,
+        autofocus: true,
+        placeholder: "What's on your mind?",
+      })
+    )
   })
 </script>
 
@@ -55,10 +78,19 @@
     <div slot="title">Create a Thread</div>
     <div slot="info">Share a link, or start a discussion.</div>
   </ModalHeader>
-  <div class="relative">
-    <div class="note-editor flex-grow overflow-hidden">
-      <EditorContent editor={$editor} />
-    </div>
+  <div class="relative col-8">
+    <Field>
+      <p slot="label">Title*</p>
+      <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+        <input bind:value={title} class="grow" type="text" placeholder="What is this thread about?" />
+      </label>
+    </Field>
+    <Field>
+      <p slot="label">Message*</p>
+      <div slot="input" class="note-editor flex-grow overflow-hidden">
+        <EditorContent editor={$editor} />
+      </div>
+    </Field>
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"

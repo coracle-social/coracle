@@ -1,6 +1,7 @@
 import type {Writable} from "svelte/store"
 import {nprofileEncode} from "nostr-tools/nip19"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
+import Placeholder from '@tiptap/extension-placeholder'
 import Code from "@tiptap/extension-code"
 import CodeBlock from "@tiptap/extension-code-block"
 import Document from "@tiptap/extension-document"
@@ -53,6 +54,7 @@ type EditorOptions = {
   loading: Writable<boolean>
   getPubkeyHints: (pubkey: string) => string[]
   submitOnEnter?: boolean
+  placeholder?: string
   autofocus?: boolean
 }
 
@@ -80,6 +82,7 @@ export const getEditorOptions = ({
   loading,
   getPubkeyHints,
   submitOnEnter,
+  placeholder = "",
   autofocus = false,
 }: EditorOptions) => ({
   autofocus,
@@ -94,6 +97,7 @@ export const getEditorOptions = ({
     Paragraph,
     Text,
     TagExtension,
+    Placeholder.configure({placeholder}),
     submitOnEnter ? getModifiedHardBreakExtension() : HardBreakExtension,
     LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),

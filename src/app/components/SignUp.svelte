@@ -28,7 +28,7 @@
       })
     }
 
-    const signupBroker = Nip46Broker.get("", secret, handler)
+    const signupBroker = Nip46Broker.get({secret, handler})
     const pubkey = await signupBroker.createAccount(username, nip46Perms)
 
     if (!pubkey) {
@@ -38,10 +38,11 @@
       })
     }
 
-    const loginBroker = Nip46Broker.get(pubkey, secret, handler)
+    // Gotta use user pubkey as the handler pubkey for historical reasons
+    const loginBroker = Nip46Broker.get({secret, handler: {...handler, pubkey}})
 
     if (await loginBroker.connect("", nip46Perms)) {
-      addSession({method: "nip46", pubkey, secret, handler})
+      addSession({method: "nip46", pubkey, secret, handler: {...handler, pubkey}})
       pushToast({message: "Successfully logged in!"})
       clearModals()
     } else {
