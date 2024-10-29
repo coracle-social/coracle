@@ -34,6 +34,8 @@
   export let hideActions = false
   export let showControls = false
 
+  let innerWidth = 0
+
   const relay = deriveRelay(url)
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
   const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
@@ -56,12 +58,21 @@
       setInboxPolicy(url, !inbox)
     }
   }
+
   let details = false
+
+  function close() {
+    details = false
+  }
+
+  $: isMobile = innerWidth < 768
 </script>
+
+<svelte:window bind:innerWidth />
 
 <AltColor background class="justify-between rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
-    <div class="flex min-w-0 shrink-0 items-center gap-2">
+    <div class="flex min-w-0 shrink-0 items-center gap-3">
       {#if $relay?.profile?.icon}
         <img class="h-9 w-9 rounded-full border" src={$relay.profile.icon} />
       {:else}
@@ -108,7 +119,7 @@
   {#if details}
     <div transition:slide class="my-4 hidden md:block">
       {#if $relay?.stats}
-        <span class="flex items-center gap-1 text-sm">
+        <span class="mb-4 flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
             <Anchor external underline href={$relay.profile.contact}>
@@ -117,10 +128,10 @@
         </span>
       {/if}<slot name="description">
         {#if $relay?.profile?.description}
-          <p class="py-3 text-sm">{$relay?.profile.description}</p>
+          <p class="text-sm">{$relay?.profile.description}</p>
         {/if}
       </slot>
-      <div class="text-sm">
+      <div class="mt-4 text-sm">
         <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
       </div>
     </div>
@@ -182,23 +193,24 @@
   {/if}
 </AltColor>
 
-{#if details}
-  <Modal mini onEscape={() => (details = false)} class="md:hidden">
+{#if isMobile && details}
+  <Modal mini onEscape={close}>
     <div>
       {#if $relay?.stats}
-        <span class="flex items-center gap-1">
+        <span class="mb-3 flex items-center gap-1">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
             <Anchor external underline href={$relay.profile.contact}>
               {displayUrl($relay.profile.contact)}</Anchor>
           {/if}
         </span>
-      {/if}<slot name="description">
+      {/if}
+      <slot name="description">
         {#if $relay?.profile?.description}
-          <p class="py-3">{$relay?.profile.description}</p>
+          <p>{$relay?.profile.description}</p>
         {/if}
       </slot>
-      <div class="">
+      <div class="mt-3">
         <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
       </div>
     </div>

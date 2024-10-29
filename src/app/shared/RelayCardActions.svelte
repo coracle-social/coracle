@@ -30,29 +30,29 @@
 
 <div class="hidden gap-4 md:flex">
   <button
-    class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
+    class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold uppercase text-tinted-700-d"
     class:bg-tinted-600-d={details}
     class:text-tinted-100-l={details}
     on:click={_ => (details = !details)}>
-    INFO
+    Info
   </button>
   <button
-    class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold capitalize text-tinted-700-d"
+    class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold uppercase text-tinted-700-d"
     on:click={() =>
       router.at(router.at("relays").of(encodeURIComponent(url)).toString()).push({modal: true})}>
-    EXPLORE
+    Explore
   </button>
   {#if !userRelayUrls.includes(url)}
     <button
-      class="flex items-center rounded-md bg-accent px-6 py-1 text-sm font-bold capitalize text-white"
+      class="flex items-center rounded-md bg-accent px-6 py-1 text-sm font-bold uppercase text-white"
       on:click={join}>
-      JOIN
+      Join
     </button>
   {:else if userRelayUrls.length > 1}
     <button
-      class="flex items-center rounded-md bg-tinted-700-d px-6 py-1 text-sm font-bold capitalize text-neutral-100"
+      class="flex items-center rounded-md bg-tinted-700-d px-6 py-1 text-sm font-bold uppercase text-neutral-100"
       on:click={leave}>
-      LEAVE
+      Leave
     </button>
   {/if}
 </div>
