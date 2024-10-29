@@ -35,7 +35,7 @@ const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
-export const theme = synced("ui/theme", prefersDark ? "dark" : "light")
+export const theme = synced("ui/theme", "dark")
 
 theme.subscribe(value => {
   if (value === "dark") {

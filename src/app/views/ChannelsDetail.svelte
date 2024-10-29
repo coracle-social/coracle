@@ -40,7 +40,10 @@
 
   onMount(() => {
     markChannelRead(channelId)
-    loadInboxRelaySelections(pubkeys)
+
+    for (const pubkey of pubkeys) {
+      loadInboxRelaySelections(pubkey)
+    }
 
     return listenForMessages(pubkeys)
   })
