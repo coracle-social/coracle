@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {fly, fade} from "src/util/transition"
@@ -78,7 +79,7 @@
     }
   }} />
 
-<div bind:this={root} class="modal group absolute">
+<div bind:this={root} class={cx($$props.class, "modal group absolute")}>
   <slot name="wrapper">
     <div transition:fade class="fixed inset-0 z-modal" class:pointer-events-none={closing}>
       <div

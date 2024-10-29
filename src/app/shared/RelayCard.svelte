@@ -12,7 +12,7 @@
   } from "@welshman/app"
   import {quantify} from "hurdak"
   import {derived} from "svelte/store"
-  import {stringToHue, displayUrl, hsl} from "src/util/misc"
+  import {displayUrl} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -21,9 +21,9 @@
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {router} from "src/app/util/router"
   import {getSetting, setInboxPolicy, setOutboxPolicy} from "src/engine"
   import {slide} from "svelte/transition"
+  import Modal from "src/partials/Modal.svelte"
 
   export let url
   export let claim = null
@@ -59,10 +59,16 @@
   let details = false
 </script>
 
-<AltColor background class="flex flex-col justify-between gap-3 rounded-md p-6 shadow">
+<AltColor background class="justify-between rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 shrink-0 items-center gap-2">
-      <div class="h-9 w-9 rounded-full" style={`background-color: ${hsl(stringToHue(url))};`} />
+      {#if $relay?.profile?.icon}
+        <img class="h-9 w-9 rounded-full border" src={$relay.profile.icon} />
+      {:else}
+        <div class="flex h-9 w-9 items-center justify-center rounded-full border">
+          <i class="fa fa-server text-xl text-neutral-100"></i>
+        </div>
+      {/if}
       <div>
         <div class="flex items-center gap-2">
           <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
@@ -100,7 +106,7 @@
     {/if}
   </div>
   {#if details}
-    <div transition:slide>
+    <div transition:slide class="my-4 hidden md:block">
       {#if $relay?.stats}
         <span class="flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}
@@ -175,3 +181,26 @@
     </div>
   {/if}
 </AltColor>
+
+{#if details}
+  <Modal mini onEscape={() => (details = false)} class="md:hidden">
+    <div>
+      {#if $relay?.stats}
+        <span class="flex items-center gap-1">
+          {#if $relay?.profile?.contact}
+            <span class="opacity-75">Contact: </span>
+            <Anchor external underline href={$relay.profile.contact}>
+              {displayUrl($relay.profile.contact)}</Anchor>
+          {/if}
+        </span>
+      {/if}<slot name="description">
+        {#if $relay?.profile?.description}
+          <p class="py-3">{$relay?.profile.description}</p>
+        {/if}
+      </slot>
+      <div class="">
+        <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
+      </div>
+    </div>
+  </Modal>
+{/if}
