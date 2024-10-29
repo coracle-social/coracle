@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Nip46Broker} from '@welshman/signer'
+  import {Nip46Broker} from "@welshman/signer"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"

@@ -20,17 +20,21 @@
   import Popover from "src/partials/Popover.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import {hasNip44, ensureMessagePlaintext} from "src/engine"
+  import {Editor} from "svelte-tiptap"
+  import {getEditorOptions} from "src/app/editor"
+  import Compose from "src/app/shared/Compose.svelte"
 
   export let pubkeys
   export let sendMessage
   export let initialMessage = ""
   export let messages: TrustedEvent[]
+
+  let editor: Editor
 
   const loading = sleep(5_000)
   const toggleScale = 0.7
@@ -70,6 +74,17 @@
   let useNip17 = isGroupMessage || ($hasNip44 && $pubkeysWithoutInbox.length === 0)
 
   onMount(() => {
+    editor = new Editor(
+      getEditorOptions({
+        submit: send,
+        element: textarea,
+        submitOnEnter: false,
+        submitOnModEnter: true,
+        autofocus: true,
+        placeholder: "Type something...",
+      }),
+    )
+
     startScroller()
 
     if (textarea) {
@@ -98,10 +113,6 @@
     }
   }
 
-  const addImage = imeta => {
-    textarea.value += "\n" + imeta.get("url").value()
-  }
-
   const sendAnyway = () => {
     send()
     closeConfirm()
@@ -116,23 +127,16 @@
   }
 
   const send = async () => {
-    const content = textarea.value.trim()
+    const content = editor.getText().trim()
 
     if (content) {
-      textarea.value = ""
       sending = true
 
       await sendMessage(content, useNip17)
 
       sending = false
       stickToBottom()
-    }
-  }
-
-  const onKeyDown = e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      sendOrConfirm()
+      editor.commands.clearContent()
     }
   }
 
@@ -244,25 +248,18 @@
     {/await}
   </div>
   {#if $hasNip44 || !isGroupMessage}
-    <div
-      class="flex border-t border-solid border-neutral-600 border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
-      <textarea
-        rows="3"
-        autofocus
-        placeholder="Type something..."
-        bind:this={textarea}
-        on:keydown={onKeyDown}
-        class="mb-8 w-full resize-none bg-transparent p-2
-             text-neutral-100 outline-0 placeholder:text-neutral-100" />
+    <div class="flex border-t border-solid border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
+      <Compose
+        bind:element={textarea}
+        {editor}
+        class="mb-8 h-20 w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
-        <ImageInput multi on:change={e => addImage(e.detail)}>
-          <button
-            slot="button"
-            class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
+        <button
+          on:click={() => editor.commands.selectFiles()}
+          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
                  py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
-            <i class="fa-solid fa-paperclip fa-lg" />
-          </button>
-        </ImageInput>
+          <i class="fa-solid fa-paperclip fa-lg" />
+        </button>
         <button
           on:click={sendOrConfirm}
           class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3

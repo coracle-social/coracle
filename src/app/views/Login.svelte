@@ -197,7 +197,8 @@
           <span slot="item" let:item>{item.domain}</span>
         </SearchSelect>
       </FieldInline>
-      <Anchor button accent tall type="submit" disabled={!username} {loading} on:click={onSubmit}>Log In</Anchor>
+      <Anchor button accent tall type="submit" disabled={!username} {loading} on:click={onSubmit}
+        >Log In</Anchor>
     </div>
     <div class="relative flex items-center gap-4">
       <div class="h-px flex-grow bg-neutral-600" />
