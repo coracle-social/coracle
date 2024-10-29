@@ -35,7 +35,7 @@
   export let maxLength = 700
   export let showEntire = false
   export let hideMedia = false
-  export let expandable = true
+  export let expandMode = "block"
   export let depth = 0
 
   const fullContent = parse(event)
@@ -80,7 +80,9 @@
         mediaLength: hideMedia ? 20 : 200,
       })
 
-  $: ellipsize = expandable && shortContent.find(isEllipsis)
+  $: hasEllipsis = shortContent.find(isEllipsis)
+  $: expandInline = hasEllipsis && expandMode === "inline"
+  $: expandBlock = hasEllipsis && expandMode === "block"
 </script>
 
 <div class="relative">
@@ -95,10 +97,10 @@
   {:else}
     <div
       class="overflow-hidden text-ellipsis"
-      style={ellipsize ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
+      style={expandBlock ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
       {#each shortContent as parsed, i}
         {#if isNewline(parsed)}
-          <ContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
+          <ContentNewline value={parsed.value.slice(1)} />
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
         {:else if isCode(parsed)}
@@ -128,12 +130,17 @@
               {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
             </Link>
           {/if}
+        {:else if isEllipsis(parsed) && expandInline}
+          {@html renderParsed(parsed)}
+          <button type="button" class="underline text-sm">
+            Read more
+          </button>
         {:else}
           {@html renderParsed(parsed)}
         {/if}
       {/each}
     </div>
-    {#if ellipsize}
+    {#if expandBlock}
       <div class="relative z-feature -mt-6 flex justify-center bg-gradient-to-t from-base-100 py-2">
         <button type="button" class="btn" on:click|stopPropagation|preventDefault={expand}>
           See more

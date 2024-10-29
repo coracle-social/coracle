@@ -16,19 +16,23 @@
   )
 </script>
 
-{#each groupedReactions.entries() as [content, events]}
-  {@const isOwn = events.some(e => e.pubkey === $pubkey)}
-  {@const onClick = () => onReactionClick(content, events)}
-  <button
-    type="button"
-    class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full"
-    class:border={isOwn}
-    class:border-solid={isOwn}
-    class:border-primary={isOwn}
-    on:click|stopPropagation={onClick}>
-    <span>{displayReaction(content)}</span>
-    {#if events.length > 1}
-      <span>{events.length}</span>
-    {/if}
-  </button>
-{/each}
+{#if $reactions.length > 0}
+  <div class="flex gap-2">
+    {#each groupedReactions.entries() as [content, events]}
+      {@const isOwn = events.some(e => e.pubkey === $pubkey)}
+      {@const onClick = () => onReactionClick(content, events)}
+      <button
+        type="button"
+        class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full"
+        class:border={isOwn}
+        class:border-solid={isOwn}
+        class:border-primary={isOwn}
+        on:click|stopPropagation={onClick}>
+        <span>{displayReaction(content)}</span>
+        {#if events.length > 1}
+          <span>{events.length}</span>
+        {/if}
+      </button>
+    {/each}
+  </div>
+{/if}

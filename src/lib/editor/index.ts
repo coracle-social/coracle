@@ -65,7 +65,7 @@ export const getModifiedHardBreakExtension = () =>
         "Shift-Enter": () => this.editor.commands.setHardBreak(),
         "Mod-Enter": () => this.editor.commands.setHardBreak(),
         Enter: () => {
-          if (this.editor.getText().trim()) {
+          if (this.editor.getText({blockSeparator: '\n'}).trim()) {
             uploadFiles(this.editor)
 
             return true

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy, sleep} from "@welshman/lib"
+  import {sortBy, nthEq, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
   import {repository, subscribe} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
@@ -36,6 +36,8 @@
 
   let showReply = false
 
+  $: title = $event?.tags.find(nthEq(0, 'title'))?.[1] || ""
+
   onMount(() => {
     const sub = subscribe({filters, relays: [url]})
 
@@ -44,7 +46,7 @@
 </script>
 
 <div class="relative flex flex-col-reverse gap-3 px-2">
-  <div class="absolute left-[51px] top-20 h-[calc(100%-200px)] w-[2px] bg-neutral" />
+  <div class="absolute left-[51px] top-32 h-[calc(100%-248px)] w-[2px] bg-neutral" />
   {#if $event}
     {#if !showReply}
       <div class="flex justify-end p-2">
@@ -57,14 +59,14 @@
     {#each sortBy(e => -e.created_at, $replies) as reply (reply.id)}
       <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
         <div class="col-3 ml-12">
-          <Content event={reply} />
+          <Content showEntire event={reply} />
           <ThreadActions event={reply} {url} />
         </div>
       </NoteCard>
     {/each}
     <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
       <div class="col-3 ml-12">
-        <Content event={$event} />
+        <Content showEntire event={$event} />
         <ThreadActions event={$event} {url} />
       </div>
     </NoteCard>
@@ -75,13 +77,14 @@
       <p>Failed to load thread.</p>
     {/await}
   {/if}
-  <PageBar>
+  <PageBar class="mx-0">
     <div slot="icon">
       <Button class="btn btn-neutral btn-sm" on:click={back}>
         <Icon icon="alt-arrow-left" />
         Go back
       </Button>
     </div>
+    <h1 slot="title" class="text-xl">{title}</h1>
     <div slot="action">
       <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
         <Icon icon="menu-dots" />

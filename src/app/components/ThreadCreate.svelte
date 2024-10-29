@@ -34,7 +34,7 @@
       })
     }
 
-    const content = $editor.getText()
+    const content = $editor.getText({blockSeparator: '\n'})
 
     if (!content.trim()) {
       return pushToast({
