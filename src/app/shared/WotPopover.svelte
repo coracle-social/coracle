@@ -44,9 +44,11 @@
       <WotScore score={wotScore} max={$maxWot} {accent} />
     </div>
     <div slot="tooltip" class="p-4">
-      <strong>{$profileDisplay}</strong>
+      <strong class="font-bold">{$profileDisplay}</strong>
       <div class="text-neutral-400">Updated {formatTimestampRelative(profileUpdated)}</div>
-      <PersonAbout class="font-thin " {pubkey} />
+      {#if $profile?.about}
+        <PersonAbout class="mt-4 font-thin" {pubkey} />
+      {/if}
       {#if $handle}
         <div class="mt-4 flex items-center gap-2 text-accent">
           <i class="fa fa-at" />
