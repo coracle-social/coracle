@@ -46,7 +46,9 @@
     </div>
     <div slot="tooltip" class="p-4">
       <strong class="cursor-pointer font-bold" on:click={showPerson}>{$profileDisplay}</strong>
-      <div class="text-neutral-400">Updated {formatTimestampRelative(profileUpdated)}</div>
+      {#if profileUpdated}
+        <div class="text-neutral-400">Updated {formatTimestampRelative(profileUpdated)}</div>
+      {/if}
       {#if $profile?.about}
         <PersonAbout class="mt-4 font-thin" {pubkey} />
       {/if}
