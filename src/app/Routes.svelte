@@ -77,8 +77,6 @@
 {#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const {component} = router.getMatch(m.path).route}
   <Modal virtual={false} canClose={!m.noEscape}>
-    {#key $pubkey}
-      <svelte:component this={component} {...router.getProps(m)} />
-    {/key}
+    <svelte:component this={component} {...router.getProps(m)} />
   </Modal>
 {/each}

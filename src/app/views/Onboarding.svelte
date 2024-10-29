@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx, uniq, nth, concat} from "@welshman/lib"
-  import {FOLLOWS, Tags, getAddress, Address, getIdFilters} from "@welshman/util"
-  import {session, tagPubkey} from "@welshman/app"
+  import {uniq, nth} from "@welshman/lib"
+  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
+  import {session, userRelaySelections, getWriteRelayUrls} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -14,51 +14,51 @@
     load,
     anonymous,
     loadPubkeys,
-    createAndPublish,
-    publishProfile,
-    setOutboxPolicies,
-    tagsFromContent,
     requestRelayAccess,
     listenForNotifications,
+    broadcastUserData,
   } from "src/engine"
   import {router} from "src/app/util/router"
 
   export let stage = "intro"
   export let invite = null
 
-  const profile = {}
+  let state = {
+    pubkey: "",
+    username: "",
+    profile: {
+      name: "",
+      about: "",
+      picture: "",
+    },
+    follows: $session ? [] : $anonymous.follows.map(nth(1)),
+    relays:
+      $anonymous.relays.length === 0
+        ? env.DEFAULT_RELAYS.map(url => ["r", url])
+        : $anonymous.relays,
+    onboardingLists: [],
+  }
+
+  if (Array.isArray(invite?.people)) {
+    state.follows = [...state.follows, ...invite.people]
+  }
+
+  if (invite?.relays) {
+    state.relays = [...state.relays, ...invite.relays.map(url => ["r", url])]
+  }
 
   const setStage = s => {
     stage = s
   }
 
-  let onboardingLists = []
-
-  let follows = $session ? [] : $anonymous.follows.map(nth(1))
-
-  if (Array.isArray(invite?.people)) {
-    follows = concat(follows, invite.people)
-  }
-
-  let relays =
-    $anonymous.relays.length === 0 ? env.DEFAULT_RELAYS.map(url => ["r", url]) : $anonymous.relays
-
-  if (invite?.relays) {
-    relays = concat(
-      relays,
-      invite.relays.map(url => ["r", url]),
-    )
-  }
-
-  const signup = async noteContent => {
+  const signup = async () => {
     if (invite?.groups) {
       router.at("invite").qp({groups: invite.groups}).push()
     } else {
       router.at("notes").push()
     }
 
-    // Immediately request access to any relays with a claim so that when we save our
-    // profile information it doesn't get rejected
+    // Immediately request access to any relays with a claim
     for (const {url, claim} of invite?.parsedRelays || []) {
       if (claim) {
         const pub = await requestRelayAccess(url, claim)
@@ -67,26 +67,8 @@
       }
     }
 
-    // Do this first so we know where to publish everything else
-    setOutboxPolicies(() => relays)
-
-    // Re-save preferences now that we have a key and relays
-    publishProfile(profile)
-    createAndPublish({
-      kind: FOLLOWS,
-      tags: follows.map(tagPubkey),
-      relays: ctx.app.router.WriteRelays().getUrls(),
-    })
-
-    // Publish our welcome note
-    if (noteContent) {
-      createAndPublish({
-        kind: 1,
-        content: noteContent,
-        tags: tagsFromContent(noteContent),
-        relays: ctx.app.router.WriteRelays().getUrls(),
-      })
-    }
+    // Make sure our profile gets to the right relays
+    broadcastUserData(getWriteRelayUrls($userRelaySelections))
 
     // Start our notifications listener
     listenForNotifications()
@@ -102,8 +84,8 @@
     load({
       filters: getIdFilters(env.ONBOARDING_LISTS),
       onEvent: e => {
-        if (!onboardingLists.find(l => getAddress(l) === getAddress(e))) {
-          onboardingLists = onboardingLists.concat(e)
+        if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
+          state.onboardingLists = state.onboardingLists.concat(e)
         }
 
         loadPubkeys(Tags.fromEvent(e).values("p").valueOf())
@@ -117,31 +99,21 @@
     {#if stage === "intro"}
       <OnboardingIntro {setStage} />
     {:else if stage === "keys"}
-      <OnboardingKeys {setStage} />
+      <OnboardingKeys {setStage} bind:state />
     {:else if stage === "profile"}
-      <OnboardingProfile {setStage} {profile} />
+      <OnboardingProfile {setStage} bind:state />
     {:else if stage === "follows"}
-      <OnboardingFollows {setStage} {onboardingLists} bind:follows bind:relays />
+      <OnboardingFollows {setStage} bind:state />
     {:else if stage === "note"}
       <OnboardingNote {setStage} {signup} />
     {/if}
   {/key}
   <div class="m-auto flex gap-2">
-    <div
-      class="h-2 w-2 rounded-full"
-      class:bg-neutral-200={stage === "intro"}
-      class:bg-neutral-700={stage !== "intro"} />
-    <div
-      class="h-2 w-2 rounded-full"
-      class:bg-neutral-200={stage === "profile"}
-      class:bg-neutral-700={stage !== "profile"} />
-    <div
-      class="h-2 w-2 rounded-full"
-      class:bg-neutral-200={stage === "follows"}
-      class:bg-neutral-700={stage !== "follows"} />
-    <div
-      class="h-2 w-2 rounded-full"
-      class:bg-neutral-200={stage === "note"}
-      class:bg-neutral-700={stage !== "note"} />
+    {#each ["intro", "keys", "profile", "follows", "note"] as s}
+      <div
+        class="h-2 w-2 rounded-full"
+        class:bg-neutral-200={s === stage}
+        class:bg-neutral-700={s !== stage} />
+    {/each}
   </div>
 </FlexColumn>

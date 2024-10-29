@@ -1,9 +1,9 @@
 <script lang="ts">
   import {reject} from "ramda"
   import {quantify} from "hurdak"
-  import {fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
-  import {getPubkeyTagValues, getAddress} from "@welshman/util"
-  import {relaySearch, profileSearch} from "@welshman/app"
+  import {ctx, fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
+  import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
+  import {relaySearch, profileSearch, tagPubkey} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -12,13 +12,12 @@
   import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {createPeopleLoader} from "src/engine"
+  import {createPeopleLoader, createAndPublish, setOutboxPolicies} from "src/engine"
 
-  export let relays
-  export let follows
+  export let state
   export let setStage
-  export let onboardingLists
 
+  let loading = false
   let listEvent
   let term = ""
   let showList
@@ -29,7 +28,26 @@
   const {load: loadPeople} = createPeopleLoader()
 
   const prev = () => setStage("profile")
-  const next = () => setStage("note")
+
+  const next = async () => {
+    loading = true
+
+    try {
+      // Publish relays
+      await setOutboxPolicies(() => state.relays)
+
+      // Publish follows
+      await createAndPublish({
+        kind: FOLLOWS,
+        tags: state.follows.map(tagPubkey),
+        relays: ctx.app.router.WriteRelays().getUrls(),
+      })
+    } finally {
+      loading = false
+    }
+
+    setStage("note")
+  }
 
   const openList = event => {
     listEvent = event
@@ -49,27 +67,27 @@
   }
 
   const addFollow = pubkey => {
-    follows = append(pubkey, follows)
+    state.follows = append(pubkey, state.follows)
   }
 
   const removeFollow = pubkey => {
-    follows = remove(pubkey, follows)
+    state.follows = remove(pubkey, state.follows)
   }
 
   const followAll = listEvent => {
-    follows = uniq([...follows, ...getPubkeyTagValues(listEvent.tags)])
+    state.follows = uniq([...state.follows, ...getPubkeyTagValues(listEvent.tags)])
   }
 
   const unfollowAll = listEvent => {
-    follows = without(getPubkeyTagValues(listEvent.tags), follows)
+    state.follows = without(getPubkeyTagValues(listEvent.tags), state.follows)
   }
 
   const removeRelay = url => {
-    relays = reject(nthEq(1, url), relays)
+    state.relays = reject(nthEq(1, url), state.relays)
   }
 
   const addRelay = url => {
-    relays = [...relays, ["r", url]]
+    state.relays = [...state.relays, ["r", url]]
   }
 
   const openPersonSearch = () => {
@@ -90,7 +108,7 @@
     showRelaySearch = false
   }
 
-  $: urls = relays.map(nth(1))
+  $: urls = state.relays.map(nth(1))
 
   $: {
     if (showPersonSearch) {
@@ -102,7 +120,7 @@
 <div class="flex gap-3">
   <p
     class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
-    3/4
+    4/5
   </p>
   <p class="text-2xl font-bold">Find your people</p>
 </div>
@@ -112,7 +130,7 @@
     on:click={openSelections}>here</Anchor> to search for specific accounts.
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
-  {#each onboardingLists as event (getAddress(event))}
+  {#each state.onboardingLists as event (getAddress(event))}
     {@const {title = "", description = ""} = fromPairs(event.tags)}
     <Card
       class="relative flex min-w-[180px] cursor-pointer flex-col gap-2 rounded-2xl sm:aspect-square"
@@ -128,15 +146,15 @@
 <div class="flex justify-between">
   <div class="flex items-center gap-2">
     <i class="fa fa-info-circle" />
-    <span>Following {quantify(follows.length, "person", "people")}</span>
+    <span>Following {quantify(state.follows.length, "person", "people")}</span>
     <span>•</span>
-    <span>{quantify(relays.length, "relay")}</span>
+    <span>{quantify(state.relays.length, "relay")}</span>
   </div>
   <Anchor underline on:click={openSelections}>View selections</Anchor>
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  <Anchor button accent class="flex-grow" on:click={() => next()}>Continue</Anchor>
+  <Anchor button accent class="flex-grow" {loading} on:click={next}>Continue</Anchor>
 </div>
 
 {#if showList}
@@ -145,7 +163,7 @@
   <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{title}</p>
-      {#if listPubkeys.every(pubkey => follows.includes(pubkey))}
+      {#if listPubkeys.every(pubkey => state.follows.includes(pubkey))}
         <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
           Unfollow all
         </Anchor>
@@ -159,7 +177,7 @@
     {#each listPubkeys as pubkey (pubkey)}
       <PersonSummary hideFollowActions {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
-          {#if follows.includes(pubkey)}
+          {#if state.follows.includes(pubkey)}
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
             </Anchor>
@@ -185,13 +203,13 @@
       These are the people you'll be following once you finish creating your account.
     </p>
     <div />
-    {#if follows.length === 0}
+    {#if state.follows.length === 0}
       <div class="my-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
         <span>No people selected</span>
       </div>
     {:else}
-      {#each follows as pubkey (pubkey)}
+      {#each state.follows as pubkey (pubkey)}
         <PersonSummary {pubkey}>
           <div slot="actions" class="flex items-start justify-end">
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
@@ -212,14 +230,14 @@
       different experience.
     </p>
     <div />
-    {#if relays.length === 0}
+    {#if state.relays.length === 0}
       <div class="my-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
         <span>No relays selected</span>
       </div>
     {:else}
       <FlexColumn small>
-        {#each relays as [_, url] (url)}
+        {#each state.relays as [_, url] (url)}
           <RelayCard inert {url}>
             <div slot="actions">
               <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
@@ -245,7 +263,7 @@
     {#each $profileSearch.searchValues(term).slice(0, 30) as pubkey (pubkey)}
       <PersonSummary {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
-          {#if follows.includes(pubkey)}
+          {#if state.follows.includes(pubkey)}
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
             </Anchor>

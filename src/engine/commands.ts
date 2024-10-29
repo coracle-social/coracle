@@ -843,9 +843,6 @@ const addSession = (s: Session) => {
   pubkey.set(s.pubkey)
 }
 
-export const loginWithPrivateKey = (secret, extra = {}) =>
-  addSession({method: "nip01", pubkey: getPubkey(secret), secret, ...extra})
-
 export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
 
 export const loginWithNip07 = pubkey => addSession({method: "nip07", pubkey})

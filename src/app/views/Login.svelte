@@ -56,10 +56,6 @@
     boot()
   }
 
-  const usePrivateKey = () => router.at("login/privkey").replaceModal()
-
-  const usePublicKey = () => router.at("login/pubkey").replaceModal()
-
   const onSubmit = async () => {
     if (!username) {
       return showWarning("Please enter a user name.")
@@ -174,7 +170,7 @@
   document.title = "Log In"
 </script>
 
-<form on:submit={onSubmit}>
+<div>
   <FlexColumn narrow large>
     <div class="text-center">
       <Heading>Welcome!</Heading>
@@ -201,7 +197,7 @@
           <span slot="item" let:item>{item.domain}</span>
         </SearchSelect>
       </FieldInline>
-      <Anchor button accent tall disabled={!username} {loading} on:click={onSubmit}>Log In</Anchor>
+      <Anchor button accent tall type="submit" disabled={!username} {loading} on:click={onSubmit}>Log In</Anchor>
     </div>
     <div class="relative flex items-center gap-4">
       <div class="h-px flex-grow bg-neutral-600" />
@@ -210,24 +206,18 @@
     </div>
     <div class="relative flex flex-col gap-4">
       {#if getNip07()}
-        <Anchor button tall accent={!username} class="cursor-pointer" on:click={useExtension}>
-          <i class="fa fa-puzzle-piece" /> Browser Extension
+        <Anchor button tall class="cursor-pointer" on:click={useExtension}>
+          <i class="fa fa-puzzle-piece" /> Use Browser Extension
         </Anchor>
       {/if}
       {#each signerApps as app}
-        <Anchor button tall accent class="cursor-pointer" on:click={() => useSigner(app)}>
+        <Anchor button tall class="cursor-pointer" on:click={() => useSigner(app)}>
           <img src={app.iconUrl} alt={app.name} width="20" height="20" />
-          {app.name}
+          Use {app.name}
         </Anchor>
       {/each}
       <Anchor button tall class="cursor-pointer" on:click={useBunker}>
-        <i class="fa fa-box" /> Bunker URL
-      </Anchor>
-      <Anchor button tall class="cursor-pointer" on:click={usePrivateKey}>
-        <i class="fa fa-key" /> Private Key
-      </Anchor>
-      <Anchor button tall class="cursor-pointer" on:click={usePublicKey}>
-        <i class="fa fa-eye" /> Public Key
+        <i class="fa fa-box" /> Use Remote Signer
       </Anchor>
     </div>
     <span class="text-center">
@@ -235,4 +225,4 @@
       <Anchor underline on:click={signUp}>Register instead</Anchor>
     </span>
   </FlexColumn>
-</form>
+</div>

@@ -56,8 +56,6 @@
   import Login from "src/app/views/Login.svelte"
   import LoginBunker from "src/app/views/LoginBunker.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
-  import LoginPrivKey from "src/app/views/LoginPrivKey.svelte"
-  import LoginPubKey from "src/app/views/LoginPubKey.svelte"
   import Logout from "src/app/views/Logout.svelte"
   import Market from "src/app/views/Market.svelte"
   import MediaDetail from "src/app/views/MediaDetail.svelte"
@@ -238,8 +236,6 @@
 
   router.register("/login", Login)
   router.register("/login/bunker", LoginBunker)
-  router.register("/login/privkey", LoginPrivKey)
-  router.register("/login/pubkey", LoginPubKey)
   router.register("/login/connect", LoginConnect, {
     requireUser: true,
   })

@@ -275,7 +275,7 @@ export const defaultSettings = {
   report_analytics: true,
   min_wot_score: 0,
   enable_client_tag: false,
-  auto_authenticate: true,
+  auto_authenticate: false,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
   nip96_urls: env.NIP96_URLS.slice(0, 1),
   imgproxy_url: env.IMGPROXY_URL,
