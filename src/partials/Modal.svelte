@@ -57,7 +57,7 @@
 
     // If history changes and removes this modal, notify the caller if virtual
     const unsub = history.subscribe($history => {
-      if (!$history.includes(historyItem)) {
+      if (!$history.includes(historyItem) && !closing) {
         onEscape?.()
       }
     })
