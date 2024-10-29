@@ -23,7 +23,8 @@ import {
 import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {PublishStatus, AuthStatus, ConnectionStatus} from "@welshman/net"
-import {Nip59, stamp} from "@welshman/signer"
+import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
+import type {Nip46Handler} from "@welshman/signer"
 import {
   pubkey,
   signer,
@@ -44,6 +45,8 @@ import {
   userInboxRelaySelections,
   nip44EncryptToSelf,
   loadRelay,
+  addSession,
+  nip46Perms,
 } from "@welshman/app"
 import {
   COMMENT,
@@ -85,6 +88,24 @@ export const makeIMeta = (url: string, data: Record<string, string>) => [
   `url ${url}`,
   ...Object.entries(data).map(([k, v]) => [k, v].join(" ")),
 ]
+
+// Log in
+
+export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
+  const secret = makeSecret()
+  const broker = Nip46Broker.get({secret, handler})
+  const result = await broker.connect(token, nip46Perms)
+
+  if (!result) return false
+
+  const pubkey = await broker.getPublicKey()
+
+  if (!pubkey) return false
+
+  addSession({method: "nip46", pubkey, secret, handler})
+
+  return true
+}
 
 // Loaders
 

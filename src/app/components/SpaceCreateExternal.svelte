@@ -37,7 +37,7 @@
     </Button>
     <Button type="submit" class="btn btn-primary">
       Let's go
-      <Icon icon="alt-arrow-right" class="!bg-base-300" />
+      <Icon icon="alt-arrow-right" />
     </Button>
   </ModalFooter>
 </form>

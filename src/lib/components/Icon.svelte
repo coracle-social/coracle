@@ -34,6 +34,7 @@
   import Copy from "@assets/icons/Copy.svg?dataurl"
   import Compass from "@assets/icons/Compass.svg?dataurl"
   import CompassBig from "@assets/icons/Compass Big.svg?dataurl"
+  import CPU from "@assets/icons/CPU.svg?dataurl"
   import Danger from "@assets/icons/Danger.svg?dataurl"
   import Exit from "@assets/icons/Exit.svg?dataurl"
   import File from "@assets/icons/File.svg?dataurl"
@@ -111,6 +112,7 @@
     copy: Copy,
     compass: Compass,
     "compass-big": CompassBig,
+    cpu: CPU,
     danger: Danger,
     exit: Exit,
     file: File,

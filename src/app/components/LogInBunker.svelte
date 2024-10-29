@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
-  import {getPubkey} from "@welshman/signer"
+  import {Nip46Broker} from "@welshman/signer"
   import {addSession} from "@welshman/app"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -8,68 +7,60 @@
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import InfoNostr from "@app/components/InfoNostr.svelte"
-  import {loadUserData} from "@app/commands"
+  import InfoBunker from "@app/components/InfoBunker.svelte"
+  import {loginWithNip46, loadUserData} from "@app/commands"
   import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
+  import {PLATFORM_NAME} from "@app/state"
 
   const back = () => history.back()
 
   const onSubmit = async () => {
-    let secret = key
+    const {pubkey, token, relays} = Nip46Broker.parseBunkerLink(bunker)
 
-    if (secret.startsWith("nsec")) {
-      secret = nip19.decode(secret).data as string
-    }
-
-    if (!isKeyValid(secret)) {
+    if (!pubkey || relays.length === 0) {
       return pushToast({
         theme: "error",
-        message: "Sorry, it looks like that's an invalid private key.",
+        message: "Sorry, it looks like that's an invalid bunker link.",
       })
     }
 
-    const pubkey = getPubkey(secret)
-
-    addSession({method: "nip01", pubkey, secret})
-
     loading = true
 
-    await loadUserData(pubkey)
+    try {
+      if (!await loginWithNip46(token, {pubkey, relays})) {
+        return pushToast({
+          theme: "error",
+          message: "Something went wrong, please try again!",
+        })
+      }
+
+      await loadUserData(pubkey)
+    } finally {
+      loading = false
+    }
 
     clearModals()
   }
 
-  const isKeyValid = (key: string) => {
-    // Validate the key before setting it to state by encoding it using bech32.
-    // This will error if invalid (this works whether it's a public or a private key)
-    try {
-      getPubkey(key)
-    } catch (e) {
-      return false
-    }
-
-    return true
-  }
-
-  let key = ""
+  let bunker = ""
   let loading = false
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={onSubmit}>
   <ModalHeader>
     <div slot="title">Log In</div>
-    <div slot="info">Already have a nostr key?</div>
+    <div slot="info">Connect your signer app with {PLATFORM_NAME} using a bunker link.</div>
   </ModalHeader>
   <Field>
-    <p slot="label">Private Key*</p>
+    <p slot="label">Bunker Link*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="key" />
-      <input bind:value={key} class="grow" type="password" />
+      <Icon icon="cpu" />
+      <input bind:value={bunker} class="grow" placeholder="bunker://" />
     </label>
     <p slot="info">
-      A nostr nsec or private key. Note that this log in method is not recommended.
-      <Button class="link" on:click={() => pushModal(InfoNostr)}>What is nostr?</Button>
+      A login link provided by a nostr signing app.
+      <Button class="link" on:click={() => pushModal(InfoBunker)}>What is a bunker link?</Button>
     </p>
   </Field>
   <ModalFooter>
@@ -79,7 +70,7 @@
     </Button>
     <Button type="submit" class="btn btn-primary" disabled={loading}>
       <Spinner {loading}>Next</Spinner>
-      <Icon icon="alt-arrow-right" class="!bg-base-300" />
+      <Icon icon="alt-arrow-right" />
     </Button>
   </ModalFooter>
 </form>

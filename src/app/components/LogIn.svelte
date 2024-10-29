@@ -10,7 +10,7 @@
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInInfoRemoteSigner from "@app/components/LogInInfoRemoteSigner.svelte"
-  import LogInKey from "@app/components/LogInKey.svelte"
+  import LogInBunker from "@app/components/LogInBunker.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
@@ -103,7 +103,7 @@
     }
   }
 
-  const loginWithKey = () => pushModal(LogInKey)
+  const loginWithBunker = () => pushModal(LogInBunker)
 
   let username = ""
   let domain = "nsec.app"
@@ -164,9 +164,9 @@
       Log in with {app.name}
     </Button>
   {/each}
-  <Button disabled={loading} on:click={loginWithKey} class="btn btn-neutral">
-    <Icon icon="key" />
-    Log in with Key
+  <Button disabled={loading} on:click={loginWithBunker} class="btn btn-neutral">
+    <Icon icon="cpu" />
+    Log in with Bunker Link
   </Button>
   <div class="text-sm">
     Need an account?

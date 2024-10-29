@@ -17,7 +17,7 @@
   <div class="column gap-4">
     <div class="py-2">
       <h1 class="heading">Welcome to {PLATFORM_NAME}!</h1>
-      <p class="text-center">The chat app built for sovereign communities.</p>
+      <p class="text-center">The chat app built for self-hosted communities.</p>
     </div>
     <Button on:click={logIn}>
       <CardButton>
