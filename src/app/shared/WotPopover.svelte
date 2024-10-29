@@ -27,6 +27,7 @@
   const wotScore = getUserWotScore(pubkey)
   const profile = deriveProfile(pubkey, {relays: []})
   const profileDisplay = deriveProfileDisplay(pubkey)
+  const showPerson = () => router.at("people").of(pubkey).open()
 
   $: zapLink = router
     .at("zap")
@@ -44,7 +45,7 @@
       <WotScore score={wotScore} max={$maxWot} {accent} />
     </div>
     <div slot="tooltip" class="p-4">
-      <strong class="font-bold">{$profileDisplay}</strong>
+      <strong class="cursor-pointer font-bold" on:click={showPerson}>{$profileDisplay}</strong>
       <div class="text-neutral-400">Updated {formatTimestampRelative(profileUpdated)}</div>
       {#if $profile?.about}
         <PersonAbout class="mt-4 font-thin" {pubkey} />
@@ -75,8 +76,8 @@
       <div class="mt-4 flex items-center gap-2">
         <Anchor modal class="flex items-center gap-1" href="/help/web-of-trust">
           WoT Score: {wotScore}
+          <i class="fa fa-info-circle" />
         </Anchor>
-        <i class="fa fa-info-circle" />
       </div>
     </div>
   </Popover>
