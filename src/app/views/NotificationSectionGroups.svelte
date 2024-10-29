@@ -15,10 +15,12 @@
 
   export let limit
 
+  let loading = false
+
   onMount(() => {
     const tracked = new Set()
 
-    const unsub = unreadGroupNotifications.subscribe($unreadGroupNotifications => {
+    const unsub = unreadGroupNotifications.subscribe(async $unreadGroupNotifications => {
       const untracked = $unreadGroupNotifications.filter(e => !tracked.has(e.id))
 
       if (untracked.length > 0) {
@@ -34,7 +36,11 @@
           }
         }
 
-        markAsSeen(SEEN_CONTEXT, eventsByContext)
+        loading = true
+
+        await markAsSeen(SEEN_CONTEXT, eventsByContext)
+
+        loading = false
       }
     })
 

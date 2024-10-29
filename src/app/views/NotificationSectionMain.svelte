@@ -32,21 +32,27 @@
     })
   })
 
+  let loading = false
+
   onMount(() => {
     const tracked = new Set()
 
-    const unsub = unreadMainNotifications.subscribe(events => {
+    const unsub = unreadMainNotifications.subscribe(async events => {
       const untracked = events.filter(e => !tracked.has(e.id))
 
-      if (untracked.length > 0) {
+      if (!loading && untracked.length > 0) {
         for (const id of untracked) {
           tracked.add(id)
         }
 
-        markAsSeen(SEEN_GENERAL, {
+        loading = true
+
+        await markAsSeen(SEEN_GENERAL, {
           mentions: $mainNotifications,
           replies: $mainNotifications,
         })
+
+        loading = false
       }
     })
 
