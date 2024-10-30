@@ -81,33 +81,29 @@
     </button>
   </Tippy>
   <div class="flex flex-col">
-    <LongPress class="chat-bubble mx-1 max-w-sm text-left" onLongPress={showMobileMenu}>
-      <div class="flex w-full items-start gap-2">
-        {#if showPubkey}
-          <Link external href={pubkeyLink(event.pubkey)}>
+    <LongPress class="chat-bubble mx-1 max-w-sm text-left flex flex-col gap-1" onLongPress={showMobileMenu}>
+      {#if showPubkey && event.pubkey !== $pubkey}
+        <div class="flex items-center gap-2">
+          <Link external href={pubkeyLink(event.pubkey)} class="flex gap-1 items-center">
             <Avatar
               src={$profile?.picture}
               class="border border-solid border-base-content"
-              size={8} />
+              size={4} />
+              <div class="flex items-center gap-2">
+                <Link
+                  external
+                  href={pubkeyLink(event.pubkey)}
+                  class="text-sm font-bold"
+                  style="color: {colorValue}">
+                  {$profileDisplay}
+                </Link>
+              </div>
           </Link>
-        {/if}
-        <div class="-mt-1 flex-grow pr-1">
-          {#if showPubkey}
-            <div class="flex items-center gap-2">
-              <Link
-                external
-                href={pubkeyLink(event.pubkey)}
-                class="text-sm font-bold"
-                style="color: {colorValue}">
-                {$profileDisplay}
-              </Link>
-              <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
-            </div>
-          {/if}
-          <div class="text-sm">
-            <Content showEntire {event} />
-          </div>
+          <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
+      {/if}
+      <div class="text-sm">
+        <Content showEntire {event} />
       </div>
     </LongPress>
     <div class="row-2 z-feature -mt-1 ml-4">

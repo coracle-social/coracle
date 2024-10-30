@@ -10,7 +10,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived, writable} from "svelte/store"
-  import {assoc, sortBy, remove} from "@welshman/lib"
+  import {int, assoc, MINUTE, now, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {
@@ -70,6 +70,7 @@
 
     let previousDate
     let previousPubkey
+    let previousCreatedAt = 0
 
     for (const event of sortBy(e => e.created_at, $chat?.messages || [])) {
       const {id, pubkey, created_at} = event
@@ -83,11 +84,12 @@
         id,
         type: "note",
         value: event,
-        showPubkey: date !== previousDate || previousPubkey !== pubkey,
+        showPubkey: ((created_at - previousCreatedAt) > int(15, MINUTE)) || previousPubkey !== pubkey,
       })
 
       previousDate = date
       previousPubkey = pubkey
+      previousCreatedAt = created_at
     }
 
     elements.reverse()

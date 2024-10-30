@@ -21,7 +21,7 @@ import {
   getRelayTagValues,
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
-import type {SubscribeRequestWithHandlers} from "@welshman/net"
+import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
 import {PublishStatus, AuthStatus, ConnectionStatus} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
 import type {Nip46Handler} from "@welshman/signer"
@@ -47,6 +47,7 @@ import {
   loadRelay,
   addSession,
   nip46Perms,
+  subscribe,
 } from "@welshman/app"
 import {
   COMMENT,
@@ -88,6 +89,33 @@ export const makeIMeta = (url: string, data: Record<string, string>) => [
   `url ${url}`,
   ...Object.entries(data).map(([k, v]) => [k, v].join(" ")),
 ]
+
+export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
+  let sub: Subscription
+  let done = false
+
+  const start = async () => {
+    // If the subscription gets closed quickly, don't start flapping
+    await Promise.all([
+      sleep(30_000),
+      new Promise(resolve => {
+        sub = subscribe(request)
+        sub.emitter.on("close", resolve)
+      })
+    ])
+
+    if (!done) {
+      start()
+    }
+  }
+
+  start()
+
+  return () => {
+    done = true
+    sub?.close()
+  }
+}
 
 // Log in
 

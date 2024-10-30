@@ -14,7 +14,7 @@
   import {sortBy, now, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
-  import {formatTimestampAsDate, subscribe, publishThunk} from "@welshman/app"
+  import {formatTimestampAsDate, publishThunk} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -36,7 +36,7 @@
     COMMENT,
     getMembershipRoomsByUrl,
   } from "@app/state"
-  import {addRoomMembership, removeRoomMembership} from "@app/commands"
+  import {subscribePersistent, addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
   import {popKey} from "@app/implicit"
 
@@ -93,7 +93,7 @@
   }
 
   onMount(() => {
-    subscribe({filters: [{"#~": [room], since: now()}], relays: [url]})
+    return subscribePersistent({filters: [{"#~": [room], since: now()}], relays: [url]})
   })
 
   setTimeout(() => {
