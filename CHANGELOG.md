@@ -4,6 +4,8 @@
 
 - [x] Switch to self-hosted analytics
 - [x] Update profile detail page (@thibaut)
+- [x] Add richer description in wot popover (@thibaut)
+- [x] Fix bunker login
 
 # 0.4.15
 
