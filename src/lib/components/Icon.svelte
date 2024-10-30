@@ -61,7 +61,9 @@
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Paperclip from "@assets/icons/Paperclip.svg?dataurl"
   import Plain from "@assets/icons/Plain.svg?dataurl"
+  import QuestionSquare from "@assets/icons/Question Square.svg?dataurl"
   import RemoteControllerMinimalistic from "@assets/icons/Remote Controller Minimalistic.svg?dataurl"
+  import Rocket2 from "@assets/icons/Rocket 2.svg?dataurl"
   import Reply from "@assets/icons/Reply.svg?dataurl"
   import Server from "@assets/icons/Server.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
@@ -139,8 +141,10 @@
     "pallete-2": Pallete2,
     paperclip: Paperclip,
     plain: Plain,
+    "question-square": QuestionSquare,
     reply: Reply,
     "remote-controller-minimalistic": RemoteControllerMinimalistic,
+    "rocket-2": Rocket2,
     "share-circle": ShareCircle,
     "shop-minimalistic": ShopMinimalistic,
     "smile-circle": SmileCircle,

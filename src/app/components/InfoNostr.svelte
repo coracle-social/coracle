@@ -10,14 +10,17 @@
     <div slot="title">What is nostr?</div>
   </ModalHeader>
   <p>
-    <Link external href="https://nostr.com/">Nostr</Link> is way to build social apps that talk to eachother.
-    Users own their social identity instead of renting it from a tech company, and can bring it with
-    them from app to app.
+    <Link external href="https://nostr.com/" class="link">Nostr</Link> is way to build
+    social apps that talk to each other. Users own their social identity instead of
+    renting it from a tech company, and can take it with them.
   </p>
   <p>
-    This can be a little confusing when you're just getting started, but as long as you're using
-    {PLATFORM_NAME}, it will work just like a normal app. When you're ready to start exploring
-    nostr, visit your settings page to learn more.
+    If you'd like to learn more about what other apps exist in the nostr ecosystem, please
+    visit <Link external class="link" href="https://nostrapps.com/">nostrapps.com</Link>.
+  </p>
+  <p>
+    To learn more about how to manage your keys, or to set up an account, try
+    <Link external class="link" href="https://nosta.me/">nosta.me</Link>.
   </p>
   <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
 </div>

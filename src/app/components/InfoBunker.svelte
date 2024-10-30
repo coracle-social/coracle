@@ -16,8 +16,8 @@
   </p>
   <p>
     A good way to manage your keys is to use a remote signing application. These apps can hold
-    your keys and log you in remotely to as many applications as you like, without increasing
-    the risk of your keys being stolen.
+    your keys and log you in remotely to as many applications as you like, without risking
+    loss or theft of your keys.
   </p>
   <p>
     One way to log in with a remote signer is using a "bunker link" which is more secure and
@@ -26,7 +26,7 @@
   </p>
   <p>
     If you don't have a signer yet, <Link external class="link" href="https://nsec.app/">nsec.app</Link>
-    is an easy way to get started.
+    is a great way to get started.
   </p>
   <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
 </div>

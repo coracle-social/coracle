@@ -68,7 +68,7 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={loading}>
+    <Button type="submit" class="btn btn-primary" disabled={loading || !bunker}>
       <Spinner {loading}>Next</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

@@ -3,19 +3,17 @@
   import {addSession, nip46Perms, loadHandle} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import LogIn from "@app/components/LogIn.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
-  import SignUpKey from "@app/components/SignUpKey.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
 
   const login = () => pushModal(LogIn)
-
-  const signUpWithKey = () => pushModal(SignUpKey)
 
   const trySignup = async () => {
     const secret = makeSecret()
@@ -94,10 +92,10 @@
     <Icon icon="alt-arrow-right" />
   </Button>
   <Divider>Or</Divider>
-  <Button disabled={loading} on:click={signUpWithKey} class="btn btn-neutral">
-    <Icon icon="key" />
-    Sign up with Key
-  </Button>
+  <Link external href="https://nosta.me" class="btn {username ? 'btn-neutral' : 'btn-primary'}">
+    <Icon icon="square-share-line" />
+    Get started on Nosta.me
+  </Link>
   <div class="text-sm">
     Already have an account?
     <Button class="link" on:click={login}>Log in instead</Button>
