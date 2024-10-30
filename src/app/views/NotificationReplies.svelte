@@ -2,6 +2,7 @@
   import {pluck} from "ramda"
   import {uniq} from "@welshman/lib"
   import {pubkey} from "@welshman/app"
+  import {isShareableRelayUrl} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
@@ -12,7 +13,10 @@
   export let notification: Notification
 
   const {root, interactions, timestamp} = notification
-  const event = deriveEvent(root)
+  const relays = uniq(interactions.flatMap(e =>
+    e.tags.flatMap(t => t.slice(2).filter(isShareableRelayUrl)),
+  ))
+  const event = deriveEvent(root, {relays})
 
   $: actionText = $event?.pubkey === $pubkey ? "replied to your note" : "mentioned you"
 </script>

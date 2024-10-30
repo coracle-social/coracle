@@ -23,7 +23,7 @@
     isSignedEvent,
     createEvent,
     getAddress,
-    getAddressTagValues,
+    getContextTagValues,
     getPubkeyTagValues,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
@@ -77,7 +77,7 @@
   export let zapper
 
   const signedEvent = asSignedEvent(note as any)
-  const address = contextAddress || first(getAddressTagValues(note.tags))
+  const address = contextAddress || first(getContextTagValues(note.tags))
   const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({
     id: note.id,
