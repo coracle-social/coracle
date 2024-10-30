@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "./build.sh",
+    "sourcemaps": "sentry-cli --url https://glitchtip.coracle.social --auth-token $GLITCHTIP_AUTH_TOKEN --api-key $VITE_GLITCHTIP_API_KEY sourcemaps --org coracle --project flotilla --release $(cat package.json|jq -r '.version') upload --url-prefix /assets/ dist/assets",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
