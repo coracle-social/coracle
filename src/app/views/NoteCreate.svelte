@@ -1,11 +1,14 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {whereEq} from "ramda"
-  import {commaFormat, toTitle, switcherFn} from "hurdak"
-  import {writable, type Writable} from "svelte/store"
   import {ctx, last, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
+  import {commaFormat, toTitle, switcherFn} from "hurdak"
+  import {writable, type Writable} from "svelte/store"
+  import {Editor} from "svelte-tiptap"
+  import {nip19} from "nostr-tools"
+  import {v4 as uuid} from "uuid"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -25,12 +28,9 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {getEditorOptions} from "src/app/editor"
   import {router} from "src/app/util/router"
-  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
   import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
-  import {Editor} from "svelte-tiptap"
-  import {nip19} from "nostr-tools"
-  import {v4 as uuid} from "uuid"
+  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
 
   export let type = "note"
   export let quote = null
@@ -140,10 +140,16 @@
         }),
     })
 
-    const pub = await signAndPublish(template, opts)
+    let cancel = false
 
-    showPublishInfo(pub)
-    router.clearModals()
+    showInfo("", {type: "delay", onCancel: () => (cancel = true)})
+
+    setTimeout(async () => {
+      if (cancel) return
+      const pub = await signAndPublish(template, opts)
+      showPublishInfo(pub)
+      router.clearModals()
+    }, $userSettings.undo_delay * 1000)
   }
 
   const togglePreview = () => {

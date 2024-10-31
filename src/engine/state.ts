@@ -226,6 +226,7 @@ export const defaultSettings = {
   relay_limit: 5,
   default_zap: 21,
   show_media: true,
+  undo_delay: 0, // undo send delay in seconds
   muted_words: [],
   hide_sensitive: true,
   report_analytics: true,
@@ -770,6 +771,8 @@ const shouldTrackPublish = (event: TrustedEvent) => {
   return event.pubkey === pubkey.get() || canUnwrap(event)
 }
 
+export type Pub = ReturnType<typeof basePublish>
+
 export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
@@ -801,7 +804,10 @@ export const publish = async ({forcePlatform = true, ...request}: MyPublishReque
   return pub
 }
 
-export const sign = (template, opts: {anonymous?: boolean; sk?: string} = {}) => {
+export const sign = (
+  template,
+  opts: {anonymous?: boolean; sk?: string} = {},
+): Promise<SignedEvent> => {
   if (opts.anonymous) {
     return Nip01Signer.ephemeral().sign(template)
   }

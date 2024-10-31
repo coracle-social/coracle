@@ -1,10 +1,16 @@
 import {throttle} from "throttle-debounce"
-import {writable} from "svelte/store"
+import {derived, writable, type Readable} from "svelte/store"
 import {now, stripProtocol, isPojo, first, sleep} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is} from "ramda"
 import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
+
+export const timestamp1: Readable<number> = derived([], (_, set) => {
+  setInterval(() => {
+    set(Math.floor(Date.now() / 1000))
+  }, 1000)
+})
 
 export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
 

@@ -55,6 +55,12 @@
         How much you'd like to tip the developer of {appName} whenever you send a zap.
       </p>
     </Field>
+    <Field label="Undo Delay">
+      <Input type="number" bind:value={values.undo_delay}>
+        <i slot="before" class="fa fa-hourglass-half" />
+      </Input>
+      <p slot="info">A delay period allowing you to cancel a reply or note creation, in seconds.</p>
+    </Field>
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Max relays per request</strong>

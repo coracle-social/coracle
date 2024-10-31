@@ -12,13 +12,13 @@
     ZAP_RESPONSE,
     getAncestorTagValues,
   } from "@welshman/util"
-  import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
+  import {repository, deriveZapperForPubkey, deriveZapper, session} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
-  import {onMount} from "svelte"
+  import {onDestroy, onMount} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {replyKinds, isLike} from "src/util/nostr"
-  import {formatTimestamp} from "src/util/misc"
+  import {formatTimestamp, timestamp1} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -40,7 +40,9 @@
     userMutes,
     getSetting,
     sortEventsDesc,
+    type Pub,
   } from "src/engine"
+  import {writable} from "svelte/store"
 
   export let note
   export let relays = []
@@ -105,7 +107,21 @@
   }
 
   const addToContext = events => {
+    console.log("add to context", events)
+    // add an ephemeral status to the events
+    events.status = "loaded"
     context = context.concat(events)
+  }
+
+  const addDraftStatus = (pub: Pub) => {
+    console.log("add draft status", pub)
+    context = context.map(c => {
+      if (c.id === "draft") {
+        return {...c, pub}
+      } else {
+        return c
+      }
+    })
   }
 
   $: ancestors = getAncestorTagValues(event.tags || [])
@@ -118,9 +134,10 @@
 
   // Find children in our context
   $: children = context.filter(e => isChildOf(e, event))
-
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+
+  $: console.log(children, replies)
 
   let mutedReplies, hiddenReplies, visibleReplies
 
@@ -134,12 +151,14 @@
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
-      } else if (!showHiddenReplies && filters && !matchFilters(filters, e)) {
+      } else if (!showHiddenReplies && filters && !matchFilters(filters, e) && e.id !== "draft") {
         hiddenReplies.push(e)
       } else {
         visibleReplies.push(e)
       }
     }
+
+    console.log(mutedReplies, hiddenReplies, visibleReplies)
 
     if (depth === 0) {
       mutedReplies.splice(0)
@@ -284,18 +303,32 @@
                 <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
-              <NoteActions
-                note={event}
-                zapper={$zapper}
-                bind:this={actions}
-                {removeFromContext}
-                {addToContext}
-                {replyCtrl}
-                {showHidden}
-                {replies}
-                {likes}
-                {zaps}
-                {muted} />
+              {#if event.status != "loaded"}
+                <NoteActions
+                  note={event}
+                  zapper={$zapper}
+                  bind:this={actions}
+                  {removeFromContext}
+                  {addToContext}
+                  {replyCtrl}
+                  {showHidden}
+                  {replies}
+                  {likes}
+                  {zaps}
+                  {muted} />
+              {:else}
+                <div class="flex h-6 w-full justify-between rounded-md bg-accent pl-4">
+                  {#if event.pub}
+                    Publishiiiing
+                  {:else}
+                    Sending reply in {event.created_at + 5 - $timestamp1} seconds
+
+                    <button
+                      class="ml-2 cursor-pointer rounded-r-md bg-neutral-100-d px-4 text-tinted-700-d"
+                      >Cancel</button>
+                  {/if}
+                </div>
+              {/if}
             </div>
           </div>
         </Card>
@@ -328,6 +361,7 @@
 
       <NoteReply
         {addToContext}
+        {addDraftStatus}
         parent={event}
         showBorder={visibleReplies.length > 0}
         bind:this={replyCtrl}

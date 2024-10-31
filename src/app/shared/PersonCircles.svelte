@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {uniq} from "@welshman/lib"
   import cx from "classnames"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
@@ -8,7 +9,7 @@
 </script>
 
 <div class="flex pr-3">
-  {#each pubkeys.slice(0, 15) as pubkey (pubkey)}
+  {#each uniq(pubkeys).slice(0, 15) as pubkey (pubkey)}
     <div class="z-feature -mr-3 inline-block">
       <PersonCircle class={cx(klass, "border border-solid border-neutral-800")} {pubkey} />
     </div>
