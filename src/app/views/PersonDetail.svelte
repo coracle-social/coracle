@@ -169,25 +169,25 @@
           </div>
         </div>
       </div>
-      <div class="flex max-w-[80%] flex-col justify-between gap-4 sm:flex-row">
+      <div class="grid grid-cols-2 max-w-[80%] gap-3 sm:flex-row">
         {#if $handle}
-          <div class="flex items-center gap-2 text-accent">
-            <i class="fa fa-at" />
+          <div class="flex items-center gap-2">
+            <i class="fa fa-at text-accent w-4" />
             <PersonHandle {pubkey} />
           </div>
         {/if}
         {#if $zapper && zapDisplay}
-          <Anchor modal class="flex items-center gap-2 opacity-75" href={zapLink}>
-            <i class="fa fa-bolt" />
+          <Anchor modal class="flex items-center gap-2" href={zapLink}>
+            <i class="fa fa-bolt w-4 text-accent" />
             {zapDisplay}
           </Anchor>
         {/if}
         {#if $profile?.website}
           <Anchor
             external
-            class="flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
+            class="flex items-center gap-2 col-span-2"
             href={ensureProto($profile.website)}>
-            <i class="fa fa-link text-accent" />
+            <i class="fa fa-link text-accent w-4" />
             {stripProtocol($profile.website)}
           </Anchor>
         {/if}
