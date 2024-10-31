@@ -3,6 +3,7 @@
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
+  import type {PublishStatusMap} from "@welshman/net"
   import {formatTimestamp} from "src/util/misc"
   import {slide, fly} from "src/util/transition"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -20,8 +21,8 @@
   const retry = (url: string, event: TrustedEvent) =>
     publish({relays: [url], event: pub.request.event})
 
-  const getUrls = (status: PublishStatus) =>
-    remove(LOCAL_RELAY_URL, Array.from(pub.status).filter(nthEq(1, status)).map(first))
+  const getUrls = (m: PublishStatusMap, status: PublishStatus) =>
+    remove(LOCAL_RELAY_URL, Array.from(m).filter(nthEq(1, status)).map(first))
 
   const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 
@@ -35,10 +36,10 @@
 
   let expanded = false
 
-  $: pending = getUrls(PublishStatus.Pending)
-  $: success = getUrls(PublishStatus.Success)
-  $: failure = getUrls(PublishStatus.Failure)
-  $: timeout = getUrls(PublishStatus.Timeout)
+  $: pending = getUrls(pub.status, PublishStatus.Pending)
+  $: success = getUrls(pub.status, PublishStatus.Success)
+  $: failure = getUrls(pub.status, PublishStatus.Failure)
+  $: timeout = getUrls(pub.status, PublishStatus.Timeout)
 </script>
 
 {#await promise}
