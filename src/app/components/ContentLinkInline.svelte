@@ -14,12 +14,12 @@
 </script>
 
 {#if url.match(/\.(jpe?g|png|gif|webp)$/)}
-  <Button class="link-content" on:click={expand}>
+  <Button class="link-content whitespace-nowrap" on:click={expand}>
     <Icon icon="link-round" size={3} class="inline-block" />
     {displayUrl(url)}
   </Button>
 {:else}
-  <Link external href={url} class="link-content">
+  <Link external href={url} class="link-content whitespace-nowrap">
     <Icon icon="link-round" size={3} class="inline-block" />
     {displayUrl(url)}
   </Link>

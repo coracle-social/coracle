@@ -96,7 +96,7 @@
     </div>
   {:else}
     <div
-      class="overflow-hidden text-ellipsis"
+      class="overflow-hidden text-ellipsis break-words"
       style={expandBlock ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
       {#each shortContent as parsed, i}
         {#if isNewline(parsed)}
