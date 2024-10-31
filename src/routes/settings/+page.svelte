@@ -36,6 +36,7 @@
 
 <form class="content column gap-4" on:submit|preventDefault={onSubmit}>
   <div class="card2 bg-alt col-4 shadow-xl">
+    <p class="text-lg">Content Settings</p>
     <FieldInline>
       <p slot="label">Hide sensitive content?</p>
       <input
@@ -62,6 +63,22 @@
         <ProfileMultiSelect bind:value={mutedPubkeys} />
       </div>
     </Field>
+    <p class="text-lg">Editor Settings</p>
+    <FieldInline>
+      <p slot="label">Send Delay</p>
+      <input
+        class="range range-primary"
+        slot="input"
+        type="range"
+        min="0"
+        max="10000"
+        step="1000"
+        bind:value={settings.send_delay} />
+      <p slot="info">
+        Delay sending chat messages for {settings.send_delay/1000}
+        {settings.send_delay === 1000 ? 'second' : 'seconds'}.
+      </p>
+    </FieldInline>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
       <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>
       <Button type="submit" class="btn btn-primary">Save Changes</Button>

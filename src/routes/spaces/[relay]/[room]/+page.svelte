@@ -26,6 +26,7 @@
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
+    userSettingValues,
     userMembership,
     decodeRelay,
     makeChannelId,
@@ -52,7 +53,7 @@
 
   const onSubmit = ({content, tags}: EventContent) => {
     const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
-    const thunk = publishThunk({event, relays: [url], delay: 3000})
+    const thunk = publishThunk({event, relays: [url], delay: $userSettingValues.send_delay})
 
     thunks.update(assoc(thunk.event.id, thunk))
   }

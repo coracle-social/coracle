@@ -33,7 +33,7 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import {deriveChat, splitChatId, PLATFORM_NAME, pubkeyLink} from "@app/state"
+  import {userSettingValues, deriveChat, splitChatId, PLATFORM_NAME, pubkeyLink} from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
@@ -57,7 +57,7 @@
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
     const template = createEvent(DIRECT_MESSAGE, {content, tags})
-    const thunk = await sendWrapped({template, pubkeys, delay: 3000})
+    const thunk = await sendWrapped({template, pubkeys, delay: $userSettingValues.send_delay})
 
     thunks.update(assoc(thunk.thunks[0].event.id, thunk))
   }

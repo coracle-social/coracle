@@ -264,12 +264,14 @@ export type Settings = {
   values: {
     show_media: boolean
     hide_sensitive: boolean
+    send_delay: number,
   }
 }
 
 export const defaultSettings = {
   show_media: true,
   hide_sensitive: true,
+  send_delay: 3000,
 }
 
 export const settings = deriveEventsMapped<Settings>(repository, {

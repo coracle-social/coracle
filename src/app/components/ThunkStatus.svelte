@@ -7,6 +7,7 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
   import ThunkStatusDetail from "@app/components/ThunkStatusDetail.svelte"
+  import {userSettingValues} from '@app/state'
 
   export let thunk: Thunk | MergedThunk
 
@@ -20,12 +21,22 @@
       : publishThunk((thunk as Thunk).request)
   }
 
+  let isPending = true
+
   $: status = throttled(300, thunk.status)
   $: ps = Object.values($status)
-  $: canCancel = ps.length === 0
+  $: canCancel = ps.length === 0 && $userSettingValues.send_delay > 0
   $: isFailure = !canCancel && ps.every(s => [Failure, Timeout].includes(s.status))
-  $: isPending = !isFailure && ps.some(s => s.status === Pending)
   $: failure = Object.entries($status).find(([url, s]) => [Failure, Timeout].includes(s.status))
+
+  $: {
+    // Delay updating isPending so users can see that the message is sent
+    if (isFailure || !ps.some(s => s.status == Pending)) {
+      setTimeout(() => {
+        isPending = false
+      }, 2000)
+    }
+  }
 </script>
 
 <div class="flex justify-end px-1 text-xs">
