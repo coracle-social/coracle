@@ -677,7 +677,7 @@ export const setInboxPolicy = (url: string, enabled: boolean) => {
   // Only update inbox policies if they already exist or we're adding them
   if (enabled || urls.includes(url)) {
     setInboxPolicies($tags => {
-      $tags = $tags.filter(t => t[1] !== url)
+      $tags = $tags.filter(t => normalizeRelayUrl(t[1]) !== url)
 
       if (enabled) {
         $tags.push(["relay", url])
@@ -690,7 +690,7 @@ export const setInboxPolicy = (url: string, enabled: boolean) => {
 
 export const setOutboxPolicy = (url: string, read: boolean, write: boolean) =>
   setOutboxPolicies($tags => {
-    $tags = $tags.filter(t => t[1] !== url)
+    $tags = $tags.filter(t => normalizeRelayUrl(t[1]) !== url)
 
     if (read && write) {
       $tags.push(["r", url])

@@ -34,8 +34,22 @@
     reader.onload = async loadEvent => {
       try {
         const data = new Uint8Array(loadEvent.target.result as ArrayBuffer)
-        const jsonl = new TextDecoder().decode(data)
-        const newEvents = jsonl.split("\n").map(l => JSON.parse(l)) as TrustedEvent[]
+        const jsonl = new TextDecoder().decode(data).split('\n')
+        const newEvents: TrustedEvent[] = []
+
+        for (let i = 0; i < jsonl.length; i++) {
+          const l = jsonl[i]
+
+          if (l) {
+            try {
+              newEvents.push(JSON.parse(l))
+            } catch (e) {
+              showInfo(`Failed to parse row #${i}`)
+              loading = false
+              return
+            }
+          }
+        }
 
         for (const event of newEvents) {
           if (isTrustedEvent(event)) {
@@ -73,8 +87,8 @@
       <p>Populate {appName}'s database with a nostr export file</p>
     </div>
     <div class="flex w-full flex-col gap-8">
-      <Field label="Only export user events">
-        <Input type="file" on:change={setFile} accept=".jsonl" />
+      <Field label="">
+        <input type="file" on:change={setFile} accept=".jsonl" />
         <p slot="info">
           Nostr exports are .jsonl files. Some software may compress exports, be sure to upload an
           uncompressed version.
