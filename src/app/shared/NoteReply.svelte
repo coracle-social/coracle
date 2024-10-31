@@ -18,8 +18,7 @@
   import {publish, tagsFromContent, getClientTags, signAndPublish} from "src/engine"
 
   export let parent
-  export let addToContext
-  export let addDraftStatus
+  export let addDraftToContext
   export let showBorder = false
   export let forceOpen = false
 
@@ -105,8 +104,8 @@
 
     const template = createEvent(1, {content, tags})
     const event = await sign(template, {anonymous: false})
-    console.log("event", event)
-    addToContext({...event, id: "draft"})
+    let canceled = false
+    addDraftToContext(event, () => (canceled = true))
     isOpen = false
     setTimeout(async () => {
       const {pubs, events} = await signAndPublish(template, opts)
@@ -117,7 +116,7 @@
       // showPublishInfo(pubs[0])
       clearDraft()
       reset()
-    }, 5000)
+    }, $userSettings.undo_delay * 1000)
   }
 
   const onBodyClick = e => {

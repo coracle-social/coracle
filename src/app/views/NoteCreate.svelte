@@ -144,6 +144,7 @@
 
     showInfo("", {type: "delay", onCancel: () => (cancel = true)})
 
+    router.clearModals()
     setTimeout(async () => {
       if (cancel) return
       const pub = await signAndPublish(template, opts)

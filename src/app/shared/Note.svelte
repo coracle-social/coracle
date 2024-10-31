@@ -14,7 +14,7 @@
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper, session} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
-  import {onDestroy, onMount} from "svelte"
+  import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {replyKinds, isLike} from "src/util/nostr"
@@ -40,9 +40,9 @@
     userMutes,
     getSetting,
     sortEventsDesc,
-    type Pub,
   } from "src/engine"
-  import {writable} from "svelte/store"
+
+  import NotePending from "./NotePending.svelte"
 
   export let note
   export let relays = []
@@ -103,25 +103,21 @@
       .open()
 
   const removeFromContext = e => {
+    console.log("remove from context", e)
     context = reject(whereEq({id: e.id}), context)
   }
 
-  const addToContext = events => {
-    console.log("add to context", events)
-    // add an ephemeral status to the events
-    events.status = "loaded"
-    context = context.concat(events)
+  const addDraftToContext = (event, cb) => {
+    event.status = "draft"
+    event.remove = () => {
+      cb()
+      removeFromContext(event)
+    }
+    context = context.concat(event)
   }
 
-  const addDraftStatus = (pub: Pub) => {
-    console.log("add draft status", pub)
-    context = context.map(c => {
-      if (c.id === "draft") {
-        return {...c, pub}
-      } else {
-        return c
-      }
-    })
+  const addToContext = (event, cb) => {
+    context = context.concat(event)
   }
 
   $: ancestors = getAncestorTagValues(event.tags || [])
@@ -151,14 +147,17 @@
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
-      } else if (!showHiddenReplies && filters && !matchFilters(filters, e) && e.id !== "draft") {
+      } else if (
+        !showHiddenReplies &&
+        filters &&
+        !matchFilters(filters, e) &&
+        e.status !== "draft"
+      ) {
         hiddenReplies.push(e)
       } else {
         visibleReplies.push(e)
       }
     }
-
-    console.log(mutedReplies, hiddenReplies, visibleReplies)
 
     if (depth === 0) {
       mutedReplies.splice(0)
@@ -303,7 +302,7 @@
                 <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
-              {#if event.status != "loaded"}
+              {#if event.status !== "draft" || event.created_at < $timestamp1 - 45}
                 <NoteActions
                   note={event}
                   zapper={$zapper}
@@ -317,17 +316,7 @@
                   {zaps}
                   {muted} />
               {:else}
-                <div class="flex h-6 w-full justify-between rounded-md bg-accent pl-4">
-                  {#if event.pub}
-                    Publishiiiing
-                  {:else}
-                    Sending reply in {event.created_at + 5 - $timestamp1} seconds
-
-                    <button
-                      class="ml-2 cursor-pointer rounded-r-md bg-neutral-100-d px-4 text-tinted-700-d"
-                      >Cancel</button>
-                  {/if}
-                </div>
+                <NotePending {event} />
               {/if}
             </div>
           </div>
@@ -360,8 +349,7 @@
       {/if}
 
       <NoteReply
-        {addToContext}
-        {addDraftStatus}
+        {addDraftToContext}
         parent={event}
         showBorder={visibleReplies.length > 0}
         bind:this={replyCtrl}
