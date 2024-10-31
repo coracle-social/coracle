@@ -5,7 +5,6 @@
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
-  import {slideAndFade, conditionalTransition} from "@lib/transition"
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -36,16 +35,13 @@
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
-  const transition = conditionalTransition(thunk, slideAndFade)
-
   const onClick = () => {
     const root = $rootEvent || event
 
     pushDrawer(ChannelConversation, {url, room, event: root})
   }
 
-  const onLongPress = () =>
-    pushModal(ChannelMessageMenuMobile, {url, event})
+  const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event})
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -66,14 +62,13 @@
 <LongPress
   on:click={isMobile || inert ? null : onClick}
   onLongPress={inert ? null : onLongPress}
-  class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert ? 'hover:bg-base-300' : ''}">
+  class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert
+    ? 'hover:bg-base-300'
+    : ''}">
   <div class="flex w-full gap-3">
     {#if showPubkey}
       <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
-        <Avatar
-          src={$profile?.picture}
-          class="border border-solid border-base-content"
-          size={10} />
+        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
       </Link>
     {:else}
       <div class="w-10 min-w-10 max-w-10" />

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {Nip46Broker} from "@welshman/signer"
-  import {addSession} from "@welshman/app"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -28,7 +27,7 @@
     loading = true
 
     try {
-      if (!await loginWithNip46(token, {pubkey, relays})) {
+      if (!(await loginWithNip46(token, {pubkey, relays}))) {
         return pushToast({
           theme: "error",
           message: "Something went wrong, please try again!",

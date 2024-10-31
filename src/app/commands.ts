@@ -101,7 +101,7 @@ export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
       new Promise(resolve => {
         sub = subscribe(request)
         sub.emitter.on("close", resolve)
-      })
+      }),
     ])
 
     if (!done) {

@@ -1,11 +1,11 @@
 import type {Page} from "@sveltejs/kit"
 import {userMembership, makeChatId, decodeRelay, encodeRelay, getMembershipUrls} from "@app/state"
 
-export const makeSpacePath = (url: string, extra = "") => {
+export const makeSpacePath = (url: string, ...extra: string[]) => {
   let path = `/spaces/${encodeRelay(url)}`
 
-  if (extra) {
-    path += "/" + encodeURIComponent(extra)
+  if (extra.length > 0) {
+    path += "/" + extra.map(s => encodeURIComponent(s)).join("/")
   }
 
   return path

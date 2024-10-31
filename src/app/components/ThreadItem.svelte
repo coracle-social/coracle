@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nthEq} from '@welshman/lib'
+  import {nthEq} from "@welshman/lib"
   import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
@@ -12,19 +12,19 @@
   export let event
   export let hideActions = false
 
-  const title = event.tags.find(nthEq(0, 'title'))?.[1]
+  const title = event.tags.find(nthEq(0, "title"))?.[1]
 </script>
 
 <Link class="col-2 card2 bg-alt w-full cursor-pointer" href={makeThreadPath(url, event.id)}>
-  <div class="flex w-full justify-between items-center gap-2">
+  <div class="flex w-full items-center justify-between gap-2">
     <p class="text-xl">{title}</p>
     <p class="text-sm opacity-75">
       {formatTimestamp(event.created_at)}
     </p>
   </div>
   <Content {event} expandMode="inline" />
-  <div class="flex gap-2 items-end justify-between w-full">
-    <span class="text-sm opacity-75 whitespace-nowrap py-1">
+  <div class="flex w-full items-end justify-between gap-2">
+    <span class="whitespace-nowrap py-1 text-sm opacity-75">
       Posted by
       <Link external href={pubkeyLink(event.pubkey)} class="link-content">
         @<ProfileName pubkey={event.pubkey} />

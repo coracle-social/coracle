@@ -3,7 +3,6 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {append} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -26,7 +25,6 @@
   const loading = writable(false)
 
   const submit = () => {
-
     if (!title) {
       return pushToast({
         theme: "error",
@@ -34,7 +32,7 @@
       })
     }
 
-    const content = $editor.getText({blockSeparator: '\n'})
+    const content = $editor.getText({blockSeparator: "\n"})
 
     if (!content.trim()) {
       return pushToast({
@@ -43,11 +41,7 @@
       })
     }
 
-    const tags = [
-      ["title", title],
-      tagRoom(GENERAL, url),
-      ...getEditorTags($editor),
-    ]
+    const tags = [["title", title], tagRoom(GENERAL, url), ...getEditorTags($editor)]
 
     publishThunk({
       event: createEvent(THREAD, {content, tags}),
@@ -68,7 +62,7 @@
         getPubkeyHints,
         autofocus: true,
         placeholder: "What's on your mind?",
-      })
+      }),
     )
   })
 </script>
@@ -78,11 +72,15 @@
     <div slot="title">Create a Thread</div>
     <div slot="info">Share a link, or start a discussion.</div>
   </ModalHeader>
-  <div class="relative col-8">
+  <div class="col-8 relative">
     <Field>
       <p slot="label">Title*</p>
       <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-        <input bind:value={title} class="grow" type="text" placeholder="What is this thread about?" />
+        <input
+          bind:value={title}
+          class="grow"
+          type="text"
+          placeholder="What is this thread about?" />
       </label>
     </Field>
     <Field>

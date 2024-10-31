@@ -17,7 +17,7 @@
 
   const submit = () => {
     onSubmit({
-      content: $editor.getText({blockSeparator: '\n'}),
+      content: $editor.getText({blockSeparator: "\n"}),
       tags: getEditorTags($editor),
     })
 

@@ -7,7 +7,7 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
   import ThunkStatusDetail from "@app/components/ThunkStatusDetail.svelte"
-  import {userSettingValues} from '@app/state'
+  import {userSettingValues} from "@app/state"
 
   export let thunk: Thunk | MergedThunk
 

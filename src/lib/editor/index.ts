@@ -1,7 +1,7 @@
 import type {Writable} from "svelte/store"
 import {nprofileEncode} from "nostr-tools/nip19"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
-import Placeholder from '@tiptap/extension-placeholder'
+import Placeholder from "@tiptap/extension-placeholder"
 import Code from "@tiptap/extension-code"
 import CodeBlock from "@tiptap/extension-code-block"
 import Document from "@tiptap/extension-document"
@@ -65,7 +65,7 @@ export const getModifiedHardBreakExtension = () =>
         "Shift-Enter": () => this.editor.commands.setHardBreak(),
         "Mod-Enter": () => this.editor.commands.setHardBreak(),
         Enter: () => {
-          if (this.editor.getText({blockSeparator: '\n'}).trim()) {
+          if (this.editor.getText({blockSeparator: "\n"}).trim()) {
             uploadFiles(this.editor)
 
             return true

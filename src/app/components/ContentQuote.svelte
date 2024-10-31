@@ -32,7 +32,7 @@
   }
 
   // If we found this event on a relay that the user is a member of, redirect internally
-  $: localHref = getLocalHref($event)
+  $: localHref = $event ? getLocalHref($event) : null
   $: href = localHref || entityLink(entity)
 </script>
 

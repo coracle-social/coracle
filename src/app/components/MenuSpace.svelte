@@ -125,6 +125,11 @@
     </div>
     <div in:fly={{delay: getDelay(true)}}>
       <SecondaryNavItem href={makeSpacePath(url)}>
+        <Icon icon="home-smile" /> Home
+      </SecondaryNavItem>
+    </div>
+    <div in:fly={{delay: getDelay()}}>
+      <SecondaryNavItem href={makeSpacePath(url, "threads")}>
         <Icon icon="notes-minimalistic" /> Threads
       </SecondaryNavItem>
     </div>

@@ -41,7 +41,7 @@
 
     const kind = isAllDay ? EVENT_DATE : EVENT_TIME
     const event = createEvent(kind, {
-      content: $editor.getText({blockSeparator: '\n'}),
+      content: $editor.getText({blockSeparator: "\n"}),
       tags: [
         ["d", randomId()],
         ["title", title],

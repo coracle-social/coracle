@@ -57,14 +57,6 @@
 
   const isStartOrEnd = (i: number) => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
 
-  const isBlock = (i: number) => {
-    const parsed = fullContent[i]
-
-    return isEvent(parsed) || isAddress(parsed) || isLink(parsed)
-  }
-
-  const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
-
   const ignoreWarning = () => {
     warning = null
   }
@@ -132,9 +124,7 @@
           {/if}
         {:else if isEllipsis(parsed) && expandInline}
           {@html renderParsed(parsed)}
-          <button type="button" class="underline text-sm">
-            Read more
-          </button>
+          <button type="button" class="text-sm underline"> Read more </button>
         {:else}
           {@html renderParsed(parsed)}
         {/if}

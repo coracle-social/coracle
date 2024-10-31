@@ -81,23 +81,25 @@
     </button>
   </Tippy>
   <div class="flex flex-col">
-    <LongPress class="chat-bubble mx-1 max-w-sm text-left flex flex-col gap-1" onLongPress={showMobileMenu}>
+    <LongPress
+      class="chat-bubble mx-1 flex max-w-sm flex-col gap-1 text-left"
+      onLongPress={showMobileMenu}>
       {#if showPubkey && event.pubkey !== $pubkey}
         <div class="flex items-center gap-2">
-          <Link external href={pubkeyLink(event.pubkey)} class="flex gap-1 items-center">
+          <Link external href={pubkeyLink(event.pubkey)} class="flex items-center gap-1">
             <Avatar
               src={$profile?.picture}
               class="border border-solid border-base-content"
               size={4} />
-              <div class="flex items-center gap-2">
-                <Link
-                  external
-                  href={pubkeyLink(event.pubkey)}
-                  class="text-sm font-bold"
-                  style="color: {colorValue}">
-                  {$profileDisplay}
-                </Link>
-              </div>
+            <div class="flex items-center gap-2">
+              <Link
+                external
+                href={pubkeyLink(event.pubkey)}
+                class="text-sm font-bold"
+                style="color: {colorValue}">
+                {$profileDisplay}
+              </Link>
+            </div>
           </Link>
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>

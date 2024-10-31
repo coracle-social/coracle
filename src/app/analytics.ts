@@ -1,3 +1,5 @@
+/* eslint prefer-rest-params: 0 */
+
 import {page} from "$app/stores"
 
 const w = window as any

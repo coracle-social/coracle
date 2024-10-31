@@ -23,7 +23,7 @@
   const loading = writable(false)
 
   const submit = () => {
-    const content = $editor.getText({blockSeparator: '\n'})
+    const content = $editor.getText({blockSeparator: "\n"})
     const tags = append(tagRoom(GENERAL, url), getEditorTags($editor))
 
     if (!content.trim()) {

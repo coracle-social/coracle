@@ -17,7 +17,7 @@
 </script>
 
 {#if $reactions.length > 0}
-  <div class="flex gap-2">
+  <div class="flex min-w-0 flex-wrap gap-2">
     {#each groupedReactions.entries() as [content, events]}
       {@const isOwn = events.some(e => e.pubkey === $pubkey)}
       {@const onClick = () => onReactionClick(content, events)}
@@ -34,5 +34,6 @@
         {/if}
       </button>
     {/each}
+    <slot />
   </div>
 {/if}

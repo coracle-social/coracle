@@ -1,91 +1,95 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {getListTags, getPubkeyTagValues} from "@welshman/util"
-  import type {Filter} from "@welshman/util"
-  import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
-  import {nthEq} from "@welshman/lib"
-  import {feedLoader, userMutes} from "@welshman/app"
-  import {createScroller} from "@lib/html"
+  import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Divider from "@lib/components/Divider.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
-  import Spinner from "@lib/components/Spinner.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
-  import ThreadItem from "@app/components/ThreadItem.svelte"
-  import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
-  import {pushModal, pushDrawer} from "@app/modal"
+  import ProfileFeed from "@app/components/ProfileFeed.svelte"
+  import RelayName from "@app/components/RelayName.svelte"
+  import RelayDescription from "@app/components/RelayDescription.svelte"
+  import {decodeRelay} from "@app/state"
+  import {pushDrawer} from "@app/modal"
+  import {makeChatPath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
-  const events = deriveEventsForUrl(url, [{kinds: [THREAD]}])
-  const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#k": [String(THREAD)]}]
-  const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
-  const loader = feedLoader.getLoader(feed, {
-    onExhausted: () => {
-      loading = false
-    },
-  })
+  const relay = deriveRelay(url)
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
-  const createThread = () => pushModal(ThreadCreate, {url})
-
-  let limit = 5
-  let loading = true
-  let element: Element
-
-  onMount(() => {
-    // Why is element not defined sometimes? SVELTEKIT
-    if (element) {
-      const scroller = createScroller({
-        element,
-        delay: 300,
-        threshold: 3000,
-        onScroll: async () => {
-          const $loader = await loader
-
-          await $loader(5)
-          limit += 5
-        },
-      })
-
-      return () => scroller.stop()
-    }
-  })
+  $: pubkey = $relay?.profile?.pubkey
 </script>
 
-<div class="relative flex h-screen flex-col">
+<div class="relative flex flex-col">
   <PageBar>
     <div slot="icon" class="center">
-      <Icon icon="notes-minimalistic" />
+      <Icon icon="home-smile" />
     </div>
-    <strong slot="title">Threads</strong>
+    <strong slot="title">Home</strong>
     <div slot="action" class="row-2">
-      <Button class="btn btn-primary btn-sm" on:click={createThread}>
-        <Icon icon="notes-minimalistic" />
-        Create a Thread
-      </Button>
+      {#if pubkey}
+        <Link class="btn btn-primary btn-sm" href={makeChatPath([pubkey])}>
+          <Icon icon="letter" />
+          Contact Owner
+        </Link>
+      {/if}
       <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
         <Icon icon="menu-dots" />
       </Button>
     </div>
   </PageBar>
-  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
-    {#each $events.slice(0, limit) as event (event.id)}
-      {#if !event.tags.some(nthEq(0, "e")) && !mutedPubkeys.includes(event.pubkey)}
-        <ThreadItem {url} {event} />
-      {/if}
-    {/each}
-    <p class="flex h-10 items-center justify-center py-20">
-      <Spinner {loading}>
-        {#if loading}
-          Looking for threads...
-        {:else if $events.length === 0}
-          No threads found.
+  {#if pubkey}
+    <div class="col-2 p-2">
+      <div class="card2 bg-alt col-4 text-left">
+        <div class="relative flex gap-4">
+          <div class="relative">
+            <div class="avatar relative">
+              <div
+                class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+                {#if $relay?.profile?.icon}
+                  <img alt="" src={$relay.profile.icon} />
+                {:else}
+                  <Icon icon="ghost" size={5} />
+                {/if}
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 class="ellipsize whitespace-nowrap text-xl">
+              <RelayName {url} />
+            </h2>
+            <p class="text-sm opacity-75">{url}</p>
+          </div>
+        </div>
+        <RelayDescription {url} />
+        {#if $relay?.profile}
+          {@const {software, version, supported_nips, limitation} = $relay.profile}
+          <div class="flex flex-wrap gap-1">
+            {#if limitation?.auth_required}
+              <p class="badge badge-neutral">Authentication Required</p>
+            {/if}
+            {#if limitation?.payment_required}
+              <p class="badge badge-neutral">Payment Required</p>
+            {/if}
+            {#if limitation?.min_pow_difficulty}
+              <p class="badge badge-neutral">Requires PoW {limitation?.min_pow_difficulty}</p>
+            {/if}
+            {#if supported_nips}
+              <p class="badge badge-neutral">NIPs: {supported_nips.join(", ")}</p>
+            {/if}
+            {#if software}
+              <p class="badge badge-neutral">Software: {software}</p>
+            {/if}
+            {#if version}
+              <p class="badge badge-neutral">Version: {version}</p>
+            {/if}
+          </div>
         {/if}
-      </Spinner>
-    </p>
-  </div>
+      </div>
+      <Divider>Recent posts from the relay admin</Divider>
+      <ProfileFeed {url} {pubkey} />
+    </div>
+  {/if}
 </div>

@@ -6,7 +6,7 @@ export const setupTracking = () => {
       dsn: import.meta.env.VITE_GLITCHTIP_API_KEY,
       tracesSampleRate: 0.01,
       integrations(integrations) {
-        return integrations.filter(integration => integration.name !== 'Breadcrumbs')
+        return integrations.filter(integration => integration.name !== "Breadcrumbs")
       },
     })
   }

@@ -10,7 +10,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived, writable} from "svelte/store"
-  import {int, assoc, MINUTE, now, sortBy, remove} from "@welshman/lib"
+  import {int, assoc, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {
@@ -84,7 +84,7 @@
         id,
         type: "note",
         value: event,
-        showPubkey: ((created_at - previousCreatedAt) > int(15, MINUTE)) || previousPubkey !== pubkey,
+        showPubkey: created_at - previousCreatedAt > int(15, MINUTE) || previousPubkey !== pubkey,
       })
 
       previousDate = date

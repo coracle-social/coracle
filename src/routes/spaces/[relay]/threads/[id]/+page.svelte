@@ -36,7 +36,7 @@
 
   let showReply = false
 
-  $: title = $event?.tags.find(nthEq(0, 'title'))?.[1] || ""
+  $: title = $event?.tags.find(nthEq(0, "title"))?.[1] || ""
 
   onMount(() => {
     const sub = subscribe({filters, relays: [url]})

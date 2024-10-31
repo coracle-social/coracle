@@ -75,8 +75,8 @@
         step="1000"
         bind:value={settings.send_delay} />
       <p slot="info">
-        Delay sending chat messages for {settings.send_delay/1000}
-        {settings.send_delay === 1000 ? 'second' : 'seconds'}.
+        Delay sending chat messages for {settings.send_delay / 1000}
+        {settings.send_delay === 1000 ? "second" : "seconds"}.
       </p>
     </FieldInline>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">

@@ -150,7 +150,7 @@
     "smile-circle": SmileCircle,
     server: Server,
     settings: Settings,
-    'settings-minimalistic': SettingsMinimalistic,
+    "settings-minimalistic": SettingsMinimalistic,
     "tag-horizontal": TagHorizontal,
     "trash-bin-2": TrashBin2,
     "ufo-3": UFO3,

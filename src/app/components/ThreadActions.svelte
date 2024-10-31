@@ -46,7 +46,7 @@
 
 <div class="flex flex-wrap items-center justify-between gap-2">
   <ReactionSummary {event} {onReactionClick} />
-  <div class="flex flex-wrap flex-grow justify-end gap-2">
+  <div class="flex flex-grow flex-wrap justify-end gap-2">
     {#if $deleted}
       <div class="btn btn-error btn-xs rounded-full">Deleted</div>
     {/if}

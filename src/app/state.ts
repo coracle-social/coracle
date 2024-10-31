@@ -264,7 +264,7 @@ export type Settings = {
   values: {
     show_media: boolean
     hide_sensitive: boolean
-    send_delay: number,
+    send_delay: number
   }
 }
 
@@ -528,7 +528,7 @@ export const encodeRelay = (url: string) => encodeURIComponent(normalizeRelayUrl
 export const decodeRelay = (url: string) => normalizeRelayUrl(decodeURIComponent(url))
 
 export const displayReaction = (content: string) => {
-  if (content === "+") return "❤️"
+  if (!content || content === "+") return "❤️"
   if (content === "-") return "👎"
   return content
 }
