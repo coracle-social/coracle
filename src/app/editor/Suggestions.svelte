@@ -77,7 +77,9 @@
     {#each items as value, i (value)}
       <button
         class="white-space-nowrap flex w-full min-w-0 cursor-pointer items-center overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
-        class:bg-tinted-100-l={index === i}
+        class:brightness-150={index === i}
+        class:dark:bg-neutral-700-d={index === i}
+        class:bg-neutral-400-d={index === i}
         on:mousedown|preventDefault|stopPropagation
         on:click|preventDefault|stopPropagation={() => select(value)}>
         <svelte:component this={component} {value} />
