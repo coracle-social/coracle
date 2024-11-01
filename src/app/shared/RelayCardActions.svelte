@@ -28,7 +28,7 @@
   ]
 </script>
 
-<div class="hidden gap-4 md:flex">
+<div class="hidden gap-3 md:flex">
   <button
     class="flex items-center rounded-md bg-tinted-100-l px-6 py-1 text-sm font-bold uppercase text-tinted-700-d"
     class:bg-tinted-600-d={details}
@@ -68,30 +68,30 @@
     class="relative flex flex-col gap-2"
     on:click={() => instance.hide()}>
     <div
-      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100"
+      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
       on:click={_ => (details = !details)}>
-      <span class="mr-2 whitespace-nowrap">Info</span>
+      <span class="whitespace-nowrap">Info</span>
       <Anchor tall button circle class="text-accent"><i class="fa fa-info text-sm" /></Anchor>
     </div>
     <div
-      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100"
+      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
       on:click={() =>
         router.at(router.at("relays").of(encodeURIComponent(url)).toString()).push({modal: true})}>
-      <span class="mr-2 whitespace-nowrap">Explore</span>
+      <span class="whitespace-nowrap">Explore</span>
       <Anchor tall button circle class="text-accent"><i class="fa fa-search text-sm" /></Anchor>
     </div>
     {#if !userRelayUrls.includes(url)}
       <div
-        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100"
+        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
         on:click={join}>
-        <span class="mr-2 whitespace-nowrap">Join</span>
+        <span class="whitespace-nowrap">Join</span>
         <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
       </div>
     {:else if userRelayUrls.length > 1}
       <div
-        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100"
+        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
         on:click={leave}>
-        <span class="mr-2 whitespace-nowrap">Leave</span>
+        <span class="whitespace-nowrap">Leave</span>
         <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
       </div>
     {/if}

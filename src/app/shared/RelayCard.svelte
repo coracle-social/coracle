@@ -29,7 +29,6 @@
   export let claim = null
   export let ratings = null
   export let showStatus = false
-  export let hideDescription = false
   export let hideRatingsCount = false
   export let hideActions = false
   export let showControls = false
@@ -117,23 +116,26 @@
     {/if}
   </div>
   {#if details}
-    <div transition:slide class="my-4 hidden md:block">
+    <div transition:slide class="hidden md:flex flex-col gap-2 py-2">
       {#if $relay?.stats}
-        <span class="mb-4 flex items-center gap-1 text-sm">
+        <span class="flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
             <Anchor external underline href={$relay.profile.contact}>
               {displayUrl($relay.profile.contact)}</Anchor>
           {/if}
         </span>
-      {/if}<slot name="description">
+      {/if}
+      <slot name="description text-sm">
         {#if $relay?.profile?.description}
-          <p class="text-sm">{$relay?.profile.description}</p>
+          {$relay?.profile.description}
         {/if}
       </slot>
-      <div class="mt-4 text-sm">
-        <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
-      </div>
+      {#if $relay?.profile?.supported_nips}
+        <div class="text-sm opacity-75">
+          Supported NIPs: {$relay?.profile?.supported_nips.join(", ")}
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -195,9 +197,9 @@
 
 {#if isMobile && details}
   <Modal mini onEscape={close}>
-    <div>
+    <div class="flex flex-col gap-2">
       {#if $relay?.stats}
-        <span class="mb-3 flex items-center gap-1">
+        <span class="flex items-center gap-1">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
             <Anchor external underline href={$relay.profile.contact}>
@@ -210,9 +212,9 @@
           <p>{$relay?.profile.description}</p>
         {/if}
       </slot>
-      <div class="mt-3">
+      {#if $relay?.profile?.supported_nips}
         <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
-      </div>
+      {/if}
     </div>
   </Modal>
 {/if}
