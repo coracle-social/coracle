@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {writable} from "svelte/store"
-  import {sortBy, now, assoc, append} from "@welshman/lib"
+  import {sortBy, ago, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -94,7 +94,12 @@
   }
 
   onMount(() => {
-    return subscribePersistent({filters: [{"#~": [room], since: now()}], relays: [url]})
+    const unsub = subscribePersistent({
+      filters: [{"#~": [room], since: ago(30)}],
+      relays: [url],
+    })
+
+    return () => unsub()
   })
 
   setTimeout(() => {

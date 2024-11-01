@@ -40,56 +40,56 @@
       </Button>
     </div>
   </PageBar>
-  {#if pubkey}
-    <div class="col-2 p-2">
-      <div class="card2 bg-alt col-4 text-left">
-        <div class="relative flex gap-4">
-          <div class="relative">
-            <div class="avatar relative">
-              <div
-                class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
-                {#if $relay?.profile?.icon}
-                  <img alt="" src={$relay.profile.icon} />
-                {:else}
-                  <Icon icon="ghost" size={5} />
-                {/if}
-              </div>
+  <div class="col-2 p-2">
+    <div class="card2 bg-alt col-4 text-left">
+      <div class="relative flex gap-4">
+        <div class="relative">
+          <div class="avatar relative">
+            <div
+              class="center !flex h-12 w-12 min-w-12 rounded-full border-2 border-solid border-base-300 bg-base-300">
+              {#if $relay?.profile?.icon}
+                <img alt="" src={$relay.profile.icon} />
+              {:else}
+                <Icon icon="ghost" size={5} />
+              {/if}
             </div>
           </div>
-          <div>
-            <h2 class="ellipsize whitespace-nowrap text-xl">
-              <RelayName {url} />
-            </h2>
-            <p class="text-sm opacity-75">{url}</p>
-          </div>
         </div>
-        <RelayDescription {url} />
-        {#if $relay?.profile}
-          {@const {software, version, supported_nips, limitation} = $relay.profile}
-          <div class="flex flex-wrap gap-1">
-            {#if limitation?.auth_required}
-              <p class="badge badge-neutral">Authentication Required</p>
-            {/if}
-            {#if limitation?.payment_required}
-              <p class="badge badge-neutral">Payment Required</p>
-            {/if}
-            {#if limitation?.min_pow_difficulty}
-              <p class="badge badge-neutral">Requires PoW {limitation?.min_pow_difficulty}</p>
-            {/if}
-            {#if supported_nips}
-              <p class="badge badge-neutral">NIPs: {supported_nips.join(", ")}</p>
-            {/if}
-            {#if software}
-              <p class="badge badge-neutral">Software: {software}</p>
-            {/if}
-            {#if version}
-              <p class="badge badge-neutral">Version: {version}</p>
-            {/if}
-          </div>
-        {/if}
+        <div>
+          <h2 class="ellipsize whitespace-nowrap text-xl">
+            <RelayName {url} />
+          </h2>
+          <p class="text-sm opacity-75">{url}</p>
+        </div>
       </div>
+      <RelayDescription {url} />
+      {#if $relay?.profile}
+        {@const {software, version, supported_nips, limitation} = $relay.profile}
+        <div class="flex flex-wrap gap-1">
+          {#if limitation?.auth_required}
+            <p class="badge badge-neutral">Authentication Required</p>
+          {/if}
+          {#if limitation?.payment_required}
+            <p class="badge badge-neutral">Payment Required</p>
+          {/if}
+          {#if limitation?.min_pow_difficulty}
+            <p class="badge badge-neutral">Requires PoW {limitation?.min_pow_difficulty}</p>
+          {/if}
+          {#if supported_nips}
+            <p class="badge badge-neutral">NIPs: {supported_nips.join(", ")}</p>
+          {/if}
+          {#if software}
+            <p class="badge badge-neutral">Software: {software}</p>
+          {/if}
+          {#if version}
+            <p class="badge badge-neutral">Version: {version}</p>
+          {/if}
+        </div>
+      {/if}
+    </div>
+    {#if pubkey}
       <Divider>Recent posts from the relay admin</Divider>
       <ProfileFeed {url} {pubkey} />
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {now, assoc} from "@welshman/lib"
+  import {ago, assoc} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
@@ -22,7 +22,7 @@
   const url = decodeRelay($page.params.relay)
   const events = deriveEventsForUrl(url, [{kinds: [THREAD]}])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#k": [String(THREAD)]}]
+  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#K": [String(THREAD)]}]
   const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
   const loader = feedLoader.getLoader(feed, {
     onExhausted: () => {
@@ -40,7 +40,7 @@
 
   onMount(() => {
     const unsub = subscribePersistent({
-      filters: filters.map(assoc('since', now())),
+      filters: filters.map(assoc('since', ago(30))),
       relays: [url],
     })
 
@@ -52,6 +52,7 @@
         const $loader = await loader
 
         await $loader(5)
+
         limit += 5
       },
     })
@@ -63,7 +64,7 @@
   })
 </script>
 
-<div class="relative flex h-screen flex-col">
+<div class="relative flex h-screen flex-col" bind:this={element}>
   <PageBar>
     <div slot="icon" class="center">
       <Icon icon="notes-minimalistic" />
@@ -79,7 +80,7 @@
       </Button>
     </div>
   </PageBar>
-  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
+  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each $events.slice(0, limit) as event (event.id)}
       {#if !event.tags.some(nthEq(0, "e")) && !mutedPubkeys.includes(event.pubkey)}
         <ThreadItem {url} {event} />
