@@ -262,9 +262,6 @@ class Uploader {
       this.editor.storage.fileUpload.loading.set(true)
       await Promise.all(tasks)
       this.options.onComplete(this.editor)
-    } catch (error) {
-      console.error(error)
-      this.editor.storage.fileUpload.loading.set(false)
     } finally {
       this.editor.storage.fileUpload.loading.set(false)
     }
