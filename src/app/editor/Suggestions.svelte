@@ -77,13 +77,9 @@
     {#each items as value, i (value)}
       <button
         class="white-space-nowrap flex w-full min-w-0 cursor-pointer items-center overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
+        class:bg-tinted-100-l={index === i}
         on:mousedown|preventDefault|stopPropagation
         on:click|preventDefault|stopPropagation={() => select(value)}>
-        {#if index === i}
-          <div transition:slide|local={{axis: "x"}} class="flex items-center pr-2">
-            <i class="fa fa-alt-arrow-right" />
-          </div>
-        {/if}
         <svelte:component this={component} {value} />
       </button>
     {/each}
