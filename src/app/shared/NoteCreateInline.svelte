@@ -101,7 +101,7 @@
         <div class="flex items-center justify-end gap-3">
           <i class="fa fa-cog cursor-pointer" on:click={() => options.setView("settings")} />
           <button
-            class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+            class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded px-6 transition-all"
             on:click|preventDefault={editor.commands.selectFiles}>
             <i class="fa fa-paperclip cursor-pointer" />
           </button>
