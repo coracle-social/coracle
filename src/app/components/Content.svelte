@@ -92,7 +92,7 @@
       style={expandBlock ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
       {#each shortContent as parsed, i}
         {#if isNewline(parsed)}
-          <ContentNewline value={parsed.value.slice(1) || "\n"} />
+          <ContentNewline value={parsed.value} />
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
         {:else if isCode(parsed)}

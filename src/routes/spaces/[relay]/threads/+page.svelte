@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
+  import {now, assoc} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
@@ -16,6 +17,7 @@
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
   import {THREAD, COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
+  import {subscribePersistent} from "@app/commands"
 
   const url = decodeRelay($page.params.relay)
   const events = deriveEventsForUrl(url, [{kinds: [THREAD]}])
@@ -37,21 +39,26 @@
   let element: Element
 
   onMount(() => {
-    // Why is element not defined sometimes? SVELTEKIT
-    if (element) {
-      const scroller = createScroller({
-        element,
-        delay: 300,
-        threshold: 3000,
-        onScroll: async () => {
-          const $loader = await loader
+    const unsub = subscribePersistent({
+      filters: filters.map(assoc('since', now())),
+      relays: [url],
+    })
 
-          await $loader(5)
-          limit += 5
-        },
-      })
+    const scroller = createScroller({
+      element,
+      delay: 300,
+      threshold: 3000,
+      onScroll: async () => {
+        const $loader = await loader
 
-      return () => scroller.stop()
+        await $loader(5)
+        limit += 5
+      },
+    })
+
+    return () => {
+      unsub()
+      scroller.stop()
     }
   })
 </script>

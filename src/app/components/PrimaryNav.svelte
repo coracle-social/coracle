@@ -44,10 +44,7 @@
           </PrimaryNavItem>
         {/each}
         <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
-          <Avatar icon="add-circle" class="!h-10 !w-10" />
-        </PrimaryNavItem>
-        <PrimaryNavItem title="Discover Spaces" href="/discover" class="tooltip-right">
-          <Avatar icon="compass-big" class="!h-10 !w-10" />
+          <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
         </PrimaryNavItem>
       {/if}
     </div>
