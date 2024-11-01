@@ -129,7 +129,8 @@
     const options = getEditorOptions({
       submit: send,
       element: editorElement,
-      submitOnEnter: true,
+      submitOnEnter: false,
+      submitOnModEnter: true,
       autofocus: true,
       content: draft || "",
     })

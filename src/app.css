@@ -251,20 +251,28 @@ body,
   @apply link-content;
 }
 
-.link-content,
+.tiptap,
 [tag] {
   @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded px-1 no-underline;
 }
 
-.link-content.link-content-selected {
-  /* @apply bg-primary text-primary-content; */
+.tiptap a {
+  @apply underline
 }
-
 .tiptap p.is-editor-empty:first-child::before {
   color: #adb5bd;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.link-content,
+.tiptap [tag] {
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-700-d px-1 text-neutral-100-d no-underline;
+}
+
+.link-content.link-content-selected {
+  @apply bg-tinted-200-l text-tinted-700-d;
 }
 
