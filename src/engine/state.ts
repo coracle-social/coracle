@@ -693,64 +693,6 @@ export const unreadReactionNotifications = derived(
   ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
 )
 
-// -- Group Notifications
-
-export const groupNotifications = derived(
-  [
-    sessionWithMeta,
-    isEventMuted,
-    groupRequests,
-    groupAlerts,
-    groupAdminKeys,
-    throttled(3000, repositoryStore),
-  ],
-  ([$session, $isMuted, $requests, $alerts, $adminKeys, $repository]) => {
-    const admins = new Set($adminKeys.map(k => k.pubkey))
-    const addresses = getUserCircles($session)
-    const kinds = [...noteKinds, ...repostKinds]
-    const events = $repository.query([{"#a": addresses, kinds}])
-
-    return sortBy(
-      e => -e.created_at,
-      [
-        ...$requests.filter(r => !r.resolved && !$repository.deletes.has(r.group)),
-        ...$alerts.filter(a => !admins.has(a.pubkey) && !$repository.deletes.has(a.group)),
-        ...events
-          .map(e => {
-            // Unwrap reposts, add community tags so we know where stuff was posted to
-            if (repostKinds.includes(e.kind)) {
-              const contextTags = getAddressTags(e.tags)
-
-              e = unwrapRepost(e)
-
-              for (const tag of contextTags) {
-                if (isContextAddress(tag[1])) {
-                  e?.tags.push(tag)
-                }
-              }
-            }
-
-            return e
-          })
-          .filter(
-            e =>
-              e &&
-              e.pubkey !== $session.pubkey &&
-              // Skip mentions since they're covered in normal notifications
-              !e.tags.some(t => t[0] === "p" && t[1] === $session.pubkey) &&
-              !$isMuted(e),
-          ),
-      ],
-    ) as (TrustedEvent | GroupRequest | GroupAlert)[]
-  },
-)
-
-export const unreadGroupNotifications = derived(
-  [isSeen, groupNotifications],
-  ([$isSeen, $groupNotifications]) =>
-    $groupNotifications.filter(e => !getContextTagValues(e.tags).every(a => $isSeen(a, e))),
-)
-
 // Channels
 
 export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")

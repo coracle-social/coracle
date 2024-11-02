@@ -5,7 +5,6 @@
   import OnboardingTasks from "src/app/shared/OnboardingTasks.svelte"
   import NotificationSectionMain from "src/app/views/NotificationSectionMain.svelte"
   import NotificationSectionReactions from "src/app/views/NotificationSectionReactions.svelte"
-  import NotificationSectionGroups from "src/app/views/NotificationSectionGroups.svelte"
   import {router} from "src/app/util/router"
   import {
     sessionWithMeta,
@@ -14,10 +13,9 @@
     loadCircleMessages,
     unreadMainNotifications,
     unreadReactionNotifications,
-    unreadGroupNotifications,
   } from "src/engine"
 
-  const allTabs = ["Mentions & Replies", "Reactions", "Groups"]
+  const allTabs = ["Mentions & Replies", "Reactions"]
 
   const setActiveTab = tab => router.at("notifications").at(tab).push()
 
@@ -30,11 +28,6 @@
   let limit = 4
   let innerWidth = 0
   let element = null
-
-  $: displayTabs =
-    innerWidth <= 640 || !$userSettings.note_actions.includes("reactions")
-      ? [allTabs[0], allTabs[2]]
-      : allTabs
 
   document.title = "Notifications"
 
@@ -52,7 +45,7 @@
 
 <svelte:window bind:innerWidth />
 
-<Tabs tabs={displayTabs} {activeTab} {setActiveTab}>
+<Tabs tabs={allTabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
     <div>{tab}</div>
     {#if activeTab !== tab}
@@ -63,10 +56,6 @@
       {:else if tab === allTabs[1] && $unreadReactionNotifications.length > 0}
         <div class="h-6 rounded-full bg-neutral-700 px-2">
           {$unreadReactionNotifications.length}
-        </div>
-      {:else if tab === allTabs[2] && $unreadGroupNotifications.length > 0}
-        <div class="h-6 rounded-full bg-neutral-700 px-2">
-          {$unreadGroupNotifications.length}
         </div>
       {/if}
     {/if}
@@ -82,7 +71,5 @@
     <NotificationSectionMain {limit} />
   {:else if activeTab === allTabs[1]}
     <NotificationSectionReactions {limit} />
-  {:else if activeTab === allTabs[2]}
-    <NotificationSectionGroups {limit} />
   {/if}
 </div>
