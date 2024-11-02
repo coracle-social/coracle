@@ -13,7 +13,6 @@
   ]
   const failureStatuses = [AuthStatus.DeniedSignature, AuthStatus.Forbidden]
 
-  let statusHover = false
   let description = "Not connected"
   let className = "bg-neutral-600"
 

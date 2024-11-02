@@ -238,7 +238,7 @@
     {:else}
       <FlexColumn small>
         {#each state.relays as [_, url] (url)}
-          <RelayCard inert {url}>
+          <RelayCard {url}>
             <div slot="actions">
               <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
                 <i class="fa fa-right-from-bracket" /> Leave
@@ -289,7 +289,7 @@
     </Input>
     <FlexColumn small>
       {#each $relaySearch.searchValues(term).slice(0, 30) as url (url)}
-        <RelayCard inert {url}>
+        <RelayCard {url}>
           <div slot="actions">
             {#if urls.includes(url)}
               <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>

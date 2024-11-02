@@ -15,15 +15,13 @@
 
   export let limit
 
-  let loading = false
-
   onMount(() => {
     const tracked = new Set()
 
     const unsub = unreadGroupNotifications.subscribe(async $unreadGroupNotifications => {
       const untracked = $unreadGroupNotifications.filter(e => !tracked.has(e.id))
 
-      if (untracked.length > 0) {
+      if (!loading && untracked.length > 0) {
         for (const id of untracked) {
           tracked.add(id)
         }
