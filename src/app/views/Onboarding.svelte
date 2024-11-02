@@ -112,8 +112,8 @@
     {#each ["intro", "keys", "profile", "follows", "note"] as s}
       <div
         class="h-2 w-2 rounded-full"
-        class:bg-neutral-200={s === stage}
-        class:bg-neutral-700={s !== stage} />
+        class:bg-neutral-300={s === stage}
+        class:bg-neutral-500={s !== stage} />
     {/each}
   </div>
 </FlexColumn>

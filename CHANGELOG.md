@@ -2,10 +2,19 @@
 
 # 0.4.16
 
+Contributors: @hodlbod, @dtonon, @thibaut
+
 - [x] Switch to self-hosted analytics
-- [x] Update profile detail page (@thibaut)
-- [x] Add richer description in wot popover (@thibaut)
+- [x] Update profile detail page
+- [x] Add richer description in wot popover
 - [x] Fix bunker login
+- [x] Re-design relay cards
+- [x] Fix hud publish status
+- [x] Default to dark theme
+- [x] Fix loading inbox relay selections
+- [x] Re-work onboarding
+- [x] Fix timeouts for subscriptions
+- [x] Stop storing ephemeral events in local relay
 
 # 0.4.15
 

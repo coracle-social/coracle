@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {Nip46Broker} from '@welshman/signer'
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -11,27 +12,11 @@
   let input = ""
   let loading = false
 
-  const parse = async (uri: string) => {
-    const r = {pubkey: "", relays: [], token: ""}
-
-    try {
-      const url = new URL(uri)
-
-      r.pubkey = url.hostname || url.pathname.replace(/\//g, "")
-      r.relays = url.searchParams.getAll("relay") || []
-      r.token = url.searchParams.get("secret") || ""
-    } catch {
-      // pass
-    }
-
-    return r
-  }
-
   const logIn = async () => {
     loading = true
 
     try {
-      const {pubkey, token, relays} = await parse(input)
+      const {pubkey, token, relays} = await Nip46Broker.parseBunkerLink(input)
 
       if (!isKeyValid(pubkey)) {
         return showWarning("Sorry, but that's an invalid public key.")
