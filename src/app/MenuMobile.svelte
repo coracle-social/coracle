@@ -26,10 +26,6 @@
     subMenu = name
   }
 
-  const openCommunity = e => {
-    setSubMenu("community")
-  }
-
   const openSettings = e => {
     setSubMenu("settings")
   }
@@ -94,20 +90,9 @@
           {/if}
         </div>
       </MenuMobileItem>
-      {#if env.FORCE_GROUP}
-        <MenuMobileItem href="/events" on:click={closeMenu}>
-          <i class="fa fa-calendar-days" /> Calendar
-        </MenuMobileItem>
-        {#if env.ENABLE_MARKET}
-          <MenuMobileItem href="/listings" on:click={closeMenu}>
-            <i class="fa fa-store" /> Market
-          </MenuMobileItem>
-        {/if}
-      {:else}
-        <MenuMobileItem stopPropagation on:click={openCommunity}>
-          <i class="fa fa-people-pulling" /> Community
-        </MenuMobileItem>
-      {/if}
+      <MenuMobileItem modal href="/groups" on:click={closeMenu}>
+        <i class="fa fa-circle-nodes" /> Groups
+      </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/channels" on:click={closeMenu}>
         <i class="fa fa-message" />
         <div class="relative inline-block">
@@ -126,27 +111,6 @@
       <Anchor class="hover:text-tinted-200" href="/about">About</Anchor> /
       <Anchor external class="hover:text-tinted-200" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-tinted-200" href="/privacy.html">Privacy</Anchor>
-    </div>
-  </SliderMenu>
-{/if}
-
-{#if subMenu === "community"}
-  <SliderMenu onEscape={closeSubMenu}>
-    <p class="staatliches mb-8 text-center text-3xl">Community</p>
-    <div class="staatliches m-auto grid grid-cols-2 gap-3">
-      <MenuMobileItem href="/events" on:click={closeMenu}>
-        <i class="fa fa-calendar-days" /> Calendar
-      </MenuMobileItem>
-      {#if env.ENABLE_MARKET}
-        <MenuMobileItem href="/listings" on:click={closeMenu}>
-          <i class="fa fa-store" /> Market
-        </MenuMobileItem>
-      {/if}
-      {#if !env.FORCE_GROUP}
-        <MenuMobileItem href="/groups" on:click={closeMenu}>
-          <i class="fa fa-circle-nodes" /> Groups
-        </MenuMobileItem>
-      {/if}
     </div>
   </SliderMenu>
 {/if}
