@@ -34,13 +34,7 @@
   import FeedCreate from "src/app/views/FeedCreate.svelte"
   import FeedEdit from "src/app/views/FeedEdit.svelte"
   import FeedList from "src/app/views/FeedList.svelte"
-  import GroupCreate from "src/app/views/GroupCreate.svelte"
-  import GroupDelete from "src/app/views/GroupDelete.svelte"
-  import GroupDetail from "src/app/views/GroupDetail.svelte"
-  import GroupEdit from "src/app/views/GroupEdit.svelte"
-  import GroupInfo from "src/app/views/GroupInfo.svelte"
   import GroupList from "src/app/views/GroupList.svelte"
-  import GroupRotate from "src/app/views/GroupRotate.svelte"
   import Help from "src/app/views/Help.svelte"
   import Home from "src/app/views/Home.svelte"
   import InviteAccept from "src/app/views/InviteAccept.svelte"
@@ -51,13 +45,10 @@
   import ListEdit from "src/app/views/ListEdit.svelte"
   import ListList from "src/app/views/ListList.svelte"
   import ListSelect from "src/app/views/ListSelect.svelte"
-  import ListingDelete from "src/app/views/ListingDelete.svelte"
-  import ListingEdit from "src/app/views/ListingEdit.svelte"
   import Login from "src/app/views/Login.svelte"
   import LoginBunker from "src/app/views/LoginBunker.svelte"
   import LoginConnect from "src/app/views/LoginConnect.svelte"
   import Logout from "src/app/views/Logout.svelte"
-  import Market from "src/app/views/Market.svelte"
   import MediaDetail from "src/app/views/MediaDetail.svelte"
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDelete from "src/app/views/NoteDelete.svelte"
@@ -141,55 +132,6 @@
   })
 
   router.register("/groups", GroupList)
-  router.register("/groups/new", GroupCreate, {
-    requireSigner: true,
-  })
-  router.register("/groups/:address/edit", GroupEdit, {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/groups/:address/delete", GroupDelete, {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/groups/:address/info", GroupInfo, {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register(
-    "/groups/:address/invite-admin",
-    import("src/app/views/GroupInviteAdmin.svelte"),
-    {
-      serializers: {
-        address: asNaddr("address"),
-      },
-    },
-  )
-  router.register("/groups/:address/rotate", GroupRotate, {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-      addMembers: asCsv("addMembers"),
-      removeMembers: asCsv("removeMembers"),
-    },
-  })
-  router.register("/groups/:address/:activeTab", GroupDetail, {
-    serializers: {
-      address: asNaddr("address"),
-      claim: asString("claim"),
-    },
-  })
-  router.register("/groups/:address", GroupDetail, {
-    serializers: {
-      address: asNaddr("address"),
-      claim: asString("claim"),
-    },
-  })
 
   router.register("/help/:topic", Help)
 
@@ -240,20 +182,6 @@
     requireUser: true,
   })
   router.register("/logout", Logout)
-
-  router.register("/listings", Market)
-  router.register("/listings/:address/edit", ListingEdit, {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/listings/:address/delete", ListingDelete, {
-    requireSigner: true,
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
 
   router.register("/media/:url", MediaDetail, {
     serializers: {

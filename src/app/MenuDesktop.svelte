@@ -109,16 +109,9 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem path="/events" isActive={$page?.path.startsWith("/events")}
-    >Calendar</MenuDesktopItem>
-  {#if env.ENABLE_MARKET}
-    <MenuDesktopItem path="/listings" isActive={$page?.path.startsWith("/listings")}
-      >Market</MenuDesktopItem>
-  {/if}
-  {#if !env.FORCE_GROUP}
-    <MenuDesktopItem path="/groups" isActive={$page?.path.startsWith("/groups")}
-      >Groups</MenuDesktopItem>
-  {/if}
+  <MenuDesktopItem modal path="/groups">
+    Groups
+  </MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
