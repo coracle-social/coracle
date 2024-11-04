@@ -50,8 +50,8 @@ import {
   uniq,
   uniqBy,
 } from "@welshman/lib"
-import type {PublishRequest} from "@welshman/net"
-import {Executor, Local, Multi, Plex, Relays, publish as basePublish} from "@welshman/net"
+import type {PublishRequest, Target} from "@welshman/net"
+import {Executor, Local, Multi, Relays, publish as basePublish} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {
@@ -92,7 +92,6 @@ import {
   getListTags,
   getPubkeyTagValues,
   getTagValues,
-  isGroupAddress,
   isHashedEvent,
   makeList,
   normalizeRelayUrl,
@@ -135,7 +134,6 @@ export const env = {
   ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
   BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
-  MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
@@ -218,7 +216,6 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
 export const defaultSettings = {
   relay_limit: 5,
-  relay_redundancy: 2,
   default_zap: 21,
   show_media: true,
   muted_words: [],
@@ -231,7 +228,6 @@ export const defaultSettings = {
   nip96_urls: env.NIP96_URLS.slice(0, 1),
   imgproxy_url: env.IMGPROXY_URL,
   dufflepud_url: env.DUFFLEPUD_URL,
-  multiplextr_url: env.MULTIPLEXTR_URL,
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
 }
 
@@ -739,26 +735,9 @@ export const addRepostFilters = (filters: Filter[]) =>
   })
 
 export const getExecutor = (urls: string[]) => {
-  const muxUrl = getSetting("multiplextr_url")
   const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)
 
-  // Try to use our multiplexer, but if it fails to connect fall back to relays. If
-  // we're only connecting to a single relay, just do it directly, unless we already
-  // have a connection to the multiplexer open, in which case we're probably doing
-  // AUTH with a single relay.
-  let target
-
-  if (muxUrl && remoteUrls.length > 0) {
-    const connection = ctx.net.pool.get(muxUrl)
-
-    if (connection.socket.isOpen()) {
-      target = new Plex(remoteUrls, connection)
-    }
-  }
-
-  if (!target) {
-    target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
-  }
+  let target: Target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
 
   if (localUrls.length > 0) {
     target = new Multi([target, new Local(relay)])
@@ -982,7 +961,7 @@ export class ThreadLoader {
     if (filteredIds.length > 0) {
       load({
         filters: getIdFilters(filteredIds),
-        relays: ctx.app.router.fromRelays(this.relays).getUrls(),
+        relays: ctx.app.router.FromRelays(this.relays).getUrls(),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
           this.loadNotes(events.flatMap(getAncestorIds))
@@ -1082,7 +1061,7 @@ const migrateEvents = (events: TrustedEvent[]) => {
     return events
   }
   // filter out all event posted to encrypted group
-  events = events.filter(e => !e.wrap?.tags.some(t => isGroupAddress(t[1])))
+  events = events.filter(e => !e.wrap?.tags.some(t => t[1].startsWith("35834:")))
 
   const scoreEvent = getScoreEvent()
 
@@ -1122,7 +1101,6 @@ if (!db) {
       indexerRelays: env.INDEXER_RELAYS,
       requestTimeout: 10000,
       router: makeRouter({
-        getRedundancy: () => getSetting("relay_redundancy"),
         getLimit: () => getSetting("relay_limit"),
       }),
     }),

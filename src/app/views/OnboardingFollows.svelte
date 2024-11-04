@@ -40,7 +40,7 @@
       await createAndPublish({
         kind: FOLLOWS,
         tags: state.follows.map(tagPubkey),
-        relays: ctx.app.router.WriteRelays().getUrls(),
+        relays: ctx.app.router.FromUser().getUrls(),
       })
     } finally {
       loading = false

@@ -26,8 +26,6 @@
   const formatPercent = d => String(Math.round(d * 100))
   const parsePercent = p => parseInt(p) / 100
 
-  $: values.relay_redundancy = Math.round(Math.log10(values.relay_limit) * 4)
-
   document.title = "Settings"
 </script>
 
@@ -111,19 +109,6 @@
         Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
         privacy. You can set up your own proxy <Anchor underline href="https://imgproxy.net/"
           >here</Anchor
-        >.
-      </p>
-    </Field>
-    <Field label="Multiplextr URL">
-      <Input bind:value={values.multiplextr_url}>
-        <i slot="before" class="fa-solid fa-code-merge" />
-      </Input>
-      <p slot="info">
-        Enter a custom proxy server for multiplexing relay connections. This can drastically improve
-        resource usage, but has some privacy trade-offs. Leave blank to connect to relays directly.
-        You can find the source code <Anchor
-          underline
-          href="https://github.com/coracle-social/multiplextr">here</Anchor
         >.
       </p>
     </Field>

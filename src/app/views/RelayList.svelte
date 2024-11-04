@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {ctx, nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {
     pubkey,
     relays,
@@ -119,7 +119,6 @@
   }, reviews)
 
   load({
-    relays: ctx.app.router.ReadRelays().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
     onEvent: event => {
       if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {

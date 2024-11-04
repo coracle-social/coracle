@@ -9,7 +9,7 @@
 </script>
 
 <NoteContentKind1
-  note={{content: $profile?.about || ""}}
+  note={{content: $profile?.about || "", tags: []}}
   class={$$props.class}
   minLength={200}
   maxLength={300}

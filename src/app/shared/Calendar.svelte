@@ -62,7 +62,7 @@
       // Load deletes for these events
       onEvent: batch(300, (chunk: TrustedEvent[]) => {
         load({
-          relays: ctx.app.router.merge(chunk.map(e => ctx.app.router.EventChildren(e))).getUrls(),
+          relays: ctx.app.router.merge(chunk.map(e => ctx.app.router.Replies(e))).getUrls(),
           filters: getReplyFilters(chunk, {kinds: [5]}),
         })
       }),

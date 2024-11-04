@@ -21,7 +21,7 @@
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {getSetting, setInboxPolicy, setOutboxPolicy} from "src/engine"
+  import {setInboxPolicy, setOutboxPolicy} from "src/engine"
   import {slide} from "svelte/transition"
   import Modal from "src/partials/Modal.svelte"
 
@@ -84,7 +84,7 @@
           <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
             {displayRelayUrl(url)}
           </div>
-          {#if showStatus && !getSetting("multiplextr_url")}
+          {#if showStatus}
             <RelayStatus {url} />
           {/if}
         </div>
@@ -95,11 +95,10 @@
             </span>
           {/if}
           <span>
-            Connected {quantify($relay.stats?.connect_count || 0, "time")}
+            Connected {quantify($relay?.stats?.open_count || 0, "time")}
           </span>
         </div>
       </div>
-
       {#if !showStatus && ratings?.length > 0}
         <div class="hidden items-center gap-1 px-4 text-sm sm:flex">
           <Rating inert value={getAvgRating(ratings)} />
@@ -116,7 +115,7 @@
     {/if}
   </div>
   {#if details}
-    <div transition:slide class="hidden md:flex flex-col gap-2 py-2">
+    <div transition:slide class="hidden flex-col gap-2 py-2 md:flex">
       {#if $relay?.stats}
         <span class="flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}

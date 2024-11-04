@@ -67,7 +67,7 @@ export const asPerson = {
       return {
         pubkey,
         relays: ctx.app.router
-          .merge([ctx.app.router.fromRelays(relays), ctx.app.router.FromPubkeys([pubkey])])
+          .merge([ctx.app.router.FromRelays(relays), ctx.app.router.FromPubkeys([pubkey])])
           .getUrls(),
       }
     }

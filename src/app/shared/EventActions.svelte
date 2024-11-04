@@ -7,7 +7,7 @@
 
   export let event
 
-  const address = Address.fromEvent(event, ctx.app.router.Event(event).redundancy(3).getUrls())
+  const address = Address.fromEvent(event, ctx.app.router.Event(event).limit(3).getUrls())
 
   let actions = []
 

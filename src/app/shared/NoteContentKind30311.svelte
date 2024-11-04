@@ -14,7 +14,7 @@
   export let note
   export let showMedia = false
 
-  const address = Address.fromEvent(note, ctx.app.router.Event(note).redundancy(3).getUrls())
+  const address = Address.fromEvent(note, ctx.app.router.Event(note).limit(3).getUrls())
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

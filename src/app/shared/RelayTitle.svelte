@@ -5,7 +5,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import {router} from "src/app/util/router"
-  import {getSetting} from "src/engine"
 
   export let url
   export let rating = null
@@ -20,9 +19,7 @@
     style={`border-color: ${hsl(stringToHue(url))}`}>
     {displayRelayUrl(url)}
   </Anchor>
-  {#if !getSetting("multiplextr_url")}
-    <RelayStatus {url} />
-  {/if}
+  <RelayStatus {url} />
   {#if rating}
     <div class="px-4 text-sm">
       <Rating inert value={rating} />

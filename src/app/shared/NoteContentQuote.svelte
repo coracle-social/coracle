@@ -17,14 +17,7 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const relays = ctx.app.router
-    .merge([
-      ctx.app.router.fromRelays(relayHints),
-      ctx.app.router.EventMentions(note),
-      ctx.app.router.ForPubkeys([note.pubkey]),
-    ])
-    .getUrls()
-
+  const relays = ctx.app.router.Quote(note, idOrAddress, relayHints).getUrls()
   const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
 
   const openQuote = e => {

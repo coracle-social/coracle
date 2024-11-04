@@ -4,8 +4,16 @@
 
   import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
+  import {ctx, ago, max, sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
+  import {
+    relaysByUrl,
+    getRelayQuality,
+    getPubkeyRelays,
+    trackRelayStats,
+    loadRelay,
+  } from "@welshman/app"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
@@ -379,7 +387,7 @@
 
   onMount(() => {
     const unsubPage = router.page.subscribe(
-      lib.memoize($page => {
+      memoize($page => {
         if ($page) {
           logUsage($page.path)
         }
@@ -419,9 +427,9 @@
     // pass
   }
 
-  lib.ctx.net.pool.on("init", connection => {
-    app.loadRelay(connection.url)
-    app.trackRelayStats(connection)
+  ctx.net.pool.on("init", connection => {
+    loadRelay(connection.url)
+    trackRelayStats(connection)
   })
 
   // App data boostrap and relay meta fetching
@@ -429,24 +437,30 @@
   ready.then(async () => {
     // Our stores are throttled by 300, so wait until they're populated
     // before loading app data
-    await lib.sleep(350)
+    await sleep(350)
 
     if ($session) {
       loadUserData()
     }
 
     const interval1 = setInterval(() => {
-      slowConnections.set(
-        app.getPubkeyRelays($pubkey).filter(url => app.getRelayQuality(url) < 0.5),
-      )
+      slowConnections.set(getPubkeyRelays($pubkey).filter(url => getRelayQuality(url) < 0.5))
 
       // Prune connections we haven't used in a while
-      for (const [_, connection] of lib.ctx.net.pool.data.entries()) {
-        const {lastOpen, lastPublish, lastRequest, lastFault} = connection.meta
-        const lastActivity = lib.max([lastOpen, lastPublish, lastRequest, lastFault])
+      for (const url of ctx.net.pool.data.keys()) {
+        const relay = relaysByUrl.get().get(url)
 
-        if (lastActivity < Date.now() - 30_000) {
-          connection.disconnect()
+        if (relay?.stats) {
+          const lastActivity = max([
+            relay.stats.last_open,
+            relay.stats.last_publish,
+            relay.stats.last_request,
+            relay.stats.last_event,
+          ])
+
+          if (lastActivity < ago(30)) {
+            ctx.net.pool.remove(url)
+          }
         }
       }
     }, 5_000)

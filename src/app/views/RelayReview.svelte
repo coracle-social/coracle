@@ -17,7 +17,7 @@
     const content = compose.parse()
 
     createAndPublish({
-      relays: ctx.app.router.WriteRelays().getUrls(),
+      relays: ctx.app.router.FromUser().getUrls(),
       kind: 1986,
       content,
       tags: [

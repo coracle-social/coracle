@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
 import {get, writable, derived} from "svelte/store"
-import {ctx, inc, assoc, pushToMapKey, now} from "@welshman/lib"
+import {ctx, uniq, inc, assoc, pushToMapKey, now, chunk} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -12,6 +12,7 @@ import {
   DIRECT_MESSAGE,
   REACTION,
   LIVE_CHAT_MESSAGE,
+  getAncestorTagValues,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
@@ -280,7 +281,7 @@ export const createFeed = (opts: FeedOpts) => {
     )
   }
 
-  function loadParents(events) {
+  function loadParents(events: TrustedEvent[]) {
     // Add notes to parents too since they might match
     for (const e of events) {
       for (const k of getIdAndAddress(e)) {
@@ -306,15 +307,13 @@ export const createFeed = (opts: FeedOpts) => {
       return true
     })
 
-    const selections = ctx.app.router
-      .merge(notesWithParent.map(ctx.app.router.EventParents))
-      .getSelections()
+    for (const events of chunk(10, notesWithParent)) {
+      const scenario = ctx.app.router.merge(events.map(e => ctx.app.router.EventParents(e)))
 
-    for (const {relay, values} of selections) {
       load({
-        relays: [relay],
-        filters: getIdFilters(values),
         signal: controller.signal,
+        relays: scenario.getUrls(),
+        filters: getIdFilters(uniq(events.flatMap(e => getAncestorTagValues(e.tags).replies))),
         onEvent: batch(100, async events => {
           if (controller.signal.aborted) {
             return

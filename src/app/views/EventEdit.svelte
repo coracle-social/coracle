@@ -27,7 +27,6 @@
       .setTag("start", dateToSeconds(values.start).toString())
       .setTag("end", dateToSeconds(values.end).toString())
       .setIMeta(images.getValue())
-      .removeContext()
 
     const template = asStampedEvent({
       ...$event,

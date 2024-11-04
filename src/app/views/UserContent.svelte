@@ -30,7 +30,7 @@
       createAndPublish({
         kind: MUTES,
         tags: mutedPubkeys.map(pk => tagPubkey(pk)),
-        relays: ctx.app.router.WriteRelays().getUrls(),
+        relays: ctx.app.router.FromUser().getUrls(),
       })
     }
 

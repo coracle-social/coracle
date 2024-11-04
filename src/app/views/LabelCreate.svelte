@@ -40,7 +40,7 @@
 
     createAndPublish({
       kind: 1985,
-      relays: ctx.app.router.User().getUrls(),
+      relays: ctx.app.router.FromUser().getUrls(),
       tags: [["e", id], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
     })
 

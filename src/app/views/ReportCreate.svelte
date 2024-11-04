@@ -36,8 +36,8 @@
       event: rumor.wrap,
       relays: ctx.app.router
         .merge([
-          ctx.app.router.fromRelays(["wss://relay.nos.social"]),
-          ctx.app.router.PublishMessage(tagr),
+          ctx.app.router.FromRelays(["wss://relay.nos.social"]),
+          ctx.app.router.PubkeyInbox(tagr),
         ])
         .getUrls(),
       forcePlatform: false,

@@ -28,7 +28,7 @@
           kind: NOTE,
           content,
           tags: tagsFromContent(content),
-          relays: ctx.app.router.WriteRelays().getUrls(),
+          relays: ctx.app.router.FromUser().getUrls(),
         })
       }
 

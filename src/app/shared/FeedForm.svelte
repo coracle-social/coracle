@@ -61,7 +61,7 @@
   }
 
   const saveFeed = async () => {
-    const relays = ctx.app.router.WriteRelays().getUrls()
+    const relays = ctx.app.router.FromUser().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
     const pub = await createAndPublish({...template, relays})
 

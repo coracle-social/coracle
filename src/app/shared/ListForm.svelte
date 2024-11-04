@@ -40,7 +40,7 @@
   }
 
   const submit = async () => {
-    const relays = ctx.app.router.WriteRelays().getUrls()
+    const relays = ctx.app.router.FromUser().getUrls()
     const template = list.event ? editUserList(list) : createUserList(list)
     const pub = await createAndPublish({...template, relays})
 

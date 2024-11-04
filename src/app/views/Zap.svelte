@@ -64,10 +64,7 @@
           const profile = $profilesByPubkey.get(zap.pubkey)
           const zapper = $zappersByLnurl.get(profile?.lnurl)
           const relays = ctx.app.router
-            .merge([
-              ctx.app.router.PublishMessage(zap.pubkey),
-              ctx.app.router.fromRelays([zap.relay]),
-            ])
+            .merge([ctx.app.router.ForPubkey(zap.pubkey), ctx.app.router.FromRelays([zap.relay])])
             .getUrls()
 
           return {...zap, zapper, relays, content}
