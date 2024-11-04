@@ -8,9 +8,7 @@
   import {router} from "src/app/util/router"
   import {
     sessionWithMeta,
-    userSettings,
     loadNotifications,
-    loadCircleMessages,
     unreadMainNotifications,
     unreadReactionNotifications,
   } from "src/engine"
@@ -33,7 +31,6 @@
 
   onMount(() => {
     loadNotifications()
-    loadCircleMessages()
 
     const scroller = createScroller(loadMore, {element})
 

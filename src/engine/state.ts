@@ -1149,11 +1149,6 @@ if (!db) {
     }),
     plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
     repository: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
-    groups: {keyPath: "address", store: groups},
-    groupAlerts: {keyPath: "id", store: groupAlerts},
-    groupRequests: {keyPath: "id", store: groupRequests},
-    groupSharedKeys: {keyPath: "pubkey", store: groupSharedKeys},
-    groupAdminKeys: {keyPath: "pubkey", store: groupAdminKeys},
   }).then(() => Promise.all(initialRelays.map(loadRelay)))
 }
 

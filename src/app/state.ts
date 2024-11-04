@@ -20,7 +20,6 @@ import {
   load,
   loadPubkeys,
   loadSeen,
-  loadGroups,
   loadDeletes,
   loadHandlers,
   loadMessages,
@@ -51,9 +50,6 @@ export const slowConnections = writable([])
 
 export const loadAppData = () => {
   // If we have a group, load that
-  if (env.FORCE_GROUP) {
-    loadGroups([env.FORCE_GROUP])
-  }
 }
 
 export const loadUserData = async (hints: string[] = []) => {

@@ -62,12 +62,9 @@ import {partition, uniq, without} from "ramda"
 import {CUSTOM_LIST_KINDS} from "src/domain"
 import {
   env,
-  getUserCircles,
   load,
   subscribePersistent,
   sessionWithMeta,
-  groupAdminKeys,
-  groupSharedKeys,
   type MySubscribeRequest,
 } from "src/engine/state"
 
@@ -149,36 +146,6 @@ export const getStaleAddrs = (addrs: string[]) => {
   }
 
   return Array.from(stale)
-}
-
-export const loadGroupMessages = async (addrs: string[]) => {
-  for (const address of addrs) {
-    const keys = [...groupAdminKeys.get(), ...groupSharedKeys.get()]
-    const pubkeys = keys.filter(k => k.group === address).map(k => k.pubkey)
-
-    await pullConservatively({
-      relays: ctx.app.router.WithinContext(address).getUrls(),
-      filters: [{kinds: [WRAP], "#p": pubkeys}],
-    })
-  }
-}
-
-export const loadCommunityMessages = async (addrs: string[]) => {
-  await pullConservatively({
-    relays: ctx.app.router.WithinMultipleContexts(addrs).getUrls(),
-    filters: [{kinds: [...noteKinds, ...repostKinds], "#a": addrs}],
-  })
-}
-
-export const loadCircleMessages = async (addrs?: string[]) => {
-  if (!addrs) {
-    addrs = getUserCircles(sessionWithMeta.get())
-  }
-
-  const [groups, communities] = partition(isGroupAddress, addrs)
-
-  loadGroupMessages(groups)
-  loadCommunityMessages(communities)
 }
 
 export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>

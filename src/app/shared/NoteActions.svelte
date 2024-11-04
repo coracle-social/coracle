@@ -54,7 +54,6 @@
     env,
     publish,
     deriveHandlersForKind,
-    groupMeta,
     signAndPublish,
     deleteEvent,
     getSetting,
@@ -222,7 +221,7 @@
     if ($signer) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-      if (isSignedEvent(note) && !env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
+      if (isSignedEvent(note)) {
         actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
       }
 
