@@ -20,8 +20,6 @@
   import NoteContentKind31890 from "src/app/shared/NoteContentKind31890.svelte"
   import NoteContentKind31923 from "src/app/shared/NoteContentKind31923.svelte"
   import NoteContentKind32123 from "src/app/shared/NoteContentKind32123.svelte"
-  import NoteContentKind34550 from "src/app/shared/NoteContentKind34550.svelte"
-  import NoteContentKind35834 from "src/app/shared/NoteContentKind35834.svelte"
   import NoteContentKindList from "src/app/shared/NoteContentKindList.svelte"
   import {getSetting, env} from "src/engine"
   import {CUSTOM_LIST_KINDS} from "src/domain"
@@ -84,10 +82,6 @@
     <NoteContentKind31923 {note} />
   {:else if note.kind === 32123}
     <NoteContentKind32123 {note} />
-  {:else if note.kind === 34550}
-    <NoteContentKind34550 {note} />
-  {:else if note.kind === 35834}
-    <NoteContentKind35834 {note} />
   {:else if CUSTOM_LIST_KINDS.includes(note.kind)}
     <NoteContentKindList {note} />
   {:else}

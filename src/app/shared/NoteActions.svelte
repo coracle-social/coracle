@@ -49,7 +49,6 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/util/router"
   import {
     env,
