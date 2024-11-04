@@ -57,10 +57,8 @@ import {
   getTagValues,
   normalizeRelayUrl,
   isContextAddress,
-  getContextTagValues,
   getAddressTagValues,
   getAncestorTagValues,
-  getAddressTags,
   makeList,
   readList,
   asDecryptedEvent,
@@ -112,7 +110,6 @@ import {
   getUserWotScore,
   sessions,
   maxWot,
-  repositoryStore,
 } from "@welshman/app"
 import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
 import {Collection as CollectionStore} from "src/util/store"
@@ -150,7 +147,7 @@ import type {
   SessionWithMeta,
   AnonymousUserState,
 } from "src/engine/model"
-import {sortEventsAsc, unwrapRepost} from "src/engine/utils"
+import {sortEventsAsc} from "src/engine/utils"
 import {GroupAccess, OnboardingTask} from "src/engine/model"
 
 export const env = {
