@@ -1,34 +1,21 @@
 <script lang="ts">
-  import {join, identity} from "ramda"
-  import {writable} from "svelte/store"
-  import {ctx} from "@welshman/lib"
-  import {Tags, createEvent} from "@welshman/util"
   import {pubkey, tagReplyTo} from "@welshman/app"
-  import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Popover from "src/partials/Popover.svelte"
+  import {ctx} from "@welshman/lib"
+  import {createEvent} from "@welshman/util"
+  import {join} from "ramda"
   import Compose from "src/app/shared/Compose.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
-  import AltColor from "src/partials/AltColor.svelte"
+  import NoteImages from "src/app/shared/NoteImages.svelte"
+  import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import NoteImages from "src/app/shared/NoteImages.svelte"
-  import GroupLink from "src/app/shared/GroupLink.svelte"
-  import {env, publish, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
+  import {getClientTags, publish, signAndPublish, tagsFromContent} from "src/engine"
+  import AltColor from "src/partials/AltColor.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
+  import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
+  import {writable} from "svelte/store"
 
   export let parent = null
-  export let group = null
-
-  if (parent && group) {
-    throw new Error("Either parent or group is allowed, not both")
-  }
-
-  const defaultGroups = env.FORCE_GROUP
-    ? [env.FORCE_GROUP]
-    : parent
-      ? Tags.fromEvent(parent).context().values().valueOf()
-      : [group].filter(identity)
 
   const defaultOpts = {anonymous: false, warning: ""}
 
@@ -78,9 +65,9 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const {pubs} = await publishToZeroOrMoreGroups(defaultGroups, template, opts)
+    const {pub} = await signAndPublish(template, opts)
 
-    showPublishInfo(pubs[0])
+    showPublishInfo(pub)
     opts = {...defaultOpts}
     compose.clear()
     saving = false
@@ -101,14 +88,6 @@
           <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
             <i slot="button" class="fa fa-paperclip cursor-pointer" />
           </ImageInput>
-          {#if group}
-            <Popover triggerType="mouseenter">
-              <i slot="trigger" class="fa fa-circle-nodes cursor-pointer" />
-              <div slot="tooltip">
-                Posting to <GroupLink address={group} />
-              </div>
-            </Popover>
-          {/if}
         </div>
         <Anchor button accent disabled={saving} on:click={() => onSubmit()}>Send</Anchor>
       </div>
@@ -116,7 +95,7 @@
   </AltColor>
 </form>
 
-<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} hideFields={["groups"]} />
+<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

@@ -1,58 +1,52 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
-  import {v4 as uuid} from "uuid"
-  import {join, whereEq, identity} from "ramda"
-  import {throttle, commaFormat, toTitle, switcherFn} from "hurdak"
-  import {writable} from "svelte/store"
+  import {session, tagPubkey} from "@welshman/app"
   import {ctx, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {session, tagPubkey} from "@welshman/app"
-  import {currencyOptions} from "src/util/i18n"
-  import {dateToSeconds} from "src/util/misc"
-  import {showWarning, showPublishInfo} from "src/partials/Toast.svelte"
+  import {commaFormat, switcherFn, throttle, toTitle} from "hurdak"
+  import {nip19} from "nostr-tools"
+  import {join, whereEq} from "ramda"
+  import Compose from "src/app/shared/Compose.svelte"
+  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import NoteImages from "src/app/shared/NoteImages.svelte"
+  import NoteOptions from "src/app/shared/NoteOptions.svelte"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
+  import {router} from "src/app/util/router"
+  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
+  import Chip from "src/partials/Chip.svelte"
+  import Content from "src/partials/Content.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Content from "src/partials/Content.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Popover from "src/partials/Popover.svelte"
+  import ImageInput from "src/partials/ImageInput.svelte"
+  import Input from "src/partials/Input.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
-  import Chip from "src/partials/Chip.svelte"
-  import Compose from "src/app/shared/Compose.svelte"
-  import NsecWarning from "src/app/shared/NsecWarning.svelte"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
-  import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {publish} from "src/engine"
-  import {router} from "src/app/util/router"
-  import {env, getClientTags, tagsFromContent, publishToZeroOrMoreGroups} from "src/engine"
+  import Popover from "src/partials/Popover.svelte"
+  import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
+  import {currencyOptions} from "src/util/i18n"
+  import {dateToSeconds} from "src/util/misc"
+  import {onMount} from "svelte"
+  import {writable} from "svelte/store"
+  import {v4 as uuid} from "uuid"
 
   export let type = "note"
   export let quote = null
   export let pubkey = null
-  export let group = null
   export let initialValues = {}
-
-  const defaultGroups = env.FORCE_GROUP ? [env.FORCE_GROUP] : [group].filter(identity)
 
   let images, compose
   let charCount = 0
   let wordCount = 0
   let showPreview = false
-  let options
   let opts = {
     title: "",
     warning: "",
     summary: "",
     price: "",
     currency: currencyOptions.find(whereEq({code: "SAT"})),
-    groups: defaultGroups,
     anonymous: false,
     location: null,
     start: null,
@@ -118,11 +112,6 @@
 
     if (quote) {
       tags.push(tagPubkey(quote.pubkey))
-
-      // Re-broadcast the note we're quoting
-      if (!opts.groups.length) {
-        publish({event: quote, relays: ctx.app.router.WriteRelays().getUrls()})
-      }
     }
 
     const template = switcherFn(type, {
@@ -154,9 +143,9 @@
         }),
     })
 
-    const {pubs} = await publishToZeroOrMoreGroups(opts.groups, template, opts)
+    const {pub} = await signAndPublish(template, opts)
 
-    showPublishInfo(pubs[0])
+    showPublishInfo(pub)
     router.clearModals()
   }
 
@@ -286,23 +275,11 @@
         <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
         <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
       </div>
-      {#if !env.FORCE_GROUP}
-        <button
-          type="button"
-          class="flex cursor-pointer items-center justify-end gap-4 text-sm"
-          on:click={() => options.setView("settings")}>
-          <span class:text-accent={opts.groups.length > 0}>
-            <i class="fa fa-circle-nodes" />
-            {opts.groups.length}
-          </span>
-          <span><i class="fa fa-warning" /> {opts.warning || 0}</span>
-        </button>
-      {/if}
     </FlexColumn>
   </Content>
 </form>
 
-<NoteOptions on:change={setOpts} bind:this={options} initialValues={opts} />
+<NoteOptions on:change={setOpts} initialValues={opts} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

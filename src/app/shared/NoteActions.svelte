@@ -55,9 +55,8 @@
     env,
     publish,
     deriveHandlersForKind,
-    userIsGroupMember,
     groupMeta,
-    publishToZeroOrMoreGroups,
+    signAndPublish,
     deleteEvent,
     getSetting,
     loadPubkeys,
@@ -128,11 +127,9 @@
 
     const tags = [...tagReactionTo(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
-    const {events} = await publishToZeroOrMoreGroups(addresses, template)
+    const {event} = await signAndPublish(template)
 
-    for (const event of events) {
-      addToContext(event)
-    }
+    addToContext(event)
   }
 
   const deleteReaction = e => {
@@ -140,7 +137,7 @@
     removeFromContext(e)
   }
 
-  const crossPost = async (addresses = []) => {
+  const crossPost = async () => {
     const content = JSON.stringify(note as SignedEvent)
     const tags = [...tagEvent(note), tagPubkey(note.pubkey), ...getClientTags()]
 
@@ -151,7 +148,7 @@
       template = createEvent(16, {content, tags: [...tags, ["k", String(note.kind)]]})
     }
 
-    publishToZeroOrMoreGroups(addresses, template)
+    signAndPublish(template)
 
     showInfo("Note has been cross-posted!")
 
@@ -200,16 +197,11 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const groupOptions = derived([groupMeta, userIsGroupMember], ([$gm, $isMember]) =>
-    $gm.filter(g => $isMember(getAddress(g.event), true)),
-  )
-
   let view
   let actions = []
   let handlersShown = false
 
-  $: disableActions =
-    !$signer || (muted && !showHidden) || (note.wrap && address && !$userIsGroupMember(address))
+  $: disableActions = !$signer || (muted && !showHidden) || (note.wrap && address)
   $: like = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
@@ -458,11 +450,6 @@
             </div>
           </Card>
         {/if}
-        {#each $groupOptions as g (getAddress(g.event))}
-          <Card invertColors interactive on:click={() => crossPost([getAddress(g.event)])}>
-            <GroupSummary address={getAddress(g.event)} />
-          </Card>
-        {/each}
       </div>
     {/if}
   </Modal>

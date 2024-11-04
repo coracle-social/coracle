@@ -1,97 +1,83 @@
-import crypto from "crypto"
-import {get} from "svelte/store"
+import type {Session} from "@welshman/app"
 import {
-  ctx,
-  cached,
-  indexBy,
-  nthNe,
-  equals,
-  splitAt,
-  first,
-  last,
-  append,
-  nthEq,
-  groupBy,
-  remove,
-  now,
-} from "@welshman/lib"
-import type {TrustedEvent, Profile} from "@welshman/util"
-import {
-  getAddress,
-  Tags,
-  createEvent,
-  Address,
-  isSignedEvent,
-  normalizeRelayUrl,
-  GROUP,
-  COMMUNITY,
-  FEEDS,
-  FOLLOWS,
-  RELAYS,
-  PROFILE,
-  INBOX_RELAYS,
-  DIRECT_MESSAGE,
-  SEEN_CONVERSATION,
-  LOCAL_RELAY_URL,
-  makeList,
-  editProfile,
-  createProfile,
-  isPublishedProfile,
-  removeFromList,
-  addToListPublicly,
-} from "@welshman/util"
-import type {Nip46Handler} from "@welshman/signer"
-import {Nip59, Nip01Signer, getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
-import {
-  updateSession,
-  repository,
-  pubkey,
-  nip46Perms,
-  signer,
-  sessions,
-  session,
-  getRelayUrls,
-  displayProfileByPubkey,
-  inboxRelaySelectionsByPubkey,
-  addNoFallbacks,
-  ensurePlaintext,
-  tagPubkey,
-  userRelaySelections,
-  userInboxRelaySelections,
   follow as baseFollow,
   unfollow as baseUnfollow,
+  ensurePlaintext,
+  getRelayUrls,
+  inboxRelaySelectionsByPubkey,
+  nip46Perms,
+  pubkey,
+  repository,
+  session,
+  sessions,
+  signer,
+  tagPubkey,
+  userInboxRelaySelections,
+  userRelaySelections,
 } from "@welshman/app"
-import type {Session} from "@welshman/app"
-import {Fetch, randomId, seconds, sleep, tryFunc} from "hurdak"
-import {assoc, flatten, identity, omit, partition, prop, reject, uniq, without} from "ramda"
-import {stripExifData, blobToFile} from "src/util/html"
-import {joinPath, parseJson} from "src/util/misc"
-import {appDataKeys} from "src/util/nostr"
-import {GroupAccess} from "src/engine/model"
-import {sortEventsDesc} from "src/engine/utils"
 import {
-  channels,
-  getChannelSeenKey,
-  createAndPublish,
-  deriveAdminKeyForGroup,
-  userIsGroupMember,
-  deriveSharedKeyForGroup,
-  env,
+  append,
+  cached,
+  ctx,
+  equals,
+  first,
+  groupBy,
+  indexBy,
+  last,
+  now,
+  nthEq,
+  nthNe,
+  remove,
+  splitAt,
+} from "@welshman/lib"
+import type {Nip46Handler} from "@welshman/signer"
+import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
+import type {Profile, TrustedEvent} from "@welshman/util"
+import {
+  Address,
+  DIRECT_MESSAGE,
+  FEEDS,
+  FOLLOWS,
+  INBOX_RELAYS,
+  LOCAL_RELAY_URL,
+  PROFILE,
+  RELAYS,
+  SEEN_CONVERSATION,
+  Tags,
+  addToListPublicly,
+  createEvent,
+  createProfile,
+  editProfile,
+  getAddress,
+  isPublishedProfile,
+  isSignedEvent,
+  makeList,
+  normalizeRelayUrl,
+  removeFromList,
+} from "@welshman/util"
+import crypto from "crypto"
+import {Fetch, seconds, sleep, tryFunc} from "hurdak"
+import {assoc, flatten, identity, omit, prop, reject, uniq, without} from "ramda"
+import {
   addClientTags,
+  anonymous,
+  channels,
+  createAndPublish,
+  getChannelIdFromEvent,
+  getChannelSeenKey,
   getClientTags,
-  groupAdminKeys,
-  groupSharedKeys,
-  groups,
+  hasNip44,
   publish,
   sign,
-  hasNip44,
-  withIndexers,
-  anonymous,
-  mentionGroup,
-  userSeenStatusEvents,
-  getChannelIdFromEvent,
   userFeedFavorites,
+  userSeenStatusEvents,
+  withIndexers,
 } from "src/engine/state"
+import {sortEventsDesc} from "src/engine/utils"
+import {blobToFile, stripExifData} from "src/util/html"
+import {joinPath, parseJson} from "src/util/misc"
+import {appDataKeys} from "src/util/nostr"
+import {get} from "svelte/store"
 
 // Helpers
 
@@ -215,359 +201,16 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
   return eventsToMeta(nip94Events)
 }
 
-// Groups
-
 // Key state management
 
-export const initSharedKey = (address: string, relays: string[]) => {
-  const privkey = makeSecret()
-  const pubkey = getPubkey(privkey)
-  const key = {
-    group: address,
-    pubkey: pubkey,
-    privkey: privkey,
-    created_at: now(),
-    hints: relays,
-  }
-
-  groupSharedKeys.key(pubkey).set(key)
-
-  return key
-}
-
-export const initGroup = (kind, relays) => {
-  const identifier = randomId()
-  const privkey = makeSecret()
-  const pubkey = getPubkey(privkey)
-  const address = `${kind}:${pubkey}:${identifier}`
-  const sharedKey = kind === 35834 ? initSharedKey(address, relays) : null
-  const adminKey = {
-    group: address,
-    pubkey: pubkey,
-    privkey: privkey,
-    created_at: now(),
-    hints: relays,
-  }
-
-  groupAdminKeys.key(pubkey).set(adminKey)
-
-  groups.key(address).set({id: identifier, pubkey, address})
-
-  return {identifier, address, adminKey, sharedKey}
-}
-
-const addGroupATags = (template, addresses) => ({
-  ...template,
-  tags: [...template.tags, ...addresses.map(mentionGroup)],
-})
-
-// Utils for publishing group-related messages
-// Relay selections for groups should ignore platform relays, since groups provide their own
-// relays, and can straddle public/private contexts.
-
-export const publishToGroupAdmin = async (address, template) => {
-  const relays = ctx.app.router.WithinContext(address).getUrls()
-  const pubkeys = [Address.from(address).pubkey, session.get().pubkey]
-  const expireTag = [["expiration", String(now() + seconds(30, "day"))]]
-  const helper = Nip59.fromSigner(signer.get())
-
-  for (const pubkey of pubkeys) {
-    const rumor = await helper.wrap(pubkey, template, expireTag)
-
-    await publish({event: rumor.wrap, relays, forcePlatform: false})
-  }
-}
-
-export const publishAsGroupAdminPublicly = async (address, template, relays = []) => {
-  const _relays = ctx.app.router
-    .merge([ctx.app.router.fromRelays(relays), ctx.app.router.WithinContext(address)])
-    .getUrls()
-  const adminKey = deriveAdminKeyForGroup(address).get()
-  const event = await sign(template, {sk: adminKey.privkey})
-
-  return publish({event, relays: _relays, forcePlatform: false})
-}
-
-export const publishAsGroupAdminPrivately = async (address, template, relays = []) => {
-  const _relays = ctx.app.router
-    .merge([ctx.app.router.fromRelays(relays), ctx.app.router.WithinContext(address)])
-    .getUrls()
-  const adminKey = deriveAdminKeyForGroup(address).get()
-  const sharedKey = deriveSharedKeyForGroup(address).get()
-  const adminSigner = new Nip01Signer(adminKey.privkey)
-  const sharedSigner = new Nip01Signer(sharedKey.privkey)
-  const helper = Nip59.fromSigner(adminSigner).withWrapper(sharedSigner)
-  const rumor = await helper.wrap(sharedKey.pubkey, template)
-
-  return publish({event: rumor.wrap, relays: _relays, forcePlatform: false})
-}
-
-export const publishToGroupsPublicly = async (addresses, template, {anonymous = false} = {}) => {
-  for (const address of addresses) {
-    if (!address.startsWith("34550:")) {
-      throw new Error(`Attempted to publish publicly to an invalid address: ${address}`)
-    }
-  }
-
-  const event = await sign(addGroupATags(template, addresses), {anonymous})
+export const signAndPublish = async (template, {anonymous = false} = {}) => {
+  const event = await sign(template, {anonymous})
   const relays = ctx.app.router.PublishEvent(event).getUrls()
 
-  return publish({event, relays, forcePlatform: false})
+  const pub = await publish({event, relays})
+
+  return {event, pub}
 }
-
-export const publishToGroupsPrivately = async (addresses, template, {anonymous = false} = {}) => {
-  const $userIsGroupMember = userIsGroupMember.get()
-
-  const events = []
-  const pubs = []
-  for (const address of addresses) {
-    const relays = ctx.app.router.WithinContext(address).getUrls()
-    const thisTemplate = addGroupATags(template, [address])
-    const sharedKey = deriveSharedKeyForGroup(address).get()
-
-    if (!address.startsWith("35834:")) {
-      throw new Error(`Attempted to publish privately to an invalid address: ${address}`)
-    }
-
-    if (!$userIsGroupMember(address)) {
-      throw new Error("Attempted to publish privately to a group the user is not a member of")
-    }
-
-    const userSigner = anonymous ? signer.get() : Nip01Signer.ephemeral()
-    const wrapSigner = new Nip01Signer(sharedKey.privkey)
-    const helper = Nip59.fromSigner(userSigner).withWrapper(wrapSigner)
-    const rumor = await helper.wrap(sharedKey.pubkey, thisTemplate)
-
-    events.push(rumor)
-    pubs.push(await publish({event: rumor.wrap, relays, forcePlatform: false}))
-  }
-
-  return {events, pubs}
-}
-
-export const publishToZeroOrMoreGroups = async (addresses, template, {anonymous = false} = {}) => {
-  const pubs = []
-  const events = []
-
-  if (addresses.length === 0) {
-    const event = await sign(template, {anonymous})
-    const relays = ctx.app.router.PublishEvent(event).getUrls()
-
-    events.push(event)
-    pubs.push(await publish({event, relays}))
-  } else {
-    const [wrap, nowrap] = partition((address: string) => address.startsWith("35834:"), addresses)
-
-    if (wrap.length > 0) {
-      const result = await publishToGroupsPrivately(wrap, template, {anonymous})
-
-      for (const event of result.events) {
-        events.push(event)
-      }
-
-      for (const pub of result.pubs) {
-        pubs.push(pub)
-      }
-    }
-
-    if (nowrap.length > 0) {
-      const pub = await publishToGroupsPublicly(nowrap, template, {anonymous})
-
-      events.push(pub.request.event)
-      pubs.push(pub)
-    }
-  }
-
-  return {events, pubs}
-}
-
-// Admin functions
-
-export const publishKeyShares = async (address, pubkeys, template) => {
-  const adminKey = deriveAdminKeyForGroup(address).get()
-
-  const pubs = []
-
-  for (const pubkey of pubkeys) {
-    const relays = ctx.app.router
-      .merge([
-        ctx.app.router.ForPubkeys([pubkey]),
-        ctx.app.router.WithinContext(address),
-        ctx.app.router.fromRelays(env.PLATFORM_RELAYS),
-      ])
-      .policy(addNoFallbacks)
-      .getUrls()
-
-    const adminSigner = new Nip01Signer(adminKey.privkey)
-    const helper = Nip59.fromSigner(adminSigner)
-    const rumor = await helper.wrap(pubkey, template)
-
-    pubs.push(await publish({event: rumor.wrap, relays, forcePlatform: false}))
-  }
-
-  return pubs
-}
-
-export const publishAdminKeyShares = async (address, pubkeys) => {
-  const relays = ctx.app.router.WithinContext(address).getUrls()
-  const {privkey} = deriveAdminKeyForGroup(address).get()
-  const template = createEvent(24, {
-    tags: [
-      mentionGroup(address),
-      ["role", "admin"],
-      ["privkey", privkey],
-      ...getClientTags(),
-      ...relays.map(url => ["relay", url]),
-    ],
-  })
-
-  return publishKeyShares(address, pubkeys, template)
-}
-
-export const publishGroupInvites = async (address, pubkeys, gracePeriod = 0) => {
-  const relays = ctx.app.router.WithinContext(address).getUrls()
-  const adminKey = deriveAdminKeyForGroup(address).get()
-  const {privkey} = deriveSharedKeyForGroup(address).get()
-  const template = createEvent(24, {
-    tags: [
-      mentionGroup(address),
-      ["role", "member"],
-      ["privkey", privkey],
-      ["grace_period", String(gracePeriod)],
-      ...getClientTags(),
-      ...relays.map(url => ["relay", url]),
-    ],
-  })
-
-  return publishKeyShares(address, [...pubkeys, adminKey.pubkey], template)
-}
-
-export const publishGroupEvictions = async (address, pubkeys) =>
-  publishKeyShares(
-    address,
-    pubkeys,
-    createEvent(24, {
-      tags: [mentionGroup(address), ...getClientTags()],
-    }),
-  )
-
-export const publishGroupMembers = async (address, op, pubkeys) => {
-  const template = createEvent(27, {
-    tags: [["op", op], mentionGroup(address), ...getClientTags(), ...pubkeys.map(tagPubkey)],
-  })
-
-  return publishAsGroupAdminPrivately(address, template)
-}
-
-export const publishCommunityMeta = (address, identifier, meta) => {
-  const template = createEvent(COMMUNITY, {
-    tags: [
-      ["d", identifier],
-      ["name", meta.name],
-      ["about", meta.about],
-      ["description", meta.about],
-      ["banner", meta.banner],
-      ["picture", meta.image],
-      ["image", meta.image],
-      ...meta.feeds,
-      ...meta.relays,
-      ...meta.moderators,
-      ...getClientTags(),
-    ],
-  })
-
-  return publishAsGroupAdminPublicly(address, template, meta.relays)
-}
-
-export const publishGroupMeta = (address, identifier, meta, listPublicly) => {
-  const template = createEvent(GROUP, {
-    tags: [
-      ["d", identifier],
-      ["name", meta.name],
-      ["about", meta.about],
-      ["description", meta.about],
-      ["banner", meta.banner],
-      ["picture", meta.image],
-      ["image", meta.image],
-      ...meta.feeds,
-      ...meta.relays,
-      ...meta.moderators,
-      ...getClientTags(),
-    ],
-  })
-
-  return listPublicly
-    ? publishAsGroupAdminPublicly(address, template, meta.relays)
-    : publishAsGroupAdminPrivately(address, template, meta.relays)
-}
-
-export const deleteGroupMeta = address =>
-  publishAsGroupAdminPublicly(address, createEvent(5, {tags: [mentionGroup(address)]}))
-
-// Member functions
-
-export const modifyGroupStatus = (session, address, timestamp, updates) => {
-  if (!session.groups) {
-    session.groups = {}
-  }
-
-  const newGroupStatus = updateRecord(session.groups[address], timestamp, updates)
-
-  if (!equals(session.groups[address], newGroupStatus)) {
-    session.groups[address] = newGroupStatus
-  }
-
-  return session
-}
-
-export const setGroupStatus = (pubkey, address, timestamp, updates) =>
-  updateSession(pubkey, s => modifyGroupStatus(s, address, timestamp, updates))
-
-export const resetGroupAccess = address =>
-  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
-
-export const publishGroupEntryRequest = (address, claim = null) => {
-  if (deriveAdminKeyForGroup(address).get()) {
-    publishGroupInvites(address, [session.get().pubkey])
-  } else {
-    setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.Requested})
-
-    const tags = [...getClientTags(), mentionGroup(address)]
-
-    if (claim) {
-      tags.push(["claim", claim])
-    }
-
-    publishToGroupAdmin(
-      address,
-      createEvent(25, {
-        content: `${displayProfileByPubkey(pubkey.get())} would like to join the group`,
-        tags,
-      }),
-    )
-  }
-}
-
-export const publishGroupExitRequest = address => {
-  setGroupStatus(pubkey.get(), address, now(), {access: GroupAccess.None})
-
-  if (!deriveAdminKeyForGroup(address).get()) {
-    publishToGroupAdmin(
-      address,
-      createEvent(26, {
-        content: `${displayProfileByPubkey(pubkey.get())} is leaving the group`,
-        tags: [...getClientTags(), mentionGroup(address)],
-      }),
-    )
-  }
-}
-
-export const publishCommunitiesList = addresses =>
-  createAndPublish({
-    kind: 10004,
-    tags: [...addresses.map(mentionGroup), ...getClientTags()],
-    relays: ctx.app.router.WriteRelays().getUrls(),
-  })
 
 // Deletes
 

@@ -1,157 +1,126 @@
-import Fuse from "fuse.js"
-import crypto from "crypto"
-import {get, derived, writable} from "svelte/store"
-import {doPipe, batch, seconds, sleep} from "hurdak"
-import {defaultTo, equals, assoc, sortBy, omit, partition, prop, whereEq, without} from "ramda"
+import type {PartialSubscribeRequest} from "@welshman/app"
 import {
-  ctx,
-  setContext,
+  subscribe as baseSubscribe,
+  db,
+  displayProfileByPubkey,
+  ensurePlaintext,
+  followsByPubkey,
+  freshness,
+  getDefaultAppContext,
+  getDefaultNetContext,
+  getNetwork,
+  getPlaintext,
+  getSession,
+  getSigner,
+  getUserWotScore,
+  handles,
+  initStorage,
+  loadRelay,
+  makeRouter,
+  maxWot,
+  mutesByPubkey,
+  plaintext,
+  pubkey,
+  relay,
+  relays,
+  repository,
+  session,
+  sessions,
+  setPlaintext,
+  signer,
+  storageAdapters,
+  tagPubkey,
+  tracker,
+  zappers,
+} from "@welshman/app"
+import * as Content from "@welshman/content"
+import {
   Worker,
-  simpleCache,
+  ctx,
+  groupBy,
   identity,
-  last,
-  nth,
+  indexBy,
+  now,
+  pushToMapKey,
+  setContext,
+  simpleCache,
+  sort,
+  take,
+  tryCatch,
   uniq,
   uniqBy,
-  now,
-  intersection,
-  sort,
-  groupBy,
-  indexBy,
-  pushToMapKey,
-  tryCatch,
-  take,
 } from "@welshman/lib"
+import type {PublishRequest} from "@welshman/net"
+import {Executor, Local, Multi, Plex, Relays, publish as basePublish} from "@welshman/net"
+import {Nip01Signer, Nip59} from "@welshman/signer"
+import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
+import type {
+  EventTemplate,
+  Filter,
+  PublishedList,
+  SignedEvent,
+  StampedEvent,
+  TrustedEvent,
+} from "@welshman/util"
 import {
-  CLIENT_AUTH,
   APP_DATA,
+  CLIENT_AUTH,
   COMMUNITIES,
-  COMMUNITY,
+  DIRECT_MESSAGE,
   FEED,
   FEEDS,
   FOLLOWS,
-  GROUP,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
+  LOCAL_RELAY_URL,
+  NAMED_BOOKMARKS,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
-  DIRECT_MESSAGE,
-  NAMED_BOOKMARKS,
-  WRAP,
-  Address,
   Tags,
+  WRAP,
+  asDecryptedEvent,
   createEvent,
   getAddress,
-  getIdentifier,
-  getIdAndAddress,
-  getIdOrAddress,
-  getIdFilters,
-  LOCAL_RELAY_URL,
-  isGroupAddress,
-  isCommunityAddress,
-  isHashedEvent,
-  getPubkeyTagValues,
-  getListTags,
-  getTagValues,
-  normalizeRelayUrl,
-  isContextAddress,
-  getContextTagValues,
   getAddressTagValues,
   getAncestorTagValues,
-  getAddressTags,
+  getIdAndAddress,
+  getIdFilters,
+  getIdOrAddress,
+  getIdentifier,
+  getListTags,
+  getPubkeyTagValues,
+  getTagValues,
+  isHashedEvent,
   makeList,
+  normalizeRelayUrl,
   readList,
-  asDecryptedEvent,
 } from "@welshman/util"
-import type {
-  Filter,
-  TrustedEvent,
-  SignedEvent,
-  EventTemplate,
-  PublishedList,
-  StampedEvent,
-} from "@welshman/util"
-import {Nip59, Nip01Signer} from "@welshman/signer"
-import {Executor, Multi, Plex, Local, Relays, publish as basePublish} from "@welshman/net"
-import type {PartialSubscribeRequest} from "@welshman/app"
-import type {PublishRequest} from "@welshman/net"
-import * as Content from "@welshman/content"
-import {withGetter, deriveEvents, deriveEventsMapped, throttled} from "@welshman/store"
+import crypto from "crypto"
+import Fuse from "fuse.js"
+import {batch, doPipe, seconds, sleep} from "hurdak"
+import {assoc, equals, omit, partition, prop, sortBy, without} from "ramda"
+import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
-  session,
-  getSession,
-  getSigner,
-  signer,
-  repository,
-  relay,
-  tracker,
-  pubkey,
-  handles,
-  displayProfileByPubkey,
-  mutesByPubkey,
-  followsByPubkey,
-  makeRouter,
-  subscribe as baseSubscribe,
-  storageAdapters,
-  freshness,
-  zappers,
-  relays,
-  initStorage,
-  db,
-  plaintext,
-  getPlaintext,
-  setPlaintext,
-  ensurePlaintext,
-  getDefaultNetContext,
-  getDefaultAppContext,
-  loadRelay,
-  tagPubkey,
-  getNetwork,
-  getUserWotScore,
-  sessions,
-  maxWot,
-  repositoryStore,
-} from "@welshman/app"
-import {parseJson, fromCsv, SearchHelper} from "src/util/misc"
-import {Collection as CollectionStore} from "src/util/store"
-import {isLike, repostKinds, noteKinds, reactionKinds, metaKinds, appDataKeys} from "src/util/nostr"
-import logger from "src/util/logger"
-import type {
-  GroupMeta,
-  PublishedFeed,
-  PublishedListFeed,
-  PublishedUserList,
-  PublishedGroupMeta,
-} from "src/domain"
-import {
-  displayFeed,
+  CollectionSearch,
   EDITABLE_LIST_KINDS,
   UserListSearch,
-  readFeed,
-  readUserList,
-  readCollections,
-  CollectionSearch,
-  readHandlers,
-  mapListToFeed,
+  displayFeed,
   getHandlerAddress,
-  readGroupMeta,
-  displayGroupMeta,
+  mapListToFeed,
+  readCollections,
+  readFeed,
+  readHandlers,
+  readUserList,
 } from "src/domain"
-import type {
-  Channel,
-  Group,
-  GroupAlert,
-  GroupKey,
-  GroupRequest,
-  GroupStatus,
-  PublishInfo,
-  SessionWithMeta,
-  AnonymousUserState,
-} from "src/engine/model"
-import {sortEventsAsc, unwrapRepost} from "src/engine/utils"
-import {GroupAccess, OnboardingTask} from "src/engine/model"
+import type {AnonymousUserState, Channel, PublishInfo, SessionWithMeta} from "src/engine/model"
+import {OnboardingTask} from "src/engine/model"
+import {sortEventsAsc} from "src/engine/utils"
+import logger from "src/util/logger"
+import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
+import {appDataKeys, isLike, metaKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {derived, get, writable} from "svelte/store"
 
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
@@ -185,12 +154,6 @@ export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], r
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
 export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
-export const groups = new CollectionStore<Group>("address")
-export const groupAdminKeys = new CollectionStore<GroupKey>("pubkey")
-export const groupSharedKeys = new CollectionStore<GroupKey>("pubkey")
-export const groupRequests = new CollectionStore<GroupRequest>("id")
-export const groupAlerts = new CollectionStore<GroupAlert>("id")
-
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
 })
@@ -218,8 +181,7 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 }
 
 export const canUnwrap = (event: TrustedEvent) =>
-  event.kind === WRAP &&
-  (getSession(Tags.fromEvent(event).get("p")?.value()) || getRecipientKey(event))
+  event.kind === WRAP && getSession(Tags.fromEvent(event).get("p")?.value())
 
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
@@ -239,17 +201,6 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (signer) {
     try {
       rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
-    } catch (e) {
-      // pass
-    }
-  }
-
-  // Decrypt by group key
-  const secret = getRecipientKey(event)
-
-  if (secret) {
-    try {
-      rumor = await Nip59.fromSecret(secret).unwrap(event as SignedEvent)
     } catch (e) {
       // pass
     }
@@ -370,18 +321,6 @@ export const communityListsByPubkey = withGetter(
   derived(communityLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
 )
 
-export const communityListsByAddress = derived(communityLists, $communityLists => {
-  const m = new Map<string, PublishedList[]>()
-
-  for (const list of $communityLists) {
-    for (const a of getAddressTagValues(getListTags(list))) {
-      pushToMapKey(m, a, list)
-    }
-  }
-
-  return m
-})
-
 export const getCommunityList = (pk: string) =>
   communityListsByPubkey.get().get(pk) as PublishedList | undefined
 
@@ -394,157 +333,10 @@ export const getCommunities = (pk: string) =>
 export const deriveCommunities = (pk: string) =>
   derived(communityListsByPubkey, m => new Set(getAddressTagValues(getListTags(m.get(pk)))))
 
-// Groups
-
-export const groupMeta = deriveEventsMapped<PublishedGroupMeta>(repository, {
-  filters: [{kinds: [GROUP, COMMUNITY]}],
-  itemToEvent: prop("event"),
-  eventToItem: readGroupMeta,
-})
-
-export const groupMetaByAddress = withGetter(
-  derived(groupMeta, $metas => indexBy($meta => getAddress($meta.event), $metas)),
-)
-
-export const deriveGroupMeta = (address: string) =>
-  derived(groupMetaByAddress, $m => $m.get(address))
-
-export const displayGroupByAddress = a => displayGroupMeta(groupMetaByAddress.get().get(a))
-
-export class GroupSearch extends SearchHelper<GroupMeta & {score: number}, string> {
-  config = {
-    keys: [{name: "identifier", weight: 0.2}, "name", {name: "about", weight: 0.5}],
-    threshold: 0.3,
-    shouldSort: false,
-    includeScore: true,
-  }
-
-  getSearch = () => {
-    const fuse = new Fuse(this.options, this.config)
-    const sortFn = (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100)
-
-    return (term: string) =>
-      term
-        ? sortBy(sortFn, fuse.search(term)).map((r: any) => r.item)
-        : sortBy(meta => -meta.score, this.options)
-  }
-
-  getValue = (option: GroupMeta) => getAddress(option.event)
-
-  displayValue = displayGroupByAddress
-}
-
-export const groupMetaSearch = derived(
-  [groupMeta, communityListsByAddress, userFollows],
-  ([$groupMeta, $communityListsByAddress, $userFollows]) => {
-    const options = $groupMeta.map(meta => {
-      const lists = $communityListsByAddress.get(getAddress(meta.event)) || []
-      const members = lists.map(l => l.event.pubkey)
-      const followedMembers = intersection(members, Array.from($userFollows))
-
-      return {...meta, score: followedMembers.length}
-    })
-
-    return new GroupSearch(options)
-  },
-)
-
-// Legacy
-export const deriveGroup = address => {
-  const {pubkey, identifier: id} = Address.from(address)
-
-  return groups.key(address).derived(defaultTo({id, pubkey, address}))
-}
-
-export const getRecipientKey = wrap => {
-  const pubkey = Tags.fromEvent(wrap).values("p").first()
-  const sharedKey = groupSharedKeys.key(pubkey).get()
-
-  if (sharedKey) {
-    return sharedKey.privkey
-  }
-
-  const adminKey = groupAdminKeys.key(pubkey).get()
-
-  if (adminKey) {
-    return adminKey.privkey
-  }
-
-  return null
-}
-
-export const deriveSharedKeyForGroup = (address: string) =>
-  groupSharedKeys.derived($keys =>
-    last(sortBy(prop("created_at"), $keys.filter(whereEq({group: address})))),
-  )
-
-export const deriveAdminKeyForGroup = (address: string) => groupAdminKeys.key(address.split(":")[1])
-
-export const getGroupStatus = (sessionWithMeta: SessionWithMeta, address: string) =>
-  (sessionWithMeta?.groups?.[address] || {}) as GroupStatus
-
-export const deriveGroupStatus = address =>
-  derived(sessionWithMeta, $sessionWithMeta => getGroupStatus($sessionWithMeta, address))
-
-export const userIsGroupMember = withGetter(
-  derived(sessionWithMeta, $sessionWithMeta => (address, includeRequests = false) => {
-    const status = getGroupStatus($sessionWithMeta, address)
-
-    if (isCommunityAddress(address)) {
-      return status.joined
-    }
-
-    if (isGroupAddress(address)) {
-      if (includeRequests && status.access === GroupAccess.Requested) {
-        return true
-      }
-
-      return status.access === GroupAccess.Granted
-    }
-
-    return false
-  }),
-)
-
-export const deriveGroupOptions = (defaultGroups = []) =>
-  derived([sessionWithMeta, userIsGroupMember], ([$sessionWithMeta, $userIsGroupMember]) => {
-    const options = []
-
-    for (const address of Object.keys($sessionWithMeta?.groups || {})) {
-      const group = groups.key(address).get()
-
-      if (group && $userIsGroupMember(address)) {
-        options.push(group)
-      }
-    }
-
-    for (const address of defaultGroups) {
-      options.push({address})
-    }
-
-    return uniqBy(prop("address"), options)
-  })
-
-export const getUserCircles = (sessionWithMeta: SessionWithMeta) => {
-  const $userIsGroupMember = userIsGroupMember.get()
-
-  return Object.entries(sessionWithMeta?.groups || {})
-    .filter(([a, s]) => !repository.deletes.has(a) && $userIsGroupMember(a))
-    .map(([a, s]) => a)
-}
-
-export const getUserGroups = (sessionWithMeta: SessionWithMeta) =>
-  getUserCircles(sessionWithMeta).filter(isGroupAddress)
-
-export const getUserCommunities = (sessionWithMeta: SessionWithMeta) =>
-  getUserCircles(sessionWithMeta).filter(isCommunityAddress)
-
-// Events
-
 export const isEventMuted = withGetter(
   derived(
-    [userMutes, userFollows, userSettings, pubkey, userIsGroupMember],
-    ([$userMutes, $userFollows, $userSettings, $pubkey, $userIsGroupMember]) => {
+    [userMutes, userFollows, userSettings, pubkey],
+    ([$userMutes, $userFollows, $userSettings, $pubkey]) => {
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
       const regex =
@@ -566,11 +358,9 @@ export const isEventMuted = withGetter(
 
         if (strict || $userFollows.has(e.pubkey)) return false
 
-        const addresses = getAddressTagValues(e.tags || []).filter(isContextAddress)
-        const wotAdjustment = addresses.some(a => $userIsGroupMember(a)) ? 1 : 0
         const wotScore = getUserWotScore(e.pubkey)
 
-        return wotScore < minWot - wotAdjustment
+        return wotScore < minWot
       }
     },
   ),
@@ -746,26 +536,6 @@ export const channelHasNewMessages = (channel: Channel) =>
   channel.last_received > Math.max(channel.last_sent, channel.last_checked)
 
 export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
-
-// Relay selection
-
-export const getGroupRelayUrls = address => {
-  const meta = groupMetaByAddress.get().get(address)
-
-  if (meta?.relays) {
-    return meta.relays.map(nth(1))
-  }
-
-  const latestKey = last(
-    sortBy(prop("created_at"), get(groupSharedKeys).filter(whereEq({group: address}))),
-  )
-
-  if (latestKey?.hints) {
-    return latestKey.hints
-  }
-
-  return get(groupHints)[address] || []
-}
 
 export const forceRelays = (relays: string[], forceRelays: string[]) =>
   forceRelays.length > 0 ? forceRelays : relays

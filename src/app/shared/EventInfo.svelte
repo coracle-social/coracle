@@ -7,7 +7,6 @@
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import GroupLink from "src/app/shared/GroupLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
@@ -69,17 +68,6 @@
       Created by
       <PersonLink pubkey={event.pubkey} />
     </span>
-    {#if groupAddrs.length > 0}
-      <span>•</span>
-      <span>
-        Posted in
-        {#if groupAddrs.length === 1}
-          <GroupLink address={groupAddrs[0]} />
-        {:else}
-          {groupAddrs.length} groups
-        {/if}
-      </span>
-    {/if}
   </div>
   <div class="h-px bg-neutral-600" />
   <div class="flex items-center gap-2 text-sm text-neutral-200">

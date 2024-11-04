@@ -223,34 +223,6 @@ export class Key<T extends R> implements IReadable<T> {
   }
 }
 
-export class DerivedKey<T extends R> implements IReadable<T> {
-  readonly pk: string
-  readonly key: string
-  base: IReadable<M<T>>
-  store: IReadable<T>
-
-  constructor(base: IReadable<M<T>>, pk: string, key: string) {
-    if (!(base.get() instanceof Map)) {
-      throw new Error("`key` can only be used on map collections")
-    }
-
-    this.pk = pk
-    this.key = key
-    this.base = base
-    this.store = base.derived<T>(m => m.get(key) as T)
-  }
-
-  get = () => this.base.get().get(this.key) as T
-
-  subscribe = (f: Subscriber<T>) => this.store.subscribe(f)
-
-  derived = <U>(f: (v: T) => U) => this.store.derived<U>(f)
-
-  throttle = (t: number) => this.store.throttle(t)
-
-  exists = () => this.base.get().has(this.key)
-}
-
 export class Collection<T extends R> implements IReadable<T[]> {
   readonly pk: string
   readonly mapStore: Writable<M<T>>

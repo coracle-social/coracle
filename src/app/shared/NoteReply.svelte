@@ -14,7 +14,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {env, publish, publishToZeroOrMoreGroups, tagsFromContent, getClientTags} from "src/engine"
+  import {env, publish, signAndPublish, tagsFromContent, getClientTags} from "src/engine"
   import {drafts} from "src/app/state"
 
   export let parent
@@ -109,14 +109,13 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-    const addresses = contextAddress ? [contextAddress] : parentTags.context().values().valueOf()
-    const {pubs, events} = await publishToZeroOrMoreGroups(addresses, template, opts)
+    const {pub, event} = await signAndPublish(template, opts)
 
     loading = false
 
     // Only track one event/pub to avoid apprent duplicates
-    addToContext(events[0])
-    showPublishInfo(pubs[0])
+    addToContext(event)
+    showPublishInfo(pub)
     clearDraft()
     reset()
   }

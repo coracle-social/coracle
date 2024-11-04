@@ -151,24 +151,6 @@ export const getStaleAddrs = (addrs: string[]) => {
   return Array.from(stale)
 }
 
-export const loadGroups = async (rawAddrs: string[], explicitRelays: string[] = []) => {
-  const addrs = getStaleAddrs(rawAddrs)
-  const authors = addrs.map(a => Address.from(a).pubkey)
-  const identifiers = addrs.map(a => Address.from(a).identifier)
-
-  if (addrs.length > 0) {
-    const filters = [{kinds: [34550, 35834], authors, "#d": identifiers}]
-    const relays = ctx.app.router
-      .merge([
-        ctx.app.router.product(addrs, explicitRelays),
-        ctx.app.router.WithinMultipleContexts(addrs),
-      ])
-      .getUrls()
-
-    return load({relays, filters, skipCache: true, forcePlatform: false})
-  }
-}
-
 export const loadGroupMessages = async (addrs: string[]) => {
   for (const address of addrs) {
     const keys = [...groupAdminKeys.get(), ...groupSharedKeys.get()]

@@ -1,25 +1,21 @@
 <script lang="ts">
-  import {uniqBy, uniq, sortBy, prop} from "ramda"
-  import {createMap} from "hurdak"
-  import {nip19} from "nostr-tools"
+  import {relaySearch, session} from "@welshman/app"
   import {ctx} from "@welshman/lib"
-  import {getAddress, WRAP, GROUP} from "@welshman/util"
+  import {getPubkey, Nip01Signer, Nip59} from "@welshman/signer"
   import type {SignedEvent} from "@welshman/util"
-  import {Nip59, Nip01Signer, getPubkey} from "@welshman/signer"
-  import {session, relaySearch} from "@welshman/app"
-  import {toHex, nsecEncode, isKeyValid} from "src/util/nostr"
-  import {showInfo, showWarning} from "src/partials/Toast.svelte"
-  import CopyValue from "src/partials/CopyValue.svelte"
+  import {WRAP} from "@welshman/util"
+  import {nip19} from "nostr-tools"
+  import {subscribe} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
+  import CopyValue from "src/partials/CopyValue.svelte"
   import Field from "src/partials/Field.svelte"
-  import SearchSelect from "src/partials/SearchSelect.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Modal from "src/partials/Modal.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import GroupCircle from "src/app/shared/GroupCircle.svelte"
-  import GroupName from "src/app/shared/GroupName.svelte"
-  import {groupSharedKeys, userIsGroupMember, groupAdminKeys, subscribe} from "src/engine"
+  import Input from "src/partials/Input.svelte"
+  import Modal from "src/partials/Modal.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
+  import {isKeyValid, nsecEncode, toHex} from "src/util/nostr"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
@@ -57,10 +53,7 @@
     const sub = subscribe({
       closeOnEose: true,
       relays: ctx.app.router.User().getUrls().concat(relays),
-      filters: [
-        {kinds: [GROUP], authors: [pubkey], limit: 1},
-        {kinds: [WRAP], "#p": [pubkey], limit: 500},
-      ],
+      filters: [{kinds: [WRAP], "#p": [pubkey], limit: 500}],
       onEvent: async event => {
         if (event.kind === WRAP) {
           event = await helper.unwrap(event as SignedEvent)
@@ -72,13 +65,6 @@
 
         found = event
         sub.close()
-        groupAdminKeys.key(pubkey).set({
-          group: getAddress(event),
-          pubkey,
-          privkey,
-          created_at: event.created_at,
-          hints: ctx.app.router.Event(event).getUrls(),
-        })
       },
       onComplete: () => {
         importing = false
@@ -92,20 +78,6 @@
       },
     })
   }
-
-  $: adminKeys = createMap("group", $groupAdminKeys)
-  $: sharedKeys = createMap(
-    "group",
-    uniqBy(
-      prop("group"),
-      sortBy(
-        k => -k.created_at,
-        $groupSharedKeys.filter(k => $userIsGroupMember(k.group)),
-      ),
-    ),
-  )
-
-  $: addresses = uniq([...Object.keys(adminKeys), ...Object.keys(sharedKeys)])
 
   document.title = "Keys"
 </script>
@@ -157,30 +129,6 @@
         <i class="fa fa-upload" /> Import Key
       </Anchor>
     </div>
-    <p>
-      These keys are used for accessing or managing closed groups. Save these to make sure you don't
-      lose access to your groups.
-    </p>
-    {#each addresses as address (address)}
-      {@const sharedKey = sharedKeys[address]}
-      {@const adminKey = adminKeys[address]}
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-2">
-          <GroupCircle class="h-4 w-4" {address} />
-          <GroupName class="font-bold" {address} />
-        </div>
-        <div class="ml-6 flex flex-col gap-4">
-          {#if sharedKey}
-            <CopyValue isPassword label="Access key" value={sharedKey.privkey} />
-          {/if}
-          {#if adminKey}
-            <CopyValue isPassword label="Admin key" value={adminKey.privkey} />
-          {/if}
-        </div>
-      </div>
-    {:else}
-      <p class="text-center py-20">No keys found.</p>
-    {/each}
   </FlexColumn>
 </FlexColumn>
 

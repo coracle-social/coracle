@@ -1,41 +1,23 @@
 <script lang="ts">
-  import {zipObj, pluck} from "ramda"
-  import {normalizeRelayUrl} from "@welshman/util"
   import {session} from "@welshman/app"
-  import {updateIn} from "src/util/misc"
-  import Card from "src/partials/Card.svelte"
-  import Heading from "src/partials/Heading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import {normalizeRelayUrl} from "@welshman/util"
+  import {zipObj} from "ramda"
   import PersonList from "src/app/shared/PersonList.svelte"
-  import GroupListItem from "src/app/shared/GroupListItem.svelte"
-  import GroupActions from "src/app/shared/GroupActions.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import {loadGroups, groupHints} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Heading from "src/partials/Heading.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
+  import {updateIn} from "src/util/misc"
 
   export let people = []
   export let relays = []
-  export let groups = []
 
   const parsedRelays = relays
     .map(s => zipObj(["url", "claim"], s.split("|")))
     .map(updateIn("url", normalizeRelayUrl))
-
-  const parsedGroups = groups.map(s => zipObj(["address", "relay", "claim"], s.split("|"))) as {
-    address: string
-    relay: string
-    claim: string
-  }[]
-
-  loadGroups(pluck("address", parsedGroups) as string[], pluck("relay", parsedGroups) as string[])
-
-  for (const {address, relay} of parsedGroups) {
-    if (relay) {
-      groupHints.update($gh => ({...$gh, [address]: [...($gh[address] || []), relay]}))
-    }
-  }
 </script>
 
 {#if $session}
@@ -68,22 +50,7 @@
       </FlexColumn>
     </Card>
   {/if}
-  {#if parsedGroups.length > 0}
-    <Card>
-      <FlexColumn>
-        <Subheading>Groups</Subheading>
-        <p>Here is a selection of groups you might be interested in.</p>
-        {#each parsedGroups as group (group.address)}
-          <GroupListItem modal address={group.address}>
-            <div slot="actions">
-              <GroupActions address={group.address} claim={group.claim} />
-            </div>
-          </GroupListItem>
-        {/each}
-      </FlexColumn>
-    </Card>
-  {/if}
   <Anchor button accent href="/">Done</Anchor>
 {:else}
-  <Onboarding invite={{people, relays, groups, parsedRelays, parsedGroups}} />
+  <Onboarding invite={{people, relays, parsedRelays}} />
 {/if}
