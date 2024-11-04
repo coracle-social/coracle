@@ -1,16 +1,19 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {NOTE} from "@welshman/util"
+  import {getEditorOptions} from "src/app/editor"
   import Compose from "src/app/shared/Compose.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import {createAndPublish, tagsFromContent} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
+  import {onMount} from "svelte"
+  import {Editor} from "svelte-tiptap"
 
   export let signup
   export let setStage
 
   let loading = false
-  let compose = null
+  let element: HTMLElement
+  let editor: Editor
 
   const prev = () => setStage("follows")
 
@@ -20,7 +23,7 @@
     loading = true
 
     try {
-      const content = compose.parse()
+      const content = editor.getText().trim()
 
       // Publish our welcome note
       if (content) {
@@ -43,7 +46,6 @@
       getEditorOptions({
         submit: next,
         element,
-        submitOnEnter: false,
         autofocus: true,
         content: "Hello world! #introductions",
       }),
