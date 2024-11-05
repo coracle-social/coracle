@@ -112,8 +112,10 @@
        background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
 <div>
-  <AltColor background class="relative flex flex-col sm:flex-row gap-8 sm:gap-4 p-6 text-neutral-100">
-    <div class="flex flex-col gap-4 items-center">
+  <AltColor
+    background
+    class="relative flex flex-col gap-8 p-6 text-neutral-100 sm:flex-row sm:gap-4">
+    <div class="flex flex-col items-center gap-4">
       <PersonCircle {pubkey} class="mt-1 h-32 w-32" />
       {#if pubkey === $session?.pubkey}
         <Anchor
@@ -127,10 +129,8 @@
           low={$following}
           on:click={() => ($following ? unfollow(pubkey) : follow(tagPubkey(pubkey)))}
           >{$following ? "Unfollow" : "Follow"}</Anchor>
-        <Anchor
-          button
-          low
-          on:click={router.at("channels").of([$session.pubkey, pubkey]).push}>Message</Anchor>
+        <Anchor button low on:click={router.at("channels").of([$session.pubkey, pubkey]).push}
+          >Message</Anchor>
       {/if}
     </div>
     <div class="flex min-w-0 flex-grow flex-col gap-4">
@@ -169,10 +169,10 @@
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-2 max-w-[80%] gap-3 sm:flex-row">
+      <div class="grid max-w-[80%] grid-cols-2 gap-3 sm:flex-row">
         {#if $handle}
           <div class="flex items-center gap-2">
-            <i class="fa fa-at text-accent w-4" />
+            <i class="fa fa-at w-4 text-accent" />
             <PersonHandle {pubkey} />
           </div>
         {/if}
@@ -185,9 +185,9 @@
         {#if $profile?.website}
           <Anchor
             external
-            class="flex items-center gap-2 col-span-2"
+            class="col-span-2 flex items-center gap-2"
             href={ensureProto($profile.website)}>
-            <i class="fa fa-link text-accent w-4" />
+            <i class="fa fa-link w-4 text-accent" />
             {stripProtocol($profile.website)}
           </Anchor>
         {/if}
@@ -217,9 +217,9 @@
 {#if $userMutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
-  <Feed showGroup forcePlatform={false} feed={notesFeed} />
+  <Feed forcePlatform={false} feed={notesFeed} />
 {:else if activeTab === "likes"}
-  <Feed showGroup forcePlatform={false} feed={likesFeed} />
+  <Feed forcePlatform={false} feed={likesFeed} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

@@ -5,7 +5,7 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
   import {makeFeed} from "src/domain"
-  import {env, loadCircleMessages} from "src/engine"
+  import {env} from "src/engine"
 
   export let feed = null
 
@@ -17,10 +17,6 @@
     feed = makeFeed({definition: makeRelayFeed(...env.PLATFORM_RELAYS)})
   } else if (!feed) {
     feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
-  }
-
-  if (env.FORCE_GROUP) {
-    loadCircleMessages([env.FORCE_GROUP])
   }
 
   document.title = "Feeds"
@@ -35,4 +31,4 @@
   </div>
 {/if}
 
-<Feed showGroup showControls={!isPlatformFeed} {feed} />
+<Feed showControls={!isPlatformFeed} {feed} />

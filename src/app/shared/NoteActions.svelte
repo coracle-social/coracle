@@ -3,14 +3,12 @@
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {ctx, nth, nthEq, remove, last, sortBy, first} from "@welshman/lib"
+  import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
   import {
     repository,
     signer,
     trackerStore,
     tagReactionTo,
-    tagEvent,
-    tagPubkey,
     tagZapSplit,
     mute,
     unmute,
@@ -22,12 +20,10 @@
     asSignedEvent,
     isSignedEvent,
     createEvent,
-    getAddress,
-    getContextTagValues,
     getPubkeyTagValues,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
-  import {identity, sum, pluck} from "ramda"
+  import {sum, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
@@ -41,23 +37,18 @@
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Card from "src/partials/Card.svelte"
-  import Heading from "src/partials/Heading.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import GroupSummary from "src/app/shared/GroupSummary.svelte"
   import {router} from "src/app/util/router"
   import {
     env,
     publish,
     deriveHandlersForKind,
-    userIsGroupMember,
-    groupMeta,
-    publishToZeroOrMoreGroups,
+    signAndPublish,
     deleteEvent,
     getSetting,
     loadPubkeys,
@@ -71,14 +62,11 @@
   export let replyCtrl
   export let showHidden
   export let addToContext
-  export let contextAddress
   export let removeFromContext
   export let replies, likes, zaps
   export let zapper
 
   const signedEvent = asSignedEvent(note as any)
-  const address = contextAddress || first(getContextTagValues(note.tags))
-  const addresses = [address].filter(identity)
   const nevent = nip19.neventEncode({
     id: note.id,
     kind: note.kind,
@@ -115,7 +103,7 @@
 
   const createLabel = () => router.at("notes").of(note.id).at("label").open()
 
-  const quote = () => router.at("notes/create").cx({quote: note, group: address}).open()
+  const quote = () => router.at("notes/create").cx({quote: note}).open()
 
   const report = () => router.at("notes").of(note.id).at("report").open()
 
@@ -128,34 +116,14 @@
 
     const tags = [...tagReactionTo(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
-    const {events} = await publishToZeroOrMoreGroups(addresses, template)
+    const pub = await signAndPublish(template)
 
-    for (const event of events) {
-      addToContext(event)
-    }
+    addToContext(pub.request.event)
   }
 
   const deleteReaction = e => {
     deleteEvent(e)
     removeFromContext(e)
-  }
-
-  const crossPost = async (addresses = []) => {
-    const content = JSON.stringify(note as SignedEvent)
-    const tags = [...tagEvent(note), tagPubkey(note.pubkey), ...getClientTags()]
-
-    let template
-    if (note.kind === 1) {
-      template = createEvent(6, {content, tags})
-    } else {
-      template = createEvent(16, {content, tags: [...tags, ["k", String(note.kind)]]})
-    }
-
-    publishToZeroOrMoreGroups(addresses, template)
-
-    showInfo("Note has been cross-posted!")
-
-    setView(null)
   }
 
   const startZap = () => {
@@ -200,16 +168,11 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const groupOptions = derived([groupMeta, userIsGroupMember], ([$gm, $isMember]) =>
-    $gm.filter(g => $isMember(getAddress(g.event), true)),
-  )
-
   let view
   let actions = []
   let handlersShown = false
 
-  $: disableActions =
-    !$signer || (muted && !showHidden) || (note.wrap && address && !$userIsGroupMember(address))
+  $: disableActions = !$signer || (muted && !showHidden)
   $: like = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
@@ -231,10 +194,6 @@
     if ($signer) {
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
-      if (isSignedEvent(note) && !env.FORCE_GROUP && ($groupOptions.length > 0 || address)) {
-        actions.push({label: "Cross-post", icon: "shuffle", onClick: () => setView("cross-post")})
-      }
-
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
       if (muted) {
@@ -246,7 +205,7 @@
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
     }
 
-    if (!env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
+    if (env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -441,29 +400,6 @@
       <CopyValue label="Link" value={toNostrURI(nevent)} />
       <CopyValue label="Event ID" encode={nip19.noteEncode} value={note.id} />
       <CopyValue label="Event JSON" value={JSON.stringify(signedEvent)} />
-    {:else if view === "cross-post"}
-      <div class="mb-4 flex items-center justify-center">
-        <Heading>Cross-post</Heading>
-      </div>
-      <div>Select where you'd like to post to:</div>
-      <div class="flex flex-col gap-2">
-        {#if address}
-          <Card invertColors interactive on:click={() => crossPost()}>
-            <div class="flex gap-4 text-neutral-100">
-              <i class="fa fa-earth-asia fa-2x" />
-              <div class="flex min-w-0 flex-grow flex-col gap-4">
-                <p class="text-2xl">Global</p>
-                <p>Post to your main feed.</p>
-              </div>
-            </div>
-          </Card>
-        {/if}
-        {#each $groupOptions as g (getAddress(g.event))}
-          <Card invertColors interactive on:click={() => crossPost([getAddress(g.event)])}>
-            <GroupSummary address={getAddress(g.event)} />
-          </Card>
-        {/each}
-      </div>
     {/if}
   </Modal>
 {/if}

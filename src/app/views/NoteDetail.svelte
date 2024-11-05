@@ -16,7 +16,7 @@
 
 {#if $event}
   <div in:fly={{y: 20}}>
-    <Note showGroup showLoading anchor={getIdOrAddress($event)} note={$event} {depth} {relays} />
+    <Note showLoading anchor={getIdOrAddress($event)} note={$event} {depth} {relays} />
   </div>
 {:else}
   <Spinner />

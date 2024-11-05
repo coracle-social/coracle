@@ -9,7 +9,6 @@
   import {
     sessionWithMeta,
     loadNotifications,
-    loadCircleMessages,
     unreadMainNotifications,
     unreadReactionNotifications,
   } from "src/engine"
@@ -32,7 +31,6 @@
 
   onMount(() => {
     loadNotifications()
-    loadCircleMessages()
 
     const scroller = createScroller(loadMore, {element})
 

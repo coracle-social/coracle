@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {tryFunc, switcherFn} from "hurdak"
 import {sortBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {fromNostrURI, Address, hasValidSignature, Tags} from "@welshman/util"
+import {fromNostrURI, Address, hasValidSignature} from "@welshman/util"
 import {parseJson} from "src/util/misc"
 
 export const sortEventsAsc = events => sortBy((e: TrustedEvent) => e.created_at, events)
@@ -42,14 +42,6 @@ export const unwrapRepost = repost => {
       return null
     }
   } catch (e) {
-    return null
-  }
-
-  const originalGroup = Tags.fromEvent(event).context().values().first()
-  const repostGroup = Tags.fromEvent(repost).context().values().first()
-
-  // Only show cross-posts, not reposts from global to global
-  if (originalGroup === repostGroup) {
     return null
   }
 

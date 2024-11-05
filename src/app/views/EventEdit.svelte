@@ -14,7 +14,7 @@
   import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/util/router"
-  import {deriveEvent, publishToZeroOrMoreGroups} from "src/engine"
+  import {deriveEvent, signAndPublish} from "src/engine"
 
   export let address
 
@@ -36,7 +36,7 @@
       created_at: inc($event.created_at),
     })
 
-    publishToZeroOrMoreGroups(values.groups, template)
+    signAndPublish(template)
     router.pop()
   }
 
@@ -51,7 +51,6 @@
       loading = false
 
       values = {
-        groups: tags.context().values().valueOf(),
         title: tags.get("name")?.value() || tags.get("title")?.value() || "",
         location: tags.get("location")?.value() || "",
         start: secondsToDate(tags.get("start")?.value() || now()),

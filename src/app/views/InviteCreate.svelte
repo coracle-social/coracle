@@ -1,22 +1,19 @@
 <script lang="ts">
-  import {ctx, without, identity} from "@welshman/lib"
-  import {getAddress, displayRelayUrl} from "@welshman/util"
   import {relaySearch} from "@welshman/app"
-  import {onMount} from "svelte"
-  import {pickVals, toSpliced} from "src/util/misc"
-  import Card from "src/partials/Card.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Heading from "src/partials/Heading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
-  import SearchSelect from "src/partials/SearchSelect.svelte"
-  import ListItem from "src/partials/ListItem.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
-  import GroupName from "src/app/shared/GroupName.svelte"
-  import GroupCircle from "src/app/shared/GroupCircle.svelte"
+  import {ctx, identity, without} from "@welshman/lib"
+  import {displayRelayUrl} from "@welshman/util"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import {groupMetaSearch, displayGroupByAddress} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Heading from "src/partials/Heading.svelte"
+  import Input from "src/partials/Input.svelte"
+  import ListItem from "src/partials/ListItem.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
+  import {pickVals, toSpliced} from "src/util/misc"
+  import {onMount} from "svelte"
 
   export let initialPubkey = null
   export let initialGroupAddress = null
@@ -52,25 +49,7 @@
     relays = toSpliced(relays, i, 1)
   }
 
-  const addGroup = address => {
-    if (address) {
-      groupInput.clear()
-      groups = [
-        ...groups,
-        {
-          address: address,
-          relay: ctx.app.router.WithinContext(address).getUrl(),
-          claim: "",
-        },
-      ]
-    }
-  }
-
-  const removeGroup = i => {
-    groups = toSpliced(groups, i, 1)
-  }
-
-  let relayInput, groupInput
+  let relayInput
   let sections = []
   let pubkeys = []
   let relays = []
@@ -170,40 +149,6 @@
         </SearchSelect>
       </FlexColumn>
     </Card>
-  {:else if section === "groups"}
-    <Card>
-      <FlexColumn>
-        <div class="flex justify-between">
-          <Subheading>Groups</Subheading>
-          <i class="fa fa-times cursor-pointer" on:click={() => hideSection("groups")} />
-        </div>
-        <p>
-          Invite people to groups. If you're inviting someone to a closed group, make sure the
-          invite code you use is valid.
-        </p>
-        {#each groups as group, i (group.address + i)}
-          <ListItem on:remove={() => removeGroup(i)}>
-            <span slot="label">{displayGroupByAddress(group.address)}</span>
-            <span slot="data">
-              <Input bind:value={group.claim} placeholder="Invite code (optional)" />
-            </span>
-          </ListItem>
-        {/each}
-        <SearchSelect
-          value={null}
-          bind:this={groupInput}
-          search={$groupMetaSearch.searchOptions}
-          displayItem={$groupMetaSearch.displayOption}
-          getKey={groupMeta => getAddress(groupMeta.event)}
-          onChange={groupMeta => groupMeta && addGroup(getAddress(groupMeta.event))}>
-          <i slot="before" class="fa fa-search" />
-          <div slot="item" let:item class="flex items-center gap-4 text-neutral-100">
-            <GroupCircle address={getAddress(item.event)} class="h-5 w-5" />
-            <GroupName address={getAddress(item.event)} />
-          </div>
-        </SearchSelect>
-      </FlexColumn>
-    </Card>
   {/if}
 {/each}
 <div class="flex justify-end gap-4">
@@ -213,14 +158,7 @@
   <Anchor disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
     <i class="fa fa-plus" /> Add relays
   </Anchor>
-  <Anchor disabled={sections.includes("groups")} on:click={() => showSection("groups")}>
-    <i class="fa fa-plus" /> Add groups
-  </Anchor>
 </div>
-<Anchor
-  button
-  accent
-  disabled={[...pubkeys, ...relays, ...groups].length === 0}
-  on:click={onSubmit}>
+<Anchor button accent disabled={[...pubkeys, ...relays].length === 0} on:click={onSubmit}>
   Create Invite Link
 </Anchor>

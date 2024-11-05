@@ -20,7 +20,6 @@ import {
   load,
   loadPubkeys,
   loadSeen,
-  loadGroups,
   loadDeletes,
   loadHandlers,
   loadMessages,
@@ -48,13 +47,6 @@ export const logUsage = async (path: string) => {
 export const slowConnections = writable([])
 
 // Synchronization from events to state
-
-export const loadAppData = () => {
-  // If we have a group, load that
-  if (env.FORCE_GROUP) {
-    loadGroups([env.FORCE_GROUP])
-  }
-}
 
 export const loadUserData = async (hints: string[] = []) => {
   // Load relays, then load everything else so we have a better chance of finding it
