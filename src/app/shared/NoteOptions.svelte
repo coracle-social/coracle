@@ -14,14 +14,14 @@
     anonymous: boolean
   }
 
-  let values = {groups: [], ...initialValues}
+  let values = initialValues
   let view = null
 
   const dispatch = createEventDispatcher()
 
   export const setView = name => {
     view = name
-    values = {groups: [], ...initialValues}
+    values = initialValues
   }
 
   const onSubmit = () => {
