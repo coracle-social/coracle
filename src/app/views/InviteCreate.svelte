@@ -1,6 +1,6 @@
 <script lang="ts">
   import {relaySearch} from "@welshman/app"
-  import {ctx, identity, without} from "@welshman/lib"
+  import {identity, without} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"

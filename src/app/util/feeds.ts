@@ -331,15 +331,13 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function discardEvents(events) {
-    const strict = true
-
     return events.filter(e => {
       if (repository.isDeleted(e)) return false
       if (e.kind === REACTION && !isLike(e)) return false
       if ([4, DIRECT_MESSAGE].includes(e.kind)) return false
       if (opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
       if (getIdOrAddress(e) === opts.anchor) return false
-      if ($isEventMuted(e, strict)) return false
+      if ($isEventMuted(e, true)) return false
 
       return true
     })
