@@ -143,7 +143,7 @@
         }),
     })
 
-    const {pub} = await signAndPublish(template, opts)
+    const pub = await signAndPublish(template, opts)
 
     showPublishInfo(pub)
     router.clearModals()

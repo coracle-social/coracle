@@ -65,7 +65,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-    const {pub} = await signAndPublish(template, opts)
+    const pub = await signAndPublish(template, opts)
 
     showPublishInfo(pub)
     opts = {...defaultOpts}

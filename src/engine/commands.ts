@@ -207,9 +207,7 @@ export const signAndPublish = async (template, {anonymous = false} = {}) => {
   const event = await sign(template, {anonymous})
   const relays = ctx.app.router.PublishEvent(event).getUrls()
 
-  const pub = await publish({event, relays})
-
-  return {event, pub}
+  return await publish({event, relays})
 }
 
 // Deletes

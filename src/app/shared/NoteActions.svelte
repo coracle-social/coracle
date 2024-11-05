@@ -122,9 +122,9 @@
 
     const tags = [...tagReactionTo(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
-    const {event} = await signAndPublish(template)
+    const pub = await signAndPublish(template)
 
-    addToContext(event)
+    addToContext(pub.request.event)
   }
 
   const deleteReaction = e => {
@@ -211,7 +211,7 @@
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
     }
 
-    if (!env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
+    if (env.PLATFORM_RELAYS.length === 0 && isSignedEvent(note)) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 

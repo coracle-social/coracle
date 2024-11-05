@@ -19,7 +19,6 @@
 
   export let parent
   export let addToContext
-  export let contextAddress = false
   export let showBorder = false
   export let forceOpen = false
 
@@ -109,12 +108,12 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-    const {pub, event} = await signAndPublish(template, opts)
+    const pub = await signAndPublish(template, opts)
 
     loading = false
 
     // Only track one event/pub to avoid apprent duplicates
-    addToContext(event)
+    addToContext(pub.request.event)
     showPublishInfo(pub)
     clearDraft()
     reset()
@@ -194,11 +193,7 @@
 {/if}
 
 {#if !env.FORCE_GROUP}
-  <NoteOptions
-    bind:this={options}
-    on:change={setOpts}
-    initialValues={opts}
-    hideFields={["groups"]} />
+  <NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} />
 {/if}
 
 {#if $nsecWarning}
