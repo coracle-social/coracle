@@ -166,6 +166,8 @@
     const options = getEditorOptions({
       submit: onSubmit,
       element,
+      submitOnEnter: false,
+      submitOnModEnter: true,
       autofocus: true,
     })
 
