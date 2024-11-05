@@ -68,7 +68,7 @@
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
-      {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
+      {#if env.PLATFORM_RELAYS.length === 0}
         <MenuMobileItem href="/settings/relays" on:click={closeMenu}>
           <i class="fa fa-server" />
           <div class="relative inline-block">

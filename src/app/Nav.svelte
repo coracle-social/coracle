@@ -40,10 +40,6 @@
       params.pubkey = props.pubkey
     }
 
-    if (env.FORCE_GROUP) {
-      params.group = env.FORCE_GROUP
-    }
-
     router.at("notes/create").qp(params).open()
   }
 </script>

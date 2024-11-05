@@ -92,6 +92,7 @@ import {
   getListTags,
   getPubkeyTagValues,
   getTagValues,
+  isGroupAddress,
   isHashedEvent,
   makeList,
   normalizeRelayUrl,
@@ -133,7 +134,6 @@ export const env = {
   ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
   ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
   BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
-  FORCE_GROUP: import.meta.env.VITE_FORCE_GROUP as string,
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   MULTIPLEXTR_URL: import.meta.env.VITE_MULTIPLEXTR_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
@@ -1089,6 +1089,8 @@ const migrateEvents = (events: TrustedEvent[]) => {
   if (events.length < 50_000) {
     return events
   }
+  // filter out all event posted to encrypted group
+  events = events.filter(e => !e.wrap?.tags.some(t => isGroupAddress(t[1])))
 
   const scoreEvent = getScoreEvent()
 
@@ -1114,7 +1116,6 @@ if (!db) {
       signEvent: (event: StampedEvent) => {
         if (
           event.kind === CLIENT_AUTH &&
-          !env.FORCE_GROUP &&
           env.PLATFORM_RELAYS.length === 0 &&
           !getSetting("auto_authenticate")
         ) {

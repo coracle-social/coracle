@@ -77,7 +77,7 @@
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
-  {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
+  {#if env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem path="/settings/relays" isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
         Relays
@@ -109,9 +109,7 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem modal path="/groups">
-    Groups
-  </MenuDesktopItem>
+  <MenuDesktopItem modal path="/groups">Groups</MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"

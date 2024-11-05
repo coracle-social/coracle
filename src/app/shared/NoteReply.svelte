@@ -170,9 +170,7 @@
               <ImageInput multi hostLimit={3} on:change={e => images.addImage(e.detail)}>
                 <i slot="button" class="fa fa-paperclip" />
               </ImageInput>
-              {#if !env.FORCE_GROUP}
-                <i class="fa fa-cog" on:click={() => options.setView("settings")} />
-              {/if}
+              <i class="fa fa-cog" on:click={() => options.setView("settings")} />
               <i class="fa fa-at" />
             </div>
           </div>
@@ -192,9 +190,7 @@
   </div>
 {/if}
 
-{#if !env.FORCE_GROUP}
-  <NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} />
-{/if}
+<NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

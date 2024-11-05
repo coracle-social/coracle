@@ -52,9 +52,7 @@
   export let showParent = true
   export let showLoading = false
   export let showHidden = false
-  export let showGroup = false
   export let showMedia = getSetting("show_media")
-  export let contextAddress = null
 
   let ready = false
   let event = note
@@ -213,7 +211,7 @@
   {@const showReply = reply && !ancestors.replies.includes(anchor) && showParent}
   {@const showRoot = root && !ancestors.roots.includes(anchor) && root !== reply && showParent}
   <div>
-    <NoteMeta note={event} {showGroup} />
+    <NoteMeta note={event} />
     <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>
@@ -290,7 +288,6 @@
                 zapper={$zapper}
                 bind:this={actions}
                 {removeFromContext}
-                {contextAddress}
                 {addToContext}
                 {replyCtrl}
                 {showHidden}
@@ -330,7 +327,6 @@
 
       <NoteReply
         {addToContext}
-        {contextAddress}
         parent={event}
         showBorder={visibleReplies.length > 0}
         bind:this={replyCtrl}

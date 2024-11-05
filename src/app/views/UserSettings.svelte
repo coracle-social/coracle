@@ -66,7 +66,7 @@
         faster, but will require more bandwidth and processing power.
       </p>
     </Field>
-    {#if !env.FORCE_GROUP && env.PLATFORM_RELAYS.length === 0}
+    {#if env.PLATFORM_RELAYS.length === 0}
       <FieldInline label="Authenticate with relays">
         <Toggle bind:value={values.auto_authenticate} />
         <p slot="info">

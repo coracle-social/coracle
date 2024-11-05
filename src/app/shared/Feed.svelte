@@ -18,7 +18,6 @@
   export let feed: Feed
   export let anchor = null
   export let eager = false
-  export let contextAddress = null
   export let skipNetwork = false
   export let forcePlatform = true
   export let shouldListen = false
@@ -102,8 +101,6 @@
       <Note
         filters={loader.getFilters() || [{ids: []}]}
         depth={$shouldHideReplies ? 0 : 2}
-        {contextAddress}
-        {showGroup}
         {anchor}
         {note} />
     </div>
