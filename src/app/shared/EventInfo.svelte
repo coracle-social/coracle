@@ -26,7 +26,6 @@
   const deleted = deriveIsDeletedByAddress(repository, event)
 
   $: tags = Tags.fromEvent(event)
-  $: groupAddrs = tags.context().values().valueOf()
   $: ({name, title, location} = fromPairs(event.tags))
   $: end = parseInt(tags.get("end")?.value())
   $: start = parseInt(tags.get("start")?.value())

@@ -331,7 +331,7 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function discardEvents(events) {
-    let strict = true
+    const strict = true
 
     return events.filter(e => {
       if (repository.isDeleted(e)) return false

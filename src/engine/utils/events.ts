@@ -2,7 +2,7 @@ import {nip19} from "nostr-tools"
 import {tryFunc, switcherFn} from "hurdak"
 import {sortBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {fromNostrURI, Address, hasValidSignature, Tags} from "@welshman/util"
+import {fromNostrURI, Address, hasValidSignature} from "@welshman/util"
 import {parseJson} from "src/util/misc"
 
 export const sortEventsAsc = events => sortBy((e: TrustedEvent) => e.created_at, events)

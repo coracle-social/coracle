@@ -3,14 +3,12 @@
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {ctx, nth, nthEq, remove, last, sortBy, first} from "@welshman/lib"
+  import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
   import {
     repository,
     signer,
     trackerStore,
     tagReactionTo,
-    tagEvent,
-    tagPubkey,
     tagZapSplit,
     mute,
     unmute,
@@ -22,12 +20,10 @@
     asSignedEvent,
     isSignedEvent,
     createEvent,
-    getAddress,
-    getContextTagValues,
     getPubkeyTagValues,
   } from "@welshman/util"
   import {tweened} from "svelte/motion"
-  import {identity, sum, pluck} from "ramda"
+  import {sum, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
@@ -41,8 +37,6 @@
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Card from "src/partials/Card.svelte"
-  import Heading from "src/partials/Heading.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"

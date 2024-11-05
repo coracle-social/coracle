@@ -1,6 +1,6 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
-  import {getAddress, Address} from "@welshman/util"
+  import {Address} from "@welshman/util"
   import {deriveProfileDisplay} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -44,7 +44,6 @@
     showHidden = true
   }
 
-  $: address = $quote ? getAddress($quote) : ""
   $: profileDisplay = deriveProfileDisplay($quote?.pubkey)
   $: muted = $quote && $isEventMuted($quote, true)
 </script>

@@ -1,11 +1,5 @@
 <script lang="ts">
-  import {
-    NAMED_PEOPLE,
-    NAMED_COMMUNITIES,
-    NAMED_RELAYS,
-    NAMED_TOPICS,
-    getAddress,
-  } from "@welshman/util"
+  import {NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS, getAddress} from "@welshman/util"
   import {tagPubkey} from "@welshman/app"
   import {isAuthorFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"

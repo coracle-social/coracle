@@ -14,7 +14,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NoteImages from "src/app/shared/NoteImages.svelte"
-  import {env, publish, signAndPublish, tagsFromContent, getClientTags} from "src/engine"
+  import {publish, signAndPublish, tagsFromContent, getClientTags} from "src/engine"
   import {drafts} from "src/app/state"
 
   export let parent
