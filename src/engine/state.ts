@@ -226,6 +226,7 @@ export const defaultSettings = {
   auto_authenticate: false,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
   nip96_urls: env.NIP96_URLS.slice(0, 1),
+  upload_type: "nip96",
   imgproxy_url: env.IMGPROXY_URL,
   dufflepud_url: env.DUFFLEPUD_URL,
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
@@ -242,7 +243,7 @@ export const userSettingsPlaintext = derived(
   ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id],
 )
 
-export const userSettings = withGetter(
+export const userSettings = withGetter<typeof defaultSettings>(
   derived(userSettingsPlaintext, $userSettingsPlaintext => {
     const overrides = parseJson($userSettingsPlaintext) || {}
 

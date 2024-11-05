@@ -8,8 +8,8 @@
 
 <div
   class={cx($$props.class, "shadow-inset relative h-7 cursor-pointer rounded", {
-    "bg-neutral-900 text-neutral-100": dark,
-    "bg-neutral-100 text-neutral-900": !dark,
+    "bg-neutral-900 text-neutral-100": !dark,
+    "bg-neutral-100 text-neutral-900": dark,
   })}>
   <select
     {...$$props}

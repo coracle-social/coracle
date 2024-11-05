@@ -73,7 +73,7 @@ export const getEditorOptions = ({
   submitOnModEnter = false,
   element,
   defaultUploadUrl = getSetting("nip96_urls").slice(0, 1)[0] || "https://nostr.build",
-  uploadType = "nip96",
+  uploadType = getSetting("upload_type"),
   autofocus = false,
   content = "",
   placeholder,

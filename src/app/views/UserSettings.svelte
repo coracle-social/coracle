@@ -12,6 +12,7 @@
   import {env, userSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
+  import Select from "src/partials/Select.svelte"
 
   const values = {...$userSettings}
 
@@ -88,6 +89,18 @@
           <strong>{item}</strong>
         </div>
       </SearchSelect>
+    </Field>
+    <Field label="Upload Type">
+      <p slot="info">
+        Choose an upload type for your files, default is nip-96 but blossom is also supported.
+      </p>
+      <div class="flex items-center bg-neutral-900 px-2">
+        <i class="fa-solid fa-cloud-upload-alt" />
+        <Select class="w-full" bind:value={$userSettings.upload_type} dark={false}>
+          <option value="nip96">NIP-96</option>
+          <option value="blossom">Blossom</option>
+        </Select>
+      </div>
     </Field>
     <Field label="Dufflepud URL">
       <Input bind:value={values.dufflepud_url}>

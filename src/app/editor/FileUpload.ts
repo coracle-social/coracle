@@ -240,7 +240,7 @@ class Uploader {
         const res = await uploadBlossom({file, serverUrl, hash, sign, expiration})
         this.editor.storage.fileUpload.tags.push([
           "imeta",
-          `url ${res.size}`,
+          `url ${res.url}`,
           `size ${res.size}`,
           `m ${res.type}`,
           `x ${res.sha256}`,
@@ -362,7 +362,7 @@ export async function uploadBlossom(options: BlossomOptions) {
   if (!options.sign) {
     throw new Error("No signer provided")
   }
-  const now = Date.now() / 1000
+  const now = Math.ceil(Date.now() / 1000)
   const hash = await options.hash(options.file)
   const event = await options.sign({
     kind: 24242,
@@ -371,10 +371,10 @@ export async function uploadBlossom(options: BlossomOptions) {
     tags: [
       ["t", "upload"],
       ["x", hash],
+      ["size", options.file.size.toString()],
       ["expiration", (now + (options.expiration || 60000)).toString()],
     ],
   })
-  await new Promise<void>(r => setTimeout(() => r(), 1000))
   const data = JSON.stringify(event)
   const base64 = btoa(data)
   const authorization = `Nostr ${base64}`
