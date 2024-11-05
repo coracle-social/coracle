@@ -16,7 +16,6 @@
   import {onMount} from "svelte"
 
   export let initialPubkey = null
-  export let initialGroupAddress = null
 
   const showSection = section => {
     sections = [...sections, section]
@@ -31,10 +30,6 @@
 
     if (section === "relays") {
       relays = []
-    }
-
-    if (section === "groups") {
-      groups = []
     }
   }
 
@@ -53,7 +48,6 @@
   let sections = []
   let pubkeys = []
   let relays = []
-  let groups = []
 
   const onSubmit = () => {
     const invite: any = {}
@@ -64,12 +58,6 @@
 
     if (sections.includes("relays")) {
       invite.relays = relays.map(r => pickVals(["url", "claim"], r).join("|")).join(",")
-    }
-
-    if (sections.includes("groups")) {
-      invite.groups = groups
-        .map(g => pickVals(["address", "relay", "claim"], g).join("|"))
-        .join(",")
     }
 
     router
@@ -84,15 +72,6 @@
       pubkeys = pubkeys.concat(initialPubkey)
     }
 
-    if (initialGroupAddress) {
-      showSection("groups")
-      groups = groups.concat({
-        address: initialGroupAddress,
-        relay: ctx.app.router.WithinContext(initialGroupAddress).getUrl(),
-        claim: "",
-      })
-    }
-
     // Not sure why, but the inputs are getting automatically focused
     setTimeout(() => (document.activeElement as any).blur())
   })
@@ -102,7 +81,7 @@
   <Heading>Create an Invite</Heading>
   <p>
     Invite links allow you to help your friends onboard to nostr more easily, or get easy access to
-    relays or groups.
+    relays.
   </p>
 </div>
 {#each sections as section (section)}
