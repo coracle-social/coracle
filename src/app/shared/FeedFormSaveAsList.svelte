@@ -12,7 +12,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import ListForm from "src/app/shared/ListForm.svelte"
-  import {makeUserList, isTopicFeed, isMentionFeed, isContextFeed} from "src/domain"
+  import {makeUserList, isTopicFeed, isMentionFeed} from "src/domain"
 
   export let feed
   export let onChange
@@ -36,8 +36,6 @@
       return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(tagPubkey)})
     } else if (isMentionFeed(feed)) {
       return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(2).map(tagPubkey)})
-    } else if (isContextFeed(feed)) {
-      return makeUserList({kind: NAMED_COMMUNITIES, tags: feed.slice(2).map(a => ["a", a])})
     } else if (isRelayFeed(feed)) {
       return makeUserList({kind: NAMED_RELAYS, tags: feed.slice(1).map(url => ["r", url])})
     } else if (isTopicFeed(feed)) {

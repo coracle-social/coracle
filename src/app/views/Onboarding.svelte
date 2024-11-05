@@ -52,11 +52,7 @@
   }
 
   const signup = async () => {
-    if (invite?.groups) {
-      router.at("invite").qp({groups: invite.groups}).push()
-    } else {
-      router.at("notes").push()
-    }
+    router.at("notes").push()
 
     // Immediately request access to any relays with a claim
     for (const {url, claim} of invite?.parsedRelays || []) {

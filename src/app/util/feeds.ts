@@ -9,22 +9,15 @@ import {
   getIdOrAddress,
   getIdAndAddress,
   getIdFilters,
-  isContextAddress,
   DIRECT_MESSAGE,
   REACTION,
   LIVE_CHAT_MESSAGE,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import type {Feed, RequestItem} from "@welshman/feeds"
-import {
-  walkFeed,
-  FeedLoader as CoreFeedLoader,
-  isIntersectionFeed,
-  isRelayFeed,
-} from "@welshman/feeds"
+import {FeedLoader as CoreFeedLoader, isIntersectionFeed, isRelayFeed} from "@welshman/feeds"
 import {repository, tracker, getFilterSelections} from "@welshman/app"
 import {noteKinds, isLike, reactionKinds, repostKinds} from "src/util/nostr"
-import {isAddressFeed} from "src/domain"
 import type {DisplayEvent} from "src/engine"
 import {
   feedLoader as baseFeedLoader,
@@ -339,13 +332,6 @@ export const createFeed = (opts: FeedOpts) => {
 
   function discardEvents(events) {
     let strict = true
-
-    // Be more tolerant when looking at communities
-    walkFeed(opts.feed, feed => {
-      if (isAddressFeed(feed)) {
-        strict = strict && !(feed.slice(2) as string[]).some(isContextAddress)
-      }
-    })
 
     return events.filter(e => {
       if (repository.isDeleted(e)) return false

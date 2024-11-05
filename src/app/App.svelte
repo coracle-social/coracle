@@ -13,7 +13,7 @@
   import {ready} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
-  import {loadAppData, slowConnections, loadUserData} from "src/app/state"
+  import {slowConnections, loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Toast from "src/partials/Toast.svelte"
   import Menu from "src/app/Menu.svelte"
@@ -195,7 +195,6 @@
     requireSigner: true,
     serializers: {
       pubkey: asPerson,
-      group: asNaddr("group"),
       type: asString("type"),
     },
   })
@@ -431,8 +430,6 @@
     // Our stores are throttled by 300, so wait until they're populated
     // before loading app data
     await lib.sleep(350)
-
-    loadAppData()
 
     if ($session) {
       loadUserData()

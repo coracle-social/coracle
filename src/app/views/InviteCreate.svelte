@@ -49,7 +49,7 @@
     relays = toSpliced(relays, i, 1)
   }
 
-  let relayInput, groupInput
+  let relayInput
   let sections = []
   let pubkeys = []
   let relays = []

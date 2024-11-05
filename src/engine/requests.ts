@@ -20,9 +20,7 @@ import {
 } from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
-  Address,
   getIdFilters,
-  isGroupAddress,
   createEvent,
   WRAP,
   EPOCH,
@@ -57,16 +55,10 @@ import {
   getNetwork,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds} from "src/util/nostr"
 import {partition, uniq, without} from "ramda"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {
-  env,
-  load,
-  subscribePersistent,
-  sessionWithMeta,
-  type MySubscribeRequest,
-} from "src/engine/state"
+import {env, load, subscribePersistent, type MySubscribeRequest} from "src/engine/state"
 
 // Utils
 
@@ -124,28 +116,6 @@ export const loadAll = (feed, opts: LoadOpts = {}) => {
   })
 
   return {promise, loading, stop}
-}
-
-// Groups
-
-export const attemptedAddrs = new Map()
-
-export const getStaleAddrs = (addrs: string[]) => {
-  const stale = new Set<string>()
-
-  for (const addr of addrs) {
-    const attempts = attemptedAddrs.get(addr) | 0
-
-    if (attempts > 0) {
-      continue
-    }
-
-    stale.add(addr)
-
-    attemptedAddrs.set(addr, attempts + 1)
-  }
-
-  return Array.from(stale)
 }
 
 export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>

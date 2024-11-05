@@ -31,4 +31,4 @@
   </div>
 {/if}
 
-<Feed showGroup showControls={!isPlatformFeed} {feed} />
+<Feed showControls={!isPlatformFeed} {feed} />

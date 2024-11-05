@@ -51,7 +51,6 @@
       loading = false
 
       values = {
-        groups: tags.context().values().valueOf(),
         title: tags.get("name")?.value() || tags.get("title")?.value() || "",
         location: tags.get("location")?.value() || "",
         start: secondsToDate(tags.get("start")?.value() || now()),

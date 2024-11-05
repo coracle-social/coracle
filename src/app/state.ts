@@ -48,10 +48,6 @@ export const slowConnections = writable([])
 
 // Synchronization from events to state
 
-export const loadAppData = () => {
-  // If we have a group, load that
-}
-
 export const loadUserData = async (hints: string[] = []) => {
   // Load relays, then load everything else so we have a better chance of finding it
   const $pubkey = pubkey.get()

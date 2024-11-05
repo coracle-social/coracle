@@ -906,14 +906,6 @@ export const createAndPublish = async ({
   return publish({event, relays, verb, timeout, forcePlatform})
 }
 
-// Publish
-
-export const mentionGroup = (address: string, ...args: unknown[]) => [
-  "a",
-  address,
-  ctx.app.router.WithinContext(address).getUrl(),
-]
-
 export const tagsFromContent = (content: string) => {
   const tags = []
 

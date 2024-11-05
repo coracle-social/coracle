@@ -24,7 +24,6 @@
   export let showControls = false
   export let hideSpinner = false
   export let includeReposts = false
-  export let showGroup = false
   export let onEvent = null
 
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
