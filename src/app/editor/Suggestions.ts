@@ -74,10 +74,15 @@ export const createSuggestions = (options: SuggestionsOptions) =>
             trigger: "manual",
             placement: "bottom-start",
           })
-
+          if (!props.query) popover[0].hide()
           suggestions = new options.suggestionsComponent({target, props: mapProps(props)})
         },
         onUpdate: props => {
+          if (props.query) {
+            popover[0].show()
+          } else {
+            popover[0].hide()
+          }
           suggestions.$set(mapProps(props))
 
           if (props.clientRect) {
