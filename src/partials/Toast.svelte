@@ -79,11 +79,7 @@
     }, 200)
   }
 
-  $: console.log($toast, timeLeft)
-
-  const timeInterval = setInterval(() => {
-    timeLeft > 0 && timeLeft--
-  }, 1000)
+  const timeInterval = setInterval(() => timeLeft > 0 && timeLeft--, 1000)
 
   onDestroy(() => {
     clearInterval(timeInterval)

@@ -23,7 +23,7 @@
 
 <script lang="ts">
   import type {SignedEvent} from "@welshman/util"
-  import {publishes, userSettings, type Pub} from "src/engine"
+  import {publishes, userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
   import {spring} from "svelte/motion"
@@ -41,7 +41,7 @@
   $: success = Array.from(pub?.status?.values() || []).filter(s => s === "success").length
   $: total = pub?.request?.relays.length || 0
 
-  let completed = spring(0)
+  const completed = spring(0)
 
   $: {
     if (pub) {

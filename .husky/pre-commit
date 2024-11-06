@@ -1,1 +1,1 @@
-npm run check
+npm run format && npm run check

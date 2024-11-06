@@ -12,7 +12,7 @@
     ZAP_RESPONSE,
     getAncestorTagValues,
   } from "@welshman/util"
-  import {repository, deriveZapperForPubkey, deriveZapper, session} from "@welshman/app"
+  import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {identity, reject, whereEq, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify, batch} from "hurdak"
