@@ -149,10 +149,10 @@
     })
 
     thunk.status.subscribe(status => {
-      if (status !== PublishStatus.Pending) {
-        cancel = true
-        router.clearModals()
-      }
+      // if (status !== PublishStatus.Pending) {
+      //   cancel = true
+      //   router.clearModals()
+      // }
     })
 
     showInfo("", {type: "delay", onCancel: () => thunk.controller.abort()})
