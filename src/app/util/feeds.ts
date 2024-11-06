@@ -25,33 +25,19 @@ import {
   sortEventsDesc,
   unwrapRepost,
   isEventMuted,
-  addRepostFilters,
   load,
 } from "src/engine"
 
 export type FeedOpts = {
   feed?: Feed
-  anchor?: string
-  skipNetwork?: boolean
   forcePlatform?: boolean
-  shouldDefer?: boolean
   shouldHideReplies?: boolean
-  shouldLoadParents?: boolean
-  includeReposts?: boolean
-  onEvent?: (e: TrustedEvent) => void
+  // Deprecated
+  anchor?: string
 }
 
-const prepFilters = (filters, opts: FeedOpts) => {
-  // Default to note kinds
-  filters = filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
-
-  // Add reposts if we don't have any authors specified
-  if (opts.includeReposts && !filters.some(f => f.authors?.length > 0)) {
-    filters = addRepostFilters(filters)
-  }
-
-  return filters
-}
+const prepFilters = (filters, opts: FeedOpts) =>
+  filters?.map(filter => ({kinds: noteKinds, ...filter})) || []
 
 function* getRequestItems({relays, filters}: RequestItem, opts: FeedOpts) {
   filters = prepFilters(filters, opts)
@@ -59,7 +45,7 @@ function* getRequestItems({relays, filters}: RequestItem, opts: FeedOpts) {
   // Use relays specified in feeds
   if (relays?.length > 0) {
     yield {filters, relays}
-  } else if (!opts.skipNetwork) {
+  } else {
     yield* getFilterSelections(filters)
   }
 }
@@ -70,19 +56,17 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
     ...baseFeedLoader.options,
     request: async ({relays, filters, onEvent}) => {
       const tracker = new Tracker()
-      const forceRelays = relays?.length > 0
-      const forcePlatform = opts.forcePlatform && !forceRelays
       const requestItems = Array.from(getRequestItems({relays, filters}, opts))
 
       await Promise.all(
-        requestItems.map(opts =>
+        requestItems.map(item =>
           load({
-            ...opts,
+            ...item,
             onEvent,
             tracker,
             signal,
             skipCache: true,
-            forcePlatform,
+            forcePlatform: opts.forcePlatform && relays?.length === 0,
           }),
         ),
       )
@@ -90,7 +74,7 @@ const createFeedLoader = (opts: FeedOpts, signal) =>
       // Wait until after we've queried the network to access our local cache. This results in less
       // snappy response times, but is necessary to prevent stale stuff that the user has already seen
       // from showing up at the top of the feed
-      if (!forceRelays) {
+      if (relays.length === 0) {
         for (const event of repository.query(prepFilters(filters, opts))) {
           onEvent(event)
         }
@@ -122,9 +106,7 @@ export const createFeed = (opts: FeedOpts) => {
 
       const keep = discardEvents(events)
 
-      if (opts.shouldLoadParents) {
-        loadParents(keep)
-      }
+      loadParents(keep)
 
       const withoutOrphans = deferOrphans(keep)
       const withoutAncient = deferAncient(withoutOrphans)
@@ -147,10 +129,6 @@ export const createFeed = (opts: FeedOpts) => {
   const sortEvents = (events: TrustedEvent[]) => (useWindowing ? sortEventsDesc(events) : events)
 
   function deferOrphans(events: TrustedEvent[]) {
-    if (!opts.shouldLoadParents || opts.shouldDefer === false) {
-      return events
-    }
-
     // If something has a parent id but we haven't found the parent yet, skip it until we have it.
     const [ok, defer] = partition(e => {
       const parentIds = Tags.fromEvent(e).parents().values().valueOf()
@@ -170,7 +148,7 @@ export const createFeed = (opts: FeedOpts) => {
   }
 
   function deferAncient(events: TrustedEvent[]) {
-    if (opts.shouldDefer === false || !useWindowing) {
+    if (!useWindowing) {
       return events
     }
 
@@ -329,7 +307,6 @@ export const createFeed = (opts: FeedOpts) => {
       if (e.kind === REACTION && !isLike(e)) return false
       if ([4, DIRECT_MESSAGE].includes(e.kind)) return false
       if (opts.shouldHideReplies && Tags.fromEvent(e).parent()) return false
-      if (getIdOrAddress(e) === opts.anchor) return false
       if ($isEventMuted(e, true)) return false
 
       return true

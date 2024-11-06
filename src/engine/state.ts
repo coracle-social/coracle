@@ -56,7 +56,6 @@ import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {
   EventTemplate,
-  Filter,
   PublishedList,
   SignedEvent,
   StampedEvent,
@@ -712,27 +711,6 @@ export const collectionSearch = derived(
 )
 
 // Network
-
-export const addRepostFilters = (filters: Filter[]) =>
-  filters.flatMap(original => {
-    const filterChunk = [original]
-
-    if (!original.kinds) {
-      filterChunk.push({...original, kinds: [6, 16]})
-    } else {
-      if (original.kinds.includes(1)) {
-        filterChunk.push({...original, kinds: [6]})
-      }
-
-      const otherKinds = without([1], original.kinds)
-
-      if (otherKinds.length > 0) {
-        filterChunk.push({...original, kinds: [16], "#k": otherKinds.map(String)})
-      }
-    }
-
-    return filterChunk
-  })
 
 export const getExecutor = (urls: string[]) => {
   const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)

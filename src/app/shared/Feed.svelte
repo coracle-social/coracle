@@ -17,13 +17,9 @@
 
   export let feed: Feed
   export let anchor = null
-  export let eager = false
-  export let skipNetwork = false
-  export let forcePlatform = true
   export let showControls = false
+  export let forcePlatform = true
   export let hideSpinner = false
-  export let includeReposts = false
-  export let onEvent = null
 
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
@@ -35,15 +31,9 @@
     limit = 0
     loader?.stop()
     loader = createFeed({
-      anchor,
-      onEvent,
-      skipNetwork,
-      forcePlatform,
-      includeReposts,
-      shouldDefer: !eager,
-      shouldLoadParents: true,
       shouldHideReplies: $shouldHideReplies,
       feed: feed.definition,
+      forcePlatform,
     })
   }
 
