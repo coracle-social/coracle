@@ -28,10 +28,8 @@
   import {timestamp1} from "src/util/misc"
   import {spring} from "svelte/motion"
 
-  export let event: SignedEvent & {
-    status: string
-    remove: () => void
-  }
+  export let event: SignedEvent
+  export let removeDraft: () => void
 
   $: pub = Object.values($publishes).find(p => p.request.event.id === event.id)
 
@@ -77,7 +75,7 @@
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
       on:click={() => {
-        event.remove()
+        removeDraft()
       }}>Cancel</button>
   {/if}
 </div>

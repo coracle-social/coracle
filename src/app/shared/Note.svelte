@@ -30,6 +30,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import NotePending from "src/app/shared/NotePending.svelte"
   import {router} from "src/app/util/router"
   import {
     env,
@@ -42,8 +43,6 @@
     sortEventsDesc,
   } from "src/engine"
 
-  import NotePending from "./NotePending.svelte"
-
   export let note
   export let relays = []
   export let filters = null
@@ -52,6 +51,8 @@
   export let anchor = null
   export let topLevel = false
   export let isLastReply = false
+  export let isDraft = false
+  export let removeDraftCb = null
   export let showParent = true
   export let showLoading = false
   export let showHidden = false
@@ -66,6 +67,8 @@
   let collapsed = depth === 0
   let context = repository.query([{"#e": [event.id]}]).filter(e => isChildOf(e, event))
   let showHiddenReplies = anchor === getIdOrAddress(event)
+  let draftEventId: string
+  let removeDraft: () => void
 
   const showEntire = showHiddenReplies
   const interactive = !anchor || !showEntire
@@ -103,16 +106,12 @@
       .open()
 
   const removeFromContext = e => {
-    console.log("remove from context", e)
     context = reject(whereEq({id: e.id}), context)
   }
 
   const addDraftToContext = (event, cb) => {
-    event.status = "draft"
-    event.remove = () => {
-      cb()
-      removeFromContext(event)
-    }
+    draftEventId = event.id
+    removeDraft = () => cb() && removeFromContext(event)
     context = context.concat(event)
   }
 
@@ -133,8 +132,6 @@
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
 
-  $: console.log(children, replies)
-
   let mutedReplies, hiddenReplies, visibleReplies
 
   $: {
@@ -151,7 +148,7 @@
         !showHiddenReplies &&
         filters &&
         !matchFilters(filters, e) &&
-        e.status !== "draft"
+        draftEventId !== e.id
       ) {
         hiddenReplies.push(e)
       } else {
@@ -302,7 +299,7 @@
                 <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
-              {#if event.status !== "draft" || event.created_at < $timestamp1 - 45}
+              {#if !isDraft || event.created_at < $timestamp1 - 45}
                 <NoteActions
                   note={event}
                   zapper={$zapper}
@@ -316,7 +313,7 @@
                   {zaps}
                   {muted} />
               {:else}
-                <NotePending {event} />
+                <NotePending {event} removeDraft={removeDraftCb} />
               {/if}
             </div>
           </div>
@@ -391,6 +388,8 @@
                     isLastReply={i === visibleReplies.length - 1}
                     showParent={false}
                     showHidden
+                    isDraft={r.id === draftEventId}
+                    removeDraftCb={removeDraft}
                     note={r}
                     depth={depth - 1}
                     {filters}
