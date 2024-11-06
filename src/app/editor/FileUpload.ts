@@ -41,7 +41,7 @@ function bufferToHex(buffer: ArrayBuffer) {
 }
 
 export const FileUploadExtension = Extension.create<FileUploadOptions>({
-  name: "uploadFile",
+  name: "fileUpload",
 
   addStorage() {
     return {
