@@ -94,9 +94,12 @@
       <p slot="info">
         Choose an upload type for your files, default is nip-96 but blossom is also supported.
       </p>
-      <div class="flex items-center bg-neutral-900 px-2">
+      <div class="flex items-center rounded-md px-2 text-neutral-600 dark:bg-neutral-100">
         <i class="fa-solid fa-cloud-upload-alt" />
-        <Select class="w-full" bind:value={$userSettings.upload_type} dark={false}>
+        <Select
+          class="w-full dark:!bg-neutral-100 dark:!text-neutral-900"
+          bind:value={values.upload_type}
+          dark={false}>
           <option value="nip96">NIP-96</option>
           <option value="blossom">Blossom</option>
         </Select>

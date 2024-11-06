@@ -18,7 +18,7 @@
       "pr-10": $$slots.after,
     })}
     bind:value
-    on:change={() => onChange(value)}>
+    on:change={() => onChange && onChange(value)}>
     <slot />
   </select>
   <div class="absolute left-0 top-0 flex gap-2 px-3 pt-3 text-tinted-700">
