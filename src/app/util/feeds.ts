@@ -1,7 +1,7 @@
 import {partition, prop, uniqBy} from "ramda"
 import {batch, tryFunc, seconds} from "hurdak"
 import {get, writable, derived} from "svelte/store"
-import {ctx, uniq, inc, assoc, pushToMapKey, now, chunk} from "@welshman/lib"
+import {ctx, uniq, inc, pushToMapKey, now, chunk} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   Tags,
@@ -26,7 +26,6 @@ import {
   unwrapRepost,
   isEventMuted,
   addRepostFilters,
-  subscribe,
   load,
 } from "src/engine"
 
@@ -36,7 +35,6 @@ export type FeedOpts = {
   skipNetwork?: boolean
   forcePlatform?: boolean
   shouldDefer?: boolean
-  shouldListen?: boolean
   shouldHideReplies?: boolean
   shouldLoadParents?: boolean
   includeReposts?: boolean
@@ -111,12 +109,30 @@ export const createFeed = (opts: FeedOpts) => {
   const $isEventMuted = isEventMuted.get()
   const controller = new AbortController()
   const welshman = createFeedLoader(opts, controller.signal)
-  const appendEvent = onEvent(appendToFeed)
-  const prependEvent = onEvent(prependToFeed)
   const useWindowing =
     !isRelayFeed(opts.feed) &&
     !(isIntersectionFeed(opts.feed) && opts.feed.length === 2 && isRelayFeed(opts.feed[1]))
-  const loaderOpts = {useWindowing, onEvent: appendEvent, onExhausted}
+
+  const loaderOpts = {
+    useWindowing,
+    onEvent: batch(300, async events => {
+      if (controller.signal.aborted) {
+        return
+      }
+
+      const keep = discardEvents(events)
+
+      if (opts.shouldLoadParents) {
+        loadParents(keep)
+      }
+
+      const withoutOrphans = deferOrphans(keep)
+      const withoutAncient = deferAncient(withoutOrphans)
+
+      appendToFeed(withoutAncient)
+    }),
+    onExhausted: () => done.set(true),
+  }
 
   let filters, delta, loader
   Promise.resolve(tryFunc(() => welshman.compiler.compile(opts.feed))).then(async reqs => {
@@ -126,24 +142,6 @@ export const createFeed = (opts: FeedOpts) => {
     loader = await (reqs
       ? welshman.getRequestsLoader(reqs, loaderOpts)
       : welshman.getLoader(opts.feed, loaderOpts))
-
-    if (reqs && opts.shouldListen) {
-      const tracker = new Tracker()
-
-      for (const request of reqs) {
-        for (const {relays, filters} of Array.from(getRequestItems(request, opts))) {
-          subscribe({
-            relays,
-            tracker,
-            skipCache: true,
-            onEvent: prependEvent,
-            signal: controller.signal,
-            filters: filters.map(assoc("since", now())),
-            forcePlatform: opts.forcePlatform && (relays?.length || 0) === 0,
-          })
-        }
-      }
-    }
   })
 
   const sortEvents = (events: TrustedEvent[]) => (useWindowing ? sortEventsDesc(events) : events)
@@ -212,10 +210,6 @@ export const createFeed = (opts: FeedOpts) => {
 
   function appendToFeed(events: TrustedEvent[]) {
     notes.update($events => uniqBy(prop("id"), [...$events, ...buildFeedChunk(events)]))
-  }
-
-  function prependToFeed(events: TrustedEvent[]) {
-    notes.update($events => uniqBy(prop("id"), [...buildFeedChunk(events), ...$events]))
   }
 
   function buildFeedChunk(events: TrustedEvent[]) {
@@ -340,29 +334,6 @@ export const createFeed = (opts: FeedOpts) => {
 
       return true
     })
-  }
-
-  function onEvent(callback) {
-    return batch(300, async events => {
-      if (controller.signal.aborted) {
-        return
-      }
-
-      const keep = discardEvents(events)
-
-      if (opts.shouldLoadParents) {
-        loadParents(keep)
-      }
-
-      const withoutOrphans = deferOrphans(keep)
-      const withoutAncient = deferAncient(withoutOrphans)
-
-      callback(withoutAncient)
-    })
-  }
-
-  function onExhausted() {
-    done.set(true)
   }
 
   return {

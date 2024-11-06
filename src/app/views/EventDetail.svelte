@@ -38,7 +38,7 @@
         <EventInfo event={$event} />
       </div>
       <NoteCreateInline parent={$event} />
-      <Feed {feed} hideSpinner shouldListen anchor={getIdOrAddress($event)} />
+      <Feed {feed} hideSpinner anchor={getIdOrAddress($event)} />
     </FlexColumn>
   </div>
 {:else}

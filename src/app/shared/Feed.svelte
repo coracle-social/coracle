@@ -20,7 +20,6 @@
   export let eager = false
   export let skipNetwork = false
   export let forcePlatform = true
-  export let shouldListen = false
   export let showControls = false
   export let hideSpinner = false
   export let includeReposts = false
@@ -40,7 +39,6 @@
       onEvent,
       skipNetwork,
       forcePlatform,
-      shouldListen,
       includeReposts,
       shouldDefer: !eager,
       shouldLoadParents: true,
