@@ -178,11 +178,7 @@
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
-              <button
-                class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
-                on:click|preventDefault={editor.commands.selectFiles}>
-                <i class="fa fa-paperclip" />
-              </button>
+              <i class="fa fa-paperclip" on:click|preventDefault={editor.commands.selectFiles} />
               <i class="fa fa-at" />
             </div>
           </div>
