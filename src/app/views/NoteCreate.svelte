@@ -142,7 +142,20 @@
 
     let cancel = false
 
-    showInfo("", {type: "delay", onCancel: () => (cancel = true)})
+    const thunk = publishThunk({
+      event: template,
+      relays: ctx.app.router.PublishEvent(template).getUrls(),
+      delay: $userSettings.undo_delay * 1000,
+    })
+
+    thunk.status.subscribe(status => {
+      if (status !== PublishStatus.Pending) {
+        cancel = true
+        router.clearModals()
+      }
+    })
+
+    showInfo("", {type: "delay", onCancel: () => thunk.controller.abort()})
 
     router.clearModals()
     setTimeout(async () => {
