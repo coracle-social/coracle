@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {batch} from "hurdak"
   import {displayRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {makeRelayFeed, feedFromFilter} from "@welshman/feeds"
-  import {deriveRelay} from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
+  import {deriveRelay, repository} from "@welshman/app"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -15,32 +15,25 @@
 
   const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]
+  const filter = {kinds: [1986], "#l": ["review/relay"], "#r": [url]}
+  const reviews = deriveEvents(repository, {filters: [filter]})
 
   const notesFeed = makeFeed({
     definition: makeRelayFeed(url),
   })
 
   const reviewsFeed = makeFeed({
-    definition: feedFromFilter({
-      kinds: [1986],
-      "#l": ["review/relay"],
-      "#r": [url],
-    }),
+    definition: feedFromFilter(filter),
   })
 
   const setActiveTab = tab => {
     activeTab = tab
   }
 
-  const onReview = batch(1000, chunk => {
-    reviews = reviews.concat(chunk)
-  })
-
-  let reviews = []
   let activeTab = "notes"
 
   $: url = normalizeRelayUrl(url)
-  $: rating = getAvgRating(reviews)
+  $: rating = getAvgRating($reviews)
 
   document.title = displayRelayUrl(url)
 </script>
@@ -59,7 +52,7 @@
 {/if}
 <Tabs {tabs} {activeTab} {setActiveTab} />
 {#if activeTab === "reviews"}
-  <Feed onEvent={onReview} feed={reviewsFeed} />
+  <Feed feed={reviewsFeed} />
 {:else}
   <Feed feed={notesFeed} />
 {/if}
