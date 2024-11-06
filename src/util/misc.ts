@@ -7,9 +7,10 @@ import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
 export const timestamp1: Readable<number> = derived([], (_, set) => {
-  setInterval(() => {
+  const interval = setInterval(() => {
     set(Math.floor(Date.now() / 1000))
   }, 1000)
+  return () => clearInterval(interval)
 })
 
 export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
