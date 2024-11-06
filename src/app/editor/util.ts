@@ -65,21 +65,21 @@ export const getEditorTags = (editor: Editor) => {
     ({attrs: {kind, pubkey, identifier, relays = []}}: any) => {
       const address = new Address(kind, pubkey, identifier).toString()
 
-      return ["q", address, ctx.app.router.fromRelays(relays).getUrl(), pubkey]
+      return ["q", address, ctx.app.router.FromRelays(relays).getUrl(), pubkey]
     },
   )
 
   const neventTags = findNodes("nevent", json).map(({attrs: {id, author, relays = []}}: any) => [
     "q",
     id,
-    ctx.app.router.fromRelays(relays).getUrl(),
+    ctx.app.router.FromRelays(relays).getUrl(),
     author || "",
   ])
 
   const mentionTags = findNodes("nprofile", json).map(({attrs: {pubkey, relays = []}}: any) => [
     "p",
     pubkey,
-    ctx.app.router.fromRelays(relays).getUrl(),
+    ctx.app.router.FromRelays(relays).getUrl(),
     "",
   ])
 

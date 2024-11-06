@@ -49,7 +49,6 @@
     const tags = Tags.fromEvent($event)
 
     values = {
-      groups: tags.context().values().valueOf(),
       title: tags.get("name")?.value() || tags.get("title")?.value() || "",
       location: tags.get("location")?.value() || "",
       start: secondsToDate(tags.get("start")?.value() || now()),
@@ -69,6 +68,7 @@
 
   $: loading = !$event
 
+  // eslint-disable-next-line
   $: editorElement && edit()
 </script>
 

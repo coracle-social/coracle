@@ -139,6 +139,7 @@
     editorLoading = editor.storage.fileUpload.loading
   }
 
+  // eslint-disable-next-line
   $: editorElement && createEditor()
 </script>
 
@@ -162,7 +163,7 @@
           <Compose bind:element={editorElement} {editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
-                on:click={send}
+                on:click={() => send()}
                 disabled={$editorLoading}
                 class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
                 {#if loading || $editorLoading}

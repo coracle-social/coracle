@@ -10,7 +10,7 @@ import {writable} from "svelte/store"
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
-    fileUpload: {
+    uploadFile: {
       selectFiles: () => ReturnType
       uploadFiles: () => ReturnType
       getMetaTags: () => string[][]
@@ -41,7 +41,7 @@ function bufferToHex(buffer: ArrayBuffer) {
 }
 
 export const FileUploadExtension = Extension.create<FileUploadOptions>({
-  name: "fileUpload",
+  name: "uploadFile",
 
   addStorage() {
     return {
@@ -80,22 +80,23 @@ export const FileUploadExtension = Extension.create<FileUploadOptions>({
         props.tr.setMeta("uploadFiles", true)
         return true
       },
-      getMetaTags: () => (props: CommandProps) => {
-        const tags: string[][] = []
-        // make sure the file uploaded is still in the editor content
-        props.editor.state.doc.descendants(node => {
-          if (!(node.type.name === "image" || node.type.name === "video")) {
-            return
-          }
-          const tag: string[] = props.editor.storage.fileUpload.tags.find(t =>
-            t[1].includes(node.attrs.src),
-          )
-          if (tag) {
-            tags.push(tag)
-          }
-        })
-        return tags
-      },
+      getMetaTags: () =>
+        ((props: CommandProps) => {
+          const tags: string[][] = []
+          // make sure the file uploaded is still in the editor content
+          props.editor.state.doc.descendants(node => {
+            if (!(node.type.name === "image" || node.type.name === "video")) {
+              return
+            }
+            const tag: string[] = props.editor.storage.fileUpload.tags.find(t =>
+              t[1].includes(node.attrs.src),
+            )
+            if (tag) {
+              tags.push(tag)
+            }
+          })
+          return tags
+        }) as any,
     }
   },
 

@@ -21,7 +21,7 @@ import {
 } from "nostr-editor"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
-import {signer, profileSearch} from "@welshman/app"
+import {signer, profileSearch, RelayMode} from "@welshman/app"
 import {createSuggestions} from "./Suggestions"
 import {LinkExtension} from "./LinkExtension"
 import EditMention from "./EditMention.svelte"
@@ -68,7 +68,7 @@ export type EditorImage = {
 
 export const getEditorOptions = ({
   submit,
-  getPubkeyHints = () => ctx.app.router.WriteRelays().getUrls(),
+  getPubkeyHints = (pubkey: string) => ctx.app.router.getRelaysForPubkey(pubkey, RelayMode.Write),
   submitOnEnter = true,
   submitOnModEnter = false,
   element,

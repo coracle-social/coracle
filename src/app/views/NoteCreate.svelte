@@ -5,7 +5,10 @@
   import {writable, type Writable} from "svelte/store"
   import {ctx, last, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
+  import {session, tagPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
+  import Content from "src/partials/Content.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
@@ -14,7 +17,8 @@
   import Input from "src/partials/Input.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
-  import Chip from "src/partials/Chip.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -22,6 +26,8 @@
   import {getEditorOptions} from "src/app/editor"
   import {router} from "src/app/util/router"
   import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
+  import {dateToSeconds} from "src/util/misc"
+  import {currencyOptions} from "src/util/i18n"
   import {Editor} from "svelte-tiptap"
   import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
@@ -34,7 +40,6 @@
   let charCount: Writable<number>
   let wordCount: Writable<number>
   let showPreview = false
-  let options
 
   let editor: Editor
   let element: HTMLElement
