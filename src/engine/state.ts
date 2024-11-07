@@ -148,7 +148,6 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 // Base state
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
-export const groupHints = withGetter(writable<Record<string, string[]>>({}))
 export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
 export const projections = new Worker<TrustedEvent>({
