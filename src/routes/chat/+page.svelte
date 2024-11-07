@@ -23,7 +23,7 @@
 
     pullConservatively({
       filters: [filter],
-      relays: ctx.app.router.InboxRelays().getUrls(),
+      relays: ctx.app.router.UserInbox().getUrls(),
     })
 
     return () => sub.close()

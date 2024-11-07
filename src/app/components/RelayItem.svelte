@@ -9,7 +9,7 @@
 
   const relay = deriveRelay(url)
 
-  $: connections = $relay?.stats?.connect_count || 0
+  $: connections = $relay?.stats?.open_count || 0
 </script>
 
 <div class="card2 card2-sm bg-alt column gap-2">

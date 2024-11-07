@@ -23,7 +23,7 @@
 
   onMount(() => {
     const filter = {kinds: [WRAP], "#p": [$pubkey!]}
-    const relays = ctx.app.router.InboxRelays().getUrls()
+    const relays = ctx.app.router.UserInbox().getUrls()
     const sub = subscribe({filters: [{...filter, since: ago(WEEK)}], relays})
 
     pullConservatively({filters: [filter], relays})

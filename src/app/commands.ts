@@ -22,7 +22,7 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
-import {PublishStatus, AuthStatus, ConnectionStatus} from "@welshman/net"
+import {PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
 import type {Nip46Handler} from "@welshman/signer"
 import {
@@ -268,8 +268,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 export const checkRelayAccess = async (url: string, claim = "") => {
   const connection = ctx.net.pool.get(url)
 
-  await connection.auth.attemptIfRequested()
-  await connection.auth.waitIfPending()
+  await connection.auth.attempt()
 
   const thunk = publishThunk({
     event: createEvent(AUTH_JOIN, {tags: [["claim", claim]]}),
@@ -298,11 +297,10 @@ export const checkRelayProfile = async (url: string) => {
 
 export const checkRelayConnection = async (url: string) => {
   const connection = ctx.net.pool.get(url)
-  const okStatuses = [ConnectionStatus.Ok, ConnectionStatus.Slow]
 
-  await connection.ensureConnected()
+  await connection.socket.open()
 
-  if (!okStatuses.includes(connection.meta.getStatus())) {
+  if (connection.socket.status !== SocketStatus.Open) {
     return `Failed to connect`
   }
 }
@@ -311,8 +309,7 @@ export const checkRelayAuth = async (url: string) => {
   const connection = ctx.net.pool.get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.auth.attemptIfRequested()
-  await connection.auth.waitIfPending()
+  await connection.auth.attempt()
 
   if (!okStatuses.includes(connection.auth.status)) {
     return `Failed to authenticate: "${connection.auth.message}"`

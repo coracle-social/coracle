@@ -6,7 +6,7 @@
   import type {Filter} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
-  import {feedLoader, userMutes} from "@welshman/app"
+  import {createFeedController, userMutes} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -24,11 +24,6 @@
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
   const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#K": [String(THREAD)]}]
   const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
-  const loader = feedLoader.getLoader(feed, {
-    onExhausted: () => {
-      loading = false
-    },
-  })
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
@@ -39,6 +34,13 @@
   let element: Element
 
   onMount(() => {
+    const ctrl = createFeedController({
+      feed: feedsFromFilters(filters),
+      onExhausted: () => {
+        loading = false
+      },
+    })
+
     const unsub = subscribePersistent({
       filters: filters.map(assoc('since', ago(30))),
       relays: [url],
@@ -48,13 +50,7 @@
       element,
       delay: 300,
       threshold: 3000,
-      onScroll: async () => {
-        const $loader = await loader
-
-        await $loader(5)
-
-        limit += 5
-      },
+      onScroll: () => ctrl.load(5),
     })
 
     return () => {
