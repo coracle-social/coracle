@@ -16,10 +16,6 @@
   import {channels, hasNip44, hasNewMessages, markAllChannelsRead} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
-  const accepted = derived(channels, $ch => $ch.filter(c => c.last_sent > 0))
-  const requests = derived(channels, $ch =>
-    $ch.filter(c => c.last_received > 0 && c.last_sent === 0),
-  )
   const setActiveTab = tab => {
     const path = tab === "requests" ? "channels/requests" : "channels"
 
@@ -36,6 +32,8 @@
   }
 
   $: tabChannels = activeTab === "conversations" ? $accepted : $requests
+  $: accepted = derived(channels, $ch => $ch.filter(c => c.last_sent > 0))
+  $: requests = derived(channels, $ch => $ch.filter(c => c.last_received > 0 && c.last_sent === 0))
 
   let element
   let limit = 20
