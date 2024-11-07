@@ -3,6 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE} from "@welshman/util"
+  import {session} from "@welshman/app"
   import {repository, displayProfileByPubkey, loadInboxRelaySelections} from "@welshman/app"
   import Channel from "src/partials/Channel.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -27,6 +28,8 @@
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
+  let isAccepted
+
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   const send = async (content, useNip17) => {
@@ -39,6 +42,7 @@
   }
 
   onMount(() => {
+    isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
     markChannelRead(channelId)
 
     for (const pubkey of pubkeys) {
@@ -58,7 +62,9 @@
 <Channel {pubkeys} messages={$messages} sendMessage={send} {initialMessage}>
   <div slot="header" class="flex h-16 items-start gap-4 overflow-hidden p-1 px-4">
     <div class="flex items-center gap-4 pt-1">
-      <Anchor class="fa fa-arrow-left cursor-pointer text-2xl" href="/channels" />
+      <Anchor
+        class="fa fa-arrow-left cursor-pointer text-2xl"
+        href={"/channels" + (isAccepted ? "" : "/requests")} />
       <PersonCircles {pubkeys} />
     </div>
     <div class="flex h-12 w-full flex-col overflow-hidden pt-1">
