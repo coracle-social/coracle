@@ -22,9 +22,7 @@
     roomsByUrl,
     GENERAL,
   } from "@app/state"
-  import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {pushModal} from "@app/modal"
-  import {pushToast} from "@app/toast"
   import {makeSpacePath} from "@app/routes"
 
   export let url
@@ -73,12 +71,6 @@
 
   onMount(async () => {
     replaceState = Boolean(element.closest(".drawer"))
-
-    const error = (await checkRelayConnection(url)) || (await checkRelayAuth(url))
-
-    if (error) {
-      pushToast({theme: "error", message: error})
-    }
   })
 </script>
 

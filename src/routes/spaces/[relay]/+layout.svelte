@@ -7,11 +7,27 @@
   import Delay from "@lib/components/Delay.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
+  import {pushToast} from "@app/toast"
+  import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {decodeRelay, MEMBERSHIPS, THREAD, MESSAGE, COMMENT} from "@app/state"
 
   $: url = decodeRelay($page.params.relay)
 
+  const ifLet = <T>(x: T | undefined, f: (x: T) => void) => x === undefined ? undefined : f(x)
+
+  const checkConnection = async () => {
+    ifLet(await checkRelayConnection(url), error => {
+      pushToast({theme: "error", message: error})
+    })
+
+    ifLet(await checkRelayAuth(url), error => {
+      pushToast({theme: "error", message: error})
+    })
+  }
+
   onMount(() => {
+    checkConnection()
+
     const sub = subscribe({
       filters: [
         {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String)},
