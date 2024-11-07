@@ -2,11 +2,6 @@ import type {Session} from "@welshman/app"
 import type {Publish} from "@welshman/net"
 import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
 
-export type DisplayEvent = TrustedEvent & {
-  replies?: DisplayEvent[]
-  reposts?: TrustedEvent[]
-}
-
 export type Zapper = WelshmanZapper & {
   lnurl: string
   pubkey: string

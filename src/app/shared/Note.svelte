@@ -45,6 +45,7 @@
   export let note
   export let relays = []
   export let filters = null
+  export let reposts = new Map()
   export let depth = 0
   export let anchor = null
   export let topLevel = false
@@ -211,7 +212,7 @@
   {@const showReply = reply && !ancestors.replies.includes(anchor) && showParent}
   {@const showRoot = root && !ancestors.roots.includes(anchor) && root !== reply && showParent}
   <div>
-    <NoteMeta note={event} />
+    <NoteMeta {reposts} note={event} />
     <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>

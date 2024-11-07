@@ -1,27 +1,12 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import {noop, sleep, switcherFn} from "hurdak"
-import type {LoadOpts} from "@welshman/feeds"
-import {FeedLoader, Scope} from "@welshman/feeds"
-import {
-  ctx,
-  assoc,
-  always,
-  chunk,
-  nthEq,
-  nth,
-  now,
-  max,
-  first,
-  int,
-  HOUR,
-  WEEK,
-  sortBy,
-} from "@welshman/lib"
+import {noop, sleep} from "hurdak"
+import type {RequestOpts, Feed} from "@welshman/feeds"
+import {FeedController} from "@welshman/feeds"
+import {ctx, assoc, always, chunk, max, first, int, HOUR, WEEK, sortBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getIdFilters,
-  createEvent,
   WRAP,
   EPOCH,
   LABEL,
@@ -36,23 +21,21 @@ import {
   DEPRECATED_DIRECT_MESSAGE,
   FEEDS,
 } from "@welshman/util"
+import {Tracker} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
-import {makeDvmRequest} from "@welshman/dvm"
 import {
   pubkey,
   repository,
-  signer,
   loadProfile,
   loadFollows,
   loadMutes,
   getFilterSelections,
-  getFollowers,
   getFollows,
   pull,
   hasNegentropy,
-  wotGraph,
-  maxWot,
-  getNetwork,
+  requestDVM,
+  getPubkeysForScope,
+  getPubkeysForWOTRange,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
@@ -94,28 +77,22 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   return Promise.all(promises)
 }
 
-export const loadAll = (feed, opts: LoadOpts = {}) => {
+export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) => {
   const loading = writable(true)
 
-  const stop = () => loading.set(false)
+  const onExhausted = () => loading.set(false)
 
   const promise = new Promise<void>(async resolve => {
-    const load = await feedLoader.getLoader(feed, {
-      onEvent: opts.onEvent,
-      onExhausted: () => {
-        opts.onExhausted?.()
-        stop()
-      },
-    })
+    const ctrl = createFeedController({feed, onEvent, onExhausted})
 
     while (get(loading)) {
-      await load(100)
+      await ctrl.load(100)
     }
 
     resolve()
   })
 
-  return {promise, loading, stop}
+  return {promise, loading, stop: onExhausted}
 }
 
 export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>
@@ -198,61 +175,51 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 
 // Feeds
 
-export const feedLoader = new FeedLoader({
-  request: async ({relays, filters, onEvent}) => {
+export type FeedRequestHandlerOptions = {forcePlatform: boolean}
+
+export const makeFeedRequestHandler =
+  ({forcePlatform}: FeedRequestHandlerOptions) =>
+  async ({relays, filters, onEvent}: RequestOpts) => {
+    const tracker = new Tracker()
+    const loadOptions = {onEvent, tracker, forcePlatform, skipCache: true}
+
     if (relays?.length > 0) {
-      await load({filters, relays, onEvent, skipCache: true, forcePlatform: false})
+      await load({...loadOptions, filters, relays})
     } else {
       await Promise.all(
-        getFilterSelections(filters).map(({relays, filters}) => load({filters, relays, onEvent})),
+        getFilterSelections(filters).map(({relays, filters}) =>
+          load({...loadOptions, relays, filters}),
+        ),
       )
-    }
-  },
-  requestDVM: async ({kind, onEvent, tags = [], ...request}) => {
-    tags = [...tags, ["expiration", String(now() + 5)]]
 
-    const req = makeDvmRequest({
-      event: await signer.get().sign(createEvent(kind, {tags})),
-      relays:
-        request.relays?.length > 0
-          ? ctx.app.router.FromRelays(request.relays).getUrls()
-          : ctx.app.router.ForPubkeys(tags.filter(nthEq(0, "p")).map(nth(1))).getUrls(),
-    })
-
-    await new Promise<void>(resolve => {
-      req.emitter.on("result", (url, event) => {
+      // Wait until after we've queried the network to access our local cache. This results in less
+      // snappy response times, but is necessary to prevent stale stuff that the user has already seen
+      // from showing up at the top of the feed
+      for (const event of repository.query(filters)) {
         onEvent(event)
-        resolve()
-      })
-    })
-  },
-  getPubkeysForScope: (scope: string) => {
-    const $pubkey = pubkey.get()
-
-    const pubkeys = switcherFn(scope, {
-      [Scope.Self]: () => ($pubkey ? [$pubkey] : []),
-      [Scope.Follows]: () => getFollows($pubkey),
-      [Scope.Network]: () => getNetwork($pubkey),
-      [Scope.Followers]: () => getFollowers($pubkey),
-      default: always([]),
-    })
-
-    return pubkeys.length === 0 ? env.DEFAULT_FOLLOWS : pubkeys
-  },
-  getPubkeysForWOTRange: (min, max) => {
-    const pubkeys = []
-    const thresholdMin = maxWot.get() * min
-    const thresholdMax = maxWot.get() * max
-
-    for (const [tpk, score] of wotGraph.get().entries()) {
-      if (score >= thresholdMin && score <= thresholdMax) {
-        pubkeys.push(tpk)
       }
     }
+  }
 
-    return pubkeys
-  },
-})
+export type FeedControllerOptions = {
+  feed: Feed
+  onEvent: (event: TrustedEvent) => void
+  onExhausted: () => void
+  forcePlatform?: boolean
+  useWindowing?: boolean
+}
+
+export const createFeedController = ({forcePlatform = true, ...options}: FeedControllerOptions) => {
+  const request = makeFeedRequestHandler({forcePlatform})
+
+  return new FeedController({
+    request,
+    requestDVM,
+    getPubkeysForScope,
+    getPubkeysForWOTRange,
+    ...options,
+  })
+}
 
 // Notifications
 

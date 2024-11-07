@@ -1,12 +1,12 @@
 <script lang="ts">
   import {uniq, pluck} from "ramda"
+  import type {TrustedEvent} from "@welshman/util"
   import PersonLink from "src/app/shared/PersonLink.svelte"
-  import type {DisplayEvent} from "src/engine"
 
-  export let note: DisplayEvent
+  export let note: TrustedEvent
+  export let reposts: Map<string, TrustedEvent[]>
 
-  const reposts = note.reposts || []
-  const repostPubkeys = uniq(pluck("pubkey", reposts))
+  const repostPubkeys = uniq(pluck("pubkey", reposts.get(note.id) || []))
 </script>
 
 {#if repostPubkeys.length > 0}
