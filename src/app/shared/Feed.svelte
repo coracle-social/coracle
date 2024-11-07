@@ -2,8 +2,27 @@
   import {onMount} from "svelte"
   import {seconds} from "hurdak"
   import {writable} from "svelte/store"
-  import {now, hash} from "@welshman/lib"
+  import {ctx, now, identity, uniqBy, range, hash, pushToMapKey} from "@welshman/lib"
+  import {
+    neverFilter,
+    getIdFilters,
+    REACTION,
+    getIdOrAddress,
+    getIdAndAddress,
+    getAncestorTagValues,
+  } from "@welshman/util"
+  import type {Filter, TrustedEvent} from "@welshman/util"
+  import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
+  import {
+    isRelayFeed,
+    makeKindFeed,
+    makeIntersectionFeed,
+    isKindFeed,
+    walkFeed,
+  } from "@welshman/feeds"
+  import {repository} from "@welshman/app"
   import {createScroller, synced} from "src/util/misc"
+  import {noteKinds, repostKinds, reactionKinds, isLike} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -11,9 +30,16 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
-  import {createFeed, router} from "src/app/util"
+  import {router} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {env} from "src/engine"
+  import {
+    env,
+    load,
+    createFeedController,
+    sortEventsDesc,
+    isEventMuted,
+    unwrapRepost,
+  } from "src/engine"
 
   export let feed: Feed
   export let anchor = null
@@ -21,20 +47,68 @@
   export let forcePlatform = true
   export let hideSpinner = false
 
+  const reposts = new Map<string, TrustedEvent[]>()
+
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
   const promptDismissed = synced("feed/promptDismissed", 0)
 
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
-  const reload = async () => {
-    limit = 0
-    loader?.stop()
-    loader = createFeed({
-      shouldHideReplies: $shouldHideReplies,
-      feed: feed.definition,
-      forcePlatform,
+  const reload = () => {
+    exhausted = false
+    useWindowing = true
+    events = []
+    buffer = []
+    filters = [neverFilter]
+
+    let hasKinds = false
+
+    walkFeed(feed.definition, (subFeed: FeedDefinition) => {
+      hasKinds = hasKinds || isKindFeed(subFeed)
+      useWindowing = useWindowing && !isRelayFeed(subFeed)
     })
+
+    const definition = hasKinds
+      ? feed.definition
+      : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
+
+    ctrl = createFeedController({
+      feed: definition,
+      forcePlatform,
+      useWindowing,
+      onEvent: async e => {
+        if (e.kind === REACTION && !isLike(e)) return false
+        if (repository.isDeleted(e)) return false
+        if ($isEventMuted(e, true)) return false
+
+        const {replies} = getAncestorTagValues(e.tags)
+
+        if ($shouldHideReplies && replies.length > 0) return false
+
+        if (replies.length > 0 && !replies.find(id => repository.getEvent(id))) {
+          await load({
+            filters: getIdFilters(replies),
+            relays: ctx.app.router.EventParents(e).getUrls(),
+          })
+        }
+
+        buffer.push(e)
+      },
+      onExhausted: () => {
+        exhausted = true
+      },
+    })
+
+    ctrl.getFilters().then($filters => {
+      if ($filters) {
+        filters = $filters
+      }
+    })
+
+    if (!useWindowing) {
+      ctrl.load(1000)
+    }
   }
 
   const toggleReplies = () => {
@@ -47,24 +121,88 @@
     reload()
   }
 
-  const loadMore = async () => {
-    limit += 10
+  const getNewEvents = () => {
+    const seen = new Set(events.map(getIdOrAddress))
 
-    if ($loader.notes.length < limit) {
-      await loader.loadMore(20)
+    const isSeen = (e: TrustedEvent) => {
+      if (getIdAndAddress(e).some(v => seen.has(v))) return true
+      if (getAncestorTagValues(e.tags).replies.some(v => seen.has(v))) return true
+
+      return false
+    }
+
+    const unwrap = (e: TrustedEvent) => {
+      if (repostKinds.includes(e.kind)) {
+        const wrappedEvent = unwrapRepost(e)
+
+        if (wrappedEvent) {
+          pushToMapKey(reposts, wrappedEvent.id, e)
+          e = wrappedEvent
+        }
+      }
+
+      return e
+    }
+
+    return buffer
+      .splice(0, 10)
+      .map((e: TrustedEvent) => {
+        // If we have a repost, use its contents instead
+        e = unwrap(e)
+
+        if (isSeen(e)) return undefined
+
+        Array.from(range(0, 2)).forEach(() => {
+          const parent = getAncestorTagValues(e.tags)
+            .replies.map(v => repository.getEvent(v))
+            .find(identity)
+
+          // If we have a parent, show that instead, with replies grouped underneath
+          if (parent) {
+            e = unwrap(parent)
+          }
+        })
+
+        if (isSeen(e)) return undefined
+        if (repostKinds.includes(e.kind)) return undefined
+        if (reactionKinds.includes(e.kind)) return undefined
+
+        for (const v of getIdAndAddress(e)) {
+          seen.add(v)
+        }
+
+        return e
+      })
+      .filter(identity)
+  }
+
+  const loadMore = async () => {
+    buffer = uniqBy(e => e.id, sortEventsDesc(buffer))
+    events = [...events, ...getNewEvents()]
+
+    if (useWindowing && buffer.length < 50) {
+      ctrl.load(50)
     }
   }
 
-  let element, loader
-  let limit = 0
+  let element
+  let exhausted = false
+  let useWindowing = true
+  let ctrl: FeedController
+  let events: TrustedEvent[] = []
+  let buffer: TrustedEvent[] = []
+  let filters: Filter[] = [neverFilter]
 
   reload()
 
   onMount(() => {
-    const scroller = createScroller(loadMore, {element})
+    const scroller = createScroller(loadMore, {
+      element,
+      delay: 300,
+      threshold: 3000,
+    })
 
     return () => {
-      loader.stop()
       scroller.stop()
     }
   })
@@ -83,13 +221,9 @@
 {/if}
 
 <FlexColumn xl bind:element>
-  {#each $loader.notes.slice(0, limit) as note, i (note.id)}
+  {#each events as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <Note
-        filters={loader.getFilters() || [{ids: []}]}
-        depth={$shouldHideReplies ? 0 : 2}
-        {anchor}
-        {note} />
+      <Note {filters} {reposts} depth={$shouldHideReplies ? 0 : 2} {anchor} {note} />
     </div>
     {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < now() - seconds(7, "day")}
       <Card class="group flex items-center justify-between">
@@ -110,7 +244,7 @@
 </FlexColumn>
 
 {#if !hideSpinner}
-  {#if $loader.done}
+  {#if exhausted}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
       <img alt="" class="h-20 w-20" src="/images/pumpkin.png" />
       That's all!
