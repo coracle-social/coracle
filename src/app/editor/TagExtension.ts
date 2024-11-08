@@ -1,5 +1,6 @@
 import type {InputRuleMatch} from "@tiptap/core"
 import {Mark, markPasteRule, mergeAttributes} from "@tiptap/core"
+import {last} from "ramda"
 
 export interface TagAttributes {
   tag: string
@@ -59,19 +60,18 @@ export const TagExtension = Mark.create({
     return [
       {
         find: text => {
-          const match = text.match(REGEX_TAG_INPUT)
-          if (match && match[0] == text) {
+          const match = last(Array.from(text.matchAll(REGEX_TAG_INPUT)))
+          if (match && text.length === match.index + match[0].length) {
             return {
-              index: match.index,
+              index: match?.index,
               text: match[0],
-              data: {tag: text.trim()},
-              match,
+              data: {tag: match[1]},
             } as InputRuleMatch
           }
           return null
         },
         handler: ({state, range, match}) => {
-          state.tr.addMark(range.from - 1, range.to, this.type.create(match.data)).insertText(" ")
+          state.tr.addMark(range.from, range.to, this.type.create(match.data)).insertText(" ")
         },
       },
     ]
