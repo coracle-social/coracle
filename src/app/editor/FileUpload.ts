@@ -1,5 +1,6 @@
 import type {CommandProps, Editor} from "@tiptap/core"
 import {Extension} from "@tiptap/core"
+import {now} from "@welshman/lib"
 import type {ImageAttributes, VideoAttributes} from "nostr-editor"
 import type {EventTemplate, NostrEvent} from "nostr-tools/core"
 import {readServerConfig, uploadFile} from "nostr-tools/nip96"
@@ -306,13 +307,10 @@ export interface NIP96Options {
   alt?: string
   serverUrl: string
   expiration?: number
-  sign?: (event: EventTemplate) => Promise<NostrEvent> | NostrEvent
+  sign: (event: EventTemplate) => Promise<NostrEvent> | NostrEvent
 }
 
 export async function uploadNIP96(options: NIP96Options) {
-  if (!options.sign) {
-    return Promise.reject("No signer found")
-  }
   try {
     const server = await readServerConfig(options.serverUrl)
     const authorization = await getToken(server.api_url, "POST", options.sign, true)
@@ -332,7 +330,7 @@ export async function uploadNIP96(options: NIP96Options) {
       tags: res.nip94_event?.tags.flatMap(item => item.join(" ")),
     }
   } catch (error) {
-    throw new Error(error as string)
+    console.warn(error)
   }
 }
 
@@ -363,17 +361,17 @@ export async function uploadBlossom(options: BlossomOptions) {
   if (!options.sign) {
     throw new Error("No signer provided")
   }
-  const now = Math.ceil(Date.now() / 1000)
+  const created_at = now()
   const hash = await options.hash(options.file)
   const event = await options.sign({
     kind: 24242,
     content: `Upload ${options.file.name}`,
-    created_at: now,
+    created_at,
     tags: [
       ["t", "upload"],
       ["x", hash],
       ["size", options.file.size.toString()],
-      ["expiration", (now + (options.expiration || 60000)).toString()],
+      ["expiration", (created_at + (options.expiration || 60000)).toString()],
     ],
   })
   const data = JSON.stringify(event)
