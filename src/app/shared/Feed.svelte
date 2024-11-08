@@ -10,6 +10,7 @@
     getIdOrAddress,
     getIdAndAddress,
     getAncestorTagValues,
+    unionFilters,
   } from "@welshman/util"
   import type {Filter, TrustedEvent} from "@welshman/util"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
@@ -100,9 +101,9 @@
       },
     })
 
-    ctrl.getFilters().then($filters => {
-      if ($filters) {
-        filters = $filters
+    ctrl.getRequestItems().then($requestItems => {
+      if ($requestItems) {
+        filters = unionFilters($requestItems.flatMap(item => item.filters))
       }
     })
 
