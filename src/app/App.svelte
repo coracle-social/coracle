@@ -7,13 +7,7 @@
   import {ctx, ago, max, sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
-  import {
-    relaysByUrl,
-    getRelayQuality,
-    getPubkeyRelays,
-    trackRelayStats,
-    loadRelay,
-  } from "@welshman/app"
+  import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
