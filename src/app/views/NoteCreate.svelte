@@ -72,7 +72,7 @@
     // prevent sending before media are uploaded and tags are correctly set
     if ($loading) return
 
-    const content = editor.getText().trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
 
@@ -269,7 +269,8 @@
           class:text-black={!showPreview}
           class:bg-tinted-700={showPreview}>
           {#if showPreview}
-            <NoteContent note={{content: editor.getText(), tags: []}} />
+            <NoteContent
+              note={{content: editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
             <Compose bind:element {editor} class="min-h-24" />

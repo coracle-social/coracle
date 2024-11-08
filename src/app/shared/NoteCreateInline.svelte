@@ -44,7 +44,7 @@
 
     saving = true
 
-    const content = editor.getText().trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
 

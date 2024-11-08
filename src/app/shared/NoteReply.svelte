@@ -77,7 +77,7 @@
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
 
-    const content = editor.getText().trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
 

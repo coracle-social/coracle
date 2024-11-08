@@ -127,7 +127,7 @@
   }
 
   const send = async () => {
-    const content = editor.getText().trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (content) {
       sending = true

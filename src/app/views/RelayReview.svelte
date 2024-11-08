@@ -18,7 +18,7 @@
   let rating
 
   const onSubmit = () => {
-    const content = editor.getText()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     createAndPublish({
       relays: ctx.app.router.FromUser().getUrls(),

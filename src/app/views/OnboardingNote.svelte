@@ -23,7 +23,7 @@
     loading = true
 
     try {
-      const content = editor.getText().trim()
+      const content = editor.getText({blockSeparator: "\n"}).trim()
 
       // Publish our welcome note
       if (content) {

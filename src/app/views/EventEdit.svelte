@@ -34,7 +34,7 @@
     const template = asStampedEvent({
       ...$event,
       tags: [...tags.unwrap(), ...editor.commands.getMetaTags()],
-      content: editor.getText(),
+      content: editor.getText({blockSeparator: "\n"}).trim(),
       created_at: inc($event.created_at),
     })
 
