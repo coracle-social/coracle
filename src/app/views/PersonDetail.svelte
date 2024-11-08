@@ -122,7 +122,7 @@
           button
           class="!bg-neutral-800 dark:!bg-white"
           on:click={router.at("/settings/profile").open}>Edit</Anchor>
-      {:else}
+      {:else if $session}
         <Anchor
           button
           accent={!$following}

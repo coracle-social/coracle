@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {makeRelayFeed, makeScopeFeed, Scope} from "@welshman/feeds"
-  import {session} from "@welshman/app"
+  import {makeRelayFeed, makeScopeFeed, makeAuthorFeed, Scope} from "@welshman/feeds"
+  import {pubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
@@ -16,13 +16,17 @@
   if (isPlatformFeed) {
     feed = makeFeed({definition: makeRelayFeed(...env.PLATFORM_RELAYS)})
   } else if (!feed) {
-    feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
+    if ($pubkey) {
+      feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
+    } else {
+      feed = makeFeed({definition: makeAuthorFeed(...env.DEFAULT_FOLLOWS)})
+    }
   }
 
   document.title = "Feeds"
 </script>
 
-{#if !$session}
+{#if !$pubkey}
   <div class="py-16 text-center">
     <p class="text-xl">Don't have an account?</p>
     <p>

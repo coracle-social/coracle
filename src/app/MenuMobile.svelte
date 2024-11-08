@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {makeScopeFeed, Scope} from "@welshman/feeds"
   import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
@@ -10,7 +9,6 @@
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {makeFeed, normalizeFeedDefinition} from "src/domain"
   import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const closeSubMenu = () => {
@@ -35,9 +33,7 @@
   }
 
   const openFeeds = () => {
-    const feed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
-
-    router.at("notes").cx({feed}).push()
+    router.at("notes").push()
     closeMenu()
   }
 
