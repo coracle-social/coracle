@@ -11,7 +11,7 @@
     Nip46Broker,
     makeSecret,
   } from "@welshman/signer"
-  import {loadHandle, nip46Perms} from "@welshman/app"
+  import {loadHandle, nip46Perms, addSession} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {appName} from "src/partials/state"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -24,6 +24,14 @@
   import {load, loginWithNip07, loginWithNip46, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
+
+  // Define the interface for AppInfo
+  interface AppInfo {
+    name: string
+    packageName: string
+    iconData: string
+    iconUrl: string // the url to the App's icon
+  }
 
   const signUp = () => {
     router.at("signup").replaceModal()
@@ -39,15 +47,36 @@
     boot()
   }
 
-  // Define the interface for AppInfo
-  interface AppInfo {
-    name: string
-    packageName: string
-    iconData: string
-    iconUrl: string // the url to the App's icon
-  }
+  const useNsecApp = async () => {
+    loading = true
 
-  let signerApps: AppInfo[] = []
+    const handler = {
+      domain: "nsec.app",
+      relays: ["wss://relay.nsec.app"],
+      pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
+    }
+
+    const {params, result, clientPubkey, clientSecret, abortController} = Nip46Broker.initiate({
+      name: appName,
+      perms: nip46Perms,
+      relays: handler.relays,
+      url: import.meta.env.VITE_APP_URL,
+      image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
+    })
+
+    window.open(getLink('use.nsec.app'))
+
+    const pubkey = await result
+
+    if (pubkey) {
+      addSession({method: "nip46", pubkey, secret: clientSecret, handler})
+      boot()
+    } else {
+      showWarning("Sorry, we weren't able to connect you. Please try again.")
+    }
+
+    loading = false
+  }
 
   const useSigner = async (app: AppInfo) => {
     const signer = new Nip55Signer(app.packageName)
@@ -89,11 +118,11 @@
       // Hopefully it will be replaced by specifying the user's pubkey somewhere in the payload.
       if (!handle?.pubkey) {
         const broker = Nip46Broker.get({secret: makeSecret(), handler})
-        const pubkey = await broker.createAccount(username, nip46Perms)
+        const response = await broker.createAccount(username, nip46Perms)
 
-        if (!pubkey) return false
+        if (!response.result) return false
 
-        handler = {...handler, pubkey}
+        handler = {...handler, pubkey: response.result}
       } else {
         handler = {...handler, pubkey: handle.pubkey}
       }
@@ -111,6 +140,7 @@
     }
   }
 
+  let signerApps: AppInfo[] = []
   let handlers = [
     //  {
     //    domain: "coracle-bunker.ngrok.io",
@@ -206,6 +236,9 @@
       <div class="h-px flex-grow bg-neutral-600" />
     </div>
     <div class="relative flex flex-col gap-4">
+      <Anchor button tall class="cursor-pointer" on:click={useNsecApp}>
+        <i class="fa fa-puzzle-piece" /> Use nsec.app
+      </Anchor>
       {#if getNip07()}
         <Anchor button tall class="cursor-pointer" on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
