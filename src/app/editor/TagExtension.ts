@@ -71,9 +71,7 @@ export const TagExtension = Mark.create({
           return null
         },
         handler: ({state, range, match}) => {
-          if (match) {
-            state.tr.addMark(range.from - 1, range.to, this.type.create(match.data)).insertText(" ")
-          }
+          state.tr.addMark(range.from - 1, range.to, this.type.create(match.data)).insertText(" ")
         },
       },
     ]
