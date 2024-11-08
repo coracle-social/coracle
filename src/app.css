@@ -269,7 +269,7 @@ body,
 
 .link-content,
 .tiptap [tag] {
-  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 no-underline;
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 no-underline text-neutral-800;
 }
 
 .link-content.link-content-selected {
