@@ -17,7 +17,6 @@ import {
   NAddrExtension,
   ImageExtension,
   VideoExtension,
-  TagExtension,
 } from "nostr-editor"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
@@ -35,6 +34,7 @@ import {asInline} from "./util"
 import {WordCount} from "./wordcounts"
 import {FileUploadExtension} from "./FileUpload"
 import {getSetting} from "src/engine"
+import {TagExtension} from "./TagExtension"
 
 export {
   createSuggestions,
