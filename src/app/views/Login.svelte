@@ -2,26 +2,17 @@
   import {onMount} from "svelte"
   import {last, prop, objOf} from "ramda"
   import {Capacitor} from "@capacitor/core"
-  import {HANDLER_INFORMATION, NOSTR_CONNECT} from "@welshman/util"
-  import {
-    getNip07,
-    Nip07Signer,
-    getNip55,
-    Nip55Signer,
-    Nip46Broker,
-    makeSecret,
-  } from "@welshman/signer"
+  import {HANDLER_INFORMATION, NOSTR_CONNECT, normalizeRelayUrl} from "@welshman/util"
+  import {getNip07, Nip07Signer, getNip55, Nip55Signer, Nip46Broker} from "@welshman/signer"
   import {loadHandle, nip46Perms, addSession} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {appName} from "src/partials/state"
   import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import FieldInline from "src/partials/FieldInline.svelte"
-  import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, loginWithNip07, loginWithNip46, loginWithNip55} from "src/engine"
+  import {load, loginWithNip07, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -47,37 +38,6 @@
     boot()
   }
 
-  const useNsecApp = async () => {
-    loading = true
-
-    const handler = {
-      domain: "nsec.app",
-      relays: ["wss://relay.nsec.app"],
-      pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
-    }
-
-    const {params, result, clientPubkey, clientSecret, abortController} = Nip46Broker.initiate({
-      name: appName,
-      perms: nip46Perms,
-      relays: handler.relays,
-      url: import.meta.env.VITE_APP_URL,
-      image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
-    })
-
-    window.open(getLink('use.nsec.app'))
-
-    const pubkey = await result
-
-    if (pubkey) {
-      addSession({method: "nip46", pubkey, secret: clientSecret, handler})
-      boot()
-    } else {
-      showWarning("Sorry, we weren't able to connect you. Please try again.")
-    }
-
-    loading = false
-  }
-
   const useSigner = async (app: AppInfo) => {
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
@@ -85,58 +45,57 @@
     boot()
   }
 
+  const normalizeHandler = async () => {
+    if (!handler.pubkey || !handler.relays) {
+      const handle = await loadHandle(`_@${handler.domain}`)
+
+      handler.pubkey = handler.pubkey || handle?.pubkey
+      handler.relays = handler.relays || handle?.nip46 || handle?.relays
+    }
+
+    if (handler.relays) {
+      handler.relays = handler.relays.map(normalizeRelayUrl)
+    }
+  }
+
   const onSubmit = async () => {
-    if (!username) {
-      return showWarning("Please enter a user name.")
-    }
-
-    if (!handler) {
-      return showWarning("Please select a login provider.")
-    }
-
-    loading = true
+    abortController = new AbortController()
 
     try {
-      // Fill in pubkey and relays if they entered a custom doain
-      if (!handler.pubkey) {
-        const handle = await loadHandle(`_@${handler.domain}`)
+      await normalizeHandler()
 
-        handler.pubkey = handle?.pubkey
-        handler.relays = handle?.nip46 || handle?.relays || []
-      }
-
-      if (!handler.relays) {
+      if (!handler.relays || !handler.pubkey) {
         return showWarning("Sorry, we weren't able to find that provider.")
       }
 
-      // Find out whether this user exists, and if so what their pubkey is
-      const handle = await loadHandle(`${username}@${handler.domain}`)
+      const init = Nip46Broker.initiate({
+        name: appName,
+        perms: nip46Perms,
+        relays: handler.relays,
+        url: import.meta.env.VITE_APP_URL,
+        image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
+        abortController,
+      })
 
-      // If the user doesn't exist, use the handler's pubkey to ask the broker to create one.
-      // This flow may be going away. It will usually open the signer in another window/app
-      // In either case, update the handler to use the user's pubkey. This wacky legacy stuff,
-      // Hopefully it will be replaced by specifying the user's pubkey somewhere in the payload.
-      if (!handle?.pubkey) {
-        const broker = Nip46Broker.get({secret: makeSecret(), handler})
-        const response = await broker.createAccount(username, nip46Perms)
+      window.open(init.getLink("use.nsec.app"))
 
-        if (!response.result) return false
+      const pubkey = await init.result
 
-        handler = {...handler, pubkey: response.result}
-      } else {
-        handler = {...handler, pubkey: handle.pubkey}
+      if (!pubkey) {
+        return showWarning("Sorry, we weren't able to connect you. Please try again.")
       }
 
-      // Now we can log in
-      const success = await loginWithNip46("", handler)
+      addSession({
+        pubkey,
+        method: "nip46",
+        secret: init.clientSecret,
+        // Goofy legacy stuff, someday this will be gone
+        handler: {...handler, pubkey},
+      })
 
-      if (success) {
-        boot()
-      } else {
-        showWarning("Sorry, we weren't able to log you in with that provider.")
-      }
+      boot()
     } finally {
-      loading = false
+      abortController = undefined
     }
   }
 
@@ -159,9 +118,8 @@
     },
   ]
 
-  let loading
+  let abortController: AbortController
   let handler = handlers[0]
-  let username = ""
 
   onMount(async () => {
     load({
@@ -211,36 +169,37 @@
       </p>
     </div>
     <div class="flex flex-col gap-2">
-      <FieldInline label="Username">
-        <Input bind:value={username} placeholder="Username">
-          <i slot="before" class="fa fa-user-astronaut" />
-        </Input>
-      </FieldInline>
-      <FieldInline label="Signer App">
-        <SearchSelect
-          bind:value={handler}
-          defaultOptions={handlers}
-          getKey={prop("domain")}
-          termToItem={objOf("domain")}
-          search={() => handlers}>
-          <i slot="before" class="fa fa-at relative top-[2px]" />
-          <span slot="item" let:item>{item.domain}</span>
-        </SearchSelect>
-      </FieldInline>
-      <Anchor button accent tall type="submit" disabled={!username} {loading} on:click={onSubmit}
-        >Log In</Anchor>
+      <div class="flex gap-2">
+        <div class="flex-grow">
+          <SearchSelect
+            bind:value={handler}
+            defaultOptions={handlers}
+            getKey={prop("domain")}
+            termToItem={objOf("domain")}
+            search={() => handlers}>
+            <i slot="before" class="fa fa-key" />
+            <span slot="item" let:item>{item.domain}</span>
+          </SearchSelect>
+        </div>
+        <Anchor button accent type="submit" loading={Boolean(abortController)} on:click={onSubmit}
+          >Log In</Anchor>
+      </div>
+      <p class="text-sm opacity-75">
+        Choose a signer who you trust to hold your keys.
+        <Anchor underline modal href="/help/remote-signers">What is a signer?</Anchor>
+      </p>
     </div>
     <div class="relative flex items-center gap-4">
       <div class="h-px flex-grow bg-neutral-600" />
       <div class="staatliches text-xl">Or</div>
       <div class="h-px flex-grow bg-neutral-600" />
     </div>
-    <div class="relative flex flex-col gap-4">
-      <Anchor button tall class="cursor-pointer" on:click={useNsecApp}>
-        <i class="fa fa-puzzle-piece" /> Use nsec.app
-      </Anchor>
+    <div
+      class="relative flex flex-col gap-4"
+      class:opacity-75={abortController}
+      class:cursor-events-none={abortController}>
       {#if getNip07()}
-        <Anchor button tall class="cursor-pointer" on:click={useExtension}>
+        <Anchor button tall accent class="cursor-pointer" on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
         </Anchor>
       {/if}
@@ -251,7 +210,7 @@
         </Anchor>
       {/each}
       <Anchor button tall class="cursor-pointer" on:click={useBunker}>
-        <i class="fa fa-box" /> Use Remote Signer
+        <i class="fa fa-box" /> Use Self-Hosted Signer
       </Anchor>
     </div>
     <span class="text-center">

@@ -447,20 +447,16 @@
       slowConnections.set(getPubkeyRelays($pubkey).filter(url => getRelayQuality(url) < 0.5))
 
       // Prune connections we haven't used in a while
-      for (const url of ctx.net.pool.data.keys()) {
-        const relay = relaysByUrl.get().get(url)
+      for (const connection of ctx.net.pool.data.values()) {
+        const lastActivity = max([
+          connection.stats.lastOpen,
+          connection.stats.lastPublish,
+          connection.stats.lastRequest,
+          connection.stats.lastEvent,
+        ])
 
-        if (relay?.stats) {
-          const lastActivity = max([
-            relay.stats.last_open,
-            relay.stats.last_publish,
-            relay.stats.last_request,
-            relay.stats.last_event,
-          ])
-
-          if (lastActivity < ago(30)) {
-            ctx.net.pool.remove(url)
-          }
+        if (lastActivity && lastActivity < ago(30)) {
+          ctx.net.pool.remove(connection.url)
         }
       }
     }, 5_000)
