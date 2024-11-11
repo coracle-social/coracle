@@ -42,14 +42,9 @@
       the signer's url. You can also run your own signer on your phone or computer. This method is
       more secure, but a little more complicated to manage.
     </p>
-    <p>
-      If you're just getting started, consider using <Anchor
-        underline
-        external
-        href="https://nsec.app/">nsec.app</Anchor
-      >, which is easy to use, and stores your keys in your browser, rather than on their server.
-      Don't forget to download your keys and store them in your password manager as a backup!
-    </p>
+    <Anchor external button tall low href="https://nostrapps.com/#Signers">
+      <i class="fa fa-compass" /> Browse Signer Apps
+    </Anchor>
   {:else if topic === "nip-17-dms"}
     <p>
       <Anchor underline external href={nip17Url}>NIP 17</Anchor> improves upon the old NIP 04 direct

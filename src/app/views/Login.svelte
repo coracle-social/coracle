@@ -1,18 +1,12 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, prop, objOf} from "ramda"
   import {Capacitor} from "@capacitor/core"
-  import {HANDLER_INFORMATION, NOSTR_CONNECT, normalizeRelayUrl} from "@welshman/util"
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
-  import {loadHandle} from "@welshman/app"
-  import {parseJson} from "src/util/misc"
   import {appName} from "src/partials/state"
-  import {showWarning} from "src/partials/Toast.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, initNip46, loginWithNip07, loginWithNip55} from "src/engine"
+  import {loginWithNip07, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -24,11 +18,9 @@
     iconUrl: string // the url to the App's icon
   }
 
-  const signUp = () => {
-    router.at("signup").replaceModal()
-  }
+  const signUp = () => router.at("signup").replaceModal()
 
-  const useBunker = () => router.at("login/bunker").replaceModal()
+  const useBunker = () => router.at("login/bunker").pushModal()
 
   const useExtension = async () => {
     const signer = new Nip07Signer()
@@ -45,92 +37,59 @@
     boot()
   }
 
-  const normalizeHandler = async () => {
-    if (!handler.pubkey || !handler.relays) {
-      const handle = await loadHandle(`_@${handler.domain}`)
+  //  const normalizeHandler = async () => {
+  //    if (!handler.pubkey || !handler.relays) {
+  //      const handle = await loadHandle(`_@${handler.domain}`)
 
-      handler.pubkey = handler.pubkey || handle?.pubkey
-      handler.relays = handler.relays || handle?.nip46 || handle?.relays
-    }
+  //      handler.pubkey = handler.pubkey || handle?.pubkey
+  //      handler.relays = handler.relays || handle?.nip46 || handle?.relays
+  //    }
 
-    if (handler.relays) {
-      handler.relays = handler.relays.map(normalizeRelayUrl)
-    }
-  }
+  //    if (handler.relays) {
+  //      handler.relays = handler.relays.map(normalizeRelayUrl)
+  //    }
+  //  }
 
-  const onSubmit = async () => {
-    abortController = new AbortController()
+  //  const onSubmit = async () => {
+  //    abortController = new AbortController()
 
-    try {
-      await normalizeHandler()
+  //    try {
+  //      await normalizeHandler()
 
-      if (!handler.relays || !handler.pubkey) {
-        return showWarning("Sorry, we weren't able to find that provider.")
-      }
+  //      if (!handler.nostrconnectTemplate) {
+  //        return showWarning("Sorry, that signer doesn't support the nostrconnect:// protocol.")
+  //      }
 
-      const pubkey = await initNip46(handler, {abortController})
+  //      if (!handler.relays || !handler.pubkey) {
+  //        return showWarning("Sorry, we weren't able to find that provider.")
+  //      }
 
-      if (!pubkey) {
-        return showWarning("Sorry, we weren't able to connect you. Please try again.")
-      }
+  //      const pubkey = await initNip46(handler, {abortController})
 
-      boot()
-    } finally {
-      abortController = undefined
-    }
-  }
+  //      if (!pubkey) {
+  //        return showWarning("Sorry, we weren't able to connect you. Please try again.")
+  //      }
+
+  //      boot()
+  //    } finally {
+  //      abortController = undefined
+  //    }
+  //  }
 
   let signerApps: AppInfo[] = []
-  let handlers = [
-    //  {
-    //    domain: "coracle-bunker.ngrok.io",
-    //    relays: ["wss://relay.nsecbunker.com", "wss://relay.damus.io"],
-    //    pubkey: "b6e0188cf22c58a96b5cf6f29014f140697196f149a2621536b12d50abf55aa0",
-    //  },
-    {
-      domain: "nsec.app",
-      relays: ["wss://relay.nsec.app/"],
-      pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
-    },
-    {
-      domain: "highlighter.com",
-      relays: ["wss://relay.nsecbunker.com/", "wss://relay.damus.io/"],
-      pubkey: "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63",
-    },
-  ]
+  //  let handlers = [
+  //    {
+  //      domain: "nsec.app",
+  //      relays: ["wss://relay.nsec.app/"],
+  //      pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
+  //      nostrconnectTemplate: "use.nsec.app",
+  //    },
+  //  ]
 
   let abortController: AbortController
-  let handler = handlers[0]
+  //  let handler = handlers[0]
 
   onMount(async () => {
-    load({
-      filters: [
-        {
-          kinds: [HANDLER_INFORMATION],
-          "#k": [NOSTR_CONNECT.toString()],
-        },
-      ],
-      onEvent: async e => {
-        const content = parseJson(e.content)
-
-        if (!content) {
-          return
-        }
-
-        const domain = last(content.nip05.split("@"))
-        const handle = await loadHandle(`_@${domain}`)
-        const relays = handle?.nip46 || handle?.relays || []
-
-        if (handlers.some(h => h.domain === domain)) {
-          return
-        }
-
-        if (handle?.pubkey === e.pubkey) {
-          handlers = handlers.concat({pubkey: e.pubkey, domain, relays})
-        }
-      },
-    })
-
     if (Capacitor.isNativePlatform()) {
       signerApps = await getNip55()
     }
@@ -149,6 +108,7 @@
         you to own your social identity.
       </p>
     </div>
+    <!--
     <div class="flex flex-col gap-2">
       <div class="flex gap-2">
         <div class="flex-grow">
@@ -175,23 +135,27 @@
       <div class="staatliches text-xl">Or</div>
       <div class="h-px flex-grow bg-neutral-600" />
     </div>
+    -->
     <div
       class="relative flex flex-col gap-4"
       class:opacity-75={abortController}
       class:cursor-events-none={abortController}>
       {#if getNip07()}
-        <Anchor button tall accent class="cursor-pointer" on:click={useExtension}>
+        <Anchor button tall accent on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
         </Anchor>
       {/if}
       {#each signerApps as app}
-        <Anchor button tall class="cursor-pointer" on:click={() => useSigner(app)}>
+        <Anchor button tall on:click={() => useSigner(app)}>
           <img src={app.iconUrl} alt={app.name} width="20" height="20" />
           Use {app.name}
         </Anchor>
       {/each}
-      <Anchor button tall class="cursor-pointer" on:click={useBunker}>
+      <Anchor button tall on:click={useBunker}>
         <i class="fa fa-box" /> Use Self-Hosted Signer
+      </Anchor>
+      <Anchor external button tall low href="https://nostrapps.com/#signers">
+        <i class="fa fa-compass" /> Browse Signer Apps
       </Anchor>
     </div>
     <span class="text-center">

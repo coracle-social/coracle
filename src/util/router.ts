@@ -240,6 +240,8 @@ class RouterExtension {
 
   open = (config = {}) => this.go({...config, modal: true})
 
+  pushModal = (config = {}) => this.go({...config, modal: true})
+
   replace = (config = {}) => this.go({...config, replace: true})
 
   replaceModal = (config = {}) => this.go({...config, replace: true, modal: true})

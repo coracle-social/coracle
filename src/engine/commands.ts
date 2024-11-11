@@ -511,7 +511,7 @@ export const loginWithNip46 = async (
 }
 
 export const initNip46 = async (
-  handler: Nip46Handler,
+  handler: Nip46Handler & {nostrconnectTemplate: string},
   params: Partial<Nip46InitiateParams> = {},
 ) => {
   const init = Nip46Broker.initiate({
@@ -523,7 +523,7 @@ export const initNip46 = async (
     ...params,
   })
 
-  window.open(init.getLink("use.nsec.app"))
+  window.open(init.getLink(handler.nostrconnectTemplate))
 
   const pubkey = await init.result
 

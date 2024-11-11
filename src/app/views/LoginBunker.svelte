@@ -4,13 +4,15 @@
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Content from "src/partials/Content.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {loginWithNip46} from "src/engine"
   import {boot} from "src/app/state"
 
   let input = ""
   let loading = false
+
+  const back = () => history.back()
 
   const logIn = async () => {
     loading = true
@@ -37,17 +39,14 @@
   }
 </script>
 
-<Content size="lg" class="text-center">
+<FlexColumn class="max-w-md text-center">
   <Heading>Login with Signer</Heading>
-  <p>To log in using a signer app, enter your connection string.</p>
+  <p>To log in using a signer app, enter a connection link starting with "bunker://".</p>
+  <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
+    <i slot="before" class="fa fa-box" />
+  </Input>
   <div class="flex gap-2">
-    <div class="flex-grow">
-      <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
-        <i slot="before" class="fa fa-box" />
-      </Input>
-    </div>
-    <Anchor button accent on:click={logIn} {loading}>
-      <i class="fa fa-right-to-bracket" />
-    </Anchor>
+    <Anchor button on:click={back} disabled={loading}><i class="fa fa-arrow-left" /> Back</Anchor>
+    <Anchor button accent class="flex-grow" {loading} on:click={logIn}>Continue</Anchor>
   </div>
-</Content>
+</FlexColumn>
