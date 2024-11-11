@@ -31,7 +31,7 @@
     "link-content-selected": selected,
   })}>
   <span class:loading={node.attrs.uploading}>
-    <i class="fas fa-paperclip"></i>
+    <i class="fas fa-xs fa-paperclip"></i>
     {node.attrs.file?.name || node.attrs.src}
   </span>
 </NodeViewWrapper>
