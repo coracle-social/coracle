@@ -3,8 +3,8 @@
   import {last, prop, objOf} from "ramda"
   import {Capacitor} from "@capacitor/core"
   import {HANDLER_INFORMATION, NOSTR_CONNECT, normalizeRelayUrl} from "@welshman/util"
-  import {getNip07, Nip07Signer, getNip55, Nip55Signer, Nip46Broker} from "@welshman/signer"
-  import {loadHandle, nip46Perms, addSession} from "@welshman/app"
+  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
+  import {loadHandle} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {appName} from "src/partials/state"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -12,7 +12,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {load, loginWithNip07, loginWithNip55} from "src/engine"
+  import {load, initNip46, loginWithNip07, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 
@@ -68,30 +68,11 @@
         return showWarning("Sorry, we weren't able to find that provider.")
       }
 
-      const init = Nip46Broker.initiate({
-        name: appName,
-        perms: nip46Perms,
-        relays: handler.relays,
-        url: import.meta.env.VITE_APP_URL,
-        image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
-        abortController,
-      })
-
-      window.open(init.getLink("use.nsec.app"))
-
-      const pubkey = await init.result
+      const pubkey = await initNip46(handler, {abortController})
 
       if (!pubkey) {
         return showWarning("Sorry, we weren't able to connect you. Please try again.")
       }
-
-      addSession({
-        pubkey,
-        method: "nip46",
-        secret: init.clientSecret,
-        // Goofy legacy stuff, someday this will be gone
-        handler: {...handler, pubkey},
-      })
 
       boot()
     } finally {

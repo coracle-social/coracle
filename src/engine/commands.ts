@@ -30,7 +30,7 @@ import {
   remove,
   splitAt,
 } from "@welshman/lib"
-import type {Nip46Handler} from "@welshman/signer"
+import type {Nip46Handler, Nip46InitiateParams} from "@welshman/signer"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
@@ -491,8 +491,11 @@ export const loginWithNip07 = pubkey => addSession({method: "nip07", pubkey})
 export const loginWithNip55 = (pubkey, pkg) =>
   addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
-export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
-  const secret = makeSecret()
+export const loginWithNip46 = async (
+  token: string,
+  handler: Nip46Handler,
+  secret = makeSecret(),
+) => {
   const broker = Nip46Broker.get({secret, handler})
   const result = await broker.connect(token, nip46Perms)
 
@@ -505,6 +508,38 @@ export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
   addSession({method: "nip46", pubkey, secret, handler})
 
   return true
+}
+
+export const initNip46 = async (
+  handler: Nip46Handler,
+  params: Partial<Nip46InitiateParams> = {},
+) => {
+  const init = Nip46Broker.initiate({
+    perms: nip46Perms,
+    relays: handler.relays,
+    url: import.meta.env.VITE_APP_URL,
+    name: import.meta.env.VITE_APP_NAME,
+    image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
+    ...params,
+  })
+
+  window.open(init.getLink("use.nsec.app"))
+
+  const pubkey = await init.result
+
+  if (!pubkey) {
+    return undefined
+  }
+
+  addSession({
+    pubkey,
+    method: "nip46",
+    secret: init.clientSecret,
+    // Goofy legacy stuff, someday this will be gone
+    handler: {...handler, pubkey},
+  })
+
+  return pubkey
 }
 
 export const logoutPubkey = pubkey => {

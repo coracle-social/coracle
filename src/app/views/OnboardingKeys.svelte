@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {Capacitor} from "@capacitor/core"
   import {assoc} from "@welshman/lib"
   import {makeSecret, Nip46Broker} from "@welshman/signer"
-  import {nip46Perms, updateSession} from "@welshman/app"
+  import {loadHandle, nip46Perms, updateSession} from "@welshman/app"
+  import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -13,13 +13,14 @@
 
   const handler = {
     domain: "nsec.app",
-    relays: ["wss://relay.nsec.app"],
+    relays: ["wss://relay.nsec.app/"],
     pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
   }
 
   const prev = () => setStage("intro")
 
-  const broker = Nip46Broker.get({secret: makeSecret(), handler})
+  const secret = makeSecret()
+  const broker = Nip46Broker.get({secret, handler})
 
   const next = async () => {
     if (state.pubkey) {
@@ -34,6 +35,12 @@
       return showWarning("Please use only numbers and lowercase letters.")
     }
 
+    const handle = await loadHandle(`${state.username}@${handler.domain}`)
+
+    if (handle?.pubkey) {
+      return showWarning("Sorry, it looks like that username is already taken.")
+    }
+
     loading = true
 
     try {
@@ -44,7 +51,7 @@
       }
 
       // Now we can log in. Use the user's pubkey for the handler (legacy stuff)
-      const success = await loginWithNip46("", {...handler, pubkey: state.pubkey})
+      const success = await loginWithNip46("", {...handler, pubkey: state.pubkey}, secret)
 
       if (!success) {
         return showWarning("Something went wrong, please try again!")
@@ -68,36 +75,29 @@
   <p class="text-2xl font-bold">Secure your Keys</p>
 </div>
 <p>
-  Keep your account secure by using a remote signer to store your keys. We recommend getting started
-  with <Anchor external underline href="https://nsec.app">nsec.app</Anchor>.
+  Nostr uses cryptographic key pairs instead of passwords, which puts you in full control of your
+  social identity!
 </p>
 <p>
-  Enter a username below and click "continue". You'll be redirected to nsec.app and asked to choose
-  a password.
+  Handing your keys to every app you log into can be risky though, which is why it's wise to use a <Anchor
+    underline
+    modal
+    href="/help/remote-signers">remote signer</Anchor> to keep them for you.
 </p>
 <p>
-  If you'd like to hold your own keys instead, try using
-  {#if Capacitor.isNativePlatform()}
-    <Anchor external underline href="https://github.com/greenart7c3/Amber">a signer app</Anchor>.
-  {:else}
-    <Anchor
-      external
-      underline
-      href="https://guides.getalby.com/user-guide/alby-account-and-browser-extension/alby-browser-extension/features/nostr"
-      >a signer extension</Anchor
-    >.
-  {/if}
+  To get you started, we'll redirect you to our favorite signer for beginners:
+  <Anchor external underline href="https://nsec.app">nsec.app</Anchor>. They'll ask you a couple
+  questions and send you back here to set up your own profile.
 </p>
-<div class="flex gap-2">
+<Field label="Your User Name">
   <Input
     bind:value={state.username}
     disabled={loading || state.pubkey}
-    placeholder="Username"
+    placeholder="nostrnewb27"
     class="flex-grow">
     <i slot="before" class="fa fa-user-astronaut" />
   </Input>
-  <p>@nsec.app</p>
-</div>
+</Field>
 <div class="flex gap-2">
   <Anchor button on:click={prev} disabled={loading}><i class="fa fa-arrow-left" /> Back</Anchor>
   <Anchor button accent class="flex-grow" {loading} on:click={next}>Continue</Anchor>
