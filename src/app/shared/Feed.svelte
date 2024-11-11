@@ -153,7 +153,7 @@
 
         if (isSeen(e)) return undefined
 
-        Array.from(range(0, 2)).forEach(() => {
+        Array.from(range(0, depth)).forEach(() => {
           const parent = getAncestorTagValues(e.tags)
             .replies.map(v => repository.getEvent(v))
             .find(identity)
@@ -194,6 +194,8 @@
   let buffer: TrustedEvent[] = []
   let filters: Filter[] = [neverFilter]
 
+  $: depth = $shouldHideReplies ? 0 : 2
+
   reload()
 
   onMount(() => {
@@ -224,7 +226,7 @@
 <FlexColumn xl bind:element>
   {#each events as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <Note {filters} {reposts} depth={$shouldHideReplies ? 0 : 2} {anchor} {note} />
+      <Note {filters} {reposts} {depth} {anchor} {note} />
     </div>
     {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < now() - seconds(7, "day")}
       <Card class="group flex items-center justify-between">
