@@ -287,7 +287,10 @@ export const loadFeedsAndLists = () =>
 
 export const loadMessages = () =>
   pullConservatively({
-    relays: ctx.app.router.UserInbox().getUrls(),
+    // TODO, stop using non-inbox relays
+    relays: ctx.app.router
+      .merge([ctx.app.router.ForUser(), ctx.app.router.FromUser(), ctx.app.router.UserInbox()])
+      .getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
       {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
@@ -300,7 +303,14 @@ export const listenForMessages = (pubkeys: string[]) => {
   return subscribePersistent({
     skipCache: true,
     forcePlatform: false,
-    relays: ctx.app.router.PubkeyInboxes(pubkeys).getUrls(),
+    // TODO, stop using non-inbox relays
+    relays: ctx.app.router
+      .merge([
+        ctx.app.router.ForPubkeys(pubkeys),
+        ctx.app.router.FromPubkeys(pubkeys),
+        ctx.app.router.PubkeyInboxes(pubkeys),
+      ])
+      .getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [WRAP], "#p": [pubkey.get()]},
