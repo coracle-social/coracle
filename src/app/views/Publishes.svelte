@@ -1,36 +1,37 @@
 <script lang="ts">
   import {pluralize, seconds} from "hurdak"
-  import {now, remove, sortBy} from "@welshman/lib"
+  import {assoc, now, remove, sortBy} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import Tile from "src/partials/Tile.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
-  import type {PublishInfo} from "src/engine"
-  import {publishes} from "src/engine"
+  import {thunks} from "src/engine"
+  import type {Thunk} from "@welshman/app"
+  import {get} from "svelte/store"
 
-  const hasStatus = (pub: PublishInfo, statuses: PublishStatus[]) =>
-    Array.from(pub.status.values()).some(s => statuses.includes(s))
+  const hasStatus = (thunk: Thunk, statuses: PublishStatus[]) =>
+    Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
 
-  $: recent = Object.values($publishes).filter(p => p.created_at > now() - seconds(24, "hour"))
+  $: recent = Object.values($thunks).filter(t => t.event.created_at > now() - seconds(24, "hour"))
   $: relays = new Set(
     remove(
       LOCAL_RELAY_URL,
       recent.flatMap(({request}) => request.relays),
     ),
   )
-  $: success = recent.filter(p => hasStatus(p, [PublishStatus.Success]))
+  $: success = recent.filter(t => hasStatus(t, [PublishStatus.Success]))
   $: pending = recent.filter(
-    p => hasStatus(p, [PublishStatus.Pending]) && !hasStatus(p, [PublishStatus.Success]),
+    t => hasStatus(t, [PublishStatus.Pending]) && !hasStatus(t, [PublishStatus.Success]),
   )
 
   // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
   $: {
-    for (const p of recent) {
-      if (p.created_at < now() - seconds(1, "minute")) {
-        for (const [url, status] of p.status.entries()) {
-          if (status === PublishStatus.Pending) {
-            p.status.set(url, PublishStatus.Failure)
+    for (const t of recent) {
+      if (t.event.created_at < now() - seconds(1, "minute")) {
+        for (const [url, s] of Object.entries(t.status)) {
+          if (s.status === PublishStatus.Pending) {
+            t.status.update(assoc(url, {status: PublishStatus.Failure, message: ""}))
           }
         }
       }
@@ -61,6 +62,6 @@
     <span class="text-sm">Failed</span>
   </Tile>
 </div>
-{#each sortBy(p => -p.created_at, recent) as pub (pub.id)}
-  <PublishCard {pub} />
+{#each sortBy(t => -t.event.created_at, recent) as thunk (thunk.event.id)}
+  <PublishCard {thunk} />
 {/each}
