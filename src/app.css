@@ -236,8 +236,40 @@ body,
   border: 1px solid var(--neutral-600);
 }
 
-/* note content */
-
-.note-content > a {
-  text-decoration: underline;
+/* nostr-editor */
+.tiptap {
+  outline: none;
+  min-height: 0;
+  height: 100%;
 }
+
+.tiptap pre code {
+  @apply link-content block w-full;
+}
+
+.tiptap p code {
+  @apply link-content;
+}
+
+.tiptap,
+[tag] {
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded px-1 no-underline;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.link-content,
+.tiptap [tag] {
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 no-underline text-neutral-800;
+}
+
+.link-content.link-content-selected {
+  @apply bg-neutral-300;
+}
+

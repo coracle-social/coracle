@@ -114,7 +114,7 @@
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
       on:click={() => setSubMenu("settings")}>Settings</Anchor>
-    <div class="staatliches block flex h-8 gap-2 px-8 text-tinted-500">
+    <div class="staatliches flex h-8 gap-2 px-8 text-tinted-500">
       <Anchor class="hover:text-tinted-100" href="/about">About</Anchor> /
       <Anchor external class="hover:text-tinted-100" href="/terms.html">Terms</Anchor> /
       <Anchor external class="hover:text-tinted-100" href="/privacy.html">Privacy</Anchor>

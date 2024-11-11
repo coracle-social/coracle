@@ -1,16 +1,19 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {NOTE} from "@welshman/util"
+  import {getEditorOptions} from "src/app/editor"
   import Compose from "src/app/shared/Compose.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import {createAndPublish, tagsFromContent} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
+  import {onMount} from "svelte"
+  import {Editor} from "svelte-tiptap"
 
   export let signup
   export let setStage
 
   let loading = false
-  let compose = null
+  let element: HTMLElement
+  let editor: Editor
 
   const prev = () => setStage("follows")
 
@@ -20,7 +23,7 @@
     loading = true
 
     try {
-      const content = compose.parse()
+      const content = editor.getText({blockSeparator: "\n"}).trim()
 
       // Publish our welcome note
       if (content) {
@@ -39,7 +42,14 @@
   }
 
   onMount(() => {
-    compose.write("Hello world! #introductions")
+    editor = new Editor(
+      getEditorOptions({
+        submit: next,
+        element,
+        autofocus: true,
+        content: "Hello world! #introductions",
+      }),
+    )
   })
 </script>
 
@@ -56,7 +66,7 @@
 </p>
 <p>Now is a great time to introduce yourself to the Nostr network!</p>
 <div class="border-l-2 border-solid border-neutral-600 pl-4">
-  <Compose autofocus bind:this={compose} onSubmit={next} />
+  <Compose bind:element {editor} class="min-h-24" />
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>

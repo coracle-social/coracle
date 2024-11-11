@@ -12,8 +12,9 @@
   import {env, userSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
+  import Select from "src/partials/Select.svelte"
 
-  const values = {...$userSettings}
+  const values = $userSettings
 
   const submit = () => {
     publishSettings(values)
@@ -21,7 +22,8 @@
     showInfo("Your settings have been saved!")
   }
 
-  const searchUploadProviders = fuzzy(env.NIP96_URLS, {keys: ["url"]})
+  const searchNIP96Providers = fuzzy(env.NIP96_URLS, {keys: ["url"]})
+  const searchBlossomProviders = fuzzy(env.BLOSSOM_URLS, {keys: ["url"]})
 
   const formatPercent = d => String(Math.round(d * 100))
   const parsePercent = p => parseInt(p) / 100
@@ -72,23 +74,53 @@
         </p>
       </FieldInline>
     {/if}
-    <Field label="Upload Provider URLs">
+    <Field label="Upload Type">
       <p slot="info">
-        Enter one or more urls for nostr media servers. You can find a full list of NIP-96
-        compatible servers
-        <Anchor underline href="https://github.com/quentintaranpino/NIP96-compatible-servers"
-          >here</Anchor>
+        Choose an upload type for your files, default is nip-96 but blossom is also supported.
       </p>
-      <SearchSelect
-        multiple
-        search={searchUploadProviders}
-        bind:value={values.nip96_urls}
-        termToItem={identity}>
-        <div slot="item" let:item>
-          <strong>{item}</strong>
-        </div>
-      </SearchSelect>
+      <div class="flex items-center rounded-md px-2 text-neutral-600 dark:bg-neutral-100">
+        <i class="fa-solid fa-cloud-upload-alt" />
+        <Select
+          class="w-full dark:!bg-neutral-100 dark:!text-neutral-900"
+          bind:value={values.upload_type}
+          dark={false}>
+          <option value="nip96">NIP-96</option>
+          <option value="blossom">Blossom</option>
+        </Select>
+      </div>
     </Field>
+    {#if values.upload_type === "nip96"}
+      <Field label="NIP96 Provider URLs">
+        <p slot="info">
+          Enter one or more urls for nostr media servers. You can find a full list of NIP-96
+          compatible servers
+          <Anchor underline href="https://github.com/quentintaranpino/NIP96-compatible-servers"
+            >here</Anchor>
+        </p>
+        <SearchSelect
+          multiple
+          search={searchNIP96Providers}
+          bind:value={values.nip96_urls}
+          termToItem={identity}>
+          <div slot="item" let:item>
+            <strong>{item}</strong>
+          </div>
+        </SearchSelect>
+      </Field>
+    {:else}
+      <Field label="Blossom Provider URLs">
+        <p slot="info">Enter one or more urls for blossom compatible nostr media servers.</p>
+        <SearchSelect
+          multiple
+          search={searchBlossomProviders}
+          bind:value={values.blossom_urls}
+          termToItem={identity}>
+          <div slot="item" let:item>
+            <strong>{item}</strong>
+          </div>
+        </SearchSelect>
+      </Field>
+    {/if}
     <Field label="Dufflepud URL">
       <Input bind:value={values.dufflepud_url}>
         <i slot="before" class="fa-solid fa-server" />

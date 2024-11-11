@@ -7,14 +7,18 @@
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
   import {createAndPublish, getClientTags, tagsFromContent} from "src/engine"
+  import {Editor} from "svelte-tiptap"
+  import {getEditorOptions} from "src/app/editor"
+  import {onMount} from "svelte"
 
   export let url
 
-  let compose
+  let editor: Editor
+  let element: HTMLElement
   let rating
 
   const onSubmit = () => {
-    const content = compose.parse()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     createAndPublish({
       relays: ctx.app.router.FromUser().getUrls(),
@@ -32,6 +36,17 @@
 
     router.pop()
   }
+
+  onMount(() => {
+    editor = new Editor(
+      getEditorOptions({
+        submit: onSubmit,
+        element,
+        submitOnEnter: true,
+        autofocus: true,
+      }),
+    )
+  })
 </script>
 
 <form on:submit|preventDefault={onSubmit}>
@@ -45,11 +60,10 @@
         </div>
       </div>
       <Compose
-        {onSubmit}
-        autofocus
+        {editor}
+        bind:element
         class="shadow-inset rounded bg-tinted-200 px-2 py-2 text-black"
-        style="min-height: 6rem"
-        bind:this={compose} />
+        style="min-height: 6rem" />
       <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
     </div>
   </Content>

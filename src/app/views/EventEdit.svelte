@@ -2,7 +2,6 @@
   import {inc} from "ramda"
   import {now} from "@welshman/lib"
   import {Tags, asStampedEvent} from "@welshman/util"
-  import {sleep} from "hurdak"
   import {secondsToDate, dateToSeconds} from "src/util/misc"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -10,28 +9,32 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
-  import NoteImages from "src/app/shared/NoteImages.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import {router} from "src/app/util/router"
   import {deriveEvent, signAndPublish} from "src/engine"
+  import {Editor} from "svelte-tiptap"
+  import {getEditorOptions} from "src/app/editor"
 
   export let address
+
+  let editor: Editor
+  let editorElement: HTMLElement
 
   const event = deriveEvent(address)
 
   const onSubmit = async () => {
+    if (editor.storage.fileUpload.loading) return
+
     const tags = Tags.fromEvent($event)
       .setTag("title", values.title)
       .setTag("location", values.location)
       .setTag("start", dateToSeconds(values.start).toString())
       .setTag("end", dateToSeconds(values.end).toString())
-      .setIMeta(images.getValue())
 
     const template = asStampedEvent({
       ...$event,
-      tags: tags.unwrap(),
-      content: compose.parse(),
+      tags: [...tags.unwrap(), ...editor.commands.getMetaTags()],
+      content: editor.getText({blockSeparator: "\n"}).trim(),
       created_at: inc($event.created_at),
     })
 
@@ -40,32 +43,33 @@
   }
 
   let loading = true
-  let images, compose
   let values: any = {}
 
-  $: {
-    if ($event) {
-      const tags = Tags.fromEvent($event)
+  function edit() {
+    const tags = Tags.fromEvent($event)
 
-      loading = false
-
-      values = {
-        title: tags.get("name")?.value() || tags.get("title")?.value() || "",
-        location: tags.get("location")?.value() || "",
-        start: secondsToDate(tags.get("start")?.value() || now()),
-        end: secondsToDate(tags.get("end")?.value() || now()),
-      }
-
-      // Wait for components to mount
-      sleep(10).then(() => {
-        compose.write($event.content)
-
-        for (const url of tags.values("image").valueOf()) {
-          images.addImage(Tags.wrap([["url", url]]))
-        }
-      })
+    values = {
+      title: tags.get("name")?.value() || tags.get("title")?.value() || "",
+      location: tags.get("location")?.value() || "",
+      start: secondsToDate(tags.get("start")?.value() || now()),
+      end: secondsToDate(tags.get("end")?.value() || now()),
     }
+
+    editor = new Editor(
+      getEditorOptions({
+        submit: onSubmit,
+        element: editorElement,
+        content: $event.content || "",
+        submitOnEnter: true,
+        autofocus: true,
+      }),
+    )
   }
+
+  $: loading = !$event
+
+  // eslint-disable-next-line
+  $: editorElement && edit()
 </script>
 
 {#if loading}
@@ -91,13 +95,16 @@
       </Field>
       <Field label="Description">
         <div class="rounded-xl border border-solid border-neutral-600 bg-white p-3 text-black">
-          <Compose autofocus bind:this={compose} {onSubmit} />
+          <Compose bind:element={editorElement} {editor} class="min-h-24" />
         </div>
       </Field>
-      <NoteImages bind:this={images} bind:compose includeInContent />
       <div class="flex gap-2">
         <Anchor button tag="button" type="submit" class="flex-grow">Save</Anchor>
-        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
+        <button
+          class="hover:bg-white-l staatliches flex h-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+          on:click|preventDefault={editor.commands.selectFiles}>
+          <i class="fa fa-upload" />
+        </button>
       </div>
     </FlexColumn>
   </form>

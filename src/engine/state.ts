@@ -134,6 +134,7 @@ export const env = {
   BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
+  BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
   PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
@@ -223,7 +224,9 @@ export const defaultSettings = {
   enable_client_tag: false,
   auto_authenticate: false,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
+  upload_type: "nip96",
   nip96_urls: env.NIP96_URLS.slice(0, 1),
+  blossom_urls: env.BLOSSOM_URLS.slice(0, 1),
   imgproxy_url: env.IMGPROXY_URL,
   dufflepud_url: env.DUFFLEPUD_URL,
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
@@ -240,7 +243,7 @@ export const userSettingsPlaintext = derived(
   ([$plaintext, $userSettingsEvent]) => $plaintext[$userSettingsEvent?.id],
 )
 
-export const userSettings = withGetter(
+export const userSettings = withGetter<typeof defaultSettings>(
   derived(userSettingsPlaintext, $userSettingsPlaintext => {
     const overrides = parseJson($userSettingsPlaintext) || {}
 

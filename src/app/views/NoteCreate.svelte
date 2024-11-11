@@ -1,35 +1,35 @@
 <script lang="ts">
-  import {session, tagPubkey} from "@welshman/app"
-  import {ctx, now} from "@welshman/lib"
+  import {onMount} from "svelte"
+  import {whereEq} from "ramda"
+  import {commaFormat, toTitle, switcherFn} from "hurdak"
+  import {writable, type Writable} from "svelte/store"
+  import {ctx, last, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
-  import {commaFormat, switcherFn, throttle, toTitle} from "hurdak"
-  import {nip19} from "nostr-tools"
-  import {join, whereEq} from "ramda"
-  import Compose from "src/app/shared/Compose.svelte"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
-  import NoteImages from "src/app/shared/NoteImages.svelte"
-  import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import NsecWarning from "src/app/shared/NsecWarning.svelte"
-  import {router} from "src/app/util/router"
-  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
+  import {session, tagPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
-  import Chip from "src/partials/Chip.svelte"
   import Content from "src/partials/Content.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import CurrencyInput from "src/partials/CurrencyInput.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import ImageInput from "src/partials/ImageInput.svelte"
   import Input from "src/partials/Input.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import Popover from "src/partials/Popover.svelte"
   import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
-  import {currencyOptions} from "src/util/i18n"
+  import Compose from "src/app/shared/Compose.svelte"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
+  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import NoteOptions from "src/app/shared/NoteOptions.svelte"
+  import {getEditorOptions} from "src/app/editor"
+  import {router} from "src/app/util/router"
+  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
   import {dateToSeconds} from "src/util/misc"
-  import {onMount} from "svelte"
-  import {writable} from "svelte/store"
+  import {currencyOptions} from "src/util/i18n"
+  import {Editor} from "svelte-tiptap"
+  import {nip19} from "nostr-tools"
   import {v4 as uuid} from "uuid"
 
   export let type = "note"
@@ -37,10 +37,13 @@
   export let pubkey = null
   export let initialValues = {}
 
-  let images, compose
-  let charCount = 0
-  let wordCount = 0
+  let charCount: Writable<number>
+  let wordCount: Writable<number>
   let showPreview = false
+
+  let editor: Editor
+  let element: HTMLElement
+
   let opts = {
     title: "",
     warning: "",
@@ -66,7 +69,10 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    const content = compose.parse().trim()
+    // prevent sending before media are uploaded and tags are correctly set
+    if ($loading) return
+
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
 
@@ -95,16 +101,7 @@
         return showWarning("Please select a currency.")
       }
     }
-
-    const tags = [...tagsFromContent(content), ...getClientTags()]
-
-    for (const imeta of images.getValue()) {
-      if (type === "listing") {
-        tags.push(["image", imeta.get("url").value()])
-      } else {
-        tags.push(["imeta", ...imeta.unwrap().map(join(" "))])
-      }
-    }
+    const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
 
     if (opts.warning) {
       tags.push(["content-warning", opts.warning])
@@ -153,22 +150,39 @@
     showPreview = !showPreview
   }
 
-  const updateCounts = throttle(300, () => {
-    if (compose) {
-      const content = compose.parse()
-
-      charCount = content.length || 0
-      wordCount = content.trim() ? (content.match(/\s+/g)?.length || 0) + 1 : 0
-    }
-  })
-
   const setType = t => {
     type = t
   }
 
+  const pubkeyEncoder = {
+    encode: pubkey => {
+      const relays = ctx.app.router.FromPubkeys([pubkey]).getUrls()
+      const nprofile = nip19.nprofileEncode({pubkey, relays})
+
+      return "nostr:" + nprofile
+    },
+    decode: link => {
+      // @ts-ignore
+      return nip19.decode(last(link.split(":"))).data.pubkey
+    },
+  }
+
   onMount(() => {
+    const options = getEditorOptions({
+      submit: onSubmit,
+      element,
+      submitOnEnter: false,
+      submitOnModEnter: true,
+      autofocus: true,
+    })
+
+    editor = new Editor(options)
+
+    charCount = editor.storage.wordCount.characters
+    wordCount = editor.storage.wordCount.words
+
     if (pubkey && pubkey !== $session.pubkey) {
-      compose.mention(pubkey)
+      editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
     }
 
     if (quote) {
@@ -179,12 +193,17 @@
         relays: ctx.app.router.Event(quote).getUrls(),
       })
 
-      compose.nevent("nostr:" + nevent)
+      editor.commands.insertNEvent({nevent: "nostr:" + nevent})
     }
   })
+
+  $: loading = editor?.storage.fileUpload.loading
 </script>
 
-<form on:submit|preventDefault={() => onSubmit()}>
+<form
+  on:submit|preventDefault={() => {
+    onSubmit()
+  }}>
   <Content size="lg">
     <div class="flex gap-2">
       <span class="text-2xl font-bold">Create a</span>
@@ -250,19 +269,20 @@
           class:text-black={!showPreview}
           class:bg-tinted-700={showPreview}>
           {#if showPreview}
-            <NoteContent note={{content: compose.parse(), tags: []}} />
+            <NoteContent
+              note={{content: editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose autofocus on:keyup={updateCounts} bind:this={compose} {onSubmit} />
+            <Compose bind:element {editor} class="min-h-24" />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-neutral-200">
           <small>
-            {commaFormat(charCount)} characters
+            {commaFormat($charCount || 0)} characters
           </small>
           <span>•</span>
           <small>
-            {commaFormat(wordCount)} words
+            {commaFormat($wordCount || 0)} words
           </small>
           <span>•</span>
           <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
@@ -270,10 +290,14 @@
           </button>
         </div>
       </Field>
-      <NoteImages bind:this={images} bind:compose includeInContent={type !== "listing"} />
       <div class="flex gap-2">
-        <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
-        <ImageInput multi hostLimit={3} on:change={e => images?.addImage(e.detail)} />
+        <Anchor button tag="button" type="submit" class="flex-grow" disabled={$loading}
+          >Send</Anchor>
+        <button
+          class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
+          on:click|preventDefault={editor.commands.selectFiles}>
+          <i class="fa fa-upload" />
+        </button>
       </div>
     </FlexColumn>
   </Content>
