@@ -104,19 +104,18 @@
 
     const template = createEvent(1, {content, tags})
     const event = await sign(template, {anonymous: false})
-    let canceled = false
-    addDraftToContext(event, () => (canceled = true))
+    const thunk = publish({
+      event,
+      relays: ctx.app.router.PublishEvent(event).getUrls(),
+      delay: $userSettings.undo_delay * 1000,
+    })
+    addDraftToContext(event, () => thunk.controller.abort())
     isOpen = false
-    setTimeout(async () => {
-      const {pubs, events} = await signAndPublish(template, opts)
-      console.log("pubs", pubs, events)
-      addDraftStatus(events[0])
 
-      // Only track one event/pub to avoid apprent duplicates
-      // showPublishInfo(pubs[0])
+    thunk.result.then(() => {
       clearDraft()
       reset()
-    }, $userSettings.undo_delay * 1000)
+    })
   }
 
   const onBodyClick = e => {

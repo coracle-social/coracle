@@ -22,8 +22,9 @@
 </style>
 
 <script lang="ts">
+  import {PublishStatus} from "@welshman/net"
   import type {SignedEvent} from "@welshman/util"
-  import {publishes, userSettings} from "src/engine"
+  import {thunks, userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
   import {spring} from "svelte/motion"
@@ -31,32 +32,35 @@
   export let event: SignedEvent
   export let removeDraft: () => void
 
-  $: pub = Object.values($publishes).find(p => p.request.event.id === event.id)
+  $: thunk = $thunks[event.id]
 
-  $: pendings = Array.from(pub?.status?.values() || []).filter(s => s === "pending" || !s).length
-  $: failed = Array.from(pub?.status?.values() || []).filter(
-    s => s === "failure" || s === "aborted",
+  $: status = thunk?.status
+
+  $: pendings = Object.values($status || {}).filter(s => s.status === PublishStatus.Pending).length
+  $: failed = Object.values($status || {}).filter(
+    s => s.status === PublishStatus.Failure || s.status === PublishStatus.Aborted,
   ).length
-  $: timeout = Array.from(pub?.status?.values() || []).filter(s => s === "timeout").length
-  $: success = Array.from(pub?.status?.values() || []).filter(s => s === "success").length
-  $: total = pub?.request?.relays.length || 0
+  $: timeout = Object.values($status || {}).filter(s => s.status === PublishStatus.Timeout).length
+  $: success = Object.values($status || {}).filter(s => s.status === PublishStatus.Success).length
+  $: total = thunk?.request?.relays.length || 0
 
   const completed = spring(0)
 
   $: {
-    if (pub) {
+    if (thunk) {
       $completed = ((total - pendings) / total) * 100
     }
   }
 
   $: isPending = pendings > 0
+  $: isCompleted = total === success + failed + timeout
 </script>
 
 <div
   class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
-  class:border={!pub}
+  class:border={!thunk}
   on:click|stopPropagation>
-  {#if pub}
+  {#if thunk && (isPending || isCompleted)}
     <div class="loading-bar bg-accent" style="width: {$completed}%"></div>
     {#if isPending}
       <span>Publishing...</span>
