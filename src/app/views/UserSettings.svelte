@@ -14,7 +14,7 @@
   import {fuzzy} from "src/util/misc"
   import Select from "src/partials/Select.svelte"
 
-  const values = $userSettings
+  const values = {...$userSettings}
 
   const submit = () => {
     publishSettings(values)
