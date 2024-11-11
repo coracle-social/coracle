@@ -1,4 +1,4 @@
-import type {PartialSubscribeRequest} from "@welshman/app"
+import type {PartialSubscribeRequest, Thunk} from "@welshman/app"
 import {
   subscribe as baseSubscribe,
   db,
@@ -21,6 +21,7 @@ import {
   mutesByPubkey,
   plaintext,
   pubkey,
+  publishThunk,
   relay,
   relays,
   repository,
@@ -159,6 +160,7 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
+export const thunks = writable<Record<string, Thunk>>({})
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -763,6 +765,7 @@ export const load = (request: MySubscribeRequest) =>
 
 export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
+  delay?: number
 }
 
 const shouldTrackPublish = (event: TrustedEvent) => {
@@ -773,7 +776,7 @@ const shouldTrackPublish = (event: TrustedEvent) => {
 
 export type Pub = ReturnType<typeof basePublish>
 
-export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
+export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
     : withPlatformRelays(request.relays)
@@ -784,24 +787,11 @@ export const publish = async ({forcePlatform = true, ...request}: MyPublishReque
 
   logger.info(`Publishing event`, request)
 
-  // Make sure the event is decrypted before updating stores
-  if (canUnwrap(request.event)) {
-    await ensureUnwrapped(request.event)
-  } else if (projections.handlers.get(request.event.kind)?.includes(ensurePlaintext)) {
-    await ensurePlaintext(request.event)
-  }
+  const thunk = publishThunk(request)
 
-  // Publish to local and remote relays
-  const pub = basePublish(request)
+  thunks.update(assoc(request.event.id, thunk))
 
-  // Listen to updates and update our publish queue
-  if (shouldTrackPublish(request.event)) {
-    const pubInfo = omit(["emitter", "result"], pub)
-
-    pub.emitter.on("*", t => publishes.update(assoc(pubInfo.id, pubInfo)))
-  }
-
-  return pub
+  return thunk
 }
 
 export const sign = (

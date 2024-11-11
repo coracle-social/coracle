@@ -139,31 +139,27 @@
           ],
         }),
     })
-
-    let cancel = false
-
-    const thunk = publishThunk({
+    const thunk = publish({
       event: template,
       relays: ctx.app.router.PublishEvent(template).getUrls(),
       delay: $userSettings.undo_delay * 1000,
     })
 
-    thunk.status.subscribe(status => {
-      // if (status !== PublishStatus.Pending) {
-      //   cancel = true
-      //   router.clearModals()
-      // }
+    showToast({
+      type: "delay",
+      timeout: $userSettings.undo_delay,
+      onCancel: () => thunk.controller.abort(),
     })
 
-    showInfo("", {type: "delay", onCancel: () => thunk.controller.abort()})
-
-    router.clearModals()
-    setTimeout(async () => {
-      if (cancel) return
-      const pub = await signAndPublish(template, opts)
-      showPublishInfo(pub)
-      router.clearModals()
-    }, $userSettings.undo_delay * 1000)
+    thunk.status.subscribe(status => {
+      if (
+        Object.values(status).length === thunk.request.relays.length &&
+        Object.values(status).every(s => s.status === PublishStatus.Pending)
+      ) {
+        showPublishInfo(thunk)
+        router.clearModals()
+      }
+    })
   }
 
   const togglePreview = () => {
