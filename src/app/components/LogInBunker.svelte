@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onDestroy} from 'svelte'
   import {Nip46Broker} from "@welshman/signer"
   import {nip46Perms, addSession} from "@welshman/app"
   import {slideAndFade} from '@lib/transition'
@@ -80,6 +81,10 @@
 
       clearModals()
     }
+  })
+
+  onDestroy(() => {
+    abortController.abort()
   })
 </script>
 

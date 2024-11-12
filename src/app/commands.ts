@@ -340,7 +340,7 @@ export const sendWrapped = async ({
       uniq(pubkeys).map(async recipient =>
         publishThunk({
           event: await nip59.wrap(recipient, stamp(template)),
-          relays: ctx.app.router.PublishMessage(recipient).getUrls(),
+          relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
           delay,
         }),
       ),
