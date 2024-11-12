@@ -50,6 +50,38 @@
   //    }
   //  }
 
+  //  const initNip46 = async (
+  //    handler: Nip46Handler & {nostrconnectTemplate: string},
+  //    params: Partial<Nip46InitiateParams> = {},
+  //  ) => {
+  //    const init = Nip46Broker.initiate({
+  //      perms: nip46Perms,
+  //      relays: handler.relays,
+  //      url: import.meta.env.VITE_APP_URL,
+  //      name: import.meta.env.VITE_APP_NAME,
+  //      image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
+  //      ...params,
+  //    })
+
+  //    window.open(init.getLink(handler.nostrconnectTemplate))
+
+  //    const pubkey = await init.result
+
+  //    if (!pubkey) {
+  //      return undefined
+  //    }
+
+  //    addSession({
+  //      pubkey,
+  //      method: "nip46",
+  //      secret: init.clientSecret,
+  //      // Goofy legacy stuff, someday this will be gone
+  //      handler: {...handler, pubkey},
+  //    })
+
+  //    return pubkey
+  //  }
+
   //  const onSubmit = async () => {
   //    abortController = new AbortController()
 
@@ -152,7 +184,7 @@
         </Anchor>
       {/each}
       <Anchor button tall on:click={useBunker}>
-        <i class="fa fa-box" /> Use Self-Hosted Signer
+        <i class="fa fa-box" /> Use Remote Signer
       </Anchor>
       <Anchor external button tall low href="https://nostrapps.com/#signers">
         <i class="fa fa-compass" /> Browse Signer Apps

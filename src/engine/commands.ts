@@ -510,38 +510,6 @@ export const loginWithNip46 = async (
   return true
 }
 
-export const initNip46 = async (
-  handler: Nip46Handler & {nostrconnectTemplate: string},
-  params: Partial<Nip46InitiateParams> = {},
-) => {
-  const init = Nip46Broker.initiate({
-    perms: nip46Perms,
-    relays: handler.relays,
-    url: import.meta.env.VITE_APP_URL,
-    name: import.meta.env.VITE_APP_NAME,
-    image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
-    ...params,
-  })
-
-  window.open(init.getLink(handler.nostrconnectTemplate))
-
-  const pubkey = await init.result
-
-  if (!pubkey) {
-    return undefined
-  }
-
-  addSession({
-    pubkey,
-    method: "nip46",
-    secret: init.clientSecret,
-    // Goofy legacy stuff, someday this will be gone
-    handler: {...handler, pubkey},
-  })
-
-  return pubkey
-}
-
 export const logoutPubkey = pubkey => {
   if (session.get().pubkey === pubkey) {
     throw new Error("Can't destroy the current session, use logout instead")
