@@ -9,7 +9,7 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived, writable} from "svelte/store"
+  import {derived} from "svelte/store"
   import {int, assoc, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
@@ -20,7 +20,6 @@
     loadInboxRelaySelections,
     tagPubkey,
   } from "@welshman/app"
-  import type {MergedThunk} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -33,7 +32,14 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import {userSettingValues, deriveChat, splitChatId, PLATFORM_NAME, pubkeyLink} from "@app/state"
+  import {
+    thunks,
+    userSettingValues,
+    deriveChat,
+    splitChatId,
+    PLATFORM_NAME,
+    pubkeyLink,
+  } from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
@@ -42,7 +48,6 @@
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey!, pubkeys)
-  const thunks = writable({} as Record<string, MergedThunk>)
   const missingInboxes = derived(inboxRelaySelectionsByPubkey, $m =>
     pubkeys.filter(pk => !$m.has(pk)),
   )
@@ -158,9 +163,7 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        {@const event = assertEvent(value)}
-        {@const thunk = $thunks[event.id]}
-        <ChatMessage {event} {thunk} {pubkeys} {showPubkey} />
+        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
       {/if}
     {/each}
     <p

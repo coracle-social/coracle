@@ -10,12 +10,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {writable} from "svelte/store"
   import {sortBy, ago, assoc, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
-  import type {Thunk} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -36,6 +34,7 @@
     MESSAGE,
     COMMENT,
     getMembershipRoomsByUrl,
+    thunks,
   } from "@app/state"
   import {subscribePersistent, addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
@@ -45,7 +44,6 @@
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
-  const thunks = writable({} as Record<string, Thunk>)
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
@@ -137,10 +135,8 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        {@const event = assertEvent(value)}
-        {@const thunk = $thunks[event.id]}
         <div in:slide>
-          <ChannelMessage {url} {room} {event} {thunk} {showPubkey} />
+          <ChannelMessage {url} {room} event={assertEvent(value)} {showPubkey} />
         </div>
       {/if}
     {/each}

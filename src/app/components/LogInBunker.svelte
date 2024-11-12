@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {onDestroy} from 'svelte'
+  import {onDestroy} from "svelte"
   import {Nip46Broker} from "@welshman/signer"
   import {nip46Perms, addSession} from "@welshman/app"
-  import {slideAndFade} from '@lib/transition'
+  import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -34,7 +34,7 @@
 
     if (loading) {
       return
-     }
+    }
 
     if (!pubkey || relays.length === 0) {
       return pushToast({
@@ -96,7 +96,7 @@
     </div>
   </ModalHeader>
   {#if !loading}
-    <div class="m-auto w-xs" out:slideAndFade>
+    <div class="w-xs m-auto" out:slideAndFade>
       <QRCode code={init.nostrconnect} />
     </div>
   {/if}

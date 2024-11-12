@@ -16,7 +16,7 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
+  import {colors, thunks, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushDrawer, pushModal} from "@app/modal"
 
@@ -27,6 +27,7 @@
   export let isHead = false
   export let inert = false
 
+  const thunk = $thunks[event.id]
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const rootTag = event.tags.find(t => t[0].match(/^e$/i))

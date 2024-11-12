@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Capacitor} from '@capacitor/core'
+  import {Capacitor} from "@capacitor/core"
   import {getNip07, getNip55, Nip55Signer} from "@welshman/signer"
   import {addSession, type Session} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"

@@ -3,7 +3,6 @@
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
-  import type {MergedThunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -16,15 +15,15 @@
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
   import ChatMessageMenuMobile from "@app/components/ChatMessageMenuMobile.svelte"
-  import {colors, pubkeyLink} from "@app/state"
+  import {colors, pubkeyLink, thunks} from "@app/state"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
   import {pushModal} from "@app/modal"
 
   export let event: TrustedEvent
-  export let thunk: MergedThunk
   export let pubkeys: string[]
   export let showPubkey = false
 
+  const thunk = $thunks[event.id]
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
