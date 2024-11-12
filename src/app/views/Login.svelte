@@ -37,89 +37,9 @@
     boot()
   }
 
-  //  const normalizeHandler = async () => {
-  //    if (!handler.pubkey || !handler.relays) {
-  //      const handle = await loadHandle(`_@${handler.domain}`)
-
-  //      handler.pubkey = handler.pubkey || handle?.pubkey
-  //      handler.relays = handler.relays || handle?.nip46 || handle?.relays
-  //    }
-
-  //    if (handler.relays) {
-  //      handler.relays = handler.relays.map(normalizeRelayUrl)
-  //    }
-  //  }
-
-  //  const initNip46 = async (
-  //    handler: Nip46Handler & {nostrconnectTemplate: string},
-  //    params: Partial<Nip46InitiateParams> = {},
-  //  ) => {
-  //    const init = Nip46Broker.initiate({
-  //      perms: nip46Perms,
-  //      relays: handler.relays,
-  //      url: import.meta.env.VITE_APP_URL,
-  //      name: import.meta.env.VITE_APP_NAME,
-  //      image: import.meta.env.VITE_APP_URL + import.meta.env.VITE_APP_LOGO,
-  //      ...params,
-  //    })
-
-  //    window.open(init.getLink(handler.nostrconnectTemplate))
-
-  //    const pubkey = await init.result
-
-  //    if (!pubkey) {
-  //      return undefined
-  //    }
-
-  //    addSession({
-  //      pubkey,
-  //      method: "nip46",
-  //      secret: init.clientSecret,
-  //      // Goofy legacy stuff, someday this will be gone
-  //      handler: {...handler, pubkey},
-  //    })
-
-  //    return pubkey
-  //  }
-
-  //  const onSubmit = async () => {
-  //    abortController = new AbortController()
-
-  //    try {
-  //      await normalizeHandler()
-
-  //      if (!handler.nostrconnectTemplate) {
-  //        return showWarning("Sorry, that signer doesn't support the nostrconnect:// protocol.")
-  //      }
-
-  //      if (!handler.relays || !handler.pubkey) {
-  //        return showWarning("Sorry, we weren't able to find that provider.")
-  //      }
-
-  //      const pubkey = await initNip46(handler, {abortController})
-
-  //      if (!pubkey) {
-  //        return showWarning("Sorry, we weren't able to connect you. Please try again.")
-  //      }
-
-  //      boot()
-  //    } finally {
-  //      abortController = undefined
-  //    }
-  //  }
-
   let signerApps: AppInfo[] = []
-  //  let handlers = [
-  //    {
-  //      domain: "nsec.app",
-  //      relays: ["wss://relay.nsec.app/"],
-  //      pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
-  //      nostrconnectTemplate: "use.nsec.app",
-  //    },
-  //  ]
 
   let abortController: AbortController
-  //  let handler = handlers[0]
 
   onMount(async () => {
     if (Capacitor.isNativePlatform()) {
@@ -140,34 +60,6 @@
         you to own your social identity.
       </p>
     </div>
-    <!--
-    <div class="flex flex-col gap-2">
-      <div class="flex gap-2">
-        <div class="flex-grow">
-          <SearchSelect
-            bind:value={handler}
-            defaultOptions={handlers}
-            getKey={prop("domain")}
-            termToItem={objOf("domain")}
-            search={() => handlers}>
-            <i slot="before" class="fa fa-key" />
-            <span slot="item" let:item>{item.domain}</span>
-          </SearchSelect>
-        </div>
-        <Anchor button accent type="submit" loading={Boolean(abortController)} on:click={onSubmit}
-          >Log In</Anchor>
-      </div>
-      <p class="text-sm opacity-75">
-        Choose a signer who you trust to hold your keys.
-        <Anchor underline modal href="/help/remote-signers">What is a signer?</Anchor>
-      </p>
-    </div>
-    <div class="relative flex items-center gap-4">
-      <div class="h-px flex-grow bg-neutral-600" />
-      <div class="staatliches text-xl">Or</div>
-      <div class="h-px flex-grow bg-neutral-600" />
-    </div>
-    -->
     <div
       class="relative flex flex-col gap-4"
       class:opacity-75={abortController}
