@@ -26,7 +26,6 @@
   import {getEditorOptions} from "src/app/editor"
   import {router} from "src/app/util/router"
   import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
-  import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
   import {Editor} from "svelte-tiptap"
   import {nip19} from "nostr-tools"
@@ -126,18 +125,6 @@
             ["price", opts.price, opts.currency.code],
           ],
         }),
-      calendar_event: () =>
-        createEvent(31923, {
-          content,
-          tags: [
-            ...tags,
-            ["d", uuid()],
-            ["title", opts.title],
-            ["location", opts.location || ""],
-            ["start", dateToSeconds(opts.start).toString()],
-            ["end", dateToSeconds(opts.end).toString()],
-          ],
-        }),
     })
 
     const pub = await signAndPublish(template, opts)
@@ -214,7 +201,6 @@
         <div slot="tooltip">
           <Menu class="-mt-2 w-24">
             <MenuItem on:click={() => setType("note")}>Note</MenuItem>
-            <MenuItem on:click={() => setType("calendar_event")}>Event</MenuItem>
             <MenuItem on:click={() => setType("listing")}>Listing</MenuItem>
           </Menu>
         </div>
