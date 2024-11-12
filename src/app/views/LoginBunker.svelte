@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onDestroy} from "svelte"
   import {Nip46Broker} from "@welshman/signer"
   import {addSession, nip46Perms} from "@welshman/app"
   import {isKeyValid} from "src/util/nostr"
@@ -61,6 +62,10 @@
         handler: {pubkey, relays: env.SIGNER_RELAYS},
       })
     }
+  })
+
+  onDestroy(() => {
+    abortController.abort()
   })
 </script>
 

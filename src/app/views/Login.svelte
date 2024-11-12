@@ -39,8 +39,6 @@
 
   let signerApps: AppInfo[] = []
 
-  let abortController: AbortController
-
   onMount(async () => {
     if (Capacitor.isNativePlatform()) {
       signerApps = await getNip55()
@@ -60,10 +58,7 @@
         you to own your social identity.
       </p>
     </div>
-    <div
-      class="relative flex flex-col gap-4"
-      class:opacity-75={abortController}
-      class:cursor-events-none={abortController}>
+    <div class="relative flex flex-col gap-4">
       {#if getNip07()}
         <Anchor button tall accent on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
