@@ -38,9 +38,12 @@
       it's wise to choose a single signer application to keep them for you.
     </p>
     <p>
-      These signer apps may live on the internet, in which case you can simply log in by specifying
-      the signer's url. You can also run your own signer on your phone or computer. This method is
-      more secure, but a little more complicated to manage.
+      Some signers live on the internet, others can be installed on your phone or computer. If
+      you're new to nostr, we recommend getting started with <Anchor
+        external
+        underline
+        href="https://nsec.app/">nsec.app</Anchor
+      >.
     </p>
     <Anchor external button tall low href="https://nostrapps.com/#Signers">
       <i class="fa fa-compass" /> Browse Signer Apps

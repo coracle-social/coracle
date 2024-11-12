@@ -1,7 +1,6 @@
 <script lang="ts">
   import QRCode from "qrcode"
   import {onMount} from "svelte"
-  import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import {copyToClipboard} from "src/util/html"
@@ -31,20 +30,11 @@
   })
 </script>
 
-<div class="rounded-xl border border-solid border-neutral-600 bg-neutral-800 p-2">
-  <div class="m-auto flex max-w-sm flex-col gap-2">
-    <Anchor external {href} on:click={onClick || (copyOnClick ? copy : null)}>
-      <div bind:this={wrapper} style={`height: ${height}px`}>
-        <canvas
-          class="rounded-xl"
-          bind:this={canvas}
-          style={`transform-origin: top left; transform: scale(${scale}, ${scale})`} />
-      </div>
-    </Anchor>
-    <slot name="below" {copy}>
-      <Input value={code}>
-        <button slot="after" class="fa fa-copy" on:click={copy} />
-      </Input>
-    </slot>
+<Anchor external {href} on:click={onClick || (copyOnClick ? copy : null)}>
+  <div bind:this={wrapper} style={`height: ${height}px`}>
+    <canvas
+      class="rounded-xl"
+      bind:this={canvas}
+      style={`transform-origin: top left; transform: scale(${scale}, ${scale})`} />
   </div>
-</div>
+</Anchor>

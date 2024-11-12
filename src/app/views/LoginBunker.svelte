@@ -1,16 +1,29 @@
 <script lang="ts">
   import {Nip46Broker} from "@welshman/signer"
+  import {addSession, nip46Perms} from "@welshman/app"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
+  import QRCode from "src/partials/QRCode.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {loginWithNip46} from "src/engine"
+  import {env, loginWithNip46} from "src/engine"
   import {boot} from "src/app/state"
 
   let input = ""
   let loading = false
+
+  const abortController = new AbortController()
+
+  const init = Nip46Broker.initiate({
+    perms: nip46Perms,
+    url: env.APP_URL,
+    name: env.APP_NAME,
+    relays: env.SIGNER_RELAYS,
+    image: env.APP_URL + env.APP_LOGO,
+    abortController,
+  })
 
   const back = () => history.back()
 
@@ -31,17 +44,33 @@
       const success = await loginWithNip46(token, {pubkey, relays})
 
       if (success) {
+        abortController.abort()
         boot()
       }
     } finally {
       loading = false
     }
   }
+
+  init.result.then(pubkey => {
+    if (pubkey) {
+      addSession({
+        pubkey,
+        method: "nip46",
+        secret: init.clientSecret,
+        handler: {pubkey, relays: env.SIGNER_RELAYS},
+      })
+    }
+  })
 </script>
 
 <FlexColumn class="max-w-md text-center">
   <Heading>Login with Signer</Heading>
-  <p>To log in using a signer app, enter a connection link starting with "bunker://".</p>
+  <p>
+    To log in using a remote signer, scan the QR code below or enter a connection link.
+    <Anchor underline modal href="/help/remote-signers">What's a signer?</Anchor>
+  </p>
+  <QRCode code={init.nostrconnect} />
   <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
     <i slot="before" class="fa fa-box" />
   </Input>

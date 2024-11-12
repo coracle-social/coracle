@@ -138,6 +138,10 @@ export const env = {
   PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
   PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
+  SIGNER_RELAYS: fromCsv(import.meta.env.VITE_SIGNER_RELAYS).map(normalizeRelayUrl) as string[],
+  APP_URL: import.meta.env.VITE_APP_URL,
+  APP_NAME: import.meta.env.VITE_APP_NAME,
+  APP_LOGO: import.meta.env.VITE_APP_LOGO,
 }
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))

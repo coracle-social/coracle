@@ -30,7 +30,7 @@ import {
   remove,
   splitAt,
 } from "@welshman/lib"
-import type {Nip46Handler, Nip46InitiateParams} from "@welshman/signer"
+import type {Nip46Handler} from "@welshman/signer"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {

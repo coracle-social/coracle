@@ -91,11 +91,11 @@
       <NoteContentCode value={parsed.value} />
     {:else if isCashu(parsed)}
       <div on:click|stopPropagation>
-        <QRCode copyOnClick code={parsed.value} />
+        <QRCode code={parsed.value} />
       </div>
     {:else if isInvoice(parsed)}
       <div on:click|stopPropagation>
-        <QRCode copyOnClick code={parsed.value} />
+        <QRCode code={parsed.value} />
       </div>
     {:else if isLink(parsed)}
       <NoteContentLink value={parsed.value} showMedia={showMedia && isEnd(i)} />
