@@ -77,7 +77,11 @@ export const INDEXER_RELAYS = [
   "wss://relay.nostr.band/",
 ]
 
-export const PLATFORM_LOGO = "/pwa-192x192.png"
+export const SIGNER_RELAYS = ["wss://relay.nsec.app/", "wss://bucket.coracle.social/"]
+
+export const PLATFORM_URL = window.location.origin
+
+export const PLATFORM_LOGO = PLATFORM_URL + "/pwa-192x192.png"
 
 export const PLATFORM_NAME = import.meta.env.VITE_PLATFORM_NAME
 

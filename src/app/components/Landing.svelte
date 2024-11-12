@@ -20,7 +20,7 @@
       <p class="text-center">The chat app built for self-hosted communities.</p>
     </div>
     <Button on:click={logIn}>
-      <CardButton>
+      <CardButton class="!btn-primary">
         <div slot="icon"><Icon icon="login-2" size={7} /></div>
         <div slot="title">Log in</div>
         <div slot="info">If you've been here before, you know the drill.</div>

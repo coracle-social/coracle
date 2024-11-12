@@ -35,14 +35,14 @@
 
   onMount(() => {
     const ctrl = createFeedController({
-      feed: feedsFromFilters(filters),
+      feed,
       onExhausted: () => {
         loading = false
       },
     })
 
     const unsub = subscribePersistent({
-      filters: filters.map(assoc('since', ago(30))),
+      filters: filters.map(assoc("since", ago(30))),
       relays: [url],
     })
 
@@ -50,7 +50,11 @@
       element,
       delay: 300,
       threshold: 3000,
-      onScroll: () => ctrl.load(5),
+      onScroll: async () => {
+        limit += 5
+
+        await ctrl.load(5)
+      },
     })
 
     return () => {

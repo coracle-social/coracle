@@ -4,7 +4,6 @@
   import {deriveEvents} from "@welshman/store"
   import {feedFromFilter} from "@welshman/feeds"
   import {NOTE, getAncestorTags} from "@welshman/util"
-  import type {TrustedEvent} from "@welshman/util"
   import {repository, createFeedController} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -24,7 +23,7 @@
       element,
       delay: 300,
       threshold: 3000,
-      onScroll: () => ctrl.load(5)
+      onScroll: () => ctrl.load(5),
     })
 
     return () => scroller.stop()

@@ -82,7 +82,7 @@
   </Tippy>
   <div class="flex flex-col">
     <LongPress
-      class="chat-bubble mx-1 flex max-w-sm flex-col gap-1 text-left bg-alt cursor-auto"
+      class="bg-alt chat-bubble mx-1 flex max-w-sm cursor-auto flex-col gap-1 text-left"
       onLongPress={showMobileMenu}>
       {#if showPubkey && event.pubkey !== $pubkey}
         <div class="flex items-center gap-2">

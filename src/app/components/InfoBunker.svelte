@@ -27,7 +27,8 @@
   <p>
     If you don't have a signer yet, <Link external class="link" href="https://nsec.app/"
       >nsec.app</Link>
-    is a great way to get started.
+    is a great way to get started. You can find more signers on <Link external class="link" href="https://nostrapps.com#signers"
+      >nostrapps.com</Link>.
   </p>
   <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
 </div>

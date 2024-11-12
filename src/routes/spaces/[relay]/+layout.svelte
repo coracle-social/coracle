@@ -13,7 +13,7 @@
 
   $: url = decodeRelay($page.params.relay)
 
-  const ifLet = <T>(x: T | undefined, f: (x: T) => void) => x === undefined ? undefined : f(x)
+  const ifLet = <T,>(x: T | undefined, f: (x: T) => void) => (x === undefined ? undefined : f(x))
 
   const checkConnection = async () => {
     ifLet(await checkRelayConnection(url), error => {
