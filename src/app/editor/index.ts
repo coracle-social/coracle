@@ -73,8 +73,8 @@ export const getEditorOptions = ({
   submitOnModEnter = false,
   element,
   defaultUploadUrl = getSetting("upload_type") == "nip96"
-    ? getSetting("nip96_urls").slice(0, 1)[0] || "https://nostr.build"
-    : getSetting("blossom_urls").slice(0, 1)[0] || "https://cdn.satellite.earth",
+    ? getSetting("nip96_urls")[0] || "https://nostr.build"
+    : getSetting("blossom_urls")[0] || "https://cdn.satellite.earth",
   uploadType = getSetting("upload_type"),
   autofocus = false,
   content = "",
