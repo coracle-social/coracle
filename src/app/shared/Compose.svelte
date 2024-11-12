@@ -16,6 +16,9 @@
 </script>
 
 <div class="relative flex w-full overflow-x-hidden">
-  <div bind:this={element} style={$$props.style} class={cx($$props.class, "relative w-full")} />
+  <div
+    bind:this={element}
+    style={$$props.style}
+    class={cx($$props.class, "relative w-full min-w-0")} />
   <slot name="addon" />
 </div>
