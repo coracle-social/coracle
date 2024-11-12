@@ -7,7 +7,6 @@
   import {Editor} from "svelte-tiptap"
   import {without, uniq} from "ramda"
   import {slide} from "src/util/transition"
-  import {showPublishInfo} from "src/partials/Toast.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import {getEditorOptions} from "src/app/editor"
@@ -15,7 +14,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {drafts} from "src/app/state"
-  import {publish, tagsFromContent, getClientTags, signAndPublish} from "src/engine"
+  import {publish, tagsFromContent, getClientTags, sign, userSettings} from "src/engine"
 
   export let parent
   export let addDraftToContext

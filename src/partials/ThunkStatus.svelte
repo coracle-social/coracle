@@ -5,7 +5,7 @@
 
   export let thunk: Thunk
 
-  let status = thunk.status
+  const status = thunk.status
   $: total = thunk.request.relays.length
   $: pending = Object.values($status).filter(s => s.status === PublishStatus.Pending).length
 </script>

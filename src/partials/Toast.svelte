@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import {randomId} from "hurdak"
-  import {get, writable, type Readable, type Writable} from "svelte/store"
+  import {get, writable} from "svelte/store"
 
   export const toast = writable(null)
 
@@ -42,11 +42,11 @@
 </script>
 
 <script lang="ts">
+  import type {Thunk} from "@welshman/app"
+  import {onDestroy} from "svelte"
   import cx from "classnames"
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
-  import {onDestroy} from "svelte"
-  import type {Thunk} from "@welshman/app"
   import ThunkStatus from "src/partials/ThunkStatus.svelte"
 
   let touchStart = 0

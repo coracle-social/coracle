@@ -3,7 +3,6 @@ import {
   subscribe as baseSubscribe,
   db,
   displayProfileByPubkey,
-  ensurePlaintext,
   followsByPubkey,
   freshness,
   getDefaultAppContext,
@@ -105,7 +104,7 @@ import {
 import crypto from "crypto"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds, sleep} from "hurdak"
-import {assoc, equals, omit, partition, prop, sortBy, without} from "ramda"
+import {assoc, equals, partition, prop, sortBy, without} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -119,7 +118,7 @@ import {
   readHandlers,
   readUserList,
 } from "src/domain"
-import type {AnonymousUserState, Channel, PublishInfo, SessionWithMeta} from "src/engine/model"
+import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
 import logger from "src/util/logger"
@@ -766,12 +765,6 @@ export const load = (request: MySubscribeRequest) =>
 export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
   delay?: number
-}
-
-const shouldTrackPublish = (event: TrustedEvent) => {
-  if ([SEEN_CONTEXT, SEEN_CONVERSATION, SEEN_GENERAL].includes(event.kind)) return false
-
-  return event.pubkey === pubkey.get() || canUnwrap(event)
 }
 
 export type Pub = ReturnType<typeof basePublish>

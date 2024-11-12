@@ -4,6 +4,7 @@
   import {ctx, last, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
+  import {PublishStatus} from "@welshman/net"
   import {commaFormat, toTitle, switcherFn} from "hurdak"
   import {writable, type Writable} from "svelte/store"
   import {Editor} from "svelte-tiptap"
@@ -21,7 +22,7 @@
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
+  import {showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -30,7 +31,7 @@
   import {router} from "src/app/util/router"
   import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
-  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
+  import {getClientTags, publish, tagsFromContent, userSettings} from "src/engine"
 
   export let type = "note"
   export let quote = null
