@@ -24,7 +24,6 @@
   import ForegroundButtons from "src/app/ForegroundButtons.svelte"
   import About from "src/app/views/About.svelte"
   import Bech32Entity from "src/app/views/Bech32Entity.svelte"
-  import Calendar from "src/app/views/Calendar.svelte"
   import ChannelCreate from "src/app/views/ChannelCreate.svelte"
   import ChannelsDetail from "src/app/views/ChannelsDetail.svelte"
   import ChannelsList from "src/app/views/ChannelsList.svelte"
@@ -99,7 +98,6 @@
 
   router.register("/about", About)
   router.register("/search", Search)
-  router.register("/events", Calendar)
 
   router.register("/channels", ChannelsList, {
     requireSigner: true,
