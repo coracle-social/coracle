@@ -48,7 +48,7 @@
   }
 
   const saveEdit = () => {
-    const relays = ctx.app.router.WriteRelays().getUrls()
+    const relays = ctx.app.router.FromUser().getUrls()
     const template = isPublishedProfile(values) ? editProfile(values) : createProfile(values)
     const event = createEvent(template.kind, template)
 

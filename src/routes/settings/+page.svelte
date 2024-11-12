@@ -19,12 +19,12 @@
       event: createEvent(SETTINGS, {
         content: await $signer!.nip04.encrypt($pubkey!, JSON.stringify(settings)),
       }),
-      relays: ctx.app.router.WriteRelays().getUrls(),
+      relays: ctx.app.router.FromUser().getUrls(),
     })
 
     publishThunk({
       event: createEvent(MUTES, {tags: mutedPubkeys.map(tagPubkey)}),
-      relays: ctx.app.router.WriteRelays().getUrls(),
+      relays: ctx.app.router.FromUser().getUrls(),
     })
 
     pushToast({message: "Your settings have been saved!"})

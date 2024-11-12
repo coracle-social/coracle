@@ -32,8 +32,11 @@
   let limit = 5
   let loading = true
   let element: Element
+  let scroller
 
   onMount(() => {
+    let unmounted = false
+
     const ctrl = createFeedController({
       feed,
       onExhausted: () => {
@@ -46,20 +49,26 @@
       relays: [url],
     })
 
-    const scroller = createScroller({
-      element,
-      delay: 300,
-      threshold: 3000,
-      onScroll: async () => {
-        limit += 5
+    // Element is frequently not defined. I don't know why
+    setTimeout(() => {
+      if (!unmounted) {
+        scroller = createScroller({
+          element,
+          delay: 300,
+          threshold: 3000,
+          onScroll: async () => {
+            limit += 5
 
-        await ctrl.load(5)
-      },
-    })
+            await ctrl.load(5)
+          },
+        })
+      }
+    }, 1000)
 
     return () => {
+      unmounted = true
       unsub()
-      scroller.stop()
+      scroller?.stop()
     }
   })
 </script>
