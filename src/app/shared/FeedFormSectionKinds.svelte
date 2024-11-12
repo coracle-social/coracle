@@ -19,8 +19,6 @@
     EVENT_RSVP,
     HANDLER_RECOMMENDATION,
     HANDLER_INFORMATION,
-    COMMUNITY,
-    GROUP,
     FILE_METADATA,
     RELAYS,
   } from "@welshman/util"
@@ -57,8 +55,6 @@
     {label: "Calendar event RSVP", kind: EVENT_RSVP},
     {label: "Handler recommendation", kind: HANDLER_RECOMMENDATION},
     {label: "Handler information", kind: HANDLER_INFORMATION},
-    {label: "Community definition", kind: COMMUNITY},
-    {label: "Group definition", kind: GROUP},
     {label: "Image", kind: FILE_METADATA},
     {label: "Relay selections", kind: RELAYS},
   ])

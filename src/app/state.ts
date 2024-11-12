@@ -1,6 +1,6 @@
-import {writable} from "svelte/store"
+import {writable, get} from "svelte/store"
 import {uniq} from "@welshman/lib"
-import {COMMUNITIES, FEEDS, APP_DATA} from "@welshman/util"
+import {FEEDS, APP_DATA, getAddressTagValues, getIdFilters, getListTags} from "@welshman/util"
 import {
   pubkey,
   loadZapper,
@@ -26,6 +26,7 @@ import {
   loadNotifications,
   loadFeedsAndLists,
   listenForNotifications,
+  userFeedFavorites,
   getSetting,
 } from "src/engine"
 
@@ -65,16 +66,22 @@ export const loadUserData = async (hints: string[] = []) => {
   // Load less important user data
   loadZapper($pubkey)
   loadHandle($pubkey)
+
+  // Load user feed selections, app data, and feeds that were favorited by the user
   load({
     relays,
     filters: [
-      {authors: [$pubkey], kinds: [COMMUNITIES, FEEDS]},
+      {authors: [$pubkey], kinds: [FEEDS]},
       {
         authors: [$pubkey],
         kinds: [APP_DATA],
         "#d": Object.values(appDataKeys),
       },
     ],
+  }).then(() => {
+    const addrs = getAddressTagValues(getListTags(get(userFeedFavorites)))
+
+    load({filters: getIdFilters(addrs)})
   })
 
   // Load enough to figure out web of trust

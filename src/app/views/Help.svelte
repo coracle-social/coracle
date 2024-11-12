@@ -6,7 +6,7 @@
 
   export let topic
 
-  const topics = ["web-of-trust", "nip-17-dms"]
+  const topics = ["web-of-trust", "nip-17-dms", "remote-signers"]
   const nip17Url = "https://github.com/nostr-protocol/nips/blob/master/17.md"
 </script>
 
@@ -27,6 +27,24 @@
       You can set a minimum web of trust score on your content settings page, which will
       automatically mute anyone with a lower score than your threshold.
     </p>
+  {:else if topic === "remote-signers"}
+    <p>
+      Nostr uses cryptographic key pairs instead of passwords to authenticate users. This means that
+      you and nobody else controls your social identity - however it also requires some care to
+      avoid losing your keys, or having them stolen.
+    </p>
+    <p>
+      Instead of pasting your private key (also known as an "nsec") into every nostr app you use,
+      it's wise to choose a single signer application to keep them for you.
+    </p>
+    <p>
+      These signer apps may live on the internet, in which case you can simply log in by specifying
+      the signer's url. You can also run your own signer on your phone or computer. This method is
+      more secure, but a little more complicated to manage.
+    </p>
+    <Anchor external button tall low href="https://nostrapps.com/#Signers">
+      <i class="fa fa-compass" /> Browse Signer Apps
+    </Anchor>
   {:else if topic === "nip-17-dms"}
     <p>
       <Anchor underline external href={nip17Url}>NIP 17</Anchor> improves upon the old NIP 04 direct

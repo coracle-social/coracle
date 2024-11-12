@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {SocketStatus, AuthStatus} from "@welshman/net"
+  import {getRelayQuality} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
 
   export let url
@@ -35,6 +36,9 @@
       } else if (cxn.socket.status === SocketStatus.New) {
         className = "bg-neutral-600"
         description = "Not connected"
+      } else if (getRelayQuality(cxn.url) < 0.5) {
+        className = "bg-warning"
+        description = "Unstable connection"
       } else {
         className = "bg-success"
         description = "Connected"

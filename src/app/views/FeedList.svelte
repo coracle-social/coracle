@@ -24,7 +24,6 @@
     userFeeds,
     feedSearch,
     userListFeeds,
-    feedFavorites,
     userFavoritedFeeds,
     userFollows,
     addSinceToFilter,
@@ -58,8 +57,6 @@
     feed => getAddress(feed.event),
     sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
   )
-
-  loadFeeds($feedFavorites.flatMap(s => getAddressTagValues(s.event.tags)))
 
   load({
     skipCache: true,

@@ -14,7 +14,7 @@
 
 <NodeViewWrapper class="inline">
   <Anchor on:click={copy} class={cx("link-content", {"link-content-selected": selected})}>
-    <i class="fas fa-bolt inline-block translate-y-px"></i>
+    <i class="fas fa-xs fa-bolt inline-block translate-y-px"></i>
     {node.attrs.lnbc.slice(0, 16)}...
   </Anchor>
 </NodeViewWrapper>

@@ -39,7 +39,6 @@ import {
   ctx,
   groupBy,
   identity,
-  indexBy,
   now,
   pushToMapKey,
   setContext,
@@ -64,7 +63,6 @@ import type {
 import {
   APP_DATA,
   CLIENT_AUTH,
-  COMMUNITIES,
   DIRECT_MESSAGE,
   FEED,
   FEEDS,
@@ -297,38 +295,6 @@ export const userMutes = derived(
   userMuteList,
   l => new Set(getTagValues(["p", "e"], getListTags(l))),
 )
-
-// Communities
-
-export const communityListEvents = deriveEvents(repository, {filters: [{kinds: [COMMUNITIES]}]})
-
-export const communityLists = derived(
-  [plaintext, communityListEvents],
-  ([$plaintext, $communityListEvents]) =>
-    $communityListEvents.map(event =>
-      readList(
-        asDecryptedEvent(event, {
-          content: $plaintext[event.id],
-        }),
-      ),
-    ),
-)
-
-export const communityListsByPubkey = withGetter(
-  derived(communityLists, $ls => indexBy($l => $l.event.pubkey, $ls)),
-)
-
-export const getCommunityList = (pk: string) =>
-  communityListsByPubkey.get().get(pk) as PublishedList | undefined
-
-export const deriveCommunityList = (pk: string) =>
-  derived(communityListsByPubkey, m => m.get(pk) as PublishedList | undefined)
-
-export const getCommunities = (pk: string) =>
-  new Set(getAddressTagValues(getListTags(getCommunityList(pk))))
-
-export const deriveCommunities = (pk: string) =>
-  derived(communityListsByPubkey, m => new Set(getAddressTagValues(getListTags(m.get(pk)))))
 
 export const isEventMuted = withGetter(
   derived(

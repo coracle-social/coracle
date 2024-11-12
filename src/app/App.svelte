@@ -7,13 +7,7 @@
   import {ctx, ago, max, sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
-  import {
-    relaysByUrl,
-    getRelayQuality,
-    getPubkeyRelays,
-    trackRelayStats,
-    loadRelay,
-  } from "@welshman/app"
+  import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
@@ -447,20 +441,16 @@
       slowConnections.set(getPubkeyRelays($pubkey).filter(url => getRelayQuality(url) < 0.5))
 
       // Prune connections we haven't used in a while
-      for (const url of ctx.net.pool.data.keys()) {
-        const relay = relaysByUrl.get().get(url)
+      for (const connection of ctx.net.pool.data.values()) {
+        const lastActivity = max([
+          connection.stats.lastOpen,
+          connection.stats.lastPublish,
+          connection.stats.lastRequest,
+          connection.stats.lastEvent,
+        ])
 
-        if (relay?.stats) {
-          const lastActivity = max([
-            relay.stats.last_open,
-            relay.stats.last_publish,
-            relay.stats.last_request,
-            relay.stats.last_event,
-          ])
-
-          if (lastActivity < ago(30)) {
-            ctx.net.pool.remove(url)
-          }
+        if (lastActivity && lastActivity < ago(30)) {
+          ctx.net.pool.remove(connection.url)
         }
       }
     }, 5_000)
