@@ -9,7 +9,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@sveltejs/kit": "^2.0.0",
@@ -51,6 +52,7 @@
     "@tiptap/extension-placeholder": "^2.9.1",
     "@tiptap/extension-text": "^2.6.6",
     "@tiptap/suggestion": "^2.6.4",
+    "@types/qrcode": "^1.5.5",
     "@types/throttle-debounce": "^5.0.2",
     "@vite-pwa/assets-generator": "^0.2.6",
     "@vite-pwa/sveltekit": "^0.6.6",
@@ -68,6 +70,7 @@
     "dotenv": "^16.4.5",
     "emoji-picker-element": "^1.22.8",
     "fuse.js": "^7.0.0",
+    "husky": "^9.1.6",
     "idb": "^8.0.0",
     "nostr-editor": "^0.0.3",
     "nostr-tools": "^2.7.2",

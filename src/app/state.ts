@@ -1,5 +1,5 @@
 import twColors from "tailwindcss/colors"
-import {get, derived, writable} from "svelte/store"
+import {get, derived} from "svelte/store"
 import {nip19} from "nostr-tools"
 import type {Maybe} from "@welshman/lib"
 import {
@@ -55,7 +55,7 @@ import {
   userFollows,
   ensurePlaintext,
 } from "@welshman/app"
-import type {AppSyncOpts, Thunk} from "@welshman/app"
+import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 
@@ -143,8 +143,6 @@ export const pubkeyLink = (
   pubkey: string,
   relays = ctx.app.router.FromPubkeys([pubkey]).getUrls(),
 ) => entityLink(nip19.nprofileEncode({pubkey, relays}))
-
-export const thunks = writable({} as Record<string, Thunk>)
 
 export const tagRoom = (room: string, url: string) => [ROOM, room, url]
 

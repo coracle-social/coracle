@@ -16,12 +16,17 @@ export const copyToClipboard = (text: string) => {
   return result
 }
 
-type ScrollerOpts = {
+export type ScrollerOpts = {
   onScroll: () => any
   element: Element
   threshold?: number
   reverse?: boolean
   delay?: number
+}
+
+export type Scroller = {
+  check: () => Promise<void>
+  stop: () => void
 }
 
 export const createScroller = ({

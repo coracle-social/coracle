@@ -21,7 +21,7 @@
   const onTouchEnd = () => clearTimeout(timeout)
 
   let touch: Touch
-  let timeout: number
+  let timeout: any
 </script>
 
 <div

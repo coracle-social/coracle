@@ -6,9 +6,10 @@
 
   export let code
 
-  let canvas, wrapper
+  let canvas: Element
+  let wrapper: Element
   let scale = 0.1
-  let height = null
+  let height: number
 
   onMount(() => {
     QRCode.toCanvas(canvas, code)

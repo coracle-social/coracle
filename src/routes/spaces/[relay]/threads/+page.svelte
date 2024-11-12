@@ -7,7 +7,7 @@
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
   import {createFeedController, userMutes} from "@welshman/app"
-  import {createScroller} from "@lib/html"
+  import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
@@ -32,7 +32,7 @@
   let limit = 5
   let loading = true
   let element: Element
-  let scroller
+  let scroller: Scroller
 
   onMount(() => {
     let unmounted = false

@@ -4,12 +4,13 @@
   import {max} from "@welshman/lib"
   import {deriveEvents, deriveIsDeleted} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
-  import {pubkey, repository, formatTimestampRelative} from "@welshman/app"
+  import {thunks, pubkey, repository, formatTimestampRelative} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
+  import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ThreadMenu from "@app/components/ThreadMenu.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
   import {COMMENT} from "@app/state"
@@ -18,8 +19,8 @@
   export let event
   export let showActivity = false
 
+  const thunk = $thunks[event.id]
   const deleted = deriveIsDeleted(repository, event)
-
   const replies = deriveEvents(repository, {filters: [{kinds: [COMMENT], "#E": [event.id]}]})
 
   const showPopover = () => popover.show()
@@ -49,6 +50,8 @@
   <div class="flex flex-grow flex-wrap justify-end gap-2">
     {#if $deleted}
       <div class="btn btn-error btn-xs rounded-full">Deleted</div>
+    {:else if thunk}
+      <ThunkStatus {thunk} />
     {/if}
     {#if showActivity}
       <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">

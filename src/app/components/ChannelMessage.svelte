@@ -2,8 +2,13 @@
   import {readable} from "svelte/store"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {deriveProfile, deriveProfileDisplay, formatTimestampAsTime, pubkey} from "@welshman/app"
-  import type {Thunk} from "@welshman/app"
+  import {
+    thunks,
+    deriveProfile,
+    deriveProfileDisplay,
+    formatTimestampAsTime,
+    pubkey,
+  } from "@welshman/app"
   import {isMobile} from "@lib/html"
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -16,13 +21,12 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, thunks, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
+  import {colors, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushDrawer, pushModal} from "@app/modal"
 
   export let url, room
   export let event: TrustedEvent
-  export let thunk: Thunk
   export let showPubkey = false
   export let isHead = false
   export let inert = false
@@ -90,7 +94,7 @@
       <div class="text-sm">
         <Content {event} />
         {#if thunk}
-          <ThunkStatus {thunk} />
+          <ThunkStatus {thunk} class="mt-2" />
         {/if}
       </div>
     </div>

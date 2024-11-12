@@ -10,7 +10,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, ago, assoc, append} from "@welshman/lib"
+  import {sortBy, ago, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -34,7 +34,6 @@
     MESSAGE,
     COMMENT,
     getMembershipRoomsByUrl,
-    thunks,
   } from "@app/state"
   import {subscribePersistent, addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
@@ -49,12 +48,12 @@
 
   const assertEvent = (e: any) => e as TrustedEvent
 
-  const onSubmit = ({content, tags}: EventContent) => {
-    const event = createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)})
-    const thunk = publishThunk({event, relays: [url], delay: $userSettingValues.send_delay})
-
-    thunks.update(assoc(thunk.event.id, thunk))
-  }
+  const onSubmit = ({content, tags}: EventContent) =>
+    publishThunk({
+      relays: [url],
+      event: createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)}),
+      delay: $userSettingValues.send_delay,
+    })
 
   let loading = true
   let elements: Element[] = []

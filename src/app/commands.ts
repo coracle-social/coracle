@@ -30,7 +30,7 @@ import {
   signer,
   repository,
   publishThunk,
-  mergeThunks,
+  publishThunks,
   loadProfile,
   loadInboxRelaySelections,
   profilesByPubkey,
@@ -335,15 +335,13 @@ export const sendWrapped = async ({
 }) => {
   const nip59 = Nip59.fromSigner(signer.get()!)
 
-  return mergeThunks(
+  return publishThunks(
     await Promise.all(
-      uniq(pubkeys).map(async recipient =>
-        publishThunk({
-          event: await nip59.wrap(recipient, stamp(template)),
-          relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
-          delay,
-        }),
-      ),
+      uniq(pubkeys).map(async recipient => ({
+        event: await nip59.wrap(recipient, stamp(template)),
+        relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
+        delay,
+      })),
     ),
   )
 }

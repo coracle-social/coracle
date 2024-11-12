@@ -10,7 +10,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {int, assoc, MINUTE, sortBy, remove} from "@welshman/lib"
+  import {int, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
   import {
@@ -32,14 +32,7 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import {
-    thunks,
-    userSettingValues,
-    deriveChat,
-    splitChatId,
-    PLATFORM_NAME,
-    pubkeyLink,
-  } from "@app/state"
+  import {userSettingValues, deriveChat, splitChatId, PLATFORM_NAME, pubkeyLink} from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped} from "@app/commands"
 
@@ -61,10 +54,12 @@
 
   const onSubmit = async ({content, ...params}: EventContent) => {
     const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
-    const template = createEvent(DIRECT_MESSAGE, {content, tags})
-    const thunk = await sendWrapped({template, pubkeys, delay: $userSettingValues.send_delay})
 
-    thunks.update(assoc(thunk.thunks[0].event.id, thunk))
+    await sendWrapped({
+      pubkeys,
+      template: createEvent(DIRECT_MESSAGE, {content, tags}),
+      delay: $userSettingValues.send_delay,
+    })
   }
 
   let loading = true

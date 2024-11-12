@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {assoc, sortBy, append} from "@welshman/lib"
+  import {sortBy, append} from "@welshman/lib"
   import type {EventContent, TrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
-  import {thunks, tagRoom, COMMENT} from "@app/state"
+  import {tagRoom, COMMENT} from "@app/state"
   import {publishComment} from "@app/commands"
 
   export let url, room, event: TrustedEvent
@@ -14,16 +14,13 @@
     filters: [{kinds: [COMMENT], "#E": [event.id]}],
   })
 
-  const onSubmit = ({content, tags}: EventContent) => {
-    const thunk = publishComment({
+  const onSubmit = ({content, tags}: EventContent) =>
+    publishComment({
       event,
       content,
       tags: append(tagRoom(room, url), tags),
       relays: [url],
     })
-
-    thunks.update(assoc(thunk.event.id, thunk))
-  }
 </script>
 
 <div class="col-2">
