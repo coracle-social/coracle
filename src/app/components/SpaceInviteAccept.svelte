@@ -38,7 +38,7 @@
 
     const connection = ctx.net.pool.get(url)
 
-    if (connection.meta.lastAuth === 0) {
+    if (connection.stats.lastAuth === 0) {
       pushModal(Confirm, {
         confirm: () => confirm(url),
         message: `This space does not appear to limit who can post to it. This can result

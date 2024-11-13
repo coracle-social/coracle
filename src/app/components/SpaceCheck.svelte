@@ -20,7 +20,7 @@
   const confirm = () => goto(makeSpacePath(url), {replaceState: true})
 
   const next = () => {
-    if (!error && ctx.net.pool.get(url).meta.lastAuth === 0) {
+    if (!error && ctx.net.pool.get(url).stats.lastAuth === 0) {
       pushModal(Confirm, {
         confirm,
         message: `This space does not appear to limit who can post to it. This can result
