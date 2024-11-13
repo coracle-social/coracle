@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy, flatten} from "@welshman/lib"
-  import {deriveEvents} from "@welshman/store"
+  import {sortBy, uniqBy} from "@welshman/lib"
   import {feedFromFilter} from "@welshman/feeds"
   import {NOTE, getAncestorTags} from "@welshman/util"
-  import {repository, createFeedController} from "@welshman/app"
+  import type {TrustedEvent} from "@welshman/util"
+  import {createFeedController} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteItem from "@app/components/NoteItem.svelte"
@@ -12,18 +12,36 @@
   export let url
   export let pubkey
 
-  const filter = {kinds: [NOTE], authors: [pubkey]}
-  const events = deriveEvents(repository, {filters: [filter]})
+  const ctrl = createFeedController({
+    useWindowing: true,
+    feed: feedFromFilter({kinds: [NOTE], authors: [pubkey]}),
+    onEvent: (event: TrustedEvent) => {
+      if (getAncestorTags(event.tags).replies.length === 0) {
+        buffer.push(event)
+      }
+    },
+  })
 
   let element: Element
+  let buffer: TrustedEvent[] = []
+  let events: TrustedEvent[] = []
 
   onMount(() => {
-    const ctrl = createFeedController({feed: feedFromFilter(filter)})
     const scroller = createScroller({
       element,
       delay: 300,
       threshold: 3000,
-      onScroll: () => ctrl.load(5),
+      onScroll: () => {
+        buffer = uniqBy(
+          e => e.id,
+          sortBy(e => -e.created_at, buffer),
+        )
+        events = [...events, ...buffer.splice(0, 5)]
+
+        if (buffer.length < 50) {
+          ctrl.load(50)
+        }
+      },
     })
 
     return () => scroller.stop()
@@ -32,10 +50,8 @@
 
 <div class="col-4" bind:this={element}>
   <div class="flex flex-col gap-2">
-    {#each sortBy(e => -e.created_at, $events) as event (event.id)}
-      {#if flatten(Object.values(getAncestorTags(event.tags))).length === 0}
-        <NoteItem {url} {event} />
-      {/if}
+    {#each events as event (event.id)}
+      <NoteItem {url} {event} />
     {/each}
     <p class="center my-12 flex">
       <Spinner loading />

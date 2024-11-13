@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {get} from "svelte/store"
   import {dev} from "$app/environment"
-  import {sleep, take, sortBy, ago, now, HOUR} from "@welshman/lib"
+  import {ctx, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     PROFILE,
@@ -13,6 +13,7 @@
     RELAYS,
     INBOX_RELAYS,
     WRAP,
+    DELETE,
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
@@ -41,8 +42,17 @@
   import {setupTracking} from "@app/tracking"
   import {setupAnalytics} from "@app/analytics"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS} from "@app/state"
-  import {loadUserData} from "@app/commands"
+  import {
+    INDEXER_RELAYS,
+    getMembershipUrls,
+    getMembershipRooms,
+    userMembership,
+    MEMBERSHIPS,
+    MESSAGE,
+    COMMENT,
+    THREAD,
+  } from "@app/state"
+  import {loadUserData, subscribePersistent} from "@app/commands"
   import * as state from "@app/state"
 
   // Migration: old nostrtalk instance used different sessions
@@ -130,10 +140,55 @@
         tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
       }).then(() => sleep(300))
 
+      let unsubRooms: any
+
+      userMembership.subscribe($membership => {
+        unsubRooms?.()
+
+        const since = ago(30)
+        const rooms = uniq(getMembershipRooms($membership).map(m => m.room))
+        const relays = uniq(getMembershipUrls($membership))
+
+        if (relays.length > 0) {
+          subscribePersistent({
+            relays,
+            filters: [
+              {kinds: [THREAD], since},
+              {kinds: [MESSAGE], "#~": rooms, since},
+              {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), since},
+              {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String), since},
+              {kinds: [MEMBERSHIPS], "#r": relays, since},
+            ],
+          })
+        }
+      })
+
+      let unsubChats: any
+
+      pubkey.subscribe($pubkey => {
+        unsubChats?.()
+
+        if ($pubkey) {
+          unsubChats = subscribePersistent({
+            filters: [{kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK)}],
+            relays: ctx.app.router.UserInbox().getUrls(),
+          })
+        }
+      })
+
+      // Unwrap gift wraps as they come in
+      repository.on("update", ({added}) => {
+        for (const event of added) {
+          state.ensureUnwrapped(event)
+        }
+      })
+
+      // Load relay info
       for (const url of INDEXER_RELAYS) {
         loadRelay(url)
       }
 
+      // Load user data
       if ($pubkey) {
         loadUserData($pubkey)
       }

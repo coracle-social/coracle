@@ -268,7 +268,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 export const checkRelayAccess = async (url: string, claim = "") => {
   const connection = ctx.net.pool.get(url)
 
-  await connection.auth.attempt()
+  await connection.auth.attempt(5000)
 
   const thunk = publishThunk({
     event: createEvent(AUTH_JOIN, {tags: [["claim", claim]]}),
@@ -309,9 +309,10 @@ export const checkRelayAuth = async (url: string) => {
   const connection = ctx.net.pool.get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.auth.attempt()
+  await connection.auth.attempt(5000)
 
   if (!okStatuses.includes(connection.auth.status)) {
+    console.log(connection.auth.status, connection)
     return `Failed to authenticate: "${connection.auth.message}"`
   }
 }

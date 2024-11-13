@@ -3,7 +3,7 @@
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import type {TrustedEvent} from "@welshman/util"
   import {REACTION} from "@welshman/util"
-  import {pubkey, load, formatTimestamp} from "@welshman/app"
+  import {pubkey, load} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import Content from "@app/components/Content.svelte"
@@ -40,8 +40,5 @@
         <Icon icon="smile-circle" size={4} />
       </EmojiButton>
     </ReactionSummary>
-    <p class="whitespace-nowrap text-sm opacity-75">
-      {formatTimestamp(event.created_at)}
-    </p>
   </div>
 </NoteCard>

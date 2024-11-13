@@ -1,15 +1,13 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {subscribe} from "@welshman/app"
-  import {DELETE} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import Delay from "@lib/components/Delay.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import {pushToast} from "@app/toast"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
-  import {decodeRelay, MEMBERSHIPS, THREAD, MESSAGE, COMMENT} from "@app/state"
+  import {decodeRelay} from "@app/state"
 
   $: url = decodeRelay($page.params.relay)
 
@@ -27,16 +25,6 @@
 
   onMount(() => {
     checkConnection()
-
-    const sub = subscribe({
-      filters: [
-        {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String)},
-        {kinds: [MEMBERSHIPS], "#r": [url]},
-      ],
-      relays: [url],
-    })
-
-    return () => sub.close()
   })
 </script>
 

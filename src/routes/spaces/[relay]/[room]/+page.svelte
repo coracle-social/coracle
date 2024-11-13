@@ -8,9 +8,8 @@
 </script>
 
 <script lang="ts">
-  import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, ago, append} from "@welshman/lib"
+  import {sortBy, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -35,7 +34,7 @@
     COMMENT,
     getMembershipRoomsByUrl,
   } from "@app/state"
-  import {subscribePersistent, addRoomMembership, removeRoomMembership} from "@app/commands"
+  import {addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
   import {popKey} from "@app/implicit"
 
@@ -89,15 +88,6 @@
 
     elements.reverse()
   }
-
-  onMount(() => {
-    const unsub = subscribePersistent({
-      filters: [{"#~": [room], since: ago(30)}],
-      relays: [url],
-    })
-
-    return () => unsub()
-  })
 
   setTimeout(() => {
     loading = false

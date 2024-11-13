@@ -4,7 +4,7 @@
   import {WEEK, ctx, ago} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {pubkey, repository, subscribe} from "@welshman/app"
+  import {pubkey, repository} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -35,15 +35,9 @@
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
 
   onMount(() => {
-    const sub = subscribe({
-      filters: [{kinds: [WRAP], "#p": [$pubkey!], since: ago(WEEK)}],
-      relays: ctx.app.router.UserInbox().getUrls(),
-    })
-
     repository.on("update", onUpdate)
 
     return () => {
-      sub.close()
       repository.off("update", onUpdate)
     }
   })

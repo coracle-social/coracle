@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ago, assoc} from "@welshman/lib"
+  import {sortBy, uniqBy} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
-  import type {Filter} from "@welshman/util"
+  import type {Filter, TrustedEvent} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
   import {createFeedController, userMutes} from "@welshman/app"
@@ -15,38 +15,41 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, COMMENT, deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {THREAD, COMMENT, decodeRelay} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
-  import {subscribePersistent} from "@app/commands"
 
   const url = decodeRelay($page.params.relay)
-  const events = deriveEventsForUrl(url, [{kinds: [THREAD]}])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
   const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#K": [String(THREAD)]}]
-  const feed = makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters))
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const createThread = () => pushModal(ThreadCreate, {url})
 
-  let limit = 5
   let loading = true
   let element: Element
   let scroller: Scroller
+  let buffer: TrustedEvent[] = []
+  let events: TrustedEvent[] = []
 
   onMount(() => {
     let unmounted = false
 
     const ctrl = createFeedController({
-      feed,
+      useWindowing: true,
+      feed: makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters)),
+      onEvent: (event: TrustedEvent) => {
+        if (
+          event.kind === THREAD &&
+          !event.tags.some(nthEq(0, "e")) &&
+          !mutedPubkeys.includes(event.pubkey)
+        ) {
+          buffer.push(event)
+        }
+      },
       onExhausted: () => {
         loading = false
       },
-    })
-
-    const unsub = subscribePersistent({
-      filters: filters.map(assoc("since", ago(30))),
-      relays: [url],
     })
 
     // Element is frequently not defined. I don't know why
@@ -56,10 +59,16 @@
           element,
           delay: 300,
           threshold: 3000,
-          onScroll: async () => {
-            limit += 5
+          onScroll: () => {
+            buffer = uniqBy(
+              e => e.id,
+              sortBy(e => -e.created_at, buffer),
+            )
+            events = [...events, ...buffer.splice(0, 5)]
 
-            await ctrl.load(5)
+            if (buffer.length < 50) {
+              ctrl.load(50)
+            }
           },
         })
       }
@@ -67,7 +76,6 @@
 
     return () => {
       unmounted = true
-      unsub()
       scroller?.stop()
     }
   })
@@ -90,16 +98,14 @@
     </div>
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
-    {#each $events.slice(0, limit) as event (event.id)}
-      {#if !event.tags.some(nthEq(0, "e")) && !mutedPubkeys.includes(event.pubkey)}
-        <ThreadItem {url} {event} />
-      {/if}
+    {#each events as event (event.id)}
+      <ThreadItem {url} {event} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>
         {#if loading}
           Looking for threads...
-        {:else if $events.length === 0}
+        {:else if events.length === 0}
           No threads found.
         {/if}
       </Spinner>
