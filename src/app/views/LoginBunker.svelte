@@ -2,6 +2,7 @@
   import {onDestroy} from "svelte"
   import {Nip46Broker} from "@welshman/signer"
   import {addSession, nip46Perms} from "@welshman/app"
+  import {normalizeRelayUrl} from "@welshman/util"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -42,10 +43,9 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      const success = await loginWithNip46(token, {pubkey, relays})
+      const success = await loginWithNip46(token, {pubkey, relays: relays.map(normalizeRelayUrl)})
 
       if (success) {
-        abortController.abort()
         boot()
       }
     } finally {
@@ -61,6 +61,8 @@
         secret: init.clientSecret,
         handler: {pubkey, relays: env.SIGNER_RELAYS},
       })
+
+      boot()
     }
   })
 
