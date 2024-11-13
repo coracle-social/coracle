@@ -114,8 +114,12 @@
           Sending in {timeLeft} seconds...
           <Anchor
             class="ml-3 inline-flex"
-            button
-            on:click={() => $toast.onCancel() && toast.set(null)}>Cancel</Anchor>
+            link
+            underline
+            on:click={() => {
+              $toast.onCancel()
+              toast.set(null)
+            }}>Cancel</Anchor>
         {:else if $toast.type === "publish"}
           <ThunkStatus thunk={$toast.thunk} />
         {/if}

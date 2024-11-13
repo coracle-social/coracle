@@ -106,7 +106,7 @@
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),
-      delay: $userSettings.undo_delay * 1000,
+      delay: $userSettings.send_delay,
     })
     addDraftToContext(event, () => thunk.controller.abort())
     isOpen = false

@@ -227,7 +227,7 @@ export const defaultSettings = {
   relay_limit: 5,
   default_zap: 21,
   show_media: true,
-  undo_delay: 0, // undo send delay in seconds
+  send_delay: 0, // undo send delay in ms
   muted_words: [],
   hide_sensitive: true,
   report_analytics: true,

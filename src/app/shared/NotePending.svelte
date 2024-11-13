@@ -72,9 +72,11 @@
         modal
         href="/publishes">See details</Anchor>
     {/if}
-  {:else}
+  {:else if $userSettings.send_delay > 0}
     <span
-      >Sending reply in {event.created_at + $userSettings.undo_delay - $timestamp1} seconds</span>
+      >Sending reply in {event.created_at +
+        Math.ceil($userSettings.send_delay / 1000) -
+        $timestamp1} seconds</span>
 
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"

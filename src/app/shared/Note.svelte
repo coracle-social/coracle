@@ -13,9 +13,10 @@
     getAncestorTagValues,
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
-  import {identity, reject, whereEq, uniqBy, prop} from "ramda"
+  import {deriveEvents} from "@welshman/store"
+  import {identity, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
-  import {quantify, batch} from "hurdak"
+  import {quantify} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {replyKinds, isLike} from "src/util/nostr"
   import {formatTimestamp, timestamp1} from "src/util/misc"
@@ -63,15 +64,18 @@
   let replyCtrl = null
   let replyIsActive = false
   let showMutedReplies = false
-  let actions = null
   let collapsed = depth === 0
-  let context = repository.query([{"#e": [event.id]}]).filter(e => isChildOf(e, event))
   let showHiddenReplies = anchor === getIdOrAddress(event)
   let draftEventId: string
   let removeDraft: () => void
 
   const showEntire = showHiddenReplies
   const interactive = !anchor || !showEntire
+
+  const addDraftToContext = (event, cb) => {
+    draftEventId = event.id
+    removeDraft = () => cb() && repository.removeEvent(event.id)
+  }
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -105,19 +109,9 @@
       .at("thread")
       .open()
 
-  const removeFromContext = e => {
-    context = reject(whereEq({id: e.id}), context)
-  }
-
-  const addDraftToContext = (event, cb) => {
-    draftEventId = event.id
-    removeDraft = () => cb() && removeFromContext(event)
-    context = context.concat(event)
-  }
-
-  const addToContext = (event, cb) => {
-    context = context.concat(event)
-  }
+  const context = deriveEvents(repository, {
+    filters: [{"#e": [event.id]}],
+  })
 
   $: ancestors = getAncestorTagValues(event.tags || [])
   $: reply = ancestors.replies[0]
@@ -128,7 +122,7 @@
   $: hidden = $isEventMuted(event, true)
 
   // Find children in our context
-  $: children = context.filter(e => isChildOf(e, event))
+  $: children = $context.filter(e => isChildOf(e, event))
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
 
@@ -215,9 +209,6 @@
       load({
         relays: ctx.app.router.Replies(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
-        onEvent: batch(200, events => {
-          context = uniqBy(prop("id"), context.concat(events))
-        }),
       })
     }
   })
@@ -303,9 +294,6 @@
                 <NoteActions
                   note={event}
                   zapper={$zapper}
-                  bind:this={actions}
-                  {removeFromContext}
-                  {addToContext}
                   {replyCtrl}
                   {showHidden}
                   {replies}
@@ -355,9 +343,6 @@
         }}
         on:reset={() => {
           replyIsActive = false
-        }}
-        on:event={e => {
-          context = [e.detail, ...context]
         }} />
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}

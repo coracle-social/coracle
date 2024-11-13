@@ -143,14 +143,15 @@
     const thunk = publish({
       event: template,
       relays: ctx.app.router.PublishEvent(template).getUrls(),
-      delay: $userSettings.undo_delay * 1000,
+      delay: $userSettings.send_delay,
     })
-
-    showToast({
-      type: "delay",
-      timeout: $userSettings.undo_delay,
-      onCancel: () => thunk.controller.abort(),
-    })
+    if ($userSettings.send_delay > 0) {
+      showToast({
+        type: "delay",
+        timeout: $userSettings.send_delay / 1000,
+        onCancel: () => thunk.controller.abort(),
+      })
+    }
 
     thunk.status.subscribe(status => {
       if (

@@ -61,8 +61,6 @@
   export let muted
   export let replyCtrl
   export let showHidden
-  export let addToContext
-  export let removeFromContext
   export let replies, likes, zaps
   export let zapper
 
@@ -116,14 +114,11 @@
 
     const tags = [...tagReactionTo(note), ...getClientTags()]
     const template = createEvent(7, {content, tags})
-    const pub = await signAndPublish(template)
-
-    addToContext(pub.request.event)
+    await signAndPublish(template)
   }
 
   const deleteReaction = e => {
     deleteEvent(e)
-    removeFromContext(e)
   }
 
   const startZap = () => {
@@ -138,7 +133,7 @@
         id: note.id,
         anonymous: Boolean(note.wrap),
       })
-      .cx({callback: addToContext})
+      .cx({callback: repository.publish})
       .open()
   }
 
