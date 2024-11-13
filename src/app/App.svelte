@@ -29,9 +29,7 @@
   import ChannelsList from "src/app/views/ChannelsList.svelte"
   import DataExport from "src/app/views/DataExport.svelte"
   import DataImport from "src/app/views/DataImport.svelte"
-  import EventDelete from "src/app/views/EventDelete.svelte"
   import EventDetail from "src/app/views/EventDetail.svelte"
-  import EventEdit from "src/app/views/EventEdit.svelte"
   import FeedCreate from "src/app/views/FeedCreate.svelte"
   import FeedEdit from "src/app/views/FeedEdit.svelte"
   import FeedList from "src/app/views/FeedList.svelte"
@@ -116,16 +114,6 @@
   })
 
   router.register("/events/:address", EventDetail, {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/events/:address/edit", EventEdit, {
-    serializers: {
-      address: asNaddr("address"),
-    },
-  })
-  router.register("/events/:address/delete", EventDelete, {
     serializers: {
       address: asNaddr("address"),
     },

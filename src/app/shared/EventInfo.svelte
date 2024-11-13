@@ -3,7 +3,7 @@
   import {fromPairs} from "ramda"
   import {Tags, getAddress} from "@welshman/util"
   import {deriveIsDeletedByAddress} from "@welshman/store"
-  import {repository, pubkey} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -21,8 +21,6 @@
   const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
   const detailPath = router.at("events").of(address).toString()
-  const editLink = router.at("events").of(address).at("edit").toString()
-  const deleteLink = router.at("events").of(address).at("delete").toString()
   const deleted = deriveIsDeletedByAddress(repository, event)
 
   $: tags = Tags.fromEvent(event)
@@ -44,14 +42,6 @@
       </Anchor>
       {#if $deleted}
         <Chip danger small>Deleted</Chip>
-      {/if}
-      {#if actionsInline && event.pubkey === $pubkey && !$deleted}
-        <Anchor modal stopPropagation href={editLink} class="flex items-center">
-          <i class="fa fa-edit text-base text-neutral-200" />
-        </Anchor>
-        <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
-          <i class="fa fa-trash text-base text-neutral-200" />
-        </Anchor>
       {/if}
     </div>
     {#if !actionsInline}
