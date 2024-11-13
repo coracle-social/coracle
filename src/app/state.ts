@@ -102,4 +102,4 @@ export const loadUserData = async (hints: string[] = []) => {
   listenForNotifications()
 }
 
-export const boot = () => router.at("login/connect").open({noEscape: true})
+export const boot = () => router.at("login/connect").open({noEscape: true, mini: true})

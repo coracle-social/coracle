@@ -19,23 +19,21 @@
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
-  import {env} from "src/engine"
+  import {env, load} from "src/engine"
   import {loadUserData} from "src/app/state"
 
   const t = Date.now()
 
-  const events = deriveEvents(repository, {
-    filters: [{kinds: [RELAYS, FOLLOWS, PROFILE], authors: [$session.pubkey]}],
-  })
+  const kinds = [PROFILE, RELAYS, FOLLOWS]
+  const filters = [{kinds, authors: [$session.pubkey]}]
+  const events = deriveEvents(repository, {filters})
 
   const skip = () => router.at("notes").push()
 
   const searchRelays = async relays => {
     failed = false
 
-    loadUserData(relays)
-
-    await sleep(5000)
+    await load({filters, relays, timeout: 8000})
 
     if (!found) {
       failed = true
@@ -56,7 +54,12 @@
 
   const tryDefaultRelays = () => {
     // Pull out all the stops to try to find the user's profile
-    searchRelays([LOCAL_RELAY_URL, ...env.DEFAULT_RELAYS, ...env.PLATFORM_RELAYS])
+    searchRelays([
+      LOCAL_RELAY_URL,
+      ...env.DEFAULT_RELAYS,
+      ...env.PLATFORM_RELAYS,
+      ...env.INDEXER_RELAYS,
+    ])
   }
 
   const openModal = m => {

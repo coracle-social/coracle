@@ -33,6 +33,7 @@
   const useSigner = async (app: AppInfo) => {
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
+
     loginWithNip55(pubkey, app.packageName)
     boot()
   }
