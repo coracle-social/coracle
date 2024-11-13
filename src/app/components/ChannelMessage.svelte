@@ -70,7 +70,7 @@
   class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert
     ? 'hover:bg-base-300'
     : ''}">
-  <div class="flex w-full gap-3">
+  <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
         <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />

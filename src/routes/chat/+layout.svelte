@@ -3,32 +3,49 @@
   import {page} from "$app/stores"
   import {WEEK, ctx, ago} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
-  import {pubkey, subscribe} from "@welshman/app"
+  import type {TrustedEvent} from "@welshman/util"
+  import {pubkey, repository, subscribe} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import SecondaryNavHeader from "@lib/components/SecondaryNavHeader.svelte"
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
-  import {chatSearch, pullConservatively} from "@app/state"
+  import {chatSearch, pullConservatively, ensureUnwrapped} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const startChat = () => pushModal(ChatStart)
+
+  const promise = pullConservatively({
+    filters: [{kinds: [WRAP], "#p": [$pubkey!], until: ago(WEEK)}],
+    relays: ctx.app.router.UserInbox().getUrls(),
+  })
+
+  const onUpdate = ({added}: {added: TrustedEvent[]}) => {
+    for (const event of added) {
+      ensureUnwrapped(event)
+    }
+  }
 
   let term = ""
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
 
   onMount(() => {
-    const filter = {kinds: [WRAP], "#p": [$pubkey!]}
-    const relays = ctx.app.router.UserInbox().getUrls()
-    const sub = subscribe({filters: [{...filter, since: ago(WEEK)}], relays})
+    const sub = subscribe({
+      filters: [{kinds: [WRAP], "#p": [$pubkey!], since: ago(WEEK)}],
+      relays: ctx.app.router.UserInbox().getUrls(),
+    })
 
-    pullConservatively({filters: [filter], relays})
+    repository.on("update", onUpdate)
 
-    return () => sub.close()
+    return () => {
+      sub.close()
+      repository.off("update", onUpdate)
+    }
   })
 </script>
 
@@ -50,6 +67,11 @@
       {#each chats as { id, pubkeys, messages } (id)}
         <ChatItem {id} {pubkeys} {messages} />
       {/each}
+      {#await promise}
+        <div class="border-t border-solid border-base-100 px-6 py-4 text-xs">
+          <Spinner loading>Loading conversations...</Spinner>
+        </div>
+      {/await}
     </div>
   {/key}
 </SecondaryNav>

@@ -130,12 +130,6 @@
         tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
       }).then(() => sleep(300))
 
-      repository.on("update", ({added}) => {
-        for (const event of added) {
-          state.ensureUnwrapped(event)
-        }
-      })
-
       for (const url of INDEXER_RELAYS) {
         loadRelay(url)
       }

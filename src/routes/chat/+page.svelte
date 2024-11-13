@@ -1,14 +1,10 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {ctx, ago} from "@welshman/lib"
-  import {WRAP} from "@welshman/util"
-  import {pubkey, subscribe} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ContentSearch from "@lib/components/ContentSearch.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
-  import {chatSearch, pullConservatively} from "@app/state"
+  import {chatSearch} from "@app/state"
   import {pushModal} from "@app/modal"
 
   let term = ""
@@ -16,18 +12,6 @@
   const startChat = () => pushModal(ChatStart)
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
-
-  onMount(() => {
-    const filter = {kinds: [WRAP], "#p": [$pubkey!]}
-    const sub = subscribe({filters: [{...filter, since: ago(30)}]})
-
-    pullConservatively({
-      filters: [filter],
-      relays: ctx.app.router.UserInbox().getUrls(),
-    })
-
-    return () => sub.close()
-  })
 </script>
 
 <div class="hidden min-h-screen md:hero">
