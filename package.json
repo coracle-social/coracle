@@ -56,7 +56,7 @@
     "@types/throttle-debounce": "^5.0.2",
     "@vite-pwa/assets-generator": "^0.2.6",
     "@vite-pwa/sveltekit": "^0.6.6",
-    "@welshman/app": "~0.0.25",
+    "@welshman/app": "~0.0.26",
     "@welshman/content": "~0.0.12",
     "@welshman/dvm": "~0.0.10",
     "@welshman/feeds": "~0.0.25",
