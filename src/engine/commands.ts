@@ -409,25 +409,6 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
 // Messages
 
-export const sendLegacyMessage = async (channelId: string, content: string) => {
-  const $pubkey = pubkey.get()
-  const recipients = without([$pubkey], channelId.split(","))
-
-  if (recipients.length > 1) {
-    throw new Error("Attempted to send legacy message to more than 1 recipient")
-  }
-
-  const recipient = recipients[0] || $pubkey
-
-  return createAndPublish({
-    kind: 4,
-    tags: [tagPubkey(recipient), ...getClientTags()],
-    content: await signer.get().nip04.encrypt(recipient, content),
-    relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
-    forcePlatform: false,
-  })
-}
-
 export const sendMessage = async (channelId: string, content: string) => {
   const recipients = channelId.split(",")
   const template = {
