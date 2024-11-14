@@ -9,7 +9,7 @@
   import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
   import {userMembership, getMembershipUrls, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
   import {pushModal} from "@app/modal"
-  import {deriveNotification, CHAT_FILTERS} from "@app/notifications"
+  import {deriveNotification, spacesNotification, CHAT_FILTERS} from "@app/notifications"
 
   const chatNotification = deriveNotification("/chat", CHAT_FILTERS)
 
@@ -76,10 +76,10 @@
       <PrimaryNavItem title="Notes" href="/notes">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Messages" href="/chat">
+      <PrimaryNavItem title="Messages" href="/chat" notification={$chatNotification}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu}>
+      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu} notification={$spacesNotification}>
         <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>

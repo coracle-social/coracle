@@ -1,16 +1,18 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import Page from "@lib/components/Page.svelte"
-  import Delay from "@lib/components/Delay.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import {pushToast} from "@app/toast"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {decodeRelay} from "@app/state"
+  import {deriveNotification, SPACE_FILTERS} from "@app/notifications"
 
-  $: url = decodeRelay($page.params.relay)
+  const url = decodeRelay($page.params.relay)
+
+  const notification = deriveNotification($page.url.pathname, SPACE_FILTERS, url)
 
   const ifLet = <T,>(x: T | undefined, f: (x: T) => void) => (x === undefined ? undefined : f(x))
 
@@ -24,24 +26,21 @@
     })
   }
 
+  // We have to watch this one, since on mobile the badge wil be visible when active
+  $: {
+    if ($notification) {
+      setChecked($page.url.pathname)
+    }
+  }
+
   onMount(() => {
     checkConnection()
   })
-
-  onDestroy(() => {
-    setChecked($page.url.pathname)
-  })
 </script>
 
-{#key url}
-  <Delay>
-    <SecondaryNav>
-      <MenuSpace {url} />
-    </SecondaryNav>
-    <Page>
-      {#key $page.params.room}
-        <slot />
-      {/key}
-    </Page>
-  </Delay>
-{/key}
+<SecondaryNav>
+  <MenuSpace {url} />
+</SecondaryNav>
+<Page>
+  <slot />
+</Page>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {page} from "$app/stores"
+  import {onDestroy} from "svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ContentSearch from "@lib/components/ContentSearch.svelte"
@@ -6,12 +8,17 @@
   import ChatStart from "@app/components/ChatStart.svelte"
   import {chatSearch} from "@app/state"
   import {pushModal} from "@app/modal"
+  import {setChecked} from "@app/notifications"
 
   let term = ""
 
   const startChat = () => pushModal(ChatStart)
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
+
+  onDestroy(() => {
+    setChecked($page.url.pathname)
+  })
 </script>
 
 <div class="hidden min-h-screen md:hero">

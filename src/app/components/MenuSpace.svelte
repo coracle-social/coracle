@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {displayRelayUrl} from "@welshman/util"
-  import {fly, slide} from "@lib/transition"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Popover from "@lib/components/Popover.svelte"
@@ -55,17 +55,6 @@
 
   const addRoom = () => pushModal(RoomCreate, {url}, {replaceState})
 
-  const getDelay = (reset = false) => {
-    if (reset) {
-      delay = 0
-    } else {
-      delay += 50
-    }
-
-    return delay
-  }
-
-  let delay = 0
   let showMenu = false
   let replaceState = false
   let element: Element
@@ -120,53 +109,37 @@
         </Popover>
       {/if}
     </div>
-    <div in:fly={{delay: getDelay(true)}}>
-      <SecondaryNavItem href={makeSpacePath(url)}>
-        <Icon icon="home-smile" /> Home
-      </SecondaryNavItem>
-    </div>
-    <div in:fly={{delay: getDelay()}}>
-      <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
-        <Icon icon="notes-minimalistic" /> Threads
-      </SecondaryNavItem>
-    </div>
-    <div transition:slide={{delay: getDelay()}}>
-      <div class="h-2" />
-      <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-    </div>
-    <div transition:slide={{delay: getDelay()}}>
-      <MenuSpaceRoomItem {url} room={GENERAL} />
-    </div>
+    <SecondaryNavItem href={makeSpacePath(url)}>
+      <Icon icon="home-smile" /> Home
+    </SecondaryNavItem>
+    <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
+      <Icon icon="notes-minimalistic" /> Threads
+    </SecondaryNavItem>
+    <div class="h-2" />
+    <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+    <MenuSpaceRoomItem {url} room={GENERAL} />
     {#each rooms as room, i (room)}
-      <div transition:slide={{delay: getDelay()}}>
-        <MenuSpaceRoomItem {url} {room} />
-      </div>
+      <MenuSpaceRoomItem {url} {room} />
     {/each}
     {#if otherRooms.length > 0}
-      <div transition:slide={{delay: getDelay()}}>
-        <div class="h-2" />
-        <SecondaryNavHeader>
-          {#if rooms.length > 0}
-            Other Rooms
-          {:else}
-            Rooms
-          {/if}
-        </SecondaryNavHeader>
-      </div>
+      <div class="h-2" />
+      <SecondaryNavHeader>
+        {#if rooms.length > 0}
+          Other Rooms
+        {:else}
+          Rooms
+        {/if}
+      </SecondaryNavHeader>
     {/if}
     {#each otherRooms as room, i (room)}
-      <div transition:slide={{delay: getDelay()}}>
-        <SecondaryNavItem href={makeSpacePath(url, room)}>
-          <Icon icon="hashtag" />
-          {room}
-        </SecondaryNavItem>
-      </div>
-    {/each}
-    <div in:fly={{delay: getDelay()}}>
-      <SecondaryNavItem on:click={addRoom}>
-        <Icon icon="add-circle" />
-        Create room
+      <SecondaryNavItem href={makeSpacePath(url, room)}>
+        <Icon icon="hashtag" />
+        {room}
       </SecondaryNavItem>
-    </div>
+    {/each}
+    <SecondaryNavItem on:click={addRoom}>
+      <Icon icon="add-circle" />
+      Create room
+    </SecondaryNavItem>
   </SecondaryNavSection>
 </div>

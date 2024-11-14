@@ -4,7 +4,15 @@ import {repository, pubkey} from "@welshman/app"
 import {prop, max, sortBy, assoc, lt, now} from "@welshman/lib"
 import type {Filter} from "@welshman/util"
 import {DIRECT_MESSAGE} from "@welshman/util"
-import {MESSAGE, THREAD, COMMENT, deriveEventsForUrl} from "@app/state"
+import {makeSpacePath} from "@app/routes"
+import {
+  MESSAGE,
+  THREAD,
+  COMMENT,
+  deriveEventsForUrl,
+  getMembershipUrls,
+  userMembership,
+} from "@app/state"
 
 // Checked state
 
@@ -49,3 +57,16 @@ export const deriveNotification = (path: string, filters: Filter[], url?: string
     },
   )
 }
+
+export const spacesNotification = derived(
+  [pubkey, checked, userMembership, deriveEvents(repository, {filters: SPACE_FILTERS})],
+  ([$pubkey, $checked, $userMembership, $events]) => {
+    return getMembershipUrls($userMembership).some(url => {
+      const path = makeSpacePath(url)
+      const lastChecked = max([$checked["*"], $checked[path]])
+      const [latestEvent] = sortBy($e => -$e.created_at, $events)
+
+      return latestEvent?.pubkey !== $pubkey && lt(lastChecked, latestEvent?.created_at)
+    })
+  },
+)

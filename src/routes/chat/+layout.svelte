@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {page} from "$app/stores"
   import {ctx} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -56,22 +55,17 @@
     <Icon icon="magnifer" />
     <input bind:value={term} class="grow" type="text" />
   </label>
-  {#key $page.params.chat}
-    <div class="overflow-auto">
-      {#each chats as { id, pubkeys, messages } (id)}
-        <ChatItem {id} {pubkeys} {messages} />
-      {/each}
-      {#await promise}
-        <div class="border-t border-solid border-base-100 px-6 py-4 text-xs">
-          <Spinner loading>Loading conversations...</Spinner>
-        </div>
-      {/await}
-    </div>
-  {/key}
+  <div class="overflow-auto">
+    {#each chats as { id, pubkeys, messages } (id)}
+      <ChatItem {id} {pubkeys} {messages} />
+    {/each}
+    {#await promise}
+      <div class="border-t border-solid border-base-100 px-6 py-4 text-xs">
+        <Spinner loading>Loading conversations...</Spinner>
+      </div>
+    {/await}
+  </div>
 </SecondaryNav>
-
 <Page>
-  {#key JSON.stringify($page.params)}
-    <slot />
-  {/key}
+  <slot />
 </Page>

@@ -2,6 +2,7 @@
   import "@src/app.css"
   import {onMount} from "svelte"
   import {get, derived} from "svelte/store"
+  import {page} from "$app/stores"
   import {dev} from "$app/environment"
   import {identity, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -229,7 +230,9 @@
 {:then}
   <div data-theme={$theme}>
     <AppContainer>
-      <slot />
+      {#key $page.url.pathname}
+        <slot />
+      {/key}
     </AppContainer>
     <ModalContainer />
     <div class="tippy-target" />

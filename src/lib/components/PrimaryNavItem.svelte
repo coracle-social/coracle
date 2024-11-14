@@ -17,10 +17,10 @@
       class:bg-base-300={active}
       class:tooltip={title}
       data-tip={title}>
-      {#if !active && notification}
-        <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
-      {/if}
       <slot />
+      {#if !active && notification}
+        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+      {/if}
     </div>
   </a>
 {:else}
@@ -30,10 +30,10 @@
       class:bg-base-300={active}
       class:tooltip={title}
       data-tip={title}>
-      {#if !active && notification}
-        <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
-      {/if}
       <slot />
+      {#if !active && notification}
+        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+      {/if}
     </div>
   </Button>
 {/if}
