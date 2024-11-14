@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
+  import {ifLet} from "@welshman/lib"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -14,14 +15,12 @@
 
   const notification = deriveNotification($page.url.pathname, SPACE_FILTERS, url)
 
-  const ifLet = <T,>(x: T | undefined, f: (x: T) => void) => (x === undefined ? undefined : f(x))
-
   const checkConnection = async () => {
     ifLet(await checkRelayConnection(url), error => {
       pushToast({theme: "error", message: error})
     })
 
-    ifLet(await checkRelayAuth(url), error => {
+    ifLet(await checkRelayAuth(url, 30_000), error => {
       pushToast({theme: "error", message: error})
     })
   }

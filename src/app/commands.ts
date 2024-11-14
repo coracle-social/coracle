@@ -305,11 +305,11 @@ export const checkRelayConnection = async (url: string) => {
   }
 }
 
-export const checkRelayAuth = async (url: string) => {
+export const checkRelayAuth = async (url: string, timeout = 3000) => {
   const connection = ctx.net.pool.get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.auth.attempt(30_000)
+  await connection.auth.attempt(timeout)
 
   // Only raise an error if it's not a timeout.
   // If it is, odds are the problem is with our signer, not the relay
@@ -318,11 +318,17 @@ export const checkRelayAuth = async (url: string) => {
   }
 }
 
-export const attemptRelayAccess = async (url: string, claim = "") =>
-  (await checkRelayProfile(url)) ||
-  (await checkRelayConnection(url)) ||
-  (await checkRelayAccess(url, claim)) ||
-  (await checkRelayAuth(url))
+export const attemptRelayAccess = async (url: string, claim = "") => {
+  const checks = [checkRelayProfile, checkRelayConnection, checkRelayAccess, checkRelayAuth]
+
+  for (const check of checks) {
+    const error = await check(url)
+
+    if (error) {
+      return error
+    }
+  }
+}
 
 // Actions
 
