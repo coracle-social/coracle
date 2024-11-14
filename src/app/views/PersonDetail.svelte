@@ -120,17 +120,21 @@
       {#if pubkey === $session?.pubkey}
         <Anchor
           button
-          class="!bg-neutral-800 dark:!bg-white"
+          class="w-full !bg-neutral-800 dark:!bg-white"
           on:click={router.at("/settings/profile").open}>Edit</Anchor>
       {:else if $session}
         <Anchor
           button
           accent={!$following}
           low={$following}
+          class="w-full"
           on:click={() => ($following ? unfollow(pubkey) : follow(tagPubkey(pubkey)))}
           >{$following ? "Unfollow" : "Follow"}</Anchor>
-        <Anchor button low on:click={router.at("channels").of([$session.pubkey, pubkey]).push}
-          >Message</Anchor>
+        <Anchor
+          button
+          low
+          on:click={router.at("channels").of([$session.pubkey, pubkey]).push}
+          class="w-full">Message</Anchor>
       {/if}
     </div>
     <div class="flex min-w-0 flex-grow flex-col gap-4">
