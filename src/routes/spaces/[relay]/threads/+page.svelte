@@ -101,14 +101,16 @@
         <ThreadItem {url} {event} />
       </div>
     {/each}
-    <p class="flex h-10 items-center justify-center py-20">
-      <Spinner {loading}>
-        {#if loading}
-          Looking for threads...
-        {:else if events.length === 0}
-          No threads found.
-        {/if}
-      </Spinner>
-    </p>
+    {#if loading || events.length === 0}
+      <p class="flex h-10 items-center justify-center py-20" out:fly>
+        <Spinner {loading}>
+          {#if loading}
+            Looking for threads...
+          {:else if events.length === 0}
+            No threads found.
+          {/if}
+        </Spinner>
+      </p>
+    {/if}
   </div>
 </div>
