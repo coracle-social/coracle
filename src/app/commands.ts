@@ -283,7 +283,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
       result[url].message?.replace(/^.*: /, "") ||
       "join request rejected"
 
-    return `Failed to join relay: ${message}`
+    return `Failed to join relay (${message})`
   }
 }
 
@@ -309,11 +309,12 @@ export const checkRelayAuth = async (url: string) => {
   const connection = ctx.net.pool.get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.auth.attempt(5000)
+  await connection.auth.attempt(30_000)
 
-  if (!okStatuses.includes(connection.auth.status)) {
-    console.log(connection.auth.status, connection)
-    return `Failed to authenticate: "${connection.auth.message}"`
+  // Only raise an error if it's not a timeout.
+  // If it is, odds are the problem is with our signer, not the relay
+  if (!okStatuses.includes(connection.auth.status) && connection.auth.message) {
+    return `Failed to authenticate (${connection.auth.message})`
   }
 }
 

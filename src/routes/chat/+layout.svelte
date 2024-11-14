@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {WEEK, ctx, ago} from "@welshman/lib"
+  import {ctx} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {pubkey, repository} from "@welshman/app"
@@ -20,7 +20,7 @@
   const startChat = () => pushModal(ChatStart)
 
   const promise = pullConservatively({
-    filters: [{kinds: [WRAP], "#p": [$pubkey!], until: ago(WEEK)}],
+    filters: [{kinds: [WRAP], "#p": [$pubkey!]}],
     relays: ctx.app.router.UserInbox().getUrls(),
   })
 

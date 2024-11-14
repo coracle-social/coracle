@@ -1,12 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {page} from "$app/stores"
   import {remove} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {pubkey, inboxRelaySelectionsByPubkey, loadInboxRelaySelections} from "@welshman/app"
+  import {pubkey, loadInboxRelaySelections} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
-  import Icon from "@lib/components/Icon.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
@@ -19,7 +17,6 @@
   const message = messages[0]
   const others = remove($pubkey!, pubkeys)
   const active = $page.params.chat === id
-  const missingInbox = derived(inboxRelaySelectionsByPubkey, $m => others.some(pk => !$m.has(pk)))
 
   onMount(() => {
     for (const pk of others) {
@@ -47,9 +44,6 @@
             </p>
           {/if}
         </div>
-        {#if $missingInbox}
-          <Icon icon="danger" class="text-error" />
-        {/if}
       </div>
       <p class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
         {message.content}

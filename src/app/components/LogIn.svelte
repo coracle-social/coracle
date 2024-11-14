@@ -88,13 +88,21 @@
   </p>
   {#if getNip07()}
     <Button disabled={loading} on:click={loginWithNip07} class="btn btn-primary">
-      <Icon icon="widget" />
+      {#if loading}
+        <span class="loading loading-spinner mr-3" />
+      {:else}
+        <Icon icon="widget" />
+      {/if}
       Log in with Extension
     </Button>
   {/if}
   {#each signers as app}
     <Button disabled={loading} class="btn btn-neutral" on:click={() => loginWithSigner(app)}>
-      <img src={app.iconUrl} alt={app.name} width="48" height="48" />
+      {#if loading}
+        <span class="loading loading-spinner mr-3" />
+      {:else}
+        <img src={app.iconUrl} alt={app.name} width="48" height="48" />
+      {/if}
       Log in with {app.name}
     </Button>
   {/each}
@@ -107,6 +115,7 @@
   </Button>
   <Link
     external
+    disabled={loading}
     href="https://nostrapps.com#signers"
     class="btn {hasNativeSigner ? '' : 'btn-neutral'}">
     <Icon icon="compass" />

@@ -26,8 +26,9 @@
 
 <form class="column gap-4" on:submit|preventDefault={logout}>
   <ModalHeader>
-    <div slot="title">Are you sure you want to log out?</div>
+    <div slot="title">Are you sure you<br />want to log out?</div>
   </ModalHeader>
+  <p>Your local database will be cleared.</p>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
       <Icon icon="alt-arrow-left" />

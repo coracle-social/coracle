@@ -1,9 +1,9 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
-  import {get} from "svelte/store"
+  import {get, derived} from "svelte/store"
   import {dev} from "$app/environment"
-  import {ctx, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK} from "@welshman/lib"
+  import {identity, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     PROFILE,
@@ -33,9 +33,12 @@
     session,
     signer,
     dropSession,
+    getRelayUrls,
+    userInboxRelaySelections,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
+  import * as net from "@welshman/net"
   import * as app from "@welshman/app"
   import AppContainer from "@app/components/AppContainer.svelte"
   import ModalContainer from "@app/components/ModalContainer.svelte"
@@ -47,6 +50,7 @@
     getMembershipUrls,
     getMembershipRooms,
     userMembership,
+    ensureUnwrapped,
     MEMBERSHIPS,
     MESSAGE,
     COMMENT,
@@ -62,8 +66,8 @@
 
   let ready: Promise<unknown> = Promise.resolve()
 
-  onMount(() => {
-    Object.assign(window, {get, ...lib, ...util, ...app, ...state})
+  onMount(async () => {
+    Object.assign(window, {get, ...lib, ...util, ...net, ...app, ...state})
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity
@@ -140,6 +144,29 @@
         tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
       }).then(() => sleep(300))
 
+      // Unwrap gift wraps as they come in, but throttled
+      const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
+
+      unwrapper.addGlobalHandler(ensureUnwrapped)
+
+      repository.on("update", ({added}) => {
+        for (const event of added) {
+          if (event.kind === WRAP) {
+            unwrapper.push(event)
+          }
+        }
+      })
+
+      // Load relay info
+      for (const url of INDEXER_RELAYS) {
+        loadRelay(url)
+      }
+
+      // Load user data
+      if ($pubkey) {
+        await loadUserData($pubkey)
+      }
+
       let unsubRooms: any
 
       userMembership.subscribe($membership => {
@@ -165,33 +192,18 @@
 
       let unsubChats: any
 
-      pubkey.subscribe($pubkey => {
-        unsubChats?.()
+      derived([pubkey, userInboxRelaySelections], identity).subscribe(
+        ([$pubkey, $userInboxRelaySelections]) => {
+          unsubChats?.()
 
-        if ($pubkey) {
-          unsubChats = subscribePersistent({
-            filters: [{kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK)}],
-            relays: ctx.app.router.UserInbox().getUrls(),
-          })
-        }
-      })
-
-      // Unwrap gift wraps as they come in
-      repository.on("update", ({added}) => {
-        for (const event of added) {
-          state.ensureUnwrapped(event)
-        }
-      })
-
-      // Load relay info
-      for (const url of INDEXER_RELAYS) {
-        loadRelay(url)
-      }
-
-      // Load user data
-      if ($pubkey) {
-        loadUserData($pubkey)
-      }
+          if ($pubkey) {
+            unsubChats = subscribePersistent({
+              filters: [{kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)}],
+              relays: getRelayUrls($userInboxRelaySelections),
+            })
+          }
+        },
+      )
     }
   })
 </script>
