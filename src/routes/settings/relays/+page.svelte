@@ -55,7 +55,7 @@
   <Collapse class="card2 bg-alt column gap-4">
     <h2 slot="title" class="flex items-center gap-3 text-xl">
       <Icon icon="earth" />
-      Broadcast Relays
+      Outbox Relays
     </h2>
     <p slot="description" class="text-sm">
       These relays will be advertised on your profile as places where you send your public notes. Be

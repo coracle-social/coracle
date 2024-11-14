@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
+  import {nip19} from "nostr-tools"
   import {get, derived} from "svelte/store"
   import {page} from "$app/stores"
   import {dev} from "$app/environment"
@@ -71,7 +72,7 @@
   let ready: Promise<unknown> = Promise.resolve()
 
   onMount(async () => {
-    Object.assign(window, {get, ...lib, ...util, ...net, ...app, ...state, ...notifications})
+    Object.assign(window, {get, nip19, ...lib, ...util, ...net, ...app, ...state, ...notifications})
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity

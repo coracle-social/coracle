@@ -12,12 +12,12 @@
   import {derived} from "svelte/store"
   import {int, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent, DIRECT_MESSAGE} from "@welshman/util"
+  import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
     pubkey,
     formatTimestampAsDate,
     inboxRelaySelectionsByPubkey,
-    loadInboxRelaySelections,
+    load,
     tagPubkey,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -95,8 +95,9 @@
     elements.reverse()
   }
 
-  onMount(async () => {
-    await Promise.all(others.map(pk => loadInboxRelaySelections(pk)))
+  onMount(() => {
+    // Don't use loadInboxRelaySelections because we want to force reload
+    load({filters: [{kinds: [INBOX_RELAYS], authors: others}]})
   })
 
   setTimeout(() => {

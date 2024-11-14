@@ -241,7 +241,7 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
 
   return publishThunk({
     event: createEvent(list.kind, {tags}),
-    relays: ctx.app.router.FromUser().getUrls(),
+    relays: [...INDEXER_RELAYS, ...ctx.app.router.FromUser().getUrls()],
   }).result
 }
 
@@ -258,7 +258,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 
     return publishThunk({
       event: createEvent(list.kind, {tags}),
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: [...INDEXER_RELAYS, ...ctx.app.router.FromUser().getUrls()],
     }).result
   }
 }
