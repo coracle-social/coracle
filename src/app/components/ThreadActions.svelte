@@ -13,6 +13,8 @@
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ThreadMenu from "@app/components/ThreadMenu.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
+  import {deriveNotification} from "@app/notifications"
+  import {makeSpacePath} from "@app/routes"
   import {COMMENT} from "@app/state"
 
   export let url
@@ -21,7 +23,10 @@
 
   const thunk = $thunks[event.id]
   const deleted = deriveIsDeleted(repository, event)
-  const replies = deriveEvents(repository, {filters: [{kinds: [COMMENT], "#E": [event.id]}]})
+  const path = makeSpacePath(url, "threads", event.id)
+  const filters = [{kinds: [COMMENT], "#E": [event.id]}]
+  const notification = deriveNotification(path, filters, url)
+  const replies = deriveEvents(repository, {filters})
 
   const showPopover = () => popover.show()
 
@@ -58,7 +63,10 @@
         <Icon icon="reply" />
         <span>{$replies.length} {$replies.length === 1 ? "reply" : "replies"}</span>
       </div>
-      <div class="btn btn-neutral btn-xs hidden rounded-full sm:flex">
+      <div class="btn btn-neutral btn-xs relative hidden rounded-full sm:flex">
+        {#if $notification}
+          <div class="h-2 w-2 rounded-full bg-primary" />
+        {/if}
         Active {formatTimestampRelative(lastActive)}
       </div>
     {/if}

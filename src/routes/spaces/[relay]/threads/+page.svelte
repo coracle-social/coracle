@@ -1,13 +1,14 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, uniqBy} from "@welshman/lib"
+  import {sortBy, sleep, uniqBy} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
-  import type {Filter, TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
   import {createFeedController, userMutes} from "@welshman/app"
   import {createScroller, type Scroller} from "@lib/html"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
@@ -15,71 +16,66 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, COMMENT, decodeRelay, setChecked} from "@app/state"
+  import {THREAD, decodeRelay, getEventsForUrl} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
+  import {THREAD_FILTERS, setChecked} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
-  const filters: Filter[] = [{kinds: [THREAD]}, {kinds: [COMMENT], "#K": [String(THREAD)]}]
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const createThread = () => pushModal(ThreadCreate, {url})
 
+  const ctrl = createFeedController({
+    useWindowing: true,
+    feed: makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(THREAD_FILTERS)),
+    onEvent: (event: TrustedEvent) => {
+      if (
+        event.kind === THREAD &&
+        !event.tags.some(nthEq(0, "e")) &&
+        !mutedPubkeys.includes(event.pubkey)
+      ) {
+        buffer.push(event)
+      }
+    },
+    onExhausted: () => {
+      loading = false
+    },
+  })
+
   let loading = true
+  let unmounted = false
   let element: Element
   let scroller: Scroller
   let buffer: TrustedEvent[] = []
-  let events: TrustedEvent[] = []
+  let events: TrustedEvent[] = sortBy(e => -e.created_at, getEventsForUrl(url, [{kinds: [THREAD]}]))
 
-  onMount(() => {
-    setChecked($page.url.pathname)
-
-    let unmounted = false
-
-    const ctrl = createFeedController({
-      useWindowing: true,
-      feed: makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(filters)),
-      onEvent: (event: TrustedEvent) => {
-        if (
-          event.kind === THREAD &&
-          !event.tags.some(nthEq(0, "e")) &&
-          !mutedPubkeys.includes(event.pubkey)
-        ) {
-          buffer.push(event)
-        }
-      },
-      onExhausted: () => {
-        loading = false
-      },
-    })
-
+  onMount(async () => {
     // Element is frequently not defined. I don't know why
-    setTimeout(() => {
-      if (!unmounted) {
-        scroller = createScroller({
-          element,
-          delay: 300,
-          threshold: 3000,
-          onScroll: () => {
-            buffer = uniqBy(
-              e => e.id,
-              sortBy(e => -e.created_at, buffer),
-            )
-            events = [...events, ...buffer.splice(0, 5)]
+    await sleep(1000)
 
-            if (buffer.length < 50) {
-              ctrl.load(50)
-            }
-          },
-        })
-      }
-    }, 1000)
+    if (!unmounted) {
+      scroller = createScroller({
+        element,
+        delay: 300,
+        threshold: 3000,
+        onScroll: () => {
+          buffer = sortBy(e => -e.created_at, buffer)
+          events = uniqBy(e => e.id, [...events, ...buffer.splice(0, 5)])
 
-    return () => {
-      unmounted = true
-      scroller?.stop()
+          if (buffer.length < 50) {
+            ctrl.load(50)
+          }
+        },
+      })
     }
+  })
+
+  onDestroy(() => {
+    unmounted = true
+    scroller?.stop()
+    setChecked($page.url.pathname)
   })
 </script>
 
@@ -101,7 +97,9 @@
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each events as event (event.id)}
-      <ThreadItem {url} {event} />
+      <div in:fly>
+        <ThreadItem {url} {event} />
+      </div>
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>

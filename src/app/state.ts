@@ -1,10 +1,9 @@
 import twColors from "tailwindcss/colors"
-import {get, derived, writable} from "svelte/store"
+import {get, derived} from "svelte/store"
 import {nip19} from "nostr-tools"
 import type {Maybe} from "@welshman/lib"
 import {
   ctx,
-  now,
   setContext,
   remove,
   assoc,
@@ -17,7 +16,6 @@ import {
   nthEq,
   shuffle,
   parseJson,
-  prop,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -253,6 +251,12 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
+export const getEventsForUrl = (url: string, filters: Filter[]) =>
+  sortBy(
+    e => -e.created_at,
+    repository.query(filters).filter(e => e.tags.find(nthEq(0, "~"))?.[2] === url),
+  )
+
 export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
   derived(deriveEvents(repository, {filters}), $events =>
     sortBy(
@@ -260,14 +264,6 @@ export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
       $events.filter(e => e.tags.find(nthEq(0, "~"))?.[2] === url),
     ),
   )
-
-// Last checked timestamps, notifications
-
-export const checked = writable<Record<string, number>>({})
-
-export const deriveChecked = (key: string) => derived(checked, prop(key))
-
-export const setChecked = (key: string, ts = now()) => checked.update(assoc(key, ts))
 
 // Settings
 

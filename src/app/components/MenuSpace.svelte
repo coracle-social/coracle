@@ -13,6 +13,7 @@
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import ProfileList from "@app/components/ProfileList.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
+  import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
   import {
     getMembershipRoomsByUrl,
     getMembershipUrls,
@@ -22,10 +23,14 @@
     roomsByUrl,
     GENERAL,
   } from "@app/state"
+  import {deriveNotification, THREAD_FILTERS} from "@app/notifications"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
   export let url
+
+  const threadsPath = makeSpacePath(url, "threads")
+  const threadsNotification = deriveNotification(threadsPath, THREAD_FILTERS, url)
 
   const openMenu = () => {
     showMenu = true
@@ -121,7 +126,7 @@
       </SecondaryNavItem>
     </div>
     <div in:fly={{delay: getDelay()}}>
-      <SecondaryNavItem href={makeSpacePath(url, "threads")}>
+      <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
         <Icon icon="notes-minimalistic" /> Threads
       </SecondaryNavItem>
     </div>
@@ -130,17 +135,11 @@
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
     </div>
     <div transition:slide={{delay: getDelay()}}>
-      <SecondaryNavItem href={makeSpacePath(url, GENERAL)}>
-        <Icon icon="hashtag" />
-        {GENERAL}
-      </SecondaryNavItem>
+      <MenuSpaceRoomItem {url} room={GENERAL} />
     </div>
     {#each rooms as room, i (room)}
       <div transition:slide={{delay: getDelay()}}>
-        <SecondaryNavItem href={makeSpacePath(url, room)}>
-          <Icon icon="hashtag" />
-          {room}
-        </SecondaryNavItem>
+        <MenuSpaceRoomItem {url} {room} />
       </div>
     {/each}
     {#if otherRooms.length > 0}

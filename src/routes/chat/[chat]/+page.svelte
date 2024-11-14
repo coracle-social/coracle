@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onDestroy} from "svelte"
   import {page} from "$app/stores"
   import Chat from "@app/components/Chat.svelte"
-  import {setChecked} from "@app/state"
+  import {setChecked} from "@app/notifications"
 
-  onMount(() => {
+  onDestroy(() => {
     setChecked($page.url.pathname)
   })
 </script>

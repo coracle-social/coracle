@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {sortBy, nthEq, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
   import {repository, subscribe} from "@welshman/app"
@@ -14,6 +14,7 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
+  import {setChecked} from "@app/notifications"
   import {pushDrawer} from "@app/modal"
 
   const {relay, id} = $page.params
@@ -42,6 +43,10 @@
     const sub = subscribe({filters, relays: [url]})
 
     return () => sub.close()
+  })
+
+  onDestroy(() => {
+    setChecked($page.url.pathname)
   })
 </script>
 

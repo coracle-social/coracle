@@ -13,6 +13,7 @@
   import InfoBunker from "@app/components/InfoBunker.svelte"
   import {loginWithNip46, loadUserData} from "@app/commands"
   import {pushModal, clearModals} from "@app/modal"
+  import {setChecked} from "@app/notifications"
   import {pushToast} from "@app/toast"
   import {PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO, SIGNER_RELAYS} from "@app/state"
 
@@ -79,6 +80,7 @@
 
       await loadUserData(pubkey)
 
+      setChecked("*")
       clearModals()
     }
   })

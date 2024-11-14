@@ -13,6 +13,7 @@
   import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
   import {loadUserData} from "@app/commands"
+  import {setChecked} from "@app/notifications"
 
   const signUp = () => pushModal(SignUp)
 
@@ -32,6 +33,7 @@
     await loadUserData(session.pubkey, {relays})
 
     pushToast({message: "Successfully logged in!"})
+    setChecked("*")
     clearModals()
   }
 

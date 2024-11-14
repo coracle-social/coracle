@@ -10,6 +10,7 @@
   import LogIn from "@app/components/LogIn.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import {pushModal, clearModals} from "@app/modal"
+  import {setChecked} from "@app/notifications"
   import {PLATFORM_NAME} from "@app/state"
   import {pushToast} from "@app/toast"
 
@@ -42,6 +43,7 @@
     if (await loginBroker.connect("", nip46Perms)) {
       addSession({method: "nip46", pubkey, secret, handler: {...handler, pubkey}})
       pushToast({message: "Successfully logged in!"})
+      setChecked("*")
       clearModals()
     } else {
       pushToast({

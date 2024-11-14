@@ -22,9 +22,11 @@
 
 <script lang="ts">
   import cx from "classnames"
+  import {fade} from "@lib/transition"
   import {page} from "$app/stores"
 
   export let href: string = ""
+  export let notification = false
 
   $: active = $page.url.pathname === href
 </script>
@@ -36,11 +38,14 @@
     on:click
     class={cx(
       $$props.class,
-      "flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
+      "relative flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
     )}
     class:text-base-content={active}
     class:bg-base-100={active}>
     <slot />
+    {#if !active && notification}
+      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade />
+    {/if}
   </a>
 {:else}
   <button
@@ -48,10 +53,13 @@
     on:click
     class={cx(
       $$props.class,
-      "flex w-full items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
+      "relative flex w-full items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
     )}
     class:text-base-content={active}
     class:bg-base-100={active}>
+    {#if !active && notification}
+      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade />
+    {/if}
     <slot />
   </button>
 {/if}

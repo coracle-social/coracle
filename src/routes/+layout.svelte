@@ -55,8 +55,11 @@
     MESSAGE,
     COMMENT,
     THREAD,
+    GENERAL,
   } from "@app/state"
   import {loadUserData, subscribePersistent} from "@app/commands"
+  import {checked} from "@app/notifications"
+  import * as notifications from "@app/notifications"
   import * as state from "@app/state"
 
   // Migration: old nostrtalk instance used different sessions
@@ -67,7 +70,7 @@
   let ready: Promise<unknown> = Promise.resolve()
 
   onMount(async () => {
-    Object.assign(window, {get, ...lib, ...util, ...net, ...app, ...state})
+    Object.assign(window, {get, ...lib, ...util, ...net, ...app, ...state, ...notifications})
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity
@@ -133,6 +136,7 @@
         events: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
         relays: {keyPath: "url", store: throttled(1000, relays)},
         handles: {keyPath: "nip05", store: throttled(1000, handles)},
+        checked: storageAdapters.fromObjectStore(checked, {throttle: 1000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
           throttle: 1000,
           migrate: migrateFreshness,
@@ -167,29 +171,32 @@
         await loadUserData($pubkey)
       }
 
+      // Listen for space data, populate space-based notifications
       let unsubRooms: any
 
       userMembership.subscribe($membership => {
         unsubRooms?.()
 
         const since = ago(30)
-        const rooms = uniq(getMembershipRooms($membership).map(m => m.room))
+        const rooms = uniq(getMembershipRooms($membership).map(m => m.room)).concat(GENERAL)
         const relays = uniq(getMembershipUrls($membership))
 
-        if (relays.length > 0) {
-          subscribePersistent({
-            relays,
-            filters: [
-              {kinds: [THREAD], since},
-              {kinds: [MESSAGE], "#~": rooms, since},
-              {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), since},
-              {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String), since},
-              {kinds: [MEMBERSHIPS], "#r": relays, since},
-            ],
-          })
-        }
+        subscribePersistent({
+          relays,
+          filters: [
+            {kinds: [THREAD], since},
+            {kinds: [THREAD], limit: 1},
+            {kinds: [MESSAGE], "#~": rooms, since},
+            {kinds: [MESSAGE], "#~": rooms, limit: 1},
+            {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), since},
+            {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), limit: 1},
+            {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String), since},
+            {kinds: [MEMBERSHIPS], "#r": relays, since: ago(WEEK, 2)},
+          ],
+        })
       })
 
+      // Listen for chats, populate chat-based notifications
       let unsubChats: any
 
       derived([pubkey, userInboxRelaySelections], identity).subscribe(
@@ -198,7 +205,10 @@
 
           if ($pubkey) {
             unsubChats = subscribePersistent({
-              filters: [{kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)}],
+              filters: [
+                {kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)},
+                {kinds: [WRAP], "#p": [$pubkey], limit: 100},
+              ],
               relays: getRelayUrls($userInboxRelaySelections),
             })
           }

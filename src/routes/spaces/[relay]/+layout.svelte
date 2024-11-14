@@ -1,11 +1,12 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
   import Page from "@lib/components/Page.svelte"
   import Delay from "@lib/components/Delay.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import {pushToast} from "@app/toast"
+  import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
   import {decodeRelay} from "@app/state"
 
@@ -25,6 +26,10 @@
 
   onMount(() => {
     checkConnection()
+  })
+
+  onDestroy(() => {
+    setChecked($page.url.pathname)
   })
 </script>
 

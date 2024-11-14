@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, last, ago} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -14,7 +14,8 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal, pushDrawer} from "@app/modal"
-  import {deriveEventsForUrl, pullConservatively, decodeRelay, setChecked} from "@app/state"
+  import {deriveEventsForUrl, pullConservatively, decodeRelay} from "@app/state"
+  import {setChecked} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
   const kinds = [EVENT_DATE, EVENT_TIME]
@@ -54,13 +55,15 @@
     .slice(0, limit)
 
   onMount(() => {
-    setChecked($page.url.pathname)
-
     const sub = subscribe({filters: [{kinds, since: ago(30)}]})
 
     pullConservatively({filters: [{kinds}], relays: [url]})
 
     return () => sub.close()
+  })
+
+  onDestroy(() => {
+    setChecked($page.url.pathname)
   })
 
   setTimeout(() => {

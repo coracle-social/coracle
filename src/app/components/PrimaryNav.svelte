@@ -1,16 +1,17 @@
 <script lang="ts">
-  import {displayRelayUrl} from "@welshman/util"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
-  import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
+  import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
   import {userMembership, getMembershipUrls, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
   import {pushModal} from "@app/modal"
-  import {makeSpacePath} from "@app/routes"
+  import {deriveNotification, CHAT_FILTERS} from "@app/notifications"
+
+  const chatNotification = deriveNotification("/chat", CHAT_FILTERS)
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -24,24 +25,14 @@
   <div class="flex h-full flex-col justify-between">
     <div>
       {#if PLATFORM_RELAY}
-        <PrimaryNavItem
-          title={displayRelayUrl(PLATFORM_RELAY)}
-          href={makeSpacePath(PLATFORM_RELAY)}
-          class="tooltip-right">
-          <SpaceAvatar url={PLATFORM_RELAY} />
-        </PrimaryNavItem>
+        <PrimaryNavItemSpace url={PLATFORM_RELAY} />
       {:else}
         <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
           <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
         </PrimaryNavItem>
         <Divider />
         {#each getMembershipUrls($userMembership) as url (url)}
-          <PrimaryNavItem
-            title={displayRelayUrl(url)}
-            href={makeSpacePath(url)}
-            class="tooltip-right">
-            <SpaceAvatar {url} />
-          </PrimaryNavItem>
+          <PrimaryNavItemSpace {url} />
         {/each}
         <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
           <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
@@ -59,7 +50,11 @@
       <PrimaryNavItem title="Notes" href="/notes" class="tooltip-right">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Messages" href="/chat" class="tooltip-right">
+      <PrimaryNavItem
+        title="Messages"
+        href="/chat"
+        class="tooltip-right"
+        notification={$chatNotification}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Search" href="/people" class="tooltip-right">
