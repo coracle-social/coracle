@@ -16,7 +16,6 @@
   export let pubkeys: string[]
   export let messages: TrustedEvent[]
 
-  const message = messages[0]
   const others = remove($pubkey!, pubkeys)
   const active = $page.params.chat === id
   const path = makeChatPath(pubkeys)
@@ -53,7 +52,7 @@
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-        {message.content}
+        {messages[0].content}
       </p>
     </div>
   </div>

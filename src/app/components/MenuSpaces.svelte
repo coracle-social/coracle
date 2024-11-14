@@ -21,11 +21,13 @@
     {/each}
     <Divider />
   {/if}
-  <Button on:click={addSpace}>
-    <CardButton>
-      <div slot="icon"><Icon icon="login-2" size={7} /></div>
-      <div slot="title">Add a space</div>
-      <div slot="info">Join or create a new space</div>
-    </CardButton>
-  </Button>
+  {#if !PLATFORM_RELAY}
+    <Button on:click={addSpace}>
+      <CardButton>
+        <div slot="icon"><Icon icon="login-2" size={7} /></div>
+        <div slot="title">Add a space</div>
+        <div slot="info">Join or create a new space</div>
+      </CardButton>
+    </Button>
+  {/if}
 </div>

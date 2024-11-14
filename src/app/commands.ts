@@ -167,15 +167,8 @@ export const loadUserData = (
   return promise
 }
 
-export const discoverRelays = (lists: List[]) => {
-  const urls = uniq(lists.flatMap(getRelayUrls))
-
-  for (const url of urls) {
-    if (isShareableRelayUrl(url)) {
-      loadRelay(url)
-    }
-  }
-}
+export const discoverRelays = (lists: List[]) =>
+  Promise.all(uniq(lists.flatMap(getRelayUrls)).filter(isShareableRelayUrl).map(loadRelay))
 
 // Synchronization
 

@@ -441,7 +441,7 @@ export type Chat = {
   search_text: string
 }
 
-export const makeChatId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
+export const makeChatId = (pubkeys: string[]) => sort(uniq(pubkeys.concat(pubkey.get()!))).join(",")
 
 export const splitChatId = (id: string) => id.split(",")
 

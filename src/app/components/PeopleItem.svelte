@@ -5,8 +5,11 @@
   import type {Filter} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {repository, load, loadRelaySelections, formatTimestampRelative} from "@welshman/app"
+  import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
+  import {makeChatPath} from "@app/routes"
 
   export let pubkey
 
@@ -28,7 +31,13 @@
 </script>
 
 <div class="card2 bg-alt col-2 shadow-xl">
-  <Profile {pubkey} />
+  <div class="flex justify-between">
+    <Profile {pubkey} />
+    <Link class="btn btn-primary" href={makeChatPath([pubkey])}>
+      <Icon icon="letter" />
+      Start a Chat
+    </Link>
+  </div>
   <ProfileInfo {pubkey} />
   {#if roots.length > 0}
     {@const event = first(sortBy(e => -e.created_at, roots))}

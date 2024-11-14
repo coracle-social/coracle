@@ -7,6 +7,7 @@
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageHeader from "@lib/components/PageHeader.svelte"
   import RelayName from "@app/components/RelayName.svelte"
@@ -40,6 +41,7 @@
   let term = ""
   let limit = 20
   let element: Element
+  let promise: Promise<any>
 
   $: relaySearch = createSearch($relays, {
     getValue: (relay: Relay) => relay.url,
@@ -57,8 +59,7 @@
   })
 
   onMount(() => {
-    discoverRelays($memberships)
-    discoverRelays($relaySelections)
+    promise = Promise.all([discoverRelays($memberships), discoverRelays($relaySelections)])
 
     const scroller = createScroller({
       element,
@@ -125,5 +126,8 @@
         {/if}
       </Button>
     {/each}
+    {#await promise}
+      <Spinner loading>Loading more relays...</Spinner>
+    {/await}
   </div>
 </Page>
