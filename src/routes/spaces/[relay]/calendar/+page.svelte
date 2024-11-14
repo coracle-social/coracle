@@ -14,7 +14,7 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal, pushDrawer} from "@app/modal"
-  import {deriveEventsForUrl, pullConservatively, decodeRelay} from "@app/state"
+  import {deriveEventsForUrl, pullConservatively, decodeRelay, setChecked} from "@app/state"
 
   const url = decodeRelay($page.params.relay)
   const kinds = [EVENT_DATE, EVENT_TIME]
@@ -54,6 +54,8 @@
     .slice(0, limit)
 
   onMount(() => {
+    setChecked($page.url.pathname)
+
     const sub = subscribe({filters: [{kinds, since: ago(30)}]})
 
     pullConservatively({filters: [{kinds}], relays: [url]})

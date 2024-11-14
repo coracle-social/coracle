@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -10,7 +11,7 @@
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {decodeRelay} from "@app/state"
+  import {decodeRelay, setChecked} from "@app/state"
   import {pushDrawer} from "@app/modal"
   import {makeChatPath} from "@app/routes"
 
@@ -20,6 +21,10 @@
   const openMenu = () => pushDrawer(MenuSpace, {url})
 
   $: pubkey = $relay?.profile?.pubkey
+
+  onMount(() => {
+    setChecked($page.url.pathname)
+  })
 </script>
 
 <div class="relative flex flex-col">

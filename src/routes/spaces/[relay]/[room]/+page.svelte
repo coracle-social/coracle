@@ -8,6 +8,7 @@
 </script>
 
 <script lang="ts">
+  import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, append} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
@@ -33,6 +34,7 @@
     MESSAGE,
     COMMENT,
     getMembershipRoomsByUrl,
+    setChecked,
   } from "@app/state"
   import {addRoomMembership, removeRoomMembership} from "@app/commands"
   import {pushDrawer} from "@app/modal"
@@ -88,6 +90,10 @@
 
     elements.reverse()
   }
+
+  onMount(() => {
+    setChecked($page.url.pathname)
+  })
 
   setTimeout(() => {
     loading = false

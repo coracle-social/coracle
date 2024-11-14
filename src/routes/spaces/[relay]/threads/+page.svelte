@@ -15,7 +15,7 @@
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, COMMENT, decodeRelay} from "@app/state"
+  import {THREAD, COMMENT, decodeRelay, setChecked} from "@app/state"
   import {pushModal, pushDrawer} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
@@ -33,6 +33,8 @@
   let events: TrustedEvent[] = []
 
   onMount(() => {
+    setChecked($page.url.pathname)
+
     let unmounted = false
 
     const ctrl = createFeedController({
