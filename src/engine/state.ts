@@ -1,4 +1,4 @@
-import type {PartialSubscribeRequest, Thunk} from "@welshman/app"
+import type {PartialSubscribeRequest} from "@welshman/app"
 import {
   subscribe as baseSubscribe,
   db,
@@ -104,7 +104,7 @@ import {
 import crypto from "crypto"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds, sleep} from "hurdak"
-import {assoc, equals, partition, prop, sortBy, without} from "ramda"
+import {equals, partition, prop, sortBy, without} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -159,7 +159,6 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 export const groupHints = withGetter(writable<Record<string, string[]>>({}))
-export const thunks = writable<Record<string, Thunk>>({})
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -781,8 +780,6 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
   logger.info(`Publishing event`, request)
 
   const thunk = publishThunk(request)
-
-  thunks.update(assoc(request.event.id, thunk))
 
   return thunk
 }

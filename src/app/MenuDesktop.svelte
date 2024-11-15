@@ -9,6 +9,8 @@
     sessions,
     deriveProfileDisplay,
     displayProfileByPubkey,
+    thunks,
+    type Thunk,
   } from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -20,7 +22,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages, hasNewNotifications, thunks} from "src/engine"
+  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const {page} = router
 
@@ -29,7 +31,7 @@
     const success = []
     const failure = []
 
-    for (const {event, request, status} of Object.values($thunks)) {
+    for (const {event, request, status} of Object.values($thunks) as Thunk[]) {
       if (event.created_at < now() - seconds(5, "minute")) {
         continue
       }

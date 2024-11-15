@@ -22,9 +22,10 @@
 </style>
 
 <script lang="ts">
+  import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent} from "@welshman/util"
-  import {thunks, userSettings} from "src/engine"
+  import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
   import {spring} from "svelte/motion"
@@ -32,7 +33,7 @@
   export let event: SignedEvent
   export let removeDraft: () => void
 
-  $: thunk = $thunks[event.id]
+  $: thunk = $thunks[event.id] as Thunk
 
   $: status = thunk?.status
 

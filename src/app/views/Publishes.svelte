@@ -6,14 +6,15 @@
   import Tile from "src/partials/Tile.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
-  import {thunks} from "src/engine"
-  import type {Thunk} from "@welshman/app"
+  import {thunks, type Thunk} from "@welshman/app"
   import {get} from "svelte/store"
 
   const hasStatus = (thunk: Thunk, statuses: PublishStatus[]) =>
     Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
 
-  $: recent = Object.values($thunks).filter(t => t.event.created_at > now() - seconds(24, "hour"))
+  $: recent = (Object.values($thunks) as Thunk[]).filter(
+    t => t.event.created_at > now() - seconds(24, "hour"),
+  )
   $: relays = new Set(
     remove(
       LOCAL_RELAY_URL,
