@@ -4,8 +4,7 @@ import type {Node as ProsemirrorNode} from "@tiptap/pm/model"
 import type {MarkdownSerializerState} from "prosemirror-markdown"
 import {createPasteRuleMatch} from "./util"
 
-export const LINK_REGEX =
-  /([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s\)\(]*/gi
+export const LINK_REGEX = /([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s<>"'\.!?,:\)\(]*/gi
 
 export interface LinkAttributes {
   url: string
@@ -67,7 +66,6 @@ export const LinkExtension = Node.create({
       new InputRule({
         find: text => {
           const match = last(Array.from(text.matchAll(LINK_REGEX)))
-
           if (match && text.length === match.index + match[0].length + 1) {
             return {
               index: match.index!,
@@ -82,15 +80,11 @@ export const LinkExtension = Node.create({
         },
         handler: ({state, range, match}) => {
           const {tr} = state
-
           if (match[0]) {
             try {
               tr.insert(range.from - 1, this.type.create(match.data))
                 .delete(tr.mapping.map(range.from - 1), tr.mapping.map(range.to))
-                .insert(
-                  tr.mapping.map(range.to),
-                  this.editor.schema.text(last(Array.from(match.input!))),
-                )
+                .insertText(last(Array.from(match.input!)))
             } catch (e) {
               // If the node was already linkified, the above code breaks for whatever reason
             }
