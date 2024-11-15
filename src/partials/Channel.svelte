@@ -245,7 +245,7 @@
       <Compose
         bind:element={textarea}
         {editor}
-        class="mb-8 h-20 w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
+        class="h-20 w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <button
           on:click={() => editor.commands.selectFiles()}
