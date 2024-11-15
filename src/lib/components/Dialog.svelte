@@ -6,7 +6,8 @@
   export let fullscreen = false
 
   $: extraClass =
-    !fullscreen && "card2 bg-alt max-h-[90vh] w-[90vw] overflow-auto text-base-content sm:w-[520px]"
+    !fullscreen &&
+    "card2 bg-alt max-h-[90vh] w-[90vw] overflow-auto text-base-content sm:w-[520px] shadow-xl"
 </script>
 
 <div class="center fixed inset-0 z-modal">
