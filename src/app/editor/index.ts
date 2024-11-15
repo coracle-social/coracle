@@ -152,6 +152,7 @@ export const getEditorOptions = ({
       sign: (event: StampedEvent) => {
         return signer.get()!.sign(event)
       },
+      allowedMimeTypes: ["image/*", "video/*"],
     }),
   ],
 })
