@@ -1,7 +1,7 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
   import {Address} from "@welshman/util"
-  import {repository, pubkey} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {router} from "src/app/util/router"
 
@@ -20,20 +20,6 @@
         label: "Share",
         icon: "share-nodes",
       })
-
-      if (event.pubkey === $pubkey) {
-        actions.push({
-          onClick: () => router.at("events").of(address.toString()).cx({event}).at("edit").open(),
-          label: "Edit",
-          icon: "edit",
-        })
-
-        actions.push({
-          onClick: () => router.at("events").of(address.toString()).cx({event}).at("delete").open(),
-          label: "Delete",
-          icon: "trash",
-        })
-      }
     }
   }
 </script>

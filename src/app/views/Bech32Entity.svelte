@@ -5,7 +5,6 @@
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import EventDetail from "src/app/views/EventDetail.svelte"
 
   export let entity, type, data, relays
 </script>
@@ -16,11 +15,7 @@
   <NoteDetail id={data} {relays} />
 {:else if type === "naddr"}
   {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
-  {#if data.kind === 31923}
-    <EventDetail {address} relays={data.relays} />
-  {:else}
-    <NoteDetail {address} relays={data.relays} />
-  {/if}
+  <NoteDetail {address} relays={data.relays} />
 {:else if type === "nprofile"}
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}
