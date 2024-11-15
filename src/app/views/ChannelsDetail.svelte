@@ -19,6 +19,7 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
   import {sendMessage, markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
+  import Popover from "src/partials/Popover.svelte"
 
   export let pubkeys
   export let channelId
@@ -83,16 +84,20 @@
       </div>
     </div>
     {#if $pubkeysWithoutInbox.length > 0}
-      <div class="inbox-warning flex items-center">
-        <div class="mr-4 w-0 overflow-hidden opacity-0">
-          {$pubkeysWithoutInbox.length} inbox is not configured
-        </div>
-        <div class="flex cursor-pointer items-center gap-4 rounded-full bg-warning px-2">
-          <i class="fa fa-exclamation-triangle" />
-          <span>
-            {$pubkeysWithoutInbox.length}
-          </span>
-        </div>
+      <div class="flex items-center">
+        <Popover triggerType="mouseenter" placement="left">
+          <div
+            slot="trigger"
+            class="flex cursor-pointer items-center gap-1 rounded-full bg-danger px-2">
+            <i class="fa fa-exclamation-triangle" />
+            <span>
+              {$pubkeysWithoutInbox.length}
+            </span>
+          </div>
+          <div slot="tooltip">
+            {$pubkeysWithoutInbox.length} inbox is not configured
+          </div>
+        </Popover>
       </div>
     {/if}
   </div>

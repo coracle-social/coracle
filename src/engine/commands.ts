@@ -57,7 +57,7 @@ import {
 } from "@welshman/util"
 import crypto from "crypto"
 import {Fetch, seconds, sleep, tryFunc} from "hurdak"
-import {assoc, flatten, identity, omit, prop, reject, uniq, without} from "ramda"
+import {assoc, flatten, identity, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
