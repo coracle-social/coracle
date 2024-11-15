@@ -244,7 +244,7 @@ body,
 }
 
 .tiptap pre code {
-  @apply block max-w-full overflow-auto whitespace-nowrap rounded bg-neutral-200 px-1 no-underline text-neutral-800;
+  @apply block max-w-full overflow-auto rounded bg-neutral-200 px-1 text-neutral-800 no-underline;
 }
 
 .tiptap p code {
@@ -266,10 +266,9 @@ body,
 
 .link-content,
 .tiptap [tag] {
-  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 no-underline text-neutral-800;
+  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 text-neutral-800 no-underline;
 }
 
 .link-content.link-content-selected {
   @apply bg-neutral-300;
 }
-
