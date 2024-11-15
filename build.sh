@@ -16,6 +16,7 @@ eval "$temp_env"
 
 if [[ $VITE_PLATFORM_LOGO =~ ^https://* ]]; then
   curl $VITE_PLATFORM_LOGO > static/logo.png
+  cp static/logo.png assets/logo.png
   export VITE_PLATFORM_LOGO=static/logo.png
 fi
 

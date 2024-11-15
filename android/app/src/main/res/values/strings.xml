@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Flotilla</string>
+    <string name="title_activity_main">Flotilla</string>
+    <string name="package_name">social.flotilla</string>
+    <string name="custom_url_scheme">social.flotilla</string>
+</resources>

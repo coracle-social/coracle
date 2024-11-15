@@ -3,7 +3,6 @@
   import {hexToBytes} from "@noble/hashes/utils"
   import {displayPubkey, displayProfile} from "@welshman/util"
   import {pubkey, session, displayNip05, deriveProfile} from "@welshman/app"
-  import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -50,12 +49,12 @@
       <Content event={{content: $profile?.about || "", tags: []}} hideMedia />
     {/key}
   </div>
-  <div class="card2 bg-alt col-4 shadow-xl" transition:slide>
+  <div class="card2 bg-alt col-4 shadow-xl">
     <FieldInline>
       <p slot="label">Public Key</p>
       <label class="input input-bordered flex w-full items-center gap-2" slot="input">
         <Icon icon="link-round" />
-        <input value={$session?.pubkey} class="grow" type="text" />
+        <input class="ellipsize" value={$session?.pubkey} />
         <Button class="flex items-center" on:click={copyNpub}>
           <Icon icon="copy" />
         </Button>

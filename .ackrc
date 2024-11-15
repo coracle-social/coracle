@@ -1,2 +1,3 @@
 --ignore-dir=.svelte-kit
+--ignore-dir=android
 --ignore-dir=build

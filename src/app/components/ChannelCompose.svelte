@@ -3,6 +3,7 @@
   import type {Readable} from "svelte/store"
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {getEditorOptions, getEditorTags, addFile} from "@lib/editor"
@@ -26,7 +27,13 @@
 
   onMount(() => {
     editor = createEditor(
-      getEditorOptions({submit, loading, getPubkeyHints, submitOnEnter: true, autofocus: true}),
+      getEditorOptions({
+        submit,
+        loading,
+        getPubkeyHints,
+        submitOnEnter: true,
+        autofocus: !isMobile,
+      }),
     )
 
     $editor.commands.setContent(content)

@@ -33,7 +33,7 @@
 <div class="card2 bg-alt col-2 shadow-xl">
   <div class="flex justify-between">
     <Profile {pubkey} />
-    <Link class="btn btn-primary" href={makeChatPath([pubkey])}>
+    <Link class="btn btn-primary hidden sm:flex" href={makeChatPath([pubkey])}>
       <Icon icon="letter" />
       Start a Chat
     </Link>
@@ -45,4 +45,8 @@
       Last active {formatTimestampRelative(event.created_at)}
     </div>
   {/if}
+  <Link class="btn btn-primary sm:hidden" href={makeChatPath([pubkey])}>
+    <Icon icon="letter" />
+    Start a Chat
+  </Link>
 </div>

@@ -69,7 +69,7 @@
 }
 
 .card2 {
-  @apply text-ellipsis rounded-box p-6 text-base-content;
+  @apply rounded-box p-6 text-base-content;
 }
 
 .card2.card2-sm {
@@ -110,6 +110,11 @@
 
 .col-8 {
   @apply flex flex-col gap-8;
+}
+
+.badge {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  display: inline;
 }
 
 .ellipsize {

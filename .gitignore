@@ -24,3 +24,5 @@ static/pwa-192x192.png
 static/pwa-512x512.png
 static/apple-touch-icon-180x180.png
 static/maskable-icon-512x512.png
+src/assets
+manifest.webmanifest

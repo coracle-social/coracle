@@ -4,6 +4,7 @@
   import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {append} from "@welshman/lib"
+  import {isMobile} from "@lib/html"
   import {fly, slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -39,7 +40,7 @@
   let editor: Readable<Editor>
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, autofocus: true}))
+    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints, autofocus: !isMobile}))
   })
 </script>
 

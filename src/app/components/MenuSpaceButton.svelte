@@ -30,9 +30,8 @@
 
   const notification = derived(
     [page, events, checked, userMembership],
-    ([$page, $events, $checked, $userMembership]) => {
-      console.log(getMembershipRoomsByUrl(url, $userMembership).concat(GENERAL))
-      return getMembershipRoomsByUrl(url, $userMembership)
+    ([$page, $events, $checked, $userMembership]) =>
+      getMembershipRoomsByUrl(url, $userMembership)
         .concat(GENERAL)
         .some(room => {
           const path = makeRoomPath(url, room)
@@ -43,8 +42,7 @@
           const roomEvents = $events.filter(e => matchFilter({"#~": [room]}, e))
 
           return getNotification($pubkey, lastChecked, roomEvents)
-        })
-    },
+        }),
   )
 </script>
 

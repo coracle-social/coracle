@@ -1,6 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {onDestroy} from "svelte"
+  import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ContentSearch from "@lib/components/ContentSearch.svelte"
@@ -41,7 +42,7 @@
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
       <input
-        autofocus
+        autofocus={!isMobile}
         bind:value={term}
         class="grow"
         type="text"

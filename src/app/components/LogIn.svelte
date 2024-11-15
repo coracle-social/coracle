@@ -99,11 +99,11 @@
     </Button>
   {/if}
   {#each signers as app}
-    <Button disabled={loading} class="btn btn-neutral" on:click={() => loginWithSigner(app)}>
+    <Button disabled={loading} class="btn btn-primary" on:click={() => loginWithSigner(app)}>
       {#if loading}
         <span class="loading loading-spinner mr-3" />
       {:else}
-        <img src={app.iconUrl} alt={app.name} width="48" height="48" />
+        <img src={app.iconUrl} alt={app.name} width="20" height="20" />
       {/if}
       Log in with {app.name}
     </Button>

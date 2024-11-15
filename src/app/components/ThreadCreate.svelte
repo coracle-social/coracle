@@ -5,6 +5,7 @@
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
+  import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -60,7 +61,6 @@
         submit,
         loading,
         getPubkeyHints,
-        autofocus: true,
         placeholder: "What's on your mind?",
       }),
     )
@@ -76,7 +76,9 @@
     <Field>
       <p slot="label">Title*</p>
       <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+        <!-- svelte-ignore a11y-autofocus -->
         <input
+          autofocus={!isMobile}
           bind:value={title}
           class="grow"
           type="text"

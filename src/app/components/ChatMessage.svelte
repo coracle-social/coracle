@@ -85,9 +85,9 @@
       <Icon icon="menu-dots" size={4} />
     </button>
   </Tippy>
-  <div class="flex flex-col">
+  <div class="flex min-w-0 flex-col">
     <LongPress
-      class="bg-alt chat-bubble mx-1 flex max-w-sm cursor-auto flex-col gap-1 text-left"
+      class="bg-alt chat-bubble mx-1 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
       onLongPress={showMobileMenu}>
       {#if showPubkey && event.pubkey !== $pubkey}
         <div class="flex items-center gap-2">

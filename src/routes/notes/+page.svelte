@@ -8,7 +8,7 @@
 
 <Page>
   <Chat {id}>
-    <p slot="info">
+    <p slot="info" class="px-4">
       This is a place for your notes. Everything you write here is encrypted and stored on the nostr
       network.
     </p>

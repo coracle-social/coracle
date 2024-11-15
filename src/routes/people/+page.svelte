@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {createScroller} from "@lib/html"
+  import {createScroller, isMobile} from "@lib/html"
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -34,7 +34,7 @@
       <Icon icon="magnifer" />
       <!-- svelte-ignore a11y-autofocus -->
       <input
-        autofocus
+        autofocus={!isMobile}
         bind:value={term}
         class="grow"
         type="text"
