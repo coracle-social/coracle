@@ -3,7 +3,7 @@
   import {derived} from "svelte/store"
   import {addToMapKey, dec, gt} from "@welshman/lib"
   import type {Relay} from "@welshman/app"
-  import {relays, createSearch, relaySelections} from "@welshman/app"
+  import {relays, createSearch} from "@welshman/app"
   import {createScroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -41,7 +41,6 @@
   let term = ""
   let limit = 20
   let element: Element
-  let promise: Promise<any>
 
   $: relaySearch = createSearch($relays, {
     getValue: (relay: Relay) => relay.url,
@@ -59,8 +58,6 @@
   })
 
   onMount(() => {
-    promise = Promise.all([discoverRelays($memberships), discoverRelays($relaySelections)])
-
     const scroller = createScroller({
       element,
       onScroll: () => {
@@ -126,8 +123,10 @@
         {/if}
       </Button>
     {/each}
-    {#await promise}
-      <Spinner loading>Loading more relays...</Spinner>
+    {#await discoverRelays($memberships)}
+      <div class="flex justify-center">
+        <Spinner loading>Loading more relays...</Spinner>
+      </div>
     {/await}
   </div>
 </Page>

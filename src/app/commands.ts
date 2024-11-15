@@ -22,7 +22,7 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
-import {PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
+import {PublishStatus, AuthStatus, SocketStatus, SubscriptionEvent} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
 import type {Nip46Handler} from "@welshman/signer"
 import {
@@ -58,6 +58,7 @@ import {
   loadMembership,
   loadSettings,
   getDefaultPubkeys,
+  getMembershipUrls,
 } from "@app/state"
 
 // Utils
@@ -100,7 +101,7 @@ export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
       sleep(30_000),
       new Promise(resolve => {
         sub = subscribe(request)
-        sub.emitter.on("close", resolve)
+        sub.emitter.on(SubscriptionEvent.Complete, resolve)
       }),
     ])
 
@@ -191,16 +192,20 @@ export const addSpaceMembership = async (url: string) => {
   const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
   const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
-  return publishThunk({event, relays}).result
+  return publishThunk({event, relays})
 }
 
 export const removeSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const pred = (t: string[]) => t[t[0] === "r" ? 1 : 2] === url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
-  const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
+  const relays = uniq([
+    url,
+    ...ctx.app.router.FromUser().getUrls(),
+    ...getRelayTagValues(event.tags),
+  ])
 
-  return publishThunk({event, relays}).result
+  return publishThunk({event, relays})
 }
 
 export const addRoomMembership = async (url: string, room: string) => {
@@ -208,16 +213,20 @@ export const addRoomMembership = async (url: string, room: string) => {
   const event = await addToListPublicly(list, tagRoom(room, url)).reconcile(nip44EncryptToSelf)
   const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
-  return publishThunk({event, relays}).result
+  return publishThunk({event, relays})
 }
 
 export const removeRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
   const pred = (t: string[]) => equals(tagRoom(room, url), t)
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
-  const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
+  const relays = uniq([
+    url,
+    ...ctx.app.router.FromUser().getUrls(),
+    ...getRelayTagValues(event.tags),
+  ])
 
-  return publishThunk({event, relays}).result
+  return publishThunk({event, relays})
 }
 
 export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
@@ -234,8 +243,13 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
 
   return publishThunk({
     event: createEvent(list.kind, {tags}),
-    relays: [...INDEXER_RELAYS, ...ctx.app.router.FromUser().getUrls()],
-  }).result
+    relays: [
+      url,
+      ...INDEXER_RELAYS,
+      ...ctx.app.router.FromUser().getUrls(),
+      ...getMembershipUrls(userMembership.get()),
+    ],
+  })
 }
 
 export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
@@ -251,8 +265,12 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 
     return publishThunk({
       event: createEvent(list.kind, {tags}),
-      relays: [...INDEXER_RELAYS, ...ctx.app.router.FromUser().getUrls()],
-    }).result
+      relays: [
+        ...INDEXER_RELAYS,
+        ...ctx.app.router.FromUser().getUrls(),
+        ...getMembershipUrls(userMembership.get()),
+      ],
+    })
   }
 }
 

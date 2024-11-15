@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {sortBy, nthEq, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
-  import {repository, subscribe} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
@@ -10,12 +10,12 @@
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import MenuSpace from "@app/components/MenuSpace.svelte"
+  import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
+  import {subscribePersistent} from "@app/commands"
   import {setChecked} from "@app/notifications"
-  import {pushDrawer} from "@app/modal"
 
   const {relay, id} = $page.params
   const url = decodeRelay(relay)
@@ -24,8 +24,6 @@
   const replies = deriveEvents(repository, {filters})
 
   const back = () => history.back()
-
-  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const openReply = () => {
     showReply = true
@@ -40,13 +38,12 @@
   $: title = $event?.tags.find(nthEq(0, "title"))?.[1] || ""
 
   onMount(() => {
-    const sub = subscribe({filters, relays: [url]})
+    const unsub = subscribePersistent({relays: [url], filters})
 
-    return () => sub.close()
-  })
-
-  onDestroy(() => {
-    setChecked($page.url.pathname)
+    return () => {
+      unsub()
+      setChecked($page.url.pathname)
+    }
   })
 </script>
 
@@ -91,9 +88,7 @@
     </div>
     <h1 slot="title" class="text-xl">{title}</h1>
     <div slot="action">
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
-        <Icon icon="menu-dots" />
-      </Button>
+      <MenuSpaceButton {url} />
     </div>
   </PageBar>
 </div>

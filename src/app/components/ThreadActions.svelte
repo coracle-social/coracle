@@ -1,10 +1,11 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import {max} from "@welshman/lib"
   import {deriveEvents, deriveIsDeleted} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
-  import {thunks, pubkey, repository, formatTimestampRelative} from "@welshman/app"
+  import {thunks, load, pubkey, repository, formatTimestampRelative} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -25,8 +26,8 @@
   const deleted = deriveIsDeleted(repository, event)
   const path = makeSpacePath(url, "threads", event.id)
   const filters = [{kinds: [COMMENT], "#E": [event.id]}]
-  const notification = deriveNotification(path, filters, url)
   const replies = deriveEvents(repository, {filters})
+  const notification = deriveNotification(path, filters, url)
 
   const showPopover = () => popover.show()
 
@@ -48,10 +49,14 @@
   let popover: Instance
 
   $: lastActive = max([...$replies, event].map(e => e.created_at))
+
+  onMount(() => {
+    load({relays: [url], filters})
+  })
 </script>
 
 <div class="flex flex-wrap items-center justify-between gap-2">
-  <ReactionSummary {event} {onReactionClick} />
+  <ReactionSummary relays={[url]} {event} {onReactionClick} />
   <div class="flex flex-grow flex-wrap justify-end gap-2">
     {#if $deleted}
       <div class="btn btn-error btn-xs rounded-full">Deleted</div>

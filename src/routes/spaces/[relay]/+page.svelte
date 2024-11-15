@@ -3,21 +3,17 @@
   import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
-  import Button from "@lib/components/Button.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
-  import MenuSpace from "@app/components/MenuSpace.svelte"
+  import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import {decodeRelay} from "@app/state"
-  import {pushDrawer} from "@app/modal"
   import {makeChatPath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-
-  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   $: pubkey = $relay?.profile?.pubkey
 </script>
@@ -35,9 +31,7 @@
           Contact Owner
         </Link>
       {/if}
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
-        <Icon icon="menu-dots" />
-      </Button>
+      <MenuSpaceButton {url} />
     </div>
   </PageBar>
   <div class="col-2 p-2">

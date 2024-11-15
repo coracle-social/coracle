@@ -15,7 +15,6 @@
     RELAYS,
     INBOX_RELAYS,
     WRAP,
-    DELETE,
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
@@ -37,9 +36,11 @@
     dropSession,
     getRelayUrls,
     userInboxRelaySelections,
+    load,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
+  import * as welshmanSigner from "@welshman/signer"
   import * as net from "@welshman/net"
   import * as app from "@welshman/app"
   import AppContainer from "@app/components/AppContainer.svelte"
@@ -53,13 +54,13 @@
     getMembershipRooms,
     userMembership,
     ensureUnwrapped,
-    MEMBERSHIPS,
     MESSAGE,
     COMMENT,
     THREAD,
     GENERAL,
   } from "@app/state"
   import {loadUserData, subscribePersistent} from "@app/commands"
+  import * as commands from "@app/commands"
   import {checked} from "@app/notifications"
   import * as notifications from "@app/notifications"
   import * as state from "@app/state"
@@ -72,7 +73,18 @@
   let ready: Promise<unknown> = Promise.resolve()
 
   onMount(async () => {
-    Object.assign(window, {get, nip19, ...lib, ...util, ...net, ...app, ...state, ...notifications})
+    Object.assign(window, {
+      get,
+      nip19,
+      ...lib,
+      ...welshmanSigner,
+      ...util,
+      ...net,
+      ...app,
+      ...state,
+      ...commands,
+      ...notifications,
+    })
 
     const getScoreEvent = () => {
       const ALWAYS_KEEP = Infinity
@@ -183,17 +195,23 @@
         const rooms = uniq(getMembershipRooms($membership).map(m => m.room)).concat(GENERAL)
         const relays = uniq(getMembershipUrls($membership))
 
+        // Get one event for each of our notification categories
+        load({
+          relays,
+          filters: [
+            {kinds: [THREAD], limit: 1},
+            {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
+            ...rooms.map(room => ({kinds: [MESSAGE], "#~": [room], limit: 1})),
+          ],
+        })
+
+        // Listen for new notifications/memberships
         subscribePersistent({
           relays,
           filters: [
             {kinds: [THREAD], since},
-            {kinds: [THREAD], limit: 1},
+            {kinds: [COMMENT], "#K": [String(THREAD)], since},
             {kinds: [MESSAGE], "#~": rooms, since},
-            {kinds: [MESSAGE], "#~": rooms, limit: 1},
-            {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), since},
-            {kinds: [COMMENT], "#K": [THREAD, MESSAGE].map(String), limit: 1},
-            {kinds: [DELETE], "#k": [THREAD, COMMENT, MESSAGE].map(String), since},
-            {kinds: [MEMBERSHIPS], "#r": relays, since: ago(WEEK, 2)},
           ],
         })
       })

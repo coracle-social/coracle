@@ -1,12 +1,19 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {deriveEvents} from "@welshman/store"
-  import {repository} from "@welshman/app"
+  import {repository, load} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import {COMMENT} from "@app/state"
 
   export let event
+  export let relays: string[] = []
 
-  const replies = deriveEvents(repository, {filters: [{kinds: [COMMENT], "#E": [event.id]}]})
+  const filters = [{kinds: [COMMENT], "#E": [event.id]}]
+  const replies = deriveEvents(repository, {filters})
+
+  onMount(() => {
+    load({relays, filters})
+  })
 </script>
 
 {#if $replies.length > 0}

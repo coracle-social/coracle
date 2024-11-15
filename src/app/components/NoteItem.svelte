@@ -1,9 +1,7 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import type {TrustedEvent} from "@welshman/util"
-  import {REACTION} from "@welshman/util"
-  import {pubkey, load} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import Content from "@app/components/Content.svelte"
@@ -26,16 +24,12 @@
 
   const onEmoji = (emoji: NativeEmoji) =>
     publishReaction({event, relays: [url], content: emoji.unicode})
-
-  onMount(() => {
-    load({filters: [{kinds: [REACTION], "#e": [event.id]}]})
-  })
 </script>
 
 <NoteCard {event} class="card2 bg-alt">
   <Content {event} expandMode="inline" />
   <div class="flex w-full justify-between gap-2">
-    <ReactionSummary {event} {onReactionClick}>
+    <ReactionSummary relays={[url]} {event} {onReactionClick}>
       <EmojiButton {onEmoji} class="btn btn-neutral btn-xs h-[26px] rounded-box">
         <Icon icon="smile-circle" size={4} />
       </EmojiButton>

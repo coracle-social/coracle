@@ -8,11 +8,11 @@
 </script>
 
 <script lang="ts">
-  import {onDestroy} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, append} from "@welshman/lib"
+  import {sortBy, append, now} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent} from "@welshman/util"
+  import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -20,10 +20,11 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import MenuSpace from "@app/components/MenuSpace.svelte"
+  import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
+    pullConservatively,
     userSettingValues,
     userMembership,
     decodeRelay,
@@ -36,16 +37,13 @@
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
-  import {addRoomMembership, removeRoomMembership} from "@app/commands"
-  import {pushDrawer} from "@app/modal"
+  import {addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
   import {popKey} from "@app/implicit"
 
   const {room = GENERAL} = $page.params
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const channel = deriveChannel(makeChannelId(url, room))
-
-  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -91,6 +89,22 @@
     elements.reverse()
   }
 
+  onMount(() => {
+    pullConservatively({
+      relays: [url],
+      filters: [{kinds: [MESSAGE, DELETE], "#~": [room]}],
+    })
+
+    const unsub = subscribePersistent({
+      relays: [url],
+      filters: [{kinds: [MESSAGE, COMMENT], "#~": [room], since: now()}],
+    })
+
+    return () => {
+      unsub()
+    }
+  })
+
   onDestroy(() => {
     setChecked($page.url.pathname)
   })
@@ -120,9 +134,7 @@
           </Button>
         {/if}
       {/if}
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm md:hidden">
-        <Icon icon="menu-dots" />
-      </Button>
+      <MenuSpaceButton {url} />
     </div>
   </PageBar>
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">

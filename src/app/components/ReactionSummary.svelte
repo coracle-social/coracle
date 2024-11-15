@@ -1,19 +1,26 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {groupBy, uniqBy} from "@welshman/lib"
   import {REACTION} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {pubkey, repository} from "@welshman/app"
+  import {pubkey, repository, load} from "@welshman/app"
   import {displayReaction} from "@app/state"
 
   export let event
   export let onReactionClick
+  export let relays: string[] = []
 
-  const reactions = deriveEvents(repository, {filters: [{kinds: [REACTION], "#e": [event.id]}]})
+  const filters = [{kinds: [REACTION], "#e": [event.id]}]
+  const reactions = deriveEvents(repository, {filters})
 
   $: groupedReactions = groupBy(
     e => e.content,
     uniqBy(e => e.pubkey + e.content, $reactions),
   )
+
+  onMount(() => {
+    load({relays, filters})
+  })
 </script>
 
 {#if $reactions.length > 0}
@@ -27,7 +34,7 @@
         class:border={isOwn}
         class:border-solid={isOwn}
         class:border-primary={isOwn}
-        on:click|stopPropagation={onClick}>
+        on:click|preventDefault|stopPropagation={onClick}>
         <span>{displayReaction(content)}</span>
         {#if events.length > 1}
           <span>{events.length}</span>

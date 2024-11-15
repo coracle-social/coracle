@@ -10,18 +10,16 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import MenuSpace from "@app/components/MenuSpace.svelte"
+  import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
-  import {pushModal, pushDrawer} from "@app/modal"
+  import {pushModal} from "@app/modal"
   import {deriveEventsForUrl, pullConservatively, decodeRelay} from "@app/state"
   import {setChecked} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
   const kinds = [EVENT_DATE, EVENT_TIME]
   const events = deriveEventsForUrl(url, [{kinds}])
-
-  const openMenu = () => pushDrawer(MenuSpace, {url})
 
   const createEvent = () => pushModal(EventCreate, {url})
 
@@ -78,9 +76,7 @@
     </div>
     <strong slot="title">Calendar</strong>
     <div slot="action" class="md:hidden">
-      <Button on:click={openMenu} class="btn btn-neutral btn-sm">
-        <Icon icon="menu-dots" />
-      </Button>
+      <MenuSpaceButton {url} />
     </div>
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">

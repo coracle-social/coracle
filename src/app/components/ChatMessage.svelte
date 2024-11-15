@@ -56,7 +56,7 @@
 </script>
 
 {#if thunk}
-  <ThunkStatus {thunk} />
+  <ThunkStatus {thunk} class="mt-1" />
 {/if}
 <div
   class="group chat flex items-center justify-end gap-1 px-2"

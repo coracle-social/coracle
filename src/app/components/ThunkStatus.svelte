@@ -44,6 +44,7 @@
   {#if isFailure && failure}
     {@const [url, {message, status}] = failure}
     <Tippy
+      class={$$props.class}
       component={ThunkStatusDetail}
       props={{url, message, status, retry}}
       params={{interactive: true}}>
@@ -53,7 +54,7 @@
       </span>
     </Tippy>
   {:else if canCancel || isPending}
-    <span class="flex items-center gap-1">
+    <span class="flex items-center gap-1 {$$props.class}">
       <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
       <span class="opacity-50">Sending...</span>
       {#if canCancel}

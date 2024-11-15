@@ -1,14 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ifLet} from "@welshman/lib"
+  import {ifLet, now} from "@welshman/lib"
+  import {subscribe} from "@welshman/app"
+  import {DELETE, REACTION} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import {pushToast} from "@app/toast"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth} from "@app/commands"
-  import {decodeRelay} from "@app/state"
+  import {decodeRelay, MEMBERSHIPS} from "@app/state"
   import {deriveNotification, SPACE_FILTERS} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
@@ -34,6 +36,15 @@
 
   onMount(() => {
     checkConnection()
+
+    const sub = subscribe({
+      relays: [url],
+      filters: [{kinds: [MEMBERSHIPS]}, {kinds: [DELETE, REACTION], since: now()}],
+    })
+
+    return () => {
+      sub.close()
+    }
   })
 </script>
 

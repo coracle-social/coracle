@@ -78,7 +78,7 @@
     {:else}
       <div class="w-10 min-w-10 max-w-10" />
     {/if}
-    <div class="-mt-1 flex-grow pr-1">
+    <div class="-mt-1 min-w-0 flex-grow pr-1">
       {#if showPubkey}
         <div class="flex items-center gap-2">
           <Link
@@ -101,9 +101,9 @@
   </div>
   <div class="row-2 ml-12">
     {#if !isHead}
-      <ReplySummary {event} on:click={onClick} />
+      <ReplySummary relays={[url]} {event} on:click={onClick} />
     {/if}
-    <ReactionSummary {event} {onReactionClick} />
+    <ReactionSummary relays={[url]} {event} {onReactionClick} />
   </div>
   <button
     class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"

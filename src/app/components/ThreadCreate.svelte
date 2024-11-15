@@ -44,8 +44,8 @@
     const tags = [["title", title], tagRoom(GENERAL, url), ...getEditorTags($editor)]
 
     publishThunk({
-      event: createEvent(THREAD, {content, tags}),
       relays: [url],
+      event: createEvent(THREAD, {content, tags}),
     })
 
     history.back()

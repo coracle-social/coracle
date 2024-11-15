@@ -1,8 +1,9 @@
 import {writable, derived} from "svelte/store"
+import {page} from "$app/stores"
 import {deriveEvents} from "@welshman/store"
 import {repository, pubkey} from "@welshman/app"
 import {prop, max, sortBy, assoc, lt, now} from "@welshman/lib"
-import type {Filter} from "@welshman/util"
+import type {Filter, TrustedEvent} from "@welshman/util"
 import {DIRECT_MESSAGE} from "@welshman/util"
 import {makeSpacePath} from "@app/routes"
 import {
@@ -43,25 +44,31 @@ export const getRoomFilters = (room: string): Filter[] => ROOM_FILTERS.map(assoc
 
 // Notification derivation
 
+export const getNotification = (
+  pubkey: string | null,
+  lastChecked: number,
+  events: TrustedEvent[],
+) => {
+  const [latestEvent] = sortBy($e => -$e.created_at, events)
+
+  return latestEvent?.pubkey !== pubkey && lt(lastChecked, latestEvent?.created_at)
+}
+
 export const deriveNotification = (path: string, filters: Filter[], url?: string) => {
   const events = url ? deriveEventsForUrl(url, filters) : deriveEvents(repository, {filters})
 
   return derived(
     [pubkey, deriveChecked("*"), deriveChecked(path), events],
     ([$pubkey, $allChecked, $checked, $events]) => {
-      const [latestEvent] = sortBy($e => -$e.created_at, $events)
-
-      return (
-        latestEvent?.pubkey !== $pubkey && lt(max([$allChecked, $checked]), latestEvent?.created_at)
-      )
+      return getNotification($pubkey, max([$allChecked, $checked]), $events)
     },
   )
 }
 
-export const spacesNotification = derived(
+export const spacesNotifications = derived(
   [pubkey, checked, userMembership, deriveEvents(repository, {filters: SPACE_FILTERS})],
   ([$pubkey, $checked, $userMembership, $events]) => {
-    return getMembershipUrls($userMembership).some(url => {
+    return getMembershipUrls($userMembership).filter(url => {
       const path = makeSpacePath(url)
       const lastChecked = max([$checked["*"], $checked[path]])
       const [latestEvent] = sortBy($e => -$e.created_at, $events)
@@ -69,4 +76,10 @@ export const spacesNotification = derived(
       return latestEvent?.pubkey !== $pubkey && lt(lastChecked, latestEvent?.created_at)
     })
   },
+)
+
+export const inactiveSpacesNotifications = derived(
+  [page, spacesNotifications],
+  ([$page, $spacesNotifications]) =>
+    $spacesNotifications.filter(url => !$page.url.pathname.startsWith(makeSpacePath(url))),
 )

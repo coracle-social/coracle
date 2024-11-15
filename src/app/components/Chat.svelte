@@ -96,7 +96,7 @@
   }
 
   onMount(() => {
-    // Don't use loadInboxRelaySelections because we want to force reload
+    // Don't use loadInboxRelaySelection because we want to force reload
     load({filters: [{kinds: [INBOX_RELAYS], authors: others}]})
   })
 
@@ -108,7 +108,7 @@
 <div class="relative flex h-full w-full flex-col">
   {#if others.length > 0}
     <PageBar>
-      <div slot="title" class="row-2">
+      <div slot="title" class="flex flex-col gap-1 sm:flex-row sm:gap-2">
         {#if others.length === 1}
           {@const pubkey = others[0]}
           <Link external href={pubkeyLink(pubkey)} class="row-2">
@@ -116,13 +116,21 @@
             <ProfileName {pubkey} />
           </Link>
         {:else}
-          <ProfileCircles pubkeys={others} size={5} />
-          <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-            <ProfileName pubkey={others[0]} />
-            and {others.length - 1}
-            {others.length > 2 ? "others" : "other"}
-            <Button on:click={showMembers} class="btn btn-link">Show all members</Button>
-          </p>
+          <div class="flex items-center gap-2">
+            <ProfileCircles pubkeys={others} size={5} />
+            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+              <ProfileName pubkey={others[0]} />
+              and
+              {#if others.length === 2}
+                <ProfileName pubkey={others[1]} />
+              {:else}
+                {others.length - 1}
+                {others.length > 2 ? "others" : "other"}
+              {/if}
+            </p>
+          </div>
+          <Button on:click={showMembers} class="btn btn-link hidden sm:block"
+            >Show all members</Button>
         {/if}
       </div>
       <div slot="action">
