@@ -85,7 +85,7 @@
       <Icon icon="menu-dots" size={4} />
     </button>
   </Tippy>
-  <div class="flex min-w-0 flex-col">
+  <div class="flex min-w-0 flex-col" class:items-end={event.pubkey === $pubkey}>
     <LongPress
       class="bg-alt chat-bubble mx-1 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
       onLongPress={showMobileMenu}>

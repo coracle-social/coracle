@@ -13,6 +13,7 @@
   import {pubkeyLink} from "@app/state"
 
   export let value: string[]
+  export let autofocus = false
 
   let term = ""
   let input: Element
@@ -59,7 +60,9 @@
   </div>
   <label class="input input-bordered flex w-full items-center gap-2" bind:this={input}>
     <Icon icon="magnifer" />
+    <!-- svelte-ignore a11y-autofocus -->
     <input
+      {autofocus}
       class="grow"
       type="text"
       placeholder="Search for profiles..."

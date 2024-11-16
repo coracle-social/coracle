@@ -1,0 +1,9 @@
+flotilla:
+  android:
+    identifier: social.flotilla
+    name: Coracle
+    description: Self-hosted community chat and threads built on the nostr protocol.
+    repository: https://github.com/coracle-social/flotilla
+    artifacts:
+      - app-release-signed.apk
+

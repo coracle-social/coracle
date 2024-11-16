@@ -7,6 +7,10 @@
 </script>
 
 <NodeViewWrapper class="link-content inline">
-  <Icon icon="paperclip" size={3} class="inline-block translate-y-px" />
+  {#if node.attrs.uploading}
+    <span class="loading loading-spinner loading-xs translate-y-[2px] scale-75" />
+  {:else}
+    <Icon icon="paperclip" size={3} class="inline-block translate-y-px" />
+  {/if}
   {node.attrs.file.name}
 </NodeViewWrapper>

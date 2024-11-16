@@ -113,8 +113,7 @@
 }
 
 .badge {
-  @apply overflow-hidden text-ellipsis whitespace-nowrap;
-  display: inline;
+  @apply justify-start overflow-hidden text-ellipsis whitespace-nowrap;
 }
 
 .ellipsize {

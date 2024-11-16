@@ -251,17 +251,20 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
+export const eventIsForUrl = (url: string, event: TrustedEvent) =>
+  event.tags.find(nthEq(0, "~"))?.[2] === url
+
 export const getEventsForUrl = (url: string, filters: Filter[]) =>
   sortBy(
     e => -e.created_at,
-    repository.query(filters).filter(e => e.tags.find(nthEq(0, "~"))?.[2] === url),
+    repository.query(filters).filter(e => eventIsForUrl(url, e)),
   )
 
 export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
   derived(deriveEvents(repository, {filters}), $events =>
     sortBy(
       e => -e.created_at,
-      $events.filter(e => e.tags.find(nthEq(0, "~"))?.[2] === url),
+      $events.filter(e => eventIsForUrl(url, e)),
     ),
   )
 
@@ -275,6 +278,9 @@ export type Settings = {
     show_media: boolean
     hide_sensitive: boolean
     send_delay: number
+    upload_type: "nip96" | "blossom"
+    nip96_urls: string[]
+    blossom_urls: string[]
   }
 }
 
@@ -282,6 +288,9 @@ export const defaultSettings = {
   show_media: true,
   hide_sensitive: true,
   send_delay: 3000,
+  upload_type: "nip96",
+  nip96_urls: ["https://nostr.build"],
+  blossom_urls: ["https://cdn.satellite.earth"],
 }
 
 export const settings = deriveEventsMapped<Settings>(repository, {
@@ -519,7 +528,11 @@ export const userSettings = withGetter(
   }),
 )
 
-export const userSettingValues = derived(userSettings, $s => $s?.values || defaultSettings)
+export const userSettingValues = withGetter(
+  derived(userSettings, $s => $s?.values || defaultSettings),
+)
+
+export const getSetting = (key: keyof Settings["values"]) => userSettingValues.get()[key]
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {

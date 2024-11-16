@@ -5,6 +5,7 @@
   import {get, derived} from "svelte/store"
   import {page} from "$app/stores"
   import {dev} from "$app/environment"
+  import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -76,6 +77,8 @@
     Object.assign(window, {
       get,
       nip19,
+      bytesToHex,
+      hexToBytes,
       ...lib,
       ...welshmanSigner,
       ...util,

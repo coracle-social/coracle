@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import type {Readable} from "svelte/store"
-  import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_DATE, EVENT_TIME} from "@welshman/util"
@@ -13,18 +12,16 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {getPubkeyHints} from "@app/commands"
-  import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
+  import {getEditorOptions, getEditorTags} from "@lib/editor"
   import {pushToast} from "@app/toast"
 
   export let url
 
-  const startSubmit = () => uploadFiles($editor)
-
   const back = () => history.back()
 
-  const loading = writable(false)
-
   const submit = () => {
+    if ($loading) return
+
     if (!title) {
       return pushToast({
         theme: "error",
@@ -63,12 +60,14 @@
   let start: Date
   let end: Date
 
+  $: loading = $editor?.storage.fileUpload.loading
+
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, loading, getPubkeyHints}))
+    editor = createEditor(getEditorOptions({submit, getPubkeyHints}))
   })
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={startSubmit}>
+<form class="column gap-4" on:submit|preventDefault={submit}>
   <ModalHeader>
     <div slot="title">Create an Event</div>
     <div slot="info">Invite other group members to events online or in real life.</div>
@@ -87,7 +86,10 @@
       <div class="input-editor flex-grow overflow-hidden">
         <EditorContent editor={$editor} />
       </div>
-      <Button data-tip="Add an image" class="center btn tooltip" on:click={() => addFile($editor)}>
+      <Button
+        data-tip="Add an image"
+        class="center btn tooltip"
+        on:click={$editor.commands.selectFiles}>
         {#if $loading}
           <span class="loading loading-spinner loading-xs"></span>
         {:else}

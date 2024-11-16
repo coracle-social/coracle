@@ -1,7 +1,6 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {onDestroy} from "svelte"
-  import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ContentSearch from "@lib/components/ContentSearch.svelte"
@@ -40,13 +39,7 @@
   <div slot="input" class="row-2 min-w-0 flex-grow items-center">
     <label class="input input-bordered flex flex-grow items-center gap-2">
       <Icon icon="magnifer" />
-      <!-- svelte-ignore a11y-autofocus -->
-      <input
-        autofocus={!isMobile}
-        bind:value={term}
-        class="grow"
-        type="text"
-        placeholder="Search for conversations..." />
+      <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
     </label>
     <Button class="btn btn-primary" on:click={startChat}>
       <Icon icon="add-circle" />

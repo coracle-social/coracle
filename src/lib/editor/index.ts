@@ -1,4 +1,3 @@
-import type {Writable} from "svelte/store"
 import {nprofileEncode} from "nostr-tools/nip19"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
 import Placeholder from "@tiptap/extension-placeholder"
@@ -19,10 +18,10 @@ import {
   ImageExtension,
   VideoExtension,
   TagExtension,
-  FileUploadExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
+import {FileUploadExtension} from "./FileUpload"
 import {createSuggestions} from "./Suggestions"
 import {LinkExtension} from "./LinkExtension"
 import EditMention from "./EditMention.svelte"
@@ -33,7 +32,8 @@ import EditVideo from "./EditVideo.svelte"
 import EditLink from "./EditLink.svelte"
 import Suggestions from "./Suggestions.svelte"
 import SuggestionProfile from "./SuggestionProfile.svelte"
-import {uploadFiles, asInline} from "./util"
+import {asInline} from "./util"
+import {getSetting} from "@app/state"
 
 export {
   createSuggestions,
@@ -49,41 +49,28 @@ export {
 }
 export * from "./util"
 
+type UploadType = "nip96" | "blossom"
+
 type EditorOptions = {
   submit: () => void
-  loading: Writable<boolean>
   getPubkeyHints: (pubkey: string) => string[]
   submitOnEnter?: boolean
   placeholder?: string
   autofocus?: boolean
+  uploadType?: UploadType
+  defaultUploadUrl?: string
 }
-
-export const getModifiedHardBreakExtension = () =>
-  HardBreakExtension.extend({
-    addKeyboardShortcuts() {
-      return {
-        "Shift-Enter": () => this.editor.commands.setHardBreak(),
-        "Mod-Enter": () => this.editor.commands.setHardBreak(),
-        Enter: () => {
-          if (this.editor.getText({blockSeparator: "\n"}).trim()) {
-            uploadFiles(this.editor)
-
-            return true
-          }
-
-          return false
-        },
-      }
-    },
-  })
 
 export const getEditorOptions = ({
   submit,
-  loading,
   getPubkeyHints,
   submitOnEnter,
   placeholder = "",
   autofocus = false,
+  uploadType = getSetting("upload_type") as UploadType,
+  defaultUploadUrl = getSetting("upload_type") == "nip96"
+    ? (getSetting("nip96_urls") as string[])[0] || "https://nostr.build"
+    : (getSetting("blossom_urls") as string[])[0] || "https://cdn.satellite.earth",
 }: EditorOptions) => ({
   autofocus,
   content: "",
@@ -98,7 +85,29 @@ export const getEditorOptions = ({
     Text,
     TagExtension,
     Placeholder.configure({placeholder}),
-    submitOnEnter ? getModifiedHardBreakExtension() : HardBreakExtension,
+    HardBreakExtension.extend({
+      addKeyboardShortcuts() {
+        return {
+          "Shift-Enter": () => this.editor.commands.setHardBreak(),
+          "Mod-Enter": () => {
+            if (this.editor.getText().trim()) {
+              submit()
+              return true
+            }
+
+            return this.editor.commands.setHardBreak()
+          },
+          Enter: () => {
+            if (submitOnEnter && this.editor.getText().trim()) {
+              submit()
+              return true
+            }
+
+            return this.editor.commands.setHardBreak()
+          },
+        }
+      },
+    }),
     LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
@@ -126,21 +135,14 @@ export const getEditorOptions = ({
     NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
     ImageExtension.extend(
       asInline({addNodeView: () => SvelteNodeViewRenderer(EditImage)}),
-    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    ).configure({defaultUploadUrl, defaultUploadType: uploadType}),
     VideoExtension.extend(
       asInline({addNodeView: () => SvelteNodeViewRenderer(EditVideo)}),
-    ).configure({defaultUploadUrl: "https://nostr.build", defaultUploadType: "nip96"}),
+    ).configure({defaultUploadUrl, defaultUploadType: uploadType}),
     FileUploadExtension.configure({
-      immediateUpload: false,
-      sign: (event: StampedEvent) => {
-        loading.set(true)
-
-        return signer.get()!.sign(event)
-      },
-      onComplete: () => {
-        loading.set(false)
-        submit()
-      },
+      immediateUpload: true,
+      allowedMimeTypes: ["image/*", "video/*"],
+      sign: (event: StampedEvent) => signer.get()!.sign(event),
     }),
   ],
 })

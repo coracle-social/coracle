@@ -23,7 +23,7 @@
   </ModalHeader>
   <Field>
     <div slot="input">
-      <ProfileMultiSelect bind:value={pubkeys} />
+      <ProfileMultiSelect autofocus bind:value={pubkeys} />
     </div>
   </Field>
   <ModalFooter>

@@ -92,7 +92,3 @@ export const getEditorTags = (editor: Editor) => {
 
   return [...topicTags, ...naddrTags, ...neventTags, ...mentionTags, ...imetaTags]
 }
-
-export const addFile = (editor: Editor) => editor.chain().selectFiles().run()
-
-export const uploadFiles = (editor: Editor) => editor.chain().uploadFiles().run()

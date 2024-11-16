@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import type {Readable} from "svelte/store"
-  import {writable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
   import {createEvent} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
@@ -13,19 +12,16 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
   import {THREAD, GENERAL, tagRoom} from "@app/state"
-
   import {getPubkeyHints} from "@app/commands"
-  import {getEditorOptions, addFile, uploadFiles, getEditorTags} from "@lib/editor"
+  import {getEditorOptions, getEditorTags} from "@lib/editor"
 
   export let url
 
-  const startSubmit = () => uploadFiles($editor)
-
   const back = () => history.back()
 
-  const loading = writable(false)
-
   const submit = () => {
+    if ($loading) return
+
     if (!title) {
       return pushToast({
         theme: "error",
@@ -55,19 +51,16 @@
   let title: string
   let editor: Readable<Editor>
 
+  $: loading = $editor?.storage.fileUpload.loading
+
   onMount(() => {
     editor = createEditor(
-      getEditorOptions({
-        submit,
-        loading,
-        getPubkeyHints,
-        placeholder: "What's on your mind?",
-      }),
+      getEditorOptions({submit, getPubkeyHints, placeholder: "What's on your mind?"}),
     )
   })
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={startSubmit}>
+<form class="column gap-4" on:submit|preventDefault={submit}>
   <ModalHeader>
     <div slot="title">Create a Thread</div>
     <div slot="info">Share a link, or start a discussion.</div>
@@ -94,7 +87,7 @@
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
-      on:click={() => addFile($editor)}>
+      on:click={$editor.commands.selectFiles}>
       {#if $loading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}

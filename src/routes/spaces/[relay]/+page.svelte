@@ -61,22 +61,28 @@
         {@const {software, version, supported_nips, limitation} = $relay.profile}
         <div class="flex flex-wrap gap-1">
           {#if limitation?.auth_required}
-            <p class="badge badge-neutral">Authentication Required</p>
+            <p class="badge badge-neutral">
+              <span class="ellipsize">Authentication Required</span>
+            </p>
           {/if}
           {#if limitation?.payment_required}
-            <p class="badge badge-neutral">Payment Required</p>
+            <p class="badge badge-neutral"><span class="ellipsize">Payment Required</span></p>
           {/if}
           {#if limitation?.min_pow_difficulty}
-            <p class="badge badge-neutral">Requires PoW {limitation?.min_pow_difficulty}</p>
+            <p class="badge badge-neutral">
+              <span class="ellipsize">Requires PoW {limitation?.min_pow_difficulty}</span>
+            </p>
           {/if}
           {#if supported_nips}
-            <p class="badge badge-neutral">NIPs: {supported_nips.join(", ")}</p>
+            <p class="badge badge-neutral">
+              <span class="ellipsize">NIPs: {supported_nips.join(", ")}</span>
+            </p>
           {/if}
           {#if software}
-            <p class="badge badge-neutral">Software: {software}</p>
+            <p class="badge badge-neutral"><span class="ellipsize">Software: {software}</span></p>
           {/if}
           {#if version}
-            <p class="badge badge-neutral">Version: {version}</p>
+            <p class="badge badge-neutral"><span class="ellipsize">Version: {version}</span></p>
           {/if}
         </div>
       {/if}
