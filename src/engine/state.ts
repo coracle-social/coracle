@@ -50,7 +50,14 @@ import {
   uniqBy,
 } from "@welshman/lib"
 import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, Local, Multi, Relays, publish as basePublish} from "@welshman/net"
+import {
+  Executor,
+  Local,
+  Multi,
+  Relays,
+  SubscriptionEvent,
+  publish as basePublish,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {
@@ -713,7 +720,7 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
 
   const sub = baseSubscribe(request)
 
-  sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
+  sub.emitter.on(SubscriptionEvent.Close, async (url: string, event: TrustedEvent) => {
     projections.push(await ensureUnwrapped(event))
   })
 
@@ -747,8 +754,10 @@ export const load = (request: MySubscribeRequest) =>
     const events: TrustedEvent[] = []
     const sub = subscribe({...request, closeOnEose: true})
 
-    sub.emitter.on("event", (url: string, event: TrustedEvent) => events.push(event))
-    sub.emitter.on("complete", (url: string) => resolve(events))
+    sub.emitter.on(SubscriptionEvent.Close, (url: string, event: TrustedEvent) =>
+      events.push(event),
+    )
+    sub.emitter.on(SubscriptionEvent.Complete, (url: string) => resolve(events))
   })
 
 export type MyPublishRequest = PublishRequest & {
