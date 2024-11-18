@@ -21,7 +21,7 @@
   const showSettingsMenu = () => pushModal(MenuSettings)
 </script>
 
-<div class="relative hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
+<div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
       {#if PLATFORM_RELAY}

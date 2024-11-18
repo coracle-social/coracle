@@ -4,8 +4,7 @@ import type {Node as ProsemirrorNode} from "@tiptap/pm/model"
 import type {MarkdownSerializerState} from "prosemirror-markdown"
 import {createPasteRuleMatch} from "./util"
 
-export const LINK_REGEX =
-  /([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s]*[^<>"'\.!?,:\s\)\(]*/gi
+export const LINK_REGEX = /([a-z\+:]{2,30}:\/\/)?[^<>\(\)\s]+\.[a-z]{2,6}[^\s<>"'\.!?,:\)\(]*/gi
 
 export interface LinkAttributes {
   url: string

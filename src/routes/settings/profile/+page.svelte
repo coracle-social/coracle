@@ -52,9 +52,13 @@
   <div class="card2 bg-alt col-4 shadow-xl">
     <FieldInline>
       <p slot="label">Public Key</p>
-      <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-        <Icon icon="link-round" />
-        <input class="ellipsize" value={$session?.pubkey} />
+      <label
+        class="input input-bordered flex w-full items-center justify-between gap-2"
+        slot="input">
+        <div class="row-2 flex-grow items-center">
+          <Icon icon="link-round" />
+          <input class="ellipsize flex-grow" value={$session?.pubkey} />
+        </div>
         <Button class="flex items-center" on:click={copyNpub}>
           <Icon icon="copy" />
         </Button>
