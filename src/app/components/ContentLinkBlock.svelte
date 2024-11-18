@@ -22,42 +22,41 @@
   const expand = () => pushModal(ContentLinkDetail, {url}, {fullscreen: true})
 </script>
 
-<Link
-  external
-  href={url}
-  style="background-color: rgba(15, 15, 14, 0.5)"
-  class="relative my-2 flex w-full flex-grow flex-col overflow-hidden rounded-xl">
-  {#if url.match(/\.(mov|webm|mp4)$/)}
-    <video controls src={url} class="max-h-96 object-contain object-center">
-      <track kind="captions" />
-    </video>
-  {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
-    <button type="button" on:click|stopPropagation|preventDefault={expand}>
-      <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96" />
-    </button>
-  {:else}
-    {#await loadPreview()}
-      <div class="center my-12 w-full">
-        <span class="loading loading-spinner" />
-      </div>
-    {:then preview}
-      {#if preview.image}
-        <img
-          alt="Link preview"
-          src={imgproxy(preview.image)}
-          class="max-h-96 object-contain object-center" />
-      {/if}
-      <div class="h-px" />
-      {#if preview.title}
-        <div class="flex flex-col px-4 py-2">
-          <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{preview.title}</strong>
-          <small>{ellipsize(preview.description, 140)}</small>
+<Link external href={url} class="my-2 flex">
+  <div class="overflow-hidden rounded-box leading-[0]">
+    {#if url.match(/\.(mov|webm|mp4)$/)}
+      <video controls src={url} class="max-h-96 object-contain object-center">
+        <track kind="captions" />
+      </video>
+    {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
+      <button type="button" on:click|stopPropagation|preventDefault={expand}>
+        <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96" />
+      </button>
+    {:else}
+      {#await loadPreview()}
+        <div class="center my-12 w-full">
+          <span class="loading loading-spinner" />
         </div>
-      {/if}
-    {:catch}
-      <p class="mb-1 p-12 text-center">
-        Unable to load a preview for {url}
-      </p>
-    {/await}
-  {/if}
+      {:then preview}
+        <div class="bg-alt flex flex-col max-w-xl leading-normal">
+          {#if preview.image}
+            <img
+              alt="Link preview"
+              src={imgproxy(preview.image)}
+              class="max-h-72 object-contain object-center bg-alt" />
+          {/if}
+          {#if preview.title}
+            <div class="flex flex-col gap-2 p-4">
+              <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{preview.title}</strong>
+              <p>{ellipsize(preview.description, 140)}</p>
+            </div>
+          {/if}
+        </div>
+      {:catch}
+        <p class="p-12 text-center bg-alt">
+          Unable to load a preview for {url}
+        </p>
+      {/await}
+    {/if}
+  </div>
 </Link>
