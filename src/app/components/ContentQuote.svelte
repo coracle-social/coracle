@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {nthEq} from "@welshman/lib"
+  import {ctx, nthEq} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import Link from "@lib/components/Link.svelte"
@@ -10,12 +10,14 @@
   import {makeThreadPath} from "@app/routes"
 
   export let value
+  export let event
   export let depth = 0
 
-  const {id, identifier, kind, pubkey, relays} = value
+  const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const addr = new Address(kind, pubkey, identifier)
   const idOrAddress = id || addr.toString()
-  const event = deriveEvent(idOrAddress, relays)
+  const relays = ctx.app.router.Quote(event, idOrAddress, relayHints).getUrls()
+  const quote = deriveEvent(idOrAddress, relays)
   const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
 
   const getLocalHref = (e: TrustedEvent) => {
@@ -32,14 +34,14 @@
   }
 
   // If we found this event on a relay that the user is a member of, redirect internally
-  $: localHref = $event ? getLocalHref($event) : null
+  $: localHref = $quote ? getLocalHref($quote) : null
   $: href = localHref || entityLink(entity)
 </script>
 
 <Link external={!localHref} {href} class="my-2 block max-w-full text-left">
-  {#if $event}
-    <NoteCard event={$event} class="bg-alt rounded-box p-4">
-      <slot name="note-content" event={$event} {depth} />
+  {#if $quote}
+    <NoteCard event={$quote} class="bg-alt rounded-box p-4">
+      <slot name="note-content" event={$quote} {depth} />
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">

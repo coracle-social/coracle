@@ -109,7 +109,7 @@
           <ContentMention value={parsed.value} />
         {:else if isEvent(parsed) || isAddress(parsed)}
           {#if isStartOrEnd(i) && depth < 2 && !hideMedia}
-            <ContentQuote value={parsed.value} {depth}>
+            <ContentQuote value={parsed.value} {depth} {event}>
               <div slot="note-content" let:event>
                 <svelte:self {hideMedia} {event} depth={depth + 1} />
               </div>
