@@ -1,6 +1,8 @@
 <script lang="ts">
   import {fly} from "@lib/transition"
-  import {toast} from "@app/toast"
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import {toast, popToast} from "@app/toast"
 </script>
 
 {#if $toast}
@@ -14,6 +16,9 @@
         class:text-base-content={theme === "info"}
         class:alert-error={theme === "error"}>
         {$toast.message}
+        <Button class="flex items-center opacity-75" on:click={() => popToast($toast.id)}>
+          <Icon icon="close-circle" />
+        </Button>
       </div>
     {/key}
   </div>
