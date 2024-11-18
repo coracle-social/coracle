@@ -3,7 +3,8 @@
   import {groupBy, uniqBy} from "@welshman/lib"
   import {REACTION} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import {pubkey, repository, load} from "@welshman/app"
+  import {pubkey, repository, load, displayProfileByPubkey} from "@welshman/app"
+  import {displayList} from "@lib/util"
   import {displayReaction} from "@app/state"
 
   export let event
@@ -26,11 +27,15 @@
 {#if $reactions.length > 0}
   <div class="flex min-w-0 flex-wrap gap-2">
     {#each groupedReactions.entries() as [content, events]}
-      {@const isOwn = events.some(e => e.pubkey === $pubkey)}
+      {@const pubkeys = events.map(e => e.pubkey)}
+      {@const isOwn = $pubkey && pubkeys.includes($pubkey)}
+      {@const info = displayList(pubkeys.map(pubkey => displayProfileByPubkey(pubkey)))}
+      {@const tooltip = `${info} reacted ${displayReaction(content)}`}
       {@const onClick = () => onReactionClick(content, events)}
       <button
         type="button"
-        class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full"
+        data-tip={tooltip}
+        class="flex-inline btn btn-neutral btn-xs tooltip gap-1 rounded-full"
         class:border={isOwn}
         class:border-solid={isOwn}
         class:border-primary={isOwn}
