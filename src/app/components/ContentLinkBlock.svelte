@@ -38,22 +38,23 @@
           <span class="loading loading-spinner" />
         </div>
       {:then preview}
-        <div class="bg-alt flex flex-col max-w-xl leading-normal">
+        <div class="bg-alt flex max-w-xl flex-col leading-normal">
           {#if preview.image}
             <img
               alt="Link preview"
               src={imgproxy(preview.image)}
-              class="max-h-72 object-contain object-center bg-alt" />
+              class="bg-alt max-h-72 object-contain object-center" />
           {/if}
           {#if preview.title}
             <div class="flex flex-col gap-2 p-4">
-              <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{preview.title}</strong>
+              <strong class="overflow-hidden text-ellipsis whitespace-nowrap"
+                >{preview.title}</strong>
               <p>{ellipsize(preview.description, 140)}</p>
             </div>
           {/if}
         </div>
       {:catch}
-        <p class="p-12 text-center bg-alt">
+        <p class="bg-alt p-12 text-center">
           Unable to load a preview for {url}
         </p>
       {/await}

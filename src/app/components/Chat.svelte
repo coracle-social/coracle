@@ -10,7 +10,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {int, MINUTE, sortBy, remove} from "@welshman/lib"
+  import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
@@ -53,7 +53,8 @@
     pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
   const onSubmit = async ({content, ...params}: EventContent) => {
-    const tags = [...params.tags, ...remove($pubkey!, pubkeys).map(tagPubkey)]
+    // Remove p tags since they result in forking the conversation
+    const tags = [...params.tags.filter(nthNe(0, "p")), ...remove($pubkey!, pubkeys).map(tagPubkey)]
 
     await sendWrapped({
       pubkeys,
@@ -129,8 +130,10 @@
               {/if}
             </p>
           </div>
-          <Button on:click={showMembers} class="btn btn-link hidden sm:block"
-            >Show all members</Button>
+          {#if others.length > 2}
+            <Button on:click={showMembers} class="btn btn-link hidden sm:block"
+              >Show all members</Button>
+          {/if}
         {/if}
       </div>
       <div slot="action">
