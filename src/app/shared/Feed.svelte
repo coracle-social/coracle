@@ -153,7 +153,7 @@
 
         if (isSeen(e)) return undefined
 
-        Array.from(range(0, depth)).forEach(() => {
+        Array.from(range(0, depth - 1)).forEach(() => {
           const parent = getAncestorTagValues(e.tags)
             .replies.map(v => repository.getEvent(v))
             .find(identity)
