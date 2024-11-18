@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
   import {loadHandle} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
@@ -16,10 +17,14 @@
   <NoteDetail id={data} {relays} />
 {:else if type === "naddr"}
   {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
+  {@const relays = [
+    ...(data.relays || []),
+    ...Array.from(ctx.app.router.FromPubkey(data.pubkey).getUrls()),
+  ]}
   {#if data.kind === 31923}
-    <EventDetail {address} relays={data.relays} />
+    <EventDetail {address} {relays} />
   {:else}
-    <NoteDetail {address} relays={data.relays} />
+    <NoteDetail {address} {relays} />
   {/if}
 {:else if type === "nprofile"}
   <PersonDetail pubkey={data.pubkey} {relays} />
