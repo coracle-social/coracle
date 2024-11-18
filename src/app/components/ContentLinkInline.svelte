@@ -2,7 +2,6 @@
   import {displayUrl} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
-  import Button from "@lib/components/Button.svelte"
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
   import {pushModal} from "@app/modal"
 
@@ -14,10 +13,11 @@
 </script>
 
 {#if url.match(/\.(jpe?g|png|gif|webp)$/)}
-  <Button class="link-content whitespace-nowrap" on:click={expand}>
+  <!-- Use a real link so people can copy the href -->
+  <a href={url} class="link-content whitespace-nowrap" on:click|preventDefault={expand}>
     <Icon icon="link-round" size={3} class="inline-block" />
     {displayUrl(url)}
-  </Button>
+  </a>
 {:else}
   <Link external href={url} class="link-content whitespace-nowrap">
     <Icon icon="link-round" size={3} class="inline-block" />
