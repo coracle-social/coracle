@@ -1,13 +1,21 @@
 <script lang="ts">
+  import {goto} from "$app/navigation"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
+  import ChatEnable from "@app/components/ChatEnable.svelte"
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
   import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
-  import {userMembership, getMembershipUrls, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
+  import {
+    userMembership,
+    getMembershipUrls,
+    canDecrypt,
+    PLATFORM_RELAY,
+    PLATFORM_LOGO,
+  } from "@app/state"
   import {pushModal} from "@app/modal"
   import {deriveNotification, inactiveSpacesNotifications, CHAT_FILTERS} from "@app/notifications"
 
@@ -19,6 +27,8 @@
     getMembershipUrls($userMembership).length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd)
 
   const showSettingsMenu = () => pushModal(MenuSettings)
+
+  const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable))
 </script>
 
 <div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
@@ -52,7 +62,7 @@
       </PrimaryNavItem>
       <PrimaryNavItem
         title="Messages"
-        href="/chat"
+        on:click={openChat}
         class="tooltip-right"
         notification={$chatNotification}>
         <Avatar icon="letter" class="!h-10 !w-10" />
@@ -76,7 +86,7 @@
       <PrimaryNavItem title="Notes" href="/notes">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Messages" href="/chat" notification={$chatNotification}>
+      <PrimaryNavItem title="Messages" on:click={openChat} notification={$chatNotification}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem

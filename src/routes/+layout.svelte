@@ -55,6 +55,7 @@
     getMembershipRooms,
     userMembership,
     ensureUnwrapped,
+    canDecrypt,
     MESSAGE,
     COMMENT,
     THREAD,
@@ -171,6 +172,10 @@
       unwrapper.addGlobalHandler(ensureUnwrapped)
 
       repository.on("update", ({added}) => {
+        if (!$canDecrypt) {
+          return
+        }
+
         for (const event of added) {
           if (event.kind === WRAP) {
             unwrapper.push(event)

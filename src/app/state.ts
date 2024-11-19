@@ -59,7 +59,7 @@ import {
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
-import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
+import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
 export const ROOM = "~"
 
@@ -277,6 +277,8 @@ export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
   )
 
 // Settings
+
+export const canDecrypt = synced("canDecrypt", false)
 
 export const SETTINGS = 38489
 
