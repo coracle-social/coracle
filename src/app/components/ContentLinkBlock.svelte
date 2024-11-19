@@ -54,7 +54,7 @@
           {/if}
         </div>
       {:catch}
-        <p class="bg-alt p-12 text-center">
+        <p class="bg-alt p-12 text-center leading-normal">
           Unable to load a preview for {url}
         </p>
       {/await}
