@@ -73,7 +73,7 @@
   data-event={event.id}
   on:click={isMobile || inert ? null : onClick}
   onLongPress={inert ? null : onLongPress}
-  class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert
+  class="group relative flex w-full flex-col p-2 pb-3 text-left transition-colors {inert
     ? 'hover:bg-base-300'
     : ''}">
   <div class="flex w-full gap-3 overflow-auto">
