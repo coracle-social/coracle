@@ -8,9 +8,12 @@
 </script>
 
 <script lang="ts">
+  import {nip19} from "nostr-tools"
   import {onMount, onDestroy} from "svelte"
+  import type {Readable} from "svelte/store"
+  import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
-  import {sortBy, append, now} from "@welshman/lib"
+  import {sortBy, append, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -47,6 +50,15 @@
 
   const assertEvent = (e: any) => e as TrustedEvent
 
+  const replyTo = (event: TrustedEvent) => {
+    const relays = ctx.app.router.Event(event).getUrls()
+    const nevent = nip19.neventEncode({...event, relays})
+
+    $editor.commands.insertNEvent({nevent})
+    $editor.commands.insertContent("\n")
+    $editor.commands.focus()
+  }
+
   const onSubmit = ({content, tags}: EventContent) =>
     publishThunk({
       relays: [url],
@@ -55,6 +67,7 @@
     })
 
   let loading = true
+  let editor: Readable<Editor>
   let elements: Element[] = []
 
   $: {
@@ -142,8 +155,8 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <div in:slide>
-          <ChannelMessage {url} {room} event={assertEvent(value)} {showPubkey} />
+        <div in:slide class:-mt-4={!showPubkey}>
+          <ChannelMessage {url} {room} {replyTo} event={assertEvent(value)} {showPubkey} />
         </div>
       {/if}
     {/each}
@@ -157,5 +170,5 @@
       </Spinner>
     </p>
   </div>
-  <ChannelCompose {content} {onSubmit} />
+  <ChannelCompose bind:editor {content} {onSubmit} />
 </div>

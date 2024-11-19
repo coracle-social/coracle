@@ -11,7 +11,7 @@
   export let selected: NodeViewProps["selected"]
 
   const displayEvent = (e: TrustedEvent) => {
-    const content = e?.tags.find(nthEq(0, "alt"))?.[1] || e?.content
+    const content = e?.tags.find(nthEq(0, "alt"))?.[1] || e?.content || ""
 
     return content.length > 1
       ? ellipsize(content, 30)

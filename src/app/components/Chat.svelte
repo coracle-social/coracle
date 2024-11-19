@@ -10,7 +10,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
+  import type {Readable} from "svelte/store"
+  import type {Editor} from "svelte-tiptap"
+  import {nip19} from "nostr-tools"
+  import {int, nthNe, MINUTE, sortBy, remove, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
@@ -52,6 +55,15 @@
   const showMembers = () =>
     pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
+  const replyTo = (event: TrustedEvent) => {
+    const relays = ctx.app.router.Event(event).getUrls()
+    const nevent = nip19.neventEncode({...event, relays})
+
+    $editor.commands.insertNEvent({nevent})
+    $editor.commands.insertContent("\n")
+    $editor.commands.focus()
+  }
+
   const onSubmit = async ({content, ...params}: EventContent) => {
     // Remove p tags since they result in forking the conversation
     const tags = [...params.tags.filter(nthNe(0, "p")), ...remove($pubkey!, pubkeys).map(tagPubkey)]
@@ -64,6 +76,7 @@
   }
 
   let loading = true
+  let editor: Readable<Editor>
   let elements: Element[] = []
 
   $: {
@@ -170,7 +183,7 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} />
+        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} {replyTo} />
       {/if}
     {/each}
     <p
@@ -185,5 +198,5 @@
       <slot name="info" />
     </p>
   </div>
-  <ChatCompose {onSubmit} />
+  <ChatCompose bind:editor {onSubmit} />
 </div>

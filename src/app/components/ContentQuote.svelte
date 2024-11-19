@@ -1,13 +1,16 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {goto} from "$app/navigation"
   import {ctx, nthEq} from "@welshman/lib"
-  import {Address} from "@welshman/util"
-  import type {TrustedEvent} from "@welshman/util"
-  import Link from "@lib/components/Link.svelte"
+  import {Address, DIRECT_MESSAGE} from "@welshman/util"
+  import {repository} from "@welshman/app"
+  import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
+  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import {deriveEvent, entityLink, MESSAGE, THREAD} from "@app/state"
   import {makeThreadPath} from "@app/routes"
+  import {pushDrawer} from "@app/modal"
 
   export let value
   export let event
@@ -20,25 +23,63 @@
   const quote = deriveEvent(idOrAddress, relays)
   const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
 
-  const getLocalHref = (e: TrustedEvent) => {
-    const url = e.tags.find(nthEq(0, "~"))?.[2]
+  const scrollToEvent = (id: string) => {
+    const element = document.querySelector(`[data-event="${id}"]`)
 
-    if (!url) return
-    if ([MESSAGE, THREAD].includes(e.kind)) return makeThreadPath(url, e.id)
+    if (element) {
+      element.scrollIntoView({behavior: "smooth"})
+    }
 
-    const kind = e.tags.find(nthEq(0, "K"))?.[1]
-    const id = e.tags.find(nthEq(0, "E"))?.[1]
-
-    if (!id || !kind) return
-    if ([MESSAGE, THREAD].includes(parseInt(kind))) return makeThreadPath(url, id)
+    return Boolean(element)
   }
 
-  // If we found this event on a relay that the user is a member of, redirect internally
-  $: localHref = $quote ? getLocalHref($quote) : null
-  $: href = localHref || entityLink(entity)
+  const openMessage = (url: string, room: string, id: string) => {
+    const event = repository.getEvent(id)
+
+    if (event) {
+      return pushDrawer(ChannelConversation, {url, room, event})
+    }
+
+    return Boolean(event)
+  }
+
+  const onClick = (e: Event) => {
+    if ($quote) {
+      if ($quote.kind === DIRECT_MESSAGE) {
+        return scrollToEvent($quote.id)
+      }
+
+      const [room, url] = $quote.tags.find(nthEq(0, "~"))?.slice(1) || []
+
+      if (url && room) {
+        if ($quote.kind === THREAD) {
+          return goto(makeThreadPath(url, $quote.id))
+        }
+
+        if ($quote.kind === MESSAGE) {
+          return scrollToEvent($quote.id) || openMessage(url, room, $quote.id)
+        }
+
+        const kind = $quote.tags.find(nthEq(0, "K"))?.[1]
+        const id = $quote.tags.find(nthEq(0, "E"))?.[1]
+
+        if (id && kind) {
+          if (parseInt(kind) === THREAD) {
+            return goto(makeThreadPath(url, id))
+          }
+
+          if (parseInt(kind) === MESSAGE) {
+            return scrollToEvent(id) || openMessage(url, room, id)
+          }
+        }
+      }
+    }
+
+    window.open(entityLink(entity))
+  }
 </script>
 
-<Link external={!localHref} {href} class="my-2 block max-w-full text-left">
+<Button class="my-2 block max-w-full text-left" on:click={onClick}>
   {#if $quote}
     <NoteCard event={$quote} class="bg-alt rounded-box p-4">
       <slot name="note-content" event={$quote} {depth} />
@@ -48,4 +89,4 @@
       <Spinner loading>Loading event...</Spinner>
     </div>
   {/if}
-</Link>
+</Button>

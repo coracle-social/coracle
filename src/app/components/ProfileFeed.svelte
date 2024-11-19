@@ -6,6 +6,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {createFeedController} from "@welshman/app"
   import {createScroller} from "@lib/html"
+  import {fly} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteItem from "@app/components/NoteItem.svelte"
 
@@ -54,7 +55,9 @@
 <div class="col-4" bind:this={element}>
   <div class="flex flex-col gap-2">
     {#each events as event (event.id)}
-      <NoteItem {url} {event} />
+      <div in:fly>
+        <NoteItem {url} {event} />
+      </div>
     {/each}
     <p class="center my-12 flex">
       <Spinner loading />

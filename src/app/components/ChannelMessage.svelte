@@ -13,6 +13,8 @@
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Link from "@lib/components/Link.svelte"
+  import Icon from "@lib/components/Icon.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ReplySummary from "@app/components/ReplySummary.svelte"
@@ -27,6 +29,7 @@
 
   export let url, room
   export let event: TrustedEvent
+  export let replyTo: any = undefined
   export let showPubkey = false
   export let isHead = false
   export let inert = false
@@ -39,6 +42,8 @@
   const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
   const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+
+  const reply = () => replyTo(event)
 
   const onClick = () => {
     const root = $rootEvent || event
@@ -65,6 +70,7 @@
 </script>
 
 <LongPress
+  data-event={event.id}
   on:click={isMobile || inert ? null : onClick}
   onLongPress={inert ? null : onLongPress}
   class="group relative flex w-full flex-col gap-1 p-2 text-left transition-colors {inert
@@ -110,6 +116,11 @@
     class:group-hover:opacity-100={!isMobile}
     on:click|stopPropagation>
     <ChannelMessageEmojiButton {url} {room} {event} />
+    {#if replyTo}
+      <Button class="btn join-item btn-xs" on:click={reply}>
+        <Icon icon="reply" size={4} />
+      </Button>
+    {/if}
     <ChannelMessageMenuButton {url} {event} />
   </button>
 </LongPress>

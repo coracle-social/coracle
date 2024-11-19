@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
+  import {ctx} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -8,10 +9,11 @@
 
   export let event
 
-  const note1 = nip19.noteEncode(event.id)
+  const relays = ctx.app.router.Event(event).getUrls()
+  const nevent1 = nip19.neventEncode({...event, relays})
   const npub1 = nip19.npubEncode(event.pubkey)
   const json = JSON.stringify(event, null, 2)
-  const copyId = () => clip(note1)
+  const copyLink = () => clip(nevent1)
   const copyPubkey = () => clip(npub1)
   const copyJson = () => clip(json)
 </script>
@@ -22,11 +24,11 @@
     <div slot="info">The full details of this event are shown below.</div>
   </ModalHeader>
   <FieldInline>
-    <p slot="label">Event ID</p>
+    <p slot="label">Event Link</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="file" />
-      <input type="text" class="ellipsize min-w-0 grow" value={note1} />
-      <Button on:click={copyId} class="flex items-center">
+      <input type="text" class="ellipsize min-w-0 grow" value={nevent1} />
+      <Button on:click={copyLink} class="flex items-center">
         <Icon icon="copy" />
       </Button>
     </label>

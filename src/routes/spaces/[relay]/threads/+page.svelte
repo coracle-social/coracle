@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {sortBy, sleep, uniqBy, now} from "@welshman/lib"
-  import {getListTags, getPubkeyTagValues} from "@welshman/util"
+  import {getListTags, getPubkeyTagValues, LOCAL_RELAY_URL} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {nthEq} from "@welshman/lib"
@@ -72,8 +72,21 @@
     })
 
     const unsub = subscribePersistent({
-      relays: [url],
-      filters: [{kinds: [COMMENT], "#K": [String(THREAD)], since: now()}],
+      relays: [url, LOCAL_RELAY_URL],
+      filters: [
+        {kinds: [THREAD], since: now()},
+        {kinds: [COMMENT], "#K": [String(THREAD)], since: now()},
+      ],
+      onEvent: (event: TrustedEvent) => {
+        if (event.kind === THREAD) {
+          const index = Math.max(
+            0,
+            events.findIndex(e => e.created_at < event.created_at),
+          )
+
+          events = [...events.slice(0, index), event, ...events.slice(index)]
+        }
+      },
     })
 
     return () => {

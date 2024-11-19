@@ -26,6 +26,7 @@
   import {pushModal} from "@app/modal"
 
   export let event: TrustedEvent
+  export let replyTo: any = undefined
   export let pubkeys: string[]
   export let showPubkey = false
 
@@ -59,6 +60,7 @@
   <ThunkStatus {thunk} class="mt-1" />
 {/if}
 <div
+  data-event={event.id}
   class="group chat flex items-center justify-end gap-1 px-2"
   class:chat-start={event.pubkey !== $pubkey}
   class:flex-row-reverse={event.pubkey !== $pubkey}
@@ -66,7 +68,7 @@
   <Tippy
     bind:popover
     component={ChatMessageMenu}
-    props={{event, pubkeys, popover}}
+    props={{event, pubkeys, popover, replyTo}}
     params={{
       interactive: true,
       trigger: "manual",
