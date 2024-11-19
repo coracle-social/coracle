@@ -209,7 +209,7 @@
         })
 
         // Listen for new notifications/memberships
-        subscribePersistent({
+        unsubRooms = subscribePersistent({
           relays,
           filters: [
             {kinds: [THREAD], since},

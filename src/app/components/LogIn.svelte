@@ -17,15 +17,17 @@
 
   const signUp = () => pushModal(SignUp)
 
-  const withLoading = (cb: () => void) => async () => {
-    loading = true
+  const withLoading =
+    (cb: (...args: any[]) => any) =>
+    async (...args: any[]) => {
+      loading = true
 
-    try {
-      await cb()
-    } finally {
-      loading = false
+      try {
+        await cb(...args)
+      } finally {
+        loading = false
+      }
     }
-  }
 
   const onSuccess = async (session: Session, relays: string[] = []) => {
     addSession(session)
@@ -50,7 +52,7 @@
     }
   })
 
-  const loginWithSigner = async (app: any) => {
+  const loginWithSigner = withLoading(async (app: any) => {
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
 
@@ -62,7 +64,7 @@
         message: "Something went wrong! Please try again.",
       })
     }
-  }
+  })
 
   const loginWithBunker = () => pushModal(LogInBunker)
 
