@@ -1,11 +1,3 @@
-<style lang="css">
-  .inbox-warning:hover > div {
-    transition: all 0.3s;
-    width: auto;
-    opacity: 1;
-  }
-</style>
-
 <script lang="ts">
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
