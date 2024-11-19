@@ -330,10 +330,15 @@ export const checkRelayAuth = async (url: string, timeout = 3000) => {
 }
 
 export const attemptRelayAccess = async (url: string, claim = "") => {
-  const checks = [checkRelayProfile, checkRelayConnection, checkRelayAccess, checkRelayAuth]
+  const checks = [
+    () => checkRelayProfile(url),
+    () => checkRelayConnection(url),
+    () => checkRelayAccess(url, claim),
+    () => checkRelayAuth(url),
+  ]
 
   for (const check of checks) {
-    const error = await check(url)
+    const error = await check()
 
     if (error) {
       return error

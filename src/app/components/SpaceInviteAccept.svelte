@@ -62,7 +62,7 @@
   let url = ""
   let loading = false
 
-  $: linkIsValid = Boolean(tryCatch(() => isRelayUrl(normalizeRelayUrl(url))))
+  $: linkIsValid = Boolean(tryCatch(() => isRelayUrl(normalizeRelayUrl(url.split("|")[0]))))
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={join}>
