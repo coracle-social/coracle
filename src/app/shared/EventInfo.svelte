@@ -6,7 +6,6 @@
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
-  import EventActions from "src/app/shared/EventActions.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {getSetting} from "src/engine"
 
@@ -39,9 +38,6 @@
         <Chip danger small>Deleted</Chip>
       {/if}
     </div>
-    {#if !actionsInline}
-      <EventActions {event} />
-    {/if}
   </div>
   <div class="flex items-center gap-2 text-sm text-neutral-200">
     {#if event.wrap}
