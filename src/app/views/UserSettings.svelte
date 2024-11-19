@@ -13,11 +13,12 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy} from "src/util/misc"
   import Select from "src/partials/Select.svelte"
+  import {pluralize} from "hurdak"
 
-  const values = {...$userSettings}
+  const values = {...$userSettings, send_delay: $userSettings.send_delay / 1000}
 
   const submit = () => {
-    publishSettings(values)
+    publishSettings({...values, send_delay: values.send_delay * 1000})
 
     showInfo("Your settings have been saved!")
   }
@@ -54,6 +55,14 @@
       <p slot="info">
         How much you'd like to tip the developer of {appName} whenever you send a zap.
       </p>
+    </Field>
+    <Field>
+      <div slot="label" class="flex justify-between">
+        <strong>Send Delay</strong>
+        <div>{values.send_delay} {pluralize(values.send_delay, "second")}</div>
+      </div>
+      <Input type="range" step="1" bind:value={values.send_delay} min={0} max={15}></Input>
+      <p slot="info">A delay period allowing you to cancel a reply or note creation, in seconds.</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">

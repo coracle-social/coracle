@@ -11,7 +11,7 @@
     timeout = 5,
     ...opts
   }) => {
-    toast.set({id, type, theme, ...opts})
+    toast.set({id, type, theme, timeout, ...opts})
 
     if (timeout) {
       setTimeout(() => {
@@ -26,7 +26,9 @@
 
   export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
 
-  export const showPublishInfo = (pub, opts = {}) => showToast({pub, type: "publish", ...opts})
+  export const showPublishInfo = (thunk: Thunk, opts = {}) => {
+    showToast({thunk, type: "publish", ...opts})
+  }
 
   window.addEventListener("online", () => {
     if (get(toast)?.id === "offline") {
@@ -40,15 +42,20 @@
 </script>
 
 <script lang="ts">
+  import type {Thunk} from "@welshman/app"
+  import {onDestroy} from "svelte"
   import cx from "classnames"
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
+  import ThunkStatus from "src/partials/ThunkStatus.svelte"
 
   let touchStart = 0
   let startOffset = 0
   let currentOffset = 0
 
   $: offset = currentOffset - startOffset
+
+  $: timeLeft = $toast?.timeout || 0
 
   const onTouchStart = e => {
     touchStart = Date.now()
@@ -75,10 +82,16 @@
       currentOffset = 0
     }, 200)
   }
+
+  const timeInterval = setInterval(() => timeLeft > 0 && timeLeft--, 1000)
+
+  onDestroy(() => {
+    clearInterval(timeInterval)
+  })
 </script>
 
 {#if $toast}
-  {#key "key"}
+  {#key $toast.id}
     <div
       on:touchstart={onTouchStart}
       on:touchmove={onTouchMove}
@@ -97,12 +110,18 @@
         )}>
         {#if $toast.type === "text"}
           {$toast.message}
+        {:else if $toast.type === "delay"}
+          Sending in {timeLeft} seconds...
+          <Anchor
+            class="ml-3 inline-flex"
+            link
+            underline
+            on:click={() => {
+              $toast.onCancel()
+              toast.set(null)
+            }}>Cancel</Anchor>
         {:else if $toast.type === "publish"}
-          {@const {status, request} = $toast.pub}
-          {@const total = request.relays.length}
-          {@const pending = Array.from(status.values()).filter(s => s === "pending").length}
-          Published to {total - pending}/{total} relays.
-          <Anchor modal underline href="/publishes">View details</Anchor>
+          <ThunkStatus thunk={$toast.thunk} />
         {/if}
         <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
           <i class="fa fa-times" />
