@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {pluralize} from "hurdak"
   import {derived} from "svelte/store"
-  import {sleep, remove} from "@welshman/lib"
+  import {sleep} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {Nip46Signer} from "@welshman/signer"
   import {
@@ -18,7 +18,6 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import Toggle from "src/partials/Toggle.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -30,14 +29,13 @@
   import Compose from "src/app/shared/Compose.svelte"
 
   export let pubkeys
-  export let sendMessage
+  export let sendMessage: (content: string) => Promise<void>
   export let initialMessage = ""
   export let messages: TrustedEvent[]
 
   let editor: Editor
 
   const loading = sleep(5_000)
-  const toggleScale = 0.7
 
   const startScroller = () => {
     scroller?.stop()
@@ -65,13 +63,9 @@
   let showNewMessages = false
   let groupedMessages = []
 
-  const isGroupMessage = pubkeys.length > 2
-  const recipients = remove($session?.pubkey, pubkeys)
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
     pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
   )
-
-  let useNip17 = isGroupMessage || ($hasNip44 && $pubkeysWithoutInbox.length === 0)
 
   onMount(() => {
     editor = new Editor(
@@ -119,7 +113,7 @@
   }
 
   const sendOrConfirm = () => {
-    if (isGroupMessage && $pubkeysWithoutInbox.length > 0) {
+    if ($pubkeysWithoutInbox.length > 0) {
       openConfirm()
     } else {
       send()
@@ -132,7 +126,7 @@
     if (content) {
       sending = true
 
-      await sendMessage(content, useNip17)
+      await sendMessage(content)
 
       sending = false
       stickToBottom()
@@ -141,7 +135,6 @@
   }
 
   $: userHasInbox = !$pubkeysWithoutInbox.includes($session?.pubkey)
-  $: hasSingleRecipientWithInbox = !isGroupMessage && !$pubkeysWithoutInbox.includes(recipients[0])
 
   // Group messages so we're only showing the person once per chunk
   $: {
@@ -247,12 +240,12 @@
       <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
     {/await}
   </div>
-  {#if $hasNip44 || !isGroupMessage}
+  {#if $hasNip44}
     <div class="flex border-t border-solid border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <Compose
         bind:element={textarea}
         {editor}
-        class="mb-8 h-20 w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
+        class="w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <button
           on:click={() => editor.commands.selectFiles()}
@@ -267,44 +260,6 @@
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
       </div>
-      {#if $hasNip44 && hasSingleRecipientWithInbox}
-        <div class="fixed bottom-0 right-12 flex items-center justify-end gap-2 p-2">
-          {#if userHasInbox}
-            <Toggle scale={toggleScale} bind:value={useNip17} />
-          {:else}
-            <Popover triggerType="mouseenter">
-              <div slot="trigger">
-                <Toggle disabled scale={toggleScale} value={false} />
-              </div>
-              <Anchor modal slot="tooltip" class="flex items-center gap-1" href="/settings/relays">
-                <i class="fa fa-info-circle" />
-                You must have at least one inbox relay to send messages using nip-17. Click here to set
-                up your inbox relays.
-              </Anchor>
-            </Popover>
-          {/if}
-          <small>
-            Send messages using
-            <Popover class="inline">
-              <span slot="trigger" class="cursor-pointer underline">NIP 17</span>
-              <div slot="tooltip" class="flex flex-col gap-2">
-                <p>
-                  When enabled, Coracle will use nostr's new group chat specification, which solves
-                  several problems with legacy DMs. Read more <Anchor
-                    underline
-                    modal
-                    href="/help/nip-17-dms">here</Anchor
-                  >.
-                </p>
-                <p>
-                  Note that these messages are not yet universally supported. Make sure the person
-                  you're chatting with is using a compatible nostr client.
-                </p>
-              </div>
-            </Popover>
-          </small>
-        </div>
-      {/if}
     </div>
   {:else}
     <FlexColumn class="bg-neutral-900 px-4 py-2">
@@ -332,8 +287,7 @@
       <p>
         {displayList($pubkeysWithoutInbox.map(displayProfileByPubkey))}
         {pluralize($pubkeysWithoutInbox.length, "does not have", "do not have")}
-        inbox relays, which means they likely either don't want to receive DMs, or are using a client
-        that does not support nostr group chats.
+        inbox relays, which means they likely don't want to receive DMs.
       </p>
     {:else if !userHasInbox}
       <p>
