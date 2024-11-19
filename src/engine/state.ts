@@ -3,7 +3,6 @@ import {
   subscribe as baseSubscribe,
   db,
   displayProfileByPubkey,
-  ensurePlaintext,
   followsByPubkey,
   freshness,
   getDefaultAppContext,
@@ -21,6 +20,7 @@ import {
   mutesByPubkey,
   plaintext,
   pubkey,
+  publishThunk,
   relay,
   relays,
   repository,
@@ -50,7 +50,14 @@ import {
   uniqBy,
 } from "@welshman/lib"
 import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, Local, Multi, Relays, publish as basePublish} from "@welshman/net"
+import {
+  Executor,
+  Local,
+  Multi,
+  Relays,
+  SubscriptionEvent,
+  publish as basePublish,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {
@@ -97,7 +104,7 @@ import {
 import crypto from "crypto"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds, sleep} from "hurdak"
-import {assoc, equals, omit, partition, prop, sortBy, without} from "ramda"
+import {equals, partition, prop, sortBy, without} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -111,7 +118,7 @@ import {
   readHandlers,
   readUserList,
 } from "src/domain"
-import type {AnonymousUserState, Channel, PublishInfo, SessionWithMeta} from "src/engine/model"
+import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsAsc} from "src/engine/utils"
 import logger from "src/util/logger"
@@ -151,7 +158,6 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 // Base state
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
-export const publishes = withGetter(writable<Record<string, PublishInfo>>({}))
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
@@ -219,6 +225,7 @@ export const defaultSettings = {
   relay_limit: 5,
   default_zap: 21,
   show_media: true,
+  send_delay: 0, // undo send delay in ms
   muted_words: [],
   hide_sensitive: true,
   report_analytics: true,
@@ -713,7 +720,7 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
 
   const sub = baseSubscribe(request)
 
-  sub.emitter.on("event", async (url: string, event: TrustedEvent) => {
+  sub.emitter.on(SubscriptionEvent.Close, async (url: string, event: TrustedEvent) => {
     projections.push(await ensureUnwrapped(event))
   })
 
@@ -747,21 +754,20 @@ export const load = (request: MySubscribeRequest) =>
     const events: TrustedEvent[] = []
     const sub = subscribe({...request, closeOnEose: true})
 
-    sub.emitter.on("event", (url: string, event: TrustedEvent) => events.push(event))
-    sub.emitter.on("complete", (url: string) => resolve(events))
+    sub.emitter.on(SubscriptionEvent.Close, (url: string, event: TrustedEvent) =>
+      events.push(event),
+    )
+    sub.emitter.on(SubscriptionEvent.Complete, (url: string) => resolve(events))
   })
 
 export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
+  delay?: number
 }
 
-const shouldTrackPublish = (event: TrustedEvent) => {
-  if ([SEEN_CONTEXT, SEEN_CONVERSATION, SEEN_GENERAL].includes(event.kind)) return false
+export type Pub = ReturnType<typeof basePublish>
 
-  return event.pubkey === pubkey.get() || canUnwrap(event)
-}
-
-export const publish = async ({forcePlatform = true, ...request}: MyPublishRequest) => {
+export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
     : withPlatformRelays(request.relays)
@@ -772,27 +778,15 @@ export const publish = async ({forcePlatform = true, ...request}: MyPublishReque
 
   logger.info(`Publishing event`, request)
 
-  // Make sure the event is decrypted before updating stores
-  if (canUnwrap(request.event)) {
-    await ensureUnwrapped(request.event)
-  } else if (projections.handlers.get(request.event.kind)?.includes(ensurePlaintext)) {
-    await ensurePlaintext(request.event)
-  }
+  const thunk = publishThunk(request)
 
-  // Publish to local and remote relays
-  const pub = basePublish(request)
-
-  // Listen to updates and update our publish queue
-  if (shouldTrackPublish(request.event)) {
-    const pubInfo = omit(["emitter", "result"], pub)
-
-    pub.emitter.on("*", t => publishes.update(assoc(pubInfo.id, pubInfo)))
-  }
-
-  return pub
+  return thunk
 }
 
-export const sign = (template, opts: {anonymous?: boolean; sk?: string} = {}) => {
+export const sign = (
+  template,
+  opts: {anonymous?: boolean; sk?: string} = {},
+): Promise<SignedEvent> => {
   if (opts.anonymous) {
     return Nip01Signer.ephemeral().sign(template)
   }

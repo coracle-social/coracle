@@ -1,6 +1,6 @@
 <script lang="ts">
   import {seconds} from "hurdak"
-  import {derived} from "svelte/store"
+  import {derived, get} from "svelte/store"
   import {now} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -9,6 +9,8 @@
     sessions,
     deriveProfileDisplay,
     displayProfileByPubkey,
+    thunks,
+    type Thunk,
   } from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -20,21 +22,21 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages, hasNewNotifications, publishes} from "src/engine"
+  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const {page} = router
 
-  const hud = derived(publishes, $publishes => {
+  const hud = derived(thunks, $thunks => {
     const pending = []
     const success = []
     const failure = []
 
-    for (const {created_at, request, status} of Object.values($publishes)) {
-      if (created_at < now() - seconds(5, "minute")) {
+    for (const {event, request, status} of Object.values($thunks) as Thunk[]) {
+      if (event.created_at < now() - seconds(5, "minute")) {
         continue
       }
 
-      const statuses = Array.from(status.values())
+      const statuses = Object.values(get(status)).map(s => s.status)
 
       if (statuses.includes(PublishStatus.Success)) {
         success.push(request.event)

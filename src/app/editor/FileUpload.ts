@@ -144,7 +144,9 @@ class Uploader {
   }
 
   addFile(file: File, pos: number) {
-    if (!this.options.allowedMimeTypes.includes(file.type)) {
+    if (
+      !this.options.allowedMimeTypes.some(amt => amt.split("*").every(s => file.type.includes(s)))
+    ) {
       return false
     }
     const {tr} = this.view.state

@@ -1,24 +1,23 @@
 <script lang="ts">
-  import {writable, type Writable} from "svelte/store"
-  import {Tags, createEvent, uniqTags} from "@welshman/util"
-  import {createEventDispatcher} from "svelte"
-  import {without, uniq} from "ramda"
-  import {ctx} from "@welshman/lib"
   import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
+  import {ctx} from "@welshman/lib"
+  import {Tags, createEvent, uniqTags} from "@welshman/util"
+  import {writable, type Writable} from "svelte/store"
+  import {createEventDispatcher} from "svelte"
+  import {Editor} from "svelte-tiptap"
+  import {without, uniq} from "ramda"
   import {slide} from "src/util/transition"
-  import {showPublishInfo} from "src/partials/Toast.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import {getEditorOptions} from "src/app/editor"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import {publish, tagsFromContent, getClientTags, signAndPublish} from "src/engine"
   import {drafts} from "src/app/state"
-  import {Editor} from "svelte-tiptap"
+  import {publish, tagsFromContent, getClientTags, sign, userSettings} from "src/engine"
 
   export let parent
-  export let addToContext
+  export let addDraftToContext
   export let showBorder = false
   export let forceOpen = false
 
@@ -103,15 +102,19 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-    const pub = await signAndPublish(template, opts)
+    const event = await sign(template, {anonymous: false})
+    const thunk = publish({
+      event,
+      relays: ctx.app.router.PublishEvent(event).getUrls(),
+      delay: $userSettings.send_delay,
+    })
+    addDraftToContext(event, () => thunk.controller.abort())
+    isOpen = false
 
-    loading = false
-
-    // Only track one event/pub to avoid apprent duplicates
-    addToContext(pub.request.event)
-    showPublishInfo(pub)
-    clearDraft()
-    reset()
+    thunk.result.then(() => {
+      clearDraft()
+      reset()
+    })
   }
 
   const onBodyClick = e => {

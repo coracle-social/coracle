@@ -1,28 +1,35 @@
 <script lang="ts">
-  import {nthEq, remove, first} from "@welshman/lib"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
-  import type {TrustedEvent} from "@welshman/util"
+  import type {Thunk, ThunkStatusByUrl} from "@welshman/app"
+  import {first, nthEq, remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import type {PublishStatusMap} from "@welshman/net"
-  import {formatTimestamp} from "src/util/misc"
-  import {slide, fly} from "src/util/transition"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Card from "src/partials/Card.svelte"
+  import type {SignedEvent, TrustedEvent} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
-  import type {PublishInfo} from "src/engine"
-  import {publish, ensureUnwrapped} from "src/engine"
+  import {ensureUnwrapped, publish} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import {formatTimestamp} from "src/util/misc"
+  import {fly, slide} from "src/util/transition"
 
-  export let pub: PublishInfo
+  export let thunk: Thunk
 
-  const promise = ensureUnwrapped(pub.request.event)
+  $: status = thunk.status
+
+  const promise = ensureUnwrapped(thunk.event)
 
   const retry = (url: string, event: TrustedEvent) =>
-    publish({relays: [url], event: pub.request.event})
+    publish({relays: [url], event: thunk.event as SignedEvent})
 
-  const getUrls = (m: PublishStatusMap, status: PublishStatus) =>
-    remove(LOCAL_RELAY_URL, Array.from(m).filter(nthEq(1, status)).map(first))
+  const getUrls = (m: ThunkStatusByUrl, status: PublishStatus) =>
+    remove(
+      LOCAL_RELAY_URL,
+      Object.entries(m || {})
+        .map(e => [e[0], e[1].status])
+        .filter(nthEq(1, status))
+        .map(first),
+    )
 
   const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 
@@ -36,10 +43,10 @@
 
   let expanded = false
 
-  $: pending = getUrls(pub.status, PublishStatus.Pending)
-  $: success = getUrls(pub.status, PublishStatus.Success)
-  $: failure = getUrls(pub.status, PublishStatus.Failure)
-  $: timeout = getUrls(pub.status, PublishStatus.Timeout)
+  $: pending = getUrls($status, PublishStatus.Pending)
+  $: success = getUrls($status, PublishStatus.Success)
+  $: failure = getUrls($status, PublishStatus.Failure)
+  $: timeout = getUrls($status, PublishStatus.Timeout)
 </script>
 
 {#await promise}
@@ -50,7 +57,7 @@
       <Card>
         <FlexColumn>
           <div class="flex justify-between">
-            <span>Kind {event.kind}, published {formatTimestamp(pub.created_at)}</span>
+            <span>Kind {event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
             <Anchor underline modal class="text-sm" on:click={() => open(event)}>View Note</Anchor>
           </div>
           <div class="flex justify-between text-sm">

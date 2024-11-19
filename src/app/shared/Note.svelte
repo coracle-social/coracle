@@ -13,12 +13,13 @@
     getAncestorTagValues,
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
-  import {identity, reject, whereEq, uniqBy, prop} from "ramda"
+  import {deriveEvents} from "@welshman/store"
+  import {identity, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
-  import {quantify, batch} from "hurdak"
+  import {quantify} from "hurdak"
   import {fly, slide} from "src/util/transition"
   import {replyKinds, isLike} from "src/util/nostr"
-  import {formatTimestamp} from "src/util/misc"
+  import {formatTimestamp, timestamp1} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -30,6 +31,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import NotePending from "src/app/shared/NotePending.svelte"
   import {router} from "src/app/util/router"
   import {
     env,
@@ -50,6 +52,8 @@
   export let anchor = null
   export let topLevel = false
   export let isLastReply = false
+  export let isDraft = false
+  export let removeDraftCb = null
   export let showParent = true
   export let showLoading = false
   export let showHidden = false
@@ -60,13 +64,18 @@
   let replyCtrl = null
   let replyIsActive = false
   let showMutedReplies = false
-  let actions = null
   let collapsed = depth === 0
-  let context = repository.query([{"#e": [event.id]}]).filter(e => isChildOf(e, event))
   let showHiddenReplies = anchor === getIdOrAddress(event)
+  let draftEventId: string
+  let removeDraft: () => void
 
   const showEntire = showHiddenReplies
   const interactive = !anchor || !showEntire
+
+  const addDraftToContext = (event, cb) => {
+    draftEventId = event.id
+    removeDraft = () => cb() && repository.removeEvent(event.id)
+  }
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -100,13 +109,9 @@
       .at("thread")
       .open()
 
-  const removeFromContext = e => {
-    context = reject(whereEq({id: e.id}), context)
-  }
-
-  const addToContext = events => {
-    context = context.concat(events)
-  }
+  const context = deriveEvents(repository, {
+    filters: [{"#e": [event.id]}],
+  })
 
   $: ancestors = getAncestorTagValues(event.tags || [])
   $: reply = ancestors.replies[0]
@@ -117,8 +122,7 @@
   $: hidden = $isEventMuted(event, true)
 
   // Find children in our context
-  $: children = context.filter(e => isChildOf(e, event))
-
+  $: children = $context.filter(e => isChildOf(e, event))
   // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
 
@@ -134,7 +138,12 @@
         mutedReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
-      } else if (!showHiddenReplies && filters && !matchFilters(filters, e)) {
+      } else if (
+        !showHiddenReplies &&
+        filters &&
+        !matchFilters(filters, e) &&
+        draftEventId !== e.id
+      ) {
         hiddenReplies.push(e)
       } else {
         visibleReplies.push(e)
@@ -200,9 +209,6 @@
       load({
         relays: ctx.app.router.Replies(event).getUrls(),
         filters: getReplyFilters([event], {kinds}),
-        onEvent: batch(200, events => {
-          context = uniqBy(prop("id"), context.concat(events))
-        }),
       })
     }
   })
@@ -284,18 +290,19 @@
                 <NoteContent note={event} {showEntire} {showMedia} />
               {/if}
               <div class="cy-note-click-target h-[2px]" />
-              <NoteActions
-                note={event}
-                zapper={$zapper}
-                bind:this={actions}
-                {removeFromContext}
-                {addToContext}
-                {replyCtrl}
-                {showHidden}
-                {replies}
-                {likes}
-                {zaps}
-                {muted} />
+              {#if !isDraft || event.created_at < $timestamp1 - 45}
+                <NoteActions
+                  note={event}
+                  zapper={$zapper}
+                  {replyCtrl}
+                  {showHidden}
+                  {replies}
+                  {likes}
+                  {zaps}
+                  {muted} />
+              {:else}
+                <NotePending {event} removeDraft={removeDraftCb} />
+              {/if}
             </div>
           </div>
         </Card>
@@ -327,7 +334,7 @@
       {/if}
 
       <NoteReply
-        {addToContext}
+        {addDraftToContext}
         parent={event}
         showBorder={visibleReplies.length > 0}
         bind:this={replyCtrl}
@@ -336,9 +343,6 @@
         }}
         on:reset={() => {
           replyIsActive = false
-        }}
-        on:event={e => {
-          context = [e.detail, ...context]
         }} />
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
@@ -369,6 +373,8 @@
                     isLastReply={i === visibleReplies.length - 1}
                     showParent={false}
                     showHidden
+                    isDraft={r.id === draftEventId}
+                    removeDraftCb={removeDraft}
                     note={r}
                     depth={depth - 1}
                     {filters}

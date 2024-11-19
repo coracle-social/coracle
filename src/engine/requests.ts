@@ -20,6 +20,7 @@ import {
   HANDLER_RECOMMENDATION,
   DEPRECATED_DIRECT_MESSAGE,
   FEEDS,
+  Address,
 } from "@welshman/util"
 import {Tracker} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
@@ -114,6 +115,10 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeReq
     deriveEvents(repository, {filters, includeDeleted: true}),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
+        if (Address.isAddress(idOrAddress) && !request.relays) {
+          const {pubkey, relays} = Address.from(idOrAddress)
+          request.relays = uniq([...relays, ...ctx.app.router.ForPubkey(pubkey).getUrls()])
+        }
         loadEvent(idOrAddress, request)
         attempted = true
       }

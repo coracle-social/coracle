@@ -1,26 +1,33 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {whereEq} from "ramda"
-  import {commaFormat} from "hurdak"
-  import {writable, type Writable} from "svelte/store"
-  import {ctx, last} from "@welshman/lib"
+  import {ctx, last, now} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
+  import {PublishStatus} from "@welshman/net"
+  import {commaFormat, toTitle, switcherFn} from "hurdak"
+  import {writable, type Writable} from "svelte/store"
+  import {Editor} from "svelte-tiptap"
+  import {nip19} from "nostr-tools"
+  import {v4 as uuid} from "uuid"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import {showPublishInfo, showWarning} from "src/partials/Toast.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Menu from "src/partials/Menu.svelte"
+  import MenuItem from "src/partials/MenuItem.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import {showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {getEditorOptions} from "src/app/editor"
   import {router} from "src/app/util/router"
-  import {getClientTags, signAndPublish, tagsFromContent} from "src/engine"
+  import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
-  import {Editor} from "svelte-tiptap"
-  import {nip19} from "nostr-tools"
+  import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
 
   export let quote = null
   export let pubkey = null
@@ -29,6 +36,7 @@
   let charCount: Writable<number>
   let wordCount: Writable<number>
   let showPreview = false
+  let signaturePending = false
 
   let editor: Editor
   let element: HTMLElement
@@ -58,6 +66,7 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
+    signaturePending = true
     // prevent sending before media are uploaded and tags are correctly set
     if ($loading) return
 
@@ -79,10 +88,33 @@
 
     const template = createEvent(1, {content, tags})
 
-    const pub = await signAndPublish(template, opts)
+    const signedTemplate = await sign(template)
 
-    showPublishInfo(pub)
-    router.clearModals()
+    signaturePending = false
+
+    const thunk = publish({
+      event: signedTemplate,
+      relays: ctx.app.router.PublishEvent(template).getUrls(),
+      delay: $userSettings.send_delay,
+    })
+
+    if ($userSettings.send_delay > 0) {
+      showToast({
+        type: "delay",
+        timeout: $userSettings.send_delay / 1000,
+        onCancel: () => thunk.controller.abort(),
+      })
+    }
+
+    thunk.status.subscribe(status => {
+      if (
+        Object.values(status).length === thunk.request.relays.length &&
+        Object.values(status).every(s => s.status === PublishStatus.Pending)
+      ) {
+        showPublishInfo(thunk)
+        router.clearModals()
+      }
+    })
   }
 
   const togglePreview = () => {
@@ -173,8 +205,18 @@
         </div>
       </Field>
       <div class="flex gap-2">
-        <Anchor button tag="button" type="submit" class="flex-grow" disabled={$loading}
-          >Send</Anchor>
+        <Anchor
+          button
+          tag="button"
+          type="submit"
+          class="flex-grow"
+          disabled={$loading || signaturePending}>
+          {#if signaturePending}
+            <i class="fa fa-circle-notch fa-spin" />
+          {:else}
+            Send
+          {/if}
+        </Anchor>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
           on:click|preventDefault={editor.commands.selectFiles}>
