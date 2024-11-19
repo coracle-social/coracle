@@ -133,7 +133,6 @@
         id: note.id,
         anonymous: Boolean(note.wrap),
       })
-      .cx({callback: repository.publish})
       .open()
   }
 
