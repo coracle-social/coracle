@@ -31,7 +31,7 @@
   import {router} from "src/app/util/router"
   import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
-  import {getClientTags, publish, tagsFromContent, userSettings} from "src/engine"
+  import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
 
   export let type = "note"
   export let quote = null
@@ -140,11 +140,15 @@
           ],
         }),
     })
+
+    const signedTemplate = await sign(template)
+
     const thunk = publish({
-      event: template,
+      event: signedTemplate,
       relays: ctx.app.router.PublishEvent(template).getUrls(),
       delay: $userSettings.send_delay,
     })
+
     if ($userSettings.send_delay > 0) {
       showToast({
         type: "delay",
