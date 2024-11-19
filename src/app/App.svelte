@@ -8,6 +8,8 @@
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
+  import * as signer from "@welshman/signer"
+  import * as net from "@welshman/net"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
@@ -340,7 +342,9 @@
     ...nostr,
     ...misc,
     ...lib,
+    ...signer,
     ...util,
+    ...net,
     ...app,
     ...domain,
     ...engine,
