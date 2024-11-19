@@ -44,6 +44,22 @@
     showEntire = true
   }
 
+  const isBlock = (i: number) => {
+    const parsed = fullContent[i]
+
+    if (!parsed || hideMedia) return true
+
+    if (isLink(parsed) && isStartOrEnd(i) && $userSettingValues.show_media) {
+      return true
+    }
+
+    if ((isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 2) {
+      return true
+    }
+
+    return false
+  }
+
   const isBoundary = (i: number) => {
     const parsed = fullContent[i]
 
@@ -92,7 +108,7 @@
       style={expandBlock ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
       {#each shortContent as parsed, i}
         {#if isNewline(parsed)}
-          <ContentNewline value={parsed.value} />
+          <ContentNewline value={parsed.value.slice(isBlock(i - 1) ? 1 : 0)} />
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
         {:else if isCode(parsed)}
@@ -102,7 +118,7 @@
         {:else if isCashu(parsed) || isInvoice(parsed)}
           <ContentToken value={parsed.value} />
         {:else if isLink(parsed)}
-          {#if isStartOrEnd(i) && !hideMedia && $userSettingValues.show_media}
+          {#if isBlock(i)}
             <ContentLinkBlock value={parsed.value} />
           {:else}
             <ContentLinkInline value={parsed.value} />
@@ -110,7 +126,7 @@
         {:else if isProfile(parsed)}
           <ContentMention value={parsed.value} />
         {:else if isEvent(parsed) || isAddress(parsed)}
-          {#if isStartOrEnd(i) && depth < 2 && !hideMedia}
+          {#if isBlock(i)}
             <ContentQuote value={parsed.value} {depth} {event}>
               <div slot="note-content" let:event>
                 <svelte:self {hideMedia} {event} depth={depth + 1} />
