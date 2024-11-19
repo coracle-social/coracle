@@ -9,8 +9,8 @@
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {decodeRelay} from "@app/state"
-  import {makeChatPath} from "@app/routes"
+  import {decodeRelay, roomsByUrl} from "@app/state"
+  import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
@@ -86,6 +86,17 @@
           {/if}
         </div>
       {/if}
+    </div>
+    <div class="grid grid-cols-3 gap-2 md:hidden">
+      <Link href={makeSpacePath(url, "threads")} class="bg-alt btn btn-neutral border-none">
+        <Icon icon="notes-minimalistic" /> Threads
+      </Link>
+      {#each $roomsByUrl.get(url) || [] as room (room)}
+        <Link href={makeRoomPath(url, room)} class="bg-alt btn btn-neutral border-none">
+          <Icon icon="hashtag" />
+          {room}
+        </Link>
+      {/each}
     </div>
     {#if pubkey}
       <Divider>Recent posts from the relay admin</Divider>
