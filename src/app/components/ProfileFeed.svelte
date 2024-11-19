@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {sortBy, uniqBy} from "@welshman/lib"
-  import {feedFromFilter} from "@welshman/feeds"
+  import {feedFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {NOTE, getAncestorTags} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {createFeedController} from "@welshman/app"
@@ -14,7 +14,10 @@
 
   const ctrl = createFeedController({
     useWindowing: true,
-    feed: feedFromFilter({kinds: [NOTE], authors: [pubkey]}),
+    feed: makeIntersectionFeed(
+      makeRelayFeed(url),
+      feedFromFilter({kinds: [NOTE], authors: [pubkey]}),
+    ),
     onEvent: (event: TrustedEvent) => {
       if (getAncestorTags(event.tags).replies.length === 0) {
         buffer.push(event)
