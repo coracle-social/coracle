@@ -41,6 +41,7 @@
   let charCount: Writable<number>
   let wordCount: Writable<number>
   let showPreview = false
+  let signaturePending = false
 
   let editor: Editor
   let element: HTMLElement
@@ -70,6 +71,7 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
+    signaturePending = true
     // prevent sending before media are uploaded and tags are correctly set
     if ($loading) return
 
@@ -142,6 +144,8 @@
     })
 
     const signedTemplate = await sign(template)
+
+    signaturePending = false
 
     const thunk = publish({
       event: signedTemplate,
@@ -313,8 +317,18 @@
         </div>
       </Field>
       <div class="flex gap-2">
-        <Anchor button tag="button" type="submit" class="flex-grow" disabled={$loading}
-          >Send</Anchor>
+        <Anchor
+          button
+          tag="button"
+          type="submit"
+          class="flex-grow"
+          disabled={$loading || signaturePending}>
+          {#if signaturePending}
+            <i class="fa fa-circle-notch fa-spin" />
+          {:else}
+            Send
+          {/if}
+        </Anchor>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
           on:click|preventDefault={editor.commands.selectFiles}>
