@@ -24,7 +24,7 @@
 <script lang="ts">
   import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
-  import type {SignedEvent} from "@welshman/util"
+  import {LOCAL_RELAY_URL, type SignedEvent} from "@welshman/util"
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
@@ -36,14 +36,17 @@
   $: thunk = $thunks[event.id] as Thunk
 
   $: status = thunk?.status
-
-  $: pendings = Object.values($status || {}).filter(s => s.status === PublishStatus.Pending).length
-  $: failed = Object.values($status || {}).filter(
+  $: relays = thunk?.request?.relays.filter(r => r !== LOCAL_RELAY_URL)
+  $: statuses = Object.entries($status || {})
+    .filter(([k, v]) => k !== LOCAL_RELAY_URL)
+    .map(([k, v]) => v)
+  $: pendings = statuses.filter(s => s.status === PublishStatus.Pending).length
+  $: failed = statuses.filter(
     s => s.status === PublishStatus.Failure || s.status === PublishStatus.Aborted,
   ).length
-  $: timeout = Object.values($status || {}).filter(s => s.status === PublishStatus.Timeout).length
-  $: success = Object.values($status || {}).filter(s => s.status === PublishStatus.Success).length
-  $: total = thunk?.request?.relays.length || 0
+  $: timeout = statuses.filter(s => s.status === PublishStatus.Timeout).length
+  $: success = statuses.filter(s => s.status === PublishStatus.Success).length
+  $: total = relays.length || 0
 
   const completed = spring(0)
 
