@@ -23,7 +23,7 @@ import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {FileUploadExtension} from "./FileUpload"
 import {createSuggestions} from "./Suggestions"
-import {LinkExtension} from "./LinkExtension"
+// import {LinkExtension} from "./LinkExtension"
 import EditMention from "./EditMention.svelte"
 import EditEvent from "./EditEvent.svelte"
 import EditImage from "./EditImage.svelte"
@@ -37,7 +37,7 @@ import {getSetting} from "@app/state"
 
 export {
   createSuggestions,
-  LinkExtension,
+  // LinkExtension,
   EditMention,
   EditEvent,
   EditImage,
@@ -108,7 +108,7 @@ export const getEditorOptions = ({
         }
       },
     }),
-    LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
+    // LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
