@@ -1,6 +1,6 @@
 <script lang="ts">
   import {makeSecret, Nip46Broker} from "@welshman/signer"
-  import {addSession, nip46Perms, loadHandle} from "@welshman/app"
+  import {addSession, loadHandle} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -11,7 +11,7 @@
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {setChecked} from "@app/notifications"
-  import {PLATFORM_NAME} from "@app/state"
+  import {PLATFORM_NAME, NIP46_PERMS} from "@app/state"
   import {pushToast} from "@app/toast"
 
   const login = () => pushModal(LogIn)
@@ -28,7 +28,7 @@
     }
 
     const signupBroker = Nip46Broker.get({secret, handler})
-    const pubkey = await signupBroker.createAccount(username, nip46Perms)
+    const pubkey = await signupBroker.createAccount(username, NIP46_PERMS)
 
     if (!pubkey) {
       return pushToast({
@@ -40,7 +40,7 @@
     // Gotta use user pubkey as the handler pubkey for historical reasons
     const loginBroker = Nip46Broker.get({secret, handler: {...handler, pubkey}})
 
-    if (await loginBroker.connect("", nip46Perms)) {
+    if (await loginBroker.connect("", NIP46_PERMS)) {
       addSession({method: "nip46", pubkey, secret, handler: {...handler, pubkey}})
       pushToast({message: "Successfully logged in!"})
       setChecked("*")

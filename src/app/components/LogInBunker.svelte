@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {Nip46Broker} from "@welshman/signer"
-  import {nip46Perms, addSession} from "@welshman/app"
+  import {addSession} from "@welshman/app"
   import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -15,14 +15,14 @@
   import {pushModal, clearModals} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {pushToast} from "@app/toast"
-  import {PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO, SIGNER_RELAYS} from "@app/state"
+  import {NIP46_PERMS, PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO, SIGNER_RELAYS} from "@app/state"
 
   const back = () => history.back()
 
   const abortController = new AbortController()
 
   const init = Nip46Broker.initiate({
-    perms: nip46Perms,
+    perms: NIP46_PERMS,
     url: PLATFORM_URL,
     name: PLATFORM_NAME,
     relays: SIGNER_RELAYS,

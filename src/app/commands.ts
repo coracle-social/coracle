@@ -46,7 +46,6 @@ import {
   nip44EncryptToSelf,
   loadRelay,
   addSession,
-  nip46Perms,
   subscribe,
 } from "@welshman/app"
 import {
@@ -55,6 +54,7 @@ import {
   userMembership,
   MEMBERSHIPS,
   INDEXER_RELAYS,
+  NIP46_PERMS,
   loadMembership,
   loadSettings,
   getDefaultPubkeys,
@@ -123,7 +123,7 @@ export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
 export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
   const secret = makeSecret()
   const broker = Nip46Broker.get({secret, handler})
-  const result = await broker.connect(token, nip46Perms)
+  const result = await broker.connect(token, NIP46_PERMS)
 
   if (!result) return false
 
