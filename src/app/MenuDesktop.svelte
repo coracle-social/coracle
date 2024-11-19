@@ -1,7 +1,8 @@
 <script lang="ts">
   import {seconds} from "hurdak"
   import {derived, get} from "svelte/store"
-  import {now} from "@welshman/lib"
+  import {now, omit} from "@welshman/lib"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import {
     signer,
@@ -36,13 +37,13 @@
         continue
       }
 
-      const statuses = Object.values(get(status)).map(s => s.status)
+      const statuses = Object.values(omit([LOCAL_RELAY_URL], get(status))).map(s => s.status)
 
       if (statuses.includes(PublishStatus.Success)) {
         success.push(request.event)
       } else if (statuses.includes(PublishStatus.Pending)) {
         pending.push(request.event)
-      } else {
+      } else if (statuses.length > 0) {
         failure.push(request.event)
       }
     }

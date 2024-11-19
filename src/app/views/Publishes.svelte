@@ -13,7 +13,9 @@
     Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
 
   $: recent = (Object.values($thunks) as Thunk[]).filter(
-    t => t.event.created_at > now() - seconds(24, "hour"),
+    t =>
+      remove(LOCAL_RELAY_URL, t.request.relays).length > 0 &&
+      t.event.created_at > now() - seconds(24, "hour"),
   )
   $: relays = new Set(
     remove(

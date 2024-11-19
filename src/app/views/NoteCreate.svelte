@@ -1,23 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {whereEq} from "ramda"
-  import {ctx, last, now} from "@welshman/lib"
+  import {ctx, last} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
-  import {commaFormat, toTitle, switcherFn} from "hurdak"
+  import {commaFormat} from "hurdak"
   import {writable, type Writable} from "svelte/store"
   import {Editor} from "svelte-tiptap"
   import {nip19} from "nostr-tools"
-  import {v4 as uuid} from "uuid"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Input from "src/partials/Input.svelte"
-  import Menu from "src/partials/Menu.svelte"
-  import MenuItem from "src/partials/MenuItem.svelte"
-  import Popover from "src/partials/Popover.svelte"
   import {showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
@@ -25,7 +20,6 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {getEditorOptions} from "src/app/editor"
   import {router} from "src/app/util/router"
-  import {dateToSeconds} from "src/util/misc"
   import {currencyOptions} from "src/util/i18n"
   import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
 
@@ -94,7 +88,7 @@
 
     const thunk = publish({
       event: signedTemplate,
-      relays: ctx.app.router.PublishEvent(template).getUrls(),
+      relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
       delay: $userSettings.send_delay,
     })
 
@@ -176,7 +170,7 @@
       <span class="text-2xl font-bold">Create a Note</span>
     </div>
     <FlexColumn>
-      <Field label={"What do you want to say?"}>
+      <Field label="What do you want to say?">
         <div
           class="rounded-xl border border-solid border-neutral-600 p-3"
           class:bg-white={!showPreview}

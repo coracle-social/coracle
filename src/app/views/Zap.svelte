@@ -17,7 +17,6 @@
   export let splits
   export let id = null
   export let anonymous = false
-  export let callback = null
   export let amount = getSetting("default_zap")
 
   let zaps = []
@@ -130,7 +129,6 @@
 
       load({
         relays,
-        onEvent: callback,
         filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since}],
       })
     }

@@ -245,17 +245,17 @@
       <Compose
         bind:element={textarea}
         {editor}
-        class="w-full resize-none bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
+        class="w-full resize-none border-r border-solid border-tinted-700 bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <button
-          on:click={() => editor.commands.selectFiles()}
-          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
-                 py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
+          class="flex cursor-pointer flex-col justify-center gap-2 p-3
+                 py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white"
+          on:click={() => editor.commands.selectFiles()}>
           <i class="fa-solid fa-paperclip fa-lg" />
         </button>
         <button
           on:click={sendOrConfirm}
-          class="flex cursor-pointer flex-col justify-center gap-2 border-l border-solid border-tinted-700 p-3
+          class="flex cursor-pointer flex-col justify-center gap-2 p-3
                py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white">
           <i class="fa-solid fa-paper-plane fa-lg" />
         </button>
@@ -287,7 +287,7 @@
       <p>
         {displayList($pubkeysWithoutInbox.map(displayProfileByPubkey))}
         {pluralize($pubkeysWithoutInbox.length, "does not have", "do not have")}
-        inbox relays, which means they likely don't want to receive DMs.
+        inbox relays, which means they may not be able to receive DMs.
       </p>
     {:else if !userHasInbox}
       <p>

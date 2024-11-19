@@ -50,14 +50,7 @@ import {
   uniqBy,
 } from "@welshman/lib"
 import type {PublishRequest, Target} from "@welshman/net"
-import {
-  Executor,
-  Local,
-  Multi,
-  Relays,
-  SubscriptionEvent,
-  publish as basePublish,
-} from "@welshman/net"
+import {Executor, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {
@@ -764,8 +757,6 @@ export type MyPublishRequest = PublishRequest & {
   forcePlatform?: boolean
   delay?: number
 }
-
-export type Pub = ReturnType<typeof basePublish>
 
 export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
   request.relays = forcePlatform
