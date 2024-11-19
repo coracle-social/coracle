@@ -6,7 +6,6 @@
   import Spinner from "src/partials/Spinner.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
-  import EventDetail from "src/app/views/EventDetail.svelte"
 
   export let entity, type, data, relays
 </script>
@@ -21,11 +20,7 @@
     ...(data.relays || []),
     ...Array.from(ctx.app.router.FromPubkey(data.pubkey).getUrls()),
   ]}
-  {#if data.kind === 31923}
-    <EventDetail {address} {relays} />
-  {:else}
-    <NoteDetail {address} {relays} />
-  {/if}
+  <NoteDetail {address} {relays} />
 {:else if type === "nprofile"}
   <PersonDetail pubkey={data.pubkey} {relays} />
 {:else if type === "npub"}

@@ -12,10 +12,6 @@
   import {v4 as uuid} from "uuid"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
-  import Chip from "src/partials/Chip.svelte"
-  import CurrencyInput from "src/partials/CurrencyInput.svelte"
-  import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
-  import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Input from "src/partials/Input.svelte"
@@ -33,7 +29,6 @@
   import {currencyOptions} from "src/util/i18n"
   import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
 
-  export let type = "note"
   export let quote = null
   export let pubkey = null
   export let initialValues = {}
@@ -81,29 +76,6 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    if (type === "calendar_event") {
-      if (!opts.title) {
-        return showWarning("Please name your event.")
-      }
-
-      if (!opts.start || !opts.end) {
-        return showWarning("Please provide a start and end date and time.")
-      }
-    }
-
-    if (type === "listing") {
-      if (!opts.title) {
-        return showWarning("Please name your listing.")
-      }
-
-      if (isNaN(parseFloat(opts.price))) {
-        return showWarning("Please provide a valid price.")
-      }
-
-      if (!opts.currency) {
-        return showWarning("Please select a currency.")
-      }
-    }
     const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
 
     if (opts.warning) {
@@ -114,34 +86,7 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const template = switcherFn(type, {
-      note: () => createEvent(1, {content, tags}),
-      listing: () =>
-        createEvent(30402, {
-          content,
-          tags: [
-            ...tags,
-            ["d", uuid()],
-            ["title", opts.title],
-            ["summary", opts.summary || ""],
-            ["location", opts.location || ""],
-            ["published_at", now().toString()],
-            ["price", opts.price, opts.currency.code],
-          ],
-        }),
-      calendar_event: () =>
-        createEvent(31923, {
-          content,
-          tags: [
-            ...tags,
-            ["d", uuid()],
-            ["title", opts.title],
-            ["location", opts.location || ""],
-            ["start", dateToSeconds(opts.start).toString()],
-            ["end", dateToSeconds(opts.end).toString()],
-          ],
-        }),
-    })
+    const template = createEvent(1, {content, tags})
 
     const signedTemplate = await sign(template)
 
@@ -174,10 +119,6 @@
 
   const togglePreview = () => {
     showPreview = !showPreview
-  }
-
-  const setType = t => {
-    type = t
   }
 
   const pubkeyEncoder = {
@@ -232,63 +173,10 @@
   }}>
   <Content size="lg">
     <div class="flex gap-2">
-      <span class="text-2xl font-bold">Create a</span>
-      <Popover theme="transparent" placement="bottom" opts={{hideOnClick: true}}>
-        <div slot="trigger">
-          <Chip class="cursor-pointer">{toTitle(type)} <i class="fa fa-caret-down" /></Chip>
-        </div>
-        <div slot="tooltip">
-          <Menu class="-mt-2 w-24">
-            <MenuItem on:click={() => setType("note")}>Note</MenuItem>
-            <MenuItem on:click={() => setType("calendar_event")}>Event</MenuItem>
-            <MenuItem on:click={() => setType("listing")}>Listing</MenuItem>
-          </Menu>
-        </div>
-      </Popover>
+      <span class="text-2xl font-bold">Create a Note</span>
     </div>
     <FlexColumn>
-      {#if type !== "note"}
-        <Field label="Title">
-          <Input bind:value={opts.title} />
-        </Field>
-      {/if}
-      {#if type === "listing"}
-        <Field label="Summary">
-          <Input bind:value={opts.summary} />
-        </Field>
-        <Field label="Price">
-          <div class="grid grid-cols-3 gap-2">
-            <div class="col-span-2">
-              <Input type="number" placeholder="0" bind:value={opts.price}>
-                <span slot="before">
-                  <CurrencySymbol code={opts.currency?.code || "SAT"} />
-                </span>
-              </Input>
-            </div>
-            <div class="relative">
-              <CurrencyInput bind:value={opts.currency} />
-            </div>
-          </div>
-        </Field>
-      {/if}
-      {#if type === "calendar_event"}
-        <div class="grid grid-cols-2 gap-2">
-          <div class="flex flex-col gap-1">
-            <strong>Start</strong>
-            <DateTimeInput bind:value={opts.start} />
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong>End</strong>
-            <DateTimeInput bind:value={opts.end} />
-          </div>
-        </div>
-      {/if}
-      {#if type !== "note"}
-        <Field label="Location (optional)">
-          <Input bind:value={opts.location} />
-        </Field>
-      {/if}
-      <Field label={type === "note" ? "What do you want to say?" : "Description"}>
+      <Field label={"What do you want to say?"}>
         <div
           class="rounded-xl border border-solid border-neutral-600 p-3"
           class:bg-white={!showPreview}
