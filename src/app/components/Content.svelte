@@ -96,7 +96,9 @@
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
         {:else if isCode(parsed)}
-          <ContentCode value={parsed.value} isBlock={isStartAndEnd(i)} />
+          <ContentCode
+            value={parsed.value}
+            isBlock={isStartAndEnd(i) || parsed.value.includes("\n")} />
         {:else if isCashu(parsed) || isInvoice(parsed)}
           <ContentToken value={parsed.value} />
         {:else if isLink(parsed)}
