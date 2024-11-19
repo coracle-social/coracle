@@ -161,6 +161,8 @@ export const getDefaultPubkeys = () => {
   return userPubkeys.length > 5 ? userPubkeys : [...userPubkeys, ...appPubkeys]
 }
 
+const failedUnwraps = new Set()
+
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
     return event
@@ -168,7 +170,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   let rumor = repository.eventsByWrap.get(event.id)
 
-  if (rumor) {
+  if (rumor || failedUnwraps.has(event.id)) {
     return rumor
   }
 
@@ -192,6 +194,8 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
     // Send the rumor via our relay so listeners get updated
     relay.send("EVENT", rumor)
+  } else {
+    failedUnwraps.add(event.id)
   }
 
   return rumor
