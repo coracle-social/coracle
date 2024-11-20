@@ -174,8 +174,7 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
-export const canUnwrap = (event: TrustedEvent) =>
-  event.kind === WRAP && getSession(Tags.fromEvent(event).get("p")?.value())
+const failedUnwraps = new Set()
 
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
@@ -184,7 +183,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   let rumor = repository.eventsByWrap.get(event.id)
 
-  if (rumor) {
+  if (rumor || failedUnwraps.has(event.id)) {
     return rumor
   }
 
@@ -203,6 +202,8 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (rumor && isHashedEvent(rumor)) {
     tracker.copy(event.id, rumor.id)
     relay.send("EVENT", rumor)
+  } else {
+    failedUnwraps.add(event.id)
   }
 
   return rumor
@@ -210,7 +211,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
 // Unwrap/decrypt stuff as it comes in
 
-export const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
+const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
 
 unwrapper.addGlobalHandler(async (event: TrustedEvent) => {
   if (event.kind === WRAP) {
