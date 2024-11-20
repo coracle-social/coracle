@@ -167,9 +167,10 @@
           <Compose bind:element={editorElement} {editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
-                on:click={() => send()}
                 disabled={$editorLoading}
-                class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-accent">
+                class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all"
+                class:hover:bg-accent={!$editorLoading}
+                on:click={() => send()}>
                 {#if loading || $editorLoading}
                   <i class="fa fa-circle-notch fa-spin" />
                 {:else}
