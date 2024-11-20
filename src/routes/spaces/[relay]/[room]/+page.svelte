@@ -13,11 +13,12 @@
   import type {Readable} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
-  import {sortBy, append, now, ctx} from "@welshman/lib"
+  import {sortBy, sleep, append, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
   import {slide} from "@lib/transition"
+  import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -66,7 +67,11 @@
       delay: $userSettingValues.send_delay,
     })
 
+  let limit = 15
   let loading = true
+  let unsub: () => void
+  let element: HTMLElement
+  let scroller: Scroller
   let editor: Readable<Editor>
   let elements: Element[] = []
 
@@ -99,27 +104,37 @@
       previousPubkey = pubkey
     }
 
-    elements.reverse()
+    elements = elements.reverse().slice(0, limit)
   }
 
-  onMount(() => {
+  onMount(async () => {
+    // Sveltekiiit
+    await sleep(100)
+
     pullConservatively({
       relays: [url],
       filters: [{kinds: [MESSAGE, DELETE], "#~": [room]}],
     })
 
-    const unsub = subscribePersistent({
+    scroller = createScroller({
+      element,
+      delay: 300,
+      threshold: 3000,
+      onScroll: () => {
+        limit += 15
+      },
+    })
+
+    unsub = subscribePersistent({
       relays: [url],
       filters: [{kinds: [MESSAGE, COMMENT], "#~": [room], since: now()}],
     })
-
-    return () => {
-      unsub()
-    }
   })
 
   onDestroy(() => {
     setChecked($page.url.pathname)
+    scroller?.stop()
+    unsub?.()
   })
 
   setTimeout(() => {
@@ -150,7 +165,9 @@
       <MenuSpaceButton {url} />
     </div>
   </PageBar>
-  <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
+  <div
+    class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-auto py-2"
+    bind:this={element}>
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <Divider>{value}</Divider>
