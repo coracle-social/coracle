@@ -713,7 +713,7 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
 
   const sub = baseSubscribe(request)
 
-  sub.emitter.on(SubscriptionEvent.Close, async (url: string, event: TrustedEvent) => {
+  sub.emitter.on(SubscriptionEvent.Event, async (url: string, event: TrustedEvent) => {
     projections.push(await ensureUnwrapped(event))
   })
 
