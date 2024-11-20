@@ -24,10 +24,20 @@
   const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
 
   const scrollToEvent = (id: string) => {
-    const element = document.querySelector(`[data-event="${id}"]`)
+    const element = document.querySelector(`[data-event="${id}"]`) as any
 
     if (element) {
       element.scrollIntoView({behavior: "smooth"})
+      element.style =
+        "filter: brightness(1.5); transition-property: all; transition-duration: 400ms;"
+
+      setTimeout(() => {
+        element.style = "transition-property: all; transition-duration: 300ms;"
+      }, 800)
+
+      setTimeout(() => {
+        element.style = ""
+      }, 800 + 400)
     }
 
     return Boolean(element)

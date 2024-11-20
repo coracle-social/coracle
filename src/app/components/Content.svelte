@@ -47,9 +47,9 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
 
-    if (!parsed || hideMedia) return true
+    if (!parsed || hideMedia) return false
 
-    if (isLink(parsed) && isStartOrEnd(i) && $userSettingValues.show_media) {
+    if (isLink(parsed) && $userSettingValues.show_media && isStartOrEnd(i)) {
       return true
     }
 
@@ -64,14 +64,18 @@
     const parsed = fullContent[i]
 
     if (!parsed || isNewline(parsed)) return true
-    if (isText(parsed)) return parsed.value.match(/^\s+$/)
+    if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
 
     return false
   }
 
-  const isStartAndEnd = (i: number) => Boolean(isBoundary(i - 1) && isBoundary(i + 1))
+  const isStart = (i: number) => isBoundary(i - 1)
 
-  const isStartOrEnd = (i: number) => Boolean(isBoundary(i - 1) || isBoundary(i + 1))
+  const isEnd = (i: number) => isBoundary(i + 1)
+
+  const isStartAndEnd = (i: number) => isStart(i) && isEnd(i)
+
+  const isStartOrEnd = (i: number) => isStart(i) || isEnd(i)
 
   const ignoreWarning = () => {
     warning = null

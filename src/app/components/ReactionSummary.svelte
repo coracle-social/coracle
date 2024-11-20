@@ -35,7 +35,7 @@
       <button
         type="button"
         data-tip={tooltip}
-        class="flex-inline btn btn-neutral btn-xs tooltip gap-1 rounded-full"
+        class="flex-inline btn btn-neutral btn-xs tooltip tooltip-right gap-1 rounded-full"
         class:border={isOwn}
         class:border-solid={isOwn}
         class:border-primary={isOwn}

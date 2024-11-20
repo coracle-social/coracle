@@ -79,10 +79,10 @@
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
-        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={10} />
+        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
       </Link>
     {:else}
-      <div class="w-10 min-w-10 max-w-10" />
+      <div class="w-8 min-w-8 max-w-8" />
     {/if}
     <div class="-mt-1 min-w-0 flex-grow pr-1">
       {#if showPubkey}
@@ -105,7 +105,7 @@
       </div>
     </div>
   </div>
-  <div class="row-2 ml-12">
+  <div class="row-2 ml-10 mt-1">
     {#if !isHead}
       <ReplySummary relays={[url]} {event} on:click={onClick} />
     {/if}

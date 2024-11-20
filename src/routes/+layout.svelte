@@ -3,7 +3,6 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {get, derived} from "svelte/store"
-  import {page} from "$app/stores"
   import {dev} from "$app/environment"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
@@ -257,9 +256,7 @@
 {:then}
   <div data-theme={$theme}>
     <AppContainer>
-      {#key $page.url.pathname}
-        <slot />
-      {/key}
+      <slot />
     </AppContainer>
     <ModalContainer />
     <div class="tippy-target" />

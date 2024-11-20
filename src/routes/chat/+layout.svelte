@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {page} from "$app/stores"
   import {ctx} from "@welshman/lib"
   import {WRAP} from "@welshman/util"
-  import type {TrustedEvent} from "@welshman/util"
-  import {pubkey, repository} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -13,7 +12,7 @@
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
-  import {chatSearch, pullConservatively, ensureUnwrapped} from "@app/state"
+  import {chatSearch, pullConservatively} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const startChat = () => pushModal(ChatStart)
@@ -23,23 +22,9 @@
     relays: ctx.app.router.UserInbox().getUrls(),
   })
 
-  const onUpdate = ({added}: {added: TrustedEvent[]}) => {
-    for (const event of added) {
-      ensureUnwrapped(event)
-    }
-  }
-
   let term = ""
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
-
-  onMount(() => {
-    repository.on("update", onUpdate)
-
-    return () => {
-      repository.off("update", onUpdate)
-    }
-  })
 </script>
 
 <SecondaryNav>
@@ -67,5 +52,7 @@
   </div>
 </SecondaryNav>
 <Page>
-  <slot />
+  {#key $page.url.pathname}
+    <slot />
+  {/key}
 </Page>

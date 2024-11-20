@@ -60,5 +60,7 @@
   <MenuSpace {url} />
 </SecondaryNav>
 <Page>
-  <slot />
+  {#key $page.url.pathname}
+    <slot />
+  {/key}
 </Page>
