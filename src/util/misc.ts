@@ -173,7 +173,7 @@ export const race = (threshold, promises) => {
       p.then(() => {
         count++
 
-        if (count >= threshold) {
+        if (count >= threshold * promises.length) {
           resolve()
         }
       }).catch(reject)

@@ -97,68 +97,70 @@
   )
 </script>
 
-<div class="flex flex-grow items-center justify-end gap-2">
-  <div class="flex">
-    <Input dark class="hidden rounded-r-none xs:block" on:input={onSearchBlur} bind:value={search}>
-      <div slot="after" class="hidden text-white xs:block">
-        <i class="fa fa-search" />
-      </div>
-    </Input>
-    <Anchor button low class="border-none xs:rounded-l-none" on:click={openForm}>
-      Filters ({feed.definition.length - 1})
-    </Anchor>
-  </div>
-  <div class="float-right flex h-8 items-center justify-end gap-2">
-    <slot name="controls" />
-    <div class="relative">
-      <button
-        type="button"
-        class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
-        on:click={$listMenu.enable}>
-        <i class="fa fa-sm fa-ellipsis-v" />
-      </button>
-      {#if $listMenu.enabled}
-        <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
-          <Menu>
-            <MenuItem
-              inert
-              class="staatliches flex cursor-default justify-between bg-neutral-800 text-lg shadow">
-              <span>Your Feeds</span>
-              <Anchor modal href="/feeds/create"><i class="fa fa-plus" /></Anchor>
-            </MenuItem>
-            <div class="max-h-80 overflow-auto">
-              <MenuItem
-                active={equals(followsFeed.definition, feed.definition)}
-                on:click={() => setFeed(followsFeed)}>
-                Follows
-              </MenuItem>
-              <MenuItem
-                active={equals(networkFeed.definition, feed.definition)}
-                on:click={() => setFeed(networkFeed)}>
-                Network
-              </MenuItem>
-              {#each allFeeds as other}
-                <MenuItem
-                  active={equals(other.definition, feed.definition)}
-                  on:click={() => setFeed(other)}>
-                  {displayFeed(other)}
-                </MenuItem>
-              {/each}
-            </div>
-            {#if $signer}
-              <div class="bg-neutral-900">
-                <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
-                  <i class="fa fa-rss" /> Manage feeds
-                </MenuItem>
-                <MenuItem href={router.at("lists").toString()} class="flex items-center gap-2">
-                  <i class="fa fa-list" /> Manage lists
-                </MenuItem>
-              </div>
-            {/if}
-          </Menu>
-        </Popover2>
-      {/if}
+<div class="flex flex-col gap-1">
+  <div class="flex flex-grow items-center justify-end gap-1">
+    <div class="flex">
+      <Input
+        dark
+        class="hidden rounded-r-none xs:block"
+        on:input={onSearchBlur}
+        bind:value={search}>
+        <div slot="after" class="hidden text-white xs:block">
+          <i class="fa fa-search" />
+        </div>
+      </Input>
+      <Anchor button low class="border-none xs:rounded-l-none" on:click={openForm}>
+        Filters ({feed.definition.length - 1})
+      </Anchor>
     </div>
+    <slot name="controls" />
+  </div>
+  <div class="flex flex-wrap justify-end gap-1">
+    <Anchor
+      button
+      low={!equals(followsFeed.definition, feed.definition)}
+      accent={equals(followsFeed.definition, feed.definition)}
+      on:click={() => setFeed(followsFeed)}>
+      Follows
+    </Anchor>
+    <Anchor
+      button
+      low={!equals(networkFeed.definition, feed.definition)}
+      accent={equals(networkFeed.definition, feed.definition)}
+      on:click={() => setFeed(networkFeed)}>
+      Network
+    </Anchor>
+    {#each allFeeds as other}
+      <Anchor
+        button
+        low={!equals(other.definition, feed.definition)}
+        accent={equals(other.definition, feed.definition)}
+        on:click={() => setFeed(other)}>
+        {displayFeed(other)}
+      </Anchor>
+    {/each}
+    {#if $signer}
+      <div class="relative">
+        <button
+          type="button"
+          class="flex h-7 w-6 cursor-pointer items-center justify-center rounded bg-neutral-700 text-center text-neutral-50 transition-colors hover:bg-neutral-600"
+          on:click={$listMenu.enable}>
+          <i class="fa fa-sm fa-ellipsis-v" />
+        </button>
+        {#if $listMenu.enabled}
+          <Popover2 absolute hideOnClick onClose={$listMenu.disable} class="right-0 top-8 w-60">
+            <Menu>
+              <MenuItem href={router.at("feeds").toString()} class="flex items-center gap-2">
+                <i class="fa fa-rss" /> Manage feeds
+              </MenuItem>
+              <MenuItem href={router.at("lists").toString()} class="flex items-center gap-2">
+                <i class="fa fa-list" /> Manage lists
+              </MenuItem>
+            </Menu>
+          </Popover2>
+        {/if}
+      </div>
+    {/if}
   </div>
 </div>
 

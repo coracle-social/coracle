@@ -1,8 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {seconds} from "hurdak"
   import {writable} from "svelte/store"
-  import {ctx, now, identity, uniqBy, range, hash, pushToMapKey} from "@welshman/lib"
+  import {
+    WEEK,
+    ctx,
+    randomId,
+    now,
+    ago,
+    identity,
+    uniqBy,
+    range,
+    hash,
+    pushToMapKey,
+  } from "@welshman/lib"
   import {
     neverFilter,
     getIdFilters,
@@ -57,6 +67,9 @@
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
   const reload = () => {
+    const thisId = randomId()
+
+    id = thisId
     exhausted = false
     useWindowing = true
     events = []
@@ -79,6 +92,7 @@
       forcePlatform,
       useWindowing,
       onEvent: async e => {
+        if (id !== thisId) return false
         if (e.kind === REACTION && !isLike(e)) return false
         if (repository.isDeleted(e)) return false
         if ($isEventMuted(e, true)) return false
@@ -186,6 +200,7 @@
     }
   }
 
+  let id
   let element
   let exhausted = false
   let useWindowing = true
@@ -228,7 +243,7 @@
     <div in:fly={{y: 20}}>
       <Note {filters} {reposts} {depth} {anchor} {note} />
     </div>
-    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < now() - seconds(7, "day")}
+    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
       <Card class="group flex items-center justify-between">
         <p class="text-xl">Enjoying Coracle?</p>
         <div class="flex gap-2">

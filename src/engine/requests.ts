@@ -3,7 +3,21 @@ import {get, writable, derived} from "svelte/store"
 import {noop, sleep} from "hurdak"
 import type {RequestOpts, Feed} from "@welshman/feeds"
 import {FeedController} from "@welshman/feeds"
-import {ctx, assoc, always, chunk, max, first, int, HOUR, WEEK, sortBy} from "@welshman/lib"
+import {
+  ctx,
+  uniq,
+  without,
+  partition,
+  assoc,
+  always,
+  chunk,
+  max,
+  first,
+  int,
+  HOUR,
+  WEEK,
+  sortBy,
+} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   getIdFilters,
@@ -40,7 +54,7 @@ import {
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
-import {partition, uniq, without} from "ramda"
+import {race} from "src/util/misc"
 import {CUSTOM_LIST_KINDS} from "src/domain"
 import {env, load, subscribePersistent, type MySubscribeRequest} from "src/engine/state"
 
@@ -186,14 +200,17 @@ export const makeFeedRequestHandler =
   ({forcePlatform}: FeedRequestHandlerOptions) =>
   async ({relays, filters, onEvent}: RequestOpts) => {
     const tracker = new Tracker()
-    const loadOptions = {onEvent, tracker, forcePlatform, skipCache: true}
+    const loadOptions = {onEvent, tracker, forcePlatform, skipCache: true, delay: 0}
 
     if (relays?.length > 0) {
       await load({...loadOptions, filters, relays})
     } else {
-      await Promise.all(
-        getFilterSelections(filters).map(({relays, filters}) =>
-          load({...loadOptions, relays, filters}),
+      // Break out selections by relay so we can complete early after a certain number
+      // of requests complete for faster load times
+      await race(
+        filters.every(f => f.search) ? 0.1 : 0.8,
+        getFilterSelections(filters).flatMap(({relays, filters}) =>
+          relays.map(relay => load({...loadOptions, relays: [relay], filters})),
         ),
       )
 

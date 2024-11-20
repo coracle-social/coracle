@@ -8,10 +8,12 @@
     isKindFeed,
     isDVMFeed,
     isRelayFeed,
+    isSearchFeed,
     isListFeed,
     makeTagFeed,
     makeAuthorFeed,
     makeRelayFeed,
+    makeSearchFeed,
     makeKindFeed,
     makeCreatedAtFeed,
     makeListFeed,
@@ -26,6 +28,7 @@
   import Popover2 from "src/partials/Popover2.svelte"
   import FeedFormSectionPeople from "src/app/shared/FeedFormSectionPeople.svelte"
   import FeedFormSectionRelays from "src/app/shared/FeedFormSectionRelays.svelte"
+  import FeedFormSectionSearch from "src/app/shared/FeedFormSectionSearch.svelte"
   import FeedFormSectionTopics from "src/app/shared/FeedFormSectionTopics.svelte"
   import FeedFormSectionMentions from "src/app/shared/FeedFormSectionMentions.svelte"
   import FeedFormSectionKinds from "src/app/shared/FeedFormSectionKinds.svelte"
@@ -59,6 +62,7 @@
   $: hasMentions = subFeeds.some(isMentionFeed)
   $: hasPeople = subFeeds.some(isPeopleFeed)
   $: hasRelays = subFeeds.some(isRelayFeed)
+  $: hasSearch = subFeeds.some(isSearchFeed)
   $: hasKinds = subFeeds.some(isKindFeed)
   $: hasCreatedAt = subFeeds.some(isCreatedAtFeed)
   $: hasList = subFeeds.some(isListFeed)
@@ -82,6 +86,8 @@
               <FeedFormSectionPeople feed={subFeed} onChange={change} />
             {:else if isRelayFeed(subFeed)}
               <FeedFormSectionRelays feed={subFeed} onChange={change} />
+            {:else if isSearchFeed(subFeed)}
+              <FeedFormSectionSearch feed={subFeed} onChange={change} />
             {:else if isTopicFeed(subFeed)}
               <FeedFormSectionTopics feed={subFeed} onChange={change} />
             {:else if isMentionFeed(subFeed)}
@@ -115,7 +121,7 @@
   {/each}
 {/key}
 
-{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
+{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasSearch || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
   <div class="relative">
     {#if menuIsOpen}
       <Popover2 hideOnClick onClose={closeMenu} position="top">
@@ -131,6 +137,9 @@
           {/if}
           {#if !hasRelays}
             <MenuItem on:click={() => addFeed(makeRelayFeed())}>Relays</MenuItem>
+          {/if}
+          {#if !hasSearch}
+            <MenuItem on:click={() => addFeed(makeSearchFeed(""))}>Search</MenuItem>
           {/if}
           {#if !hasKinds}
             <MenuItem on:click={() => addFeed(makeKindFeed())}>Kinds</MenuItem>
