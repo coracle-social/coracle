@@ -41,6 +41,7 @@ import {
   groupBy,
   identity,
   now,
+  ago,
   pushToMapKey,
   setContext,
   simpleCache,
@@ -1008,12 +1009,18 @@ const getScoreEvent = () => {
   }
 }
 
+let lastMigrate = 0
+
 const migrateEvents = (events: TrustedEvent[]) => {
-  if (events.length < 50_000) {
+  if (events.length < 50_000 || ago(lastMigrate) < 60) {
     return events
   }
+
   // filter out all event posted to encrypted group
   events = events.filter(e => !e.wrap?.tags.some(t => t[1].startsWith("35834:")))
+
+  // Keep track of the last time we migrated the events, since it's expensive
+  lastMigrate = now()
 
   const scoreEvent = getScoreEvent()
 
