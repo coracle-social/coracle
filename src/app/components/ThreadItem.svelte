@@ -23,7 +23,7 @@
     </p>
   </div>
   <Content {event} expandMode="inline" />
-  <div class="flex w-full items-end justify-between gap-2">
+  <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <span class="whitespace-nowrap py-1 text-sm opacity-75">
       Posted by
       <Link external href={pubkeyLink(event.pubkey)} class="link-content">

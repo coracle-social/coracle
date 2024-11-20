@@ -153,8 +153,11 @@
       {/each}
     </div>
     {#if expandBlock}
-      <div class="relative z-feature -mt-6 flex justify-center bg-gradient-to-t from-base-100 py-2">
-        <button type="button" class="btn" on:click|stopPropagation|preventDefault={expand}>
+      <div class="relative z-feature -mt-6 flex justify-center py-2">
+        <button
+          type="button"
+          class="btn btn-neutral"
+          on:click|stopPropagation|preventDefault={expand}>
           See more
         </button>
       </div>
