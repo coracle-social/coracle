@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {sleep} from "hurdak"
   import type {TrustedEvent} from "@welshman/util"
   import {isTrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
@@ -11,7 +10,6 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
-  import {projections} from "src/engine"
 
   const setFile = e => {
     file = e.target.files[0]
@@ -33,7 +31,7 @@
     reader.onload = async loadEvent => {
       try {
         const data = new Uint8Array(loadEvent.target.result as ArrayBuffer)
-        const jsonl = new TextDecoder().decode(data).split('\n')
+        const jsonl = new TextDecoder().decode(data).split("\n")
         const newEvents: TrustedEvent[] = []
 
         for (let i = 0; i < jsonl.length; i++) {
@@ -53,12 +51,7 @@
         for (const event of newEvents) {
           if (isTrustedEvent(event)) {
             repository.publish(event)
-            projections.push(event)
           }
-        }
-
-        while (projections.buffer.length > 0) {
-          await sleep(100)
         }
 
         showInfo("Import complete!")

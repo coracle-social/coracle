@@ -150,28 +150,7 @@ export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWi
 
 export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
-// Base state
-
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
-
-export const projections = new Worker<TrustedEvent>({
-  getKey: prop("kind"),
-})
-
-projections.addGlobalHandler(ensurePlaintext)
-
-const decryptKinds = [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION, APP_DATA, FOLLOWS, MUTES]
-
-// Synchronize repository with projections. All events should be published to the
-// repository, and when accepted, be propagated to projections. This avoids processing
-// the same event multiple times, since repository deduplicates
-repository.on("update", ({added}: {added: TrustedEvent[]}) => {
-  for (const event of added) {
-    if (decryptKinds.includes(event.kind)) {
-      projections.push(event)
-    }
-  }
-})
 
 // Plaintext
 
@@ -228,6 +207,32 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   return rumor
 }
+
+// Unwrap/decrypt stuff as it comes in
+
+export const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
+
+unwrapper.addGlobalHandler(async (event: TrustedEvent) => {
+  if (event.kind === WRAP) {
+    await ensureUnwrapped(event)
+  } else {
+    await ensurePlaintext(event)
+  }
+})
+
+const decryptKinds = [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION, APP_DATA, FOLLOWS, MUTES]
+
+repository.on("update", ({added}: {added: TrustedEvent[]}) => {
+  for (const event of added) {
+    if (decryptKinds.includes(event.kind) && event.content && !getPlaintext(event)) {
+      unwrapper.push(event)
+    }
+
+    if (event.kind === WRAP) {
+      unwrapper.push(event)
+    }
+  }
+})
 
 // Settings
 
@@ -728,13 +733,7 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
     request.relays = [...request.relays, LOCAL_RELAY_URL]
   }
 
-  const sub = baseSubscribe(request)
-
-  sub.emitter.on(SubscriptionEvent.Event, async (url: string, event: TrustedEvent) => {
-    projections.push(await ensureUnwrapped(event))
-  })
-
-  return sub
+  return baseSubscribe(request)
 }
 
 export const subscribePersistent = (request: MySubscribeRequest) => {
