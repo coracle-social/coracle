@@ -110,6 +110,7 @@
     })
     addDraftToContext(event, () => thunk.controller.abort())
     isOpen = false
+    loading = false
 
     thunk.result.then(() => {
       clearDraft()
