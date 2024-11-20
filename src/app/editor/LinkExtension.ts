@@ -74,27 +74,28 @@ export const LinkExtension = Node.create({
               index: match.index!,
               text: match[0],
               data: {
-                url: match[0],
+                url: match[0].trim(),
               },
             }
           }
 
           return null
         },
-        handler: ({state, range, match, chain}) => {
-          const {tr} = state
+        handler: ({range, match, chain}) => {
           if (match[0]) {
-            try {
-              chain()
-                .deleteRange({from: range.from - 1, to: range.from - 1 + match[0].length})
-                .insertLink({url: match[0]})
-                .run()
-            } catch (e) {
-              // If the node was already linkified, the above code breaks for whatever reason
-            }
-          }
+            const lastChar = last(Array.from(match.input!))
+            const chainCommand = chain()
+              .deleteRange({from: range.from - 1, to: range.from - 1 + match[0].length})
+              .insertLink({url: match[0]})
 
-          tr.scrollIntoView()
+            if (lastChar === "\n") {
+              chainCommand.splitBlock()
+            } else {
+              chainCommand.insertContent(" ")
+            }
+
+            chainCommand.run()
+          }
         },
       }),
     ]
