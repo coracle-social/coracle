@@ -23,6 +23,7 @@ export const LinkExtension = Node.create({
   name: "inlineLink",
   group: "inline",
   inline: true,
+  inclusive: false,
   selectable: true,
   draggable: true,
   priority: 1000,
@@ -65,32 +66,36 @@ export const LinkExtension = Node.create({
     return [
       new InputRule({
         find: text => {
+          const realText = this.editor.state.doc.textContent
           const match = last(Array.from(text.matchAll(LINK_REGEX)))
-          if (match && text.length === match.index + match[0].length + 1) {
+          const realMatch = last(Array.from(realText.matchAll(LINK_REGEX)))
+          if (match && realMatch && text.length === match.index + match[0].length + 1) {
             return {
               index: match.index!,
               text: match[0],
               data: {
-                url: match[0],
+                url: match[0].trim(),
               },
             }
           }
 
           return null
         },
-        handler: ({state, range, match}) => {
-          const {tr} = state
+        handler: ({range, match, chain}) => {
           if (match[0]) {
-            try {
-              tr.insert(range.from - 1, this.type.create(match.data))
-                .delete(tr.mapping.map(range.from - 1), tr.mapping.map(range.to))
-                .insertText(last(Array.from(match.input!)))
-            } catch (e) {
-              // If the node was already linkified, the above code breaks for whatever reason
-            }
-          }
+            const lastChar = last(Array.from(match.input!))
+            const chainCommand = chain()
+              .deleteRange({from: range.from - 1, to: range.from - 1 + match[0].length})
+              .insertLink({url: match[0]})
 
-          tr.scrollIntoView()
+            if (lastChar === "\n") {
+              chainCommand.splitBlock()
+            } else {
+              chainCommand.insertContent(" ")
+            }
+
+            chainCommand.run()
+          }
         },
       }),
     ]
