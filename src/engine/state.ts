@@ -3,6 +3,7 @@ import {
   subscribe as baseSubscribe,
   db,
   displayProfileByPubkey,
+  ensurePlaintext,
   followsByPubkey,
   freshness,
   getDefaultAppContext,
@@ -71,6 +72,7 @@ import {
   HANDLER_RECOMMENDATION,
   LABEL,
   LOCAL_RELAY_URL,
+  MUTES,
   NAMED_BOOKMARKS,
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
@@ -154,6 +156,21 @@ export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], r
 
 export const projections = new Worker<TrustedEvent>({
   getKey: prop("kind"),
+})
+
+projections.addGlobalHandler(ensurePlaintext)
+
+const decryptKinds = [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION, APP_DATA, FOLLOWS, MUTES]
+
+// Synchronize repository with projections. All events should be published to the
+// repository, and when accepted, be propagated to projections. This avoids processing
+// the same event multiple times, since repository deduplicates
+repository.on("update", ({added}: {added: TrustedEvent[]}) => {
+  for (const event of added) {
+    if (decryptKinds.includes(event.kind)) {
+      projections.push(event)
+    }
+  }
 })
 
 // Plaintext
