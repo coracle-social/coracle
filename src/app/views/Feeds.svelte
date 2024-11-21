@@ -5,7 +5,7 @@
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
   import {makeFeed} from "src/domain"
-  import {env} from "src/engine"
+  import {env, userFollows} from "src/engine"
 
   export let feed = null
 
@@ -16,7 +16,7 @@
   if (isPlatformFeed) {
     feed = makeFeed({definition: makeRelayFeed(...env.PLATFORM_RELAYS)})
   } else if (!feed) {
-    if ($pubkey) {
+    if ($userFollows?.size > 0) {
       feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
     } else {
       feed = makeFeed({definition: makeAuthorFeed(...env.DEFAULT_FOLLOWS)})

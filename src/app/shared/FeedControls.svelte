@@ -40,7 +40,7 @@
   const getSearch = definition => (getFeedArgs(definition)?.find(isSearchFeed)?.[1] as string) || ""
 
   const setFeedDefinition = definition => {
-    feed.definition = definition
+    feed = {...feed, definition}
     search = getSearch(definition)
     $form.disable()
     updateFeed(feed)
