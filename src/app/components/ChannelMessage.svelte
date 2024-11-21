@@ -84,7 +84,7 @@
     {:else}
       <div class="w-8 min-w-8 max-w-8" />
     {/if}
-    <div class="-mt-1 min-w-0 flex-grow pr-1">
+    <div class="min-w-0 flex-grow pr-1">
       {#if showPubkey}
         <div class="flex items-center gap-2">
           <Link
