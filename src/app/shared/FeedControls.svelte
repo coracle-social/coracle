@@ -5,7 +5,7 @@
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import {signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
-  import {slide} from "src/util/transition"
+  import {slideAndFade} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import Card from "src/partials/Card.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -95,29 +95,18 @@
   )
 </script>
 
-<div class="flex flex-col gap-1">
+<div class="flex flex-col">
   <div class="flex flex-grow items-center justify-end gap-2">
-    <div class="flex">
-      <Input
-        dark
-        class="hidden rounded-r-none xs:block"
-        on:input={onSearchBlur}
-        bind:value={search}>
-        <div slot="after" class="hidden text-white xs:block">
-          <i class="fa fa-search" />
-        </div>
-      </Input>
-      <Anchor button low class="xs:rounded-l-none" on:click={openForm}>
-        Filters ({feed.definition.length - 1})
-      </Anchor>
-    </div>
+    <Input dark class="hidden xs:block" on:input={onSearchBlur} bind:value={search}>
+      <div slot="after" class="hidden text-white xs:block">
+        <i class="fa fa-search" />
+      </div>
+    </Input>
     <slot name="controls" />
-    <Anchor class="py-4 pl-1" on:click={$expanded.toggle}>
-      <i class="fa fa-lg fa-cog transition-all duration-700" class:rotate-180={$expanded.enabled} />
-    </Anchor>
+    <Anchor button low on:click={$expanded.toggle}>Customize</Anchor>
   </div>
   {#if $expanded.enabled}
-    <div transition:slide>
+    <div transition:slideAndFade class="pt-4">
       <Card class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <p class="staatliches text-2xl">Your Feeds</p>
@@ -155,7 +144,7 @@
               <Anchor button href={router.at("lists").toString()}>Manage lists</Anchor>
               <Anchor button href={router.at("feeds").toString()}>Manage feeds</Anchor>
             </div>
-            <Anchor button accent on:click={openForm}>Customize feed</Anchor>
+            <Anchor button accent on:click={openForm}>Edit feed</Anchor>
           </div>
         {/if}
       </Card>
