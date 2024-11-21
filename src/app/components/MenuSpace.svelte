@@ -69,7 +69,7 @@
 </script>
 
 <div bind:this={element}>
-  <SecondaryNavSection>
+  <SecondaryNavSection class="max-h-screen">
     <div>
       <SecondaryNavItem class="w-full !justify-between" on:click={openMenu}>
         <strong>{displayRelayUrl(url)}</strong>
@@ -109,37 +109,39 @@
         </Popover>
       {/if}
     </div>
-    <SecondaryNavItem href={makeSpacePath(url)}>
-      <Icon icon="home-smile" /> Home
-    </SecondaryNavItem>
-    <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
-      <Icon icon="notes-minimalistic" /> Threads
-    </SecondaryNavItem>
-    <div class="h-2" />
-    <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-    <MenuSpaceRoomItem {url} room={GENERAL} />
-    {#each rooms as room, i (room)}
-      <MenuSpaceRoomItem {url} {room} />
-    {/each}
-    {#if otherRooms.length > 0}
-      <div class="h-2" />
-      <SecondaryNavHeader>
-        {#if rooms.length > 0}
-          Other Rooms
-        {:else}
-          Rooms
-        {/if}
-      </SecondaryNavHeader>
-    {/if}
-    {#each otherRooms as room, i (room)}
-      <SecondaryNavItem href={makeSpacePath(url, room)}>
-        <Icon icon="hashtag" />
-        {room}
+    <div class="min-h-0 overflow-auto">
+      <SecondaryNavItem href={makeSpacePath(url)}>
+        <Icon icon="home-smile" /> Home
       </SecondaryNavItem>
-    {/each}
-    <SecondaryNavItem on:click={addRoom}>
-      <Icon icon="add-circle" />
-      Create room
-    </SecondaryNavItem>
+      <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
+        <Icon icon="notes-minimalistic" /> Threads
+      </SecondaryNavItem>
+      <div class="h-2" />
+      <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+      <MenuSpaceRoomItem {url} room={GENERAL} />
+      {#each rooms as room, i (room)}
+        <MenuSpaceRoomItem {url} {room} />
+      {/each}
+      {#if otherRooms.length > 0}
+        <div class="h-2" />
+        <SecondaryNavHeader>
+          {#if rooms.length > 0}
+            Other Rooms
+          {:else}
+            Rooms
+          {/if}
+        </SecondaryNavHeader>
+      {/if}
+      {#each otherRooms as room, i (room)}
+        <SecondaryNavItem href={makeSpacePath(url, room)}>
+          <Icon icon="hashtag" />
+          {room}
+        </SecondaryNavItem>
+      {/each}
+      <SecondaryNavItem on:click={addRoom}>
+        <Icon icon="add-circle" />
+        Create room
+      </SecondaryNavItem>
+    </div>
   </SecondaryNavSection>
 </div>
