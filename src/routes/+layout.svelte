@@ -193,10 +193,10 @@
       }
 
       // Listen for space data, populate space-based notifications
-      let unsubRooms: any
+      let unsubSpaces: any
 
       userMembership.subscribe($membership => {
-        unsubRooms?.()
+        unsubSpaces?.()
 
         const since = ago(30)
         const rooms = uniq(getMembershipRooms($membership).map(m => m.room)).concat(GENERAL)
@@ -213,7 +213,7 @@
         })
 
         // Listen for new notifications/memberships
-        unsubRooms = subscribePersistent({
+        unsubSpaces = subscribePersistent({
           relays,
           filters: [
             {kinds: [THREAD], since},

@@ -19,7 +19,7 @@
   }
 </script>
 
-<div class="card2 bg-alt col-2">
+<div class="card2 bg-alt col-2 shadow-2xl">
   <p>
     Failed to publish to {displayRelayUrl(url)}: {message}.
   </p>

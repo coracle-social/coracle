@@ -31,6 +31,7 @@
   export let showPubkey = false
 
   const thunk = $thunks[event.id]
+  const isOwn = event.pubkey === $pubkey
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
@@ -62,9 +63,9 @@
 <div
   data-event={event.id}
   class="group chat flex items-center justify-end gap-1 px-2"
-  class:chat-start={event.pubkey !== $pubkey}
-  class:flex-row-reverse={event.pubkey !== $pubkey}
-  class:chat-end={event.pubkey === $pubkey}>
+  class:chat-start={!isOwn}
+  class:flex-row-reverse={!isOwn}
+  class:chat-end={isOwn}>
   <Tippy
     bind:popover
     component={ChatMessageMenu}
@@ -87,27 +88,29 @@
       <Icon icon="menu-dots" size={4} />
     </button>
   </Tippy>
-  <div class="flex min-w-0 flex-col" class:items-end={event.pubkey === $pubkey}>
+  <div class="flex min-w-0 flex-col" class:items-end={isOwn}>
     <LongPress
       class="bg-alt chat-bubble mx-1 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
       onLongPress={showMobileMenu}>
-      {#if showPubkey && event.pubkey !== $pubkey}
+      {#if showPubkey}
         <div class="flex items-center gap-2">
-          <Link external href={pubkeyLink(event.pubkey)} class="flex items-center gap-1">
-            <Avatar
-              src={$profile?.picture}
-              class="border border-solid border-base-content"
-              size={4} />
-            <div class="flex items-center gap-2">
-              <Link
-                external
-                href={pubkeyLink(event.pubkey)}
-                class="text-sm font-bold"
-                style="color: {colorValue}">
-                {$profileDisplay}
-              </Link>
-            </div>
-          </Link>
+          {#if !isOwn}
+            <Link external href={pubkeyLink(event.pubkey)} class="flex items-center gap-1">
+              <Avatar
+                src={$profile?.picture}
+                class="border border-solid border-base-content"
+                size={4} />
+              <div class="flex items-center gap-2">
+                <Link
+                  external
+                  href={pubkeyLink(event.pubkey)}
+                  class="text-sm font-bold"
+                  style="color: {colorValue}">
+                  {$profileDisplay}
+                </Link>
+              </div>
+            </Link>
+          {/if}
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}
@@ -117,7 +120,7 @@
     </LongPress>
     <div class="row-2 z-feature -mt-1 ml-4">
       <ReplySummary {event} />
-      <ReactionSummary {event} {onReactionClick} />
+      <ReactionSummary {event} {onReactionClick} noTooltip />
     </div>
   </div>
 </div>

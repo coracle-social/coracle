@@ -109,7 +109,7 @@
     {#if !isHead}
       <ReplySummary relays={[url]} {event} on:click={onClick} />
     {/if}
-    <ReactionSummary relays={[url]} {event} {onReactionClick} />
+    <ReactionSummary relays={[url]} {event} {onReactionClick} reactionClass="tooltip-right" />
   </div>
   <button
     class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"

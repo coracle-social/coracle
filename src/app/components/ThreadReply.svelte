@@ -47,7 +47,7 @@
   in:fly
   out:slideAndFade
   on:submit|preventDefault={submit}
-  class="card2 sticky bottom-2 z-feature mx-2 mt-2 bg-neutral">
+  class="card2 sticky bottom-2 z-feature mx-2 mt-4 bg-neutral">
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">
       <EditorContent editor={$editor} />

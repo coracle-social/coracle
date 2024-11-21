@@ -5,11 +5,14 @@
   import {deriveEvents} from "@welshman/store"
   import {pubkey, repository, load, displayProfileByPubkey} from "@welshman/app"
   import {displayList} from "@lib/util"
+  import {isMobile} from "@lib/html"
   import {displayReaction} from "@app/state"
 
   export let event
   export let onReactionClick
   export let relays: string[] = []
+  export let reactionClass = ""
+  export let noTooltip = false
 
   const filters = [{kinds: [REACTION], "#e": [event.id]}]
   const reactions = deriveEvents(repository, {filters})
@@ -35,7 +38,8 @@
       <button
         type="button"
         data-tip={tooltip}
-        class="flex-inline btn btn-neutral btn-xs tooltip tooltip-right gap-1 rounded-full"
+        class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full {reactionClass}"
+        class:tooltip={!noTooltip && !isMobile}
         class:border={isOwn}
         class:border-solid={isOwn}
         class:border-primary={isOwn}
