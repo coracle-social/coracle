@@ -19,6 +19,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {getEditorOptions} from "src/app/editor"
+  import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {currencyOptions} from "src/util/i18n"
   import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
@@ -60,9 +61,10 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    signaturePending = true
     // prevent sending before media are uploaded and tags are correctly set
     if ($loading) return
+
+    signaturePending = true
 
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
@@ -86,17 +88,31 @@
 
     signaturePending = false
 
+    drafts.set("notecreate", editor.getHTML())
+
+    router.clearModals()
+
     const thunk = publish({
       event: signedTemplate,
       relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
       delay: $userSettings.send_delay,
     })
 
+    thunk.result.finally(() => {
+      charCount.set(0)
+      wordCount.set(0)
+      drafts.delete("notecreate")
+    })
+
     if ($userSettings.send_delay > 0) {
       showToast({
+        id: "send-delay",
         type: "delay",
         timeout: $userSettings.send_delay / 1000,
-        onCancel: () => thunk.controller.abort(),
+        onCancel: () => {
+          thunk.controller.abort()
+          router.at("notes/create").open()
+        },
       })
     }
 
@@ -106,7 +122,6 @@
         Object.values(status).every(s => s.status === PublishStatus.Pending)
       ) {
         showPublishInfo(thunk)
-        router.clearModals()
       }
     })
   }
@@ -130,6 +145,7 @@
 
   onMount(() => {
     const options = getEditorOptions({
+      content: drafts.get("notecreate") || "",
       submit: onSubmit,
       element,
       submitOnEnter: false,
