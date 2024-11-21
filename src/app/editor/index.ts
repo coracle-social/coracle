@@ -22,12 +22,10 @@ import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch, RelayMode} from "@welshman/app"
 import {createSuggestions} from "./Suggestions"
-import {LinkExtension} from "./LinkExtension"
 import EditMention from "./EditMention.svelte"
 import EditEvent from "./EditEvent.svelte"
 import EditBolt11 from "./EditBolt11.svelte"
 import EditMedia from "./EditMedia.svelte"
-import EditLink from "./EditLink.svelte"
 import Suggestions from "./Suggestions.svelte"
 import SuggestionProfile from "./SuggestionProfile.svelte"
 import {asInline} from "./util"
@@ -36,16 +34,7 @@ import {FileUploadExtension} from "./FileUpload"
 import {getSetting} from "src/engine"
 import {TagExtension} from "./TagExtension"
 
-export {
-  createSuggestions,
-  LinkExtension,
-  EditMention,
-  EditEvent,
-  EditBolt11,
-  EditMedia,
-  EditLink,
-  Suggestions,
-}
+export {createSuggestions, EditMention, EditEvent, EditBolt11, EditMedia, Suggestions}
 export * from "./util"
 
 type EditorOptions = {
@@ -116,7 +105,6 @@ export const getEditorOptions = ({
         }
       },
     }),
-    LinkExtension.extend({addNodeView: () => SvelteNodeViewRenderer(EditLink)}),
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
