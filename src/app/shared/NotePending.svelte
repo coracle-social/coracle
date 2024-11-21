@@ -24,11 +24,14 @@
 <script lang="ts">
   import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
+  import {now} from "@welshman/signer"
   import {LOCAL_RELAY_URL, type SignedEvent} from "@welshman/util"
+  import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
-  import {spring} from "svelte/motion"
+
+  const rendered = now()
 
   export let event: SignedEvent
   export let removeDraft: () => void
@@ -48,11 +51,11 @@
   $: success = statuses.filter(s => s.status === PublishStatus.Success).length
   $: total = relays.length || 0
 
-  const completed = spring(0)
+  const completed = tweened(0)
 
   $: {
-    if (thunk) {
-      $completed = ((total - pendings) / total) * 100
+    if (thunk && statuses.length > 0) {
+      $completed = ((total - pendings) / total) * 80
     }
   }
 
@@ -62,10 +65,11 @@
 
 <div
   class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
-  class:border={!thunk}
+  class:bg-neutral-500={thunk && (isPending || isCompleted)}
+  class:px-4={thunk && isPending}
   on:click|stopPropagation>
   {#if thunk && (isPending || isCompleted)}
-    <div class="loading-bar bg-accent" style="width: {$completed}%"></div>
+    <div class="loading-bar bg-accent" style="width: {20 + $completed}%"></div>
     {#if isPending}
       <span>Publishing...</span>
       <span>{total - pendings} of {total} relays</span>
@@ -77,10 +81,8 @@
         href="/publishes">See details</Anchor>
     {/if}
   {:else if $userSettings.send_delay > 0}
-    <span
-      >Sending reply in {event.created_at +
-        Math.ceil($userSettings.send_delay / 1000) -
-        $timestamp1} seconds</span>
+    <span class="-ml-4"
+      >Sending reply in {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1} seconds</span>
 
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"

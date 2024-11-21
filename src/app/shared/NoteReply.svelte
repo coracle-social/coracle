@@ -102,7 +102,9 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
+
     const event = await sign(template, {anonymous: false})
+
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),

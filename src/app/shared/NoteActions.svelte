@@ -3,6 +3,7 @@
   import {nip19} from "nostr-tools"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import {slide} from "svelte/transition"
   import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
   import {
     repository,
@@ -60,6 +61,7 @@
   export let note: TrustedEvent
   export let muted
   export let replyCtrl
+  export let replyIsActive = false
   export let showHidden
   export let replies, likes, zaps
   export let zapper
@@ -229,6 +231,16 @@
   class="flex justify-between text-neutral-100"
   on:click|stopPropagation>
   <div class="flex gap-8 text-sm">
+    {#if replyIsActive}
+      <button
+        class="relative flex items-center gap-1 rounded-md px-4 text-xs uppercase"
+        class:border={!replyIsActive}
+        class:bg-accent={replyIsActive}
+        transition:slide|local={{axis: "x", duration: 100}}
+        on:click={replyCtrl?.start}>
+        Reply
+      </button>
+    {/if}
     <button
       class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
         "pointer-events-none opacity-50": disableActions,

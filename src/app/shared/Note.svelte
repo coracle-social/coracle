@@ -32,6 +32,7 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotePending from "src/app/shared/NotePending.svelte"
+  import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {
     env,
@@ -74,7 +75,12 @@
 
   const addDraftToContext = (event, cb) => {
     draftEventId = event.id
-    removeDraft = () => cb() && repository.removeEvent(event.id)
+    removeDraft = () => {
+      cb()
+      repository.removeEvent(event.id)
+      drafts.set(note.id, event.content)
+      replyIsActive = false
+    }
   }
 
   const onClick = e => {
@@ -290,6 +296,7 @@
                   note={event}
                   zapper={$zapper}
                   {replyCtrl}
+                  {replyIsActive}
                   {showHidden}
                   {replies}
                   {likes}
