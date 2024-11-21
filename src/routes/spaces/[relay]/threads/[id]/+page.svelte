@@ -33,6 +33,11 @@
     showReply = false
   }
 
+  const expand = () => {
+    showAll = true
+  }
+
+  let showAll = false
   let showReply = false
 
   $: title = $event?.tags.find(nthEq(0, "title"))?.[1] || ""
@@ -51,14 +56,14 @@
   <div class="absolute left-[51px] top-32 h-[calc(100%-248px)] w-[2px] bg-neutral" />
   {#if $event}
     {#if !showReply}
-      <div class="flex justify-end p-2">
+      <div class="flex justify-end px-2 pb-2">
         <Button class="btn btn-primary" on:click={openReply}>
           <Icon icon="reply" />
           Reply to thread
         </Button>
       </div>
     {/if}
-    {#each sortBy(e => -e.created_at, $replies) as reply (reply.id)}
+    {#each sortBy(e => -e.created_at, $replies).slice(0, showAll ? undefined : 4) as reply (reply.id)}
       <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
         <div class="col-3 ml-12">
           <Content showEntire event={reply} />
@@ -66,6 +71,14 @@
         </div>
       </NoteCard>
     {/each}
+    {#if !showAll}
+      <div class="flex justify-center">
+        <Button class="btn btn-link" on:click={expand}>
+          <Icon icon="sort-vertical" />
+          Show all {$replies.length} replies
+        </Button>
+      </div>
+    {/if}
     <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
       <div class="col-3 ml-12">
         <Content showEntire event={$event} />
