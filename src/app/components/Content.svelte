@@ -36,6 +36,7 @@
   export let showEntire = false
   export let hideMedia = false
   export let expandMode = "block"
+  export let quoteProps: Record<string, any> = {}
   export let depth = 0
 
   const fullContent = parse(event)
@@ -131,7 +132,7 @@
           <ContentMention value={parsed.value} />
         {:else if isEvent(parsed) || isAddress(parsed)}
           {#if isBlock(i)}
-            <ContentQuote value={parsed.value} {depth} {event}>
+            <ContentQuote {...quoteProps} value={parsed.value} {depth} {event}>
               <div slot="note-content" let:event>
                 <svelte:self {hideMedia} {event} depth={depth + 1} />
               </div>

@@ -15,6 +15,7 @@
   export let value
   export let event
   export let depth = 0
+  export let minimal = false
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const addr = new Address(kind, pubkey, identifier)
@@ -91,7 +92,7 @@
 
 <Button class="my-2 block max-w-full text-left" on:click={onClick}>
   {#if $quote}
-    <NoteCard event={$quote} class="bg-alt rounded-box p-4">
+    <NoteCard {minimal} event={$quote} class="bg-alt rounded-box p-4">
       <slot name="note-content" event={$quote} {depth} />
     </NoteCard>
   {:else}

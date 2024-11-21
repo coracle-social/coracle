@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {ctx} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
@@ -7,9 +8,11 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Profile from "@app/components/Profile.svelte"
+  import ProfileName from "@app/components/ProfileName.svelte"
   import {entityLink} from "@app/state"
 
   export let event
+  export let minimal = false
   export let hideProfile = false
 
   const relays = ctx.app.router.Event(event).getUrls()
@@ -34,9 +37,16 @@
   {:else}
     <div class="flex justify-between gap-2">
       {#if !hideProfile}
-        <Profile pubkey={event.pubkey} />
+        {#if minimal}
+          @<ProfileName pubkey={event.pubkey} />
+        {:else}
+          <Profile pubkey={event.pubkey} />
+        {/if}
       {/if}
-      <Link external href={entityLink(nevent)} class="text-sm opacity-75">
+      <Link
+        external
+        href={entityLink(nevent)}
+        class={cx("text-sm opacity-75", {"text-xs": minimal})}>
         {formatTimestamp(event.created_at)}
       </Link>
     </div>

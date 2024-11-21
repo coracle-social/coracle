@@ -98,7 +98,7 @@
         </div>
       {/if}
       <div class="text-sm">
-        <Content {event} />
+        <Content {event} quoteProps={{minimal: true}} />
         {#if thunk}
           <ThunkStatus {thunk} class="mt-2" />
         {/if}
