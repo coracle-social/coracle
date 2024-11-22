@@ -78,7 +78,6 @@
     draftEventId = event.id
     removeDraft = () => {
       cb()
-      repository.removeEvent(event.id)
       drafts.set(note.id, event.content)
       sleep(10).then(() => {
         replyCtrl?.start()
