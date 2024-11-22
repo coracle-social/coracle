@@ -1,7 +1,8 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
-  import {sortBy, equals, uniqBy} from "@welshman/lib"
+  import {sortBy, not, equals, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
+  import {synced} from "@welshman/store"
   import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
   import {signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
@@ -23,9 +24,11 @@
   feed.definition = normalizeFeedDefinition(feed.definition)
 
   const form = boolCtrl()
-  const expanded = boolCtrl()
+  const expanded = synced("FeedControls/expanded", false)
   const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
   const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
+
+  const toggleExpanded = () => expanded.update(not)
 
   const openForm = () => {
     savePoint = {...feed}
@@ -103,17 +106,15 @@
       </div>
     </Input>
     <slot name="controls" />
-    <Anchor button low on:click={$expanded.toggle}>Customize</Anchor>
+    <Anchor button low on:click={toggleExpanded}>Customize</Anchor>
   </div>
-  {#if $expanded.enabled}
+  {#if $expanded}
     <div transition:slideAndFade class="pt-4">
       <Card class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <p class="staatliches text-2xl">Your Feeds</p>
-          <Anchor on:click={$expanded.toggle}>
-            <i
-              class="fa fa-lg fa-times transition-all duration-700"
-              class:rotate-180={$expanded.enabled} />
+          <Anchor on:click={toggleExpanded}>
+            <i class="fa fa-lg fa-times transition-all duration-700" class:rotate-180={$expanded} />
           </Anchor>
         </div>
         <div class="flex flex-wrap gap-1">

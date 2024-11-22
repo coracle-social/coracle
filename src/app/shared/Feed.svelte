@@ -195,8 +195,8 @@
     buffer = uniqBy(e => e.id, sortEventsDesc(buffer))
     events = [...events, ...getNewEvents()]
 
-    if (useWindowing && buffer.length < 50) {
-      ctrl.load(50)
+    if (useWindowing && buffer.length < 25) {
+      ctrl.load(25)
     }
   }
 
