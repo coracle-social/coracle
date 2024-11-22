@@ -71,7 +71,7 @@
         </div>
       </NoteCard>
     {/each}
-    {#if !showAll}
+    {#if !showAll && $replies.length > 4}
       <div class="flex justify-center">
         <Button class="btn btn-link" on:click={expand}>
           <Icon icon="sort-vertical" />
