@@ -74,7 +74,14 @@
       <span>Publishing...</span>
       <span>{total - pendings} of {total} relays</span>
     {:else}
-      <span>Published to {success}/{total} ({failed} failed, {timeout} timed out)</span>
+      <span
+        >Published to {success}/{total}
+        {#if failed > 0 || timeout > 0}
+          ({failed > 0 ? failed + " failed" : ""}{timeout > 0
+            ? (failed > 0 ? ", " : "") + timeout + " timed out"
+            : ""})
+        {/if}
+      </span>
       <Anchor
         class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
         modal

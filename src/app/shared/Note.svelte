@@ -14,6 +14,7 @@
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
+  import {sleep} from "hurdak"
   import {identity, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
@@ -79,7 +80,9 @@
       cb()
       repository.removeEvent(event.id)
       drafts.set(note.id, event.content)
-      replyIsActive = false
+      sleep(10).then(() => {
+        replyCtrl?.start()
+      })
     }
   }
 
@@ -296,7 +299,6 @@
                   note={event}
                   zapper={$zapper}
                   {replyCtrl}
-                  {replyIsActive}
                   {showHidden}
                   {replies}
                   {likes}
