@@ -1,13 +1,21 @@
 <script lang="ts">
-  import {pluralize, seconds} from "hurdak"
-  import {assoc, now, remove, sortBy} from "@welshman/lib"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
-  import {PublishStatus} from "@welshman/net"
-  import Tile from "src/partials/Tile.svelte"
-  import Subheading from "src/partials/Subheading.svelte"
-  import PublishCard from "src/app/shared/PublishCard.svelte"
   import {thunks, type Thunk} from "@welshman/app"
+  import {assoc, now, remove, sortBy} from "@welshman/lib"
+  import {PublishStatus} from "@welshman/net"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
   import {get} from "svelte/store"
+  import {pluralize, seconds} from "hurdak"
+  import PublishCard from "src/app/shared/PublishCard.svelte"
+  import Subheading from "src/partials/Subheading.svelte"
+  import Tabs from "src/partials/Tabs.svelte"
+  import Tile from "src/partials/Tile.svelte"
+  import PublishesConnections from "src/app/views/PublishesConnections.svelte"
+  import PublishesNotices from "src/app/views/PublishesNotices.svelte"
+
+  const tabs = ["events", "connections", "notices"]
+  let activeTab = "events"
+
+  let selectedUrl: string
 
   const hasStatus = (thunk: Thunk, statuses: PublishStatus[]) =>
     Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
@@ -43,28 +51,35 @@
 </script>
 
 <Subheading>Published Events</Subheading>
-<div class="grid grid-cols-4 justify-between gap-2 sm:grid-cols-5">
-  <Tile background>
-    <p class="text-lg sm:text-2xl">{recent.length}</p>
-    <span class="text-sm">{pluralize(recent.length, "Event")}</span>
-  </Tile>
-  <Tile background>
-    <p class="text-lg sm:text-2xl">{relays.size}</p>
-    <span class="text-sm">{pluralize(relays.size, "Relay")}</span>
-  </Tile>
-  <Tile background lass="hidden sm:block">
-    <p class="text-lg sm:text-2xl">{pending.length}</p>
-    <span class="text-sm">Pending</span>
-  </Tile>
-  <Tile background>
-    <p class="text-lg sm:text-2xl">{success.length}</p>
-    <span class="text-sm">Succeeded</span>
-  </Tile>
-  <Tile background>
-    <p class="text-lg sm:text-2xl">{recent.length - pending.length - success.length}</p>
-    <span class="text-sm">Failed</span>
-  </Tile>
-</div>
-{#each sortBy(t => -t.event.created_at, recent) as thunk (thunk.event.id)}
-  <PublishCard {thunk} />
-{/each}
+<Tabs {tabs} {activeTab} setActiveTab={tab => (activeTab = tab)} />
+{#if activeTab === "events"}
+  <div class="grid grid-cols-4 justify-between gap-2 sm:grid-cols-5">
+    <Tile background>
+      <p class="text-lg sm:text-2xl">{recent.length}</p>
+      <span class="text-sm">{pluralize(recent.length, "Event")}</span>
+    </Tile>
+    <Tile background>
+      <p class="text-lg sm:text-2xl">{relays.size}</p>
+      <span class="text-sm">{pluralize(relays.size, "Relay")}</span>
+    </Tile>
+    <Tile background lass="hidden sm:block">
+      <p class="text-lg sm:text-2xl">{pending.length}</p>
+      <span class="text-sm">Pending</span>
+    </Tile>
+    <Tile background>
+      <p class="text-lg sm:text-2xl">{success.length}</p>
+      <span class="text-sm">Succeeded</span>
+    </Tile>
+    <Tile background>
+      <p class="text-lg sm:text-2xl">{recent.length - pending.length - success.length}</p>
+      <span class="text-sm">Failed</span>
+    </Tile>
+  </div>
+  {#each sortBy(t => -t.event.created_at, recent) as thunk (thunk.event.id)}
+    <PublishCard {thunk} />
+  {/each}
+{:else if activeTab === "connections"}
+  <PublishesConnections bind:selected={selectedUrl} bind:activeTab />
+{:else if activeTab === "notices"}
+  <PublishesNotices selected={[selectedUrl].filter(Boolean)} />
+{/if}
