@@ -5,7 +5,7 @@
   import {ctx, now, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, profilesByPubkey, zappersByLnurl} from "@welshman/app"
+  import {signer, profilesByPubkey, displayProfileByPubkey, zappersByLnurl} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -99,7 +99,7 @@
         const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
         const res = await tryCatch(() => fetchJson(zapper.callback + qs))
 
-        return {...zap, invoice: res?.pr}
+        return {...zap, invoice: res?.pr, error: res?.reason}
       }),
     )
 
@@ -113,8 +113,13 @@
     // Close the router once we can show the next modal
     router.pop()
 
-    for (const {invoice, relays, zapper, pubkey} of preppedZaps) {
+    for (const {invoice, error, relays, zapper, pubkey} of preppedZaps) {
       if (!invoice) {
+        const profileDisplay = displayProfileByPubkey(pubkey)
+        const message = error || "no error given"
+
+        alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
+
         continue
       }
 
