@@ -109,7 +109,7 @@
         </Popover>
       {/if}
     </div>
-    <div class="min-h-0 overflow-auto">
+    <div class="flex min-h-0 flex-col gap-1 overflow-auto">
       <SecondaryNavItem href={makeSpacePath(url)}>
         <Icon icon="home-smile" /> Home
       </SecondaryNavItem>
