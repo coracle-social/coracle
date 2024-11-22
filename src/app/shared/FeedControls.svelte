@@ -155,6 +155,10 @@
 
 {#if $form.enabled}
   <Modal onEscape={closeForm}>
-    <FeedForm {feed} exit={exitForm} apply={() => setFeedDefinition(feed.definition)} />
+    <FeedForm
+      {feed}
+      exit={exitForm}
+      showDelete={Boolean(feed.event)}
+      apply={() => setFeedDefinition(feed.definition)} />
   </Modal>
 {/if}

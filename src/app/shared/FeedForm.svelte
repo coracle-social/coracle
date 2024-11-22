@@ -1,5 +1,6 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
+  import {getAddress} from "@welshman/util"
   import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -12,7 +13,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {deleteEvent, createAndPublish} from "src/engine"
+  import {deleteEvent, createAndPublish, removeFeedFavorite} from "src/engine"
 
   export let feed
   export let exit
@@ -47,7 +48,14 @@
   }
 
   const confirmDelete = () => {
-    deleteEvent(feed.event || feed.list.event)
+    const event = feed.event || feed.list.event
+
+    if (event.pubkey === $pubkey) {
+      deleteEvent(event)
+    } else {
+      removeFeedFavorite(getAddress(event))
+    }
+
     exit()
   }
 
@@ -158,7 +166,7 @@
   <Modal onEscape={closeDelete}>
     <Subheading>Confirm deletion</Subheading>
     <p>
-      Are you sure you want to delete your {displayFeed(feed)} feed?
+      Are you sure you want to delete your "{displayFeed(feed)}" feed?
     </p>
     <div class="flex justify-between gap-2">
       <Anchor button on:click={closeDelete}>Cancel</Anchor>
