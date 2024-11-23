@@ -109,9 +109,7 @@
       .at("thread")
       .open()
 
-  const context = deriveEvents(repository, {
-    filters: [{"#e": [event.id]}],
-  })
+  const context = deriveEvents(repository, {filters: getReplyFilters([event])})
 
   $: ancestors = getAncestorTagValues(event.tags || [])
   $: reply = ancestors.replies[0]
@@ -120,10 +118,7 @@
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
   $: hidden = $isEventMuted(event, true)
-
-  // Find children in our context
   $: children = $context.filter(e => isChildOf(e, event))
-  // Sort our replies
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
 
   let mutedReplies, hiddenReplies, visibleReplies

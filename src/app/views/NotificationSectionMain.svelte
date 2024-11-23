@@ -11,6 +11,8 @@
 
   export let limit
 
+  const DELIMITER = "--"
+
   const notifications = derived(mainNotifications, $events => {
     const eventsByKey = new Map<string, TrustedEvent[]>()
 
@@ -19,13 +21,13 @@
 
       // Group and sort by time/event so we can cluster interactions with the same event
       const date = Math.round(ago(event.created_at) / int(HOUR, 3)).toString()
-      const key = [parentId ? "reply" : "mention", parentId || event.id, date].join(":")
+      const key = [parentId ? "reply" : "mention", parentId || event.id, date].join(DELIMITER)
 
       pushToMapKey(eventsByKey, key, event)
     }
 
     return Array.from(eventsByKey.entries()).map(([key, interactions]) => {
-      const [type, root] = key.split(":")
+      const [type, root] = key.split(DELIMITER)
       const timestamp = max(interactions.map(e => e.created_at))
 
       return {key, type, root, timestamp, interactions}
