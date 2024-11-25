@@ -22,11 +22,11 @@
 
 <div class="flex max-w-full gap-3">
   <div class="py-1">
-    <PersonCircle {pubkey} />
+    <PersonCircle {pubkey} class="h-10 w-10" />
   </div>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
-      <div class="text-bold overflow-hidden text-ellipsis">
+      <div class="text-bold overflow-hidden text-ellipsis text-base">
         {$profileDisplay}
       </div>
       <WotScore score={$score} accent={following} />
