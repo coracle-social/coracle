@@ -1,14 +1,14 @@
 <script lang="ts">
-  import {formatTimestamp, thunks, type Thunk} from "@welshman/app"
+  import {formatTimestamp, thunks, type Thunk, type ThunkStatus} from "@welshman/app"
   import {ctx, identity, uniq} from "@welshman/lib"
   import {PublishStatus, type Connection} from "@welshman/net"
+  import cx from "classnames"
   import {get} from "svelte/store"
   import {fly} from "svelte/transition"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {fuzzy} from "src/util/misc"
-  import Anchor from "src/partials/Anchor.svelte"
-  import {router} from "src/app/util"
   import AltColor from "src/partials/AltColor.svelte"
+  import {fuzzy} from "src/util/misc"
+  import {router} from "src/app/util"
 
   export let selected: string[] = []
 
@@ -20,18 +20,19 @@
     )
   }
 
-  function iconStatus(status: PublishStatus) {
-    switch (status) {
+  function messageAndColorFromStatus(status: ThunkStatus) {
+    console.log("message", status)
+    switch (status.status) {
       case PublishStatus.Success:
-        return "fa fa-check-circle text-success"
+        return {message: status.message || "Published", color: "text-success"}
       case PublishStatus.Pending:
-        return "fa fa-clock"
+        return {message: status.message || "Pending", color: "text-warning"}
       case PublishStatus.Failure:
-        return "fa fa-times-circle text-danger"
+        return {message: status.message || "Failed", color: "text-danger"}
       case PublishStatus.Timeout:
-        return "fa fa-hourglass-half text-accent"
+        return {message: status.message || "Timed out", color: "text-accent"}
       case PublishStatus.Aborted:
-        return "fa fa-ban"
+        return {message: status.message || "Aborted", color: "text-accent"}
     }
   }
 
@@ -59,24 +60,23 @@
   </div>
 {:else}
   {#each notices as thunk}
-    <AltColor background class="rounded-md p-6 shadow">
-      <div class="flex justify-between">
-        <span>Kind {thunk.event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
-        <Anchor
-          underline
-          modal
-          class="text-sm"
-          on:click={() => router.at("notes").of(thunk.event.id).open()}>View Note</Anchor>
-      </div>
-      {#each uniq(Object.entries(get(thunk.status)).filter( ([k, v]) => selected.includes(k), )) as [url, status]}
-        <div class="mt-4 flex items-center justify-between">
-          <strong>{url}</strong>
-          <div class="flex items-center gap-1">
-            <i class={iconStatus(status.status)} />
-            <span class="ml-2">{status.status}</span>
+    <AltColor
+      background
+      class="rounded-md p-6 shadow"
+      on:click={() => router.at("notes").of(thunk.event.id).open()}>
+      <div class="flex items-center gap-2">
+        <span class="text-neutral-400">{formatTimestamp(thunk.event.created_at)}</span>
+        <span>[Kind {thunk.event.kind}]</span>
+        {#each uniq(Object.entries(get(thunk.status)).filter( ([k, v]) => selected.includes(k), )) as [url, status]}
+          {@const {message, color} = messageAndColorFromStatus(get(thunk.status)[url])}
+          <div class="flex items-center justify-between gap-2">
+            to <strong>{url}:</strong>
+            <div class={cx(color, "flex items-center gap-1")}>
+              <span class="">{message}</span>
+            </div>
           </div>
-        </div>
-      {/each}
+        {/each}
+      </div>
     </AltColor>
   {/each}
 {/if}

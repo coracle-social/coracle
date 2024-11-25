@@ -1,20 +1,27 @@
 <script lang="ts">
-  import {getRelayQuality, relaysByUrl, thunks} from "@welshman/app"
-  import {AuthStatus, PublishStatus, SocketStatus, type Connection} from "@welshman/net"
+  import {getRelayQuality, relaysByUrl} from "@welshman/app"
   import {ctx} from "@welshman/lib"
+  import {AuthStatus, SocketStatus, type Connection} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
-  import {onMount} from "svelte"
-  import cx from "classnames"
-  import AltColor from "src/partials/AltColor.svelte"
   import {quantify} from "hurdak"
-  import {get} from "svelte/store"
-  import Tile from "src/partials/Tile.svelte"
+  import {onMount} from "svelte"
+  import AltColor from "src/partials/AltColor.svelte"
+  import SelectButton from "src/partials/SelectButton.svelte"
 
   export let selected: string
   export let activeTab: string
 
   const connectionsStatus: {[key: string]: Map<string, Connection>} = {}
-  const filters: {[key: string]: boolean} = {}
+
+  const options = [
+    "Connected",
+    "Logging in",
+    "Failed to log in",
+    "Failed to connect",
+    "Waiting to reconnect",
+    "Not connected",
+    "Unstable connection",
+  ]
 
   const pendingStatuses = [
     AuthStatus.Requested,
@@ -24,16 +31,8 @@
 
   const failureStatuses = [AuthStatus.DeniedSignature, AuthStatus.Forbidden]
 
-  function getStatus(status: PublishStatus, cxn: Connection) {
-    return Object.values($thunks).filter(t => get(t.status)[cxn.url]?.status == status)
-  }
-
   $: connections = Array.from(ctx.net.pool.data.entries())
-    .filter(([url, cxn]) =>
-      Object.keys(filters).filter(f => filters[f]).length
-        ? Object.keys(filters).some(f => filters[f] && connectionsStatus[f]?.has(url))
-        : true,
-    )
+    .filter(([url, cxn]) => (selected ? connectionsStatus[selected]?.has(url) : true))
     .map(([url, cxn]) => cxn)
 
   onMount(() => {
@@ -79,63 +78,14 @@
   })
 </script>
 
-<div class="grid grid-cols-6 justify-between gap-2 sm:grid-cols-4">
-  <Tile
-    class={cx({border: filters["Connected"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Connected"] = !filters["Connected"])}>
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Connected"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Connected</span>
-  </Tile>
-  <Tile
-    class={cx({border: filters["Logging in"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Logging in"] = !filters["Logging in"])}>
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Logging in"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Logging in</span>
-  </Tile>
-  <Tile
-    class={cx({border: filters["Failed to log in"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Failed to log in"] = !filters["Failed to log in"])}>
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Failed to log in"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Login failed</span>
-  </Tile>
-  <Tile
-    class={cx({border: filters["Failed to connect"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Failed to connect"] = !filters["Failed to connect"])}
-    lass="hidden sm:block">
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Failed to connect"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Connection failed</span>
-  </Tile>
-  <Tile
-    class={cx({border: filters["Waiting to reconnect"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Waiting to reconnect"] = !filters["Waiting to reconnect"])}>
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Waiting to reconnect"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Reconnecting</span>
-  </Tile>
-  <Tile
-    class={cx({border: filters["Not connected"]}, "cursor-pointer")}
-    background
-    on:click={() => (filters["Not connected"] = !filters["Not connected"])}>
-    <p class="text-lg sm:text-2xl">
-      {Array.from(connectionsStatus["Not connected"]?.values() || []).length || 0}
-    </p>
-    <span class="text-sm">Not Connected</span>
-  </Tile>
-</div>
+<SelectButton {options} bind:value={selected}>
+  <div slot="item" let:option let:active>
+    <div class="flex items-center gap-2">
+      {Array.from(connectionsStatus[option]?.values() || []).length || 0}
+      {option}
+    </div>
+  </div>
+</SelectButton>
 {#each connections as cxn (cxn.url)}
   {@const relay = $relaysByUrl.get(cxn.url)}
   <AltColor
@@ -145,7 +95,7 @@
       selected = cxn.url
       activeTab = "notices"
     }}>
-    <div class="flex min-w-0 shrink-0 items-center gap-3">
+    <div class="flex min-w-0 shrink-0 items-start gap-3">
       {#if relay?.profile?.icon}
         <img class="h-9 w-9 shrink-0 rounded-full border" src={relay.profile.icon} />
       {:else}
@@ -170,31 +120,20 @@
           </span>
         </div>
       </div>
-      <div class="flex w-full justify-end gap-2">
-        {#if getStatus(PublishStatus.Success, cxn).length > 0}
-          {@const success = getStatus(PublishStatus.Success, cxn).length}
-          <div class="flex items-center gap-2">
-            <i class="fa fa-check-circle text-success"></i>{success || ""}
-          </div>
-        {/if}
-        {#if getStatus(PublishStatus.Failure, cxn).length > 0}
-          {@const failure = getStatus(PublishStatus.Failure, cxn).length}
-          <div class="flex items-center gap-2">
-            <i class="fa fa-times-circle text-danger"></i>{failure || ""}
-          </div>
-        {/if}
-        {#if getStatus(PublishStatus.Pending, cxn).length > 0}
-          {@const pending = getStatus(PublishStatus.Pending, cxn).length}
-          <div class="flex items-center gap-2">
-            <i class="fa fa-hourglass-half text-accent"></i>{pending || ""}
-          </div>
-        {/if}
-        {#if getStatus(PublishStatus.Timeout, cxn).length > 0}
-          {@const timeout = getStatus(PublishStatus.Pending, cxn).length}
-          <div class="flex items-center gap-2">
-            <i class="fa fa-clock"></i>{timeout || ""}
-          </div>
-        {/if}
+      <div class="flex w-full items-center justify-end gap-2 text-sm">
+        {#each options as opt}
+          {#if connectionsStatus[opt]?.has(cxn.url)}
+            <div class="hidden items-center gap-2 first:flex">
+              <span>{opt}</span>
+              <div
+                class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
+                class:!bg-warning={opt == "Logging in" ||
+                  opt == "Waiting to reconnect" ||
+                  opt == "Unstable connection"}
+                class="h-3 w-3 rounded-full bg-success" />
+            </div>
+          {/if}
+        {/each}
       </div>
     </div>
   </AltColor>
