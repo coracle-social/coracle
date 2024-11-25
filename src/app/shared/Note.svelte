@@ -14,6 +14,7 @@
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
+  import {sleep} from "hurdak"
   import {identity, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
@@ -32,6 +33,7 @@
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NotePending from "src/app/shared/NotePending.svelte"
+  import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {
     env,
@@ -74,7 +76,13 @@
 
   const addDraftToContext = (event, cb) => {
     draftEventId = event.id
-    removeDraft = () => cb() && repository.removeEvent(event.id)
+    removeDraft = () => {
+      cb()
+      drafts.set(note.id, event.content)
+      sleep(10).then(() => {
+        replyCtrl?.start()
+      })
+    }
   }
 
   const onClick = e => {

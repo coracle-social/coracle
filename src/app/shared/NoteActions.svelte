@@ -1,7 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
+  import {sum, pluck} from "ramda"
   import {onMount} from "svelte"
+  import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
   import {
@@ -22,8 +24,6 @@
     createEvent,
     getPubkeyTagValues,
   } from "@welshman/util"
-  import {tweened} from "svelte/motion"
-  import {sum, pluck} from "ramda"
   import {fly} from "src/util/transition"
   import {formatSats} from "src/util/misc"
   import {quantify, pluralize} from "hurdak"
