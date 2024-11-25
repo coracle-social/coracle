@@ -92,6 +92,10 @@ body,
     -3px -3px 20px rgba(0, 0, 0, 0.1);
 }
 
+.tippy-content {
+  padding: 0 !important;
+}
+
 .tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow {
   bottom: -1px !important;
 }

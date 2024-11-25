@@ -94,4 +94,12 @@
       Loading more options...
     </div>
   {/if}
+  {#if !items.length && !loading}
+    <div class="flex gap-2 px-4 py-2 text-base">
+      <div>
+        <i class="fa fa-exclamation-circle" />
+      </div>
+      No results
+    </div>
+  {/if}
 {/if}
