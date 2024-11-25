@@ -66,6 +66,7 @@
 <div
   class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
   class:bg-neutral-500={thunk && (isPending || isCompleted)}
+  class:border={!(isPending || isCompleted)}
   class:px-4={thunk && isPending}
   on:click|stopPropagation>
   {#if thunk && (isPending || isCompleted)}
@@ -88,7 +89,7 @@
         href="/publishes">See details</Anchor>
     {/if}
   {:else if $userSettings.send_delay > 0}
-    <span class="-ml-4"
+    <span
       >Sending reply in {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1} seconds</span>
 
     <button
