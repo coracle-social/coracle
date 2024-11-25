@@ -64,7 +64,11 @@
   let groupedMessages = []
 
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
-    pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
+    pubkeys.filter(
+      pubkey =>
+        !$inboxRelayPoliciesByPubkey.has(pubkey) ||
+        !$inboxRelayPoliciesByPubkey.get(pubkey).publicTags.length,
+    ),
   )
 
   onMount(() => {
@@ -176,6 +180,16 @@
         </div>
       {/if}
     </div>
+    {#if !userHasInbox}
+      <div class="m-auto max-w-96 py-20 text-center">
+        <div class="mb-4 text-lg text-accent">
+          <i class="fa fa-exclamation-triangle"></i> Your inbox is not configured.
+        </div>
+        In order to deliver messages, Coracle needs to know where to send them. Please visit your
+        <a class="cursor-pointer underline" href="/settings/relays"> relay settings page</a> and set
+        up your inbox relays.
+      </div>
+    {/if}
     {#each groupedMessages as message (message.id)}
       <div in:fly={{y: 20}} class="grid gap-2 py-1">
         <div
