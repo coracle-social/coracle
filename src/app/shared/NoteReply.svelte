@@ -184,7 +184,7 @@
         </div>
         <div class="h-px" />
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
-          <div class="inline-block border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
+          <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
               <i class="fa fa-paperclip" on:click|preventDefault={editor.commands.selectFiles} />
               <i class="fa fa-at" />
