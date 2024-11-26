@@ -4,7 +4,7 @@
   import {pluralize} from "hurdak"
   import {derived} from "svelte/store"
   import {sleep} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
+  import {getListTags, type TrustedEvent} from "@welshman/util"
   import {Nip46Signer} from "@welshman/signer"
   import {
     session,
@@ -64,11 +64,7 @@
   let groupedMessages = []
 
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
-    pubkeys.filter(
-      pubkey =>
-        !$inboxRelayPoliciesByPubkey.has(pubkey) ||
-        !$inboxRelayPoliciesByPubkey.get(pubkey).publicTags.length,
-    ),
+    pubkeys.filter(pubkey => !getListTags($inboxRelayPoliciesByPubkey.get(pubkey)).length),
   )
 
   onMount(() => {
