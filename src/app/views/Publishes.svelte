@@ -15,7 +15,7 @@
   const tabs = ["events", "connections", "notices"]
   let activeTab = "events"
 
-  let selectedUrl: string
+  let selected: string
 
   const hasStatus = (thunk: Thunk, statuses: PublishStatus[]) =>
     Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
@@ -79,7 +79,7 @@
     <PublishCard {thunk} />
   {/each}
 {:else if activeTab === "connections"}
-  <PublishesConnections bind:selected={selectedUrl} bind:activeTab />
+  <PublishesConnections bind:selected bind:activeTab />
 {:else if activeTab === "notices"}
-  <PublishesNotices selected={[selectedUrl].filter(Boolean)} />
+  <PublishesNotices selected={[selected]} />
 {/if}

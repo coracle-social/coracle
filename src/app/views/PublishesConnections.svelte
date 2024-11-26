@@ -11,7 +11,8 @@
   export let selected: string
   export let activeTab: string
 
-  const connectionsStatus: {[key: string]: Map<string, Connection>} = {}
+  let selectedOptions: string[] = []
+  let connectionsStatus: {[key: string]: Map<string, Connection>} = {}
 
   const options = [
     "Connected",
@@ -32,44 +33,49 @@
   const failureStatuses = [AuthStatus.DeniedSignature, AuthStatus.Forbidden]
 
   $: connections = Array.from(ctx.net.pool.data.entries())
-    .filter(([url, cxn]) => (selected ? connectionsStatus[selected]?.has(url) : true))
+    .filter(([url, cxn]) =>
+      selectedOptions.length ? selectedOptions.some(s => connectionsStatus[s]?.has(url)) : true,
+    )
     .map(([url, cxn]) => cxn)
 
   onMount(() => {
     const interval = setInterval(() => {
+      // make a copy of the connections
+      const newConnectionStatus: {[key: string]: Map<string, Connection>} = {}
       for (const [url, cxn] of ctx.net.pool.data.entries()) {
         if (pendingStatuses.includes(cxn.auth.status)) {
-          connectionsStatus["Logging in"] = (connectionsStatus["Logging in"] || new Map()).set(
+          newConnectionStatus["Logging in"] = (newConnectionStatus["Logging in"] || new Map()).set(
             url,
             cxn,
           )
         } else if (failureStatuses.includes(cxn.auth.status)) {
-          connectionsStatus["Failed to log in"] = (
-            connectionsStatus["Failed to log in"] || new Map()
+          newConnectionStatus["Failed to log in"] = (
+            newConnectionStatus["Failed to log in"] || new Map()
           ).set(url, cxn)
         } else if (cxn.socket.status === SocketStatus.Error) {
-          connectionsStatus["Failed to connect"] = (
-            connectionsStatus["Failed to connect"] || new Map()
+          newConnectionStatus["Failed to connect"] = (
+            newConnectionStatus["Failed to connect"] || new Map()
           ).set(url, cxn)
         } else if (cxn.socket.status === SocketStatus.Closed) {
-          connectionsStatus["Waiting to reconnect"] = (
-            connectionsStatus["Waiting to reconnect"] || new Map()
+          newConnectionStatus["Waiting to reconnect"] = (
+            newConnectionStatus["Waiting to reconnect"] || new Map()
           ).set(url, cxn)
         } else if (cxn.socket.status === SocketStatus.New) {
-          connectionsStatus["Not connected"] = (
-            connectionsStatus["Not connected"] || new Map()
+          newConnectionStatus["Not connected"] = (
+            newConnectionStatus["Not connected"] || new Map()
           ).set(url, cxn)
         } else if (getRelayQuality(cxn.url) < 0.5) {
-          connectionsStatus["Unstable connection"] = (
-            connectionsStatus["Unstable connection"] || new Map()
+          newConnectionStatus["Unstable connection"] = (
+            newConnectionStatus["Unstable connection"] || new Map()
           ).set(url, cxn)
         } else {
-          connectionsStatus["Connected"] = (connectionsStatus["Connected"] || new Map()).set(
+          newConnectionStatus["Connected"] = (newConnectionStatus["Connected"] || new Map()).set(
             url,
             cxn,
           )
         }
       }
+      connectionsStatus = newConnectionStatus
     }, 800)
 
     return () => {
@@ -78,12 +84,10 @@
   })
 </script>
 
-<SelectButton {options} bind:value={selected}>
-  <div slot="item" let:option let:active>
-    <div class="flex items-center gap-2">
-      {Array.from(connectionsStatus[option]?.values() || []).length || 0}
-      {option}
-    </div>
+<SelectButton {options} bind:value={selectedOptions} multiple>
+  <div class="flex items-center gap-2" slot="item" let:option>
+    {Array.from(connectionsStatus[option]?.values() || []).length || 0}
+    {option}
   </div>
 </SelectButton>
 {#each connections as cxn (cxn.url)}
@@ -123,7 +127,7 @@
       <div class="flex w-full items-center justify-end gap-2 text-sm">
         {#each options as opt}
           {#if connectionsStatus[opt]?.has(cxn.url)}
-            <div class="hidden items-center gap-2 first:flex">
+            <div class="flex items-center gap-2">
               <span>{opt}</span>
               <div
                 class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
