@@ -81,5 +81,5 @@
 {:else if activeTab === "connections"}
   <PublishesConnections bind:selected bind:activeTab />
 {:else if activeTab === "notices"}
-  <PublishesNotices selected={[selected]} />
+  <PublishesNotices selected={[selected].filter(Boolean)} />
 {/if}
