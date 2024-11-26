@@ -52,19 +52,12 @@ import {
   uniqBy,
 } from "@welshman/lib"
 import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
+import {Executor, AuthMode, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
-import type {
-  EventTemplate,
-  PublishedList,
-  SignedEvent,
-  StampedEvent,
-  TrustedEvent,
-} from "@welshman/util"
+import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
 import {
   APP_DATA,
-  CLIENT_AUTH,
   DIRECT_MESSAGE,
   FEED,
   FEEDS,
@@ -1041,20 +1034,7 @@ if (!db) {
   ]
 
   setContext({
-    net: getDefaultNetContext({
-      getExecutor,
-      signEvent: (event: StampedEvent) => {
-        if (
-          event.kind === CLIENT_AUTH &&
-          env.PLATFORM_RELAYS.length === 0 &&
-          !getSetting("auto_authenticate")
-        ) {
-          return
-        }
-
-        return signer.get()?.sign(event)
-      },
-    }),
+    net: getDefaultNetContext({getExecutor}),
     app: getDefaultAppContext({
       dufflepudUrl: env.DUFFLEPUD_URL,
       indexerRelays: env.INDEXER_RELAYS,
@@ -1066,6 +1046,9 @@ if (!db) {
   })
 
   userSettings.subscribe($settings => {
+    const autoAuthenticate = $settings.auto_authenticate || env.PLATFORM_RELAYS.length > 0
+
+    ctx.net.authMode = autoAuthenticate ? AuthMode.Implicit : AuthMode.Explicit
     ctx.app.dufflepudUrl = getSetting("dufflepud_url")
   })
 

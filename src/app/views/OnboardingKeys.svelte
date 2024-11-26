@@ -35,15 +35,15 @@
       return showWarning("Please use only numbers and lowercase letters.")
     }
 
-    const handle = await loadHandle(`${state.username}@${handler.domain}`)
-
-    if (handle?.pubkey) {
-      return showWarning("Sorry, it looks like that username is already taken.")
-    }
-
     loading = true
 
     try {
+      const handle = await loadHandle(`${state.username}@${handler.domain}`)
+
+      if (handle?.pubkey) {
+        return showWarning("Sorry, it looks like that username is already taken.")
+      }
+
       state.pubkey = await broker.createAccount(state.username, nip46Perms)
 
       if (!state.pubkey) {

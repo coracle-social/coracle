@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {identity} from "@welshman/lib"
   import {FeedType} from "@welshman/feeds"
   import {relaySearch} from "@welshman/app"
   import {displayRelayUrl} from "@welshman/util"
@@ -13,6 +14,7 @@
   multiple
   value={feed.slice(1)}
   search={$relaySearch.searchValues}
+  termToItem={identity}
   onChange={urls => onChange([FeedType.Relay, ...urls])}>
   <span slot="item" let:item>{displayRelayUrl(item)}</span>
 </SearchSelect>

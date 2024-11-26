@@ -200,10 +200,16 @@ export const makeFeedRequestHandler =
   ({forcePlatform}: FeedRequestHandlerOptions) =>
   async ({relays, filters, onEvent}: RequestOpts) => {
     const tracker = new Tracker()
-    const loadOptions = {onEvent, tracker, forcePlatform, skipCache: true, delay: 0}
+    const loadOptions = {
+      onEvent,
+      tracker,
+      forcePlatform,
+      skipCache: true,
+      delay: 0,
+    }
 
     if (relays?.length > 0) {
-      await load({...loadOptions, filters, relays})
+      await load({...loadOptions, filters, relays, authTimeout: 3000})
     } else {
       // Break out selections by relay so we can complete early after a certain number
       // of requests complete for faster load times

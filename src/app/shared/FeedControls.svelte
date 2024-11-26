@@ -3,7 +3,7 @@
   import {sortBy, not, equals, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {synced} from "@welshman/store"
-  import {isSearchFeed, makeSearchFeed, makeScopeFeed, Scope, getFeedArgs} from "@welshman/feeds"
+  import {isSearchFeed, makeSearchFeed, getFeedArgs} from "@welshman/feeds"
   import {signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {slideAndFade} from "src/util/transition"
@@ -15,7 +15,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, makeFeed, displayFeed} from "src/domain"
+  import {normalizeFeedDefinition, readFeed, displayFeed} from "src/domain"
   import {userListFeeds, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
   export let feed
@@ -25,8 +25,6 @@
 
   const form = boolCtrl()
   const expanded = synced("FeedControls/expanded", false)
-  const followsFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Follows))})
-  const networkFeed = makeFeed({definition: normalizeFeedDefinition(makeScopeFeed(Scope.Network))})
 
   const toggleExpanded = () => expanded.update(not)
 
@@ -106,7 +104,9 @@
       </div>
     </Input>
     <slot name="controls" />
-    <Anchor button low on:click={toggleExpanded}>Customize</Anchor>
+    {#if $signer}
+      <Anchor button low on:click={toggleExpanded}>Customize</Anchor>
+    {/if}
   </div>
   {#if $expanded}
     <div transition:slideAndFade class="pt-4">
@@ -118,18 +118,6 @@
           </Anchor>
         </div>
         <div class="flex flex-wrap gap-1">
-          <Chip
-            class="cursor-pointer"
-            accent={equals(followsFeed.definition, feed.definition)}
-            on:click={() => setFeed(followsFeed)}>
-            Follows
-          </Chip>
-          <Chip
-            class="cursor-pointer"
-            accent={equals(networkFeed.definition, feed.definition)}
-            on:click={() => setFeed(networkFeed)}>
-            Network
-          </Chip>
           {#each allFeeds as other}
             <Chip
               class="cursor-pointer"
@@ -137,17 +125,17 @@
               on:click={() => setFeed(other)}>
               {displayFeed(other)}
             </Chip>
+          {:else}
+            <p>No custom feeds found - click "Edit feed" below to get started!</p>
           {/each}
         </div>
-        {#if $signer}
-          <div class="my-4 flex flex-col-reverse justify-between gap-2 sm:flex-row">
-            <div class="flex flex-col gap-2 sm:flex-row">
-              <Anchor button href={router.at("lists").toString()}>Manage lists</Anchor>
-              <Anchor button href={router.at("feeds").toString()}>Manage feeds</Anchor>
-            </div>
-            <Anchor button accent on:click={openForm}>Edit feed</Anchor>
+        <div class="my-4 flex flex-col-reverse justify-between gap-2 sm:flex-row">
+          <div class="flex flex-col gap-2 sm:flex-row">
+            <Anchor button href={router.at("lists").toString()}>Manage lists</Anchor>
+            <Anchor button href={router.at("feeds").toString()}>Manage feeds</Anchor>
           </div>
-        {/if}
+          <Anchor button accent on:click={openForm}>Edit feed</Anchor>
+        </div>
       </Card>
     </div>
   {/if}
