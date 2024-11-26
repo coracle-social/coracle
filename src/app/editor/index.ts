@@ -108,6 +108,7 @@ export const getEditorOptions = ({
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
+      renderText: props => "nostr:" + props.node.attrs.nprofile,
       addProseMirrorPlugins() {
         return [
           createSuggestions({
@@ -127,8 +128,18 @@ export const getEditorOptions = ({
         ]
       },
     }),
-    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
+    NEventExtension.extend(
+      asInline({
+        addNodeView: () => SvelteNodeViewRenderer(EditEvent),
+        renderText: props => "nostr:" + props.node.attrs.nevent,
+      }),
+    ),
+    NAddrExtension.extend(
+      asInline({
+        addNodeView: () => SvelteNodeViewRenderer(EditEvent),
+        renderText: props => "nostr:" + props.node.attrs.naddr,
+      }),
+    ),
     ImageExtension.extend(
       asInline({addNodeView: () => SvelteNodeViewRenderer(EditMedia)}),
     ).configure({defaultUploadUrl, defaultUploadType: uploadType}),
