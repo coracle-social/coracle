@@ -84,7 +84,7 @@
   })
 </script>
 
-<SelectButton {options} bind:value={selectedOptions} multiple>
+<SelectButton {options} bind:value={selectedOptions} multiple class="text-left">
   <div class="flex items-center gap-2" slot="item" let:option>
     {Array.from(connectionsStatus[option]?.values() || []).length || 0}
     {option}
