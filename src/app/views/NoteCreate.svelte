@@ -62,9 +62,9 @@
     filters: [DVM_HANDLER_FILTER],
   })
 
-  const requests = deriveEvents(repository, {
-    filters: [DVM_REQUEST_FILTER],
-  })
+  // const requests = deriveEvents(repository, {
+  //   filters: [DVM_REQUEST_FILTER],
+  // })
 
   const nsecWarning = writable(null)
 

@@ -12,7 +12,7 @@
   export let initialValues: {
     warning: string
     anonymous: boolean
-    delay: string
+    delay?: string
   }
 
   let values = initialValues
