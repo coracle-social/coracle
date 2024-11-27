@@ -3,7 +3,7 @@
   import {postJson, sleep} from "@welshman/lib"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
-  import LogInBurrow from "@app/components/LogInBurrow.svelte"
+  import LogInPassword from "@app/components/LogInPassword.svelte"
   import {pushModal} from "@app/modal"
   import {BURROW_URL} from "@app/state"
 
@@ -11,7 +11,7 @@
   export let token
 
   const login = () => {
-    pushModal(LogInBurrow, {email}, {path: "/"})
+    pushModal(LogInPassword, {email}, {path: "/"})
   }
 
   let error: string

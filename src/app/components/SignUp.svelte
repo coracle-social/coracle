@@ -38,7 +38,7 @@
       }
     }
 
-  const signupBurrow = withLoading(async () => {
+  const signupPassword = withLoading(async () => {
     const res = await postJson(BURROW_URL + "/user", {email, password})
 
     if (res.error) {
@@ -93,7 +93,7 @@
 
   const signup = () => {
     if (BURROW_URL) {
-      signupBurrow()
+      signupPassword()
     } else {
       signupNsecApp()
     }

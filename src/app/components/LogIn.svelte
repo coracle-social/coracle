@@ -10,7 +10,7 @@
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInBunker from "@app/components/LogInBunker.svelte"
-  import LogInBurrow from "@app/components/LogInBurrow.svelte"
+  import LogInPassword from "@app/components/LogInPassword.svelte"
   import {pushModal, clearModals} from "@app/modal"
   import {PLATFORM_NAME, BURROW_URL} from "@app/state"
   import {pushToast} from "@app/toast"
@@ -68,7 +68,7 @@
     }
   })
 
-  const loginWithBurrow = () => pushModal(LogInBurrow)
+  const loginWithPassword = () => pushModal(LogInPassword)
 
   const loginWithBunker = () => pushModal(LogInBunker)
 
@@ -95,7 +95,7 @@
     you to own your social identity.
   </p>
   {#if BURROW_URL}
-    <Button disabled={loading} on:click={loginWithBurrow} class="btn btn-primary">
+    <Button disabled={loading} on:click={loginWithPassword} class="btn btn-primary">
       {#if loading}
         <span class="loading loading-spinner mr-3" />
       {:else}

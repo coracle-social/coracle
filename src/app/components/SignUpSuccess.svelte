@@ -1,11 +1,11 @@
 <script lang="ts">
   import Button from "@lib/components/Button.svelte"
-  import LogInBurrow from "@app/components/LogInBurrow.svelte"
+  import LogInPassword from "@app/components/LogInPassword.svelte"
   import {pushModal} from "@app/modal"
 
   export let email
 
-  const login = () => pushModal(LogInBurrow)
+  const login = () => pushModal(LogInPassword)
 </script>
 
 <div class="column gap-4">
