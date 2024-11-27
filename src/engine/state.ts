@@ -66,6 +66,7 @@ import {
   APP_DATA,
   CLIENT_AUTH,
   DIRECT_MESSAGE,
+  DVM_REQUEST_PUBLISH_SCHEDULE,
   FEED,
   FEEDS,
   FOLLOWS,
@@ -217,6 +218,8 @@ const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
 unwrapper.addGlobalHandler(async (event: TrustedEvent) => {
   if (event.kind === WRAP) {
     await ensureUnwrapped(event)
+  } else if (event.kind === DVM_REQUEST_PUBLISH_SCHEDULE) {
+    console.log("DVM_REQUEST_PUBLISH_SCHEDULE", event)
   } else {
     await ensurePlaintext(event)
   }
