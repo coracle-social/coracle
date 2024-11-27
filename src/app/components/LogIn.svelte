@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cx from "classnames"
   import {onMount} from "svelte"
   import {Capacitor} from "@capacitor/core"
   import {getNip07, getNip55, Nip55Signer} from "@welshman/signer"
@@ -9,8 +10,9 @@
   import SignUp from "@app/components/SignUp.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
   import LogInBunker from "@app/components/LogInBunker.svelte"
+  import LogInBurrow from "@app/components/LogInBurrow.svelte"
   import {pushModal, clearModals} from "@app/modal"
-  import {PLATFORM_NAME} from "@app/state"
+  import {PLATFORM_NAME, BURROW_URL} from "@app/state"
   import {pushToast} from "@app/toast"
   import {loadUserData} from "@app/commands"
   import {setChecked} from "@app/notifications"
@@ -66,6 +68,8 @@
     }
   })
 
+  const loginWithBurrow = () => pushModal(LogInBurrow)
+
   const loginWithBunker = () => pushModal(LogInBunker)
 
   let loading = false
@@ -90,8 +94,21 @@
     <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>
+  {#if BURROW_URL}
+    <Button disabled={loading} on:click={loginWithBurrow} class="btn btn-primary">
+      {#if loading}
+        <span class="loading loading-spinner mr-3" />
+      {:else}
+        <Icon icon="key" />
+      {/if}
+      Log in with Password
+    </Button>
+  {/if}
   {#if getNip07()}
-    <Button disabled={loading} on:click={loginWithNip07} class="btn btn-primary">
+    <Button
+      disabled={loading}
+      on:click={loginWithNip07}
+      class={cx("btn", {"btn-primary": !BURROW_URL, "btn-neutral": BURROW_URL})}>
       {#if loading}
         <span class="loading loading-spinner mr-3" />
       {:else}
@@ -101,7 +118,10 @@
     </Button>
   {/if}
   {#each signers as app}
-    <Button disabled={loading} class="btn btn-primary" on:click={() => loginWithSigner(app)}>
+    <Button
+      disabled={loading}
+      class={cx("btn", {"btn-primary": !BURROW_URL, "btn-neutral": BURROW_URL})}
+      on:click={() => loginWithSigner(app)}>
       {#if loading}
         <span class="loading loading-spinner mr-3" />
       {:else}

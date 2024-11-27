@@ -1,13 +1,13 @@
-<div class="grid grid-cols-1 gap-2 lg:grid-cols-2 {$$props.class}">
+<div class="grid grid-cols-1 gap-2 md:grid-cols-3 {$$props.class}">
   <label class="flex items-center gap-2 font-bold">
     <slot name="label" />
   </label>
-  <div class="flex items-center gap-2">
+  <div class="col-span-2 flex items-center gap-2">
     <slot name="input" />
   </div>
-  {#if $$slots.info}
-    <p class="flex-end text-sm sm:col-span-2">
+  <p class="flex-end text-sm md:col-span-3">
+    {#if $$slots.info}
       <slot name="info" />
-    </p>
-  {/if}
+    {/if}
+  </p>
 </div>

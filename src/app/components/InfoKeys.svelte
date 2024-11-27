@@ -1,8 +1,17 @@
 <script lang="ts">
+  import {session} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
+  import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import ProfileEject from "@app/components/ProfileEject.svelte"
   import {PLATFORM_NAME} from "@app/state"
+  import {pushModal} from "@app/modal"
+
+  const back = () => history.back()
+
+  const startEject = () => pushModal(ProfileEject)
 </script>
 
 <div class="column gap-4">
@@ -10,21 +19,33 @@
     <div slot="title">What is a private key?</div>
   </ModalHeader>
   <p>
-    Most software keeps track of users by giving them a username and password. This gives the
-    service
-    <strong>total control</strong> over their users, allowing them to ban them at any time, or sell their
-    activity.
+    Most online services keep track of users by giving them a username and password. This gives the
+    service <strong>total control</strong> over their users, allowing them to ban them at any time, or
+    sell their activity.
   </p>
   <p>
     On <Link external href="https://nostr.com/">Nostr</Link>, <strong>you</strong> control your own
     identity and social data, through the magic of crytography. The basic idea is that you have a
-    <strong>public key</strong>, which acts as your user id, and a <strong>private key</strong> which
-    allows you to authenticate any message you send.
+    <strong>public key</strong>, which acts as your user id, and a
+    <strong>private key</strong> which allows you to prove your identity.
   </p>
-  <p>
-    It's very important to keep private keys safe, but this can sometimes be confusing for
-    newcomers. This is why {PLATFORM_NAME} supports <strong>remote signer</strong> login. These services
-    can store your keys securely for you, giving you access using a username and password.
-  </p>
-  <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
+  {#if $session?.email}
+    <p>
+      It's very important to keep private keys safe, but this can sometimes be tricky, which is why {PLATFORM_NAME}
+      supports a traditional account-based login for new users.
+    </p>
+    <p>If you'd like to switch to self-custody, please click below to get started.</p>
+    <ModalFooter>
+      <Button class="btn btn-link" on:click={back}>
+        <Icon icon="alt-arrow-left" />
+        Go back
+      </Button>
+      <Button class="btn btn-primary" on:click={startEject}>
+        <Icon icon="check-circle" />
+        I want to hold my own keys
+      </Button>
+    </ModalFooter>
+  {:else}
+    <Button class="btn btn-primary" on:click={back}>Got it</Button>
+  {/if}
 </div>

@@ -1,0 +1,124 @@
+<script lang="ts">
+  import {onMount, onDestroy} from "svelte"
+  import {postJson, stripProtocol} from "@welshman/lib"
+  import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {addSession} from "@welshman/app"
+  import Spinner from "@lib/components/Spinner.svelte"
+  import Button from "@lib/components/Button.svelte"
+  import FieldInline from "@lib/components/FieldInline.svelte"
+  import Icon from "@lib/components/Icon.svelte"
+  import ModalHeader from "@lib/components/ModalHeader.svelte"
+  import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import {loadUserData} from "@app/commands"
+  import {clearModals} from "@app/modal"
+  import {setChecked} from "@app/notifications"
+  import {pushToast} from "@app/toast"
+  import {NIP46_PERMS, BURROW_URL, PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO} from "@app/state"
+
+  export let email = ""
+
+  const clientSecret = makeSecret()
+
+  const abortController = new AbortController()
+
+  const relays = ["ws://" + stripProtocol(BURROW_URL)]
+
+  const broker = Nip46Broker.get({clientSecret, relays})
+
+  const back = () => history.back()
+
+  const onSubmit = async () => {
+    loading = true
+
+    const res = await postJson(BURROW_URL + "/session", {email, password, nostrconnect: url})
+
+    if (res.error) {
+      pushToast({message: res.error, theme: "error"})
+      loading = false
+    }
+  }
+
+  let url = ""
+  let password = ""
+  let loading = false
+
+  onMount(async () => {
+    url = await broker.makeNostrconnectUrl({
+      perms: NIP46_PERMS,
+      url: PLATFORM_URL,
+      name: PLATFORM_NAME,
+      image: PLATFORM_LOGO,
+    })
+
+    let response
+    try {
+      response = await broker.waitForNostrconnect(url, abortController)
+    } catch (errorResponse: any) {
+      if (errorResponse?.error) {
+        pushToast({
+          theme: "error",
+          message: `Received error from signer: ${errorResponse.error}`,
+        })
+      } else if (errorResponse) {
+        console.error(errorResponse)
+      }
+    }
+
+    if (response) {
+      loading = true
+
+      const userPubkey = await broker.getPublicKey()
+
+      addSession({
+        method: "nip46",
+        pubkey: userPubkey,
+        secret: clientSecret,
+        handler: {pubkey: response.event.pubkey, relays},
+      })
+
+      await loadUserData(userPubkey)
+
+      setChecked("*")
+      clearModals()
+    }
+  })
+
+  onDestroy(() => {
+    abortController.abort()
+  })
+</script>
+
+<form class="column gap-4" on:submit|preventDefault={onSubmit}>
+  <ModalHeader>
+    <div slot="title">Log In</div>
+    <div slot="info">Log in using your email and password.</div>
+  </ModalHeader>
+  <FieldInline>
+    <p slot="label">Email</p>
+    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+      <Icon icon="user-rounded" />
+      <input bind:value={email} />
+    </label>
+  </FieldInline>
+  <FieldInline>
+    <p slot="label">Password</p>
+    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+      <Icon icon="key" />
+      <input bind:value={password} type="password" />
+    </label>
+  </FieldInline>
+  <p class="text-sm opacity-75">
+    Your email and password only work to log in to {PLATFORM_NAME}. To use your key on other nostr
+    applications, visit your settings page.
+  </p>
+  <ModalFooter>
+    <Button class="btn btn-link" on:click={back} disabled={loading}>
+      <Icon icon="alt-arrow-left" />
+      Go back
+    </Button>
+    <Button type="submit" class="btn btn-primary" disabled={loading || !email || !password}>
+      <Spinner {loading}>Next</Spinner>
+      <Icon icon="alt-arrow-right" />
+    </Button>
+  </ModalFooter>
+</form>

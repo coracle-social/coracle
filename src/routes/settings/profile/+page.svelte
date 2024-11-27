@@ -9,6 +9,8 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileEdit from "@app/components/ProfileEdit.svelte"
+  import InfoKeys from "@app/components/InfoKeys.svelte"
+  import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 
@@ -21,6 +23,8 @@
   const copyNsec = () => clip(nip19.nsecEncode(hexToBytes($session!.secret!)))
 
   const startEdit = () => pushModal(ProfileEdit)
+
+  const startEject = () => pushModal(InfoKeys)
 </script>
 
 <div class="content column gap-4">
@@ -49,6 +53,21 @@
       <Content event={{content: $profile?.about || "", tags: []}} hideMedia />
     {/key}
   </div>
+  {#if $session?.email}
+    <div class="card2 bg-alt col-4 shadow-xl">
+      <FieldInline>
+        <p slot="label">Email Address</p>
+        <label class="input input-bordered flex w-full items-center gap-2" slot="input">
+          <Icon icon="user-rounded" />
+          <input readonly value={$session.email} class="grow" />
+        </label>
+        <p slot="info">
+          Your email and password can only be used to log into {PLATFORM_NAME}.
+          <Button class="link" on:click={startEject}>Start holding your own keys</Button>
+        </p>
+      </FieldInline>
+    </div>
+  {/if}
   <div class="card2 bg-alt col-4 shadow-xl">
     <FieldInline>
       <p slot="label">Public Key</p>
@@ -57,7 +76,7 @@
         slot="input">
         <div class="row-2 flex-grow items-center">
           <Icon icon="link-round" />
-          <input class="ellipsize flex-grow" value={$session?.pubkey} />
+          <input readonly class="ellipsize flex-grow" value={$session?.pubkey} />
         </div>
         <Button class="flex items-center" on:click={copyNpub}>
           <Icon icon="copy" />
@@ -73,7 +92,7 @@
         <p slot="label">Private Key</p>
         <label class="input input-bordered flex w-full items-center gap-2" slot="input">
           <Icon icon="link-round" />
-          <input value={$session.secret} class="grow" type="password" />
+          <input readonly value={$session.secret} class="grow" type="password" />
           <Button class="flex items-center" on:click={copyNsec}>
             <Icon icon="copy" />
           </Button>

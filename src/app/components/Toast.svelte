@@ -11,7 +11,7 @@
     {#key $toast.id}
       <div
         role="alert"
-        class="alert flex justify-center"
+        class="alert flex justify-center whitespace-normal text-left"
         class:bg-base-100={theme === "info"}
         class:text-base-content={theme === "info"}
         class:alert-error={theme === "error"}>

@@ -7,6 +7,7 @@ export type ModalOptions = {
   drawer?: boolean
   fullscreen?: boolean
   replaceState?: boolean
+  path?: string
 }
 
 export type Modal = {
@@ -26,10 +27,11 @@ export const pushModal = (
   options: ModalOptions = {},
 ) => {
   const id = randomId()
+  const path = options.path || ""
 
   modals.update(assoc(id, {id, component, props, options}))
 
-  goto("#" + id, {replaceState: options.replaceState})
+  goto(path + "#" + id, {replaceState: options.replaceState})
 
   return id
 }

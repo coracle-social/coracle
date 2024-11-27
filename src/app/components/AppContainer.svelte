@@ -4,7 +4,16 @@
   import Landing from "@app/components/Landing.svelte"
   import Toast from "@app/components/Toast.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
-  import {modals} from "@app/modal"
+  import SignUpConfirm from "@app/components/SignUpConfirm.svelte"
+  import {BURROW_URL} from "@app/state"
+  import {modals, pushModal} from "@app/modal"
+
+  if (BURROW_URL && $page.route.id === "/confirm-email") {
+    pushModal(SignUpConfirm, {
+      email: $page.url.searchParams.get("email"),
+      token: $page.url.searchParams.get("token"),
+    })
+  }
 </script>
 
 <div class="flex h-screen overflow-hidden">
