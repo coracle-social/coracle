@@ -13,6 +13,7 @@
   export let initialValues: {
     warning: string
     anonymous: boolean
+    delay: string
   }
 
   const values = {...initialValues}
@@ -28,6 +29,9 @@
       </div>
       <Field icon="fa-warning" label="Content warnings">
         <Input bind:value={values.warning} placeholder="Why might people want to skip this post?" />
+      </Field>
+      <Field icon="fa-hourglass-half" label="Schedule post">
+        <Input type="datetime-local" bind:value={values.delay} />
       </Field>
       <FieldInline icon="fa-user-secret" label="Post anonymously">
         <Toggle bind:value={values.anonymous} />
