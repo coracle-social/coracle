@@ -102,7 +102,7 @@ export const IMGPROXY_URL = "https://imgproxy.coracle.social"
 export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
 
 export const NIP46_PERMS =
-  "nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt" +
+  "nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt," +
   [CLIENT_AUTH, AUTH_JOIN, MESSAGE, THREAD, COMMENT, MEMBERSHIPS, WRAP, REACTION]
     .map(k => `sign_event:${k}`)
     .join(",")
