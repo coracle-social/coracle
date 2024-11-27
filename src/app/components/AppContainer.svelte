@@ -4,15 +4,25 @@
   import Landing from "@app/components/Landing.svelte"
   import Toast from "@app/components/Toast.svelte"
   import PrimaryNav from "@app/components/PrimaryNav.svelte"
-  import SignUpConfirm from "@app/components/SignUpConfirm.svelte"
+  import EmailConfirm from "@app/components/EmailConfirm.svelte"
+  import PasswordReset from "@app/components/PasswordReset.svelte"
   import {BURROW_URL} from "@app/state"
   import {modals, pushModal} from "@app/modal"
 
-  if (BURROW_URL && $page.route.id === "/confirm-email") {
-    pushModal(SignUpConfirm, {
-      email: $page.url.searchParams.get("email"),
-      token: $page.url.searchParams.get("token"),
-    })
+  if (BURROW_URL && !$pubkey) {
+    if ($page.url.pathname === "/confirm-email") {
+      pushModal(EmailConfirm, {
+        email: $page.url.searchParams.get("email"),
+        confirm_token: $page.url.searchParams.get("confirm_token"),
+      })
+    }
+
+    if ($page.url.pathname === "/reset-password") {
+      pushModal(PasswordReset, {
+        email: $page.url.searchParams.get("email"),
+        reset_token: $page.url.searchParams.get("reset_token"),
+      })
+    }
   }
 </script>
 

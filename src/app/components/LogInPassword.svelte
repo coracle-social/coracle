@@ -2,6 +2,7 @@
   import {onMount, onDestroy} from "svelte"
   import {postJson, stripProtocol} from "@welshman/lib"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {normalizeRelayUrl} from "@welshman/util"
   import {addSession} from "@welshman/app"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -9,8 +10,9 @@
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import PasswordResetRequest from "@app/components/PasswordResetRequest.svelte"
   import {loadUserData} from "@app/commands"
-  import {clearModals} from "@app/modal"
+  import {clearModals, pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {pushToast} from "@app/toast"
   import {NIP46_PERMS, BURROW_URL, PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO} from "@app/state"
@@ -19,9 +21,11 @@
 
   const clientSecret = makeSecret()
 
+  const startReset = () => pushModal(PasswordResetRequest, {email})
+
   const abortController = new AbortController()
 
-  const relays = ["ws://" + stripProtocol(BURROW_URL)]
+  const relays = [normalizeRelayUrl("ws://" + stripProtocol(BURROW_URL))]
 
   const broker = Nip46Broker.get({clientSecret, relays})
 
@@ -30,10 +34,15 @@
   const onSubmit = async () => {
     loading = true
 
-    const res = await postJson(BURROW_URL + "/session", {email, password, nostrconnect: url})
+    try {
+      const res = await postJson(BURROW_URL + "/session", {email, password, nostrconnect: url})
 
-    if (res.error) {
-      pushToast({message: res.error, theme: "error"})
+      if (res.error) {
+        pushToast({message: res.error, theme: "error"})
+        loading = false
+      }
+    } catch (e) {
+      pushToast({message: "Something went wrong, please try again!", theme: "error"})
       loading = false
     }
   }
@@ -91,7 +100,7 @@
 <form class="column gap-4" on:submit|preventDefault={onSubmit}>
   <ModalHeader>
     <div slot="title">Log In</div>
-    <div slot="info">Log in using your email and password.</div>
+    <div slot="info">Log in using your email and password</div>
   </ModalHeader>
   <FieldInline>
     <p slot="label">Email</p>
@@ -107,9 +116,10 @@
       <input bind:value={password} type="password" />
     </label>
   </FieldInline>
-  <p class="text-sm opacity-75">
+  <p class="text-sm">
     Your email and password only work to log in to {PLATFORM_NAME}. To use your key on other nostr
-    applications, visit your settings page.
+    applications, visit your settings page. <Button class="link" on:click={startReset}
+      >Forgot your password?</Button>
   </p>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back} disabled={loading}>

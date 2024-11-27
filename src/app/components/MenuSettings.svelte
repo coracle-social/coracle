@@ -39,7 +39,7 @@
       <div slot="info">Learn about {PLATFORM_NAME} and support the developer</div>
     </CardButton>
   </Link>
-  <Button on:click={logout} class="btn btn-error">
+  <Button on:click={logout} class="btn btn-neutral">
     <Icon icon="exit" /> Log Out
   </Button>
 </div>

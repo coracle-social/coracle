@@ -8,7 +8,7 @@
   import {BURROW_URL} from "@app/state"
 
   export let email
-  export let token
+  export let confirm_token
 
   const login = () => {
     pushModal(LogInPassword, {email}, {path: "/"})
@@ -19,7 +19,7 @@
 
   onMount(async () => {
     const [res] = await Promise.all([
-      postJson(BURROW_URL + "/user/confirm", {email, token}),
+      postJson(BURROW_URL + "/user/confirm-email", {email, confirm_token}),
       sleep(2000),
     ])
 
