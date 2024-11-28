@@ -96,7 +96,7 @@
     }
   }
 
-  const showPerson = () => router.at("people").of(event.pubkey).open()
+  const showPerson = () => router.at("people").of(event.pubkey).open({drawer: false})
 
   const goToDetail = () =>
     router
