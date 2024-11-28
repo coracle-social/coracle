@@ -1,48 +1,19 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
-  import {SocketStatus, AuthStatus} from "@welshman/net"
-  import {getRelayQuality} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
+  import {ConnectionType} from "src/engine"
+  import {getConnectionStatus} from "src/util/connection"
 
   export let url
 
-  const pendingStatuses = [
-    AuthStatus.Requested,
-    AuthStatus.PendingSignature,
-    AuthStatus.PendingResponse,
-  ]
-  const failureStatuses = [AuthStatus.DeniedSignature, AuthStatus.Forbidden]
-
-  let description = "Not connected"
-  let className = "bg-neutral-600"
+  let status = ConnectionType.NotConnected
 
   onMount(() => {
     const interval = setInterval(() => {
       const cxn = ctx.net.pool.get(url)
 
-      if (pendingStatuses.includes(cxn.auth.status)) {
-        className = "bg-warning"
-        description = "Logging in"
-      } else if (failureStatuses.includes(cxn.auth.status)) {
-        className = "bg-danger"
-        description = "Failed to log in"
-      } else if (cxn.socket.status === SocketStatus.Error) {
-        className = "bg-danger"
-        description = "Failed to connect"
-      } else if (cxn.socket.status === SocketStatus.Closed) {
-        className = "bg-warning"
-        description = "Waiting to reconnect"
-      } else if (cxn.socket.status === SocketStatus.New) {
-        className = "bg-neutral-600"
-        description = "Not connected"
-      } else if (getRelayQuality(cxn.url) < 0.5) {
-        className = "bg-warning"
-        description = "Unstable connection"
-      } else {
-        className = "bg-success"
-        description = "Connected"
-      }
+      status = getConnectionStatus(cxn)
     }, 800)
 
     return () => {
@@ -52,8 +23,20 @@
 </script>
 
 <Popover triggerType="mouseenter">
-  <div slot="trigger" class="h-2 w-2 cursor-pointer rounded-full {className}" />
+  <div
+    slot="trigger"
+    class="h-2 w-2 cursor-pointer rounded-full bg-neutral-600"
+    class:bg-neutral-600={ConnectionType.NotConnected == status}
+    class:bg-danger={[ConnectionType.LoginFailed, ConnectionType.ConnectFailed].some(
+      s => s == status,
+    )}
+    class:bg-success={ConnectionType.Connected == status}
+    class:bg-warning={[
+      ConnectionType.Logging,
+      ConnectionType.WaitReconnect,
+      ConnectionType.UnstableConnection,
+    ].some(s => s == status)} />
   <div slot="tooltip" class="transition-all sm:block">
-    {description}
+    {status}
   </div>
 </Popover>
