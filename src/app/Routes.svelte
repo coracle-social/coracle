@@ -54,7 +54,13 @@
       }
     }
   }
+
+  let innerWidth
+
+  $: isMobile = innerWidth < 768
 </script>
+
+<svelte:window bind:innerWidth />
 
 {#key $pubkey}
   <div
@@ -75,7 +81,7 @@
 
 {#each [...$modals].reverse().filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const {component} = router.getMatch(m.path).route}
-  <Modal mini={m.mini} drawer={m.drawer} virtual={false} canClose={!m.noEscape}>
+  <Modal mini={m.mini} drawer={!isMobile && m.drawer} virtual={false} canClose={!m.noEscape}>
     <svelte:component this={component} {...router.getProps(m)} />
   </Modal>
 {/each}
