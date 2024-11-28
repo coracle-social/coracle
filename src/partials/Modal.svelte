@@ -2,11 +2,15 @@
   import cx from "classnames"
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
+  import {tweened} from "svelte/motion"
   import {fly, fade} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import {router} from "src/app/util/router"
+  import {swipe} from "src/util/swipe"
+  import {cubicOut} from "svelte/easing"
 
   export let mini = false
+  export let drawer = false
   export let virtual = true
   export let onEscape = null
   export let canClose = true
@@ -70,6 +74,22 @@
       router.remove(key)
     }
   })
+
+  const translateY = tweened(0, {easing: cubicOut, duration: 150})
+
+  function handleSwipe(e: CustomEvent) {
+    if (e.detail.isTop) {
+      translateY.set(e.detail.deltaY, {duration: 0})
+    }
+  }
+
+  function handleSwipeEnd(e) {
+    if ($translateY > 200) {
+      tryClose()
+    } else {
+      $translateY = 0
+    }
+  }
 </script>
 
 <svelte:body
@@ -89,14 +109,22 @@
         class="modal-content h-full overflow-auto"
         class:overflow-hidden={mini}
         class:pointer-events-none={mini}
-        transition:fly={{y: 1000}}
+        use:swipe
+        on:swipe={handleSwipe}
+        on:end={handleSwipeEnd}
+        transition:fly={drawer ? {x: -1000} : {y: 1000}}
+        style="margin-top: {$translateY}px;"
         bind:this={content}>
         <div
-          class="pointer-events-auto mt-12 min-h-full transition transition-all duration-500"
+          class="pointer-events-auto mt-12 min-h-full flex-row-reverse justify-end transition-all duration-500"
+          class:flex={drawer}
+          class:mt-0={drawer}
           class:mt-[55vh]={mini}>
           {#if canClose}
             <div
-              class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2">
+              class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2"
+              class:w-auto={drawer}
+              class:fixed={drawer}>
               <div
                 class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                      border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
@@ -108,20 +136,41 @@
                 class:hidden={!isNested || !canCloseAll}
                 class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
                        rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
-                <i class="fa fa-angles-down fa-lg" />
+                <i
+                  class={cx(
+                    {"fa-angles-left": drawer, "fa-angles-down": !drawer},
+                    "fa fa-angles-left fa-lg",
+                  )} />
               </div>
             </div>
           {/if}
-          <AltColor background class="absolute mt-12 h-full w-full" />
-          <div on:click|stopPropagation>
+          {#if !drawer}
+            <AltColor background class="absolute mt-12 h-full w-full" />
+          {/if}
+          <div
+            on:click|stopPropagation
+            class:w-full={drawer}
+            class:border-l={drawer}
+            class:max-w-screen-md={drawer}>
             <AltColor
               background
-              class="relative h-full w-full cursor-auto rounded-t-2xl pb-20 pt-2">
+              class={cx(
+                {
+                  "rounded-t-none": drawer,
+                  "rounded-r-2xl": drawer,
+                  "h-screen": drawer,
+                  "overflow-scroll": drawer,
+                },
+                "relative w-full cursor-auto  rounded-t-2xl pb-20 pt-2",
+              )}>
               <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
                 <slot />
               </div>
             </AltColor>
           </div>
+          {#if drawer}
+            <div class="hidden w-72 shrink-0 sm:block" />
+          {/if}
         </div>
       </div>
     </div>
