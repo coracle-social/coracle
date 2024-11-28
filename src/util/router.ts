@@ -139,6 +139,7 @@ export type HistoryItem = {
   path: string
   key?: string
   mini?: boolean
+  drawer?: boolean
   modal?: boolean
   virtual?: boolean
   noEscape?: boolean
@@ -238,7 +239,7 @@ class RouterExtension {
 
   push = (config = {}) => this.go(config)
 
-  open = (config = {}) => this.go({...config, modal: true})
+  open = (config = {}) => this.go({modal: true, drawer: true, ...config})
 
   pushModal = (config = {}) => this.go({...config, modal: true})
 
