@@ -1,79 +1,40 @@
 <script lang="ts">
-  import {getRelayQuality, relaysByUrl} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
-  import {AuthStatus, SocketStatus, type Connection} from "@welshman/net"
+  import {relaysByUrl} from "@welshman/app"
+  import {addToMapKey, ctx} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount} from "svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
+  import {ConnectionType} from "src/engine"
+  import {getConnectionStatus} from "src/util/connection"
 
   export let selected: string
   export let activeTab: string
 
   let selectedOptions: string[] = []
-  let connectionsStatus: {[key: string]: Map<string, Connection>} = {}
+  let connectionsStatus: Map<string, Set<string>> = new Map()
 
   const options = [
-    "Connected",
-    "Logging in",
-    "Failed to log in",
-    "Failed to connect",
-    "Waiting to reconnect",
-    "Not connected",
-    "Unstable connection",
+    ConnectionType.Connected,
+    ConnectionType.Logging,
+    ConnectionType.LoginFailed,
+    ConnectionType.ConnectFailed,
+    ConnectionType.WaitReconnect,
+    ConnectionType.NotConnected,
+    ConnectionType.UnstableConnection,
   ]
 
-  const pendingStatuses = [
-    AuthStatus.Requested,
-    AuthStatus.PendingSignature,
-    AuthStatus.PendingResponse,
-  ]
-
-  const failureStatuses = [AuthStatus.DeniedSignature, AuthStatus.Forbidden]
-
-  $: connections = Array.from(ctx.net.pool.data.entries())
-    .filter(([url, cxn]) =>
-      selectedOptions.length ? selectedOptions.some(s => connectionsStatus[s]?.has(url)) : true,
-    )
-    .map(([url, cxn]) => cxn)
+  $: connections = Array.from(ctx.net.pool.data.keys()).filter(url =>
+    selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
+  )
 
   onMount(() => {
     const interval = setInterval(() => {
       // make a copy of the connections
-      const newConnectionStatus: {[key: string]: Map<string, Connection>} = {}
+      const newConnectionStatus: Map<string, Set<string>> = new Map()
       for (const [url, cxn] of ctx.net.pool.data.entries()) {
-        if (pendingStatuses.includes(cxn.auth.status)) {
-          newConnectionStatus["Logging in"] = (newConnectionStatus["Logging in"] || new Map()).set(
-            url,
-            cxn,
-          )
-        } else if (failureStatuses.includes(cxn.auth.status)) {
-          newConnectionStatus["Failed to log in"] = (
-            newConnectionStatus["Failed to log in"] || new Map()
-          ).set(url, cxn)
-        } else if (cxn.socket.status === SocketStatus.Error) {
-          newConnectionStatus["Failed to connect"] = (
-            newConnectionStatus["Failed to connect"] || new Map()
-          ).set(url, cxn)
-        } else if (cxn.socket.status === SocketStatus.Closed) {
-          newConnectionStatus["Waiting to reconnect"] = (
-            newConnectionStatus["Waiting to reconnect"] || new Map()
-          ).set(url, cxn)
-        } else if (cxn.socket.status === SocketStatus.New) {
-          newConnectionStatus["Not connected"] = (
-            newConnectionStatus["Not connected"] || new Map()
-          ).set(url, cxn)
-        } else if (getRelayQuality(cxn.url) < 0.5) {
-          newConnectionStatus["Unstable connection"] = (
-            newConnectionStatus["Unstable connection"] || new Map()
-          ).set(url, cxn)
-        } else {
-          newConnectionStatus["Connected"] = (newConnectionStatus["Connected"] || new Map()).set(
-            url,
-            cxn,
-          )
-        }
+        addToMapKey(newConnectionStatus, getConnectionStatus(cxn), url)
       }
       connectionsStatus = newConnectionStatus
     }, 800)
@@ -86,17 +47,17 @@
 
 <SelectButton {options} bind:value={selectedOptions} multiple class="text-left">
   <div class="flex items-center gap-2" slot="item" let:option>
-    {Array.from(connectionsStatus[option]?.values() || []).length || 0}
+    {connectionsStatus.get(option)?.size || 0}
     {option}
   </div>
 </SelectButton>
-{#each connections as cxn (cxn.url)}
-  {@const relay = $relaysByUrl.get(cxn.url)}
+{#each connections as url (url)}
+  {@const relay = $relaysByUrl.get(url)}
   <AltColor
     background
     class="cursor-pointer justify-between rounded-md p-6 shadow"
     on:click={() => {
-      selected = cxn.url
+      selected = url
       activeTab = "notices"
     }}>
     <div class="flex min-w-0 shrink-0 items-start gap-3">
@@ -110,7 +71,7 @@
       <div class="shrink-0">
         <div class="flex items-center gap-2">
           <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
-            {displayRelayUrl(cxn.url)}
+            {displayRelayUrl(url)}
           </div>
         </div>
         <div class="flex gap-4 text-xs text-neutral-400">
@@ -125,18 +86,16 @@
         </div>
       </div>
       <div class="flex w-full items-center justify-end gap-2 text-sm">
-        {#each options as opt}
-          {#if connectionsStatus[opt]?.has(cxn.url)}
-            <div class="flex items-center gap-2">
-              <span>{opt}</span>
-              <div
-                class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
-                class:!bg-warning={opt == "Logging in" ||
-                  opt == "Waiting to reconnect" ||
-                  opt == "Unstable connection"}
-                class="h-3 w-3 rounded-full bg-success" />
-            </div>
-          {/if}
+        {#each options.filter(o => connectionsStatus.get(o)?.has(url)) as opt}
+          <div class="flex items-center gap-2">
+            <span>{opt}</span>
+            <div
+              class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
+              class:!bg-warning={opt == "Logging in" ||
+                opt == ConnectionType.WaitReconnect ||
+                opt == ConnectionType.UnstableConnection}
+              class="h-3 w-3 rounded-full bg-success" />
+          </div>
         {/each}
       </div>
     </div>

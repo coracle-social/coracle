@@ -43,3 +43,13 @@ export type AnonymousUserState = {
   follows: string[][]
   relays: string[][]
 }
+
+export enum ConnectionType {
+  Connected = "Connected",
+  Logging = "Logging in",
+  LoginFailed = "Failed to log in",
+  ConnectFailed = "Failed to connect",
+  WaitReconnect = "Wainting to reconnect",
+  NotConnected = "Not connected",
+  UnstableConnection = "Unstable connection",
+}
