@@ -6,8 +6,8 @@ export interface TagAttributes {
   tag: string
 }
 
-const REGEX_TAG_PASTE = /(#[^\W]+)(?=\s) /g
-const REGEX_TAG_INPUT = /(#[^\W]+)(?=\s) /g
+const REGEX_TAG_PASTE = /(#\p{L}[\p{L}\p{N}_]*)(?=\s)/gu
+const REGEX_TAG_INPUT = /(#\p{L}[\p{L}\p{N}_]*)(?=\s)/gu
 
 export const TagExtension = Mark.create({
   atom: true,
@@ -61,7 +61,7 @@ export const TagExtension = Mark.create({
       {
         find: text => {
           const match = last(Array.from(text.matchAll(REGEX_TAG_INPUT)))
-          if (match && text.length === match.index + match[0].length) {
+          if (match && text.length === match.index + match[0].length + 1) {
             return {
               index: match?.index,
               text: match[0],
@@ -71,7 +71,12 @@ export const TagExtension = Mark.create({
           return null
         },
         handler: ({state, range, match}) => {
-          state.tr.addMark(range.from, range.to, this.type.create(match.data)).insertText(" ")
+          const newTr = state.tr.addMark(range.from - 1, range.to, this.type.create(match.data))
+          if (last(match.input) === "\n") {
+            newTr.split(range.to)
+          } else {
+            newTr.insertText(" ")
+          }
         },
       },
     ]
