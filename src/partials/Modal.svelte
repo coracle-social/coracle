@@ -106,25 +106,22 @@
         class="fixed inset-0 cursor-pointer bg-black opacity-50"
         on:click|stopPropagation={tryClose} />
       <div
-        class="modal-content h-full overflow-auto"
+        class="modal-content ml-0 h-full overflow-auto lg:ml-72"
         class:overflow-hidden={mini}
         class:pointer-events-none={mini}
         use:swipe
         on:swipe={handleSwipe}
         on:end={handleSwipeEnd}
-        transition:fly={drawer ? {x: -1000} : {y: 1000}}
+        transition:fly={{y: 1000}}
         style="margin-top: {$translateY}px;"
         bind:this={content}>
         <div
-          class="pointer-events-auto mt-12 min-h-full flex-row-reverse justify-end transition-all duration-500"
-          class:flex={drawer}
-          class:mt-0={drawer}
+          class="pointer-events-auto flex min-h-full flex-col justify-center transition-all duration-500"
+          class:mt-12={!drawer}
           class:mt-[55vh]={mini}>
           {#if canClose}
             <div
-              class="pointer-events-none sticky top-0 z-popover flex w-full flex-col items-end gap-2 p-2"
-              class:w-auto={drawer}
-              class:fixed={drawer}>
+              class="pointer-events-none sticky top-0 z-popover mx-auto flex w-full max-w-4xl flex-col items-end gap-2 p-2">
               <div
                 class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                      border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
@@ -136,32 +133,16 @@
                 class:hidden={!isNested || !canCloseAll}
                 class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
                        rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600">
-                <i
-                  class={cx(
-                    {"fa-angles-left": drawer, "fa-angles-down": !drawer},
-                    "fa fa-angles-left fa-lg",
-                  )} />
+                <i class="fa-angles-down fa fa-lg" />
               </div>
             </div>
           {/if}
-          {#if !drawer}
-            <AltColor background class="absolute mt-12 h-full w-full" />
-          {/if}
-          <div
-            on:click|stopPropagation
-            class:w-full={drawer}
-            class:border-l={drawer}
-            class:max-w-screen-md={drawer}>
+          <div on:click|stopPropagation class="">
             <AltColor
               background
               class={cx(
-                {
-                  "rounded-t-none": drawer,
-                  "rounded-r-2xl": drawer,
-                  "h-screen": drawer,
-                  "overflow-scroll": drawer,
-                },
-                "relative w-full cursor-auto  rounded-t-2xl pb-20 pt-2",
+                {"min-h-screen": !drawer, "pb-4": drawer, "rounded-b-2xl": drawer},
+                "relative m-auto h-full w-full max-w-3xl cursor-auto overflow-hidden rounded-t-2xl pb-20 pt-2",
               )}>
               <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
                 <slot />
@@ -169,7 +150,7 @@
             </AltColor>
           </div>
           {#if drawer}
-            <div class="hidden w-72 shrink-0 sm:block" />
+            <div class="h-12" />
           {/if}
         </div>
       </div>
