@@ -167,15 +167,17 @@
   $: canZap = zapper?.allowsNostr && note.pubkey !== $sessionWithMeta?.pubkey
   $: reply = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $repliesCount = replies.length
-  $: handlers = $kindHandlers.filter(
-    h =>
-      h.name.toLowerCase() !== "coracle" &&
-      h.event.tags.some(
-        t =>
-          ["web", os].includes(t[0]) &&
-          (t.length === 2 || ["note", "nevent", ""].includes(last(t))),
-      ),
-  )
+  $: handlers =
+    note.kind != 1 &&
+    $kindHandlers.filter(
+      h =>
+        h.name.toLowerCase() !== "coracle" &&
+        h.event.tags.some(
+          t =>
+            ["web", os].includes(t[0]) &&
+            (t.length == 2 || ["note", "nevent", ""].includes(last(t))),
+        ),
+    )
 
   $: {
     actions = []
@@ -269,8 +271,8 @@
       <Popover theme="transparent" opts={{hideOnClick: true}}>
         <button
           slot="trigger"
-          class="relative flex hidden h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
-          <i class="fa fa-up-right-from-square fa-sm" />
+          class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
+          <i class="fa-solid fa-list" />
         </button>
         <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
           <Menu>
