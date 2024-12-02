@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {onDestroy} from "svelte"
-  import {Nip46Broker} from "@welshman/signer"
+  import {onMount, onDestroy} from "svelte"
+  import {Nip46Broker, makeSecret} from "@welshman/signer"
   import {addSession, nip46Perms} from "@welshman/app"
-  import {normalizeRelayUrl} from "@welshman/util"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -13,19 +12,15 @@
   import {env, loginWithNip46} from "src/engine"
   import {boot} from "src/app/state"
 
+  let url = ""
   let input = ""
   let loading = false
 
+  const clientSecret = makeSecret()
+
   const abortController = new AbortController()
 
-  const init = Nip46Broker.initiate({
-    perms: nip46Perms,
-    url: env.APP_URL,
-    name: env.APP_NAME,
-    relays: env.SIGNER_RELAYS,
-    image: env.APP_URL + env.APP_LOGO,
-    abortController,
-  })
+  const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS})
 
   const back = () => history.back()
 
@@ -33,9 +28,9 @@
     loading = true
 
     try {
-      const {pubkey, token, relays} = await Nip46Broker.parseBunkerLink(input)
+      const {signerPubkey, connectSecret, relays} = broker.parseBunkerUrl(input)
 
-      if (!isKeyValid(pubkey)) {
+      if (!isKeyValid(signerPubkey)) {
         return showWarning("Sorry, but that's an invalid public key.")
       }
 
@@ -43,9 +38,7 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      const success = await loginWithNip46(token, {pubkey, relays: relays.map(normalizeRelayUrl)})
-
-      if (success) {
+      if (await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})) {
         boot()
       }
     } finally {
@@ -53,13 +46,36 @@
     }
   }
 
-  init.result.then(pubkey => {
-    if (pubkey) {
+  onMount(async () => {
+    url = await broker.makeNostrconnectUrl({
+      url: env.APP_URL,
+      name: env.APP_NAME,
+      image: env.APP_URL + env.APP_LOGO,
+      perms: nip46Perms,
+    })
+
+    let response
+    try {
+      response = await broker.waitForNostrconnect(url, abortController)
+    } catch (errorResponse: any) {
+      if (errorResponse?.error) {
+        showWarning(`Received error from signer: ${errorResponse.error}`)
+      } else if (errorResponse) {
+        console.error(errorResponse)
+      }
+    }
+
+    if (response) {
+      const userPubkey = await broker.getPublicKey()
+
       addSession({
-        pubkey,
         method: "nip46",
-        secret: init.clientSecret,
-        handler: {pubkey, relays: env.SIGNER_RELAYS},
+        pubkey: userPubkey,
+        secret: clientSecret,
+        handler: {
+          pubkey: response.event.pubkey,
+          relays: env.SIGNER_RELAYS,
+        },
       })
 
       boot()
@@ -77,7 +93,9 @@
     To log in using a remote signer, scan the QR code below or enter a connection link.
     <Anchor underline modal href="/help/remote-signers">What's a signer?</Anchor>
   </p>
-  <QRCode code={init.nostrconnect} />
+  {#if url}
+    <QRCode code={url} />
+  {/if}
   <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
     <i slot="before" class="fa fa-box" />
   </Input>

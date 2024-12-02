@@ -6,21 +6,22 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {showWarning} from "src/partials/Toast.svelte"
-  import {OnboardingTask, loginWithNip46} from "src/engine"
+  import {env, OnboardingTask, loginWithNip46} from "src/engine"
 
   export let state
   export let setStage
 
-  const handler = {
-    domain: "nsec.app",
-    relays: ["wss://relay.nsec.app/"],
-    pubkey: "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb",
-  }
+  const clientSecret = makeSecret()
+
+  const signerPubkey = "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb"
+
+  const signerDomain = "nsec.app"
+
+  const relays = env.SIGNER_RELAYS
+
+  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
 
   const prev = () => setStage("intro")
-
-  const secret = makeSecret()
-  const broker = Nip46Broker.get({secret, handler})
 
   const next = async () => {
     if (state.pubkey) {
@@ -38,20 +39,20 @@
     loading = true
 
     try {
-      const handle = await loadHandle(`${state.username}@${handler.domain}`)
+      const handle = await loadHandle(`${state.username}@${signerDomain}`)
 
       if (handle?.pubkey) {
         return showWarning("Sorry, it looks like that username is already taken.")
       }
 
-      state.pubkey = await broker.createAccount(state.username, nip46Perms)
+      state.pubkey = await broker.createAccount(state.username, signerDomain, nip46Perms)
 
       if (!state.pubkey) {
         return showWarning("Something went wrong, please try again!")
       }
 
       // Now we can log in. Use the user's pubkey for the handler (legacy stuff)
-      const success = await loginWithNip46("", {...handler, pubkey: state.pubkey}, secret)
+      const success = await loginWithNip46({relays, signerPubkey: state.pubkey, clientSecret})
 
       if (!success) {
         return showWarning("Something went wrong, please try again!")

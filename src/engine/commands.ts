@@ -30,7 +30,6 @@ import {
   remove,
   splitAt,
 } from "@welshman/lib"
-import type {Nip46Handler} from "@welshman/signer"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
@@ -472,21 +471,30 @@ export const loginWithNip07 = pubkey => addSession({method: "nip07", pubkey})
 export const loginWithNip55 = (pubkey, pkg) =>
   addSession({method: "nip55", pubkey: pubkey, signer: pkg})
 
-export const loginWithNip46 = async (
-  token: string,
-  handler: Nip46Handler,
-  secret = makeSecret(),
-) => {
-  const broker = Nip46Broker.get({secret, handler})
-  const result = await broker.connect(token, nip46Perms)
+export const loginWithNip46 = async ({
+  relays,
+  signerPubkey,
+  clientSecret = makeSecret(),
+  connectSecret = "",
+}: {
+  relays: string[]
+  signerPubkey: string
+  clientSecret?: string
+  connectSecret?: string
+}) => {
+  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+  const result = await broker.connect("", connectSecret, nip46Perms)
 
-  if (!result) return false
+  // TODO: remove ack result
+  if (!["ack", connectSecret].includes(result)) return false
 
   const pubkey = await broker.getPublicKey()
 
   if (!pubkey) return false
 
-  addSession({method: "nip46", pubkey, secret, handler})
+  const handler = {relays, pubkey: signerPubkey}
+
+  addSession({method: "nip46", pubkey, secret: clientSecret, handler})
 
   return true
 }
