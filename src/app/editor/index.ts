@@ -22,17 +22,17 @@ import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch, RelayMode} from "@welshman/app"
 import {createSuggestions} from "./Suggestions"
-import EditMention from "./EditMention.svelte"
-import EditEvent from "./EditEvent.svelte"
-import EditBolt11 from "./EditBolt11.svelte"
-import EditMedia from "./EditMedia.svelte"
-import Suggestions from "./Suggestions.svelte"
-import SuggestionProfile from "./SuggestionProfile.svelte"
-import {asInline} from "./util"
-import {WordCount} from "./wordcounts"
-import {FileUploadExtension} from "./FileUpload"
+import EditMention from "src/app/editor/EditMention.svelte"
+import EditEvent from "src/app/editor/EditEvent.svelte"
+import EditBolt11 from "src/app/editor/EditBolt11.svelte"
+import EditMedia from "src/app/editor/EditMedia.svelte"
+import Suggestions from "src/app/editor/Suggestions.svelte"
+import SuggestionProfile from "src/app/editor/SuggestionProfile.svelte"
+import {asInline} from "src/app/editor/util"
+import {WordCount} from "src/app/editor/wordcounts"
+import {FileUploadExtension} from "src/app/editor/FileUpload"
 import {getSetting} from "src/engine"
-import {TagExtension} from "./TagExtension"
+import {Hashtag} from "src/app/editor/Hashtag"
 
 export {createSuggestions, EditMention, EditEvent, EditBolt11, EditMedia, Suggestions}
 export * from "./util"
@@ -81,7 +81,7 @@ export const getEditorOptions = ({
     History,
     Paragraph,
     Text,
-    TagExtension,
+    Hashtag,
     WordCount,
     Placeholder.configure({placeholder}),
     HardBreakExtension.extend({
