@@ -758,9 +758,7 @@ export const load = (request: MySubscribeRequest) =>
     const events: TrustedEvent[] = []
     const sub = subscribe({...request, closeOnEose: true})
 
-    sub.emitter.on(SubscriptionEvent.Close, (url: string, event: TrustedEvent) =>
-      events.push(event),
-    )
+    sub.emitter.on(SubscriptionEvent.Event, (url: string, e: TrustedEvent) => events.push(e))
     sub.emitter.on(SubscriptionEvent.Complete, (url: string) => resolve(events))
   })
 

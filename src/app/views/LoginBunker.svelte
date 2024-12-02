@@ -40,6 +40,7 @@
 
       if (await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})) {
         boot()
+        abortController.abort()
       }
     } finally {
       loading = false
