@@ -168,7 +168,7 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
-const failedUnwraps = new Set()
+const pendingUnwraps = new Map<string, Promise<TrustedEvent>>()
 
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
@@ -177,8 +177,14 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   let rumor = repository.eventsByWrap.get(event.id)
 
-  if (rumor || failedUnwraps.has(event.id)) {
+  if (rumor) {
     return rumor
+  }
+
+  const pending = pendingUnwraps.get(event.id)
+
+  if (pending) {
+    return pending
   }
 
   // Decrypt by session
@@ -187,17 +193,19 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   if (signer) {
     try {
-      rumor = await Nip59.fromSigner(signer).unwrap(event as SignedEvent)
+      const pending = Nip59.fromSigner(signer).unwrap(event as SignedEvent)
+
+      pendingUnwraps.set(event.id, pending)
+      rumor = await pending
     } catch (e) {
       // pass
     }
   }
 
   if (rumor && isHashedEvent(rumor)) {
+    pendingUnwraps.delete(event.id)
     tracker.copy(event.id, rumor.id)
     relay.send("EVENT", rumor)
-  } else {
-    failedUnwraps.add(event.id)
   }
 
   return rumor
