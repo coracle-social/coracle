@@ -19,7 +19,12 @@
 
   const relays = env.SIGNER_RELAYS
 
-  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+  const broker = Nip46Broker.get({
+    relays,
+    clientSecret,
+    signerPubkey,
+    algorithm: "nip04",
+  })
 
   const prev = () => setStage("intro")
 
