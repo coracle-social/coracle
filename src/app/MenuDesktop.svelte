@@ -81,7 +81,10 @@
   </Anchor>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
   {#if env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem path="/settings/relays" isActive={$page?.path.startsWith("/settings/relays")}>
+    <MenuDesktopItem
+      path="/settings/relays"
+      disabled={!$signer}
+      isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
         Relays
         {#if $slowConnections.length > 0}
@@ -112,7 +115,7 @@
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem modal path="/groups">Groups</MenuDesktopItem>
+  <MenuDesktopItem modal path="/groups" disabled={!$signer}>Groups</MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
@@ -127,7 +130,10 @@
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
           <i class="fa fa-palette" /> Toggle Theme
         </MenuItem>
-        <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/data">
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          href="/settings/data"
+          disabled={!$signer}>
           <i class="fa fa-database" /> Database
         </MenuItem>
         <MenuItem

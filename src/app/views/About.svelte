@@ -20,7 +20,7 @@
 <FlexColumn class="gap-8">
   <div class="flex flex-col items-center justify-center">
     <Heading>Coracle</Heading>
-    <h2>An experimental nostr client</h2>
+    <h2 class="m-auto text-center">A Nostr client for feeds that puts relays first.</h2>
     {#if hash}
       <p class="mt-1 text-xs">Running build {hash.slice(0, 8)}</p>
     {/if}
@@ -29,9 +29,7 @@
     <Card>
       <FlexColumn class="py-6 text-center">
         <h3 class="text-xl sm:h-12">Support development</h3>
-        <p class="sm:h-24">
-          All funds donated will be used to support server costs and development.
-        </p>
+        <p class="sm:h-20">All funds will be used to support server costs and development.</p>
         <div class="flex justify-center">
           <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
             Zap the developer
@@ -42,7 +40,7 @@
     <Card>
       <FlexColumn class="py-6 text-center">
         <h3 class="text-xl sm:h-12">Get in touch</h3>
-        <p class="sm:h-24">Having problems? Let us know.</p>
+        <p class="sm:h-20">Having problems? Let us know.</p>
         <div class="flex justify-center">
           <Anchor
             button

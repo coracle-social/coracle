@@ -65,7 +65,7 @@
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
       {#if env.PLATFORM_RELAYS.length === 0}
-        <MenuMobileItem href="/settings/relays" on:click={closeMenu}>
+        <MenuMobileItem href="/settings/relays" disabled={!$signer} on:click={closeMenu}>
           <i class="fa fa-server" />
           <div class="relative inline-block">
             Relays
@@ -76,7 +76,7 @@
           </div>
         </MenuMobileItem>
       {/if}
-      <MenuMobileItem disabled={!$pubkey} href="/notifications" on:click={closeMenu}>
+      <MenuMobileItem disabled={!$signer} href="/notifications" on:click={closeMenu}>
         <i class="fa fa-bell" />
         <div class="relative inline-block">
           Notifications
@@ -86,7 +86,7 @@
           {/if}
         </div>
       </MenuMobileItem>
-      <MenuMobileItem modal href="/groups" on:click={closeMenu}>
+      <MenuMobileItem modal disabled={!$signer} href="/groups" on:click={closeMenu}>
         <i class="fa fa-circle-nodes" /> Groups
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/channels" on:click={closeMenu}>
@@ -123,7 +123,7 @@
       <MenuMobileItem on:click={toggleTheme} on:click={closeMenu}>
         <i class="fa fa-palette" /> Theme
       </MenuMobileItem>
-      <MenuMobileItem disabled={!$pubkey} href="/settings/data" on:click={closeMenu}>
+      <MenuMobileItem disabled={!$signer} href="/settings/data" on:click={closeMenu}>
         <i class="fa fa-database" /> Database
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/content" on:click={closeMenu}>
