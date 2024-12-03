@@ -34,7 +34,12 @@
     }
 
     const clientSecret = makeSecret()
-    const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+    const broker = Nip46Broker.get({
+      relays,
+      clientSecret,
+      signerPubkey,
+      algorithm: "nip04",
+    })
 
     const userPubkey = await broker.createAccount(username, signerDomain, NIP46_PERMS)
 
