@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {onDestroy} from "svelte"
-  import {Nip46Broker} from "@welshman/signer"
-  import {addSession} from "@welshman/app"
+  import {onMount, onDestroy} from "svelte"
+  import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {addSession, pubkey} from "@welshman/app"
   import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -17,27 +17,22 @@
   import {pushToast} from "@app/toast"
   import {NIP46_PERMS, PLATFORM_URL, PLATFORM_NAME, PLATFORM_LOGO, SIGNER_RELAYS} from "@app/state"
 
-  const back = () => history.back()
+  const clientSecret = makeSecret()
 
   const abortController = new AbortController()
 
-  const init = Nip46Broker.initiate({
-    perms: NIP46_PERMS,
-    url: PLATFORM_URL,
-    name: PLATFORM_NAME,
-    relays: SIGNER_RELAYS,
-    image: PLATFORM_LOGO,
-    abortController,
-  })
+  const broker = Nip46Broker.get({clientSecret, relays: SIGNER_RELAYS})
+
+  const back = () => history.back()
 
   const onSubmit = async () => {
-    const {pubkey, token, relays} = Nip46Broker.parseBunkerLink(bunker)
+    const {signerPubkey, connectSecret, relays} = broker.parseBunkerUrl(input)
 
     if (loading) {
       return
     }
 
-    if (!pubkey || relays.length === 0) {
+    if (!signerPubkey || relays.length === 0) {
       return pushToast({
         theme: "error",
         message: "Sorry, it looks like that's an invalid bunker link.",
@@ -47,16 +42,16 @@
     loading = true
 
     try {
-      if (!(await loginWithNip46(token, {pubkey, relays}))) {
+      if (await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})) {
+        abortController.abort()
+
+        await loadUserData($pubkey!)
+      } else {
         return pushToast({
           theme: "error",
           message: "Something went wrong, please try again!",
         })
       }
-
-      abortController.abort()
-
-      await loadUserData(pubkey)
     } finally {
       loading = false
     }
@@ -64,21 +59,48 @@
     clearModals()
   }
 
-  let bunker = ""
+  let url = ""
+  let input = ""
   let loading = false
 
-  init.result.then(async pubkey => {
-    if (pubkey) {
+  onMount(async () => {
+    url = await broker.makeNostrconnectUrl({
+      perms: NIP46_PERMS,
+      url: PLATFORM_URL,
+      name: PLATFORM_NAME,
+      image: PLATFORM_LOGO,
+    })
+
+    let response
+    try {
+      response = await broker.waitForNostrconnect(url, abortController)
+    } catch (errorResponse: any) {
+      if (errorResponse?.error) {
+        pushToast({
+          theme: "error",
+          message: `Received error from signer: ${errorResponse.error}`,
+        })
+      } else if (errorResponse) {
+        console.error(errorResponse)
+      }
+    }
+
+    if (response) {
       loading = true
 
+      const userPubkey = await broker.getPublicKey()
+
       addSession({
-        pubkey,
         method: "nip46",
-        secret: init.clientSecret,
-        handler: {pubkey, relays: SIGNER_RELAYS},
+        pubkey: userPubkey,
+        secret: clientSecret,
+        handler: {
+          pubkey: response.event.pubkey,
+          relays: SIGNER_RELAYS,
+        },
       })
 
-      await loadUserData(pubkey)
+      await loadUserData(userPubkey)
 
       setChecked("*")
       clearModals()
@@ -97,16 +119,16 @@
       Connect your signer by scanning the QR code below or pasting a bunker link.
     </div>
   </ModalHeader>
-  {#if !loading}
+  {#if !loading && url}
     <div class="w-xs m-auto" out:slideAndFade>
-      <QRCode code={init.nostrconnect} />
+      <QRCode code={url} />
     </div>
   {/if}
   <Field>
     <p slot="label">Bunker Link*</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="cpu" />
-      <input disabled={loading} bind:value={bunker} class="grow" placeholder="bunker://" />
+      <input disabled={loading} bind:value={input} class="grow" placeholder="bunker://" />
     </label>
     <p slot="info">
       A login link provided by a nostr signing app.
@@ -118,7 +140,7 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={loading || !bunker}>
+    <Button type="submit" class="btn btn-primary" disabled={loading || !input}>
       <Spinner {loading}>Next</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

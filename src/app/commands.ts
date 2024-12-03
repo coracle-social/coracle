@@ -24,7 +24,6 @@ import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
 import {PublishStatus, AuthStatus, SocketStatus, SubscriptionEvent} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
-import type {Nip46Handler} from "@welshman/signer"
 import {
   pubkey,
   signer,
@@ -120,18 +119,30 @@ export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
 
 // Log in
 
-export const loginWithNip46 = async (token: string, handler: Nip46Handler) => {
-  const secret = makeSecret()
-  const broker = Nip46Broker.get({secret, handler})
-  const result = await broker.connect(token, NIP46_PERMS)
+export const loginWithNip46 = async ({
+  relays,
+  signerPubkey,
+  clientSecret = makeSecret(),
+  connectSecret = "",
+}: {
+  relays: string[]
+  signerPubkey: string
+  clientSecret?: string
+  connectSecret?: string
+}) => {
+  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+  const result = await broker.connect("", connectSecret, NIP46_PERMS)
 
-  if (!result) return false
+  // TODO: remove ack result
+  if (!["ack", connectSecret].includes(result)) return false
 
   const pubkey = await broker.getPublicKey()
 
   if (!pubkey) return false
 
-  addSession({method: "nip46", pubkey, secret, handler})
+  const handler = {relays, pubkey: signerPubkey}
+
+  addSession({method: "nip46", pubkey, secret: clientSecret, handler})
 
   return true
 }

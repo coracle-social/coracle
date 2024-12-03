@@ -1,6 +1,6 @@
 <script lang="ts">
   import {makeSecret, Nip46Broker} from "@welshman/signer"
-  import {addSession, loadHandle} from "@welshman/app"
+  import {loadHandle} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -13,12 +13,18 @@
   import {setChecked} from "@app/notifications"
   import {PLATFORM_NAME, NIP46_PERMS} from "@app/state"
   import {pushToast} from "@app/toast"
+  import {loginWithNip46} from "@app/commands"
+
+  const relays = ["wss://relay.nsec.app"]
+
+  const signerDomain = "nsec.app"
+
+  const signerPubkey = "e24a86943d37a91ab485d6f9a7c66097c25ddd67e8bd1b75ed252a3c266cf9bb"
 
   const login = () => pushModal(LogIn)
 
   const trySignup = async () => {
-    const secret = makeSecret()
-    const handle = await loadHandle(`${username}@${handler.domain}`)
+    const handle = await loadHandle(`${username}@${signerDomain}`)
 
     if (handle?.pubkey) {
       return pushToast({
@@ -27,30 +33,31 @@
       })
     }
 
-    const signupBroker = Nip46Broker.get({secret, handler})
-    const pubkey = await signupBroker.createAccount(username, NIP46_PERMS)
+    const clientSecret = makeSecret()
+    const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
 
-    if (!pubkey) {
+    const userPubkey = await broker.createAccount(username, signerDomain, NIP46_PERMS)
+
+    if (!userPubkey) {
       return pushToast({
         theme: "error",
         message: "Sorry, it looks like something went wrong. Please try again.",
       })
     }
 
-    // Gotta use user pubkey as the handler pubkey for historical reasons
-    const loginBroker = Nip46Broker.get({secret, handler: {...handler, pubkey}})
+    // Now we can log in. Use the user's pubkey for the handler (legacy stuff)
+    const success = await loginWithNip46({relays, signerPubkey: userPubkey, clientSecret})
 
-    if (await loginBroker.connect("", NIP46_PERMS)) {
-      addSession({method: "nip46", pubkey, secret, handler: {...handler, pubkey}})
-      pushToast({message: "Successfully logged in!"})
-      setChecked("*")
-      clearModals()
-    } else {
-      pushToast({
+    if (!success) {
+      return pushToast({
         theme: "error",
-        message: "Something went wrong! Please try again.",
+        message: "Sorry, it looks like something went wrong. Please try again.",
       })
     }
+
+    pushToast({message: "Successfully logged in!"})
+    setChecked("*")
+    clearModals()
   }
 
   const signup = async () => {
