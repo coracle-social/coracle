@@ -1,9 +1,11 @@
 <script lang="ts">
   import {relaysByUrl} from "@welshman/app"
   import {addToMapKey, ctx} from "@welshman/lib"
+  import {throttled} from "@welshman/store"
   import {displayRelayUrl} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount} from "svelte"
+  import {writable, type Writable} from "svelte/store"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {ConnectionType} from "src/engine"
@@ -13,8 +15,8 @@
   export let activeTab: string
 
   let selectedOptions: string[] = []
-  let connectionsStatus: Map<string, Set<string>> = new Map()
 
+  const connectionsStatus: Writable<Map<string, Set<string>>> = throttled(1000, writable(new Map()))
   const options = [
     ConnectionType.Connected,
     ConnectionType.Logging,
@@ -26,7 +28,7 @@
   ]
 
   $: connections = Array.from(ctx.net.pool.data.keys()).filter(url =>
-    selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
+    selectedOptions.length ? selectedOptions.some(s => $connectionsStatus.get(s)?.has(url)) : true,
   )
 
   onMount(() => {
@@ -36,7 +38,7 @@
       for (const [url, cxn] of ctx.net.pool.data.entries()) {
         addToMapKey(newConnectionStatus, getConnectionStatus(cxn), url)
       }
-      connectionsStatus = newConnectionStatus
+      $connectionsStatus = newConnectionStatus
     }, 800)
 
     return () => {
@@ -47,7 +49,7 @@
 
 <SelectButton {options} bind:value={selectedOptions} multiple class="text-left">
   <div class="flex items-center gap-2" slot="item" let:option>
-    {connectionsStatus.get(option)?.size || 0}
+    {$connectionsStatus.get(option)?.size || 0}
     {option}
   </div>
 </SelectButton>
@@ -86,7 +88,7 @@
         </div>
       </div>
       <div class="flex w-full items-center justify-end gap-2 text-sm">
-        {#each options.filter(o => connectionsStatus.get(o)?.has(url)) as opt}
+        {#each options.filter(o => $connectionsStatus.get(o)?.has(url)) as opt}
           <div class="flex items-center gap-2">
             <span>{opt}</span>
             <div

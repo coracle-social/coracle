@@ -51,8 +51,16 @@ import {
   uniq,
   uniqBy,
 } from "@welshman/lib"
-import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, AuthMode, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
+import type {Connection, PublishRequest, Target} from "@welshman/net"
+import {
+  Executor,
+  AuthMode,
+  Local,
+  Multi,
+  Relays,
+  SubscriptionEvent,
+  ConnectionEvent,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
@@ -1029,6 +1037,10 @@ const migrateEvents = (events: TrustedEvent[]) => {
   )
 }
 
+export type SubscriptionNotice = {created_at: number; notice: string[]}
+
+export const subscriptionNotices = writable<Map<string, SubscriptionNotice[]>>(new Map())
+
 // Avoid initializing multiple times on hot reload
 if (!db) {
   const initialRelays = [
@@ -1056,6 +1068,17 @@ if (!db) {
 
     ctx.net.authMode = autoAuthenticate ? AuthMode.Implicit : AuthMode.Explicit
     ctx.app.dufflepudUrl = getSetting("dufflepud_url")
+  })
+
+  ctx.net.pool.on("init", (connection: Connection) => {
+    // if (!connection.url.includes("snort")) return
+    connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
+      if (verb == "EVENT") return
+      subscriptionNotices.update($notices => {
+        pushToMapKey($notices, connection.url, {created_at: now(), notice: [verb, ...args]})
+        return $notices
+      })
+    })
   })
 
   ready = initStorage("coracle", 2, {
