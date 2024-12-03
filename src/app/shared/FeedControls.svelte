@@ -3,7 +3,7 @@
   import {sortBy, not, equals, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {synced} from "@welshman/store"
-  import {isSearchFeed, makeSearchFeed, getFeedArgs} from "@welshman/feeds"
+  import {isSearchFeed, makeScopeFeed, Scope, makeSearchFeed, getFeedArgs} from "@welshman/feeds"
   import {signer} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {slideAndFade} from "src/util/transition"
@@ -15,7 +15,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
-  import {normalizeFeedDefinition, readFeed, displayFeed} from "src/domain"
+  import {normalizeFeedDefinition, makeFeed, readFeed, displayFeed} from "src/domain"
   import {userListFeeds, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
 
   export let feed
@@ -62,6 +62,13 @@
   const setFeed = newFeed => {
     feed = newFeed
     setFeedDefinition(feed.definition)
+  }
+
+  const createFeed = () => {
+    const definition = normalizeFeedDefinition(makeScopeFeed(Scope.Follows))
+
+    setFeed(makeFeed({definition}))
+    openForm()
   }
 
   const exitForm = event => {
@@ -125,9 +132,11 @@
               on:click={() => setFeed(other)}>
               {displayFeed(other)}
             </Chip>
-          {:else}
-            <p>No custom feeds found - click "Edit feed" below to get started!</p>
           {/each}
+          <Chip class="cursor-pointer" on:click={createFeed}>
+            <i class="fa fa-plus" />
+            Add feed
+          </Chip>
         </div>
         <div class="my-4 flex flex-col-reverse justify-between gap-2 sm:flex-row">
           <div class="flex flex-col gap-2 sm:flex-row">

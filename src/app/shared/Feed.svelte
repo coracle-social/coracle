@@ -116,8 +116,10 @@
     })
 
     ctrl.getRequestItems().then($requestItems => {
-      if ($requestItems) {
-        filters = unionFilters($requestItems.flatMap(item => item.filters))
+      const filterOnlyRequestItems = $requestItems?.filter(ri => !ri.relays?.length)
+
+      if (filterOnlyRequestItems) {
+        filters = unionFilters(filterOnlyRequestItems.flatMap(item => item.filters))
       }
     })
 

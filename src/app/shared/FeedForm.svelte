@@ -106,7 +106,7 @@
         <p>You are currently editing "{displayFeed(draft)}" feed.</p>
       {:else}
         <p>
-          You are currently cloning "{displayFeed(draft)}" by @{displayProfileByPubkey(
+          You are currently cloning "{displayFeed(feed)}" by @{displayProfileByPubkey(
             event.pubkey,
           )}.
         </p>
