@@ -3,14 +3,11 @@
   import {goto} from "$app/navigation"
   import {ctx, nthEq} from "@welshman/lib"
   import {Address, DIRECT_MESSAGE} from "@welshman/util"
-  import {repository} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import {deriveEvent, entityLink, MESSAGE, THREAD} from "@app/state"
   import {makeThreadPath} from "@app/routes"
-  import {pushDrawer} from "@app/modal"
 
   export let value
   export let event
@@ -44,16 +41,6 @@
     return Boolean(element)
   }
 
-  const openMessage = (url: string, room: string, id: string) => {
-    const event = repository.getEvent(id)
-
-    if (event) {
-      return pushDrawer(ChannelConversation, {url, room, event})
-    }
-
-    return Boolean(event)
-  }
-
   const onClick = (e: Event) => {
     if ($quote) {
       if ($quote.kind === DIRECT_MESSAGE) {
@@ -68,7 +55,7 @@
         }
 
         if ($quote.kind === MESSAGE) {
-          return scrollToEvent($quote.id) || openMessage(url, room, $quote.id)
+          return scrollToEvent($quote.id)
         }
 
         const kind = $quote.tags.find(nthEq(0, "K"))?.[1]
@@ -80,7 +67,7 @@
           }
 
           if (parseInt(kind) === MESSAGE) {
-            return scrollToEvent(id) || openMessage(url, room, id)
+            return scrollToEvent(id)
           }
         }
       }

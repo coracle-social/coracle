@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {readable} from "svelte/store"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -17,39 +16,26 @@
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
-  import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
-  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, tagRoom, deriveEvent, pubkeyLink} from "@app/state"
+  import {colors, tagRoom, pubkeyLink} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
-  import {pushDrawer, pushModal} from "@app/modal"
+  import {pushModal} from "@app/modal"
 
   export let url, room
   export let event: TrustedEvent
   export let replyTo: any = undefined
   export let showPubkey = false
-  export let isHead = false
   export let inert = false
 
   const thunk = $thunks[event.id]
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
-  const rootTag = event.tags.find(t => t[0].match(/^e$/i))
-  const rootId = rootTag?.[1]
-  const rootHints = [rootTag?.[2]].filter(Boolean) as string[]
-  const rootEvent = rootId ? deriveEvent(rootId, rootHints) : readable(null)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
   const reply = () => replyTo(event)
-
-  const onClick = () => {
-    const root = $rootEvent || event
-
-    pushDrawer(ChannelConversation, {url, room, event: root})
-  }
 
   const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event})
 
@@ -71,11 +57,8 @@
 
 <LongPress
   data-event={event.id}
-  on:click={isMobile || inert ? null : onClick}
   onLongPress={inert ? null : onLongPress}
-  class="group relative flex w-full flex-col p-2 pb-3 text-left transition-colors {inert
-    ? 'hover:bg-base-300'
-    : ''}">
+  class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left hover:z-feature">
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
@@ -106,9 +89,6 @@
     </div>
   </div>
   <div class="row-2 ml-10 mt-1">
-    {#if !isHead}
-      <ReplySummary relays={[url]} {event} on:click={onClick} />
-    {/if}
     <ReactionSummary relays={[url]} {event} {onReactionClick} reactionClass="tooltip-right" />
   </div>
   <button

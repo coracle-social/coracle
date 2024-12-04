@@ -37,7 +37,6 @@
     GENERAL,
     tagRoom,
     MESSAGE,
-    COMMENT,
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
@@ -82,10 +81,6 @@
     let previousPubkey
 
     for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
-      if (event.kind === COMMENT) {
-        continue
-      }
-
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
@@ -127,7 +122,7 @@
 
     unsub = subscribePersistent({
       relays: [url],
-      filters: [{kinds: [MESSAGE, COMMENT], "#~": [room], since: now()}],
+      filters: [{kinds: [MESSAGE], "#~": [room], since: now()}],
     })
   })
 

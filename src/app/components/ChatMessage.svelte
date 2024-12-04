@@ -16,7 +16,6 @@
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
-  import ReplySummary from "@app/components/ReplySummary.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
@@ -119,7 +118,6 @@
       </div>
     </LongPress>
     <div class="row-2 z-feature -mt-1 ml-4">
-      <ReplySummary {event} />
       <ReactionSummary {event} {onReactionClick} noTooltip />
     </div>
   </div>

@@ -5,10 +5,9 @@
   import Icon from "@lib/components/Icon.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import ChannelConversation from "@app/components/ChannelConversation.svelte"
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {publishReaction} from "@app/commands"
-  import {pushModal, pushDrawer} from "@app/modal"
+  import {pushModal} from "@app/modal"
   import {tagRoom} from "@app/state"
 
   export let url
@@ -27,9 +26,6 @@
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
-  const showConversation = () =>
-    pushDrawer(ChannelConversation, {url, room, event}, {replaceState: true})
-
   const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
 
   const showDelete = () => pushModal(ConfirmDelete, {url, event})
@@ -39,10 +35,6 @@
   <Button class="btn btn-primary w-full" on:click={showEmojiPicker}>
     <Icon size={4} icon="smile-circle" />
     Send Reaction
-  </Button>
-  <Button class="btn btn-neutral w-full" on:click={showConversation}>
-    <Icon size={4} icon="reply" />
-    View Conversation
   </Button>
   <Button class="btn btn-neutral" on:click={showInfo}>
     <Icon size={4} icon="code-2" />

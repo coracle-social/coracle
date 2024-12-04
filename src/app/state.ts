@@ -396,7 +396,7 @@ export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
 }
 
 export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
-  filters: [{kinds: [MESSAGE, COMMENT]}],
+  filters: [{kinds: [MESSAGE]}],
   eventToItem: readMessage,
   itemToEvent: item => item.event,
 })
