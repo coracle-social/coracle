@@ -239,7 +239,7 @@ class RouterExtension {
 
   push = (config = {}) => this.go(config)
 
-  open = (config = {}) => this.go({modal: true, drawer: true, ...config})
+  open = (config = {}) => this.go({modal: true, ...config})
 
   pushModal = (config = {}) => this.go({...config, modal: true})
 
