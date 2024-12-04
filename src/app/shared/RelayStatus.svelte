@@ -2,8 +2,7 @@
   import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import Popover from "src/partials/Popover.svelte"
-  import {ConnectionType} from "src/engine"
-  import {getConnectionStatus} from "src/util/connection"
+  import {ConnectionType, displayConnectionType, getConnectionStatus} from "src/domain/connection"
 
   export let url
 
@@ -37,6 +36,6 @@
       ConnectionType.UnstableConnection,
     ].some(s => s == status)} />
   <div slot="tooltip" class="transition-all sm:block">
-    {status}
+    {displayConnectionType(status)}
   </div>
 </Popover>
