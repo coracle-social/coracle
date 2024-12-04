@@ -117,11 +117,11 @@
         bind:this={content}>
         <div
           class="pointer-events-auto flex min-h-full flex-col justify-center transition-all duration-500"
-          class:mt-12={!drawer}
+          class:mt-12={drawer}
           class:mt-[55vh]={mini}>
           {#if canClose}
             <div
-              class="pointer-events-none sticky top-0 z-popover mx-auto flex w-full max-w-4xl flex-col items-end gap-2 p-2">
+              class="pointer-events-none sticky top-0 z-popover mx-auto flex w-full max-w-3xl flex-col items-end gap-2 p-2">
               <div
                 class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                      border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
@@ -141,15 +141,15 @@
             <AltColor
               background
               class={cx(
-                {"min-h-screen": !drawer, "pb-4": drawer, "rounded-b-2xl": drawer},
-                "relative m-auto h-full w-full max-w-3xl cursor-auto overflow-hidden rounded-t-2xl pb-20 pt-2",
+                {"min-h-screen": drawer, "rounded-b-2xl": !drawer},
+                "relative m-auto h-full w-full max-w-2xl cursor-auto overflow-hidden rounded-t-2xl",
               )}>
-              <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-2">
+              <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-4">
                 <slot />
               </div>
             </AltColor>
           </div>
-          {#if drawer}
+          {#if !drawer}
             <div class="h-12" />
           {/if}
         </div>
