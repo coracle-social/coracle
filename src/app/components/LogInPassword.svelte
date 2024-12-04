@@ -25,7 +25,7 @@
 
   const abortController = new AbortController()
 
-  const relays = BURROW_URL.startsWith('http://')
+  const relays = BURROW_URL.startsWith("http://")
     ? [normalizeRelayUrl("ws://" + stripProtocol(BURROW_URL))]
     : [normalizeRelayUrl(BURROW_URL)]
 

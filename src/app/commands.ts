@@ -46,6 +46,8 @@ import {
   loadRelay,
   addSession,
   subscribe,
+  clearStorage,
+  dropSession,
 } from "@welshman/app"
 import {
   COMMENT,
@@ -147,6 +149,19 @@ export const loginWithNip46 = async ({
   addSession({method: "nip46", pubkey, secret: clientSecret, handler})
 
   return true
+}
+
+// Log out
+
+export const logout = async () => {
+  const $pubkey = pubkey.get()
+
+  if ($pubkey) {
+    dropSession($pubkey)
+  }
+
+  await clearStorage()
+  localStorage.clear()
 }
 
 // Loaders

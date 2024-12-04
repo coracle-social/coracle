@@ -1,30 +1,28 @@
 <script lang="ts">
-  import {clearStorage} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import {logout} from "@app/commands"
 
   const back = () => history.back()
 
-  const logout = async () => {
+  const doLogout = async () => {
     loading = true
 
     try {
-      await clearStorage()
-      localStorage.clear()
+      await logout()
+      window.location.href = "/"
     } catch (e) {
       loading = false
     }
-
-    window.location.reload()
   }
 
   let loading = false
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={logout}>
+<form class="column gap-4" on:submit|preventDefault={doLogout}>
   <ModalHeader>
     <div slot="title">Are you sure you want<br />to log out?</div>
   </ModalHeader>
