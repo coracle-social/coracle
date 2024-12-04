@@ -1,22 +1,19 @@
 <script lang="ts">
   import {relaysByUrl} from "@welshman/app"
   import {addToMapKey, ctx} from "@welshman/lib"
-  import {throttled} from "@welshman/store"
   import {displayRelayUrl} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount} from "svelte"
-  import {writable, type Writable} from "svelte/store"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {ConnectionType} from "src/engine"
-  import {getConnectionStatus} from "src/util/connection"
+  import {ConnectionType, displayConnectionType, getConnectionStatus} from "src/domain/connection"
 
   export let selected: string
   export let activeTab: string
 
-  let selectedOptions: string[] = []
+  let selectedOptions: ConnectionType[] = []
+  let connectionsStatus: Map<ConnectionType, Set<string>> = new Map()
 
-  const connectionsStatus: Writable<Map<string, Set<string>>> = throttled(1000, writable(new Map()))
   const options = [
     ConnectionType.Connected,
     ConnectionType.Logging,
@@ -28,18 +25,20 @@
   ]
 
   $: connections = Array.from(ctx.net.pool.data.keys()).filter(url =>
-    selectedOptions.length ? selectedOptions.some(s => $connectionsStatus.get(s)?.has(url)) : true,
+    selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
   )
 
+  function fetchConnectionStatus() {
+    const newConnectionStatus: Map<ConnectionType, Set<string>> = new Map()
+    for (const [url, cxn] of ctx.net.pool.data.entries()) {
+      addToMapKey(newConnectionStatus, getConnectionStatus(cxn), url)
+    }
+    connectionsStatus = newConnectionStatus
+  }
+
   onMount(() => {
-    const interval = setInterval(() => {
-      // make a copy of the connections
-      const newConnectionStatus: Map<string, Set<string>> = new Map()
-      for (const [url, cxn] of ctx.net.pool.data.entries()) {
-        addToMapKey(newConnectionStatus, getConnectionStatus(cxn), url)
-      }
-      $connectionsStatus = newConnectionStatus
-    }, 800)
+    fetchConnectionStatus()
+    const interval = setInterval(fetchConnectionStatus, 800)
 
     return () => {
       clearInterval(interval)
@@ -49,8 +48,8 @@
 
 <SelectButton {options} bind:value={selectedOptions} multiple class="text-left">
   <div class="flex items-center gap-2" slot="item" let:option>
-    {$connectionsStatus.get(option)?.size || 0}
-    {option}
+    {connectionsStatus.get(option)?.size || 0}
+    {displayConnectionType(option)}
   </div>
 </SelectButton>
 {#each connections as url (url)}
@@ -88,14 +87,15 @@
         </div>
       </div>
       <div class="flex w-full items-center justify-end gap-2 text-sm">
-        {#each options.filter(o => $connectionsStatus.get(o)?.has(url)) as opt}
+        {#each options.filter(o => connectionsStatus.get(o)?.has(url)) as o}
+          {@const opt = displayConnectionType(o)}
           <div class="flex items-center gap-2">
             <span>{opt}</span>
             <div
               class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
               class:!bg-warning={opt == "Logging in" ||
-                opt == ConnectionType.WaitReconnect ||
-                opt == ConnectionType.UnstableConnection}
+                o == ConnectionType.WaitReconnect ||
+                o == ConnectionType.UnstableConnection}
               class="h-3 w-3 rounded-full bg-success" />
           </div>
         {/each}

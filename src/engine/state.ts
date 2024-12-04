@@ -966,6 +966,7 @@ export class ThreadLoader {
 
 // Remove the old database. TODO remove this
 import {deleteDB} from "idb"
+import {subscriptionNotices} from "src/domain/connection"
 deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()
@@ -1037,10 +1038,6 @@ const migrateEvents = (events: TrustedEvent[]) => {
   )
 }
 
-export type SubscriptionNotice = {created_at: number; notice: string[]}
-
-export const subscriptionNotices = writable<Map<string, SubscriptionNotice[]>>(new Map())
-
 // Avoid initializing multiple times on hot reload
 if (!db) {
   const initialRelays = [
@@ -1071,11 +1068,14 @@ if (!db) {
   })
 
   ctx.net.pool.on("init", (connection: Connection) => {
-    // if (!connection.url.includes("snort")) return
     connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
-      if (verb == "EVENT") return
+      if (verb == "EVENT" || verb == "EOSE" || verb == "NEG-MSG") return
       subscriptionNotices.update($notices => {
-        pushToMapKey($notices, connection.url, {created_at: now(), notice: [verb, ...args]})
+        pushToMapKey($notices, connection.url, {
+          created_at: now(),
+          url: cxn.url,
+          notice: [verb, ...args],
+        })
         return $notices
       })
     })
