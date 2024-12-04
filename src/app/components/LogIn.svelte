@@ -20,28 +20,27 @@
   const signUp = () => pushModal(SignUp)
 
   const withLoading =
-    (cb: (...args: any[]) => any) =>
+    (s: string, cb: (...args: any[]) => any) =>
     async (...args: any[]) => {
-      loading = true
+      loading = s
 
       try {
         await cb(...args)
       } finally {
-        loading = false
+        loading = undefined
       }
     }
 
   const onSuccess = async (session: Session, relays: string[] = []) => {
-    addSession(session)
-
     await loadUserData(session.pubkey, {relays})
 
+    addSession(session)
     pushToast({message: "Successfully logged in!"})
     setChecked("*")
     clearModals()
   }
 
-  const loginWithNip07 = withLoading(async () => {
+  const loginWithNip07 = withLoading("nip07", async () => {
     const pubkey = await getNip07()?.getPublicKey()
 
     if (pubkey) {
@@ -54,7 +53,7 @@
     }
   })
 
-  const loginWithSigner = withLoading(async (app: any) => {
+  const loginWithNip55 = withLoading("nip55", async (app: any) => {
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
 
@@ -72,8 +71,8 @@
 
   const loginWithBunker = () => pushModal(LogInBunker)
 
-  let loading = false
   let signers: any[] = []
+  let loading: string | undefined
   let hasNativeSigner = Boolean(getNip07())
 
   onMount(async () => {
@@ -96,7 +95,7 @@
   </p>
   {#if BURROW_URL}
     <Button disabled={loading} on:click={loginWithPassword} class="btn btn-primary">
-      {#if loading}
+      {#if loading === "password"}
         <span class="loading loading-spinner mr-3" />
       {:else}
         <Icon icon="key" />
@@ -109,7 +108,7 @@
       disabled={loading}
       on:click={loginWithNip07}
       class={cx("btn", {"btn-primary": !BURROW_URL, "btn-neutral": BURROW_URL})}>
-      {#if loading}
+      {#if loading === "nip07"}
         <span class="loading loading-spinner mr-3" />
       {:else}
         <Icon icon="widget" />
@@ -121,8 +120,8 @@
     <Button
       disabled={loading}
       class={cx("btn", {"btn-primary": !BURROW_URL, "btn-neutral": BURROW_URL})}
-      on:click={() => loginWithSigner(app)}>
-      {#if loading}
+      on:click={() => loginWithNip55(app)}>
+      {#if loading === "nip55"}
         <span class="loading loading-spinner mr-3" />
       {:else}
         <img src={app.iconUrl} alt={app.name} width="20" height="20" />

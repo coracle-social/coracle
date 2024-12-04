@@ -140,6 +140,8 @@ export const loginWithNip46 = async ({
 
   if (!pubkey) return false
 
+  await loadUserData(pubkey)
+
   const handler = {relays, pubkey: signerPubkey}
 
   addSession({method: "nip46", pubkey, secret: clientSecret, handler})
@@ -153,13 +155,16 @@ export const loadUserData = (
   pubkey: string,
   request: Partial<SubscribeRequestWithHandlers> = {},
 ) => {
-  const promise = Promise.all([
-    loadInboxRelaySelections(pubkey, request),
-    loadMembership(pubkey, request),
-    loadSettings(pubkey, request),
-    loadProfile(pubkey, request),
-    loadFollows(pubkey, request),
-    loadMutes(pubkey, request),
+  const promise = Promise.race([
+    sleep(3000),
+    Promise.all([
+      loadInboxRelaySelections(pubkey, request),
+      loadMembership(pubkey, request),
+      loadSettings(pubkey, request),
+      loadProfile(pubkey, request),
+      loadFollows(pubkey, request),
+      loadMutes(pubkey, request),
+    ]),
   ])
 
   // Load followed profiles slowly in the background without clogging other stuff up

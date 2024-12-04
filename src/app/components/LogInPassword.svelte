@@ -25,7 +25,9 @@
 
   const abortController = new AbortController()
 
-  const relays = [normalizeRelayUrl("ws://" + stripProtocol(BURROW_URL))]
+  const relays = BURROW_URL.startsWith('http://')
+    ? [normalizeRelayUrl("ws://" + stripProtocol(BURROW_URL))]
+    : [normalizeRelayUrl(BURROW_URL)]
 
   const broker = Nip46Broker.get({clientSecret, relays})
 
@@ -78,14 +80,15 @@
 
       const userPubkey = await broker.getPublicKey()
 
+      await loadUserData(userPubkey)
+
       addSession({
+        email,
         method: "nip46",
         pubkey: userPubkey,
         secret: clientSecret,
         handler: {pubkey: response.event.pubkey, relays},
       })
-
-      await loadUserData(userPubkey)
 
       setChecked("*")
       clearModals()

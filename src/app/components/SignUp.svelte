@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {postJson} from "@welshman/lib"
+  import {postJson, assoc} from "@welshman/lib"
   import {makeSecret, Nip46Broker} from "@welshman/signer"
-  import {loadHandle} from "@welshman/app"
+  import {pubkey, loadHandle, updateSession} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
@@ -49,7 +49,6 @@
   })
 
   const signupNsecApp = withLoading(async () => {
-    const secret = makeSecret()
     const handle = await loadHandle(`${username}@${signerDomain}`)
 
     if (handle?.pubkey) {
@@ -86,6 +85,7 @@
       })
     }
 
+    updateSession($pubkey!, assoc("email", email))
     pushToast({message: "Successfully logged in!"})
     setChecked("*")
     clearModals()

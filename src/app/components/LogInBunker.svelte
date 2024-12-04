@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
-  import {addSession, pubkey} from "@welshman/app"
+  import {addSession} from "@welshman/app"
   import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -42,10 +42,10 @@
     loading = true
 
     try {
-      if (await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})) {
-        abortController.abort()
+      const success = await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})
 
-        await loadUserData($pubkey!)
+      if (success) {
+        abortController.abort()
       } else {
         return pushToast({
           theme: "error",
@@ -90,6 +90,8 @@
 
       const userPubkey = await broker.getPublicKey()
 
+      await loadUserData(userPubkey)
+
       addSession({
         method: "nip46",
         pubkey: userPubkey,
@@ -99,8 +101,6 @@
           relays: SIGNER_RELAYS,
         },
       })
-
-      await loadUserData(userPubkey)
 
       setChecked("*")
       clearModals()
