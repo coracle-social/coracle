@@ -161,6 +161,7 @@ export const logout = async () => {
   }
 
   await clearStorage()
+
   localStorage.clear()
 }
 
