@@ -18,7 +18,7 @@
   import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
-  import {LOCAL_RELAY_URL, type SignedEvent} from "@welshman/util"
+  import {LOCAL_RELAY_URL, type TrustedEvent} from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
@@ -26,7 +26,7 @@
 
   const rendered = now()
 
-  export let event: SignedEvent
+  export let event: TrustedEvent
   export let removeDraft: () => void
 
   $: thunk = $thunks[event.id] as Thunk
@@ -42,7 +42,7 @@
   ).length
   $: timeout = statuses.filter(s => s.status === PublishStatus.Timeout).length
   $: success = statuses.filter(s => s.status === PublishStatus.Success).length
-  $: total = relays.length || 0
+  $: total = relays?.length || 0
 
   const completed = tweened(0)
 
