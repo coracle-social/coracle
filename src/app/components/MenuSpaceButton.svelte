@@ -39,7 +39,7 @@
           if ($page.url.pathname === path) return false
 
           const lastChecked = max([$checked["*"], $checked[path]])
-          const roomEvents = $events.filter(e => matchFilter({"#~": [room]}, e))
+          const roomEvents = $events.filter(e => matchFilter({"#h": [room]}, e))
 
           return getNotification($pubkey, lastChecked, roomEvents)
         }),

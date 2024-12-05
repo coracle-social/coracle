@@ -40,7 +40,7 @@ export const THREAD_FILTERS: Filter[] = [
 export const getNotificationFilters = (since: number): Filter[] =>
   [...CHAT_FILTERS, ...SPACE_FILTERS, ...THREAD_FILTERS].map(assoc("since", since))
 
-export const getRoomFilters = (room: string): Filter[] => ROOM_FILTERS.map(assoc("#~", [room]))
+export const getRoomFilters = (room: string): Filter[] => ROOM_FILTERS.map(assoc("#h", [room]))
 
 // Notification derivation
 

@@ -1,7 +1,6 @@
 import twColors from "tailwindcss/colors"
 import {get, derived} from "svelte/store"
 import {nip19} from "nostr-tools"
-import type {Maybe} from "@welshman/lib"
 import {
   ctx,
   setContext,
@@ -32,8 +31,6 @@ import {
   readList,
   getListTags,
   asDecryptedEvent,
-  isSignedEvent,
-  hasValidSignature,
   normalizeRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
@@ -48,6 +45,7 @@ import {
   getDefaultNetContext,
   makeRouter,
   tracker,
+  trackerStore,
   relay,
   getSession,
   getSigner,
@@ -56,22 +54,23 @@ import {
   createSearch,
   userFollows,
   ensurePlaintext,
+  thunkWorker,
 } from "@welshman/app"
-import type {AppSyncOpts} from "@welshman/app"
+import type {AppSyncOpts, Thunk} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
-export const ROOM = "~"
+export const ROOM = "h"
 
-export const GENERAL = "general"
+export const GENERAL = "_"
 
-export const MESSAGE = 209
+export const MESSAGE = 9
 
-export const THREAD = 309
+export const THREAD = 11
 
 export const COMMENT = 1111
 
-export const MEMBERSHIPS = 10209
+export const MEMBERSHIPS = 10009
 
 export const INDEXER_RELAYS = [
   "wss://purplepag.es/",
@@ -154,7 +153,7 @@ export const pubkeyLink = (
   relays = ctx.app.router.FromPubkeys([pubkey]).getUrls(),
 ) => entityLink(nip19.nprofileEncode({pubkey, relays}))
 
-export const tagRoom = (room: string, url: string) => [ROOM, room, url]
+export const tagRoom = (room: string, url: string) => [ROOM, room]
 
 export const getDefaultPubkeys = () => {
   const appPubkeys = DEFAULT_PUBKEYS.split(",")
@@ -222,30 +221,6 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   return Promise.all(promises)
 }
 
-setContext({
-  net: getDefaultNetContext({
-    isValid: (url: string, event: TrustedEvent) => {
-      if (!isSignedEvent(event) || !hasValidSignature(event)) {
-        return false
-      }
-
-      const roomTags = event.tags.filter(nthEq(0, "~"))
-
-      if (roomTags.length > 0 && !roomTags.some(nthEq(2, url))) {
-        return false
-      }
-
-      return true
-    },
-  }),
-  app: getDefaultAppContext({
-    dufflepudUrl: DUFFLEPUD_URL,
-    indexerRelays: INDEXER_RELAYS,
-    requestTimeout: 5000,
-    router: makeRouter(),
-  }),
-})
-
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   let attempted = false
 
@@ -265,22 +240,41 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-export const eventIsForUrl = (url: string, event: TrustedEvent) =>
-  event.tags.find(nthEq(0, "~"))?.[2] === url
-
 export const getEventsForUrl = (url: string, filters: Filter[]) =>
   sortBy(
     e => -e.created_at,
-    repository.query(filters).filter(e => eventIsForUrl(url, e)),
+    repository.query(filters).filter(e => tracker.hasRelay(e.id, url)),
   )
 
 export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
-  derived(deriveEvents(repository, {filters}), $events =>
+  derived([deriveEvents(repository, {filters}), trackerStore], ([$events, $tracker]) =>
     sortBy(
       e => -e.created_at,
-      $events.filter(e => eventIsForUrl(url, e)),
+      $events.filter(e => $tracker.hasRelay(e.id, url)),
     ),
   )
+
+// Context
+
+setContext({
+  net: getDefaultNetContext(),
+  app: getDefaultAppContext({
+    dufflepudUrl: DUFFLEPUD_URL,
+    indexerRelays: INDEXER_RELAYS,
+    requestTimeout: 5000,
+    router: makeRouter(),
+  }),
+})
+
+// Track what urls we're attempting to send messages to so we can associate them with spaces immediately
+
+thunkWorker.addGlobalHandler((thunk: Thunk) => {
+  if (thunk.event.tags.find(t => t[0] === ROOM)) {
+    for (const url of thunk.request.relays) {
+      tracker.track(thunk.event.id, url)
+    }
+  }
+})
 
 // Settings
 
@@ -335,7 +329,7 @@ export const {
 export const hasMembershipUrl = (list: List | undefined, url: string) =>
   getListTags(list).some(t => {
     if (t[0] === "r") return t[1] === url
-    if (t[0] === "~") return t[2] === url
+    if (t[0] === "group") return t[2] === url
 
     return false
   })
@@ -344,13 +338,13 @@ export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getList
 
 export const getMembershipRooms = (list?: List) =>
   getListTags(list)
-    .filter(t => t[0] === "~")
+    .filter(t => t[0] === "group")
     .map(t => ({url: t[2], room: t[1]}))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
   sort(
     getListTags(list)
-      .filter(t => t[0] === "~" && t[2] === url)
+      .filter(t => t[0] === "group" && t[2] === url)
       .map(nth(1)),
   )
 
@@ -373,85 +367,6 @@ export const {
       ...request,
       filters: [{kinds: [MEMBERSHIPS], authors: [pubkey]}],
     }),
-})
-
-// Messages
-
-export type ChannelMessage = {
-  url: string
-  room: string
-  event: TrustedEvent
-}
-
-export const readMessage = (event: TrustedEvent): Maybe<ChannelMessage> => {
-  const roomTags = event.tags.filter(nthEq(0, ROOM))
-
-  if (roomTags.length !== 1) return undefined
-
-  const [_, room, url] = roomTags[0]
-
-  if (!url || !room) return undefined
-
-  return {url: normalizeRelayUrl(url), room, event}
-}
-
-export const channelMessages = deriveEventsMapped<ChannelMessage>(repository, {
-  filters: [{kinds: [MESSAGE]}],
-  eventToItem: readMessage,
-  itemToEvent: item => item.event,
-})
-
-// Channels
-
-export type Channel = {
-  id: string
-  url: string
-  room: string
-  messages: ChannelMessage[]
-}
-
-export const makeChannelId = (url: string, room: string) => `${url}|${room}`
-
-export const splitChannelId = (id: string) => id.split("|")
-
-export const channels = derived(
-  [memberships, channelMessages],
-  ([$memberships, $channelMessages]) => {
-    const messagesByChannelId = new Map<string, ChannelMessage[]>()
-
-    // Add known rooms by membership so we don't have to scan messages to load all rooms
-    for (const membership of $memberships) {
-      for (const {url, room} of getMembershipRooms(membership)) {
-        messagesByChannelId.set(makeChannelId(url, room), [])
-      }
-    }
-
-    // Add messages/rooms without memberships
-    for (const message of $channelMessages) {
-      pushToMapKey(messagesByChannelId, makeChannelId(message.url, message.room), message)
-    }
-
-    return Array.from(messagesByChannelId.entries()).map(([id, messages]) => {
-      const [url, room] = splitChannelId(id)
-
-      return {id, url, room, messages}
-    })
-  },
-)
-
-export const {
-  indexStore: channelsById,
-  deriveItem: deriveChannel,
-  loadItem: loadChannel,
-} = collection({
-  name: "channels",
-  store: channels,
-  getKey: channel => channel.id,
-  load: (id: string, request: Partial<SubscribeRequestWithHandlers> = {}) => {
-    const [url, room] = splitChannelId(id)
-
-    return load({...request, relays: [url], filters: [{"#~": [room]}]})
-  },
 })
 
 // Chats
@@ -518,19 +433,94 @@ export const chatSearch = derived(chats, $chats =>
   }),
 )
 
+// Messages
+
+export const messages = deriveEvents(repository, {filters: [{kinds: [MESSAGE]}]})
+
+// Channels
+
+export type Channel = {
+  url: string
+  room: string
+  name: string
+  events: TrustedEvent[]
+}
+
+export const makeChannelId = (url: string, room: string) => `${url}|${room}`
+
+export const splitChannelId = (id: string) => id.split("|")
+
+export const channelsById = derived(
+  [memberships, messages, trackerStore],
+  ([$memberships, $messages, $tracker]) => {
+    const eventsByChannelId = new Map<string, TrustedEvent[]>()
+
+    // Add known rooms by membership so we have a full listing even if there are no messages there
+    for (const membership of $memberships) {
+      for (const {url, room} of getMembershipRooms(membership)) {
+        eventsByChannelId.set(makeChannelId(url, room), [])
+      }
+    }
+
+    // Add known messages to rooms
+    for (const event of $messages) {
+      const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
+
+      if (room) {
+        for (const url of $tracker.getRelays(event.id)) {
+          pushToMapKey(eventsByChannelId, makeChannelId(url, room), event)
+        }
+      }
+    }
+
+    const channelsById = new Map<string, Channel>()
+
+    for (const [id, unsorted] of eventsByChannelId.entries()) {
+      const [url, room] = splitChannelId(id)
+      const events = sortBy(e => -e.created_at, unsorted)
+
+      let name = room
+      for (const event of events) {
+        const tag = event.tags.find(t => t[0] === ROOM && t[2])
+
+        if (tag) {
+          name = tag[2]
+          break
+        }
+      }
+
+      channelsById.set(id, {url, room, name, events})
+    }
+
+    return channelsById
+  },
+)
+
+export const deriveChannel = (url: string, room: string) =>
+  derived(channelsById, $channelsById => $channelsById.get(makeChannelId(url, room)))
+
+export const deriveChannelMessages = (url: string, room: string) =>
+  derived(channelsById, $channelsById => $channelsById.get(makeChannelId(url, room))?.events || [])
+
 // Rooms
 
-export const roomsByUrl = derived(channels, $channels => {
+export const roomsByUrl = derived(channelsById, $channelsById => {
   const $roomsByUrl = new Map<string, string[]>()
 
-  for (const channel of $channels) {
-    if (channel.room) {
-      pushToMapKey($roomsByUrl, channel.url, channel.room)
-    }
+  for (const {url, room} of $channelsById.values()) {
+    pushToMapKey($roomsByUrl, url, room)
   }
 
   return $roomsByUrl
 })
+
+export const displayRoom = (room: string) => {
+  if (room === GENERAL) {
+    return "general"
+  }
+
+  return room
+}
 
 // User stuff
 

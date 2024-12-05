@@ -13,7 +13,7 @@
   import type {Readable} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
-  import {sortBy, sleep, append, now, ctx} from "@welshman/lib"
+  import {sleep, append, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -32,12 +32,12 @@
     userSettingValues,
     userMembership,
     decodeRelay,
-    makeChannelId,
-    deriveChannel,
+    deriveChannelMessages,
     GENERAL,
     tagRoom,
     MESSAGE,
     getMembershipRoomsByUrl,
+    displayRoom,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
@@ -46,7 +46,7 @@
   const {room = GENERAL} = $page.params
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
-  const channel = deriveChannel(makeChannelId(url, room))
+  const events = deriveChannelMessages(url, room)
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -80,7 +80,7 @@
     let previousDate
     let previousPubkey
 
-    for (const {event} of sortBy(m => m.event.created_at, $channel?.messages || [])) {
+    for (const event of $events.toReversed()) {
       const {id, pubkey, created_at} = event
       const date = formatTimestampAsDate(created_at)
 
@@ -108,7 +108,7 @@
 
     pullConservatively({
       relays: [url],
-      filters: [{kinds: [MESSAGE, DELETE], "#~": [room]}],
+      filters: [{kinds: [MESSAGE, DELETE], "#h": [room]}],
     })
 
     scroller = createScroller({
@@ -122,7 +122,7 @@
 
     unsub = subscribePersistent({
       relays: [url],
-      filters: [{kinds: [MESSAGE], "#~": [room], since: now()}],
+      filters: [{kinds: [MESSAGE], "#h": [room], since: now()}],
     })
   })
 
@@ -142,7 +142,7 @@
     <div slot="icon" class="center">
       <Icon icon="hashtag" />
     </div>
-    <strong slot="title">{room}</strong>
+    <strong slot="title">{displayRoom(room)}</strong>
     <div slot="action" class="row-2">
       {#if room !== GENERAL}
         {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}

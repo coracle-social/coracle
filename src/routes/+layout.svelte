@@ -208,7 +208,7 @@
           filters: [
             {kinds: [THREAD], limit: 1},
             {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
-            ...rooms.map(room => ({kinds: [MESSAGE], "#~": [room], limit: 1})),
+            ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
           ],
         })
 
@@ -218,7 +218,7 @@
           filters: [
             {kinds: [THREAD], since},
             {kinds: [COMMENT], "#K": [String(THREAD)], since},
-            {kinds: [MESSAGE], "#~": rooms, since},
+            {kinds: [MESSAGE], "#h": rooms, since},
           ],
         })
       })

@@ -2,6 +2,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import {makeSpacePath} from "@app/routes"
+  import {displayRoom} from "@app/state"
   import {deriveNotification, getRoomFilters} from "@app/notifications"
 
   export let url
@@ -13,5 +14,5 @@
 
 <SecondaryNavItem href={path} notification={$notification}>
   <Icon icon="hashtag" />
-  {room}
+  {displayRoom(room)}
 </SecondaryNavItem>
