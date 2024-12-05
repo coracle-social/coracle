@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {whereEq} from "ramda"
   import {ctx, last} from "@welshman/lib"
-  import {createEvent} from "@welshman/util"
+  import {createEvent, toNostrURI} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {commaFormat} from "hurdak"
@@ -135,7 +135,7 @@
       const relays = ctx.app.router.FromPubkeys([pubkey]).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
-      return "nostr:" + nprofile
+      return toNostrURI(nprofile)
     },
     decode: link => {
       // @ts-ignore
@@ -170,7 +170,7 @@
         relays: ctx.app.router.Event(quote).getUrls(),
       })
 
-      editor.commands.insertNEvent({nevent: "nostr:" + nevent})
+      editor.commands.insertNEvent({nevent: toNostrURI(nevent)})
     }
   })
 

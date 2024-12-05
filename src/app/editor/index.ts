@@ -20,6 +20,7 @@ import {
 } from "nostr-editor"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
+import {toNostrURI} from "@welshman/util"
 import {signer, profileSearch, RelayMode} from "@welshman/app"
 import {createSuggestions} from "./Suggestions"
 import EditMention from "src/app/editor/EditMention.svelte"
@@ -108,7 +109,7 @@ export const getEditorOptions = ({
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
-      renderText: props => "nostr:" + props.node.attrs.nprofile,
+      renderText: props => toNostrURI(props.node.attrs.nprofile),
       addProseMirrorPlugins() {
         return [
           createSuggestions({
@@ -131,13 +132,13 @@ export const getEditorOptions = ({
     NEventExtension.extend(
       asInline({
         addNodeView: () => SvelteNodeViewRenderer(EditEvent),
-        renderText: props => "nostr:" + props.node.attrs.nevent,
+        renderText: props => toNostrURI(props.node.attrs.nevent),
       }),
     ),
     NAddrExtension.extend(
       asInline({
         addNodeView: () => SvelteNodeViewRenderer(EditEvent),
-        renderText: props => "nostr:" + props.node.attrs.naddr,
+        renderText: props => toNostrURI(props.node.attrs.naddr),
       }),
     ),
     ImageExtension.extend(
