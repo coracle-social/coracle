@@ -28,7 +28,9 @@
 
   const showSettingsMenu = () => pushModal(MenuSettings)
 
-  const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable))
+  const openNotes = () => ($canDecrypt ? goto("/notes") : pushModal(ChatEnable, {next: "/notes"}))
+
+  const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 </script>
 
 <div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
@@ -57,7 +59,7 @@
         class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Notes" href="/notes" class="tooltip-right">
+      <PrimaryNavItem title="Notes" on:click={openNotes} class="tooltip-right">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem

@@ -51,7 +51,6 @@ import {
 } from "@welshman/app"
 import {
   COMMENT,
-  tagRoom,
   userMembership,
   MEMBERSHIPS,
   INDEXER_RELAYS,
@@ -242,7 +241,9 @@ export const removeSpaceMembership = async (url: string) => {
 
 export const addRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
-  const event = await addToListPublicly(list, tagRoom(room, url)).reconcile(nip44EncryptToSelf)
+  const event = await addToListPublicly(list, ["r", url], ["group", room, url]).reconcile(
+    nip44EncryptToSelf,
+  )
   const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
   return publishThunk({event, relays})
@@ -250,7 +251,7 @@ export const addRoomMembership = async (url: string, room: string) => {
 
 export const removeRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
-  const pred = (t: string[]) => equals(tagRoom(room, url), t)
+  const pred = (t: string[]) => equals(["group", room, url], t)
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
   const relays = uniq([
     url,

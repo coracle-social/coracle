@@ -24,6 +24,7 @@ import {
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
+  getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
   isHashedEvent,
@@ -334,17 +335,19 @@ export const hasMembershipUrl = (list: List | undefined, url: string) =>
     return false
   })
 
-export const getMembershipUrls = (list?: List) => sort(getRelayTagValues(getListTags(list)))
+export const getMembershipUrls = (list?: List) => {
+  const tags = getListTags(list)
+
+  return sort(uniq([...getRelayTagValues(tags), ...getGroupTags(tags).map(nth(2))]))
+}
 
 export const getMembershipRooms = (list?: List) =>
-  getListTags(list)
-    .filter(t => t[0] === "group")
-    .map(t => ({url: t[2], room: t[1]}))
+  getGroupTags(getListTags(list)).map(t => ({url: t[2], room: t[1]}))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
   sort(
-    getListTags(list)
-      .filter(t => t[0] === "group" && t[2] === url)
+    getGroupTags(getListTags(list))
+      .filter(t => t[2] === url)
       .map(nth(1)),
   )
 

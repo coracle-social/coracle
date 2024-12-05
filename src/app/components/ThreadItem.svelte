@@ -16,12 +16,18 @@
 </script>
 
 <Link class="col-2 card2 bg-alt w-full cursor-pointer" href={makeThreadPath(url, event.id)}>
-  <div class="flex w-full items-center justify-between gap-2">
-    <p class="text-xl">{title}</p>
-    <p class="text-sm opacity-75">
+  {#if title}
+    <div class="flex w-full items-center justify-between gap-2">
+      <p class="text-xl">{title}</p>
+      <p class="text-sm opacity-75">
+        {formatTimestamp(event.created_at)}
+      </p>
+    </div>
+  {:else}
+    <p class="-mb-3 h-0 text-end text-xs opacity-75">
       {formatTimestamp(event.created_at)}
     </p>
-  </div>
+  {/if}
   <Content {event} expandMode="inline" />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <span class="whitespace-nowrap py-1 text-sm opacity-75">

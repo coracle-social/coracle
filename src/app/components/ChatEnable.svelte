@@ -10,6 +10,8 @@
   import {canDecrypt, PLATFORM_NAME, ensureUnwrapped} from "@app/state"
   import {clearModals} from "@app/modal"
 
+  export let next
+
   let loading = false
 
   const enableChat = async () => {
@@ -20,7 +22,7 @@
     }
 
     clearModals()
-    goto("/chat")
+    goto(next)
   }
 
   const submit = async () => {
@@ -38,16 +40,16 @@
 
 <form class="column gap-4" on:submit|preventDefault={submit}>
   <ModalHeader>
-    <div slot="title">Enable Chat</div>
-    <div slot="info">Do you want to enable direct messages?</div>
+    <div slot="title">Enable Messages</div>
+    <div slot="info">Do you want to enable notes and direct messages?</div>
   </ModalHeader>
   <p>
-    By default, direct messages are disabled, since loading them requires
+    By default, notes and direct messages are disabled, since loading them requires
     {PLATFORM_NAME} to download and decrypt a lot of data.
   </p>
   <p>
-    If you'd like to enable direct messages, please make sure your signer is set up to to
-    auto-approve requests to decrypt data.
+    If you'd like to enable them, please make sure your signer is set up to to auto-approve requests
+    to decrypt data.
   </p>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>
@@ -55,7 +57,7 @@
       Go back
     </Button>
     <Button type="submit" class="btn btn-primary" disabled={loading}>
-      <Spinner {loading}>Enable Chat</Spinner>
+      <Spinner {loading}>Enable Messages</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>
   </ModalFooter>

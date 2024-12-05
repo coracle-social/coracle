@@ -4,7 +4,7 @@
   import {
     parse,
     truncate,
-    render as renderParsed,
+    renderAsHtml,
     isText,
     isTopic,
     isCode,
@@ -146,10 +146,10 @@
             </Link>
           {/if}
         {:else if isEllipsis(parsed) && expandInline}
-          {@html renderParsed(parsed)}
+          {@html renderAsHtml(parsed)}
           <button type="button" class="text-sm underline"> Read more </button>
         {:else}
-          {@html renderParsed(parsed)}
+          {@html renderAsHtml(parsed)}
         {/if}
       {/each}
     </div>

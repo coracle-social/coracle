@@ -2,12 +2,13 @@
   import {nip19} from "nostr-tools"
   import {goto} from "$app/navigation"
   import {ctx, nthEq} from "@welshman/lib"
+  import {tracker, repository} from "@welshman/app"
   import {Address, DIRECT_MESSAGE} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import {deriveEvent, entityLink, MESSAGE, THREAD} from "@app/state"
-  import {makeThreadPath} from "@app/routes"
+  import {deriveEvent, entityLink, ROOM, MESSAGE, THREAD} from "@app/state"
+  import {makeThreadPath, makeRoomPath} from "@app/routes"
 
   export let value
   export let event
@@ -41,13 +42,27 @@
     return Boolean(element)
   }
 
+  const openMessage = (url: string, room: string, id: string) => {
+    const event = repository.getEvent(id)
+
+    if (event) {
+      goto(makeRoomPath(url, room))
+
+      // TODO: if the event doesn't immediately load, this won't work. Scroll up until it's found
+      setTimeout(() => scrollToEvent(id), 300)
+    }
+
+    return Boolean(event)
+  }
+
   const onClick = (e: Event) => {
     if ($quote) {
       if ($quote.kind === DIRECT_MESSAGE) {
         return scrollToEvent($quote.id)
       }
 
-      const [room, url] = $quote.tags.find(nthEq(0, "~"))?.slice(1) || []
+      const [url] = tracker.getRelays($quote.id)
+      const room = $quote.tags.find(nthEq(0, ROOM))?.[1]
 
       if (url && room) {
         if ($quote.kind === THREAD) {
@@ -55,7 +70,7 @@
         }
 
         if ($quote.kind === MESSAGE) {
-          return scrollToEvent($quote.id)
+          return scrollToEvent($quote.id) || openMessage(url, room, $quote.id)
         }
 
         const kind = $quote.tags.find(nthEq(0, "K"))?.[1]
@@ -67,7 +82,7 @@
           }
 
           if (parseInt(kind) === MESSAGE) {
-            return scrollToEvent(id)
+            return scrollToEvent(id) || openMessage(url, room, id)
           }
         }
       }
