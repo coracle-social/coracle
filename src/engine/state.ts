@@ -1069,7 +1069,7 @@ if (!db) {
 
   ctx.net.pool.on("init", (connection: Connection) => {
     connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
-      if (verb == "EVENT" || verb == "EOSE" || verb == "NEG-MSG") return
+      if (verb == "EVENT" || verb == "EOSE" || verb == "CLOSED") return
       subscriptionNotices.update($notices => {
         pushToMapKey($notices, connection.url, {
           created_at: now(),
