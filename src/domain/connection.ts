@@ -1,11 +1,11 @@
 import {getRelayQuality, type ThunkStatus} from "@welshman/app"
-import {AuthStatus, Connection, SocketStatus} from "@welshman/net"
+import {AuthStatus, Connection, PublishStatus, SocketStatus} from "@welshman/net"
 import {derived, writable} from "svelte/store"
 
 export type PublishNotice = {
   eventId: string
   created_at: number
-  eventKind: number
+  eventKind: string
   message: string
   status: ThunkStatus
   url: string
@@ -42,6 +42,21 @@ export const getConnectionStatus = (cxn: Connection): ConnectionType => {
     return ConnectionType.UnstableConnection
   } else {
     return ConnectionType.Connected
+  }
+}
+
+export function messageAndColorFromStatus(status: ThunkStatus) {
+  switch (status.status) {
+    case PublishStatus.Success:
+      return {message: status.message || "Published", color: "text-success"}
+    case PublishStatus.Pending:
+      return {message: status.message || "Pending", color: "text-warning"}
+    case PublishStatus.Failure:
+      return {message: status.message || "Failed", color: "text-danger"}
+    case PublishStatus.Timeout:
+      return {message: status.message || "Timed out", color: "text-accent"}
+    case PublishStatus.Aborted:
+      return {message: status.message || "Aborted", color: "text-accent"}
   }
 }
 
