@@ -4,7 +4,7 @@
   import {
     parse,
     truncate,
-    render as renderParsed,
+    renderAsHtml,
     isText,
     isTopic,
     isCode,
@@ -118,7 +118,7 @@
         </Anchor>
       {/if}
     {:else}
-      {@html renderParsed(parsed)}
+      {@html renderAsHtml(parsed)}
     {/if}
   {/each}
 </div>
