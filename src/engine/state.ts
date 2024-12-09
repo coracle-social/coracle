@@ -137,6 +137,7 @@ export const env = {
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
   BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
+  LOG_VERBS: fromCsv(import.meta.env.VITE_LOG_VERBS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
   PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
@@ -1069,7 +1070,7 @@ if (!db) {
 
   ctx.net.pool.on("init", (connection: Connection) => {
     connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
-      if (verb == "EVENT" || verb == "EOSE" || verb == "CLOSED") return
+      if (!env.LOG_VERBS.includes(verb)) return
       subscriptionNotices.update($notices => {
         pushToMapKey($notices, connection.url, {
           created_at: now(),
