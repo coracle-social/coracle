@@ -51,8 +51,16 @@ import {
   uniq,
   uniqBy,
 } from "@welshman/lib"
-import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, AuthMode, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
+import type {Connection, PublishRequest, Target} from "@welshman/net"
+import {
+  Executor,
+  AuthMode,
+  Local,
+  Multi,
+  Relays,
+  SubscriptionEvent,
+  ConnectionEvent,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
@@ -129,6 +137,7 @@ export const env = {
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
   BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
+  LOG_VERBS: fromCsv(import.meta.env.VITE_LOG_VERBS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
   PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
@@ -958,6 +967,7 @@ export class ThreadLoader {
 
 // Remove the old database. TODO remove this
 import {deleteDB} from "idb"
+import {subscriptionNotices} from "src/domain/connection"
 deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()
@@ -1056,6 +1066,20 @@ if (!db) {
 
     ctx.net.authMode = autoAuthenticate ? AuthMode.Implicit : AuthMode.Explicit
     ctx.app.dufflepudUrl = getSetting("dufflepud_url")
+  })
+
+  ctx.net.pool.on("init", (connection: Connection) => {
+    connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
+      if (!env.LOG_VERBS.includes(verb)) return
+      subscriptionNotices.update($notices => {
+        pushToMapKey($notices, connection.url, {
+          created_at: now(),
+          url: cxn.url,
+          notice: [verb, ...args],
+        })
+        return $notices
+      })
+    })
   })
 
   ready = initStorage("coracle", 2, {
