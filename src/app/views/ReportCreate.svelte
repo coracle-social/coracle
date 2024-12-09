@@ -11,7 +11,7 @@
   import Field from "src/partials/Field.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import {router} from "src/app/util/router"
   import {publish} from "src/engine"
 
@@ -62,7 +62,7 @@
         with the report.
       </div>
     </Field>
-    <Note note={event} showMedia={false} />
+    <FeedItem note={event} showMedia={false} />
     <Anchor button tag="button" type="submit">Save</Anchor>
   </FlexColumn>
 </form>

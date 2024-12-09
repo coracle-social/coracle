@@ -4,7 +4,7 @@
   import {getAncestorTagValues} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import type {Notification} from "src/engine"
   import {deriveEvent} from "src/engine"
@@ -22,7 +22,7 @@
     <small>{formatTimestamp(timestamp)}</small>
   </div>
   {#if $event}
-    <Note
+    <FeedItem
       topLevel
       showLoading
       depth={1}

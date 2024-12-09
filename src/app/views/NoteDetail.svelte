@@ -3,7 +3,7 @@
   import {fly} from "src/util/transition"
   import {getIdOrAddress} from "@welshman/util"
   import Spinner from "src/partials/Spinner.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import Thread from "src/app/shared/FeedItem.svelte"
   import {deriveEvent} from "src/engine"
 
   export let id = null
@@ -16,7 +16,7 @@
 
 {#if $event}
   <div in:fly={{y: 20}}>
-    <Note showLoading anchor={getIdOrAddress($event)} note={$event} {depth} {relays} />
+    <Thread showLoading anchor={getIdOrAddress($event)} note={$event} {depth} {relays} />
   </div>
 {:else}
   <Spinner />

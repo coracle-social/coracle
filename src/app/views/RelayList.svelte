@@ -25,7 +25,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import {load, userFollows, sortEventsDesc, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]
@@ -172,7 +172,7 @@
   <Tabs {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
     {#each reviews.slice(0, limit) as review (review.id)}
-      <Note note={review} />
+      <FeedItem note={review} />
     {/each}
   {:else}
     <Input

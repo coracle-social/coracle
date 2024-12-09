@@ -12,7 +12,6 @@
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
@@ -49,7 +48,7 @@
   )
 </script>
 
-<Card class="flex gap-3">
+<div class="flex gap-3">
   <div class="mt-[6px] hidden sm:block">
     <i class="fa fa-rss fa-2xl" />
   </div>
@@ -116,4 +115,4 @@
         )}</pre>
     {/if}
   </FlexColumn>
-</Card>
+</div>

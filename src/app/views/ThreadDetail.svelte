@@ -4,7 +4,7 @@
   import {ThreadLoader} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import {deriveEvent} from "src/engine"
 
   export let id = null
@@ -34,10 +34,10 @@
 {#if loading}
   <Spinner />
 {:else}
-  <Note note={$root} />
+  <FeedItem note={$root} />
   {#if showAncestors}
     {#each $ancestors as ancestor (ancestor.id)}
-      <Note topLevel showParent={false} note={ancestor} />
+      <FeedItem topLevel showParent={false} note={ancestor} />
     {/each}
   {:else if $ancestors.length > 0}
     <Anchor
@@ -49,6 +49,6 @@
       Show {quantify($ancestors.length, "other note")}
     </Anchor>
   {/if}
-  <Note topLevel showParent={false} note={$parent} />
-  <Note topLevel showParent={false} note={$event} depth={2} />
+  <FeedItem topLevel showParent={false} note={$parent} />
+  <FeedItem topLevel showParent={false} note={$event} depth={2} />
 {/if}

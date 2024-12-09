@@ -25,17 +25,19 @@
   import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
-  import {LOCAL_RELAY_URL, type SignedEvent} from "@welshman/util"
+  import {getAncestorTagValues, LOCAL_RELAY_URL, type TrustedEvent} from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
+  import {openReplies} from "../state"
 
   const rendered = now()
 
-  export let event: SignedEvent
-  export let removeDraft: () => void
+  export let event: TrustedEvent
 
+  $: ancestors = getAncestorTagValues(event.tags || [])
+  $: parent = ancestors.replies[0]
   $: thunk = $thunks[event.id] as Thunk
 
   $: status = thunk?.status
@@ -49,7 +51,7 @@
   ).length
   $: timeout = statuses.filter(s => s.status === PublishStatus.Timeout).length
   $: success = statuses.filter(s => s.status === PublishStatus.Success).length
-  $: total = relays.length || 0
+  $: total = relays?.length || 0
 
   const completed = tweened(0)
 
@@ -95,7 +97,8 @@
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
       on:click={() => {
-        removeDraft()
+        thunk.controller.abort()
+        $openReplies[parent] = true
       }}>Cancel</button>
   {/if}
 </div>

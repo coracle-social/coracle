@@ -27,7 +27,6 @@
   export let note
   export let depth = 0
   export let showEntire = false
-  export let expandable = true
   export let showMedia = getSetting("show_media")
 
   let warning = getSetting("hide_sensitive") ? getContentWarning(note) : null
@@ -85,7 +84,7 @@
   {:else if CUSTOM_LIST_KINDS.includes(note.kind)}
     <NoteContentKindList {note} />
   {:else}
-    <NoteContentKind1 {note} {showEntire} {showMedia} {expandable} {depth}>
+    <NoteContentKind1 {note} {showEntire} {showMedia} {depth} expandable>
       <div slot="note-content" let:quote>
         <svelte:self depth={depth + 1} note={quote} />
       </div>

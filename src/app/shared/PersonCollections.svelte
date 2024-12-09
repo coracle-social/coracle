@@ -1,7 +1,7 @@
 <script lang="ts">
   import Chip from "src/partials/Chip.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import {loadLabels, deriveCollections} from "src/engine"
 
   export let pubkey
@@ -30,6 +30,6 @@
 {#if selection}
   <Subheading>#{selection.name}</Subheading>
   {#each selection.ids as id (id)}
-    <Note note={{id}} />
+    <FeedItem note={{id}} />
   {/each}
 {/if}
