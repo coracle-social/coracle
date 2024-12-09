@@ -28,7 +28,7 @@
     "@capacitor/core": "^6.1.2",
     "@capacitor/ios": "^6.1.2",
     "@fortawesome/fontawesome-free": "^6.6.0",
-    "@getalby/bitcoin-connect": "^3.6.2",
+    "@getalby/bitcoin-connect": "^3.6.3",
     "@scure/base": "^1.1.9",
     "@sentry/browser": "^8.35.0",
     "@sentry/cli": "^2.38.1",

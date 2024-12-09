@@ -11,7 +11,6 @@
 
   export let event
   export let showDate = false
-  export let actionsInline = false
 
   const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
