@@ -1,44 +1,36 @@
 <script lang="ts">
-  import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
+  import {displayProfileByPubkey, session, tagPubkey, tagReplyTo} from "@welshman/app"
   import {ctx} from "@welshman/lib"
-  import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
-  import {writable, type Writable} from "svelte/store"
-  import {createEventDispatcher} from "svelte"
+  import {Tags, createEvent, uniqTags} from "@welshman/util"
+  import {uniq, without} from "ramda"
   import {Editor} from "svelte-tiptap"
-  import {without, uniq} from "ramda"
-  import {slide} from "src/util/transition"
-  import AltColor from "src/partials/AltColor.svelte"
-  import Chip from "src/partials/Chip.svelte"
+  import {writable, type Writable} from "svelte/store"
   import {getEditorOptions} from "src/app/editor"
   import Compose from "src/app/shared/Compose.svelte"
-  import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import {drafts} from "src/app/state"
-  import {publish, tagsFromContent, getClientTags, sign, userSettings} from "src/engine"
+  import NsecWarning from "src/app/shared/NsecWarning.svelte"
+  import {drafts, openReplies} from "src/app/state"
+  import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
+  import AltColor from "src/partials/AltColor.svelte"
+  import Chip from "src/partials/Chip.svelte"
+  import {slide} from "src/util/transition"
 
   export let parent
-  export let addDraftToContext
   export let showBorder = false
   export let forceOpen = false
 
-  const dispatch = createEventDispatcher()
   const nsecWarning = writable(null)
 
-  let container, loading
-  let isOpen = false
-  let showOptions = false
-  let mentions = []
-  let options = {warning: "", anonymous: false}
+  $: mentions = without(
+    [$session.pubkey],
+    uniq(parentTags.values("p").valueOf().concat(parent?.pubkey)),
+  )
+
+  let loading
+  let opts = {warning: "", anonymous: false}
   let editorElement: HTMLElement
   let editor: Editor
   let editorLoading: Writable<boolean>
-
-  export const start = () => {
-    dispatch("start")
-
-    isOpen = true
-    mentions = without([$session.pubkey], uniq([parent.pubkey, ...getPubkeyTagValues(parent.tags)]))
-  }
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -68,20 +60,13 @@
     drafts.delete(parent.id)
   }
 
-  const reset = () => {
-    dispatch("reset")
-
-    isOpen = false
-    mentions = []
-  }
-
   const removeMention = pubkey => {
     mentions = without([pubkey], mentions)
   }
 
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
-
+    saveDraft()
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
@@ -115,23 +100,18 @@
       delay: $userSettings.send_delay,
     })
 
-    addDraftToContext(event, () => thunk.controller.abort())
-    isOpen = false
+    $openReplies[parent.id] = false
     loading = false
 
     thunk.result.then(() => {
       clearDraft()
-      reset()
     })
   }
 
   const onBodyClick = e => {
-    const target = e.target as HTMLElement
+    saveDraft()
 
-    if (isOpen && container && !container.contains(target)) {
-      saveDraft()
-      reset()
-    }
+    $openReplies = {}
   }
 
   const createEditor = () => {
@@ -149,11 +129,10 @@
     editorLoading = editor.storage.fileUpload.loading
   }
 
-  $: {
-    if (editorElement) {
-      createEditor()
-    }
-  }
+  // eslint-disable-next-line
+  $: editorElement && createEditor()
+
+  $: isOpen = $openReplies[parent?.id]
 </script>
 
 <svelte:body on:click={onBodyClick} />
@@ -163,14 +142,10 @@
     class="relative transition-colors"
     class:opacity-50={loading}
     class:pointer-events-none={loading}>
-    {#if showBorder}
+    <!-- {#if showBorder}
       <AltColor background class="absolute -top-4 z-none h-5 w-1" />
-    {/if}
-    <div
-      transition:slide|local
-      class="note-reply relative my-2 gap-1"
-      bind:this={container}
-      on:click|stopPropagation>
+    {/if} -->
+    <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
           <Compose bind:element={editorElement} {editor}>
@@ -213,9 +188,7 @@
   </div>
 {/if}
 
-{#if showOptions}
-  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
-{/if}
+<NoteOptions on:change={setOpts} initialValues={opts} />
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

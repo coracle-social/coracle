@@ -15,8 +15,8 @@
   $: reply = ancestors.replies[0]
   $: root = ancestors.roots[0]
 
-  const showReply = reply && !ancestors.replies.includes(anchor) && showParent
-  const showRoot = root && !ancestors.roots.includes(anchor) && root !== reply && showParent
+  $: showReply = reply && !ancestors.replies.includes(anchor) && showParent
+  $: showRoot = root && !ancestors.roots.includes(anchor) && root !== reply && showParent
 
   const showPerson = () => router.at("people").of(event.pubkey).open()
 

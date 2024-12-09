@@ -50,7 +50,7 @@
     isEventMuted,
     unwrapRepost,
   } from "src/engine"
-  import Thread from "src/app/shared/Thread.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
   export let anchor = null
@@ -244,7 +244,7 @@
 <FlexColumn bind:element>
   {#each events as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <Thread {filters} {reposts} {depth} {anchor} {note} />
+      <FeedItem {filters} {reposts} {depth} {anchor} {note} />
     </div>
     {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
       <Card class="group flex items-center justify-between">
