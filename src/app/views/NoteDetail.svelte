@@ -3,7 +3,7 @@
   import {fly} from "src/util/transition"
   import {getIdOrAddress} from "@welshman/util"
   import Spinner from "src/partials/Spinner.svelte"
-  import Thread from "src/app/shared/Thread.svelte"
+  import Thread from "src/app/shared/FeedItem.svelte"
   import {deriveEvent} from "src/engine"
 
   export let id = null

@@ -3,18 +3,17 @@
   import {ctx} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters} from "@welshman/util"
-  import {quantify, sleep} from "hurdak"
+  import {quantify} from "hurdak"
   import {onMount} from "svelte"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
-  import NoteReply from "src/app/shared/NoteReply.svelte"
   import NoteKind from "src/app/shared/NoteKind.svelte"
-  import {drafts} from "src/app/state"
-  import {ensureUnwrapped, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
+  import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {replyKinds} from "src/util/nostr"
   import {fly, slide} from "src/util/transition"
+  import {openReplies} from "src/app/state"
 
   export let note
   export let relays = []
@@ -26,34 +25,22 @@
   export let isLastReply = false
   export let showParent = true
   export let showLoading = false
+  export let showMedia = getSetting("show_media")
 
   let ready = false
   let event = note
-  let replyCtrl = null
-  let replyIsActive = false
   let showMutedReplies = false
   let collapsed = depth === 0
   let showHiddenReplies = anchor === getIdOrAddress(event)
   let draftEventId: string
-  let removeDraft: () => void
 
   const showEntire = showHiddenReplies
-
-  const addDraftToContext = (event, cb) => {
-    draftEventId = event.id
-    removeDraft = () => {
-      cb()
-      drafts.set(note.id, event.content)
-      sleep(10).then(() => {
-        replyCtrl?.start()
-      })
-    }
-  }
 
   const context = deriveEvents(repository, {filters: getReplyFilters([event])})
 
   $: children = $context.filter(e => isChildOf(e, event))
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+  $: replyIsActive = $openReplies[event.id]
 
   let mutedReplies, hiddenReplies, visibleReplies
 
@@ -100,7 +87,6 @@
   }
 
   onMount(async () => {
-    console.log("THREAD")
     if (!event.pubkey) {
       event = await loadEvent(event.id, {
         relays: ctx.app.router.FromRelays(relays).getUrls(),
@@ -113,8 +99,6 @@
       ready = true
     }
   })
-
-  $: console.log(ready)
 </script>
 
 {#if ready}
@@ -122,7 +106,6 @@
     <NoteMeta {reposts} note={event} />
     <div class="note relative">
       {#if !showParent && !topLevel}
-        <!-- {#if true} -->
         <AltColor let:isAlt>
           <svg height="36" width="36" class="absolute -left-[18px] top-1">
             <circle
@@ -143,7 +126,7 @@
           <AltColor background class="absolute -bottom-2 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
-      <NoteKind note={event} {children} {showEntire} />
+      <NoteKind note={event} {children} {showEntire} {showParent} {showMedia} />
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor
@@ -168,18 +151,6 @@
           </AltColor>
         </div>
       {/if}
-
-      <NoteReply
-        {addDraftToContext}
-        parent={event}
-        showBorder={visibleReplies.length > 0}
-        bind:this={replyCtrl}
-        on:start={() => {
-          replyIsActive = true
-        }}
-        on:reset={() => {
-          replyIsActive = false
-        }} />
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
         <div
@@ -209,8 +180,6 @@
                     isLastReply={i === visibleReplies.length - 1}
                     showParent={false}
                     showHidden
-                    isDraft={r.id === draftEventId}
-                    removeDraftCb={removeDraft}
                     note={r}
                     depth={depth - 1}
                     {filters}
