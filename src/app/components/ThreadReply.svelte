@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import type {Readable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {append} from "@welshman/lib"
   import {isMobile} from "@lib/html"
   import {fly, slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -10,7 +9,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {getEditorOptions, getEditorTags} from "@lib/editor"
   import {getPubkeyHints, publishComment} from "@app/commands"
-  import {tagRoom, GENERAL} from "@app/state"
+  import {tagRoom, GENERAL, PROTECTED} from "@app/state"
   import {pushToast} from "@app/toast"
 
   export let url
@@ -22,7 +21,7 @@
     if ($loading) return
 
     const content = $editor.getText({blockSeparator: "\n"})
-    const tags = append(tagRoom(GENERAL, url), getEditorTags($editor))
+    const tags = [...getEditorTags($editor), tagRoom(GENERAL, url), [PROTECTED]]
 
     if (!content.trim()) {
       return pushToast({

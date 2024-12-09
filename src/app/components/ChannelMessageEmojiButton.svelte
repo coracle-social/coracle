@@ -2,7 +2,7 @@
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import Icon from "@lib/components/Icon.svelte"
-  import {tagRoom} from "@app/state"
+  import {tagRoom, PROTECTED} from "@app/state"
   import {publishReaction} from "@app/commands"
 
   export let url, room, event
@@ -12,7 +12,7 @@
       event,
       relays: [url],
       content: emoji.unicode,
-      tags: [tagRoom(room, url)],
+      tags: [tagRoom(room, url), PROTECTED],
     })
 </script>
 

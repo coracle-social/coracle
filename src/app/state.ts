@@ -65,6 +65,8 @@ export const ROOM = "h"
 
 export const GENERAL = "_"
 
+export const PROTECTED = ["-"]
+
 export const MESSAGE = 9
 
 export const THREAD = 11

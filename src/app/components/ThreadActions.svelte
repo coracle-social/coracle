@@ -16,7 +16,7 @@
   import {publishDelete, publishReaction} from "@app/commands"
   import {deriveNotification} from "@app/notifications"
   import {makeSpacePath} from "@app/routes"
-  import {COMMENT} from "@app/state"
+  import {COMMENT, PROTECTED} from "@app/state"
 
   export let url
   export let event
@@ -39,12 +39,12 @@
     if (reaction) {
       publishDelete({relays: [url], event: reaction})
     } else {
-      publishReaction({event, content, relays: [url]})
+      publishReaction({event, content, tags: [PROTECTED], relays: [url]})
     }
   }
 
   const onEmoji = (emoji: NativeEmoji) =>
-    publishReaction({event, relays: [url], content: emoji.unicode})
+    publishReaction({event, content: emoji.unicode, tags: [PROTECTED], relays: [url]})
 
   let popover: Instance
 

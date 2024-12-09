@@ -13,7 +13,7 @@
   import type {Readable} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
-  import {sleep, append, now, ctx} from "@welshman/lib"
+  import {sleep, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
@@ -41,6 +41,7 @@
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
+  import {PROTECTED} from "@app/state"
   import {popKey} from "@app/implicit"
 
   const {room = GENERAL} = $page.params
@@ -62,7 +63,7 @@
   const onSubmit = ({content, tags}: EventContent) =>
     publishThunk({
       relays: [url],
-      event: createEvent(MESSAGE, {content, tags: append(tagRoom(room, url), tags)}),
+      event: createEvent(MESSAGE, {content, tags: [...tags, tagRoom(room, url), PROTECTED]}),
       delay: $userSettingValues.send_delay,
     })
 

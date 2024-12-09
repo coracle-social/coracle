@@ -20,7 +20,7 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, tagRoom, pubkeyLink} from "@app/state"
+  import {colors, tagRoom, pubkeyLink, PROTECTED} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -49,7 +49,7 @@
         event,
         content,
         relays: [url],
-        tags: [tagRoom(room, url)],
+        tags: [tagRoom(room, url), PROTECTED],
       })
     }
   }

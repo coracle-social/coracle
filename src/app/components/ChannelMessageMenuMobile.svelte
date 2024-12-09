@@ -8,7 +8,7 @@
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
-  import {tagRoom} from "@app/state"
+  import {tagRoom, PROTECTED} from "@app/state"
 
   export let url
   export let room
@@ -20,7 +20,7 @@
       event,
       relays: [url],
       content: emoji.unicode,
-      tags: [tagRoom(room, url)],
+      tags: [tagRoom(room, url), PROTECTED],
     })
   }
 

@@ -11,6 +11,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
+  import {PROTECTED} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, getEditorTags} from "@lib/editor"
   import {pushToast} from "@app/toast"
@@ -46,6 +47,7 @@
         ["start", dateToSeconds(start).toString()],
         ["end", dateToSeconds(end).toString()],
         ...getEditorTags($editor),
+        PROTECTED,
       ],
     })
 

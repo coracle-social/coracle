@@ -11,7 +11,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
-  import {THREAD, GENERAL, tagRoom} from "@app/state"
+  import {THREAD, GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, getEditorTags} from "@lib/editor"
 
@@ -38,7 +38,7 @@
       })
     }
 
-    const tags = [["title", title], tagRoom(GENERAL, url), ...getEditorTags($editor)]
+    const tags = [["title", title], tagRoom(GENERAL, url), ...getEditorTags($editor), PROTECTED]
 
     publishThunk({
       relays: [url],
