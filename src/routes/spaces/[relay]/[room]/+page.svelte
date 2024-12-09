@@ -1,12 +1,3 @@
-<script lang="ts" context="module">
-  type Element = {
-    id: string
-    type: "date" | "note"
-    value: string | TrustedEvent
-    showPubkey: boolean
-  }
-</script>
-
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {onMount, onDestroy} from "svelte"
@@ -49,7 +40,7 @@
   const {room = GENERAL} = $page.params
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
-  const events = deriveChannelMessages(url, room)
+  const events = throttled(300, deriveChannelMessages(url, room))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -76,39 +67,33 @@
   let scroller: Scroller
   let editor: Readable<Editor>
 
-  const elements = throttled(
-    300,
-    derived(
-      events,
-      $events => {
-        const $elements = []
+  const elements = derived(events, $events => {
+    const $elements = []
 
-        let previousDate
-        let previousPubkey
+    let previousDate
+    let previousPubkey
 
-        for (const event of $events.toReversed()) {
-          const {id, pubkey, created_at} = event
-          const date = formatTimestampAsDate(created_at)
+    for (const event of $events.toReversed()) {
+      const {id, pubkey, created_at} = event
+      const date = formatTimestampAsDate(created_at)
 
-          if (date !== previousDate) {
-            $elements.push({type: "date", value: date, id: date, showPubkey: false})
-          }
-
-          $elements.push({
-            id,
-            type: "note",
-            value: event,
-            showPubkey: date !== previousDate || previousPubkey !== pubkey,
-          })
-
-          previousDate = date
-          previousPubkey = pubkey
-        }
-
-        return $elements.reverse().slice(0, limit)
+      if (date !== previousDate) {
+        $elements.push({type: "date", value: date, id: date, showPubkey: false})
       }
-    )
-  )
+
+      $elements.push({
+        id,
+        type: "note",
+        value: event,
+        showPubkey: date !== previousDate || previousPubkey !== pubkey,
+      })
+
+      previousDate = date
+      previousPubkey = pubkey
+    }
+
+    return $elements.reverse().slice(0, limit)
+  })
 
   onMount(async () => {
     // Sveltekiiit

@@ -46,7 +46,7 @@ import {
   getDefaultNetContext,
   makeRouter,
   tracker,
-  trackerStore,
+  makeTrackerStore,
   relay,
   getSession,
   getSigner,
@@ -223,6 +223,8 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
 
   return Promise.all(promises)
 }
+
+export const trackerStore = makeTrackerStore()
 
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   let attempted = false

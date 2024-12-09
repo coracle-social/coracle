@@ -150,7 +150,6 @@
       setupAnalytics()
 
       ready = initStorage("flotilla", 4, {
-        events: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
         relays: {keyPath: "url", store: throttled(1000, relays)},
         handles: {keyPath: "nip05", store: throttled(1000, handles)},
         checked: storageAdapters.fromObjectStore(checked, {throttle: 1000}),
@@ -162,7 +161,10 @@
           throttle: 1000,
           migrate: migratePlaintext,
         }),
-        tracker: storageAdapters.fromTracker(tracker, {throttle: 1000}),
+        events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
+          throttle: 3000,
+          migrate: migrateEvents,
+        }),
       }).then(() => sleep(300))
 
       // Unwrap gift wraps as they come in, but throttled
