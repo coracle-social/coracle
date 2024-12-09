@@ -11,10 +11,12 @@
   import {nip19} from "nostr-tools"
   import {onMount, onDestroy} from "svelte"
   import type {Readable} from "svelte/store"
+  import {derived} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
   import {sleep, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
+  import {throttled} from "@welshman/store"
   import {createEvent, DELETE} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk} from "@welshman/app"
   import {slide} from "@lib/transition"
@@ -73,35 +75,40 @@
   let element: HTMLElement
   let scroller: Scroller
   let editor: Readable<Editor>
-  let elements: Element[] = []
 
-  $: {
-    elements = []
+  const elements = throttled(
+    300,
+    derived(
+      events,
+      $events => {
+        const $elements = []
 
-    let previousDate
-    let previousPubkey
+        let previousDate
+        let previousPubkey
 
-    for (const event of $events.toReversed()) {
-      const {id, pubkey, created_at} = event
-      const date = formatTimestampAsDate(created_at)
+        for (const event of $events.toReversed()) {
+          const {id, pubkey, created_at} = event
+          const date = formatTimestampAsDate(created_at)
 
-      if (date !== previousDate) {
-        elements.push({type: "date", value: date, id: date, showPubkey: false})
+          if (date !== previousDate) {
+            $elements.push({type: "date", value: date, id: date, showPubkey: false})
+          }
+
+          $elements.push({
+            id,
+            type: "note",
+            value: event,
+            showPubkey: date !== previousDate || previousPubkey !== pubkey,
+          })
+
+          previousDate = date
+          previousPubkey = pubkey
+        }
+
+        return $elements.reverse().slice(0, limit)
       }
-
-      elements.push({
-        id,
-        type: "note",
-        value: event,
-        showPubkey: date !== previousDate || previousPubkey !== pubkey,
-      })
-
-      previousDate = date
-      previousPubkey = pubkey
-    }
-
-    elements = elements.reverse().slice(0, limit)
-  }
+    )
+  )
 
   onMount(async () => {
     // Sveltekiiit
@@ -164,7 +171,7 @@
   <div
     class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-auto py-2"
     bind:this={element}>
-    {#each elements as { type, id, value, showPubkey } (id)}
+    {#each $elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
