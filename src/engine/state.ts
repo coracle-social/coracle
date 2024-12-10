@@ -137,7 +137,6 @@ export const env = {
   IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   NIP96_URLS: fromCsv(import.meta.env.VITE_NIP96_URLS) as string[],
   BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
-  LOG_VERBS: fromCsv(import.meta.env.VITE_LOG_VERBS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
   PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
@@ -1041,6 +1040,7 @@ const migrateEvents = (events: TrustedEvent[]) => {
 
 // Avoid initializing multiple times on hot reload
 if (!db) {
+  const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
   const initialRelays = [
     ...env.DEFAULT_RELAYS,
     ...env.DVM_RELAYS,
@@ -1070,7 +1070,7 @@ if (!db) {
 
   ctx.net.pool.on("init", (connection: Connection) => {
     connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
-      if (!env.LOG_VERBS.includes(verb)) return
+      if (!noticeVerbs.includes(verb)) return
       subscriptionNotices.update($notices => {
         pushToMapKey($notices, connection.url, {
           created_at: now(),
