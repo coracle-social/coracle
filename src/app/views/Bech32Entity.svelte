@@ -7,13 +7,13 @@
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
 
-  export let entity, type, data, relays
+  export let entity, type, data
 </script>
 
 {#if type === "nevent"}
-  <NoteDetail id={data.id} {relays} />
+  <NoteDetail id={data.id} relays={data.relays} />
 {:else if type === "note"}
-  <NoteDetail id={data} {relays} />
+  <NoteDetail id={data} relays={data.relays} />
 {:else if type === "naddr"}
   {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
   {@const relays = [
@@ -22,7 +22,7 @@
   ]}
   <NoteDetail {address} {relays} />
 {:else if type === "nprofile"}
-  <PersonDetail pubkey={data.pubkey} {relays} />
+  <PersonDetail pubkey={data.pubkey} relays={data.relays} />
 {:else if type === "npub"}
   <PersonDetail pubkey={data} />
 {:else if entity.includes("@")}
