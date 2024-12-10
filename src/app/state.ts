@@ -455,22 +455,23 @@ export const chatSearch = derived(chats, $chats =>
 // Messages
 
 // TODO: remove support for legacy messages
+export const adaptLegacyMessage = (event: TrustedEvent) => {
+  if (event.kind === LEGACY_MESSAGE) {
+    let room = event.tags.find(nthEq(0, "~"))?.[1] || GENERAL
+
+    if (room === "general") {
+      room = GENERAL
+    }
+
+    return {...event, kind: MESSAGE, tags: [...event.tags, tagRoom(room, "")]}
+  }
+
+  return event
+}
+
 export const messages = derived(
   deriveEvents(repository, {filters: [{kinds: [MESSAGE, LEGACY_MESSAGE]}]}),
-  $events =>
-    $events.map(e => {
-      if (e.kind === LEGACY_MESSAGE) {
-        let room = e.tags.find(nthEq(0, "~"))?.[1] || GENERAL
-
-        if (room === "general") {
-          room = GENERAL
-        }
-
-        return {...e, kind: MESSAGE, tags: [...e.tags, tagRoom(room, "")]}
-      }
-
-      return e
-    }),
+  $events => $events.map(adaptLegacyMessage),
 )
 
 // Group Meta

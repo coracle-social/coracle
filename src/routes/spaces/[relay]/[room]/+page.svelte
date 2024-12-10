@@ -49,7 +49,14 @@
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-  const events = throttled(300, deriveEventsForUrl(url, [{kinds: [MESSAGE], "#h": [room]}]))
+  const legacyRoom = room === GENERAL ? "general" : room
+  const events = throttled(
+    300,
+    deriveEventsForUrl(url, [
+      {kinds: [MESSAGE], "#h": [room]},
+      {kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]},
+    ]),
+  )
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -132,7 +139,7 @@
       load({
         delay: 0,
         relays: [url],
-        filters: [{kinds: [LEGACY_MESSAGE], "#~": [room]}],
+        filters: [{kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]}],
       })
     }
 
