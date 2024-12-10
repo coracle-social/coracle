@@ -6,15 +6,7 @@
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
-  import {
-    repository,
-    signer,
-    trackerStore,
-    tagReactionTo,
-    tagZapSplit,
-    mute,
-    unmute,
-  } from "@welshman/app"
+  import {repository, signer, tagReactionTo, tagZapSplit, mute, unmute} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {
     LOCAL_RELAY_URL,
@@ -53,6 +45,7 @@
     getSetting,
     loadPubkeys,
     getClientTags,
+    trackerStore,
     sessionWithMeta,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"

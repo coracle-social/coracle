@@ -17,6 +17,7 @@ import {
   initStorage,
   loadRelay,
   makeRouter,
+  makeTrackerStore,
   maxWot,
   mutesByPubkey,
   plaintext,
@@ -244,6 +245,10 @@ repository.on("update", ({added}: {added: TrustedEvent[]}) => {
     }
   }
 })
+
+// Tracker
+
+export const trackerStore = makeTrackerStore({throttle: 1000})
 
 // Settings
 
