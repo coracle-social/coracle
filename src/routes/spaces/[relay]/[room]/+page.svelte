@@ -18,6 +18,7 @@
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
+  import ChannelName from "@app/components/ChannelName.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
@@ -30,7 +31,6 @@
     tagRoom,
     MESSAGE,
     getMembershipRoomsByUrl,
-    displayRoom,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
@@ -135,7 +135,9 @@
     <div slot="icon" class="center">
       <Icon icon="hashtag" />
     </div>
-    <strong slot="title">{displayRoom(room)}</strong>
+    <strong slot="title">
+      <ChannelName {url} {room} />
+    </strong>
     <div slot="action" class="row-2">
       {#if room !== GENERAL}
         {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}

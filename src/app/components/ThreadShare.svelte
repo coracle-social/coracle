@@ -7,7 +7,8 @@
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {roomsByUrl} from "@app/state"
+  import ChannelName from "@app/components/ChannelName.svelte"
+  import {channelsByUrl} from "@app/state"
   import {makeRoomPath} from "@app/routes"
   import {setKey} from "@app/implicit"
 
@@ -37,14 +38,14 @@
     <div slot="info">Which room would you like to share this thread to?</div>
   </ModalHeader>
   <div class="grid grid-cols-3 gap-2">
-    {#each $roomsByUrl.get(url) || [] as room (room)}
+    {#each $channelsByUrl.get(url) || [] as channel (channel.room)}
       <button
         type="button"
         class="btn"
-        class:btn-neutral={selection !== room}
-        class:btn-primary={selection === room}
-        on:click={() => toggleRoom(room)}>
-        #{room}
+        class:btn-neutral={selection !== channel.room}
+        class:btn-primary={selection === channel.room}
+        on:click={() => toggleRoom(channel.room)}>
+        #<ChannelName {...channel} />
       </button>
     {/each}
   </div>

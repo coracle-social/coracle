@@ -15,6 +15,7 @@ import {
   nthEq,
   shuffle,
   parseJson,
+  fromPairs,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -24,6 +25,7 @@ import {
   REACTION,
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
+  GROUP_META,
   getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
@@ -444,63 +446,108 @@ export const chatSearch = derived(chats, $chats =>
 
 export const messages = deriveEvents(repository, {filters: [{kinds: [MESSAGE]}]})
 
+// Group Meta
+
+export const groupMeta = deriveEvents(repository, {filters: [{kinds: [GROUP_META]}]})
+
 // Channels
+
+export type ChannelMeta = {
+  access: "public" | "private"
+  membership: "open" | "closed"
+  picture?: string
+  about?: string
+}
 
 export type Channel = {
   url: string
   room: string
   name: string
   events: TrustedEvent[]
+  meta?: ChannelMeta
 }
 
 export const makeChannelId = (url: string, room: string) => `${url}|${room}`
 
 export const splitChannelId = (id: string) => id.split("|")
 
-export const channelsById = derived(
-  [memberships, messages, trackerStore],
-  ([$memberships, $messages, $tracker]) => {
-    const eventsByChannelId = new Map<string, TrustedEvent[]>()
+export const channelsById = withGetter(
+  derived(
+    [groupMeta, memberships, messages, trackerStore],
+    ([$groupMeta, $memberships, $messages, $tracker]) => {
+      const eventsByChannelId = new Map<string, TrustedEvent[]>()
 
-    // Add known rooms by membership so we have a full listing even if there are no messages there
-    for (const membership of $memberships) {
-      for (const {url, room} of getMembershipRooms(membership)) {
-        eventsByChannelId.set(makeChannelId(url, room), [])
-      }
-    }
-
-    // Add known messages to rooms
-    for (const event of $messages) {
-      const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
-
-      if (room) {
-        for (const url of $tracker.getRelays(event.id)) {
-          pushToMapKey(eventsByChannelId, makeChannelId(url, room), event)
-        }
-      }
-    }
-
-    const channelsById = new Map<string, Channel>()
-
-    for (const [id, unsorted] of eventsByChannelId.entries()) {
-      const [url, room] = splitChannelId(id)
-      const events = sortBy(e => -e.created_at, unsorted)
-
-      let name = room
-      for (const event of events) {
-        const tag = event.tags.find(t => t[0] === ROOM && t[2])
-
-        if (tag) {
-          name = tag[2]
-          break
+      // Add known rooms by membership so we have a full listing even if there are no messages there
+      for (const membership of $memberships) {
+        for (const {url, room} of getMembershipRooms(membership)) {
+          eventsByChannelId.set(makeChannelId(url, room), [])
         }
       }
 
-      channelsById.set(id, {url, room, name, events})
-    }
+      // Add known messages to rooms
+      for (const event of $messages) {
+        const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
 
-    return channelsById
-  },
+        if (room) {
+          for (const url of $tracker.getRelays(event.id)) {
+            pushToMapKey(eventsByChannelId, makeChannelId(url, room), event)
+          }
+        }
+      }
+
+      const channelsById = new Map<string, Channel>()
+
+      for (const [id, unsorted] of eventsByChannelId.entries()) {
+        const [url, room] = splitChannelId(id)
+        const events = sortBy(e => -e.created_at, unsorted)
+
+        let name = room
+        for (const event of events) {
+          const tag = event.tags.find(t => t[0] === ROOM && t[2])
+
+          if (tag) {
+            name = tag[2]
+            break
+          }
+        }
+
+        channelsById.set(id, {url, room, name, events})
+      }
+
+      // Add meta using group meta events
+      for (const event of $groupMeta) {
+        const meta = fromPairs(event.tags)
+        const room = meta.d
+
+        if (room) {
+          for (const url of $tracker.getRelays(event.id)) {
+            const id = makeChannelId(url, room)
+            const channel: Channel = channelsById.get(id) || {
+              url,
+              room,
+              name: room,
+              events: [],
+            }
+
+            if (meta.name) {
+              channel.name = meta.name
+            }
+
+            channel.meta = {
+              access: meta.public ? "public" : "private",
+              membership: meta.open ? "open" : "closed",
+              picture: meta.picture,
+              about: meta.about,
+            }
+
+            channelsById.set(id, channel)
+          }
+        }
+      }
+
+      return channelsById
+    },
+  ),
 )
 
 export const deriveChannel = (url: string, room: string) =>
@@ -509,24 +556,22 @@ export const deriveChannel = (url: string, room: string) =>
 export const deriveChannelMessages = (url: string, room: string) =>
   derived(channelsById, $channelsById => $channelsById.get(makeChannelId(url, room))?.events || [])
 
-// Rooms
+export const channelsByUrl = derived(channelsById, $channelsById => {
+  const $channelsByUrl = new Map<string, Channel[]>()
 
-export const roomsByUrl = derived(channelsById, $channelsById => {
-  const $roomsByUrl = new Map<string, string[]>()
-
-  for (const {url, room} of $channelsById.values()) {
-    pushToMapKey($roomsByUrl, url, room)
+  for (const channel of $channelsById.values()) {
+    pushToMapKey($channelsByUrl, channel.url, channel)
   }
 
-  return $roomsByUrl
+  return $channelsByUrl
 })
 
-export const displayRoom = (room: string) => {
+export const displayChannel = (url: string, room: string) => {
   if (room === GENERAL) {
     return "general"
   }
 
-  return room
+  return channelsById.get().get(makeChannelId(url, room))?.name || room
 }
 
 // User stuff

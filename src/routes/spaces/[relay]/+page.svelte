@@ -7,9 +7,10 @@
   import PageBar from "@lib/components/PageBar.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
+  import ChannelName from "@app/components/ChannelName.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {decodeRelay, roomsByUrl} from "@app/state"
+  import {decodeRelay, channelsByUrl} from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
@@ -87,14 +88,20 @@
         </div>
       {/if}
     </div>
-    <div class="grid grid-cols-3 gap-2 md:hidden">
-      <Link href={makeSpacePath(url, "threads")} class="bg-alt btn btn-neutral border-none">
+    <div class="grid grid-cols-3 gap-2">
+      <Link
+        href={makeSpacePath(url, "threads")}
+        class="bg-alt btn btn-neutral justify-start border-none">
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
-      {#each $roomsByUrl.get(url) || [] as room (room)}
-        <Link href={makeRoomPath(url, room)} class="bg-alt btn btn-neutral border-none">
+      {#each $channelsByUrl.get(url) || [] as channel (channel.room)}
+        <Link
+          href={makeRoomPath(url, channel.room)}
+          class="bg-alt btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
           <Icon icon="hashtag" />
-          {room}
+          <div class="min-w-0 overflow-hidden text-ellipsis">
+            <ChannelName {...channel} />
+          </div>
         </Link>
       {/each}
     </div>

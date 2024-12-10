@@ -1,6 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {displayRelayUrl} from "@welshman/util"
+  import {sortBy} from "@welshman/lib"
+  import {displayRelayUrl, GROUP_META} from "@welshman/util"
+  import {load} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -13,6 +15,7 @@
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import ProfileList from "@app/components/ProfileList.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
+  import ChannelName from "@app/components/ChannelName.svelte"
   import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
   import {
     getMembershipRoomsByUrl,
@@ -20,8 +23,9 @@
     hasMembershipUrl,
     userMembership,
     memberships,
-    roomsByUrl,
+    channelsByUrl,
     GENERAL,
+    displayChannel,
   } from "@app/state"
   import {deriveNotification, THREAD_FILTERS} from "@app/notifications"
   import {pushModal} from "@app/modal"
@@ -58,13 +62,28 @@
   let showMenu = false
   let replaceState = false
   let element: Element
+  let userRooms: string[] = []
+  let otherRooms: string[] = []
 
-  $: rooms = getMembershipRoomsByUrl(url, $userMembership)
-  $: otherRooms = ($roomsByUrl.get(url) || []).filter(room => !rooms.concat(GENERAL).includes(room))
   $: members = $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey)
+
+  $: {
+    userRooms = [GENERAL, ...getMembershipRoomsByUrl(url, $userMembership)]
+    otherRooms = []
+
+    for (const channel of $channelsByUrl.get(url) || []) {
+      if (!userRooms.includes(channel.room)) {
+        otherRooms.push(channel.room)
+      }
+    }
+
+    userRooms = sortBy(room => displayChannel(url, room), userRooms)
+    otherRooms = sortBy(room => displayChannel(url, room), otherRooms)
+  }
 
   onMount(async () => {
     replaceState = Boolean(element.closest(".drawer"))
+    load({relays: [url], filters: [{kinds: [GROUP_META]}]})
   })
 </script>
 
@@ -118,14 +137,13 @@
       </SecondaryNavItem>
       <div class="h-2" />
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-      <MenuSpaceRoomItem {url} room={GENERAL} />
-      {#each rooms as room, i (room)}
+      {#each userRooms as room, i (room)}
         <MenuSpaceRoomItem {url} {room} />
       {/each}
       {#if otherRooms.length > 0}
         <div class="h-2" />
         <SecondaryNavHeader>
-          {#if rooms.length > 0}
+          {#if userRooms.length > 0}
             Other Rooms
           {:else}
             Rooms
@@ -135,7 +153,7 @@
       {#each otherRooms as room, i (room)}
         <SecondaryNavItem href={makeSpacePath(url, room)}>
           <Icon icon="hashtag" />
-          {room}
+          <ChannelName {url} {room} />
         </SecondaryNavItem>
       {/each}
       <SecondaryNavItem on:click={addRoom}>
