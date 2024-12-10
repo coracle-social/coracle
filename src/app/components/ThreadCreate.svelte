@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import type {Readable} from "svelte/store"
   import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
-  import {createEvent} from "@welshman/util"
+  import {createEvent, THREAD} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -11,7 +11,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
-  import {THREAD, GENERAL, tagRoom, PROTECTED} from "@app/state"
+  import {GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {getPubkeyHints} from "@app/commands"
   import {getEditorOptions, getEditorTags} from "@lib/editor"
 

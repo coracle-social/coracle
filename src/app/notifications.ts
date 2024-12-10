@@ -4,17 +4,9 @@ import {deriveEvents} from "@welshman/store"
 import {repository, pubkey} from "@welshman/app"
 import {prop, max, sortBy, assoc, lt, now} from "@welshman/lib"
 import type {Filter, TrustedEvent} from "@welshman/util"
-import {DIRECT_MESSAGE} from "@welshman/util"
+import {DIRECT_MESSAGE, MESSAGE, THREAD, COMMENT} from "@welshman/util"
 import {makeSpacePath} from "@app/routes"
-import {
-  MESSAGE,
-  THREAD,
-  LEGACY_THREAD,
-  COMMENT,
-  deriveEventsForUrl,
-  getMembershipUrls,
-  userMembership,
-} from "@app/state"
+import {LEGACY_THREAD, deriveEventsForUrl, getMembershipUrls, userMembership} from "@app/state"
 
 // Checked state
 

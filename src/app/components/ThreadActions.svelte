@@ -5,6 +5,7 @@
   import {max} from "@welshman/lib"
   import {deriveEvents, deriveIsDeleted} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
+  import {COMMENT} from "@welshman/util"
   import {thunks, load, pubkey, repository, formatTimestampRelative} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
@@ -16,7 +17,7 @@
   import {publishDelete, publishReaction} from "@app/commands"
   import {deriveNotification} from "@app/notifications"
   import {makeSpacePath} from "@app/routes"
-  import {COMMENT, PROTECTED} from "@app/state"
+  import {PROTECTED} from "@app/state"
 
   export let url
   export let event

@@ -8,7 +8,7 @@
   import {sleep, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
-  import {createEvent, DELETE} from "@welshman/util"
+  import {createEvent, DELETE, MESSAGE} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import {formatTimestampAsDate, load, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
@@ -30,7 +30,6 @@
     deriveChannelMessages,
     GENERAL,
     tagRoom,
-    MESSAGE,
     LEGACY_MESSAGE,
     getMembershipRoomsByUrl,
   } from "@app/state"

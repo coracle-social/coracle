@@ -15,6 +15,9 @@
     RELAYS,
     INBOX_RELAYS,
     WRAP,
+    MESSAGE,
+    COMMENT,
+    THREAD,
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
@@ -55,9 +58,6 @@
     userMembership,
     ensureUnwrapped,
     canDecrypt,
-    MESSAGE,
-    COMMENT,
-    THREAD,
     GENERAL,
   } from "@app/state"
   import {loadUserData, subscribePersistent} from "@app/commands"

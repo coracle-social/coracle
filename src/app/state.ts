@@ -27,6 +27,10 @@ import {
   ZAP_RESPONSE,
   DIRECT_MESSAGE,
   GROUP_META,
+  MESSAGE,
+  GROUPS,
+  THREAD,
+  COMMENT,
   getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
@@ -71,17 +75,9 @@ export const GENERAL = "_"
 
 export const PROTECTED = ["-"]
 
-export const MESSAGE = 9
-
 export const LEGACY_MESSAGE = 209
 
-export const THREAD = 11
-
 export const LEGACY_THREAD = 309
-
-export const COMMENT = 1111
-
-export const MEMBERSHIPS = 10009
 
 export const INDEXER_RELAYS = [
   "wss://purplepag.es/",
@@ -115,7 +111,7 @@ export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
 
 export const NIP46_PERMS =
   "nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt," +
-  [CLIENT_AUTH, AUTH_JOIN, MESSAGE, THREAD, COMMENT, MEMBERSHIPS, WRAP, REACTION]
+  [CLIENT_AUTH, AUTH_JOIN, MESSAGE, THREAD, COMMENT, GROUPS, WRAP, REACTION]
     .map(k => `sign_event:${k}`)
     .join(",")
 
@@ -372,7 +368,7 @@ export const getMembershipRoomsByUrl = (url: string, list?: List) =>
   )
 
 export const memberships = deriveEventsMapped<PublishedList>(repository, {
-  filters: [{kinds: [MEMBERSHIPS]}],
+  filters: [{kinds: [GROUPS]}],
   itemToEvent: item => item.event,
   eventToItem: (event: TrustedEvent) => readList(asDecryptedEvent(event)),
 })
@@ -388,7 +384,7 @@ export const {
   load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
     load({
       ...request,
-      filters: [{kinds: [MEMBERSHIPS], authors: [pubkey]}],
+      filters: [{kinds: [GROUPS], authors: [pubkey]}],
     }),
 })
 

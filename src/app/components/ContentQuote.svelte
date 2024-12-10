@@ -3,11 +3,11 @@
   import {goto} from "$app/navigation"
   import {ctx, nthEq} from "@welshman/lib"
   import {tracker, repository} from "@welshman/app"
-  import {Address, DIRECT_MESSAGE} from "@welshman/util"
+  import {Address, DIRECT_MESSAGE, MESSAGE, THREAD} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
-  import {deriveEvent, entityLink, ROOM, MESSAGE, THREAD} from "@app/state"
+  import {deriveEvent, entityLink, ROOM} from "@app/state"
   import {makeThreadPath, makeRoomPath} from "@app/routes"
 
   export let value

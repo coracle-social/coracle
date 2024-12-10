@@ -3,7 +3,7 @@
   import {page} from "$app/stores"
   import {now} from "@welshman/lib"
   import {subscribe} from "@welshman/app"
-  import {DELETE, REACTION} from "@welshman/util"
+  import {DELETE, REACTION, GROUPS} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -12,7 +12,7 @@
   import {pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
-  import {decodeRelay, MEMBERSHIPS} from "@app/state"
+  import {decodeRelay} from "@app/state"
   import {deriveNotification, SPACE_FILTERS} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
@@ -47,7 +47,7 @@
 
     const sub = subscribe({
       relays: [url],
-      filters: [{kinds: [MEMBERSHIPS]}, {kinds: [DELETE, REACTION], since: now()}],
+      filters: [{kinds: [GROUPS]}, {kinds: [DELETE, REACTION], since: now()}],
     })
 
     return () => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {COMMENT} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
@@ -6,7 +7,6 @@
   import ThreadShare from "@app/components/ThreadShare.svelte"
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {pushModal} from "@app/modal"
-  import {COMMENT} from "@app/state"
 
   export let url
   export let event

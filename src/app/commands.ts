@@ -10,6 +10,8 @@ import {
   AUTH_JOIN,
   GROUP_JOIN,
   GROUP_LEAVE,
+  GROUPS,
+  COMMENT,
   isSignedEvent,
   createEvent,
   displayProfile,
@@ -53,10 +55,8 @@ import {
 } from "@welshman/app"
 import type {Relay} from "@welshman/app"
 import {
-  COMMENT,
   tagRoom,
   userMembership,
-  MEMBERSHIPS,
   INDEXER_RELAYS,
   NIP46_PERMS,
   loadMembership,
@@ -239,7 +239,7 @@ export const nip29 = {
 // List updates
 
 export const addSpaceMembership = async (url: string) => {
-  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const list = get(userMembership) || makeList({kind: GROUPS})
   const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
   const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
@@ -247,7 +247,7 @@ export const addSpaceMembership = async (url: string) => {
 }
 
 export const removeSpaceMembership = async (url: string) => {
-  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const list = get(userMembership) || makeList({kind: GROUPS})
   const pred = (t: string[]) => t[t[0] === "r" ? 1 : 2] === url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
   const relays = uniq([
@@ -260,7 +260,7 @@ export const removeSpaceMembership = async (url: string) => {
 }
 
 export const addRoomMembership = async (url: string, room: string) => {
-  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const list = get(userMembership) || makeList({kind: GROUPS})
   const event = await addToListPublicly(list, ["r", url], ["group", room, url]).reconcile(
     nip44EncryptToSelf,
   )
@@ -270,7 +270,7 @@ export const addRoomMembership = async (url: string, room: string) => {
 }
 
 export const removeRoomMembership = async (url: string, room: string) => {
-  const list = get(userMembership) || makeList({kind: MEMBERSHIPS})
+  const list = get(userMembership) || makeList({kind: GROUPS})
   const pred = (t: string[]) => equals(["group", room, url], t)
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
   const relays = uniq([

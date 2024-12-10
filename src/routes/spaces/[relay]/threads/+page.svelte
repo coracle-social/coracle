@@ -3,7 +3,7 @@
   import {derived} from "svelte/store"
   import {page} from "$app/stores"
   import {sortBy, min, nthEq, sleep} from "@welshman/lib"
-  import {getListTags, getPubkeyTagValues} from "@welshman/util"
+  import {getListTags, getPubkeyTagValues, THREAD, COMMENT} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {createFeedController, userMutes} from "@welshman/app"
@@ -16,7 +16,7 @@
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, LEGACY_THREAD, COMMENT, decodeRelay, deriveEventsForUrl} from "@app/state"
+  import {LEGACY_THREAD, decodeRelay, deriveEventsForUrl} from "@app/state"
   import {THREAD_FILTERS, setChecked} from "@app/notifications"
   import {pushModal} from "@app/modal"
 

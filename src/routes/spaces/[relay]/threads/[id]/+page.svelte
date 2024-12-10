@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy, nthEq, sleep} from "@welshman/lib"
   import {page} from "$app/stores"
+  import {sortBy, nthEq, sleep} from "@welshman/lib"
+  import {COMMENT} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
@@ -13,7 +14,7 @@
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
-  import {COMMENT, deriveEvent, decodeRelay} from "@app/state"
+  import {deriveEvent, decodeRelay} from "@app/state"
   import {subscribePersistent} from "@app/commands"
   import {setChecked} from "@app/notifications"
 

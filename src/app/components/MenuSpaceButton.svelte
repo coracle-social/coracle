@@ -2,19 +2,13 @@
   import {page} from "$app/stores"
   import {derived} from "svelte/store"
   import {max} from "@welshman/lib"
-  import {matchFilter} from "@welshman/util"
+  import {matchFilter, MESSAGE} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
   import {checked, getNotification, deriveNotification, THREAD_FILTERS} from "@app/notifications"
-  import {
-    userMembership,
-    getMembershipRoomsByUrl,
-    deriveEventsForUrl,
-    MESSAGE,
-    GENERAL,
-  } from "@app/state"
+  import {userMembership, getMembershipRoomsByUrl, deriveEventsForUrl, GENERAL} from "@app/state"
   import {makeRoomPath, makeSpacePath} from "@app/routes"
   import {pushDrawer} from "@app/modal"
 
