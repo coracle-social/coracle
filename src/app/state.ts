@@ -358,7 +358,7 @@ export const getMembershipUrls = (list?: List) => {
 }
 
 export const getMembershipRooms = (list?: List) =>
-  getGroupTags(getListTags(list)).map(t => ({url: t[2], room: t[1]}))
+  getGroupTags(getListTags(list)).map(([_, room, url, name = ""]) => ({url, room, name}))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
   sort(
@@ -490,7 +490,6 @@ export type Channel = {
   url: string
   room: string
   name: string
-  events: TrustedEvent[]
   meta?: ChannelMeta
 }
 
@@ -502,44 +501,7 @@ export const channelsById = withGetter(
   derived(
     [groupMeta, memberships, messages, getUrlsForEvent],
     ([$groupMeta, $memberships, $messages, $getUrlsForEvent]) => {
-      const eventsByChannelId = new Map<string, TrustedEvent[]>()
-
-      // Add known rooms by membership so we have a full listing even if there are no messages there
-      for (const membership of $memberships) {
-        for (const {url, room} of getMembershipRooms(membership)) {
-          eventsByChannelId.set(makeChannelId(url, room), [])
-        }
-      }
-
-      // Add known messages to rooms
-      for (const event of $messages) {
-        const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
-
-        if (room) {
-          for (const url of $getUrlsForEvent(event.id)) {
-            pushToMapKey(eventsByChannelId, makeChannelId(url, room), event)
-          }
-        }
-      }
-
       const channelsById = new Map<string, Channel>()
-
-      for (const [id, unsorted] of eventsByChannelId.entries()) {
-        const [url, room] = splitChannelId(id)
-        const events = sortBy(e => -e.created_at, unsorted)
-
-        let name = room
-        for (const event of events) {
-          const tag = event.tags.find(t => t[0] === ROOM && t[2])
-
-          if (tag) {
-            name = tag[2]
-            break
-          }
-        }
-
-        channelsById.set(id, {url, room, name, events})
-      }
 
       // Add meta using group meta events
       for (const event of $groupMeta) {
@@ -549,25 +511,44 @@ export const channelsById = withGetter(
         if (room) {
           for (const url of $getUrlsForEvent(event.id)) {
             const id = makeChannelId(url, room)
-            const channel: Channel = channelsById.get(id) || {
+
+            channelsById.set(id, {
               url,
               room,
-              name: room,
-              events: [],
-            }
+              name: meta.name || room,
+              meta: {
+                access: meta.private ? "private" : "public",
+                membership: meta.closed ? "closed" : "open",
+                picture: meta.picture,
+                about: meta.about,
+              },
+            })
+          }
+        }
+      }
 
-            if (meta.name) {
-              channel.name = meta.name
-            }
+      // Add known rooms based on membership events
+      for (const membership of $memberships) {
+        for (const {url, room, name} of getMembershipRooms(membership)) {
+          const id = makeChannelId(url, room)
 
-            channel.meta = {
-              access: meta.private ? "private" : "public",
-              membership: meta.closed ? "closed" : "open",
-              picture: meta.picture,
-              about: meta.about,
-            }
+          if (!channelsById.has(id)) {
+            channelsById.set(id, {url, room, name})
+          }
+        }
+      }
 
-            channelsById.set(id, channel)
+      // Add rooms based on known messages
+      for (const event of $messages) {
+        const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
+
+        if (room) {
+          for (const url of $getUrlsForEvent(event.id)) {
+            const id = makeChannelId(url, room)
+
+            if (!channelsById.has(id)) {
+              channelsById.set(id, {url, room, name: room})
+            }
           }
         }
       }
@@ -579,9 +560,6 @@ export const channelsById = withGetter(
 
 export const deriveChannel = (url: string, room: string) =>
   derived(channelsById, $channelsById => $channelsById.get(makeChannelId(url, room)))
-
-export const deriveChannelMessages = (url: string, room: string) =>
-  derived(channelsById, $channelsById => $channelsById.get(makeChannelId(url, room))?.events || [])
 
 export const channelsByUrl = derived(channelsById, $channelsById => {
   const $channelsByUrl = new Map<string, Channel[]>()

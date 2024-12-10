@@ -1,5 +1,6 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import {randomId} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import Field from "@lib/components/Field.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -12,10 +13,12 @@
 
   export let url
 
+  const room = randomId()
+
   const back = () => history.back()
 
   const tryCreate = async () => {
-    addRoomMembership(url, room)
+    addRoomMembership(url, room, name)
     goto(makeSpacePath(url, room))
   }
 
@@ -29,7 +32,7 @@
     }
   }
 
-  let room = ""
+  let name = ""
   let loading = false
 </script>
 
@@ -44,7 +47,7 @@
     <p slot="label">Room Name</p>
     <label class="input input-bordered flex w-full items-center gap-2" slot="input">
       <Icon icon="hashtag" />
-      <input bind:value={room} class="grow" type="text" />
+      <input bind:value={name} class="grow" type="text" />
     </label>
   </Field>
   <ModalFooter>
@@ -52,7 +55,7 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={!room || loading}>
+    <Button type="submit" class="btn btn-primary" disabled={!name || loading}>
       <Spinner {loading}>Create Room</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

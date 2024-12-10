@@ -27,11 +27,12 @@
     userSettingValues,
     userMembership,
     decodeRelay,
-    deriveChannelMessages,
+    deriveEventsForUrl,
     GENERAL,
     tagRoom,
     LEGACY_MESSAGE,
     getMembershipRoomsByUrl,
+    displayChannel,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {nip29, addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
@@ -43,7 +44,7 @@
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-  const events = throttled(300, deriveChannelMessages(url, room))
+  const events = throttled(300, deriveEventsForUrl(url, [{kinds: [MESSAGE], "#h": [room]}]))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -58,7 +59,7 @@
       }
     }
 
-    addRoomMembership(url, room)
+    addRoomMembership(url, room, displayChannel(url, room))
   }
 
   const leaveRoom = () => {
