@@ -39,7 +39,7 @@
       class:text-neutral-100={message.pubkey !== $session.pubkey}>
       {#if thunk}
         {#await thunk.result}
-          <i class="fa fa-spinner fa-spin"></i>
+          <i class="fa fa-circle-notch fa-spin"></i>
           Sending...
           {#if message.created_at > $timestamp1 - $userSettings.send_delay / 1000}
             <button
