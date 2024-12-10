@@ -8,6 +8,8 @@ import {
   FOLLOWS,
   REACTION,
   AUTH_JOIN,
+  GROUP_JOIN,
+  GROUP_LEAVE,
   isSignedEvent,
   createEvent,
   displayProfile,
@@ -49,8 +51,10 @@ import {
   clearStorage,
   dropSession,
 } from "@welshman/app"
+import type {Relay} from "@welshman/app"
 import {
   COMMENT,
+  tagRoom,
   userMembership,
   MEMBERSHIPS,
   INDEXER_RELAYS,
@@ -216,6 +220,22 @@ export const broadcastUserData = async (relays: string[]) => {
   }
 }
 
+// NIP 29 stuff
+
+export const nip29 = {
+  isSupported: (relay?: Relay) => relay?.profile?.supported_nips?.map(String)?.includes("29"),
+  joinRoom: (url: string, room: string) => {
+    const event = createEvent(GROUP_JOIN, {tags: [tagRoom(room, url)]})
+
+    return publishThunk({event, relays: [url]})
+  },
+  leaveRoom: (url: string, room: string) => {
+    const event = createEvent(GROUP_LEAVE, {tags: [tagRoom(room, url)]})
+
+    return publishThunk({event, relays: [url]})
+  },
+}
+
 // List updates
 
 export const addSpaceMembership = async (url: string) => {
@@ -327,7 +347,11 @@ export const checkRelayAccess = async (url: string, claim = "") => {
       result[url].message?.replace(/^.*: /, "") ||
       "join request rejected"
 
-    return `Failed to join relay (${message})`
+    // If it's a strict NIP 29 relay don't worry about requesting access
+    // TODO: remove this if relay29 ever gets less strict
+    if (message !== "missing group (`h`) tag") {
+      return `Failed to join relay (${message})`
+    }
   }
 }
 

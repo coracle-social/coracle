@@ -9,7 +9,8 @@
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {createEvent, DELETE} from "@welshman/util"
-  import {formatTimestampAsDate, publishThunk} from "@welshman/app"
+  import {PublishStatus} from "@welshman/net"
+  import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -33,16 +34,40 @@
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
-  import {addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
+  import {nip29, addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
   import {PROTECTED} from "@app/state"
   import {popKey} from "@app/implicit"
+  import {pushToast} from "@app/toast"
 
   const {room = GENERAL} = $page.params
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
+  const relay = deriveRelay(url)
   const events = throttled(300, deriveChannelMessages(url, room))
 
   const assertEvent = (e: any) => e as TrustedEvent
+
+  const joinRoom = async () => {
+    if (nip29.isSupported($relay)) {
+      const thunk = nip29.joinRoom(url, room)
+      const result = await thunk.result
+      const {status, message} = result[url]!
+
+      if (status !== PublishStatus.Success) {
+        return pushToast({theme: "error", message})
+      }
+    }
+
+    addRoomMembership(url, room)
+  }
+
+  const leaveRoom = () => {
+    if (nip29.isSupported($relay)) {
+      nip29.leaveRoom(url, room)
+    }
+
+    removeRoomMembership(url, room)
+  }
 
   const replyTo = (event: TrustedEvent) => {
     const relays = ctx.app.router.Event(event).getUrls()
@@ -141,12 +166,12 @@
     <div slot="action" class="row-2">
       {#if room !== GENERAL}
         {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}
-          <Button class="btn btn-neutral btn-sm" on:click={() => removeRoomMembership(url, room)}>
+          <Button class="btn btn-neutral btn-sm" on:click={leaveRoom}>
             <Icon icon="arrows-a-logout-2" />
             Leave Room
           </Button>
         {:else}
-          <Button class="btn btn-neutral btn-sm" on:click={() => addRoomMembership(url, room)}>
+          <Button class="btn btn-neutral btn-sm" on:click={joinRoom}>
             <Icon icon="login-2" />
             Join Room
           </Button>
