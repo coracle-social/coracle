@@ -10,11 +10,13 @@
   import ChannelName from "@app/components/ChannelName.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {decodeRelay, channelsByUrl} from "@app/state"
+  import {decodeRelay, deriveUserRooms, deriveOtherRooms} from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
+  const userRooms = deriveUserRooms(url)
+  const otherRooms = deriveOtherRooms(url)
 
   $: pubkey = $relay?.profile?.pubkey
 </script>
@@ -89,18 +91,26 @@
       {/if}
     </div>
     <div class="grid grid-cols-3 gap-2">
-      <Link
-        href={makeSpacePath(url, "threads")}
-        class="bg-alt btn btn-neutral justify-start border-none">
+      <Link href={makeSpacePath(url, "threads")} class="btn btn-primary justify-start border-none">
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
-      {#each $channelsByUrl.get(url) || [] as channel (channel.room)}
+      {#each $userRooms as room (room)}
         <Link
-          href={makeRoomPath(url, channel.room)}
+          href={makeRoomPath(url, room)}
+          class="btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
+          <Icon icon="hashtag" />
+          <div class="min-w-0 overflow-hidden text-ellipsis">
+            <ChannelName {url} {room} />
+          </div>
+        </Link>
+      {/each}
+      {#each $otherRooms as room (room)}
+        <Link
+          href={makeRoomPath(url, room)}
           class="bg-alt btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
           <Icon icon="hashtag" />
           <div class="min-w-0 overflow-hidden text-ellipsis">
-            <ChannelName {...channel} />
+            <ChannelName {url} {room} />
           </div>
         </Link>
       {/each}

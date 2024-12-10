@@ -14,5 +14,7 @@
 
 <SecondaryNavItem href={path} notification={$notification}>
   <Icon icon="hashtag" />
-  <ChannelName {url} {room} />
+  <div class="min-w-0 overflow-hidden text-ellipsis">
+    <ChannelName {url} {room} />
+  </div>
 </SecondaryNavItem>

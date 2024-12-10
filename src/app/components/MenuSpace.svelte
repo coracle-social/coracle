@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sortBy} from "@welshman/lib"
   import {displayRelayUrl, GROUP_META} from "@welshman/util"
   import {load} from "@welshman/app"
   import {fly} from "@lib/transition"
@@ -18,14 +17,12 @@
   import ChannelName from "@app/components/ChannelName.svelte"
   import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
   import {
-    getMembershipRoomsByUrl,
     getMembershipUrls,
     hasMembershipUrl,
     userMembership,
     memberships,
-    channelsByUrl,
-    GENERAL,
-    displayChannel,
+    deriveUserRooms,
+    deriveOtherRooms,
   } from "@app/state"
   import {deriveNotification, THREAD_FILTERS} from "@app/notifications"
   import {pushModal} from "@app/modal"
@@ -35,6 +32,8 @@
 
   const threadsPath = makeSpacePath(url, "threads")
   const threadsNotification = deriveNotification(threadsPath, THREAD_FILTERS, url)
+  const userRooms = deriveUserRooms(url)
+  const otherRooms = deriveOtherRooms(url)
 
   const openMenu = () => {
     showMenu = true
@@ -62,24 +61,8 @@
   let showMenu = false
   let replaceState = false
   let element: Element
-  let userRooms: string[] = []
-  let otherRooms: string[] = []
 
   $: members = $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey)
-
-  $: {
-    userRooms = [GENERAL, ...getMembershipRoomsByUrl(url, $userMembership)]
-    otherRooms = []
-
-    for (const channel of $channelsByUrl.get(url) || []) {
-      if (!userRooms.includes(channel.room)) {
-        otherRooms.push(channel.room)
-      }
-    }
-
-    userRooms = sortBy(room => displayChannel(url, room), userRooms)
-    otherRooms = sortBy(room => displayChannel(url, room), otherRooms)
-  }
 
   onMount(async () => {
     replaceState = Boolean(element.closest(".drawer"))
@@ -137,23 +120,25 @@
       </SecondaryNavItem>
       <div class="h-2" />
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-      {#each userRooms as room, i (room)}
+      {#each $userRooms as room, i (room)}
         <MenuSpaceRoomItem {url} {room} />
       {/each}
-      {#if otherRooms.length > 0}
+      {#if $otherRooms.length > 0}
         <div class="h-2" />
         <SecondaryNavHeader>
-          {#if userRooms.length > 0}
+          {#if $userRooms.length > 0}
             Other Rooms
           {:else}
             Rooms
           {/if}
         </SecondaryNavHeader>
       {/if}
-      {#each otherRooms as room, i (room)}
+      {#each $otherRooms as room, i (room)}
         <SecondaryNavItem href={makeSpacePath(url, room)}>
           <Icon icon="hashtag" />
-          <ChannelName {url} {room} />
+          <div class="min-w-0 overflow-hidden text-ellipsis">
+            <ChannelName {url} {room} />
+          </div>
         </SecondaryNavItem>
       {/each}
       <SecondaryNavItem on:click={addRoom}>

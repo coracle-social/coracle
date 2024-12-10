@@ -605,6 +605,9 @@ export const displayChannel = (url: string, room: string) => {
   return channelsById.get().get(makeChannelId(url, room))?.name || room
 }
 
+export const roomComparator = (url: string) => (room: string) =>
+  displayChannel(url, room).toLowerCase()
+
 // User stuff
 
 export const userSettings = withGetter(
@@ -632,6 +635,20 @@ export const userMembership = withGetter(
     return $membershipByPubkey.get($pubkey)
   }),
 )
+
+export const deriveUserRooms = (url: string) =>
+  derived(userMembership, $userMembership => [
+    GENERAL,
+    ...sortBy(roomComparator(url), getMembershipRoomsByUrl(url, $userMembership)),
+  ])
+
+export const deriveOtherRooms = (url: string) =>
+  derived([deriveUserRooms(url), channelsByUrl], ([$userRooms, $channelsByUrl]) =>
+    sortBy(
+      roomComparator(url),
+      ($channelsByUrl.get(url) || []).filter(c => !$userRooms.includes(c.room)).map(c => c.room),
+    ),
+  )
 
 // Other utils
 
