@@ -51,8 +51,16 @@ import {
   uniq,
   uniqBy,
 } from "@welshman/lib"
-import type {PublishRequest, Target} from "@welshman/net"
-import {Executor, AuthMode, Local, Multi, Relays, SubscriptionEvent} from "@welshman/net"
+import type {Connection, PublishRequest, Target} from "@welshman/net"
+import {
+  Executor,
+  AuthMode,
+  Local,
+  Multi,
+  Relays,
+  SubscriptionEvent,
+  ConnectionEvent,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
 import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
@@ -958,6 +966,7 @@ export class ThreadLoader {
 
 // Remove the old database. TODO remove this
 import {deleteDB} from "idb"
+import {subscriptionNotices} from "src/domain/connection"
 deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()
@@ -1031,6 +1040,7 @@ const migrateEvents = (events: TrustedEvent[]) => {
 
 // Avoid initializing multiple times on hot reload
 if (!db) {
+  const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
   const initialRelays = [
     ...env.DEFAULT_RELAYS,
     ...env.DVM_RELAYS,
@@ -1056,6 +1066,20 @@ if (!db) {
 
     ctx.net.authMode = autoAuthenticate ? AuthMode.Implicit : AuthMode.Explicit
     ctx.app.dufflepudUrl = getSetting("dufflepud_url")
+  })
+
+  ctx.net.pool.on("init", (connection: Connection) => {
+    connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
+      if (!noticeVerbs.includes(verb)) return
+      subscriptionNotices.update($notices => {
+        pushToMapKey($notices, connection.url, {
+          created_at: now(),
+          url: cxn.url,
+          notice: [verb, ...args],
+        })
+        return $notices
+      })
+    })
   })
 
   ready = initStorage("coracle", 2, {
