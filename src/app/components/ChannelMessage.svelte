@@ -58,7 +58,7 @@
 <LongPress
   data-event={event.id}
   onLongPress={inert ? null : onLongPress}
-  class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left hover:z-feature">
+  class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left">
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">

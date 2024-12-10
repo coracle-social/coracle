@@ -16,6 +16,7 @@ import {
   shuffle,
   parseJson,
   fromPairs,
+  memoize,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -57,7 +58,8 @@ import {
   createSearch,
   userFollows,
   ensurePlaintext,
-  thunkWorker,
+  thunks,
+  walkThunks,
 } from "@welshman/app"
 import type {AppSyncOpts, Thunk} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -247,17 +249,35 @@ export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   )
 }
 
-export const getEventsForUrl = (url: string, filters: Filter[]) =>
-  sortBy(
-    e => -e.created_at,
-    repository.query(filters).filter(e => tracker.hasRelay(e.id, url)),
-  )
+export const getUrlsForEvent = derived([trackerStore, thunks], ([$tracker, $thunks]) => {
+  const getThunksByEventId = memoize(() => {
+    const thunksByEventId = new Map<string, Thunk[]>()
+
+    for (const thunk of walkThunks(Object.values($thunks))) {
+      pushToMapKey(thunksByEventId, thunk.event.id, thunk)
+    }
+
+    return thunksByEventId
+  })
+
+  return (id: string) => {
+    const urls = Array.from($tracker.getRelays(id))
+
+    for (const thunk of getThunksByEventId().get(id) || []) {
+      for (const url of thunk.request.relays) {
+        urls.push(url)
+      }
+    }
+
+    return uniq(urls)
+  }
+})
 
 export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
-  derived([deriveEvents(repository, {filters}), trackerStore], ([$events, $tracker]) =>
+  derived([deriveEvents(repository, {filters}), getUrlsForEvent], ([$events, $getUrlsForEvent]) =>
     sortBy(
       e => -e.created_at,
-      $events.filter(e => $tracker.hasRelay(e.id, url)),
+      $events.filter(e => $getUrlsForEvent(e.id).includes(url)),
     ),
   )
 
@@ -271,16 +291,6 @@ setContext({
     requestTimeout: 5000,
     router: makeRouter(),
   }),
-})
-
-// Track what urls we're attempting to send messages to so we can associate them with spaces immediately
-
-thunkWorker.addGlobalHandler((thunk: Thunk) => {
-  if (thunk.event.tags.find(t => t[0] === ROOM)) {
-    for (const url of thunk.request.relays) {
-      tracker.track(thunk.event.id, url)
-    }
-  }
 })
 
 // Settings
@@ -473,8 +483,8 @@ export const splitChannelId = (id: string) => id.split("|")
 
 export const channelsById = withGetter(
   derived(
-    [groupMeta, memberships, messages, trackerStore],
-    ([$groupMeta, $memberships, $messages, $tracker]) => {
+    [groupMeta, memberships, messages, getUrlsForEvent],
+    ([$groupMeta, $memberships, $messages, $getUrlsForEvent]) => {
       const eventsByChannelId = new Map<string, TrustedEvent[]>()
 
       // Add known rooms by membership so we have a full listing even if there are no messages there
@@ -489,7 +499,7 @@ export const channelsById = withGetter(
         const [_, room] = event.tags.find(nthEq(0, ROOM)) || []
 
         if (room) {
-          for (const url of $tracker.getRelays(event.id)) {
+          for (const url of $getUrlsForEvent(event.id)) {
             pushToMapKey(eventsByChannelId, makeChannelId(url, room), event)
           }
         }
@@ -520,7 +530,7 @@ export const channelsById = withGetter(
         const room = meta.d
 
         if (room) {
-          for (const url of $tracker.getRelays(event.id)) {
+          for (const url of $getUrlsForEvent(event.id)) {
             const id = makeChannelId(url, room)
             const channel: Channel = channelsById.get(id) || {
               url,
