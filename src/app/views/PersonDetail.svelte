@@ -21,7 +21,7 @@
     tagZapSplit,
     deriveProfileDisplay,
     deriveFollows,
-    getFollowers,
+    followersByPubkey,
     getUserWotScore,
     maxWot,
     session,
@@ -74,13 +74,8 @@
 
   let activeTab = "notes"
 
-  followersCount.set(getFollowers(pubkey).length)
-
-  $: pubkeys = getPubkeyTagValues(getListTags($follows))
-
-  $: {
-    followsCount.set(pubkeys.length)
-  }
+  $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
+  $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
 
   $: ({rgb, rgba} = $themeBackgroundGradient)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
