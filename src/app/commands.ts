@@ -10,6 +10,8 @@ import {
   AUTH_JOIN,
   GROUP_JOIN,
   GROUP_LEAVE,
+  GROUP_CREATE,
+  GROUP_EDIT_META,
   GROUPS,
   COMMENT,
   isSignedEvent,
@@ -53,7 +55,7 @@ import {
   clearStorage,
   dropSession,
 } from "@welshman/app"
-import type {Relay} from "@welshman/app"
+import type {Relay, Thunk} from "@welshman/app"
 import {
   tagRoom,
   userMembership,
@@ -119,6 +121,15 @@ export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
   return () => {
     done = true
     sub?.close()
+  }
+}
+
+export const getThunkError = async (thunk: Thunk) => {
+  const result = await thunk.result
+  const [{status, message}] = Object.values(result) as any
+
+  if (status !== PublishStatus.Success) {
+    return message
   }
 }
 
@@ -224,6 +235,18 @@ export const broadcastUserData = async (relays: string[]) => {
 
 export const nip29 = {
   isSupported: (relay?: Relay) => relay?.profile?.supported_nips?.map(String)?.includes("29"),
+  createRoom: (url: string, room: string) => {
+    const event = createEvent(GROUP_CREATE, {tags: [tagRoom(room, url)]})
+
+    return publishThunk({event, relays: [url]})
+  },
+  editMeta: (url: string, room: string, meta: Record<string, string>) => {
+    const event = createEvent(GROUP_EDIT_META, {
+      tags: [tagRoom(room, url), ...Object.entries(meta)],
+    })
+
+    return publishThunk({event, relays: [url]})
+  },
   joinRoom: (url: string, room: string) => {
     const event = createEvent(GROUP_JOIN, {tags: [tagRoom(room, url)]})
 

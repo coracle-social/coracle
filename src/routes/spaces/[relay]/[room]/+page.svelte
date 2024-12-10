@@ -9,7 +9,6 @@
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {createEvent, DELETE, MESSAGE} from "@welshman/util"
-  import {PublishStatus} from "@welshman/net"
   import {formatTimestampAsDate, load, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
@@ -35,7 +34,13 @@
     displayChannel,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
-  import {nip29, addRoomMembership, removeRoomMembership, subscribePersistent} from "@app/commands"
+  import {
+    nip29,
+    addRoomMembership,
+    removeRoomMembership,
+    getThunkError,
+    subscribePersistent,
+  } from "@app/commands"
   import {PROTECTED} from "@app/state"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
@@ -50,11 +55,9 @@
 
   const joinRoom = async () => {
     if (nip29.isSupported($relay)) {
-      const thunk = nip29.joinRoom(url, room)
-      const result = await thunk.result
-      const {status, message} = result[url]!
+      const message = await getThunkError(nip29.joinRoom(url, room))
 
-      if (status !== PublishStatus.Success) {
+      if (message && !message.includes("already")) {
         return pushToast({theme: "error", message})
       }
     }

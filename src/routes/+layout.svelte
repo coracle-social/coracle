@@ -150,15 +150,15 @@
       setupAnalytics()
 
       ready = initStorage("flotilla", 4, {
-        relays: {keyPath: "url", store: throttled(1000, relays)},
-        handles: {keyPath: "nip05", store: throttled(1000, handles)},
-        checked: storageAdapters.fromObjectStore(checked, {throttle: 1000}),
+        relays: {keyPath: "url", store: throttled(3000, relays)},
+        handles: {keyPath: "nip05", store: throttled(3000, handles)},
+        checked: storageAdapters.fromObjectStore(checked, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
-          throttle: 1000,
+          throttle: 3000,
           migrate: migrateFreshness,
         }),
         plaintext: storageAdapters.fromObjectStore(plaintext, {
-          throttle: 1000,
+          throttle: 3000,
           migrate: migratePlaintext,
         }),
         events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {

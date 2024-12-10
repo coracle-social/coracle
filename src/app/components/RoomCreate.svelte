@@ -2,22 +2,45 @@
   import {goto} from "$app/navigation"
   import {randomId} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
+  import {deriveRelay} from "@welshman/app"
   import Field from "@lib/components/Field.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {addRoomMembership} from "@app/commands"
+  import {addRoomMembership, nip29, getThunkError} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
+  import {pushToast} from "@app/toast"
 
   export let url
 
   const room = randomId()
+  const relay = deriveRelay(url)
 
   const back = () => history.back()
 
   const tryCreate = async () => {
+    if (nip29.isSupported($relay)) {
+      const createMessage = await getThunkError(nip29.createRoom(url, room))
+
+      if (createMessage && !createMessage.includes("already")) {
+        return pushToast({theme: "error", message: createMessage})
+      }
+
+      const editMessage = await getThunkError(nip29.editMeta(url, room, {name}))
+
+      if (editMessage) {
+        return pushToast({theme: "error", message: editMessage})
+      }
+
+      const joinMessage = await getThunkError(nip29.joinRoom(url, room))
+
+      if (joinMessage && !joinMessage.includes("already")) {
+        return pushToast({theme: "error", message: joinMessage})
+      }
+    }
+
     addRoomMembership(url, room, name)
     goto(makeSpacePath(url, room))
   }
