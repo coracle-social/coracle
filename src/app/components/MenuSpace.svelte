@@ -14,7 +14,6 @@
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import ProfileList from "@app/components/ProfileList.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
-  import ChannelName from "@app/components/ChannelName.svelte"
   import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
   import {
     getMembershipUrls,
@@ -121,7 +120,7 @@
       <div class="h-2" />
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
       {#each $userRooms as room, i (room)}
-        <MenuSpaceRoomItem {url} {room} />
+        <MenuSpaceRoomItem notify {url} {room} />
       {/each}
       {#if $otherRooms.length > 0}
         <div class="h-2" />
@@ -134,12 +133,7 @@
         </SecondaryNavHeader>
       {/if}
       {#each $otherRooms as room, i (room)}
-        <SecondaryNavItem href={makeSpacePath(url, room)}>
-          <Icon icon="hashtag" />
-          <div class="min-w-0 overflow-hidden text-ellipsis">
-            <ChannelName {url} {room} />
-          </div>
-        </SecondaryNavItem>
+        <MenuSpaceRoomItem {url} {room} />
       {/each}
       <SecondaryNavItem on:click={addRoom}>
         <Icon icon="add-circle" />

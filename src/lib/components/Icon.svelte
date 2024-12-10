@@ -51,6 +51,7 @@
   import KeyMinimalisticSquare3 from "@assets/icons/Key Minimalistic Square 3.svg?dataurl"
   import Letter from "@assets/icons/Letter.svg?dataurl"
   import LinkRound from "@assets/icons/Link Round.svg?dataurl"
+  import Lock from "@assets/icons/Lock.svg?dataurl"
   import Login from "@assets/icons/Login.svg?dataurl"
   import Login2 from "@assets/icons/Login 2.svg?dataurl"
   import Magnifer from "@assets/icons/Magnifer.svg?dataurl"
@@ -133,6 +134,7 @@
     letter: Letter,
     "link-round": LinkRound,
     login: Login,
+    lock: Lock,
     "login-2": Login2,
     magnifer: Magnifer,
     mailbox: Mailbox,

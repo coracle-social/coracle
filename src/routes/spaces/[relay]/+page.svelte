@@ -10,7 +10,14 @@
   import ChannelName from "@app/components/ChannelName.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
-  import {decodeRelay, deriveUserRooms, deriveOtherRooms} from "@app/state"
+  import {
+    decodeRelay,
+    channelIsLocked,
+    makeChannelId,
+    channelsById,
+    deriveUserRooms,
+    deriveOtherRooms,
+  } from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
 
   const url = decodeRelay($page.params.relay)
@@ -98,7 +105,11 @@
         <Link
           href={makeRoomPath(url, room)}
           class="btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
-          <Icon icon="hashtag" />
+          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+            <Icon icon="lock" size={4} />
+          {:else}
+            <Icon icon="hashtag" />
+          {/if}
           <div class="min-w-0 overflow-hidden text-ellipsis">
             <ChannelName {url} {room} />
           </div>
@@ -108,7 +119,11 @@
         <Link
           href={makeRoomPath(url, room)}
           class="bg-alt btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
-          <Icon icon="hashtag" />
+          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+            <Icon icon="lock" size={4} />
+          {:else}
+            <Icon icon="hashtag" />
+          {/if}
           <div class="min-w-0 overflow-hidden text-ellipsis">
             <ChannelName {url} {room} />
           </div>

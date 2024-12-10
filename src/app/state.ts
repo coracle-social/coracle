@@ -561,8 +561,8 @@ export const channelsById = withGetter(
             }
 
             channel.meta = {
-              access: meta.public ? "public" : "private",
-              membership: meta.open ? "open" : "closed",
+              access: meta.private ? "private" : "public",
+              membership: meta.closed ? "closed" : "open",
               picture: meta.picture,
               about: meta.about,
             }
@@ -603,6 +603,9 @@ export const displayChannel = (url: string, room: string) => {
 
 export const roomComparator = (url: string) => (room: string) =>
   displayChannel(url, room).toLowerCase()
+
+export const channelIsLocked = (channel?: Channel) =>
+  channel?.meta?.access === "private" && channel?.meta?.membership === "closed"
 
 // User stuff
 

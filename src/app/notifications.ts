@@ -12,6 +12,8 @@ import {LEGACY_THREAD, deriveEventsForUrl, getMembershipUrls, userMembership} fr
 
 export const checked = writable<Record<string, number>>({})
 
+checked.subscribe(v => console.trace("======", v))
+
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
 export const setChecked = (key: string, ts = now()) =>
