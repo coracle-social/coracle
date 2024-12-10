@@ -408,7 +408,7 @@ export const markAsSeen = async (kind: number, eventsByKey: Record<string, Trust
 
 // Messages
 
-export const sendMessage = async (channelId: string, content: string) => {
+export const sendMessage = async (channelId: string, content: string, delay: number) => {
   const recipients = channelId.split(",")
   const template = {
     content,
@@ -421,10 +421,12 @@ export const sendMessage = async (channelId: string, content: string) => {
     const helper = Nip59.fromSigner(signer.get())
     const rumor = await helper.wrap(recipient, template)
 
-    await publish({
+    repository.publish(rumor)
+    publish({
       event: rumor.wrap,
       relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
       forcePlatform: false,
+      delay,
     })
   }
 }

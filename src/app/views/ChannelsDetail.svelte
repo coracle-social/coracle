@@ -10,7 +10,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
-  import {sendMessage, markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
+  import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
 
   export let pubkeys
@@ -30,10 +30,6 @@
 
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
-  const send = async content => {
-    await sendMessage(channelId, content)
-  }
-
   onMount(() => {
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
     markChannelRead(channelId)
@@ -50,9 +46,11 @@
   })
 
   document.title = `Direct Messages`
+
+  $: console.log("messages", $messages)
 </script>
 
-<Channel {pubkeys} messages={$messages} sendMessage={send} {initialMessage}>
+<Channel {pubkeys} {channelId} messages={$messages} {initialMessage}>
   <div slot="header" class="flex h-16 justify-between px-4">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-4 pt-1">
