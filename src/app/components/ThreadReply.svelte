@@ -21,7 +21,7 @@
     if ($loading) return
 
     const content = $editor.getText({blockSeparator: "\n"})
-    const tags = [...getEditorTags($editor), tagRoom(GENERAL, url), [PROTECTED]]
+    const tags = [...getEditorTags($editor), tagRoom(GENERAL, url), PROTECTED]
 
     if (!content.trim()) {
       return pushToast({

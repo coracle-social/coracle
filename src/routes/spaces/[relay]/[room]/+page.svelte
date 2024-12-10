@@ -10,7 +10,7 @@
   import {throttled} from "@welshman/store"
   import {createEvent, DELETE} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
-  import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
+  import {formatTimestampAsDate, load, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -31,6 +31,7 @@
     GENERAL,
     tagRoom,
     MESSAGE,
+    LEGACY_MESSAGE,
     getMembershipRoomsByUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
@@ -123,6 +124,14 @@
   onMount(async () => {
     // Sveltekiiit
     await sleep(100)
+
+    if (!nip29.isSupported($relay)) {
+      load({
+        delay: 0,
+        relays: [url],
+        filters: [{kinds: [LEGACY_MESSAGE], "#~": [room]}],
+      })
+    }
 
     pullConservatively({
       relays: [url],

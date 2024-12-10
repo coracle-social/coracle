@@ -13,14 +13,19 @@
   export let value
   export let event
   export let depth = 0
+  export let relays: string[] = []
   export let minimal = false
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
-  const addr = new Address(kind, pubkey, identifier)
-  const idOrAddress = id || addr.toString()
-  const relays = ctx.app.router.Quote(event, idOrAddress, relayHints).getUrls()
-  const quote = deriveEvent(idOrAddress, relays)
-  const entity = id ? nip19.neventEncode({id, relays}) : addr.toNaddr()
+  const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
+  const mergedRelays = [
+    ...relays,
+    ...ctx.app.router.Quote(event, idOrAddress, relayHints).getUrls(),
+  ]
+  const quote = deriveEvent(idOrAddress, mergedRelays)
+  const entity = id
+    ? nip19.neventEncode({id, relays: mergedRelays})
+    : new Address(kind, pubkey, identifier, mergedRelays).toNaddr()
 
   const scrollToEvent = (id: string) => {
     const element = document.querySelector(`[data-event="${id}"]`) as any

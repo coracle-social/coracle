@@ -134,7 +134,7 @@
           {#if isBlock(i)}
             <ContentQuote {...quoteProps} value={parsed.value} {depth} {event}>
               <div slot="note-content" let:event>
-                <svelte:self {hideMedia} {event} depth={depth + 1} />
+                <svelte:self {quoteProps} {hideMedia} {event} depth={depth + 1} />
               </div>
             </ContentQuote>
           {:else}

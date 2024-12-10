@@ -16,13 +16,15 @@
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {THREAD, COMMENT, decodeRelay, deriveEventsForUrl} from "@app/state"
+  import {THREAD, LEGACY_THREAD, COMMENT, decodeRelay, deriveEventsForUrl} from "@app/state"
   import {THREAD_FILTERS, setChecked} from "@app/notifications"
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const threads = deriveEventsForUrl(url, [{kinds: [THREAD]}])
-  const comments = deriveEventsForUrl(url, [{kinds: [COMMENT], "#K": [String(THREAD)]}])
+  const threads = deriveEventsForUrl(url, [{kinds: [THREAD, LEGACY_THREAD]}])
+  const comments = deriveEventsForUrl(url, [
+    {kinds: [COMMENT], "#K": [String(THREAD), String(LEGACY_THREAD)]},
+  ])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 
   const events = throttled(

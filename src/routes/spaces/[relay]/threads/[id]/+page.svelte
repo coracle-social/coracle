@@ -81,7 +81,7 @@
     {/if}
     <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
       <div class="col-3 ml-12">
-        <Content showEntire event={$event} />
+        <Content showEntire event={$event} quoteProps={{relays: [url]}} />
         <ThreadActions event={$event} {url} />
       </div>
     </NoteCard>

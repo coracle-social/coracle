@@ -9,6 +9,7 @@ import {makeSpacePath} from "@app/routes"
 import {
   MESSAGE,
   THREAD,
+  LEGACY_THREAD,
   COMMENT,
   deriveEventsForUrl,
   getMembershipUrls,
@@ -33,8 +34,8 @@ export const SPACE_FILTERS: Filter[] = [{kinds: [THREAD, MESSAGE, COMMENT]}]
 export const ROOM_FILTERS: Filter[] = [{kinds: [MESSAGE]}]
 
 export const THREAD_FILTERS: Filter[] = [
-  {kinds: [THREAD]},
-  {kinds: [COMMENT], "#K": [String(THREAD)]},
+  {kinds: [THREAD, LEGACY_THREAD]},
+  {kinds: [COMMENT], "#K": [String(THREAD), String(LEGACY_THREAD)]},
 ]
 
 export const getNotificationFilters = (since: number): Filter[] =>

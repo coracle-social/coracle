@@ -73,7 +73,11 @@ export const PROTECTED = ["-"]
 
 export const MESSAGE = 9
 
+export const LEGACY_MESSAGE = 209
+
 export const THREAD = 11
+
+export const LEGACY_THREAD = 309
 
 export const COMMENT = 1111
 
@@ -454,7 +458,24 @@ export const chatSearch = derived(chats, $chats =>
 
 // Messages
 
-export const messages = deriveEvents(repository, {filters: [{kinds: [MESSAGE]}]})
+// TODO: remove support for legacy messages
+export const messages = derived(
+  deriveEvents(repository, {filters: [{kinds: [MESSAGE, LEGACY_MESSAGE]}]}),
+  $events =>
+    $events.map(e => {
+      if (e.kind === LEGACY_MESSAGE) {
+        let room = e.tags.find(nthEq(0, "~"))?.[1] || GENERAL
+
+        if (room === "general") {
+          room = GENERAL
+        }
+
+        return {...e, kind: MESSAGE, tags: [...e.tags, tagRoom(room, "")]}
+      }
+
+      return e
+    }),
+)
 
 // Group Meta
 
