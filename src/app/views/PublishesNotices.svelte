@@ -53,6 +53,7 @@
     fuseOptions: {
       keys: ["url", "message", "eventKind", "notice"],
       shouldSort: false,
+      threshold: 0.2,
     },
   })
 </script>
