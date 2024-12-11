@@ -12,6 +12,7 @@
   import {router} from "src/app/util/router"
   import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
+  import {setChecked} from "src/domain/notifications"
 
   export let pubkeys
   export let channelId
@@ -34,7 +35,7 @@
     const sub = listenForMessages(pubkeys)
 
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
-    markChannelRead(channelId)
+    setChecked([channelId])
 
     for (const pubkey of pubkeys) {
       loadInboxRelaySelections(pubkey)
@@ -46,7 +47,7 @@
   })
 
   onDestroy(() => {
-    markChannelRead(channelId)
+    setChecked([channelId])
   })
 
   document.title = `Direct Messages`

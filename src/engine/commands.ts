@@ -19,7 +19,6 @@ import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
   Address,
-  DIRECT_MESSAGE,
   FEEDS,
   FOLLOWS,
   INBOX_RELAYS,
@@ -44,10 +43,7 @@ import {assoc, flatten, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
-  channels,
   createAndPublish,
-  getChannelIdFromEvent,
-  getChannelSeenKey,
   getClientTags,
   hasNip44,
   publish,
@@ -374,34 +370,6 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     })
   }
 }
-
-export const markChannelsRead = (ids: Set<string>) => {
-  const $pubkey = pubkey.get()
-  const eventsByKey = {}
-
-  for (const {id, last_sent = 0, last_received = 0, last_checked = 0} of get(channels)) {
-    if (!ids.has(id) || Math.max(last_sent, last_checked) > last_received) {
-      continue
-    }
-
-    const members = id.split(",")
-    const key = getChannelSeenKey(id)
-    const since = Math.max(last_sent, last_checked)
-    const events = repository
-      .query([{kinds: [4, DIRECT_MESSAGE], authors: members, "#p": members, since}])
-      .filter(e => getChannelIdFromEvent(e) === id && e.pubkey !== $pubkey)
-
-    if (events.length > 0) {
-      eventsByKey[key] = events
-    }
-  }
-
-  // markAsSeen(SEEN_CONVERSATION, eventsByKey)
-}
-
-export const markAllChannelsRead = () => markChannelsRead(new Set(get(channels).map(c => c.id)))
-
-export const markChannelRead = (id: string) => markChannelsRead(new Set([id]))
 
 // Session/login
 

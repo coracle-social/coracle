@@ -11,7 +11,8 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages, markAllChannelsRead} from "src/engine"
+  import {channels, hasNewMessages} from "src/engine"
+  import {setChecked} from "src/domain/notifications"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {
@@ -38,6 +39,8 @@
       scroller.stop()
     }
   })
+
+  const markAllChannelsRead = () => setChecked($channels.map(c => c.id))
 
   document.title = "Direct Messages"
 </script>

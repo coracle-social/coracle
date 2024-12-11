@@ -98,7 +98,6 @@ import {
   normalizeRelayUrl,
   readList,
 } from "@welshman/util"
-import crypto from "crypto"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds} from "hurdak"
 import {equals, partition, prop, sortBy} from "ramda"
@@ -391,13 +390,7 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...getPubkeyTagValues(event.tags)])
 
-export const getChannelSeenKey = (id: string) =>
-  crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
-
-export const messages = deriveEvents(repository, {
-  throttle: 300,
-  filters: [{kinds: [4, DIRECT_MESSAGE]}],
-})
+export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
 
 export const channels = derived(
   [pubkey, messages, getSeenAt],
@@ -411,7 +404,6 @@ export const channels = derived(
         continue
       }
 
-      const key = getChannelSeenKey(id)
       const chan = channelsById[id] || {
         id,
         last_sent: 0,
@@ -421,7 +413,7 @@ export const channels = derived(
       }
 
       chan.messages.push(e)
-      chan.last_checked = Math.max(chan.last_checked, $getSeenAt(key, e))
+      chan.last_checked = Math.max(chan.last_checked, $getSeenAt(id, e))
 
       if (e.pubkey === $pubkey) {
         chan.last_sent = Math.max(chan.last_sent, e.created_at)
