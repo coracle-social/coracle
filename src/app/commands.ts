@@ -460,10 +460,10 @@ export const makeComment = ({event, content, tags = []}: ReplyParams) => {
   if (seenRoots.size === 0) {
     tags.push(["K", String(event.kind)])
     tags.push(["E", event.id])
-  } else {
-    tags.push(["k", String(event.kind)])
-    tags.push(["e", event.id])
   }
+
+  tags.push(["k", String(event.kind)])
+  tags.push(["e", event.id])
 
   return createEvent(COMMENT, {content, tags})
 }
