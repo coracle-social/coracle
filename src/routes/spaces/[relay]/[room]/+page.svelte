@@ -5,11 +5,11 @@
   import {derived} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
-  import {sleep, now, ctx} from "@welshman/lib"
+  import {sleep, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
-  import {createEvent, DELETE, MESSAGE} from "@welshman/util"
-  import {formatTimestampAsDate, load, publishThunk, deriveRelay} from "@welshman/app"
+  import {createEvent, MESSAGE} from "@welshman/util"
+  import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -22,7 +22,6 @@
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
-    pullConservatively,
     userSettingValues,
     userMembership,
     decodeRelay,
@@ -34,13 +33,8 @@
     displayChannel,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
-  import {
-    nip29,
-    addRoomMembership,
-    removeRoomMembership,
-    getThunkError,
-    subscribePersistent,
-  } from "@app/commands"
+  import {nip29, addRoomMembership, removeRoomMembership, getThunkError} from "@app/commands"
+  import {listenForChannelMessages} from "@app/requests"
   import {PROTECTED} from "@app/state"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
@@ -96,7 +90,7 @@
       delay: $userSettingValues.send_delay,
     })
 
-  let limit = 15
+  let limit = 30
   let loading = true
   let unsub: () => void
   let element: HTMLElement
@@ -135,32 +129,16 @@
     // Sveltekiiit
     await sleep(100)
 
-    if (!nip29.isSupported($relay)) {
-      load({
-        delay: 0,
-        relays: [url],
-        filters: [{kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]}],
-      })
-    }
-
-    pullConservatively({
-      relays: [url],
-      filters: [{kinds: [MESSAGE, DELETE], "#h": [room]}],
-    })
-
     scroller = createScroller({
       element,
       delay: 300,
       threshold: 3000,
       onScroll: () => {
-        limit += 15
+        limit += 30
       },
     })
 
-    unsub = subscribePersistent({
-      relays: [url],
-      filters: [{kinds: [MESSAGE], "#h": [room], since: now()}],
-    })
+    unsub = listenForChannelMessages(url, room)
   })
 
   onDestroy(() => {

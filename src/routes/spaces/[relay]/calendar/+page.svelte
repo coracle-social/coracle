@@ -14,7 +14,8 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveEventsForUrl, pullConservatively, decodeRelay} from "@app/state"
+  import {deriveEventsForUrl, decodeRelay} from "@app/state"
+  import {pullConservatively} from "@app/requests"
   import {setChecked} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)

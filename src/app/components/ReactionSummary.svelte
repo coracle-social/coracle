@@ -1,7 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {groupBy, uniqBy} from "@welshman/lib"
-  import {REACTION} from "@welshman/util"
+  import {groupBy, uniqBy, batch} from "@welshman/lib"
+  import {REACTION, DELETE} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {pubkey, repository, load, displayProfileByPubkey} from "@welshman/app"
   import {displayList} from "@lib/util"
@@ -23,7 +24,16 @@
   )
 
   onMount(() => {
-    load({relays, filters})
+    load({
+      relays,
+      filters,
+      onEvent: batch(300, (events: TrustedEvent[]) => {
+        load({
+          relays,
+          filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
+        })
+      }),
+    })
   })
 </script>
 

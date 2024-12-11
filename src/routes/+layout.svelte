@@ -5,7 +5,7 @@
   import {get, derived} from "svelte/store"
   import {dev} from "$app/environment"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
-  import {identity, uniq, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
+  import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     PROFILE,
@@ -15,9 +15,6 @@
     RELAYS,
     INBOX_RELAYS,
     WRAP,
-    MESSAGE,
-    COMMENT,
-    THREAD,
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
@@ -39,7 +36,6 @@
     dropSession,
     getRelayUrls,
     userInboxRelaySelections,
-    load,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -51,17 +47,11 @@
   import {setupTracking} from "@app/tracking"
   import {setupAnalytics} from "@app/analytics"
   import {theme} from "@app/theme"
-  import {
-    INDEXER_RELAYS,
-    getMembershipUrls,
-    getMembershipRooms,
-    userMembership,
-    ensureUnwrapped,
-    canDecrypt,
-    GENERAL,
-  } from "@app/state"
-  import {loadUserData, subscribePersistent} from "@app/commands"
+  import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
+  import {loadUserData} from "@app/commands"
+  import {subscribePersistent, listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
+  import * as requests from "@app/requests"
   import {checked} from "@app/notifications"
   import * as notifications from "@app/notifications"
   import * as state from "@app/state"
@@ -86,6 +76,7 @@
       ...app,
       ...state,
       ...commands,
+      ...requests,
       ...notifications,
     })
 
@@ -199,30 +190,7 @@
 
       userMembership.subscribe($membership => {
         unsubSpaces?.()
-
-        const since = ago(30)
-        const rooms = uniq(getMembershipRooms($membership).map(m => m.room)).concat(GENERAL)
-        const relays = uniq(getMembershipUrls($membership))
-
-        // Get one event for each of our notification categories
-        load({
-          relays,
-          filters: [
-            {kinds: [THREAD], limit: 1},
-            {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
-            ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
-          ],
-        })
-
-        // Listen for new notifications/memberships
-        unsubSpaces = subscribePersistent({
-          relays,
-          filters: [
-            {kinds: [THREAD], since},
-            {kinds: [COMMENT], "#K": [String(THREAD)], since},
-            {kinds: [MESSAGE], "#h": rooms, since},
-          ],
-        })
+        unsubSpaces = listenForNotifications()
       })
 
       // Listen for chats, populate chat-based notifications

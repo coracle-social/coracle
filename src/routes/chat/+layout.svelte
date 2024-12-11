@@ -12,7 +12,8 @@
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
-  import {chatSearch, pullConservatively} from "@app/state"
+  import {chatSearch} from "@app/state"
+  import {pullConservatively} from "@app/requests"
   import {pushModal} from "@app/modal"
 
   const startChat = () => pushModal(ChatStart)

@@ -15,7 +15,7 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {deriveEvent, decodeRelay} from "@app/state"
-  import {subscribePersistent} from "@app/commands"
+  import {subscribePersistent} from "@app/requests"
   import {setChecked} from "@app/notifications"
 
   const {relay, id} = $page.params

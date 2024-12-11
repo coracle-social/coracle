@@ -5,11 +5,9 @@ import {
   ctx,
   setContext,
   remove,
-  assoc,
   sortBy,
   sort,
   uniq,
-  partition,
   nth,
   pushToMapKey,
   nthEq,
@@ -17,6 +15,7 @@ import {
   parseJson,
   fromPairs,
   memoize,
+  addToMapKey,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -57,15 +56,13 @@ import {
   relay,
   getSession,
   getSigner,
-  hasNegentropy,
-  pull,
   createSearch,
   userFollows,
   ensurePlaintext,
   thunks,
   walkThunks,
 } from "@welshman/app"
-import type {AppSyncOpts, Thunk} from "@welshman/app"
+import type {Thunk} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
@@ -207,25 +204,6 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   }
 
   return rumor
-}
-
-export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
-  const [smart, dumb] = partition(hasNegentropy, relays)
-  const promises = [pull({relays: smart, filters})]
-
-  // Since pulling from relays without negentropy is expensive, limit how many
-  // duplicates we repeatedly download
-  if (dumb.length > 0) {
-    const events = sortBy(e => -e.created_at, repository.query(filters))
-
-    if (events.length > 100) {
-      filters = filters.map(assoc("since", events[100]!.created_at))
-    }
-
-    promises.push(pull({relays: dumb, filters}))
-  }
-
-  return Promise.all(promises)
 }
 
 export const trackerStore = makeTrackerStore()
@@ -382,10 +360,7 @@ export const {
   store: memberships,
   getKey: list => list.event.pubkey,
   load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
-    load({
-      ...request,
-      filters: [{kinds: [GROUPS], authors: [pubkey]}],
-    }),
+    load({...request, filters: [{kinds: [GROUPS], authors: [pubkey]}]}),
 })
 
 // Chats
@@ -614,11 +589,26 @@ export const userMembership = withGetter(
   }),
 )
 
+export const userRoomsByUrl = withGetter(
+  derived(userMembership, $userMembership => {
+    const $userRoomsByUrl = new Map<string, Set<string>>()
+
+    for (const [_, room, url] of getGroupTags(getListTags($userMembership))) {
+      addToMapKey($userRoomsByUrl, url, room)
+    }
+
+    for (const url of $userRoomsByUrl.keys()) {
+      addToMapKey($userRoomsByUrl, url, GENERAL)
+    }
+
+    return $userRoomsByUrl
+  }),
+)
+
 export const deriveUserRooms = (url: string) =>
-  derived(userMembership, $userMembership => [
-    GENERAL,
-    ...sortBy(roomComparator(url), getMembershipRoomsByUrl(url, $userMembership)),
-  ])
+  derived(userRoomsByUrl, $userRoomsByUrl =>
+    sortBy(roomComparator(url), Array.from($userRoomsByUrl.get(url) || [])),
+  )
 
 export const deriveOtherRooms = (url: string) =>
   derived([deriveUserRooms(url), channelsByUrl], ([$userRooms, $channelsByUrl]) =>
