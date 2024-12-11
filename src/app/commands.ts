@@ -1,5 +1,5 @@
 import {get} from "svelte/store"
-import {ctx, uniq, sleep, chunk, equals, choice} from "@welshman/lib"
+import {ctx, sample, uniq, sleep, chunk, equals, choice} from "@welshman/lib"
 import {
   DELETE,
   PROFILE,
@@ -169,16 +169,19 @@ export const loadUserData = (
     ]),
   ])
 
-  // Load followed profiles slowly in the background without clogging other stuff up
+  // Load followed profiles slowly in the background without clogging other stuff up. Only use a single
+  // indexer relay to avoid too many redundant validations, which slow things down and eat bandwidth
   promise.then(async () => {
     for (const pubkeys of chunk(50, getDefaultPubkeys())) {
-      await sleep(300)
+      const relays = sample(1, INDEXER_RELAYS)
+
+      await sleep(1000)
 
       for (const pubkey of pubkeys) {
-        loadMembership(pubkey)
-        loadProfile(pubkey)
-        loadFollows(pubkey)
-        loadMutes(pubkey)
+        loadMembership(pubkey, {relays})
+        loadProfile(pubkey, {relays})
+        loadFollows(pubkey, {relays})
+        loadMutes(pubkey, {relays})
       }
     }
   })

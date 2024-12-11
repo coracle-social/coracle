@@ -118,7 +118,7 @@
     const migrateFreshness = (data: {key: string; value: number}[]) => {
       const cutoff = ago(HOUR)
 
-      return data.filter(({value}) => value < cutoff)
+      return data.filter(({value}) => value > cutoff)
     }
 
     const migratePlaintext = (data: {key: string; value: number}[]) => data.slice(0, 10_000)
