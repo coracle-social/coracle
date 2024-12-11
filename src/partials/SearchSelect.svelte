@@ -115,7 +115,6 @@
       onFocus()
     }
   })
-
 </script>
 
 {#if multiple}

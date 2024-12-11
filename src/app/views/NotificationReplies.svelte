@@ -13,9 +13,9 @@
   export let notification: Notification
 
   const {root, interactions, timestamp} = notification
-  const relays = uniq(interactions.flatMap(e =>
-    e.tags.flatMap(t => t.slice(2).filter(isShareableRelayUrl)),
-  ))
+  const relays = uniq(
+    interactions.flatMap(e => e.tags.flatMap(t => t.slice(2).filter(isShareableRelayUrl))),
+  )
   const event = deriveEvent(root, {relays})
 
   $: actionText = $event?.pubkey === $pubkey ? "replied to your note" : "mentioned you"

@@ -1,5 +1,5 @@
 import "src/app.css"
-import * as Sentry from '@sentry/browser'
+import * as Sentry from "@sentry/browser"
 import {App as CapacitorApp} from "@capacitor/app"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
@@ -9,7 +9,7 @@ if (import.meta.env.VITE_GLITCHTIP_API_KEY) {
     dsn: import.meta.env.VITE_GLITCHTIP_API_KEY,
     tracesSampleRate: 0.01,
     integrations(integrations) {
-      return integrations.filter(integration => integration.name !== 'Breadcrumbs')
+      return integrations.filter(integration => integration.name !== "Breadcrumbs")
     },
   })
 }

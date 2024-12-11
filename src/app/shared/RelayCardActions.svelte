@@ -68,13 +68,13 @@
     class="relative flex flex-col gap-2"
     on:click={() => instance.hide()}>
     <div
-      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
+      class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
       on:click={_ => (details = !details)}>
       <span class="whitespace-nowrap">Info</span>
       <Anchor tall button circle class="text-accent"><i class="fa fa-info text-sm" /></Anchor>
     </div>
     <div
-      class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
+      class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
       on:click={() =>
         router.at(router.at("relays").of(encodeURIComponent(url)).toString()).push({modal: true})}>
       <span class="whitespace-nowrap">Explore</span>
@@ -82,14 +82,14 @@
     </div>
     {#if !userRelayUrls.includes(url)}
       <div
-        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
+        class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
         on:click={join}>
         <span class="whitespace-nowrap">Join</span>
         <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
       </div>
     {:else if userRelayUrls.length > 1}
       <div
-        class="relative z-popover flex cursor-pointer items-center justify-end text-neutral-100 gap-2"
+        class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
         on:click={leave}>
         <span class="whitespace-nowrap">Leave</span>
         <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
