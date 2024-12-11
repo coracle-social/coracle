@@ -421,7 +421,10 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     const helper = Nip59.fromSigner(signer.get())
     const rumor = await helper.wrap(recipient, template)
 
+    // Publish immediately to the repository so messages show up right away
     repository.publish(rumor)
+
+    // Publish via thunk
     publish({
       event: rumor.wrap,
       relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),

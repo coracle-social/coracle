@@ -799,9 +799,7 @@ export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) =>
 
   logger.info(`Publishing event`, request)
 
-  const thunk = publishThunk(request)
-
-  return thunk
+  return publishThunk(request)
 }
 
 export const sign = (
