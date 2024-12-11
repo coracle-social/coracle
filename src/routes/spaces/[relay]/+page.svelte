@@ -1,5 +1,6 @@
 <script lang="ts">
   import {page} from "$app/stores"
+  import type {TrustedEvent} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -31,6 +32,8 @@
   const otherRooms = deriveOtherRooms(url)
 
   const joinSpace = () => pushModal(SpaceJoin, {url})
+
+  let relayAdminEvents: TrustedEvent[] = []
 
   $: pubkey = $relay?.profile?.pubkey
 </script>
@@ -143,8 +146,10 @@
       {/each}
     </div>
     {#if pubkey}
-      <Divider>Recent posts from the relay admin</Divider>
-      <ProfileFeed {url} {pubkey} />
+      <div class="hidden flex-col gap-2" class:!flex={relayAdminEvents.length > 0}>
+        <Divider>Recent posts from the relay admin</Divider>
+        <ProfileFeed {url} {pubkey} bind:events={relayAdminEvents} />
+      </div>
     {/if}
   </div>
 </div>

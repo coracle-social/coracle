@@ -12,6 +12,7 @@
 
   export let url
   export let pubkey
+  export let events: TrustedEvent[] = []
 
   const ctrl = createFeedController({
     useWindowing: true,
@@ -28,7 +29,6 @@
 
   let element: Element
   let buffer: TrustedEvent[] = []
-  let events: TrustedEvent[] = []
 
   onMount(() => {
     const scroller = createScroller({
