@@ -977,7 +977,7 @@ let ready: Promise<any> = Promise.resolve()
 const migrateFreshness = (data: {key: string; value: number}[]) => {
   const cutoff = now() - seconds(1, "hour")
 
-  return data.filter(({value}) => value < cutoff)
+  return data.filter(({value}) => value > cutoff)
 }
 
 const getScoreEvent = () => {

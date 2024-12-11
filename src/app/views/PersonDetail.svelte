@@ -206,7 +206,7 @@
           </div>
         {:else if tab == "followers" && $followersCount > 0}
           <div class="h-6 rounded-full bg-neutral-700 px-2">
-            {$followersCount}
+            {$followersCount}+
           </div>
         {/if}
       </div>
