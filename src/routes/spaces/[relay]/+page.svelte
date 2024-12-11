@@ -12,6 +12,7 @@
   import ChannelName from "@app/components/ChannelName.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RelayName from "@app/components/RelayName.svelte"
+  import RoomCreate from "@app/components/RoomCreate.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import {
     decodeRelay,
@@ -32,6 +33,8 @@
   const otherRooms = deriveOtherRooms(url)
 
   const joinSpace = () => pushModal(SpaceJoin, {url})
+
+  const addRoom = () => pushModal(RoomCreate, {url})
 
   let relayAdminEvents: TrustedEvent[] = []
 
@@ -113,37 +116,37 @@
       {/if}
     </div>
     <div class="grid grid-cols-3 gap-2">
-      <Link href={makeSpacePath(url, "threads")} class="btn btn-primary justify-start border-none">
+      <Link href={makeSpacePath(url, "threads")} class="btn btn-primary">
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
       {#each $userRooms as room (room)}
         <Link
           href={makeRoomPath(url, room)}
-          class="btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
+          class="btn btn-neutral">
           {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
             <Icon icon="lock" size={4} />
           {:else}
             <Icon icon="hashtag" />
           {/if}
-          <div class="min-w-0 overflow-hidden text-ellipsis">
-            <ChannelName {url} {room} />
-          </div>
+          <ChannelName {url} {room} />
         </Link>
       {/each}
       {#each $otherRooms as room (room)}
         <Link
           href={makeRoomPath(url, room)}
-          class="bg-alt btn btn-neutral flex-nowrap justify-start whitespace-nowrap border-none">
+          class="btn btn-neutral">
           {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
             <Icon icon="lock" size={4} />
           {:else}
             <Icon icon="hashtag" />
           {/if}
-          <div class="min-w-0 overflow-hidden text-ellipsis">
-            <ChannelName {url} {room} />
-          </div>
+          <ChannelName {url} {room} />
         </Link>
       {/each}
+      <Button on:click={addRoom} class="btn btn-neutral">
+        <Icon icon="add-circle" />
+        Create Room
+      </Button>
     </div>
     {#if pubkey}
       <div class="hidden flex-col gap-2" class:!flex={relayAdminEvents.length > 0}>

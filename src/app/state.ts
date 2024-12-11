@@ -597,17 +597,13 @@ export const userRoomsByUrl = withGetter(
       addToMapKey($userRoomsByUrl, url, room)
     }
 
-    for (const url of $userRoomsByUrl.keys()) {
-      addToMapKey($userRoomsByUrl, url, GENERAL)
-    }
-
     return $userRoomsByUrl
   }),
 )
 
 export const deriveUserRooms = (url: string) =>
   derived(userRoomsByUrl, $userRoomsByUrl =>
-    sortBy(roomComparator(url), Array.from($userRoomsByUrl.get(url) || [])),
+    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || []).concat(GENERAL))),
   )
 
 export const deriveOtherRooms = (url: string) =>
