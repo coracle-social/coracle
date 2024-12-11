@@ -41,6 +41,8 @@
   export let feed
   export let onChange
 
+  const isDateFeed = f => isCreatedAtFeed(f) && !f[1]?.relative
+
   const addFeed = newFeed => onChange([...feed, newFeed])
 
   const onSubFeedChange = (i, newFeed) => onChange(toSpliced(feed, i, 1, newFeed))
@@ -64,7 +66,7 @@
   $: hasRelays = subFeeds.some(isRelayFeed)
   $: hasSearch = subFeeds.some(isSearchFeed)
   $: hasKinds = subFeeds.some(isKindFeed)
-  $: hasCreatedAt = subFeeds.some(isCreatedAtFeed)
+  $: hasDate = subFeeds.some(isDateFeed)
   $: hasList = subFeeds.some(isListFeed)
   $: hasDVM = subFeeds.some(isDVMFeed)
 </script>
@@ -94,7 +96,7 @@
               <FeedFormSectionMentions feed={subFeed} onChange={change} />
             {:else if isKindFeed(subFeed)}
               <FeedFormSectionKinds feed={subFeed} onChange={change} />
-            {:else if isCreatedAtFeed(subFeed)}
+            {:else if isDateFeed(subFeed)}
               <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
             {:else if isListFeed(subFeed)}
               <FeedFormSectionList feed={subFeed} onChange={change} />
@@ -121,7 +123,7 @@
   {/each}
 {/key}
 
-{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasSearch || !hasKinds || !hasCreatedAt || !hasDVM || !hasList}
+{#if !hasTopics || !hasMentions || !hasPeople || !hasRelays || !hasSearch || !hasKinds || !hasDate || !hasDVM || !hasList}
   <div class="relative">
     {#if menuIsOpen}
       <Popover2 hideOnClick onClose={closeMenu} position="top">
@@ -144,7 +146,7 @@
           {#if !hasKinds}
             <MenuItem on:click={() => addFeed(makeKindFeed())}>Kinds</MenuItem>
           {/if}
-          {#if !hasCreatedAt}
+          {#if !hasDate}
             <MenuItem on:click={() => addFeed(makeCreatedAtFeed())}>Date range</MenuItem>
           {/if}
           {#if !hasList}
