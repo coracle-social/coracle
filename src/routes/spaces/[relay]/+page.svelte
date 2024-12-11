@@ -120,9 +120,7 @@
         <Icon icon="notes-minimalistic" /> Threads
       </Link>
       {#each $userRooms as room (room)}
-        <Link
-          href={makeRoomPath(url, room)}
-          class="btn btn-neutral">
+        <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
           {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
             <Icon icon="lock" size={4} />
           {:else}
@@ -132,9 +130,7 @@
         </Link>
       {/each}
       {#each $otherRooms as room (room)}
-        <Link
-          href={makeRoomPath(url, room)}
-          class="btn btn-neutral">
+        <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
           {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
             <Icon icon="lock" size={4} />
           {:else}
@@ -151,7 +147,7 @@
     {#if pubkey}
       <div class="hidden flex-col gap-2" class:!flex={relayAdminEvents.length > 0}>
         <Divider>Recent posts from the relay admin</Divider>
-        <ProfileFeed {url} {pubkey} bind:events={relayAdminEvents} />
+        <ProfileFeed hideLoading {url} {pubkey} bind:events={relayAdminEvents} />
       </div>
     {/if}
   </div>

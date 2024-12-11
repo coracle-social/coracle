@@ -5,7 +5,7 @@
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {spacesNotifications} from "@app/notifications"
+  import {inactiveSpacesNotifications} from "@app/notifications"
 
   export let url
 
@@ -17,7 +17,7 @@
     <div slot="icon"><SpaceAvatar {url} /></div>
     <div slot="title" class="flex gap-1">
       <RelayName {url} />
-      {#if $spacesNotifications.includes(url)}
+      {#if $inactiveSpacesNotifications.includes(path)}
         <div class="relative top-1 h-2 w-2 rounded-full bg-primary" />
       {/if}
     </div>

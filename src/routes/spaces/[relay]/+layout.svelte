@@ -13,11 +13,9 @@
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
   import {decodeRelay} from "@app/state"
-  import {deriveNotification, SPACE_FILTERS} from "@app/notifications"
+  import {spacesNotifications} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
-
-  const notification = deriveNotification($page.url.pathname, SPACE_FILTERS, url)
 
   const checkConnection = async () => {
     const connectionError = await checkRelayConnection(url)
@@ -35,9 +33,9 @@
     }
   }
 
-  // We have to watch this one, since on mobile the badge wil be visible when active
+  // We have to watch this one, since on mobile the badge will be visible when active
   $: {
-    if ($notification) {
+    if ($spacesNotifications.includes($page.url.pathname)) {
       setChecked($page.url.pathname)
     }
   }

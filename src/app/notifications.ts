@@ -17,7 +17,7 @@ checked.subscribe(v => console.log("====== checked", v))
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
 export const setChecked = (key: string, ts = now()) =>
-  Boolean(console.trace("====== setChecked", key))||
+  Boolean(console.trace("====== setChecked", key)) ||
   checked.update(state => ({...state, [key]: ts}))
 
 // Filters for various routes
@@ -64,18 +64,20 @@ export const deriveNotification = (path: string, filters: Filter[], url?: string
 export const spacesNotifications = derived(
   [pubkey, checked, userMembership, deriveEvents(repository, {filters: SPACE_FILTERS})],
   ([$pubkey, $checked, $userMembership, $events]) => {
-    return getMembershipUrls($userMembership).filter(url => {
-      const path = makeSpacePath(url)
-      const lastChecked = max([$checked["*"], $checked[path]])
-      const [latestEvent] = sortBy($e => -$e.created_at, $events)
+    return getMembershipUrls($userMembership)
+      .filter(url => {
+        const path = makeSpacePath(url)
+        const lastChecked = max([$checked["*"], $checked[path]])
+        const [latestEvent] = sortBy($e => -$e.created_at, $events)
 
-      return latestEvent?.pubkey !== $pubkey && lt(lastChecked, latestEvent?.created_at)
-    })
+        return latestEvent?.pubkey !== $pubkey && lt(lastChecked, latestEvent?.created_at)
+      })
+      .map(url => makeSpacePath(url))
   },
 )
 
 export const inactiveSpacesNotifications = derived(
   [page, spacesNotifications],
   ([$page, $spacesNotifications]) =>
-    $spacesNotifications.filter(url => !$page.url.pathname.startsWith(makeSpacePath(url))),
+    $spacesNotifications.filter(path => !$page.url.pathname.startsWith(path)),
 )

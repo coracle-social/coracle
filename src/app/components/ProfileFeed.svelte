@@ -13,6 +13,7 @@
   export let url
   export let pubkey
   export let events: TrustedEvent[] = []
+  export let hideLoading = false
 
   const ctrl = createFeedController({
     useWindowing: true,
@@ -59,8 +60,10 @@
         <NoteItem {url} {event} />
       </div>
     {/each}
-    <p class="center my-12 flex">
-      <Spinner loading />
-    </p>
+    {#if !hideLoading}
+      <p class="center my-12 flex">
+        <Spinner loading />
+      </p>
+    {/if}
   </div>
 </div>
