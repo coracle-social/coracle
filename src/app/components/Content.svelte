@@ -54,7 +54,7 @@
       return true
     }
 
-    if ((isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 2) {
+    if ((isEvent(parsed) || isAddress(parsed)) && isStartOrEnd(i) && depth < 1) {
       return true
     }
 
