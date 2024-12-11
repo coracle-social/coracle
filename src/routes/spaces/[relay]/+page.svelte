@@ -3,11 +3,13 @@
   import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
+  import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import {
@@ -17,13 +19,18 @@
     channelsById,
     deriveUserRooms,
     deriveOtherRooms,
+    userMembership,
+    getMembershipUrls,
   } from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
+  import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
+
+  const joinSpace = () => pushModal(SpaceJoin, {url})
 
   $: pubkey = $relay?.profile?.pubkey
 </script>
@@ -35,7 +42,12 @@
     </div>
     <strong slot="title">Home</strong>
     <div slot="action" class="row-2">
-      {#if pubkey}
+      {#if !getMembershipUrls($userMembership).includes(url)}
+        <Button class="btn btn-primary btn-sm" on:click={joinSpace}>
+          <Icon icon="login-2" />
+          Join Space
+        </Button>
+      {:else if pubkey}
         <Link class="btn btn-primary btn-sm" href={makeChatPath([pubkey])}>
           <Icon icon="letter" />
           Contact Owner

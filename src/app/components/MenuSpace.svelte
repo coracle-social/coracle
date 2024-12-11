@@ -100,7 +100,7 @@
                   Leave Space
                 </Button>
               {:else}
-                <Button on:click={joinSpace}>
+                <Button on:click={joinSpace} class="bg-primary text-primary-content">
                   <Icon icon="login-2" />
                   Join Space
                 </Button>
