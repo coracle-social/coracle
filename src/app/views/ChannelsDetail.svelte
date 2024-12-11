@@ -46,8 +46,6 @@
   })
 
   document.title = `Direct Messages`
-
-  $: console.log("messages", $messages)
 </script>
 
 <Channel {pubkeys} {channelId} messages={$messages} {initialMessage}>

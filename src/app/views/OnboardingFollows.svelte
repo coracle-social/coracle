@@ -127,7 +127,7 @@
 <p>
   Pick a category to find some people to follow, or click <Anchor
     underline
-    on:click={openSelections}>here</Anchor> to search for specific accounts.
+    on:click={openPersonSearch}>here</Anchor> to search for specific accounts.
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
   {#each state.onboardingLists as event (getAddress(event))}
@@ -257,11 +257,11 @@
 
 {#if showPersonSearch}
   <Modal onEscape={closePersonSearch} canCloseAll={false}>
-    <Input bind:value={term}>
+    <Input bind:value={term} placeholder="Search for people...">
       <i slot="before" class="fa fa-search" />
     </Input>
     {#each $profileSearch.searchValues(term).slice(0, 30) as pubkey (pubkey)}
-      <PersonSummary {pubkey}>
+      <PersonSummary hideFollowActions {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if state.follows.includes(pubkey)}
             <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
