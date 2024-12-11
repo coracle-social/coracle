@@ -91,7 +91,7 @@
     })
 
   let limit = 30
-  let loading = true
+  let loading = sleep(5000)
   let unsub: () => void
   let element: HTMLElement
   let scroller: Scroller
@@ -135,6 +135,7 @@
       threshold: 3000,
       onScroll: () => {
         limit += 30
+        loading = sleep(5000)
       },
     })
 
@@ -146,10 +147,6 @@
     scroller?.stop()
     unsub?.()
   })
-
-  setTimeout(() => {
-    loading = false
-  }, 5000)
 </script>
 
 <div class="relative flex h-full flex-col">
@@ -190,13 +187,11 @@
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
-      <Spinner {loading}>
-        {#if loading}
-          Looking for messages...
-        {:else}
-          End of message history
-        {/if}
-      </Spinner>
+      {#await loading}
+        <Spinner loading>Looking for messages...</Spinner>
+      {:then}
+        <Spinner>End of message history</Spinner>
+      {/await}
     </p>
   </div>
   <ChannelCompose bind:editor {content} {onSubmit} />

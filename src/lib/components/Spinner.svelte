@@ -1,7 +1,7 @@
 <script lang="ts">
   import {slide, fade} from "svelte/transition"
 
-  export let loading
+  export let loading = false
 </script>
 
 <span class="flex min-h-10 items-center">
