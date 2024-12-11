@@ -2,7 +2,6 @@ import type {Session} from "@welshman/app"
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
-  ensurePlaintext,
   getRelayUrls,
   inboxRelaySelectionsByPubkey,
   nip46Perms,
@@ -15,22 +14,7 @@ import {
   userInboxRelaySelections,
   userRelaySelections,
 } from "@welshman/app"
-import {
-  identity,
-  append,
-  cached,
-  ctx,
-  equals,
-  first,
-  groupBy,
-  indexBy,
-  last,
-  now,
-  nthEq,
-  nthNe,
-  remove,
-  splitAt,
-} from "@welshman/lib"
+import {identity, append, cached, ctx, groupBy, now, nthEq, remove} from "@welshman/lib"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
@@ -39,10 +23,8 @@ import {
   FEEDS,
   FOLLOWS,
   INBOX_RELAYS,
-  LOCAL_RELAY_URL,
   PROFILE,
   RELAYS,
-  SEEN_CONVERSATION,
   addToListPublicly,
   createEvent,
   createProfile,
@@ -71,12 +53,10 @@ import {
   publish,
   sign,
   userFeedFavorites,
-  userSeenStatusEvents,
   withIndexers,
 } from "src/engine/state"
-import {sortEventsDesc} from "src/engine/utils"
 import {blobToFile, stripExifData} from "src/util/html"
-import {joinPath, parseJson} from "src/util/misc"
+import {joinPath} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {get} from "svelte/store"
 
@@ -367,47 +347,6 @@ export const joinRelay = async (url: string, claim?: string) => {
   }
 }
 
-// Read receipts
-
-export const markAsSeen = async (kind: number, eventsByKey: Record<string, TrustedEvent[]>) => {
-  if (!get(hasNip44) || Object.entries(eventsByKey).length === 0) {
-    return
-  }
-
-  const cutoff = now() - seconds(180, "day")
-  const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const prevTags = prev ? parseJson(await ensurePlaintext(prev))?.filter?.(nthNe(1, "*")) : []
-  const data = indexBy(t => t[1], prevTags || [])
-
-  for (const [key, events] of Object.entries(eventsByKey)) {
-    if (events.length === 0) {
-      continue
-    }
-
-    const [newer, older] = splitAt(1, sortEventsDesc(events))
-    const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
-
-    if (ts >= cutoff) {
-      data.set(key, ["seen", key, String(ts), ...newer.map(e => e.id)])
-    } else {
-      data.delete(key)
-    }
-  }
-
-  const tags = Array.from(data.values())
-
-  if (equals(tags, prevTags)) {
-    return
-  }
-
-  // Wait until after comparing for equality to add our current timestamp
-  const json = JSON.stringify([...tags, ["seen", "*", String(cutoff)]])
-  // const relays = ctx.app.router.FromUser().getUrls()
-  const content = await signer.get().nip44.encrypt(pubkey.get(), json)
-
-  await createAndPublish({kind, content, relays: [LOCAL_RELAY_URL]})
-}
-
 // Messages
 
 export const sendMessage = async (channelId: string, content: string, delay: number) => {
@@ -457,7 +396,7 @@ export const markChannelsRead = (ids: Set<string>) => {
     }
   }
 
-  markAsSeen(SEEN_CONVERSATION, eventsByKey)
+  // markAsSeen(SEEN_CONVERSATION, eventsByKey)
 }
 
 export const markAllChannelsRead = () => markChannelsRead(new Set(get(channels).map(c => c.id)))

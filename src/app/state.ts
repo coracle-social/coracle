@@ -29,6 +29,7 @@ import {
   userFeedFavorites,
   getSetting,
 } from "src/engine"
+// import {setChecked} from "src/domain/notifications"
 
 export const drafts = new Map<string, string>()
 
@@ -102,4 +103,7 @@ export const loadUserData = async (hints: string[] = []) => {
   listenForNotifications()
 }
 
-export const boot = () => router.at("login/connect").open({noEscape: true, mini: true})
+export const boot = () => {
+  router.at("login/connect").open({noEscape: true, mini: true})
+  // setChecked(["*"])
+}

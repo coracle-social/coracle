@@ -23,7 +23,8 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
+  import {env, hasNewMessages} from "src/engine"
+  import {hasNewNotifications} from "src/domain/notifications"
 
   const {page} = router
 

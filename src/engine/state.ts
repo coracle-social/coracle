@@ -48,7 +48,6 @@ import {
   simpleCache,
   sort,
   take,
-  tryCatch,
   uniq,
   uniqBy,
 } from "@welshman/lib"
@@ -102,7 +101,7 @@ import {
 import crypto from "crypto"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds} from "hurdak"
-import {equals, partition, prop, sortBy, without} from "ramda"
+import {equals, partition, prop, sortBy} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -117,11 +116,9 @@ import {
   readUserList,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
-import {OnboardingTask} from "src/engine/model"
-import {sortEventsAsc} from "src/engine/utils"
 import logger from "src/util/logger"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
-import {appDataKeys, isLike, metaKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {appDataKeys, metaKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {derived, get, writable} from "svelte/store"
 
 export const env = {
@@ -373,120 +370,19 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const seenStatusEvents = deriveEvents(repository, {
-  filters: [{kinds: [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION]}],
+export const checked = writable<Record<string, number>>({})
+
+export const deriveChecked = (key: string) => derived(checked, prop(key))
+
+export const getSeenAt = derived([checked], ([$checked]) => (key: string, event: TrustedEvent) => {
+  const match = $checked[key]
+  const fallback = $checked["*"]
+  const ts = Math.max(match || 0, fallback || 0)
+
+  if (ts >= event.created_at) return ts
+
+  return 0
 })
-
-export const userSeenStatusEvents = derived(
-  [pubkey, seenStatusEvents],
-  ([$pubkey, $seenStatusEvents]) => $seenStatusEvents.filter(e => e.pubkey === $pubkey),
-)
-
-export const userSeenStatuses = derived(
-  [pubkey, plaintext, userSeenStatusEvents],
-  ([$pubkey, $plaintext, $userSeenStatusEvents]) => {
-    const data = {}
-
-    for (const event of sortEventsAsc($userSeenStatusEvents)) {
-      const tags = tryCatch(() => JSON.parse($plaintext[event.id]))
-
-      if (!Array.isArray(tags)) {
-        continue
-      }
-
-      for (const tag of tags) {
-        if (tag[0] === "seen") {
-          data[tag[1]] = {
-            ts: parseInt(tag[2]),
-            ids: new Set(tag.slice(3)),
-          }
-        }
-      }
-    }
-
-    return data
-  },
-)
-
-export const getSeenAt = derived(
-  [userSeenStatuses],
-  ([$userSeenStatuses]) =>
-    (key: string, event: TrustedEvent) => {
-      const match = $userSeenStatuses[key]
-      const fallback = $userSeenStatuses["*"]
-      const ts = Math.max(match?.ts || 0, fallback?.ts || 0)
-
-      if (ts >= event.created_at) return ts
-      if (match?.ids.has(event.id)) return event.created_at
-
-      return 0
-    },
-)
-
-export const isSeen = derived(
-  getSeenAt,
-  $getSeenAt => (key: string, event: TrustedEvent) => $getSeenAt(key, event) > 0,
-)
-
-// Notifications
-
-// -- Main Notifications
-
-export const mainNotifications = derived(
-  [pubkey, isEventMuted, deriveEvents(repository, {throttle: 800, filters: [{kinds: noteKinds}]})],
-  ([$pubkey, $isEventMuted, $events]) =>
-    $events.filter(
-      e =>
-        e.pubkey !== $pubkey &&
-        e.tags.some(t => t[0] === "p" && t[1] === $pubkey) &&
-        !$isEventMuted(e),
-    ),
-)
-
-export const unreadMainNotifications = derived([isSeen, mainNotifications], ([$isSeen, events]) =>
-  events.filter(e => !$isSeen("replies", e) && !$isSeen("mentions", e)),
-)
-
-export const hasNewNotifications = derived(
-  [sessionWithMeta, unreadMainNotifications],
-  ([$sessionWithMeta, $unread]) => {
-    if ($unread.length > 0) {
-      return true
-    }
-
-    if ($sessionWithMeta?.onboarding_tasks_completed) {
-      return (
-        without($sessionWithMeta.onboarding_tasks_completed, Object.values(OnboardingTask)).length >
-        0
-      )
-    }
-
-    return false
-  },
-)
-
-// -- Reaction Notifications
-
-export const reactionNotifications = derived(
-  [
-    pubkey,
-    isEventMuted,
-    deriveEvents(repository, {throttle: 800, filters: [{kinds: reactionKinds}]}),
-  ],
-  ([$pubkey, $isEventMuted, $events]) =>
-    $events.filter(
-      e =>
-        e.pubkey !== $pubkey &&
-        e.tags.some(t => t[0] === "p" && t[1] === $pubkey) &&
-        !$isEventMuted(e) &&
-        isLike(e),
-    ),
-)
-
-export const unreadReactionNotifications = derived(
-  [isSeen, reactionNotifications],
-  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
-)
 
 // Channels
 
@@ -951,6 +847,7 @@ export class ThreadLoader {
 // Remove the old database. TODO remove this
 import {deleteDB} from "idb"
 import {subscriptionNotices} from "src/domain/connection"
+
 deleteDB("nostr-engine/Storage")
 
 let ready: Promise<any> = Promise.resolve()
@@ -1066,10 +963,11 @@ if (!db) {
     })
   })
 
-  ready = initStorage("coracle", 2, {
+  ready = initStorage("coracle", 3, {
     relays: {keyPath: "url", store: throttled(1000, relays)},
     handles: {keyPath: "nip05", store: throttled(1000, handles)},
     zappers: {keyPath: "lnurl", store: throttled(1000, zappers)},
+    checked: storageAdapters.fromObjectStore(checked, {throttle: 1000}),
     freshness: storageAdapters.fromObjectStore(freshness, {
       throttle: 1000,
       migrate: migrateFreshness,
