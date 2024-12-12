@@ -35,7 +35,7 @@
   import {setChecked} from "@app/notifications"
   import {nip29, addRoomMembership, removeRoomMembership, getThunkError} from "@app/commands"
   import {listenForChannelMessages} from "@app/requests"
-  import {PROTECTED} from "@app/state"
+  import {PROTECTED, hasNip29} from "@app/state"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
 
@@ -55,7 +55,7 @@
   const assertEvent = (e: any) => e as TrustedEvent
 
   const joinRoom = async () => {
-    if (nip29.isSupported($relay)) {
+    if (hasNip29($relay)) {
       const message = await getThunkError(nip29.joinRoom(url, room))
 
       if (message && !message.includes("already")) {
@@ -67,7 +67,7 @@
   }
 
   const leaveRoom = () => {
-    if (nip29.isSupported($relay)) {
+    if (hasNip29($relay)) {
       nip29.leaveRoom(url, room)
     }
 

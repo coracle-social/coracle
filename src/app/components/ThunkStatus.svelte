@@ -32,9 +32,9 @@
 
   // Delay updating isPending so users can see that the message is sent
   $: {
-    isPending = isPending || ps.some(s => s.status == Pending)
+    isPending = isPending || ps.some(s => s.status === Pending)
 
-    if (!ps.some(s => s.status == Pending)) {
+    if (!ps.some(s => s.status === Pending)) {
       setTimeout(() => {
         isPending = false
       }, 2000)

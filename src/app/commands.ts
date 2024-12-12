@@ -54,7 +54,7 @@ import {
   clearStorage,
   dropSession,
 } from "@welshman/app"
-import type {Relay, Thunk} from "@welshman/app"
+import type {Thunk} from "@welshman/app"
 import {
   tagRoom,
   userMembership,
@@ -209,7 +209,6 @@ export const broadcastUserData = async (relays: string[]) => {
 // NIP 29 stuff
 
 export const nip29 = {
-  isSupported: (relay?: Relay) => relay?.profile?.supported_nips?.map(String)?.includes("29"),
   createRoom: (url: string, room: string) => {
     const event = createEvent(GROUP_CREATE, {tags: [tagRoom(room, url)]})
 

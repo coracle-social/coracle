@@ -459,9 +459,12 @@ export const messages = derived(
   $events => $events.map(adaptLegacyMessage),
 )
 
-// Group Meta
+// Nip29
 
 export const groupMeta = deriveEvents(repository, {filters: [{kinds: [GROUP_META]}]})
+
+export const hasNip29 = (relay?: Relay) =>
+  relay?.profile?.supported_nips?.map(String)?.includes("29")
 
 // Channels
 

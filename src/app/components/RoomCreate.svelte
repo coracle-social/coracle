@@ -9,6 +9,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import {hasNip29} from "@app/state"
   import {addRoomMembership, nip29, getThunkError} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
   import {pushToast} from "@app/toast"
@@ -21,7 +22,7 @@
   const back = () => history.back()
 
   const tryCreate = async () => {
-    if (nip29.isSupported($relay)) {
+    if (hasNip29($relay)) {
       const createMessage = await getThunkError(nip29.createRoom(url, room))
 
       if (createMessage && !createMessage.match(/^duplicate:|already a member/)) {
