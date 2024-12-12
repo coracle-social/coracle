@@ -25,10 +25,11 @@
   const nsecWarning = writable(null)
   const parentTags = Tags.fromEvent(parent)
 
-  let container, options, loading
+  let container, loading
   let isOpen = false
+  let showOptions = false
   let mentions = []
-  let opts = {warning: "", anonymous: false}
+  let options = {warning: "", anonymous: false}
   let editorElement: HTMLElement
   let editor: Editor
   let editorLoading: Writable<boolean>
@@ -48,8 +49,17 @@
     send({skipNsecWarning: true})
   }
 
-  const setOpts = e => {
-    opts = {...opts, ...e.detail}
+  const openOptions = () => {
+    showOptions = true
+  }
+
+  const closeOptions = () => {
+    showOptions = false
+  }
+
+  const setOptions = values => {
+    options = {...options, ...values}
+    showOptions = false
   }
 
   const saveDraft = () => {
@@ -90,8 +100,8 @@
       ...getClientTags(),
     ])
 
-    if (opts.warning) {
-      tags.push(["content-warning", opts.warning])
+    if (options.warning) {
+      tags.push(["content-warning", options.warning])
     }
 
     // Re-broadcast the note we're replying to
@@ -102,14 +112,13 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-
-    const event = await sign(template, {anonymous: false})
-
+    const event = await sign(template, options)
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),
       delay: $userSettings.send_delay,
     })
+
     addDraftToContext(event, () => thunk.controller.abort())
     isOpen = false
     loading = false
@@ -130,23 +139,25 @@
   }
 
   const createEditor = () => {
-    const draft = drafts.get(parent.id)
+    editor = new Editor(
+      getEditorOptions({
+        submit: send,
+        element: editorElement,
+        submitOnEnter: false,
+        submitOnModEnter: true,
+        autofocus: true,
+        content: drafts.get(parent.id) || "",
+      }),
+    )
 
-    const options = getEditorOptions({
-      submit: send,
-      element: editorElement,
-      submitOnEnter: false,
-      submitOnModEnter: true,
-      autofocus: true,
-      content: draft || "",
-    })
-
-    editor = new Editor({...options})
     editorLoading = editor.storage.fileUpload.loading
   }
 
-  // eslint-disable-next-line
-  $: editorElement && createEditor()
+  $: {
+    if (editorElement) {
+      createEditor()
+    }
+  }
 </script>
 
 <svelte:body on:click={onBodyClick} />
@@ -187,7 +198,7 @@
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
               <i class="fa fa-paperclip" on:click|preventDefault={editor.commands.selectFiles} />
-              <i class="fa fa-at" />
+              <i class="fa fa-cog" on:click|preventDefault={openOptions} />
             </div>
           </div>
           <div on:click|stopPropagation class="flex items-center">
@@ -206,7 +217,9 @@
   </div>
 {/if}
 
-<NoteOptions bind:this={options} on:change={setOpts} initialValues={opts} />
+{#if showOptions}
+  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
+{/if}
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

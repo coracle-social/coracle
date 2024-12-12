@@ -7,48 +7,33 @@
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import {createEventDispatcher} from "svelte"
 
+  export let onClose
+  export let onSubmit
   export let initialValues: {
     warning: string
     anonymous: boolean
   }
 
-  let values = initialValues
-  let view = null
+  const values = {...initialValues}
 
-  const dispatch = createEventDispatcher()
-
-  export const setView = name => {
-    view = name
-    values = initialValues
-  }
-
-  const onSubmit = () => {
-    initialValues = values
-    dispatch("change", values)
-    setView(null)
-  }
+  const submit = () => onSubmit(values)
 </script>
 
-{#if view}
-  <Modal onEscape={() => setView(null)}>
-    <form on:submit|preventDefault={onSubmit}>
-      <FlexColumn>
-        <div class="mb-4 flex items-center justify-center">
-          <Heading>Note settings</Heading>
-        </div>
-        <Field icon="fa-warning" label="Content warnings">
-          <Input
-            bind:value={values.warning}
-            placeholder="Why might people want to skip this post?" />
-        </Field>
-        <FieldInline icon="fa-user-secret" label="Post anonymously">
-          <Toggle bind:value={values.anonymous} />
-          <p slot="info">Enable this to create an anonymous note.</p>
-        </FieldInline>
-        <Anchor button tag="button" type="submit">Done</Anchor>
-      </FlexColumn>
-    </form>
-  </Modal>
-{/if}
+<Modal onEscape={onClose}>
+  <form on:submit|preventDefault={submit}>
+    <FlexColumn>
+      <div class="mb-4 flex items-center justify-center">
+        <Heading>Note settings</Heading>
+      </div>
+      <Field icon="fa-warning" label="Content warnings">
+        <Input bind:value={values.warning} placeholder="Why might people want to skip this post?" />
+      </Field>
+      <FieldInline icon="fa-user-secret" label="Post anonymously">
+        <Toggle bind:value={values.anonymous} />
+        <p slot="info">Enable this to create an anonymous note.</p>
+      </FieldInline>
+      <Anchor button tag="button" type="submit">Done</Anchor>
+    </FlexColumn>
+  </form>
+</Modal>

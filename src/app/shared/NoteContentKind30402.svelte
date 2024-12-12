@@ -23,7 +23,7 @@
   const images = tags.values("image").valueOf()
   const {title, summary, location, status} = tags.asObject()
   const [price, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
-  const address = Address.fromEvent(note, ctx.app.router.Event(note).limit(3).getUrls())
+  const address = Address.fromEvent(note, ctx.app.router.Event(note).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
   const deleted = deriveIsDeletedByAddress(repository, note)

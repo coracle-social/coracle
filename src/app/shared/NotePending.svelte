@@ -1,12 +1,5 @@
 <style>
-  .loading-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-  }
-
-  div.loading-bar::after {
+  .loading-bar::after {
     content: "";
     position: absolute;
     top: 0;
@@ -17,7 +10,7 @@
   }
 
   .loading-bar-content > * {
-    z-index: 1;
+    @apply z-feature;
   }
 </style>
 
@@ -70,7 +63,9 @@
   class:px-4={thunk && isPending}
   on:click|stopPropagation>
   {#if thunk && (isPending || isCompleted)}
-    <div class="loading-bar bg-accent" style="width: {20 + $completed}%"></div>
+    <div
+      class="loading-bar absolute left-0 top-0 h-full bg-accent"
+      style="width: {20 + $completed}%" />
     {#if isPending}
       <span>Publishing...</span>
       <span>{total - pendings} of {total} relays</span>
@@ -91,11 +86,8 @@
   {:else if $userSettings.send_delay > 0}
     <span
       >Sending reply in {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1} seconds</span>
-
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
-      on:click={() => {
-        removeDraft()
-      }}>Cancel</button>
+      on:click={removeDraft}>Cancel</button>
   {/if}
 </div>

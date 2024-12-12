@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {whereEq} from "ramda"
   import {ctx, last} from "@welshman/lib"
   import {createEvent, toNostrURI} from "@welshman/util"
   import {session, tagPubkey} from "@welshman/app"
@@ -21,38 +20,34 @@
   import {getEditorOptions} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {currencyOptions} from "src/util/i18n"
   import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
 
   export let quote = null
   export let pubkey = null
-  export let initialValues = {}
 
   let charCount: Writable<number>
   let wordCount: Writable<number>
   let showPreview = false
+  let showOptions = false
   let signaturePending = false
 
   let editor: Editor
   let element: HTMLElement
-
-  let opts = {
-    title: "",
-    warning: "",
-    summary: "",
-    price: "",
-    currency: currencyOptions.find(whereEq({code: "SAT"})),
-    anonymous: false,
-    location: null,
-    start: null,
-    end: null,
-    ...initialValues,
-  }
+  let options = {warning: "", anonymous: false}
 
   const nsecWarning = writable(null)
 
-  const setOpts = e => {
-    opts = {...opts, ...e.detail}
+  const openOptions = () => {
+    showOptions = true
+  }
+
+  const closeOptions = () => {
+    showOptions = false
+  }
+
+  const setOptions = values => {
+    options = {...options, ...values}
+    showOptions = false
   }
 
   const bypassNsecWarning = () => {
@@ -74,8 +69,8 @@
 
     const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
 
-    if (opts.warning) {
-      tags.push(["content-warning", opts.warning])
+    if (options.warning) {
+      tags.push(["content-warning", options.warning])
     }
 
     if (quote) {
@@ -83,8 +78,7 @@
     }
 
     const template = createEvent(1, {content, tags})
-
-    const signedTemplate = await sign(template)
+    const signedTemplate = await sign(template, options)
 
     signaturePending = false
 
@@ -144,16 +138,16 @@
   }
 
   onMount(() => {
-    const options = getEditorOptions({
-      content: drafts.get("notecreate") || "",
-      submit: onSubmit,
-      element,
-      submitOnEnter: false,
-      submitOnModEnter: true,
-      autofocus: true,
-    })
-
-    editor = new Editor(options)
+    editor = new Editor(
+      getEditorOptions({
+        content: drafts.get("notecreate") || "",
+        submit: onSubmit,
+        element,
+        submitOnEnter: false,
+        submitOnModEnter: true,
+        autofocus: true,
+      }),
+    )
 
     charCount = editor.storage.wordCount.characters
     wordCount = editor.storage.wordCount.words
@@ -212,6 +206,9 @@
           <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
             {showPreview ? "Hide" : "Show"} Preview
           </button>
+          <button type="button" on:click={openOptions} class="cursor-pointer text-sm">
+            <i class="fa fa-cog" />
+          </button>
         </div>
       </Field>
       <div class="flex gap-2">
@@ -237,7 +234,9 @@
   </Content>
 </form>
 
-<NoteOptions on:change={setOpts} initialValues={opts} />
+{#if showOptions}
+  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
+{/if}
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />
