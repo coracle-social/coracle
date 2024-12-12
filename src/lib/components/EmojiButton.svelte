@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {throttle} from "throttle-debounce"
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
-  import {between} from "@welshman/lib"
+  import {between, throttle} from "@welshman/lib"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"

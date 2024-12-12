@@ -1,9 +1,8 @@
 <svelte:options accessors />
 
 <script lang="ts">
-  import {throttle} from "throttle-debounce"
   import {fly, slide} from "svelte/transition"
-  import {clamp} from "@welshman/lib"
+  import {clamp, throttle} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import {theme} from "@app/theme"
 

@@ -251,6 +251,16 @@ export const getUrlsForEvent = derived([trackerStore, thunks], ([$tracker, $thun
   }
 })
 
+export const getEventsForUrl = (url: string, filters: Filter[]) => {
+  const $getUrlsForEvent = get(getUrlsForEvent)
+  const $events = repository.query(filters)
+
+  return sortBy(
+    e => -e.created_at,
+    $events.filter(e => $getUrlsForEvent(e.id).includes(url)),
+  )
+}
+
 export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
   derived([deriveEvents(repository, {filters}), getUrlsForEvent], ([$events, $getUrlsForEvent]) =>
     sortBy(

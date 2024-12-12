@@ -1,11 +1,11 @@
 import type {Unsubscriber} from "svelte/store"
-import {sleep, partition, assoc, now, sortBy} from "@welshman/lib"
+import {sleep, partition, assoc, now} from "@welshman/lib"
 import {MESSAGE, DELETE, THREAD, COMMENT} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
 import {SubscriptionEvent} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, load, pull, repository, hasNegentropy} from "@welshman/app"
-import {userRoomsByUrl, LEGACY_MESSAGE, GENERAL} from "@app/state"
+import {subscribe, load, pull, hasNegentropy} from "@welshman/app"
+import {userRoomsByUrl, LEGACY_MESSAGE, GENERAL, getEventsForUrl} from "@app/state"
 
 // Utils
 
@@ -15,14 +15,14 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
 
   // Since pulling from relays without negentropy is expensive, limit how many
   // duplicates we repeatedly download
-  if (dumb.length > 0) {
-    const events = sortBy(e => -e.created_at, repository.query(filters))
+  for (const url of dumb) {
+    const events = getEventsForUrl(url, filters)
 
     if (events.length > 100) {
       filters = filters.map(assoc("since", events[10]!.created_at))
     }
 
-    promises.push(pull({relays: dumb, filters}))
+    promises.push(pull({relays: [url], filters}))
   }
 
   return Promise.all(promises)
