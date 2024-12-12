@@ -12,12 +12,12 @@
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Message from "src/partials/Message.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {hasNip44, sendMessage, userSettings} from "src/engine"
-  import {getEditorOptions} from "src/app/editor"
+  import Message from "src/app/shared/Message.svelte"
   import Compose from "src/app/shared/Compose.svelte"
+  import {getEditorOptions} from "src/app/editor"
 
   export let pubkeys
   export let initialMessage = ""

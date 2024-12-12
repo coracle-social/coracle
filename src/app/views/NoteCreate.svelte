@@ -171,10 +171,7 @@
   $: loading = editor?.storage.fileUpload.loading
 </script>
 
-<form
-  on:submit|preventDefault={() => {
-    onSubmit()
-  }}>
+<form on:submit|preventDefault={() => onSubmit()}>
   <Content size="lg">
     <div class="flex gap-2">
       <span class="text-2xl font-bold">Create a Note</span>
