@@ -6,7 +6,16 @@
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
-  import {repository, signer, tagReactionTo, tagZapSplit, mute, unmute} from "@welshman/app"
+  import {
+    deriveZapper,
+    deriveZapperForPubkey,
+    repository,
+    signer,
+    tagReactionTo,
+    tagZapSplit,
+    mute,
+    unmute,
+  } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {
@@ -61,7 +70,7 @@
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
   import {drafts, openReplies} from "src/app/state"
-  import {isLike, replyKinds} from "src/util/nostr"
+  import {isLike} from "src/util/nostr"
 
   export let event: TrustedEvent
   export let showHidden = false
@@ -184,7 +193,7 @@
     .filter(e => e.kind === 9735)
     .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
-  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(children.filter(e => e.kind == NOTE))
 
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)

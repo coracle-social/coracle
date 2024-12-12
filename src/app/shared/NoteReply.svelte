@@ -1,7 +1,7 @@
 <script lang="ts">
   import {displayProfileByPubkey, session, tagPubkey, tagReplyTo} from "@welshman/app"
   import {ctx} from "@welshman/lib"
-  import {Tags, createEvent, uniqTags} from "@welshman/util"
+  import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {uniq, without} from "ramda"
   import {Editor} from "svelte-tiptap"
   import {writable, type Writable} from "svelte/store"
@@ -19,11 +19,13 @@
   export let showBorder = false
   export let forceOpen = false
 
+  let showOptions = false
+
   const nsecWarning = writable(null)
 
   $: mentions = without(
     [$session?.pubkey],
-    uniq(parentTags.values("p").valueOf().concat(parent?.pubkey)),
+    uniq([parent.pubkey, ...getPubkeyTagValues(parent.tags)]),
   )
 
   let loading
@@ -37,17 +39,16 @@
     send({skipNsecWarning: true})
   }
 
-  const openOptions = () => {
-    showOptions = true
-  }
-
   const closeOptions = () => {
     showOptions = false
   }
 
-  const setOptions = values => {
-    options = {...options, ...values}
-    showOptions = false
+  const openOptions = () => {
+    showOptions = true
+  }
+
+  const setOpts = e => {
+    opts = {...opts, ...e.detail}
   }
 
   const saveDraft = () => {
@@ -81,8 +82,8 @@
       ...getClientTags(),
     ])
 
-    if (options.warning) {
-      tags.push(["content-warning", options.warning])
+    if (opts.warning) {
+      tags.push(["content-warning", opts.warning])
     }
 
     // Re-broadcast the note we're replying to
@@ -93,7 +94,7 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-    const event = await sign(template, options)
+    const event = await sign(template, opts)
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),
@@ -188,7 +189,9 @@
   </div>
 {/if}
 
-<NoteOptions on:change={setOpts} initialValues={opts} />
+{#if showOptions}
+  <NoteOptions onClose={closeOptions} onSubmit={setOpts} initialValues={opts} />
+{/if}
 
 {#if $nsecWarning}
   <NsecWarning onAbort={() => nsecWarning.set(null)} onBypass={bypassNsecWarning} />

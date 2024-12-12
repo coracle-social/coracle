@@ -48,10 +48,10 @@
           }}>Show</Anchor>
       </p>
     {:else}
-      <div class:pl-0={note.kind == 31890} class="mt-2 pl-14">
+      <div class:!pl-0={note.kind == 31890} class="mt-2 pl-14">
         <NoteContent {note} {depth} {showEntire} {showMedia} />
       </div>
-      <div class:pl-0={note.kind == 31890} class="pl-14 pt-4">
+      <div class:!pl-10={note.kind == 31890} class="pl-14 pt-4">
         <NoteActions event={note} />
       </div>
     {/if}

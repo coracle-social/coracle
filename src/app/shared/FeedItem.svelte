@@ -2,16 +2,15 @@
   import {repository} from "@welshman/app"
   import {ctx} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
-  import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters} from "@welshman/util"
+  import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters, NOTE} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount} from "svelte"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
-  import NoteKind from "src/app/shared/Note.svelte"
+  import Note from "src/app/shared/Note.svelte"
   import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import {replyKinds} from "src/util/nostr"
   import {fly, slide} from "src/util/transition"
   import {openReplies} from "src/app/state"
 
@@ -39,7 +38,7 @@
   const context = deriveEvents(repository, {filters: getReplyFilters([event])})
 
   $: children = $context.filter(e => isChildOf(e, event))
-  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(children.filter(e => e.kind == NOTE))
   $: replyIsActive = $openReplies[event.id]
 
   let mutedReplies, hiddenReplies, visibleReplies
@@ -126,7 +125,7 @@
           <AltColor background class="absolute -bottom-2 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
-      <NoteKind note={event} {children} {showEntire} {showParent} {showMedia} />
+      <Note note={event} {showEntire} {showParent} {showMedia} />
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor
