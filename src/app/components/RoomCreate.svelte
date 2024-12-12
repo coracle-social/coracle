@@ -24,7 +24,7 @@
     if (nip29.isSupported($relay)) {
       const createMessage = await getThunkError(nip29.createRoom(url, room))
 
-      if (createMessage && !createMessage.includes("already")) {
+      if (createMessage && !createMessage.match(/^duplicate:|already a member/)) {
         return pushToast({theme: "error", message: createMessage})
       }
 
