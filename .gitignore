@@ -37,4 +37,4 @@ public/images/favicon.ico
 public/images/maskable-icon-512x512.png
 public/images/pwa-*
 android/app/release/*
-assets/*
+icons/*
