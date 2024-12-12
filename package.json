@@ -52,7 +52,7 @@
     "@welshman/content": "~0.0.13",
     "@welshman/dvm": "~0.0.11",
     "@welshman/feeds": "~0.0.26",
-    "@welshman/lib": "~0.0.30",
+    "@welshman/lib": "~0.0.32",
     "@welshman/net": "~0.0.41",
     "@welshman/signer": "~0.0.16",
     "@welshman/store": "~0.0.13",
