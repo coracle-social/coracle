@@ -1,11 +1,9 @@
 # Changelog
 
-# 0.4.16
+# 0.5.0
 
 Contributors: @hodlbod, @dtonon, @thibaut
 
-- [x] Add richer description in wot popover
-- [x] Use new nip46 implementation, re-design login experience
 - [x] Re-design relay cards
 - [x] Fix hud publish status
 - [x] Default to dark theme
@@ -37,6 +35,14 @@ Contributors: @hodlbod, @dtonon, @thibaut
 - [x] Add blossom support with configurable servers
 - [x] Re-write feed loader
 - [x] Re-write relay selection logic
+- [x] Add icon to apk
+
+# 0.4.16
+
+Contributors: @hodlbod, @dtonon, @thibaut
+
+- [x] Add richer description in wot popover
+- [x] Use new nip46 implementation, re-design login experience
 
 # 0.4.15
 
