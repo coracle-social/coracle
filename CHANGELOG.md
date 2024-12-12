@@ -4,10 +4,8 @@
 
 Contributors: @hodlbod, @dtonon, @thibaut
 
-- [x] Switch to self-hosted analytics
-- [x] Update profile detail page
 - [x] Add richer description in wot popover
-- [x] Fix bunker login
+- [x] Use new nip46 implementation, re-design login experience
 - [x] Re-design relay cards
 - [x] Fix hud publish status
 - [x] Default to dark theme
@@ -15,6 +13,30 @@ Contributors: @hodlbod, @dtonon, @thibaut
 - [x] Re-work onboarding
 - [x] Fix timeouts for subscriptions
 - [x] Stop storing ephemeral events in local relay
+- [x] Limit created_at feed editing to absolute dates
+- [x] Fix caching bug, improving performance
+- [x] Use custom throttle function, improving performance
+- [x] Improve direct message sending UX
+- [x] Make follower count reactive
+- [x] Improve HUD to include connection stats and searchable notices
+- [x] Disable some navigation items for non-users
+- [x] Re-design feed selector interface
+- [x] Add suggestions for hashtags
+- [x] Improve relay feed support
+- [x] Add nostr: prefix to entities
+- [x] Make inbox relay warnings more prominent
+- [x] Use nostr-editor to power note composition dialog
+- [x] Add delay-based undo for note creation and replies
+- [x] Remove groups, markets, calendars
+- [x] Fix missing replies in notifications
+- [x] Allow deleting feeds from the feed edit dialog
+- [x] Show error on failed zap
+- [x] Improve gift-wrap unwrapping
+- [x] Remove support for sending nip04 messages
+- [x] Improve quote relay selection
+- [x] Add blossom support with configurable servers
+- [x] Re-write feed loader
+- [x] Re-write relay selection logic
 
 # 0.4.15
 
