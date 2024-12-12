@@ -25,11 +25,7 @@
   export let selected: NodeViewProps["selected"]
 </script>
 
-<!-- this component display image or videos only, the filter is made by tiptap -->
-<NodeViewWrapper
-  class={cx("link-content inline", {
-    "link-content-selected": selected,
-  })}>
+<NodeViewWrapper class={cx("link-content inline", {"link-content-selected": selected})}>
   <span class:loading={node.attrs.uploading}>
     <i class="fas fa-xs fa-paperclip"></i>
     {node.attrs.file?.name || node.attrs.src}

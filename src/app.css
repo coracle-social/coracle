@@ -260,6 +260,10 @@ body,
   @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded px-1 no-underline;
 }
 
+a[data-type="tag"] {
+  text-decoration: underline;
+}
+
 .tiptap p.is-editor-empty:first-child::before {
   color: #adb5bd;
   content: attr(data-placeholder);

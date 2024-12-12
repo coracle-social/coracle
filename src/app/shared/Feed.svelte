@@ -183,6 +183,7 @@
         if (isSeen(e)) return undefined
         if (repostKinds.includes(e.kind)) return undefined
         if (reactionKinds.includes(e.kind)) return undefined
+        if ($isEventMuted(e, true)) return undefined
 
         for (const v of getIdAndAddress(e)) {
           seen.add(v)

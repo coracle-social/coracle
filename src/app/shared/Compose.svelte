@@ -1,9 +1,3 @@
-<style>
-  :global(a[data-type="tag"]) {
-    text-decoration: underline;
-  }
-</style>
-
 <script lang="ts">
   import cx from "classnames"
   import {onDestroy} from "svelte"
