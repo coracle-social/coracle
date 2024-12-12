@@ -498,7 +498,10 @@ export const getChannelIdFromEvent = (event: TrustedEvent) =>
 export const getChannelSeenKey = (id: string) =>
   crypto.createHash("sha256").update(id.replace(",", "")).digest("hex")
 
-export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
+export const messages = deriveEvents(repository, {
+  throttle: 300,
+  filters: [{kinds: [4, DIRECT_MESSAGE]}],
+})
 
 export const channels = derived(
   [pubkey, messages, getSeenAt],

@@ -1,6 +1,5 @@
-import {throttle} from "throttle-debounce"
 import {derived, writable, type Readable} from "svelte/store"
-import {now, stripProtocol, isPojo, first, sleep} from "@welshman/lib"
+import {now, throttle, stripProtocol, isPojo, first, sleep} from "@welshman/lib"
 import {pluck, fromPairs, last, identity, sum, is} from "ramda"
 import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
