@@ -19,7 +19,7 @@
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {fly, slide} from "src/util/transition"
-  import {replyKinds, isLike} from "src/util/nostr"
+  import {isLike} from "src/util/nostr"
   import {formatTimestamp, timestamp1} from "src/util/misc"
   import Popover from "src/partials/Popover.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -127,7 +127,7 @@
   $: muted = $userMutes.has(event.id)
   $: hidden = $isEventMuted(event, true)
   $: children = $context.filter(e => isChildOf(e, event))
-  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
 
   let mutedReplies, hiddenReplies, visibleReplies
 

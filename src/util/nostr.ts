@@ -1,19 +1,14 @@
 import {
   fromNostrURI,
-  AUDIO,
-  CLASSIFIED,
-  EVENT_TIME,
   GENERIC_REPOST,
   HIGHLIGHT,
   LONG_FORM,
   NOTE,
   REACTION,
-  REMIX,
   REPOST,
   ZAP_RESPONSE,
   Tags,
   Address,
-  LIVE_CHAT_MESSAGE,
   RELAYS,
   PROFILE,
   INBOX_RELAYS,
@@ -42,17 +37,7 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [
-  NOTE,
-  LONG_FORM,
-  HIGHLIGHT,
-  REMIX,
-  AUDIO,
-  EVENT_TIME,
-  CLASSIFIED,
-  LIVE_CHAT_MESSAGE,
-]
-export const replyKinds = [NOTE, HIGHLIGHT, REMIX, AUDIO]
+export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
