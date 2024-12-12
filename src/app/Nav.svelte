@@ -9,7 +9,7 @@
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
   import {hasNewMessages} from "src/engine"
-  import {hasNewNotifications} from "src/domain/notifications"
+  import {hasNewNotifications} from "src/engine/notifications"
 
   let innerWidth = 0
   let searching = false

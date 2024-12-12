@@ -50,6 +50,7 @@ import {
   take,
   uniq,
   uniqBy,
+  max,
 } from "@welshman/lib"
 import type {Connection, PublishRequest, Target} from "@welshman/net"
 import {
@@ -376,7 +377,7 @@ export const deriveChecked = (key: string) => derived(checked, prop(key))
 export const getSeenAt = derived([checked], ([$checked]) => (key: string, event: TrustedEvent) => {
   const match = $checked[key]
   const fallback = $checked["*"]
-  const ts = Math.max(match || 0, fallback || 0)
+  const ts = max([match, fallback])
 
   if (ts >= event.created_at) return ts
 

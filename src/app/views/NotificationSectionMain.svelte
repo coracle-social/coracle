@@ -7,7 +7,7 @@
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import {mainNotifications, setChecked, unreadMainNotifications} from "src/domain/notifications"
+  import {mainNotifications, setChecked, unreadMainNotifications} from "src/engine/notifications"
 
   export let limit
 
@@ -45,12 +45,13 @@
         for (const id of untracked) {
           tracked.add(id)
         }
-
-        setChecked(["replies", "mentions"])
       }
     })
 
-    return unsub
+    return () => {
+      unsub()
+      setChecked(["replies", "mentions"])
+    }
   })
 </script>
 

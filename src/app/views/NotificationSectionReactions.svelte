@@ -11,7 +11,7 @@
     reactionNotifications,
     setChecked,
     unreadReactionNotifications,
-  } from "src/domain/notifications"
+  } from "src/engine/notifications"
 
   export let limit
 
@@ -47,12 +47,13 @@
         for (const id of untracked) {
           tracked.add(id)
         }
-
-        setChecked(["reactions", "zaps"])
       }
     })
 
-    return unsub
+    return () => {
+      unsub()
+      setChecked(["reactions", "zaps"])
+    }
   })
 </script>
 

@@ -7,7 +7,7 @@
   import NotificationSectionReactions from "src/app/views/NotificationSectionReactions.svelte"
   import {router} from "src/app/util/router"
   import {sessionWithMeta, loadNotifications} from "src/engine"
-  import {unreadMainNotifications, unreadReactionNotifications} from "src/domain/notifications"
+  import {unreadMainNotifications, unreadReactionNotifications} from "src/engine/notifications"
 
   const allTabs = ["Mentions & Replies", "Reactions"]
 

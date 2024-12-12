@@ -10,7 +10,7 @@
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, hasNewMessages} from "src/engine"
-  import {hasNewNotifications} from "src/domain/notifications"
+  import {hasNewNotifications} from "src/engine/notifications"
 
   const closeSubMenu = () => {
     subMenu = null

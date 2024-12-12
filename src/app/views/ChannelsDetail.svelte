@@ -12,7 +12,7 @@
   import {router} from "src/app/util/router"
   import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
-  import {setChecked} from "src/domain/notifications"
+  import {setChecked} from "src/engine/notifications"
 
   export let pubkeys
   export let channelId
