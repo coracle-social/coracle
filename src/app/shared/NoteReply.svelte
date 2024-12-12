@@ -22,7 +22,7 @@
   const nsecWarning = writable(null)
 
   $: mentions = without(
-    [$session.pubkey],
+    [$session?.pubkey],
     uniq(parentTags.values("p").valueOf().concat(parent?.pubkey)),
   )
 

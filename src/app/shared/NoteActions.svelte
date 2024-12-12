@@ -8,6 +8,7 @@
   import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
   import {repository, signer, tagReactionTo, tagZapSplit, mute, unmute} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
+  import {deriveEvents} from "@welshman/store"
   import {
     LOCAL_RELAY_URL,
     toNostrURI,
@@ -326,8 +327,8 @@
         <Popover theme="transparent" opts={{hideOnClick: true}}>
           <button
             slot="trigger"
-            class="relative flex h-6 items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
-            <i class="fa-solid fa-list" />
+            class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
+            <Icon icon="openwith" color="neutral-100" class="cursor-pointer" />
           </button>
           <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
             <Menu>
