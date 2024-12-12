@@ -7,7 +7,7 @@
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import {mainNotifications, setChecked, unreadMainNotifications} from "src/engine/notifications"
+  import {mainNotifications, setChecked, unreadMainNotifications} from "src/engine"
 
   export let limit
 

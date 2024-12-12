@@ -11,8 +11,7 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages} from "src/engine"
-  import {setChecked} from "src/engine/notifications"
+  import {channels, hasNewMessages, setChecked} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {

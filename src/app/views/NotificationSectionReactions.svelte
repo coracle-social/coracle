@@ -7,11 +7,7 @@
   import {formatTimestampAsDate} from "src/util/misc"
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
-  import {
-    reactionNotifications,
-    setChecked,
-    unreadReactionNotifications,
-  } from "src/engine/notifications"
+  import {reactionNotifications, setChecked, unreadReactionNotifications} from "src/engine"
 
   export let limit
 

@@ -9,8 +9,7 @@
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages} from "src/engine"
-  import {hasNewNotifications} from "src/engine/notifications"
+  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
 
   const closeSubMenu = () => {
     subMenu = null

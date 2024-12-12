@@ -8,8 +8,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {hasNewMessages} from "src/engine"
-  import {hasNewNotifications} from "src/engine/notifications"
+  import {hasNewMessages, hasNewNotifications} from "src/engine"
 
   let innerWidth = 0
   let searching = false

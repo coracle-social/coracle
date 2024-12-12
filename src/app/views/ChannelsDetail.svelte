@@ -10,9 +10,8 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
-  import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
-  import {setChecked} from "src/engine/notifications"
+  import {getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
 
   export let pubkeys
   export let channelId
