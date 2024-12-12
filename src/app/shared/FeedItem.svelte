@@ -6,7 +6,7 @@
   import {quantify} from "hurdak"
   import {onMount} from "svelte"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
-  import NoteKind from "src/app/shared/NoteKind.svelte"
+  import NoteKind from "src/app/shared/Note.svelte"
   import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
