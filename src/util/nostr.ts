@@ -18,11 +18,11 @@ import {
   getTagValue,
   getTopicTagValues,
 } from "@welshman/util"
+import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {hexToBytes} from "@noble/hashes/utils"
 import {nip05, nip19} from "nostr-tools"
-import {identity} from "ramda"
 import {avg} from "hurdak"
 import {parseJson} from "src/util/misc"
 

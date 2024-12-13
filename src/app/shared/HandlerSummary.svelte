@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq, pluck} from "ramda"
+  import {uniq, prop} from "@welshman/lib"
   import {pluralize} from "hurdak"
   import {getAddress} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,7 +11,7 @@
 
   const address = getAddress(handler.event)
   const recommendations = $recommendationsByHandlerAddress.get(address) || []
-  const pubkeys = uniq(pluck("pubkey", recommendations))
+  const pubkeys = uniq(recommendations.map(prop("pubkey")))
   const actionText = `${pluralize(pubkeys.length, "recommends", "recommend")} this app`
 </script>
 

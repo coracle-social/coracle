@@ -7,7 +7,6 @@
   import {ctx, ago, max, sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
-  import * as content from "@welshman/content"
   import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
   import * as signer from "@welshman/signer"
   import * as net from "@welshman/net"
@@ -75,7 +74,6 @@
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
   import Zap from "src/app/views/Zap.svelte"
-  import {isNil} from "ramda"
   import {onMount} from "svelte"
   import {logUsage} from "src/app/state"
   import {
@@ -319,7 +317,6 @@
     nip19,
     logger,
     router,
-    content,
     ...nostr,
     ...misc,
     ...lib,
@@ -341,7 +338,7 @@
 
   // Scroll position
 
-  let scrollY
+  let scrollY: number
 
   const unsubHistory = router.history.subscribe($history => {
     if ($history[0].modal) {
@@ -435,7 +432,7 @@
         ])
 
         if (lastActivity && lastActivity < ago(30)) {
-          ctx.net.pool.get(connection.url).socket.close()
+          ctx.net.pool.remove(connection.url)
         }
       }
     }, 5_000)

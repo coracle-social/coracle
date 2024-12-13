@@ -1,4 +1,4 @@
-import {takeWhile, find, filter, identity, mergeLeft, reject} from "ramda"
+import {identity} from "@welshman/lib"
 import {first, randomId, filterVals} from "hurdak"
 import {get, derived, writable} from "svelte/store"
 import logger from "src/util/logger"
@@ -208,9 +208,9 @@ class RouterExtension {
     return this.clone({queryParams: data})
   }
 
-  cx = context => this.clone(updateIn("context", mergeLeft(context))(this.params))
+  cx = context => this.clone(updateIn("context", (c: object) => ({...c, ...context}))(this.params))
 
-  cg = config => this.clone(updateIn("config", mergeLeft(config))(this.params))
+  cg = config => this.clone(updateIn("config", (c: object) => ({...c, ...config}))(this.params))
 
   toString = () => {
     let path = this.path
@@ -251,26 +251,21 @@ export class Router {
   routes: Route[] = []
   extensions: Record<string, RouterExtension> = {}
   history = writable<HistoryItem[]>([])
-  nonVirtual = derived(
-    this.history,
-    reject((h: HistoryItem) => h.virtual),
-  )
-  pages = derived(
-    this.nonVirtual,
-    filter((h: HistoryItem) => !h.modal),
-  )
-  page = derived(
-    this.nonVirtual,
-    find((h: HistoryItem) => !h.modal),
-  )
-  modals = derived(
-    this.nonVirtual,
-    takeWhile((h: HistoryItem) => h.modal),
-  )
-  modal = derived(
-    this.nonVirtual,
-    find((h: HistoryItem) => h.modal),
-  )
+  nonVirtual = derived(this.history, $history => $history.filter(h => !h.virtual))
+  pages = derived(this.nonVirtual, $nonVirtual => $nonVirtual.filter(h => !h.modal))
+  page = derived(this.nonVirtual, $nonVirtual => $nonVirtual.find((h: HistoryItem) => !h.modal))
+  modals = derived(this.nonVirtual, $nonVirtual => {
+    const modals = []
+    for (const h of $nonVirtual) {
+      if (h.modal) {
+        modals.push(h)
+      } else {
+        break
+      }
+    }
+    return modals
+  })
+  modal = derived(this.nonVirtual, $nonVirtual => $nonVirtual.find((h: HistoryItem) => h.modal))
   current = derived(this.nonVirtual, history => history[0])
 
   init() {
@@ -350,7 +345,7 @@ export class Router {
   }
 
   remove(key) {
-    this.history.update(reject(($item: HistoryItem) => $item.key === key))
+    this.history.update($history => $history.filter($item => $item.key !== key))
   }
 
   clearModals() {

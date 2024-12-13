@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {without} from "ramda"
-
   export let value = null
   export let options = []
   export let onChange = null
@@ -10,7 +8,7 @@
 
   const onClick = option => {
     if (multiple) {
-      value = value.includes(option) ? without([option], value) : [...value, option]
+      value = value.includes(option) ? value.filter(v => v != option) : [...value, option]
     } else {
       value = option
     }

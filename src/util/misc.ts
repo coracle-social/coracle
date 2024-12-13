@@ -1,6 +1,16 @@
 import {derived, writable, type Readable} from "svelte/store"
-import {now, throttle, stripProtocol, isPojo, first, sleep} from "@welshman/lib"
-import {pluck, fromPairs, last, identity, sum, is} from "ramda"
+import {
+  now,
+  stripProtocol,
+  first,
+  sleep,
+  fromPairs,
+  last,
+  sum,
+  identity,
+  prop,
+  throttle,
+} from "@welshman/lib"
 import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
@@ -190,57 +200,6 @@ export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
 }
 
-// https://stackoverflow.com/a/11900218/1467342
-export function roughSizeOfObject(o, max = Infinity) {
-  const seen = new Set()
-  const stack = [o]
-  let bytes = 0
-
-  while (stack.length) {
-    const value = stack.pop()
-
-    if (typeof value === "boolean") {
-      bytes += 4
-    } else if (typeof value === "string") {
-      bytes += value.length * 2
-    } else if (typeof value === "number") {
-      bytes += 8
-    } else if (isPojo(value) && !seen.has(value)) {
-      seen.add(value)
-
-      for (const [k, v] of Object.entries(value)) {
-        stack.push(k)
-        stack.push(v)
-      }
-    } else if (is(Map, value) && !seen.has(value)) {
-      seen.add(value)
-
-      for (const [k, v] of value.entries()) {
-        stack.push(k)
-        stack.push(v)
-      }
-    } else if (Array.isArray(value) && !seen.has(value)) {
-      seen.add(value)
-
-      for (const v of value) {
-        stack.push(v)
-      }
-    } else if (is(Set, value) && !seen.has(value)) {
-      seen.add(value)
-
-      for (const v of value.values()) {
-        stack.push(v)
-      }
-    }
-
-    if (bytes > max) {
-      return max
-    }
-  }
-
-  return bytes
-}
-
 export const sumBy = (f, xs) => sum(xs.map(f))
 
 export const ensureProto = url => (url.includes("://") ? url : "https://" + url)
@@ -287,12 +246,12 @@ export const getStringWidth = (text: string) => {
   return width
 }
 
-export const fuzzy = <T>(data: T[], opts = {}) => {
+export const fuzzy = <T>(data: T[], opts = {}): ((q: string) => any[]) => {
   const fuse = new Fuse(data, opts) as any
 
   // Slice pattern because the docs warn that it"ll crash if too long
   return (q: string) => {
-    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
+    return q ? (fuse.search(q.slice(0, 32)) as any[]).map(prop("item")) : data
   }
 }
 
@@ -315,7 +274,7 @@ export class SearchHelper<T, V> {
     return this
   }
 
-  getSearch = () => fuzzy(this.options, this.config)
+  getSearch = () => fuzzy<T>(this.options, this.config)
 
   getOption = (value: V) => this._setup()._optionsByValue.get(value)
 

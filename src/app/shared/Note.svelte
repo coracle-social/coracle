@@ -13,9 +13,9 @@
     getAncestorTagValues,
   } from "@welshman/util"
   import {repository, deriveZapperForPubkey, deriveZapper} from "@welshman/app"
+  import {identity, uniqBy, prop} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {sleep} from "hurdak"
-  import {identity, uniqBy, prop} from "ramda"
   import {onMount} from "svelte"
   import {quantify} from "hurdak"
   import {fly, slide} from "src/util/transition"

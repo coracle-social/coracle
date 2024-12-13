@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
+  import {prop, uniq} from "@welshman/lib"
   import {batch} from "hurdak"
-  import {pluck, uniq} from "ramda"
   import PersonList from "src/app/shared/PersonList.svelte"
   import {subscribe} from "src/engine"
   import Spinner from "src/partials/Spinner.svelte"
@@ -20,7 +20,7 @@
       },
       filters: [{kinds: [3], "#p": [pubkey]}],
       onEvent: batch(500, (events: TrustedEvent[]) => {
-        pubkeys = uniq(pubkeys.concat(pluck("pubkey", events)))
+        pubkeys = uniq(pubkeys.concat(events.map(prop("pubkey"))))
       }),
     })
 

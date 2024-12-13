@@ -1,8 +1,6 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
-  import {sortBy, uniqBy, filter, map, reject} from "ramda"
-  import {doPipe} from "hurdak"
-  import {ctx, now, tryCatch, fetchJson} from "@welshman/lib"
+  import {ctx, now, sortBy, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, profilesByPubkey, displayProfileByPubkey, zappersByLnurl} from "@welshman/app"
@@ -17,7 +15,7 @@
   export let splits
   export let id = null
   export let anonymous = false
-  export let amount = getSetting("default_zap")
+  export let amount = getSetting("default_zap") as string
 
   let zaps = []
   let message = ""
@@ -25,52 +23,45 @@
 
   const updateZaps = (message, amount) => {
     let totalWeight = 0
+    const percent = getSetting("platform_zap_split") as number
 
-    zaps = doPipe(splits, [
-      reject((s: string[]) => s.length < 4 || s[1].length !== 64 || !s[3].match(/\d+(\.\d+)?$/)),
-      map((s: string[]) => [...s.slice(1, 3), parseFloat(s[3])]),
-      filter((s: any[]) => s[2] && s[2] > 0),
-      uniqBy((s: any[]) => s[0]),
-      map((s: any[]) => {
-        totalWeight += s[2]
-
-        return s
-      }),
-      map(([pubkey, relay, weight]: string[]) => ({
-        relay,
-        pubkey,
-        amount: Math.round(amount * (parseFloat(weight) / totalWeight)),
-        status: "pending",
-      })),
-      sortBy((split: any) => -split.amount),
-      (zaps: any[]) => {
-        const percent = getSetting("platform_zap_split")
-
-        // Add our platform split on top as a "tip"
-        if (percent > 0 && totalWeight > 0) {
-          zaps.push({
-            pubkey: env.PLATFORM_PUBKEY,
-            relay: ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
-            amount: Math.round(zaps.reduce((a, z) => a + z.amount, 0) * percent),
-            status: "pending",
-            isTip: true,
-          })
-        }
-
-        // Add our zapper and relay hints
-        return zaps.map((zap, i) => {
-          const content = i === 0 ? message : ""
-          const profile = $profilesByPubkey.get(zap.pubkey)
-          const zapper = $zappersByLnurl.get(profile?.lnurl)
-          const relays = ctx.app.router
-            .merge([ctx.app.router.ForPubkey(zap.pubkey), ctx.app.router.FromRelays([zap.relay])])
-            .getUrls()
-
-          return {...zap, zapper, relays, content}
+    for (const split of splits) {
+      // validate the split
+      if (split.length < 4 || split[1].length !== 64 || !split[3].match(/\d+(\.\d+)?$/)) {
+        continue
+      }
+      // format the split
+      const [pubkey, relay, weight] = [split[1], split[2], parseFloat(split[3])]
+      if (weight == 0) continue
+      // make sure we do not zap the same pubkey twice
+      if (zaps.some(z => z[0] === pubkey)) continue
+      totalWeight += weight
+      zaps.push({pubkey, relay, weight, status: "pending"})
+      // add the tip zip
+      if (percent > 0) {
+        zaps.push({
+          pubkey: env.PLATFORM_PUBKEY,
+          relay: ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
+          weight: weight * percent,
+          status: "pending",
+          isTip: true,
         })
-      },
-      filter((zap: any) => zap.zapper?.allowsNostr),
-    ])
+      }
+    }
+
+    for (const zap of zaps) {
+      zap.content = zap.isTip ? "" : message
+      zap.amount = Math.round(amount * (zap.weight / totalWeight))
+      zap.zapper = $zappersByLnurl.get($profilesByPubkey.get(zap.pubkey)?.lnurl)
+      zap.relays = ctx.app.router
+        .merge([ctx.app.router.ForPubkey(zap.pubkey), ctx.app.router.FromRelays([zap.relay])])
+        .getUrls()
+    }
+
+    zaps = sortBy(
+      z => -z.amount,
+      zaps.filter(zip => zip.zapper?.allowsNostr),
+    )
   }
 
   const requestZaps = () =>

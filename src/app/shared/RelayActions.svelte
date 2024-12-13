@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {last} from "ramda"
+  import {last} from "@welshman/lib"
   import {
     pubkey,
     signer,

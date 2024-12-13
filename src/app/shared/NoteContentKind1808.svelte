@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
+  import {fromPairs} from "@welshman/lib"
   import Media from "src/partials/Media.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"

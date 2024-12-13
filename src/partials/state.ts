@@ -1,5 +1,5 @@
 import Bowser from "bowser"
-import {fromPairs} from "ramda"
+import {fromPairs} from "@welshman/lib"
 import {derived, writable, get} from "svelte/store"
 import {parseHex} from "src/util/html"
 import {synced} from "src/util/misc"

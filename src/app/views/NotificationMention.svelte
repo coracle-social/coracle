@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, uniq} from "ramda"
+  import {prop, uniq} from "@welshman/lib"
   import {ctx} from "@welshman/lib"
   import {getAncestorTagValues} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
@@ -18,7 +18,7 @@
 
 <div class="my-4">
   <div class="mb-4 flex justify-between">
-    <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} actionText="mentioned you" />
+    <PeopleAction pubkeys={uniq(interactions.map(prop("pubkey")))} actionText="mentioned you" />
     <small>{formatTimestamp(timestamp)}</small>
   </div>
   {#if $event}
@@ -27,7 +27,7 @@
       showLoading
       depth={1}
       note={$event}
-      filters={[{ids: pluck("id", interactions)}]}
+      filters={[{ids: interactions.map(prop("id"))}]}
       relays={ctx.app.router.EventParents(interactions[0]).getUrls()} />
   {:else}
     <Spinner />

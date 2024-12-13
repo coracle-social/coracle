@@ -1,11 +1,10 @@
 <script lang="ts">
   import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
+  import {ctx, without, uniq} from "@welshman/lib"
   import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {writable, type Writable} from "svelte/store"
   import {createEventDispatcher} from "svelte"
   import {Editor} from "svelte-tiptap"
-  import {without, uniq} from "ramda"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"

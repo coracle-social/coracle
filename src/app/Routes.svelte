@@ -1,6 +1,5 @@
 <script lang="ts">
   import cx from "classnames"
-  import {reverse} from "ramda"
   import {signer, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
   import Modal from "src/partials/Modal.svelte"
@@ -74,7 +73,7 @@
   </div>
 {/key}
 
-{#each reverse($modals).filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
+{#each $modals.reverse().filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const {component} = router.getMatch(m.path).route}
   <Modal mini={m.mini} virtual={false} canClose={!m.noEscape}>
     <svelte:component this={component} {...router.getProps(m)} />

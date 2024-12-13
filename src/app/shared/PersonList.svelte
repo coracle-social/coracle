@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {flatten, partition} from "ramda"
+  import {flatten, partition} from "@welshman/lib"
   import {profileHasName} from "@welshman/util"
   import {profilesByPubkey} from "@welshman/app"
   import {createScroller} from "src/util/misc"
