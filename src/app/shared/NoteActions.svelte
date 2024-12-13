@@ -142,10 +142,10 @@
     const [templateTag] = sortBy((t: string[]) => {
       if (t[0] === "web" && last(t) === "nevent") return -6
       if (t[0] === "web" && last(t) === "note") return -5
-      if (t[0] === "web" && t.length === 2) return -4
+      if ((t[0] === "web" && t.length === 2) || last(t) === "") return -4
       if (t[0] === os && last(t) === "nevent") return -3
       if (t[0] === os && last(t) === "note") return -2
-      if (t[0] === os && t.length === 2) return -1
+      if ((t[0] === os && t.length === 2) || last(t) === "") return -1
 
       return 0
     }, handler.event.tags)
@@ -171,7 +171,8 @@
     h =>
       h.name.toLowerCase() !== "coracle" &&
       h.event.tags.some(
-        t => ["web", os].includes(t[0]) && (t.length == 2 || ["note", "nevent"].includes(last(t))),
+        t =>
+          ["web", os].includes(t[0]) && (t.length == 2 || ["note", "nevent", ""].includes(last(t))),
       ),
   )
 
