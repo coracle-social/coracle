@@ -15,6 +15,7 @@ import {
   userRelaySelections,
 } from "@welshman/app"
 import {
+  identity,
   append,
   cached,
   ctx,
@@ -24,7 +25,6 @@ import {
   remove,
   assoc,
   flatten,
-  identity,
   omit,
   prop,
   uniq,

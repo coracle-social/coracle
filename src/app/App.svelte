@@ -7,6 +7,7 @@
   import {ctx, ago, max, sleep, memoize, isNil} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
+  import * as content from "@welshman/content"
   import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
   import * as signer from "@welshman/signer"
   import * as net from "@welshman/net"
@@ -317,6 +318,7 @@
     nip19,
     logger,
     router,
+    content,
     ...nostr,
     ...misc,
     ...lib,
