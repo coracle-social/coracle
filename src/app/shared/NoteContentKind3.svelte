@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {Tags} from "@welshman/util"
+  import {take} from "@welshman/lib"
+  import {getPubkeyTagValues} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
@@ -12,8 +13,6 @@
   }
 
   let limit = showEntire ? Infinity : 5
-
-  $: pubkeys = Tags.fromEvent(note).values("p").take(limit).valueOf()
 </script>
 
 <FlexColumn small>
@@ -22,7 +21,7 @@
       Updated follows list:
     </div>
     <div>
-      {#each pubkeys as pubkey}
+      {#each take(limit, getPubkeyTagValues(note.tags)) as pubkey}
         <div class="inline-block rounded-full px-3 py-2 transition-colors hover:bg-neutral-800">
           <PersonBadgeSmall {pubkey} />
         </div>

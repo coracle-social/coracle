@@ -80,7 +80,6 @@ import {
   SEEN_CONTEXT,
   SEEN_CONVERSATION,
   SEEN_GENERAL,
-  Tags,
   WRAP,
   asDecryptedEvent,
   createEvent,
@@ -93,6 +92,7 @@ import {
   getIdentifier,
   getListTags,
   getPubkeyTagValues,
+  getTagValue,
   getTagValues,
   isHashedEvent,
   makeList,
@@ -160,7 +160,7 @@ export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], r
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   if (!e.content) return undefined
   if (!getPlaintext(e)) {
-    const recipient = Tags.fromEvent(e).get("p")?.value()
+    const recipient = getTagValue("p", e.tags)
     const session = getSession(e.pubkey) || getSession(recipient)
     const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
     const signer = getSigner(session)
@@ -197,7 +197,7 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
   }
 
   // Decrypt by session
-  const session = getSession(Tags.fromEvent(event).get("p")?.value())
+  const session = getSession(getTagValue("p", event.tags))
   const signer = getSigner(session)
 
   if (signer) {
@@ -894,9 +894,9 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
 // Thread
 
 const getAncestorIds = e => {
-  const {roots, replies} = Tags.fromEvent(e).ancestors()
+  const {roots, replies} = getAncestorTagValues(e.tags)
 
-  return [...roots.values().valueOf(), ...replies.values().valueOf()]
+  return [...roots, ...replies]
 }
 
 export class ThreadLoader {
@@ -946,14 +946,14 @@ export class ThreadLoader {
 
   addToThread(events) {
     const ancestors = []
-    const {roots, replies} = Tags.fromEvent(this.note).ancestors()
+    const {roots, replies} = getAncestorTagValues(this.note.tags)
 
     for (const event of events) {
       const ids = getIdOrAddress(event)
 
-      if (replies.find(t => ids.includes(t.value()))) {
+      if (replies.find(id => ids.includes(id))) {
         this.parent.set(event)
-      } else if (roots.find(t => ids.includes(t.value()))) {
+      } else if (roots.find(id => ids.includes(id))) {
         this.root.set(event)
       } else {
         ancestors.push(event)
