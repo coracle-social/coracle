@@ -240,43 +240,18 @@ body,
   border: 1px solid var(--neutral-600);
 }
 
-/* nostr-editor */
+/* tiptap */
+
 .tiptap {
-  outline: none;
-  min-height: 0;
-  height: 100%;
+  --tiptap-object-bg: var(--neutral-100);
+  --tiptap-object-fg: var(--neutral-800);
+  --tiptap-active-bg: var(--neutral-200);
+  --tiptap-active-fg: var(--neutral-800);
 }
 
-.tiptap pre code {
-  @apply block max-w-full overflow-auto rounded bg-neutral-200 px-1 text-neutral-800 no-underline;
-}
-
-.tiptap p code {
-  @apply link-content;
-}
-
-.tiptap,
-[tag] {
-  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded px-1 no-underline;
-}
-
-a[data-type="tag"] {
-  text-decoration: underline;
-}
-
-.tiptap p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-.link-content,
-.tiptap [tag] {
-  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral-200 px-1 text-neutral-800 no-underline;
-}
-
-.link-content.link-content-selected {
-  @apply bg-neutral-300;
+.tiptap-suggestions {
+  --tiptap-object-bg: var(--neutral-800);
+  --tiptap-object-fg: var(--neutral-200);
+  --tiptap-active-bg: var(--neutral-700);
+  --tiptap-active-fg: var(--neutral-200);
 }
