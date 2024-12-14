@@ -1,6 +1,6 @@
 <script lang="ts">
   import {first} from "@welshman/lib"
-  import {getAddress, Tags} from "@welshman/util"
+  import {getAddress, getTags} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
   import {quantify} from "hurdak"
   import Subheading from "src/partials/Subheading.svelte"
@@ -46,7 +46,7 @@
         {#if list.description}
           <p>{list.description}</p>
         {/if}
-        {quantify(Tags.wrap(list.tags).filterByKey(tagTypes).count(), "item")}
+        {quantify(getTags(tagTypes, list.tags).length, "item")}
       </FlexColumn>
     </Card>
   {:else}

@@ -16,6 +16,7 @@ import {
   userRelaySelections,
 } from "@welshman/app"
 import {
+  identity,
   append,
   cached,
   ctx,
@@ -42,7 +43,6 @@ import {
   PROFILE,
   RELAYS,
   SEEN_CONVERSATION,
-  Tags,
   addToListPublicly,
   createEvent,
   createProfile,
@@ -53,10 +53,12 @@ import {
   makeList,
   normalizeRelayUrl,
   removeFromList,
+  getTagValue,
+  uniqTags,
 } from "@welshman/util"
 import crypto from "crypto"
 import {Fetch, seconds, sleep, tryFunc} from "hurdak"
-import {assoc, flatten, identity, omit, prop, reject, uniq} from "ramda"
+import {assoc, flatten, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
@@ -185,12 +187,12 @@ export const compressFiles = (files, opts) =>
   )
 
 export const eventsToMeta = (events: TrustedEvent[]) => {
-  const tagsByHash = groupBy((tags: Tags) => tags.get("ox").value(), events.map(Tags.fromEvent))
+  const tagsByHash = groupBy(
+    imeta => getTagValue("ox", imeta),
+    events.map(e => e.tags),
+  )
 
-  // Merge all nip94 tags together so we can supply as much imeta as possible
-  return Array.from(tagsByHash.values()).map(groupedTags => {
-    return Tags.wrap(groupedTags.flatMap(tags => tags.unwrap())).uniq()
-  })
+  return uniqTags(Array.from(tagsByHash.values()).flatMap(identity).flatMap(identity))
 }
 
 export const uploadFiles = async (urls, files, compressorOpts = {}) => {
