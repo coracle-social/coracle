@@ -6,7 +6,7 @@
   import {fromPairs} from "ramda"
   import {switcherFn} from "hurdak"
   import {urlIsMedia} from "@welshman/content"
-  import {fromNostrURI, Tags} from "@welshman/util"
+  import {fromNostrURI, getTopicTagValues} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
@@ -71,7 +71,7 @@
     <NoteContentLink value={{url: image, isMedia: true}} showMedia />
   {/if}
   <div>
-    {#each Tags.fromEvent(note).topics().valueOf() as topic}
+    {#each getTopicTagValues(note.tags) as topic}
       <Anchor modal href={router.at("topics").of(topic).toString()}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
       </Anchor>

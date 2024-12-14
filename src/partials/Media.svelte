@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {last, ellipsize, postJson} from "@welshman/lib"
-  import {Tags} from "@welshman/util"
+  import {getTagValues} from "@welshman/util"
   import Audio from "src/partials/Audio.svelte"
   import Image from "src/partials/Image.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -9,7 +9,7 @@
   import {dufflepud, imgproxy} from "src/engine"
 
   export let url
-  export let imeta = Tags.wrap([["url", url]])
+  export let tags = [["url", url]]
   export let onClick = null
   export let onClose = null
   export let fullSize = false
@@ -74,11 +74,7 @@
       {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
         <Image
           alt="Link preview"
-          src={imeta
-            .whereKey("url")
-            .values()
-            .valueOf()
-            .map(url => imgproxy(url))}
+          src={getTagValues("url", tags).map(url => imgproxy(url))}
           class={cx("object-contain object-center", {"max-h-96": !fullSize})} />
       {:else}
         {#await loadPreview()}

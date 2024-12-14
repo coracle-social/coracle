@@ -1,15 +1,14 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {Tags} from "@welshman/util"
+  import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
 
-  const tags = Tags.fromEvent(note)
-  const imeta = tags.whereKey("imeta").first()
-  const categories = tags.values("c").valueOf()
+  const imeta = getTag("imeta", note.tags)
+  const categories = getTagValues("c", note.tags)
   const {cover, subject, title} = fromPairs(note.tags)
 </script>
 
@@ -24,8 +23,8 @@
     </Chips>
   </div>
   {#if imeta}
-    {@const tags = Tags.fromIMeta(imeta.drop(1).valueOf())}
-    <Media url={tags.values("url").first()} imeta={tags} />
+    {@const tags = tagsFromIMeta(imeta.slice(1))}
+    <Media url={getTagValue("url", tags)} {tags} />
   {/if}
   {#if cover}
     <NoteContentLink {showMedia} value={{url: cover, isMedia: true}} />
