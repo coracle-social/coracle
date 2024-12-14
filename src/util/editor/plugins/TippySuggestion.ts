@@ -1,27 +1,39 @@
 import type {SvelteComponent, ComponentType} from "svelte"
 import type {Readable} from "svelte/store"
-import tippy, {type Instance} from "tippy.js"
-import type {Editor} from "@tiptap/core"
+import type {Instance} from "tippy.js"
+import tippy from "tippy.js"
+import {nprofileEncode} from "nostr-tools/nip19"
+import type {Editor} from "svelte-tiptap"
 import {PluginKey} from "@tiptap/pm/state"
 import Suggestion from "@tiptap/suggestion"
-import type {Search} from "@welshman/app"
+import Suggestions from "../components/Suggestions.svelte"
+import SuggestionString from "../components/SuggestionString.svelte"
 
-export type SuggestionsOptions = {
+export type TippySuggestionOptions = {
   char: string
   name: string
   editor: Editor
-  search: Readable<Search<any, any>>
-  select: (value: any, props: any) => void
+  search: Readable<(term: string) => string[]>
+  select: (value: string, props: any) => void
   allowCreate?: boolean
-  suggestionComponent: ComponentType
-  suggestionsComponent: ComponentType
+  wrapper?: ComponentType
+  component?: ComponentType
 }
 
-export const createSuggestions = (options: SuggestionsOptions) =>
+export const TippySuggestion = ({
+  char,
+  name,
+  editor,
+  search,
+  select,
+  allowCreate,
+  wrapper = Suggestions,
+  component = SuggestionString,
+}: TippySuggestionOptions) =>
   Suggestion({
-    char: options.char,
-    editor: options.editor,
-    pluginKey: new PluginKey(`suggest-${options.name}`),
+    char,
+    editor,
+    pluginKey: new PluginKey(`suggest-${name}`),
     command: ({editor, range, props}) => {
       // increase range.to by one when the next node is of type "text"
       // and starts with a space character
@@ -36,7 +48,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
         .chain()
         .focus()
         .insertContentAt(range, [
-          {type: options.name, attrs: props},
+          {type: name, attrs: props},
           {type: "text", text: " "},
         ])
         .run()
@@ -45,7 +57,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
     },
     allow: ({state, range}) => {
       const $from = state.doc.resolve(range.from)
-      const type = state.schema.nodes[options.name]
+      const type = state.schema.nodes[name]
 
       return !!$from.parent.type.contentMatch.matchType(type)
     },
@@ -55,16 +67,17 @@ export const createSuggestions = (options: SuggestionsOptions) =>
 
       const mapProps = (props: any) => ({
         term: props.query,
-        search: options.search,
-        allowCreate: options.allowCreate,
-        component: options.suggestionComponent,
-        select: (value: string) => options.select(value, props),
+        search,
+        component,
+        allowCreate,
+        select: (value: string) => select(value, props),
       })
 
       return {
         onStart: props => {
           const target = document.createElement("div")
 
+          // @ts-ignore
           popover = tippy("body", {
             getReferenceClientRect: props.clientRect as any,
             appendTo: document.querySelector("dialog[open]") || document.body,
@@ -74,8 +87,10 @@ export const createSuggestions = (options: SuggestionsOptions) =>
             trigger: "manual",
             placement: "bottom-start",
           })
+
           if (!props.query) popover[0].hide()
-          suggestions = new options.suggestionsComponent({target, props: mapProps(props)})
+
+          suggestions = new wrapper({target, props: mapProps(props)})
         },
         onUpdate: props => {
           if (props.query) {
@@ -83,6 +98,7 @@ export const createSuggestions = (options: SuggestionsOptions) =>
           } else {
             popover[0].hide()
           }
+
           suggestions.$set(mapProps(props))
 
           if (props.clientRect) {
@@ -106,4 +122,23 @@ export const createSuggestions = (options: SuggestionsOptions) =>
         },
       }
     },
+  })
+
+export type MentionSuggestionOptions = Partial<TippySuggestionOptions> & {
+  editor: Editor
+  search: Readable<(term: string) => string[]>
+  getRelays: (pubkey: string) => string[]
+}
+
+export const MentionSuggestion = (options: MentionSuggestionOptions) =>
+  TippySuggestion({
+    char: "@",
+    name: "nprofile",
+    select: (pubkey: string, props: any) => {
+      const relays = options.getRelays(pubkey)
+      const nprofile = nprofileEncode({pubkey, relays})
+
+      return props.command({pubkey, relays, nprofile})
+    },
+    ...options,
   })

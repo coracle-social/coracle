@@ -1,18 +1,17 @@
 <script lang="ts">
-  import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
+  import {session, displayProfileByPubkey, tagReplyTo} from "@welshman/app"
   import {ctx, without, uniq} from "@welshman/lib"
   import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
-  import {Editor} from "svelte-tiptap"
-  import {writable, type Writable} from "svelte/store"
+  import {writable} from "svelte/store"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
-  import {getEditorOptions} from "src/app/editor"
   import {drafts, openReplies} from "src/app/state"
-  import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
+  import {getClientTags, publish, sign, userSettings} from "src/engine"
+  import {getEditor} from "src/app/editor"
 
   export let parent
   export let showBorder = false
@@ -21,6 +20,7 @@
   let showOptions = false
 
   const nsecWarning = writable(null)
+  const editorLoading = writable(false)
 
   $: mentions = without(
     [$session?.pubkey],
@@ -29,9 +29,8 @@
 
   let loading
   let options = {warning: "", anonymous: false}
-  let editorElement: HTMLElement
-  let editor: Editor
-  let editorLoading: Writable<boolean>
+  let element: HTMLElement
+  let editor: ReturnType<typeof getEditor>
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -52,8 +51,8 @@
   }
 
   const saveDraft = () => {
-    if (editor) {
-      drafts.set(parent.id, editor.getHTML())
+    if ($editor) {
+      drafts.set(parent.id, $editor.getHTML())
     }
   }
 
@@ -68,17 +67,15 @@
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
     saveDraft()
-    const content = editor.getText({blockSeparator: "\n"}).trim()
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     const tags = uniqTags([
-      ...mentions.map(tagPubkey),
+      ...$editor.storage.welshman.getEditorTags(),
       ...tagReplyTo(parent),
-      ...tagsFromContent(content),
-      ...editor.commands.getMetaTags(),
       ...getClientTags(),
     ])
 
@@ -116,22 +113,16 @@
   }
 
   const createEditor = () => {
-    editor = new Editor(
-      getEditorOptions({
-        submit: send,
-        element: editorElement,
-        submitOnEnter: false,
-        submitOnModEnter: true,
-        autofocus: true,
-        content: drafts.get(parent.id) || "",
-      }),
-    )
-
-    editorLoading = editor.storage.fileUpload.loading
+    editor = getEditor({
+      element,
+      submit: send,
+      autofocus: true,
+      content: drafts.get(parent.id) || "",
+    })
   }
 
   $: {
-    if (editorElement) {
+    if (element) {
       createEditor()
     }
   }
@@ -152,7 +143,7 @@
     <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
-          <Compose bind:element={editorElement} {editor}>
+          <Compose bind:element editor={$editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
                 disabled={$editorLoading}
@@ -172,7 +163,9 @@
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
-              <i class="fa fa-paperclip" on:click|preventDefault={editor.commands.selectFiles} />
+              <i
+                class="fa fa-paperclip"
+                on:click|preventDefault={() => $editor.chain().selectFiles().run()} />
               <i class="fa fa-cog" on:click|preventDefault={openOptions} />
             </div>
           </div>

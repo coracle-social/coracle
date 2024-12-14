@@ -5,8 +5,7 @@
   import {session, tagPubkey} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {commaFormat} from "hurdak"
-  import {writable, type Writable} from "svelte/store"
-  import {Editor} from "svelte-tiptap"
+  import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
@@ -17,21 +16,23 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import {getEditorOptions} from "src/app/editor"
+  import {getEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
+  import {getClientTags, publish, sign, userSettings} from "src/engine"
 
   export let quote = null
   export let pubkey = null
 
-  let charCount: Writable<number>
-  let wordCount: Writable<number>
+  const uploading = writable(false)
+  const wordCount = writable(0)
+  const charCount = writable(0)
+
   let showPreview = false
   let showOptions = false
   let signaturePending = false
 
-  let editor: Editor
+  let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
   let options = {warning: "", anonymous: false}
 
@@ -56,18 +57,18 @@
   }
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
-    // prevent sending before media are uploaded and tags are correctly set
-    if ($loading) return
+    // prevent sending before media are uploaded
+    if ($uploading) return
 
-    signaturePending = true
+    //  signaturePending = true
 
-    const content = editor.getText({blockSeparator: "\n"}).trim()
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
+    const tags = [...$editor.storage.welshman.getEditorTags(content), ...getClientTags()]
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])
@@ -82,7 +83,7 @@
 
     signaturePending = false
 
-    drafts.set("notecreate", editor.getHTML())
+    drafts.set("notecreate", $editor.getHTML())
 
     router.clearModals()
 
@@ -138,22 +139,18 @@
   }
 
   onMount(() => {
-    editor = new Editor(
-      getEditorOptions({
-        content: drafts.get("notecreate") || "",
-        submit: onSubmit,
-        element,
-        submitOnEnter: false,
-        submitOnModEnter: true,
-        autofocus: true,
-      }),
-    )
-
-    charCount = editor.storage.wordCount.characters
-    wordCount = editor.storage.wordCount.words
+    editor = getEditor({
+      element,
+      uploading,
+      content: drafts.get("notecreate") || "",
+      submit: onSubmit,
+      autofocus: true,
+      charCount,
+      wordCount,
+    })
 
     if (pubkey && pubkey !== $session.pubkey) {
-      editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
+      $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
     }
 
     if (quote) {
@@ -164,11 +161,9 @@
         relays: ctx.app.router.Event(quote).getUrls(),
       })
 
-      editor.commands.insertNEvent({nevent: toNostrURI(nevent)})
+      $editor.commands.insertNEvent({nevent: toNostrURI(nevent)})
     }
   })
-
-  $: loading = editor?.storage.fileUpload.loading
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
@@ -185,19 +180,19 @@
           class:bg-tinted-700={showPreview}>
           {#if showPreview}
             <NoteContent
-              note={{content: editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
+              note={{content: $editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose bind:element {editor} class="min-h-24" />
+            <Compose bind:element editor={$editor} class="min-h-24" />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-neutral-200">
           <small>
-            {commaFormat($charCount || 0)} characters
+            {commaFormat($charCount)} characters
           </small>
           <span>•</span>
           <small>
-            {commaFormat($wordCount || 0)} words
+            {commaFormat($wordCount)} words
           </small>
           <span>•</span>
           <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
@@ -214,8 +209,8 @@
           tag="button"
           type="submit"
           class="flex-grow"
-          disabled={$loading || signaturePending}>
-          {#if signaturePending}
+          disabled={$uploading || signaturePending}>
+          {#if $uploading || signaturePending}
             <i class="fa fa-circle-notch fa-spin" />
           {:else}
             Send
@@ -223,7 +218,7 @@
         </Anchor>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
-          on:click|preventDefault={editor.commands.selectFiles}>
+          on:click|preventDefault={() => $editor.chain().selectFiles().run()}>
           <i class="fa fa-upload" />
         </button>
       </div>

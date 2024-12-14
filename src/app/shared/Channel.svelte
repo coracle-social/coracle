@@ -5,7 +5,6 @@
   import {pluralize} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {Editor} from "svelte-tiptap"
   import {fly} from "src/util/transition"
   import {createScroller, displayList} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
@@ -14,16 +13,16 @@
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {hasNip44, sendMessage, userSettings} from "src/engine"
+  import {getEditor} from "src/app/editor"
   import Message from "src/app/shared/Message.svelte"
   import Compose from "src/app/shared/Compose.svelte"
-  import {getEditorOptions} from "src/app/editor"
 
   export let pubkeys
   export let initialMessage = ""
   export let channelId: string
   export let messages: TrustedEvent[]
 
-  let editor: Editor
+  let editor: ReturnType<typeof getEditor>
 
   const loading = sleep(5_000)
 
@@ -56,16 +55,13 @@
   )
 
   onMount(() => {
-    editor = new Editor(
-      getEditorOptions({
-        submit: send,
-        element: textarea,
-        submitOnEnter: false,
-        submitOnModEnter: true,
-        autofocus: true,
-        placeholder: "Type something...",
-      }),
-    )
+    editor = getEditor({
+      autofocus: true,
+      aggressive: true,
+      element: textarea,
+      placeholder: "Say hello...",
+      submit: sendOrConfirm,
+    })
 
     startScroller()
 
@@ -109,8 +105,9 @@
   }
 
   const send = async () => {
-    const content = editor.getText({blockSeparator: "\n"}).trim()
-    editor.commands.clearContent()
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
+
+    $editor.commands.clearContent()
 
     if (content) {
       sending = true
@@ -177,13 +174,13 @@
     <div class="flex border-t border-solid border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
       <Compose
         bind:element={textarea}
-        {editor}
+        editor={$editor}
         class="w-full resize-none border-r border-solid border-tinted-700 bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <button
           class="flex cursor-pointer flex-col justify-center gap-2 p-3
                  py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white"
-          on:click={() => editor.commands.selectFiles()}>
+          on:click={() => $editor.chain().selectFiles().run()}>
           <i class="fa-solid fa-paperclip fa-lg" />
         </button>
         <button
