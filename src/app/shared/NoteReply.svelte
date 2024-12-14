@@ -1,7 +1,7 @@
 <script lang="ts">
   import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
   import {ctx} from "@welshman/lib"
-  import {Tags, createEvent, uniqTags} from "@welshman/util"
+  import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {writable, type Writable} from "svelte/store"
   import {createEventDispatcher} from "svelte"
   import {Editor} from "svelte-tiptap"
@@ -23,7 +23,6 @@
 
   const dispatch = createEventDispatcher()
   const nsecWarning = writable(null)
-  const parentTags = Tags.fromEvent(parent)
 
   let container, loading
   let isOpen = false
@@ -38,10 +37,7 @@
     dispatch("start")
 
     isOpen = true
-    mentions = without(
-      [$session.pubkey],
-      uniq(parentTags.values("p").valueOf().concat(parent.pubkey)),
-    )
+    mentions = without([$session.pubkey], uniq([parent.pubkey, ...getPubkeyTagValues(parent.tags)]))
   }
 
   const bypassNsecWarning = () => {

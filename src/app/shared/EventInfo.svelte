@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "ramda"
-  import {Tags} from "@welshman/util"
+  import {getTagValue} from "@welshman/util"
   import {deriveIsDeletedByAddress} from "@welshman/store"
   import {repository} from "@welshman/app"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
@@ -16,10 +16,9 @@
   const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
   const deleted = deriveIsDeletedByAddress(repository, event)
 
-  $: tags = Tags.fromEvent(event)
   $: ({name, title, location} = fromPairs(event.tags))
-  $: end = parseInt(tags.get("end")?.value())
-  $: start = parseInt(tags.get("start")?.value())
+  $: end = parseInt(getTagValue("end", event.tags))
+  $: start = parseInt(getTagValue("start", event.tags))
   $: startDate = secondsToDate(start)
   $: endDate = secondsToDate(end)
   $: startDateDisplay = formatTimestampAsDate(start)

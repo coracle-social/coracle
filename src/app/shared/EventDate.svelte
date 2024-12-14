@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Tags} from "@welshman/util"
+  import {getTagValue} from "@welshman/util"
   import {secondsToDate, getLocale} from "src/util/misc"
 
   export let event
@@ -7,7 +7,7 @@
   const monthFmt = new Intl.DateTimeFormat(getLocale(), {month: "short"})
   const dayFmt = new Intl.DateTimeFormat(getLocale(), {day: "numeric"})
 
-  $: date = secondsToDate(Tags.fromEvent(event).get("start")?.value())
+  $: date = secondsToDate(getTagValue("start", event.tags))
 </script>
 
 <div class="flex flex-col gap-1 px-12">

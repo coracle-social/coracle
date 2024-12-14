@@ -1,7 +1,7 @@
 <script lang="ts">
   import {switcherFn} from "hurdak"
   import {ctx} from "@welshman/lib"
-  import {Tags, displayRelayUrl} from "@welshman/util"
+  import {getTag, displayRelayUrl} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
@@ -9,13 +9,13 @@
 
   export let note, rating
 
-  const tag = Tags.fromEvent(note).find(t => ["r", "p", "e"].includes(t.key()))
+  const tag = getTag(["r", "p", "e"], note.tags)
 
   let href
   let display
 
   if (tag) {
-    const [type, value] = tag.valueOf()
+    const [type, value] = tag
     const relays = ctx.app.router.Event(note).getUrls()
 
     href = switcherFn(type, {
