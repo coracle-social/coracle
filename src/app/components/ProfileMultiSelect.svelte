@@ -5,12 +5,12 @@
   import {profileSearch} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Suggestions from "@lib/editor/Suggestions.svelte"
   import SuggestionProfile from "@lib/editor/SuggestionProfile.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
-  import {pubkeyLink} from "@app/state"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {pushModal} from "@app/modal"
 
   export let value: string[]
   export let autofocus = false
@@ -48,13 +48,14 @@
 <div class="flex flex-col gap-2">
   <div>
     {#each value as pubkey (pubkey)}
+      {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
       <div class="flex-inline badge badge-neutral mr-1 gap-1">
         <Button class="flex items-center" on:click={() => removePubkey(pubkey)}>
           <Icon icon="close-circle" size={4} class="-ml-1 mt-px" />
         </Button>
-        <Link external href={pubkeyLink(pubkey)}>
+        <Button on:click={onClick}>
           <ProfileName {pubkey} />
-        </Link>
+        </Button>
       </div>
     {/each}
   </div>

@@ -11,16 +11,17 @@
   } from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
-  import Link from "@lib/components/Link.svelte"
+  import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
   import ChatMessageMenuMobile from "@app/components/ChatMessageMenuMobile.svelte"
-  import {colors, pubkeyLink} from "@app/state"
+  import {colors} from "@app/state"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -41,6 +42,8 @@
 
     await sendWrapped({template, pubkeys})
   }
+
+  const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 
   const showMobileMenu = () => pushModal(ChatMessageMenuMobile, {event, pubkeys})
 
@@ -94,21 +97,20 @@
       {#if showPubkey}
         <div class="flex items-center gap-2">
           {#if !isOwn}
-            <Link external href={pubkeyLink(event.pubkey)} class="flex items-center gap-1">
+            <Button on:click={openProfile} class="flex items-center gap-1">
               <Avatar
                 src={$profile?.picture}
                 class="border border-solid border-base-content"
                 size={4} />
               <div class="flex items-center gap-2">
-                <Link
-                  external
-                  href={pubkeyLink(event.pubkey)}
+                <Button
+                  on:click={openProfile}
                   class="text-sm font-bold"
                   style="color: {colorValue}">
                   {$profileDisplay}
-                </Link>
+                </Button>
               </div>
-            </Link>
+            </Button>
           {/if}
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>

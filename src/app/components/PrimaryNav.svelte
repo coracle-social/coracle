@@ -90,7 +90,7 @@
       <PrimaryNavItem title="Search" href="/people">
         <Avatar icon="magnifer" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Notes" href="/notes">
+      <PrimaryNavItem title="Notes" on:click={openNotes}>
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem

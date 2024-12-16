@@ -11,16 +11,16 @@
   import {isMobile} from "@lib/html"
   import LongPress from "@lib/components/LongPress.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, tagRoom, pubkeyLink, PROTECTED} from "@app/state"
+  import {colors, tagRoom, PROTECTED} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -38,6 +38,8 @@
   const reply = () => replyTo(event)
 
   const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event})
+
+  const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -61,22 +63,18 @@
   class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left">
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
-      <Link external href={pubkeyLink(event.pubkey)} class="flex items-start">
+      <Button on:click={openProfile} class="flex items-start">
         <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
-      </Link>
+      </Button>
     {:else}
       <div class="w-8 min-w-8 max-w-8" />
     {/if}
     <div class="min-w-0 flex-grow pr-1">
       {#if showPubkey}
         <div class="flex items-center gap-2">
-          <Link
-            external
-            href={pubkeyLink(event.pubkey)}
-            class="text-sm font-bold"
-            style="color: {colorValue}">
+          <Button on:click={openProfile} class="text-sm font-bold" style="color: {colorValue}">
             {$profileDisplay}
-          </Link>
+          </Button>
           <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}

@@ -120,8 +120,8 @@
     </div>
     <div class="grid grid-cols-3 gap-2">
       <Link href={threadsPath} class="btn btn-primary">
-        <Icon icon="notes-minimalistic" />
-        <div class="relative">
+        <div class="relative flex items-center gap-2">
+          <Icon icon="notes-minimalistic" />
           Threads
           {#if $notifications.has(threadsPath)}
             <div
@@ -133,12 +133,12 @@
       {#each $userRooms as room (room)}
         {@const roomPath = makeRoomPath(url, room)}
         <Link href={roomPath} class="btn btn-neutral">
-          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
-            <Icon icon="lock" size={4} />
-          {:else}
-            <Icon icon="hashtag" />
-          {/if}
-          <div class="relative">
+          <div class="relative flex min-w-0 items-center gap-2 overflow-hidden">
+            {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+              <Icon icon="lock" size={4} />
+            {:else}
+              <Icon icon="hashtag" />
+            {/if}
             <ChannelName {url} {room} />
             {#if $notifications.has(roomPath)}
               <div
@@ -150,12 +150,14 @@
       {/each}
       {#each $otherRooms as room (room)}
         <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
-          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
-            <Icon icon="lock" size={4} />
-          {:else}
-            <Icon icon="hashtag" />
-          {/if}
-          <ChannelName {url} {room} />
+          <div class="relative flex min-w-0 items-center gap-2 overflow-hidden">
+            {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+              <Icon icon="lock" size={4} />
+            {:else}
+              <Icon icon="hashtag" />
+            {/if}
+            <ChannelName {url} {room} />
+          </div>
         </Link>
       {/each}
       <Button on:click={addRoom} class="btn btn-neutral">

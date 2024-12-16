@@ -1,14 +1,17 @@
 <script lang="ts">
   import {displayProfile} from "@welshman/util"
   import {deriveProfile} from "@welshman/app"
-  import Link from "@lib/components/Link.svelte"
-  import {pubkeyLink} from "@app/state"
+  import Button from "@lib/components/Button.svelte"
+  import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {pushModal} from "@app/modal"
 
   export let value
 
   const profile = deriveProfile(value.pubkey)
+
+  const openProfile = () => pushModal(ProfileDetail, {pubkey: value.pubkey})
 </script>
 
-<Link external href={pubkeyLink(value.pubkey)} class="link-content">
+<Button on:click={openProfile} class="link-content">
   @{displayProfile($profile)}
-</Link>
+</Button>
