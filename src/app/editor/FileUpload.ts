@@ -367,7 +367,7 @@ export async function uploadBlossom(options: BlossomOptions) {
   const hash = await options.hash(options.file)
   const event = await options.sign({
     kind: 24242,
-    content: `Upload ${options.file.name}`,
+    content: `Upload ${encodeURIComponent(options.file.name)}`,
     created_at,
     tags: [
       ["t", "upload"],
