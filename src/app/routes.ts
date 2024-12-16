@@ -15,8 +15,15 @@ export const makeChatPath = (pubkeys: string[]) => `/chat/${makeChatId(pubkeys)}
 
 export const makeRoomPath = (url: string, room: string) => `/spaces/${encodeRelay(url)}/${room}`
 
-export const makeThreadPath = (url: string, eventId: string) =>
-  `/spaces/${encodeRelay(url)}/threads/${eventId}`
+export const makeThreadPath = (url: string, eventId?: string) => {
+  let path = `/spaces/${encodeRelay(url)}/threads`
+
+  if (eventId) {
+    path += "/" + eventId
+  }
+
+  return path
+}
 
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 

@@ -53,6 +53,7 @@ import {
   makeRouter,
   tracker,
   makeTrackerStore,
+  makeRepositoryStore,
   relay,
   getSession,
   getSigner,
@@ -208,6 +209,8 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
 export const trackerStore = makeTrackerStore()
 
+export const repositoryStore = makeRepositoryStore()
+
 export const deriveEvent = (idOrAddress: string, hints: string[] = []) => {
   let attempted = false
 
@@ -251,7 +254,7 @@ export const getUrlsForEvent = derived([trackerStore, thunks], ([$tracker, $thun
   }
 })
 
-export const getEventsForUrl = (url: string, filters: Filter[]) => {
+export const getEventsForUrl = (repository: Repository, url: string, filters: Filter[]) => {
   const $getUrlsForEvent = get(getUrlsForEvent)
   const $events = repository.query(filters)
 
@@ -604,10 +607,15 @@ export const userMembership = withGetter(
 
 export const userRoomsByUrl = withGetter(
   derived(userMembership, $userMembership => {
+    const tags = getListTags($userMembership)
     const $userRoomsByUrl = new Map<string, Set<string>>()
 
-    for (const [_, room, url] of getGroupTags(getListTags($userMembership))) {
+    for (const [_, room, url] of getGroupTags(tags)) {
       addToMapKey($userRoomsByUrl, url, room)
+    }
+
+    for (const url of getRelayTagValues(tags)) {
+      addToMapKey($userRoomsByUrl, url, GENERAL)
     }
 
     return $userRoomsByUrl
@@ -616,7 +624,7 @@ export const userRoomsByUrl = withGetter(
 
 export const deriveUserRooms = (url: string) =>
   derived(userRoomsByUrl, $userRoomsByUrl =>
-    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || []).concat(GENERAL))),
+    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || []))),
   )
 
 export const deriveOtherRooms = (url: string) =>

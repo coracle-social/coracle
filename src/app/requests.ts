@@ -4,7 +4,7 @@ import {MESSAGE, DELETE, THREAD, COMMENT} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
 import {SubscriptionEvent} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, load, pull, hasNegentropy} from "@welshman/app"
+import {subscribe, repository, load, pull, hasNegentropy} from "@welshman/app"
 import {userRoomsByUrl, LEGACY_MESSAGE, GENERAL, getEventsForUrl} from "@app/state"
 
 // Utils
@@ -16,7 +16,7 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   // Since pulling from relays without negentropy is expensive, limit how many
   // duplicates we repeatedly download
   for (const url of dumb) {
-    const events = getEventsForUrl(url, filters)
+    const events = getEventsForUrl(repository, url, filters)
 
     if (events.length > 100) {
       filters = filters.map(assoc("since", events[10]!.created_at))

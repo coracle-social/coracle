@@ -5,8 +5,15 @@ import {repository, pubkey} from "@welshman/app"
 import {prop, max, sortBy, assoc, lt, now} from "@welshman/lib"
 import type {Filter, TrustedEvent} from "@welshman/util"
 import {DIRECT_MESSAGE, MESSAGE, THREAD, COMMENT} from "@welshman/util"
-import {makeSpacePath} from "@app/routes"
-import {LEGACY_THREAD, deriveEventsForUrl, getMembershipUrls, userMembership} from "@app/state"
+import {makeSpacePath, makeThreadPath, makeRoomPath} from "@app/routes"
+import {
+  LEGACY_THREAD,
+  getEventsForUrl,
+  deriveEventsForUrl,
+  getMembershipUrls,
+  userRoomsByUrl,
+  repositoryStore,
+} from "@app/state"
 
 // Checked state
 
@@ -62,17 +69,30 @@ export const deriveNotification = (path: string, filters: Filter[], url?: string
 }
 
 export const spacesNotifications = derived(
-  [pubkey, checked, userMembership, deriveEvents(repository, {filters: SPACE_FILTERS})],
-  ([$pubkey, $checked, $userMembership, $events]) => {
-    return getMembershipUrls($userMembership)
-      .filter(url => {
-        const path = makeSpacePath(url)
-        const lastChecked = max([$checked["*"], $checked[path]])
-        const [latestEvent] = sortBy($e => -$e.created_at, $events)
+  [pubkey, checked, userRoomsByUrl, repositoryStore],
+  ([$pubkey, $checked, $userRoomsByUrl, $repository]) => {
+    const hasNotification = (url: string, path: string, filters: Filter[]) => {
+      const lastChecked = max([$checked["*"], $checked[path]])
+      const events = getEventsForUrl($repository, url, filters)
 
-        return latestEvent?.pubkey !== $pubkey && lt(lastChecked, latestEvent?.created_at)
+      return getNotification($pubkey, lastChecked, events)
+    }
+
+    return Array.from($userRoomsByUrl.entries())
+      .filter(([url, rooms]) => {
+        if (hasNotification(url, makeThreadPath(url), THREAD_FILTERS)) {
+          return true
+        }
+
+        for (const room of rooms) {
+          if (hasNotification(url, makeRoomPath(url, room), [{kinds: [MESSAGE], "#h": [room]}])) {
+            return true
+          }
+        }
+
+        return false
       })
-      .map(url => makeSpacePath(url))
+      .map(([url]) => makeSpacePath(url))
   },
 )
 
