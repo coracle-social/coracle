@@ -52,7 +52,6 @@
   import {subscribePersistent, listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
-  import {checked} from "@app/notifications"
   import * as notifications from "@app/notifications"
   import * as state from "@app/state"
 
@@ -143,7 +142,6 @@
       ready = initStorage("flotilla", 4, {
         relays: {keyPath: "url", store: throttled(3000, relays)},
         handles: {keyPath: "nip05", store: throttled(3000, handles)},
-        checked: storageAdapters.fromObjectStore(checked, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
           throttle: 3000,
           migrate: migrateFreshness,

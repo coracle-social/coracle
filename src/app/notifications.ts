@@ -1,4 +1,5 @@
-import {writable, derived} from "svelte/store"
+import {derived} from "svelte/store"
+import {synced} from "@welshman/store"
 import {pubkey} from "@welshman/app"
 import {prop, sortBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
@@ -15,7 +16,7 @@ import {
 
 // Checked state
 
-export const checked = writable<Record<string, number>>({})
+export const checked = synced<Record<string, number>>("checked", {})
 
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
