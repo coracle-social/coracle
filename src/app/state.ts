@@ -40,7 +40,14 @@ import {
   asDecryptedEvent,
   normalizeRelayUrl,
 } from "@welshman/util"
-import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
+import type {
+  TrustedEvent,
+  Repository,
+  SignedEvent,
+  PublishedList,
+  List,
+  Filter,
+} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
 import {
   pubkey,
@@ -63,7 +70,7 @@ import {
   thunks,
   walkThunks,
 } from "@welshman/app"
-import type {Thunk} from "@welshman/app"
+import type {Thunk, Relay} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
@@ -106,6 +113,13 @@ export const DUFFLEPUD_URL = "https://dufflepud.onrender.com"
 export const IMGPROXY_URL = "https://imgproxy.coracle.social"
 
 export const REACTION_KINDS = [REACTION, ZAP_RESPONSE]
+
+export const THREAD_FILTER: Filter = {kinds: [THREAD, LEGACY_THREAD]}
+
+export const COMMENT_FILTER: Filter = {
+  kinds: [COMMENT],
+  "#K": [String(THREAD), String(LEGACY_THREAD)],
+}
 
 export const NIP46_PERMS =
   "nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt," +

@@ -3,7 +3,7 @@
   import PrimaryNavItem from "@lib/components/PrimaryNavItem.svelte"
   import SpaceAvatar from "@app/components/SpaceAvatar.svelte"
   import {makeSpacePath} from "@app/routes"
-  import {spacesNotifications} from "@app/notifications"
+  import {notifications} from "@app/notifications"
 
   export let url
 
@@ -14,6 +14,6 @@
   title={displayRelayUrl(url)}
   href={path}
   class="tooltip-right"
-  notification={$spacesNotifications.includes(path)}>
+  notification={$notifications.has(path)}>
   <SpaceAvatar {url} />
 </PrimaryNavItem>

@@ -3,7 +3,7 @@
   import {derived} from "svelte/store"
   import {page} from "$app/stores"
   import {sortBy, min, nthEq, sleep} from "@welshman/lib"
-  import {getListTags, getPubkeyTagValues, THREAD, COMMENT} from "@welshman/util"
+  import {getListTags, getPubkeyTagValues} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {createFeedController, userMutes} from "@welshman/app"
@@ -16,15 +16,14 @@
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
   import ThreadCreate from "@app/components/ThreadCreate.svelte"
-  import {LEGACY_THREAD, decodeRelay, deriveEventsForUrl} from "@app/state"
-  import {THREAD_FILTERS, setChecked} from "@app/notifications"
+  import {THREAD_FILTER, COMMENT_FILTER, decodeRelay, deriveEventsForUrl} from "@app/state"
+  import {setChecked} from "@app/notifications"
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const threads = deriveEventsForUrl(url, [{kinds: [THREAD, LEGACY_THREAD]}])
-  const comments = deriveEventsForUrl(url, [
-    {kinds: [COMMENT], "#K": [String(THREAD), String(LEGACY_THREAD)]},
-  ])
+  const feeds = feedsFromFilters([THREAD_FILTER, COMMENT_FILTER])
+  const threads = deriveEventsForUrl(url, [THREAD_FILTER])
+  const comments = deriveEventsForUrl(url, [COMMENT_FILTER])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
 
   const events = throttled(
@@ -51,7 +50,7 @@
 
   const ctrl = createFeedController({
     useWindowing: true,
-    feed: makeIntersectionFeed(makeRelayFeed(url), feedsFromFilters(THREAD_FILTERS)),
+    feed: makeIntersectionFeed(makeRelayFeed(url), feeds),
     onExhausted: () => {
       loading = false
     },

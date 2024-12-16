@@ -22,7 +22,7 @@
     deriveUserRooms,
     deriveOtherRooms,
   } from "@app/state"
-  import {deriveNotification, THREAD_FILTERS} from "@app/notifications"
+  import {notifications} from "@app/notifications"
   import {pullConservatively} from "@app/requests"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
@@ -30,7 +30,6 @@
   export let url
 
   const threadsPath = makeSpacePath(url, "threads")
-  const threadsNotification = deriveNotification(threadsPath, THREAD_FILTERS, url)
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
 
@@ -114,7 +113,7 @@
       <SecondaryNavItem href={makeSpacePath(url)}>
         <Icon icon="home-smile" /> Home
       </SecondaryNavItem>
-      <SecondaryNavItem href={threadsPath} notification={$threadsNotification}>
+      <SecondaryNavItem href={threadsPath} notification={$notifications.has(threadsPath)}>
         <Icon icon="notes-minimalistic" /> Threads
       </SecondaryNavItem>
       <div class="h-2" />

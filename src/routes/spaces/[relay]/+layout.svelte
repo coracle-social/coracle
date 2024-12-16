@@ -13,7 +13,7 @@
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
   import {decodeRelay} from "@app/state"
-  import {spacesNotifications} from "@app/notifications"
+  import {notifications} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
 
@@ -35,7 +35,7 @@
 
   // We have to watch this one, since on mobile the badge will be visible when active
   $: {
-    if ($spacesNotifications.includes($page.url.pathname)) {
+    if ($notifications.has($page.url.pathname)) {
       setChecked($page.url.pathname)
     }
   }

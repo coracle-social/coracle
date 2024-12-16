@@ -17,20 +17,22 @@
     PLATFORM_LOGO,
   } from "@app/state"
   import {pushModal} from "@app/modal"
-  import {deriveNotification, inactiveSpacesNotifications, CHAT_FILTERS} from "@app/notifications"
-
-  const chatNotification = deriveNotification("/chat", CHAT_FILTERS)
+  import {makeSpacePath} from "@app/routes"
+  import {notifications, inactiveNotifications} from "@app/notifications"
 
   const addSpace = () => pushModal(SpaceAdd)
 
-  const showSpacesMenu = () =>
-    getMembershipUrls($userMembership).length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd)
+  const showSpacesMenu = () => (spacePaths.length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd))
 
   const showSettingsMenu = () => pushModal(MenuSettings)
 
   const openNotes = () => ($canDecrypt ? goto("/notes") : pushModal(ChatEnable, {next: "/notes"}))
 
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
+
+  $: spaceUrls = getMembershipUrls($userMembership)
+  $: spacePaths = spaceUrls.map(url => makeSpacePath(url))
+  $: anySpaceNotifications = spacePaths.some(path => $inactiveNotifications.has(path))
 </script>
 
 <div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
@@ -43,7 +45,7 @@
           <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
         </PrimaryNavItem>
         <Divider />
-        {#each getMembershipUrls($userMembership) as url (url)}
+        {#each spaceUrls as url (url)}
           <PrimaryNavItemSpace {url} />
         {/each}
         <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
@@ -66,7 +68,7 @@
         title="Messages"
         on:click={openChat}
         class="tooltip-right"
-        notification={$chatNotification}>
+        notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem title="Search" href="/people" class="tooltip-right">
@@ -88,13 +90,13 @@
       <PrimaryNavItem title="Notes" href="/notes">
         <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Messages" on:click={openChat} notification={$chatNotification}>
+      <PrimaryNavItem
+        title="Messages"
+        on:click={openChat}
+        notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem
-        title="Spaces"
-        on:click={showSpacesMenu}
-        notification={$inactiveSpacesNotifications.length > 0}>
+      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu} notification={anySpaceNotifications}>
         <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
