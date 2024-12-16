@@ -2,6 +2,7 @@
   import {page} from "$app/stores"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
+  import {fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -25,12 +26,14 @@
     getMembershipUrls,
   } from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
+  import {notifications} from "@app/notifications"
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
+  const threadsPath = makeSpacePath(url, "threads")
 
   const joinSpace = () => pushModal(SpaceJoin, {url})
 
@@ -116,17 +119,33 @@
       {/if}
     </div>
     <div class="grid grid-cols-3 gap-2">
-      <Link href={makeSpacePath(url, "threads")} class="btn btn-primary">
-        <Icon icon="notes-minimalistic" /> Threads
+      <Link href={threadsPath} class="btn btn-primary">
+        <Icon icon="notes-minimalistic" />
+        <div class="relative">
+          Threads
+          {#if $notifications.has(threadsPath)}
+            <div
+              class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary-content"
+              transition:fade />
+          {/if}
+        </div>
       </Link>
       {#each $userRooms as room (room)}
-        <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
+        {@const roomPath = makeRoomPath(url, room)}
+        <Link href={roomPath} class="btn btn-neutral">
           {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
             <Icon icon="lock" size={4} />
           {:else}
             <Icon icon="hashtag" />
           {/if}
-          <ChannelName {url} {room} />
+          <div class="relative">
+            <ChannelName {url} {room} />
+            {#if $notifications.has(roomPath)}
+              <div
+                class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary"
+                transition:fade />
+            {/if}
+          </div>
         </Link>
       {/each}
       {#each $otherRooms as room (room)}

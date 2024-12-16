@@ -1,6 +1,6 @@
 import type {Unsubscriber} from "svelte/store"
 import {sleep, partition, assoc, now} from "@welshman/lib"
-import {MESSAGE, DELETE, THREAD, COMMENT} from "@welshman/util"
+import {MESSAGE, REACTION, DELETE, THREAD, COMMENT} from "@welshman/util"
 import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
 import {SubscriptionEvent} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
@@ -93,14 +93,15 @@ export const listenForNotifications = () => {
 export const listenForChannelMessages = (url: string, room: string) => {
   const since = now()
   const relays = [url]
+  const kinds = [MESSAGE, REACTION, DELETE]
   const legacyRoom = room === GENERAL ? "general" : room
 
   // Load legacy immediate so our request doesn't get rejected by nip29 relays
   load({relays, filters: [{kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]}], delay: 0})
 
   // Load historical state with negentropy if available
-  pullConservatively({relays, filters: [{kinds: [MESSAGE, DELETE], "#h": [room]}]})
+  pullConservatively({relays, filters: [{kinds, "#h": [room]}]})
 
   // Listen for new messages
-  return subscribePersistent({relays, filters: [{kinds: [MESSAGE, DELETE], "#h": [room], since}]})
+  return subscribePersistent({relays, filters: [{kinds, "#h": [room], since}]})
 }

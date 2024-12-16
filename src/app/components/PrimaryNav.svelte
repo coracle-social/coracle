@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -18,7 +19,7 @@
   } from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
-  import {notifications, inactiveNotifications} from "@app/notifications"
+  import {notifications} from "@app/notifications"
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -32,7 +33,9 @@
 
   $: spaceUrls = getMembershipUrls($userMembership)
   $: spacePaths = spaceUrls.map(url => makeSpacePath(url))
-  $: anySpaceNotifications = spacePaths.some(path => $inactiveNotifications.has(path))
+  $: anySpaceNotifications = spacePaths.some(
+    path => !$page.url.pathname.startsWith(path) && $notifications.has(path),
+  )
 </script>
 
 <div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">

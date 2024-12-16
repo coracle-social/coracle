@@ -1,7 +1,6 @@
 import {writable, derived} from "svelte/store"
-import {page} from "$app/stores"
 import {pubkey} from "@welshman/app"
-import {prop, max, sortBy, now} from "@welshman/lib"
+import {prop, sortBy, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {MESSAGE} from "@welshman/util"
 import {makeSpacePath, makeChatPath, makeThreadPath, makeRoomPath} from "@app/routes"
@@ -20,8 +19,7 @@ export const checked = writable<Record<string, number>>({})
 
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
-export const setChecked = (key: string) =>
-  checked.update(state => ({...state, [key]: now()}))
+export const setChecked = (key: string) => checked.update(state => ({...state, [key]: now()}))
 
 // Derived notifications state
 
@@ -35,15 +33,15 @@ export const notifications = derived(
         return false
       }
 
-      let checkPath = ""
-      let lastChecked = $checked["*"]
+      for (const [entryPath, ts] of Object.entries($checked)) {
+        const isMatch = entryPath === "*" || entryPath.startsWith(path)
 
-      for (const segment of path.slice(1).split("/")) {
-        checkPath += "/" + segment
-        lastChecked = max([lastChecked, $checked[checkPath]])
+        if (isMatch && ts > latestEvent.created_at) {
+          return false
+        }
       }
 
-      return lastChecked < latestEvent.created_at
+      return true
     }
 
     const paths = new Set<string>()
@@ -82,10 +80,4 @@ export const notifications = derived(
 
     return paths
   },
-)
-
-export const inactiveNotifications = derived(
-  [page, notifications],
-  ([$page, $notifications]) =>
-    new Set(Array.from($notifications).filter(path => !$page.url.pathname.startsWith(path))),
 )
