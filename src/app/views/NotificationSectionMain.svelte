@@ -7,7 +7,7 @@
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import {mainNotifications, setChecked, unreadMainNotifications} from "src/engine"
+  import {mainNotifications, setChecked} from "src/engine"
 
   export let limit
 
@@ -35,21 +35,9 @@
   })
 
   onMount(() => {
-    const tracked = new Set()
     setChecked(["replies", "mentions"])
 
-    const unsub = unreadMainNotifications.subscribe(async events => {
-      const untracked = events.filter(e => !tracked.has(e.id))
-
-      if (untracked.length > 0) {
-        for (const id of untracked) {
-          tracked.add(id)
-        }
-      }
-    })
-
     return () => {
-      unsub()
       setChecked(["replies", "mentions"])
     }
   })

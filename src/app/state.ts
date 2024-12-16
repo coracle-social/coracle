@@ -19,7 +19,6 @@ import {
   env,
   load,
   loadPubkeys,
-  loadSeen,
   loadDeletes,
   loadHandlers,
   loadMessages,
@@ -28,8 +27,8 @@ import {
   listenForNotifications,
   userFeedFavorites,
   getSetting,
+  setChecked,
 } from "src/engine"
-// import {setChecked} from "src/domain/notifications"
 
 export const drafts = new Map<string, string>()
 
@@ -92,7 +91,6 @@ export const loadUserData = async (hints: string[] = []) => {
   loadPubkeys([env.PLATFORM_PUBKEY])
 
   // Load anything they might need to be notified about
-  loadSeen()
   loadMessages()
   loadNotifications()
   loadFeedsAndLists()
@@ -105,5 +103,5 @@ export const loadUserData = async (hints: string[] = []) => {
 
 export const boot = () => {
   router.at("login/connect").open({noEscape: true, mini: true})
-  // setChecked(["*"])
+  setChecked(["*", "channels/*"])
 }

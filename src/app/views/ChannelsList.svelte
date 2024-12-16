@@ -3,6 +3,7 @@
   import {toTitle} from "hurdak"
   import {derived} from "svelte/store"
   import {signer} from "@welshman/app"
+  import {now} from "@welshman/lib"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -39,7 +40,7 @@
     }
   })
 
-  const markAllChannelsRead = () => setChecked($channels.map(c => c.id))
+  const markAllChannelsRead = () => setChecked(["channels/*"], now())
 
   document.title = "Direct Messages"
 </script>

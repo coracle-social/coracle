@@ -38,14 +38,13 @@ import {
   uniqTags,
 } from "@welshman/util"
 import crypto from "crypto"
-import {Fetch, seconds, sleep, tryFunc} from "hurdak"
+import {Fetch, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
   createAndPublish,
   getClientTags,
-  hasNip44,
   publish,
   sign,
   userFeedFavorites,

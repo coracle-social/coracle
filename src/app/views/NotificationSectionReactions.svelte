@@ -7,7 +7,7 @@
   import {formatTimestampAsDate} from "src/util/misc"
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationReactions from "src/app/views/NotificationReactions.svelte"
-  import {reactionNotifications, setChecked, unreadReactionNotifications} from "src/engine"
+  import {reactionNotifications, setChecked} from "src/engine"
 
   export let limit
 
@@ -33,21 +33,9 @@
   })
 
   onMount(() => {
-    const tracked = new Set()
     setChecked(["reactions", "zaps"])
 
-    const unsub = unreadReactionNotifications.subscribe(async events => {
-      const untracked = events.filter(e => !tracked.has(e.id))
-
-      if (untracked.length > 0) {
-        for (const id of untracked) {
-          tracked.add(id)
-        }
-      }
-    })
-
     return () => {
-      unsub()
       setChecked(["reactions", "zaps"])
     }
   })

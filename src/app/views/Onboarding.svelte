@@ -69,7 +69,7 @@
 
     // Start our notifications listener
     listenForNotifications()
-    setChecked(["*"])
+    setChecked(["*", "channels/*"])
   }
 
   onMount(async () => {

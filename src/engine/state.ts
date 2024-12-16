@@ -77,9 +77,6 @@ import {
   LOCAL_RELAY_URL,
   MUTES,
   NAMED_BOOKMARKS,
-  SEEN_CONTEXT,
-  SEEN_CONVERSATION,
-  SEEN_GENERAL,
   WRAP,
   asDecryptedEvent,
   createEvent,
@@ -229,7 +226,7 @@ unwrapper.addGlobalHandler(async (event: TrustedEvent) => {
   }
 })
 
-const decryptKinds = [SEEN_GENERAL, SEEN_CONTEXT, SEEN_CONVERSATION, APP_DATA, FOLLOWS, MUTES]
+const decryptKinds = [APP_DATA, FOLLOWS, MUTES]
 
 repository.on("update", ({added}: {added: TrustedEvent[]}) => {
   for (const event of added) {
@@ -376,7 +373,7 @@ export const deriveChecked = (key: string) => derived(checked, prop(key))
 
 export const getSeenAt = derived([checked], ([$checked]) => (key: string, event: TrustedEvent) => {
   const match = $checked[key]
-  const fallback = $checked["*"]
+  const fallback = $checked[key.includes("channels") ? "channels/*" : "*"]
   const ts = max([match, fallback])
 
   if (ts >= event.created_at) return ts
@@ -414,7 +411,7 @@ export const channels = derived(
       }
 
       chan.messages.push(e)
-      chan.last_checked = Math.max(chan.last_checked, $getSeenAt(id, e))
+      chan.last_checked = Math.max(chan.last_checked, $getSeenAt("channels/" + id, e))
 
       if (e.pubkey === $pubkey) {
         chan.last_sent = Math.max(chan.last_sent, e.created_at)
