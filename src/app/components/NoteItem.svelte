@@ -8,7 +8,6 @@
   import NoteCard from "@app/components/NoteCard.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
-  import {PROTECTED} from "@app/state"
 
   export let url
   export let event
@@ -19,12 +18,12 @@
     if (reaction) {
       publishDelete({relays: [url], event: reaction})
     } else {
-      publishReaction({event, content, tags: [PROTECTED], relays: [url]})
+      publishReaction({event, content, relays: [url]})
     }
   }
 
   const onEmoji = (emoji: NativeEmoji) =>
-    publishReaction({event, content: emoji.unicode, tags: [PROTECTED], relays: [url]})
+    publishReaction({event, content: emoji.unicode, relays: [url]})
 </script>
 
 <NoteCard {event} class="card2 bg-alt">

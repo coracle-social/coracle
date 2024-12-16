@@ -21,6 +21,7 @@ import {
   makeList,
   addToListPublicly,
   removeFromListByPredicate,
+  getTag,
   getListTags,
   getRelayTags,
   isShareableRelayUrl,
@@ -57,6 +58,7 @@ import {
 import type {Thunk} from "@welshman/app"
 import {
   tagRoom,
+  PROTECTED,
   userMembership,
   INDEXER_RELAYS,
   NIP46_PERMS,
@@ -426,14 +428,37 @@ export const sendWrapped = async ({
   )
 }
 
+export const makeDelete = ({event}: {event: TrustedEvent}) => {
+  const tags = [["k", String(event.kind)], ...tagEvent(event)]
+  const groupTag = getTag("h", event.tags)
+
+  if (groupTag) {
+    tags.push(PROTECTED)
+    tags.push(groupTag)
+  }
+
+  return createEvent(DELETE, {tags})
+}
+
+export const publishDelete = ({relays, event}: {relays: string[]; event: TrustedEvent}) =>
+  publishThunk({event: makeDelete({event}), relays})
+
 export type ReactionParams = {
   event: TrustedEvent
   content: string
-  tags?: string[][]
 }
 
-export const makeReaction = ({event, content, tags = []}: ReactionParams) =>
-  createEvent(REACTION, {content, tags: [...tags, ...tagReactionTo(event)]})
+export const makeReaction = ({event, content}: ReactionParams) => {
+  const tags = [["k", String(event.kind)], ...tagReactionTo(event)]
+  const groupTag = getTag("h", event.tags)
+
+  if (groupTag) {
+    tags.push(PROTECTED)
+    tags.push(groupTag)
+  }
+
+  return createEvent(REACTION, {content, tags})
+}
 
 export const publishReaction = ({relays, ...params}: ReactionParams & {relays: string[]}) =>
   publishThunk({event: makeReaction(params), relays})
@@ -472,9 +497,3 @@ export const makeComment = ({event, content, tags = []}: ReplyParams) => {
 
 export const publishComment = ({relays, ...params}: ReplyParams & {relays: string[]}) =>
   publishThunk({event: makeComment(params), relays})
-
-export const makeDelete = ({event}: {event: TrustedEvent}) =>
-  createEvent(DELETE, {tags: [["k", String(event.kind)], ...tagEvent(event)]})
-
-export const publishDelete = ({relays, event}: {relays: string[]; event: TrustedEvent}) =>
-  publishThunk({event: makeDelete({event}), relays})

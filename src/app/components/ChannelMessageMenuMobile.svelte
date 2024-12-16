@@ -8,20 +8,13 @@
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
-  import {tagRoom, PROTECTED} from "@app/state"
 
   export let url
-  export let room
   export let event
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()
-    publishReaction({
-      event,
-      relays: [url],
-      content: emoji.unicode,
-      tags: [tagRoom(room, url), PROTECTED],
-    })
+    publishReaction({event, relays: [url], content: emoji.unicode})
   }
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})

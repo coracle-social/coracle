@@ -15,8 +15,9 @@
   export let reactionClass = ""
   export let noTooltip = false
 
-  const filters = [{kinds: [REACTION], "#e": [event.id]}]
-  const reactions = deriveEvents(repository, {filters})
+  const reactions = deriveEvents(repository, {
+    filters: [{kinds: [REACTION], "#e": [event.id]}],
+  })
 
   $: groupedReactions = groupBy(
     e => e.content,
@@ -26,7 +27,7 @@
   onMount(() => {
     load({
       relays,
-      filters,
+      filters: [{kinds: [REACTION, DELETE], "#e": [event.id]}],
       onEvent: batch(300, (events: TrustedEvent[]) => {
         load({
           relays,

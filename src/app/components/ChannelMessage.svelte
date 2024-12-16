@@ -20,7 +20,7 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, tagRoom, PROTECTED} from "@app/state"
+  import {colors} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -47,12 +47,7 @@
     if (reaction) {
       publishDelete({relays: [url], event: reaction})
     } else {
-      publishReaction({
-        event,
-        content,
-        relays: [url],
-        tags: [tagRoom(room, url), PROTECTED],
-      })
+      publishReaction({event, content, relays: [url]})
     }
   }
 </script>
