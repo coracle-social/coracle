@@ -33,10 +33,10 @@
   })
 
   onMount(() => {
-    setChecked(["reactions", "zaps"])
+    setChecked("reactions/*")
 
     return () => {
-      setChecked(["reactions", "zaps"])
+      setChecked("reactions/*")
     }
   })
 </script>

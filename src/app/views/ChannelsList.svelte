@@ -40,7 +40,7 @@
     }
   })
 
-  const markAllChannelsRead = () => setChecked(["channels/*"], now())
+  const markAllChannelsRead = () => setChecked("channels/*", now())
 
   document.title = "Direct Messages"
 </script>

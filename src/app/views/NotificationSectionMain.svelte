@@ -35,10 +35,10 @@
   })
 
   onMount(() => {
-    setChecked(["replies", "mentions"])
+    setChecked("notes/*")
 
     return () => {
-      setChecked(["replies", "mentions"])
+      setChecked("notes/*")
     }
   })
 </script>

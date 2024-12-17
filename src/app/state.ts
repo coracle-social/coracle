@@ -103,5 +103,5 @@ export const loadUserData = async (hints: string[] = []) => {
 
 export const boot = () => {
   router.at("login/connect").open({noEscape: true, mini: true})
-  setChecked(["*", "channels/*"])
+  setChecked("*")
 }

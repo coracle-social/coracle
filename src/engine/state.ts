@@ -371,10 +371,8 @@ export const checked = writable<Record<string, number>>({})
 
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
-export const getSeenAt = derived([checked], ([$checked]) => (key: string, event: TrustedEvent) => {
-  const match = $checked[key]
-  const fallback = $checked[key.includes("channels") ? "channels/*" : "*"]
-  const ts = max([match, fallback])
+export const getSeenAt = derived([checked], ([$checked]) => (path: string, event: TrustedEvent) => {
+  const ts = max([$checked[path], $checked[path.split("/")[0] + "/*"], $checked["*"]])
 
   if (ts >= event.created_at) return ts
 

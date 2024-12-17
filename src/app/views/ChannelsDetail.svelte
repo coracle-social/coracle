@@ -34,7 +34,7 @@
     const sub = listenForMessages(pubkeys)
 
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
-    setChecked(["channels/" + channelId])
+    setChecked("channels/" + channelId)
 
     for (const pubkey of pubkeys) {
       loadInboxRelaySelections(pubkey)
@@ -46,7 +46,7 @@
   })
 
   onDestroy(() => {
-    setChecked(["channels/" + channelId])
+    setChecked("channels/" + channelId)
   })
 
   document.title = `Direct Messages`

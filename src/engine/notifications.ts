@@ -13,13 +13,8 @@ export const isSeen = derived(
   $getSeenAt => (key: string, event: TrustedEvent) => $getSeenAt(key, event) > 0,
 )
 
-export const setChecked = (keys: string[], ts = now()) =>
-  checked.update(state => {
-    keys.forEach(key => {
-      state = {...state, [key]: ts}
-    })
-    return state
-  })
+export const setChecked = (path: string, ts = now()) =>
+  checked.update(state => ({...state, [path]: ts}))
 
 // Notifications
 
@@ -37,7 +32,7 @@ export const mainNotifications = derived(
 )
 
 export const unreadMainNotifications = derived([isSeen, mainNotifications], ([$isSeen, events]) =>
-  events.filter(e => !$isSeen("replies", e) && !$isSeen("mentions", e)),
+  events.filter(e => !$isSeen("notes/*", e)),
 )
 
 export const hasNewNotifications = derived(
@@ -78,5 +73,5 @@ export const reactionNotifications = derived(
 
 export const unreadReactionNotifications = derived(
   [isSeen, reactionNotifications],
-  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions", e) && !$isSeen("zaps", e)),
+  ([$isSeen, events]) => events.filter(e => !$isSeen("reactions/*", e)),
 )
