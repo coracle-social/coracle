@@ -2,7 +2,6 @@ import type {Session} from "@welshman/app"
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
-  ensurePlaintext,
   getRelayUrls,
   inboxRelaySelectionsByPubkey,
   nip46Perms,
@@ -15,34 +14,16 @@ import {
   userInboxRelaySelections,
   userRelaySelections,
 } from "@welshman/app"
-import {
-  identity,
-  append,
-  cached,
-  ctx,
-  equals,
-  first,
-  groupBy,
-  indexBy,
-  last,
-  now,
-  nthEq,
-  nthNe,
-  remove,
-  splitAt,
-} from "@welshman/lib"
+import {identity, append, cached, ctx, groupBy, now, nthEq, remove} from "@welshman/lib"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
   Address,
-  DIRECT_MESSAGE,
   FEEDS,
   FOLLOWS,
   INBOX_RELAYS,
-  LOCAL_RELAY_URL,
   PROFILE,
   RELAYS,
-  SEEN_CONVERSATION,
   addToListPublicly,
   createEvent,
   createProfile,
@@ -57,26 +38,20 @@ import {
   uniqTags,
 } from "@welshman/util"
 import crypto from "crypto"
-import {Fetch, seconds, sleep, tryFunc} from "hurdak"
+import {Fetch, sleep, tryFunc} from "hurdak"
 import {assoc, flatten, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
-  channels,
   createAndPublish,
-  getChannelIdFromEvent,
-  getChannelSeenKey,
   getClientTags,
-  hasNip44,
   publish,
   sign,
   userFeedFavorites,
-  userSeenStatusEvents,
   withIndexers,
 } from "src/engine/state"
-import {sortEventsDesc} from "src/engine/utils"
 import {blobToFile, stripExifData} from "src/util/html"
-import {joinPath, parseJson} from "src/util/misc"
+import {joinPath} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {get} from "svelte/store"
 
@@ -367,47 +342,6 @@ export const joinRelay = async (url: string, claim?: string) => {
   }
 }
 
-// Read receipts
-
-export const markAsSeen = async (kind: number, eventsByKey: Record<string, TrustedEvent[]>) => {
-  if (!get(hasNip44) || Object.entries(eventsByKey).length === 0) {
-    return
-  }
-
-  const cutoff = now() - seconds(180, "day")
-  const prev = get(userSeenStatusEvents).find(e => e.kind === kind)
-  const prevTags = prev ? parseJson(await ensurePlaintext(prev))?.filter?.(nthNe(1, "*")) : []
-  const data = indexBy(t => t[1], prevTags || [])
-
-  for (const [key, events] of Object.entries(eventsByKey)) {
-    if (events.length === 0) {
-      continue
-    }
-
-    const [newer, older] = splitAt(1, sortEventsDesc(events))
-    const ts = first(older)?.created_at || last(newer).created_at - seconds(3, "hour")
-
-    if (ts >= cutoff) {
-      data.set(key, ["seen", key, String(ts), ...newer.map(e => e.id)])
-    } else {
-      data.delete(key)
-    }
-  }
-
-  const tags = Array.from(data.values())
-
-  if (equals(tags, prevTags)) {
-    return
-  }
-
-  // Wait until after comparing for equality to add our current timestamp
-  const json = JSON.stringify([...tags, ["seen", "*", String(cutoff)]])
-  // const relays = ctx.app.router.FromUser().getUrls()
-  const content = await signer.get().nip44.encrypt(pubkey.get(), json)
-
-  await createAndPublish({kind, content, relays: [LOCAL_RELAY_URL]})
-}
-
 // Messages
 
 export const sendMessage = async (channelId: string, content: string, delay: number) => {
@@ -435,34 +369,6 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     })
   }
 }
-
-export const markChannelsRead = (ids: Set<string>) => {
-  const $pubkey = pubkey.get()
-  const eventsByKey = {}
-
-  for (const {id, last_sent = 0, last_received = 0, last_checked = 0} of get(channels)) {
-    if (!ids.has(id) || Math.max(last_sent, last_checked) > last_received) {
-      continue
-    }
-
-    const members = id.split(",")
-    const key = getChannelSeenKey(id)
-    const since = Math.max(last_sent, last_checked)
-    const events = repository
-      .query([{kinds: [4, DIRECT_MESSAGE], authors: members, "#p": members, since}])
-      .filter(e => getChannelIdFromEvent(e) === id && e.pubkey !== $pubkey)
-
-    if (events.length > 0) {
-      eventsByKey[key] = events
-    }
-  }
-
-  markAsSeen(SEEN_CONVERSATION, eventsByKey)
-}
-
-export const markAllChannelsRead = () => markChannelsRead(new Set(get(channels).map(c => c.id)))
-
-export const markChannelRead = (id: string) => markChannelsRead(new Set([id]))
 
 // Session/login
 

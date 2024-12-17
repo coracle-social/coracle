@@ -3,11 +3,11 @@
   import {derived} from "svelte/store"
   import {max, ago, int, HOUR, pushToMapKey} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getAncestorTagValues, SEEN_GENERAL} from "@welshman/util"
+  import {getAncestorTagValues} from "@welshman/util"
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
-  import {mainNotifications, unreadMainNotifications, markAsSeen} from "src/engine"
+  import {mainNotifications, setChecked} from "src/engine"
 
   export let limit
 
@@ -34,31 +34,12 @@
     })
   })
 
-  let loading = false
-
   onMount(() => {
-    const tracked = new Set()
+    setChecked("notes/*")
 
-    const unsub = unreadMainNotifications.subscribe(async events => {
-      const untracked = events.filter(e => !tracked.has(e.id))
-
-      if (!loading && untracked.length > 0) {
-        for (const id of untracked) {
-          tracked.add(id)
-        }
-
-        loading = true
-
-        await markAsSeen(SEEN_GENERAL, {
-          mentions: $mainNotifications,
-          replies: $mainNotifications,
-        })
-
-        loading = false
-      }
-    })
-
-    return unsub
+    return () => {
+      setChecked("notes/*")
+    }
   })
 </script>
 

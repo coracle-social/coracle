@@ -26,9 +26,6 @@ import {
   LABEL,
   DELETE,
   FEED,
-  SEEN_CONVERSATION,
-  SEEN_GENERAL,
-  SEEN_CONTEXT,
   NAMED_BOOKMARKS,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
@@ -287,17 +284,6 @@ export const loadDeletes = () =>
     skipCache: true,
     forcePlatform: false,
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
-  })
-
-export const loadSeen = () =>
-  load({
-    skipCache: true,
-    filters: [
-      addSinceToFilter({
-        kinds: [SEEN_CONVERSATION, SEEN_GENERAL, SEEN_CONTEXT],
-        authors: [pubkey.get()],
-      }),
-    ],
   })
 
 export const loadFeedsAndLists = () =>

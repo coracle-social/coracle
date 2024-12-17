@@ -3,6 +3,7 @@
   import {toTitle} from "hurdak"
   import {derived} from "svelte/store"
   import {signer} from "@welshman/app"
+  import {now} from "@welshman/lib"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -11,7 +12,7 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages, markAllChannelsRead} from "src/engine"
+  import {channels, hasNewMessages, setChecked} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {
@@ -38,6 +39,8 @@
       scroller.stop()
     }
   })
+
+  const markAllChannelsRead = () => setChecked("channels/*", now())
 
   document.title = "Direct Messages"
 </script>
