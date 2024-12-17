@@ -64,7 +64,7 @@ import {
   ConnectionEvent,
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
+import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
 import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
 import {
   APP_DATA,
@@ -149,6 +149,8 @@ export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWi
 export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
+
+export const canDecrypt = synced("canDecrypt", false)
 
 // Plaintext
 
@@ -236,7 +238,9 @@ repository.on("update", ({added}: {added: TrustedEvent[]}) => {
     }
 
     if (event.kind === WRAP) {
-      unwrapper.push(event)
+      if (get(canDecrypt)) {
+        unwrapper.push(event)
+      }
     }
   }
 })
