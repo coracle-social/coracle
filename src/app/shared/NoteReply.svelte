@@ -39,16 +39,17 @@
     send({skipNsecWarning: true})
   }
 
-  const closeOptions = () => {
-    showOptions = false
-  }
-
   const openOptions = () => {
     showOptions = true
   }
 
-  const setOpts = e => {
-    opts = {...opts, ...e.detail}
+  const closeOptions = () => {
+    showOptions = false
+  }
+
+  const setOpts = values => {
+    opts = {...opts, ...values}
+    showOptions = false
   }
 
   const saveDraft = () => {
@@ -143,9 +144,9 @@
     class="relative transition-colors"
     class:opacity-50={loading}
     class:pointer-events-none={loading}>
-    <!-- {#if showBorder}
+    {#if showBorder}
       <AltColor background class="absolute -top-4 z-none h-5 w-1" />
-    {/if} -->
+    {/if}
     <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>

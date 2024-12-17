@@ -5,7 +5,7 @@
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {ctx, nth, nthEq, remove, last, sortBy} from "@welshman/lib"
+  import {ctx, nth, nthEq, remove, last, sortBy, uniqBy, prop, identity} from "@welshman/lib"
   import {
     deriveZapper,
     deriveZapperForPubkey,
@@ -14,6 +14,7 @@
     tagReactionTo,
     tagZapSplit,
     mute,
+    pubkey,
     unmute,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
@@ -67,9 +68,10 @@
     sessionWithMeta,
     userMutes,
     sortEventsDesc,
+    load,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
-  import {drafts, openReplies} from "src/app/state"
+  import {openReplies} from "src/app/state"
   import {isLike} from "src/util/nostr"
 
   export let event: TrustedEvent
@@ -280,7 +282,7 @@
   })
 </script>
 
-{#if event.created_at > $timestamp1 - 45 && event.pubkey === $session?.pubkey}
+{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey}
   <NotePending {event} />
 {:else}
   <button
