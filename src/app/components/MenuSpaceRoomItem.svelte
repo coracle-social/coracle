@@ -2,7 +2,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
-  import {makeSpacePath} from "@app/routes"
+  import {makeRoomPath} from "@app/routes"
   import {deriveChannel, channelIsLocked} from "@app/state"
   import {notifications} from "@app/notifications"
 
@@ -10,7 +10,7 @@
   export let room
   export let notify = false
 
-  const path = makeSpacePath(url, room)
+  const path = makeRoomPath(url, room)
   const channel = deriveChannel(url, room)
 </script>
 

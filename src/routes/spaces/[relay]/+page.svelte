@@ -131,25 +131,23 @@
       </Link>
       {#each $userRooms as room (room)}
         {@const roomPath = makeRoomPath(url, room)}
-        <Link href={roomPath} class="btn btn-neutral">
-          <div class="relative flex min-w-0 items-center gap-2 overflow-hidden">
+        <Link href={roomPath} class="btn btn-neutral relative">
+          <div class="flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
             {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
               <Icon icon="lock" size={4} />
             {:else}
               <Icon icon="hashtag" />
             {/if}
             <ChannelName {url} {room} />
-            {#if $notifications.has(roomPath)}
-              <div
-                class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary"
-                transition:fade />
-            {/if}
           </div>
+          {#if $notifications.has(roomPath)}
+            <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" transition:fade />
+          {/if}
         </Link>
       {/each}
       {#each $otherRooms as room (room)}
         <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
-          <div class="relative flex min-w-0 items-center gap-2 overflow-hidden">
+          <div class="relative flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
             {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
               <Icon icon="lock" size={4} />
             {:else}
