@@ -10,9 +10,10 @@
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Content from "src/partials/Content.svelte"
+  import ChatEnable from "src/partials/ChatEnable.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages, setChecked} from "src/engine"
+  import {canDecrypt, channels, hasNewMessages, setChecked} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {
@@ -80,3 +81,7 @@
     <Content size="lg" class="text-center">No messages found.</Content>
   {/each}
 </FlexColumn>
+
+{#if !$canDecrypt}
+  <ChatEnable />
+{/if}
