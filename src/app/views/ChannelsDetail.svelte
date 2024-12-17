@@ -61,7 +61,7 @@
           href={"/channels" + (isAccepted ? "" : "/requests")} />
         <PersonCircles {pubkeys} />
       </div>
-      <div class:h-16={pubkeys.length == 1} class="flex flex-col items-start overflow-hidden pt-2">
+      <div class:h-16={pubkeys.length === 1} class="flex flex-col items-start overflow-hidden pt-2">
         <div>
           {#each pubkeys as pubkey, i (pubkey)}
             {#if i > 0}&bullet;{/if}
