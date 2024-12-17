@@ -9,6 +9,7 @@
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {createEvent, MESSAGE} from "@welshman/util"
+  import type {Subscription} from "@welshman/net"
   import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
@@ -92,7 +93,7 @@
 
   let limit = 30
   let loading = sleep(5000)
-  let unsub: () => void
+  let sub: Subscription
   let element: HTMLElement
   let scroller: Scroller
   let editor: Readable<Editor>
@@ -139,13 +140,13 @@
       },
     })
 
-    unsub = listenForChannelMessages(url, room)
+    sub = listenForChannelMessages(url, room)
   })
 
   onDestroy(() => {
     setChecked($page.url.pathname)
     scroller?.stop()
-    unsub?.()
+    sub?.close()
   })
 </script>
 

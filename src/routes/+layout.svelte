@@ -35,6 +35,7 @@
     signer,
     dropSession,
     getRelayUrls,
+    subscribe,
     userInboxRelaySelections,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
@@ -49,7 +50,7 @@
   import {theme} from "@app/theme"
   import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
   import {loadUserData} from "@app/commands"
-  import {subscribePersistent, listenForNotifications} from "@app/requests"
+  import {listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
   import * as notifications from "@app/notifications"
@@ -184,22 +185,22 @@
       }
 
       // Listen for space data, populate space-based notifications
-      let unsubSpaces: any
+      let spacesSub: any
 
       userMembership.subscribe($membership => {
-        unsubSpaces?.()
-        unsubSpaces = listenForNotifications()
+        spacesSub?.close()
+        spacesSub = listenForNotifications()
       })
 
       // Listen for chats, populate chat-based notifications
-      let unsubChats: any
+      let chatsSub: any
 
       derived([pubkey, userInboxRelaySelections], identity).subscribe(
         ([$pubkey, $userInboxRelaySelections]) => {
-          unsubChats?.()
+          chatsSub?.close()
 
           if ($pubkey) {
-            unsubChats = subscribePersistent({
+            chatsSub = subscribe({
               filters: [
                 {kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)},
                 {kinds: [WRAP], "#p": [$pubkey], limit: 100},

@@ -3,7 +3,7 @@
   import {page} from "$app/stores"
   import {sortBy, nthEq, sleep} from "@welshman/lib"
   import {COMMENT} from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {repository, subscribe} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
@@ -15,7 +15,6 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import ThreadReply from "@app/components/ThreadReply.svelte"
   import {deriveEvent, decodeRelay} from "@app/state"
-  import {subscribePersistent} from "@app/requests"
   import {setChecked} from "@app/notifications"
 
   const {relay, id} = $page.params
@@ -44,10 +43,10 @@
   $: title = $event?.tags.find(nthEq(0, "title"))?.[1] || ""
 
   onMount(() => {
-    const unsub = subscribePersistent({relays: [url], filters})
+    const sub = subscribe({relays: [url], filters})
 
     return () => {
-      unsub()
+      sub.close()
       setChecked($page.url.pathname)
     }
   })

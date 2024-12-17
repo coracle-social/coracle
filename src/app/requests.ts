@@ -1,8 +1,6 @@
-import type {Unsubscriber} from "svelte/store"
-import {sleep, partition, assoc, now} from "@welshman/lib"
+import {partition, assoc, now} from "@welshman/lib"
 import {MESSAGE, REACTION, DELETE, THREAD, COMMENT} from "@welshman/util"
-import type {SubscribeRequestWithHandlers, Subscription} from "@welshman/net"
-import {SubscriptionEvent} from "@welshman/net"
+import type {Subscription} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
 import {subscribe, repository, load, pull, hasNegentropy} from "@welshman/app"
 import {userRoomsByUrl, LEGACY_MESSAGE, GENERAL, getEventsForUrl} from "@app/state"
@@ -28,38 +26,11 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   return Promise.all(promises)
 }
 
-export const subscribePersistent = (request: SubscribeRequestWithHandlers) => {
-  let sub: Subscription
-  let done = false
-
-  const start = async () => {
-    // If the subscription gets closed quickly, don't start flapping
-    await Promise.all([
-      sleep(30_000),
-      new Promise(resolve => {
-        sub = subscribe(request)
-        sub.emitter.on(SubscriptionEvent.Complete, resolve)
-      }),
-    ])
-
-    if (!done) {
-      start()
-    }
-  }
-
-  start()
-
-  return () => {
-    done = true
-    sub?.close()
-  }
-}
-
 // Application requests
 
 export const listenForNotifications = () => {
   const since = now()
-  const unsubscribers: Unsubscriber[] = []
+  const subs: Subscription[] = []
 
   for (const [url, rooms] of userRoomsByUrl.get()) {
     load({
@@ -71,8 +42,8 @@ export const listenForNotifications = () => {
       ],
     })
 
-    unsubscribers.push(
-      subscribePersistent({
+    subs.push(
+      subscribe({
         relays: [url],
         filters: [
           {kinds: [THREAD], since},
@@ -84,8 +55,8 @@ export const listenForNotifications = () => {
   }
 
   return () => {
-    for (const unsubscribe of unsubscribers) {
-      unsubscribe()
+    for (const sub of subs) {
+      sub.close()
     }
   }
 }
@@ -103,5 +74,5 @@ export const listenForChannelMessages = (url: string, room: string) => {
   pullConservatively({relays, filters: [{kinds, "#h": [room]}]})
 
   // Listen for new messages
-  return subscribePersistent({relays, filters: [{kinds, "#h": [room], since}]})
+  return subscribe({relays, filters: [{kinds, "#h": [room], since}]})
 }
