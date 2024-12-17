@@ -337,12 +337,22 @@ export class Router {
 
   pop() {
     const $history = get(this.history)
-
     if ($history.length === 1) {
       return
     }
-
     window.history.back()
+  }
+
+  back(times: number) {
+    let count = 0
+    const goBack = () => {
+      if (count < times) {
+        this.pop()
+        count++
+      }
+    }
+    window.addEventListener("popstate", goBack)
+    this.pop()
   }
 
   remove(key) {

@@ -12,7 +12,7 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages, setChecked} from "src/engine"
+  import {canDecrypt, channels, hasNewMessages, setChecked} from "src/engine"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {
@@ -33,6 +33,9 @@
   let limit = 20
 
   onMount(() => {
+    if (!$canDecrypt) {
+      router.at("channels/enable").open({mini: true, noEscape: true})
+    }
     const scroller = createScroller(loadMore, {element, delay: 300})
 
     return () => {
