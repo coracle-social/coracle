@@ -40,14 +40,14 @@
             <CardButton>
               <div slot="icon"><Icon icon="compass" size={7} /></div>
               <div slot="title">Browse the network</div>
-              <div slot="info">Find your people on the nostr network</div>
+              <div slot="info">Find your people on the nostr network.</div>
             </CardButton>
           </Link>
           <Button on:click={startChat}>
             <CardButton>
               <div slot="icon"><Icon icon="chat-round" size={7} /></div>
               <div slot="title">Start a conversation</div>
-              <div slot="info">Use nostr's encrypted group chats to stay in touch</div>
+              <div slot="info">Use nostr's encrypted group chats to stay in touch.</div>
             </CardButton>
           </Button>
         </div>
