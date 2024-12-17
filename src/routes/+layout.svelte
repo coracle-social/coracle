@@ -185,11 +185,11 @@
       }
 
       // Listen for space data, populate space-based notifications
-      let spacesSub: any
+      let unsubSpaces: any
 
       userMembership.subscribe($membership => {
-        spacesSub?.close()
-        spacesSub = listenForNotifications()
+        unsubSpaces?.()
+        unsubSpaces = listenForNotifications()
       })
 
       // Listen for chats, populate chat-based notifications

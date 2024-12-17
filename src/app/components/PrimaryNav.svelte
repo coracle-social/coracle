@@ -10,13 +10,7 @@
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
   import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
-  import {
-    userMembership,
-    getMembershipUrls,
-    canDecrypt,
-    PLATFORM_RELAY,
-    PLATFORM_LOGO,
-  } from "@app/state"
+  import {userRoomsByUrl, canDecrypt, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
@@ -31,7 +25,7 @@
 
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 
-  $: spaceUrls = getMembershipUrls($userMembership)
+  $: spaceUrls = Array.from($userRoomsByUrl.keys())
   $: spacePaths = spaceUrls.map(url => makeSpacePath(url))
   $: anySpaceNotifications = spacePaths.some(
     path => !$page.url.pathname.startsWith(path) && $notifications.has(path),

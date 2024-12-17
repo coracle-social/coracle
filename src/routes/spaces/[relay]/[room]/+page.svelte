@@ -24,13 +24,12 @@
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
     userSettingValues,
-    userMembership,
     decodeRelay,
     deriveEventsForUrl,
     GENERAL,
     tagRoom,
     LEGACY_MESSAGE,
-    getMembershipRoomsByUrl,
+    userRoomsByUrl,
     displayChannel,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
@@ -160,7 +159,7 @@
     </strong>
     <div slot="action" class="row-2">
       {#if room !== GENERAL}
-        {#if getMembershipRoomsByUrl(url, $userMembership).includes(room)}
+        {#if $userRoomsByUrl.get(url)?.has(room)}
           <Button class="btn btn-neutral btn-sm" on:click={leaveRoom}>
             <Icon icon="arrows-a-logout-2" />
             Leave Room

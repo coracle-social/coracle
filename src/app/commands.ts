@@ -65,7 +65,7 @@ import {
   loadMembership,
   loadSettings,
   getDefaultPubkeys,
-  getMembershipUrls,
+  userRoomsByUrl,
 } from "@app/state"
 
 // Utils
@@ -301,7 +301,7 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
       url,
       ...INDEXER_RELAYS,
       ...ctx.app.router.FromUser().getUrls(),
-      ...getMembershipUrls(userMembership.get()),
+      ...userRoomsByUrl.get().keys(),
     ],
   })
 }
@@ -322,7 +322,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
       relays: [
         ...INDEXER_RELAYS,
         ...ctx.app.router.FromUser().getUrls(),
-        ...getMembershipUrls(userMembership.get()),
+        ...userRoomsByUrl.get().keys(),
       ],
     })
   }

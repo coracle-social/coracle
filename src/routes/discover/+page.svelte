@@ -15,10 +15,10 @@
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
   import {
-    userMembership,
     memberships,
     membershipByPubkey,
     getMembershipUrls,
+    userRoomsByUrl,
     getDefaultPubkeys,
   } from "@app/state"
   import {discoverRelays} from "@app/commands"
@@ -98,7 +98,7 @@
                   {/if}
                 </div>
               </div>
-              {#if getMembershipUrls($userMembership).includes(relay.url)}
+              {#if $userRoomsByUrl.has(relay.url)}
                 <div
                   class="tooltip absolute -right-1 -top-1 h-5 w-5 rounded-full bg-primary"
                   data-tip="You are already a member of this space.">

@@ -638,7 +638,7 @@ export const userRoomsByUrl = withGetter(
 
 export const deriveUserRooms = (url: string) =>
   derived(userRoomsByUrl, $userRoomsByUrl =>
-    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || []))),
+    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || [GENERAL]))),
   )
 
 export const deriveOtherRooms = (url: string) =>

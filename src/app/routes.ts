@@ -1,5 +1,5 @@
 import type {Page} from "@sveltejs/kit"
-import {userMembership, makeChatId, decodeRelay, encodeRelay, getMembershipUrls} from "@app/state"
+import {makeChatId, decodeRelay, encodeRelay, userRoomsByUrl} from "@app/state"
 
 export const makeSpacePath = (url: string, ...extra: string[]) => {
   let path = `/spaces/${encodeRelay(url)}`
@@ -28,7 +28,7 @@ export const makeThreadPath = (url: string, eventId?: string) => {
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 
 export const getPrimaryNavItemIndex = ($page: Page) => {
-  const urls = getMembershipUrls(userMembership.get())
+  const urls = Array.from(userRoomsByUrl.get().keys())
 
   switch (getPrimaryNavItem($page)) {
     case "discover":

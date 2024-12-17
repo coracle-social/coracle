@@ -15,9 +15,8 @@
   import RoomCreate from "@app/components/RoomCreate.svelte"
   import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
   import {
-    getMembershipUrls,
+    userRoomsByUrl,
     hasMembershipUrl,
-    userMembership,
     memberships,
     deriveUserRooms,
     deriveOtherRooms,
@@ -93,7 +92,7 @@
               </Button>
             </li>
             <li>
-              {#if getMembershipUrls($userMembership).includes(url)}
+              {#if $userRoomsByUrl.has(url)}
                 <Button on:click={leaveSpace} class="text-error">
                   <Icon icon="exit" />
                   Leave Space

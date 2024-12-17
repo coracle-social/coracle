@@ -22,8 +22,7 @@
     channelsById,
     deriveUserRooms,
     deriveOtherRooms,
-    userMembership,
-    getMembershipUrls,
+    userRoomsByUrl,
   } from "@app/state"
   import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
@@ -51,7 +50,7 @@
     </div>
     <strong slot="title">Home</strong>
     <div slot="action" class="row-2">
-      {#if !getMembershipUrls($userMembership).includes(url)}
+      {#if !$userRoomsByUrl.has(url)}
         <Button class="btn btn-primary btn-sm" on:click={joinSpace}>
           <Icon icon="login-2" />
           Join Space
