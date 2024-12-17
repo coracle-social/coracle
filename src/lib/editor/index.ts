@@ -20,6 +20,7 @@ import {
   TagExtension,
 } from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
+import {toNostrURI} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {FileUploadExtension} from "./FileUpload"
 import {createSuggestions} from "./Suggestions"
@@ -107,6 +108,7 @@ export const getEditorOptions = ({
     Bolt11Extension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditBolt11)})),
     NProfileExtension.extend({
       addNodeView: () => SvelteNodeViewRenderer(EditMention),
+      renderText: props => toNostrURI(props.node.attrs.nprofile),
       addProseMirrorPlugins() {
         return [
           createSuggestions({
@@ -126,8 +128,18 @@ export const getEditorOptions = ({
         ]
       },
     }),
-    NEventExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
-    NAddrExtension.extend(asInline({addNodeView: () => SvelteNodeViewRenderer(EditEvent)})),
+    NEventExtension.extend(
+      asInline({
+        addNodeView: () => SvelteNodeViewRenderer(EditEvent),
+        renderText: (props: any) => toNostrURI(props.node.attrs.nevent),
+      }),
+    ),
+    NAddrExtension.extend(
+      asInline({
+        addNodeView: () => SvelteNodeViewRenderer(EditEvent),
+        renderText: (props: any) => toNostrURI(props.node.attrs.nevent),
+      }),
+    ),
     ImageExtension.extend(
       asInline({addNodeView: () => SvelteNodeViewRenderer(EditImage)}),
     ).configure({defaultUploadUrl, defaultUploadType: uploadType}),

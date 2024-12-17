@@ -2,6 +2,7 @@ import type {JSONContent, PasteRuleMatch, InputRuleMatch} from "@tiptap/core"
 import {Editor} from "@tiptap/core"
 import {ctx} from "@welshman/lib"
 import {Address} from "@welshman/util"
+import {repository} from "@welshman/app"
 
 export const asInline = (extend: Record<string, any>) => ({
   inline: true,
@@ -69,12 +70,13 @@ export const getEditorTags = (editor: Editor) => {
     },
   )
 
-  const neventTags = findNodes("nevent", json).map(({attrs: {id, author, relays = []}}: any) => [
-    "q",
-    id,
-    ctx.app.router.FromRelays(relays).getUrl(),
-    author || "",
-  ])
+  const neventTags = findNodes("nevent", json).map(({attrs: {id, author, relays = []}}: any) => {
+    const event = repository.getEvent(id)
+    const pubkey = author || repository.getEvent(id)?.pubkey || ""
+    const scenario = event ? ctx.app.router.Event(event) : ctx.app.router.FromPubkeys([pubkey])
+
+    return ["q", id, scenario.getUrl(), pubkey]
+  })
 
   const mentionTags = findNodes("nprofile", json).map(({attrs: {pubkey, relays = []}}: any) => [
     "p",
