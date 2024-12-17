@@ -31,6 +31,8 @@
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   onMount(() => {
+    const sub = listenForMessages(pubkeys)
+
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
     markChannelRead(channelId)
 
@@ -38,7 +40,9 @@
       loadInboxRelaySelections(pubkey)
     }
 
-    return listenForMessages(pubkeys)
+    return () => {
+      sub.close()
+    }
   })
 
   onDestroy(() => {
