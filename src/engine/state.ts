@@ -101,7 +101,7 @@ import {
 } from "@welshman/util"
 import crypto from "crypto"
 import Fuse from "fuse.js"
-import {batch, doPipe, seconds, sleep} from "hurdak"
+import {batch, doPipe, seconds} from "hurdak"
 import {equals, partition, prop, sortBy, without} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
@@ -753,28 +753,6 @@ export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeReq
   }
 
   return baseSubscribe(request)
-}
-
-export const subscribePersistent = (request: MySubscribeRequest) => {
-  let done = false
-
-  const start = async () => {
-    // If the subscription gets closed quickly due to eose, don't start flapping
-    await Promise.all([
-      sleep(30_000),
-      new Promise(resolve => subscribe(request).emitter.on("close", resolve)),
-    ])
-
-    if (!done) {
-      start()
-    }
-  }
-
-  start()
-
-  return () => {
-    done = true
-  }
 }
 
 export const load = (request: MySubscribeRequest) =>
