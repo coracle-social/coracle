@@ -172,7 +172,8 @@
       h.name.toLowerCase() !== "coracle" &&
       h.event.tags.some(
         t =>
-          ["web", os].includes(t[0]) && (t.length == 2 || ["note", "nevent", ""].includes(last(t))),
+          ["web", os].includes(t[0]) &&
+          (t.length === 2 || ["note", "nevent", ""].includes(last(t))),
       ),
   )
 

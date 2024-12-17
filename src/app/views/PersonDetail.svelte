@@ -200,11 +200,11 @@
     <Tabs {tabs} {activeTab} {setActiveTab}>
       <div slot="tab" let:tab class="flex gap-2 px-2">
         {toTitle(tab)}
-        {#if tab == "following" && $followsCount > 0}
+        {#if tab === "following" && $followsCount > 0}
           <div class="h-6 rounded-full bg-neutral-700 px-2">
             {$followsCount}
           </div>
-        {:else if tab == "followers" && $followersCount > 0}
+        {:else if tab === "followers" && $followersCount > 0}
           <div class="h-6 rounded-full bg-neutral-700 px-2">
             {$followersCount}+
           </div>

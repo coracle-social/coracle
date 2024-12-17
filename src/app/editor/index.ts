@@ -62,7 +62,7 @@ export const getEditorOptions = ({
   submitOnEnter = true,
   submitOnModEnter = false,
   element,
-  defaultUploadUrl = getSetting("upload_type") == "nip96"
+  defaultUploadUrl = getSetting("upload_type") === "nip96"
     ? getSetting("nip96_urls")[0] || "https://nostr.build"
     : getSetting("blossom_urls")[0] || "https://cdn.satellite.earth",
   uploadType = getSetting("upload_type"),
