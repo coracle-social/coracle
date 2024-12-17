@@ -19,6 +19,7 @@
     broadcastUserData,
   } from "src/engine"
   import {router} from "src/app/util/router"
+  import {setChecked} from "src/engine"
 
   export let stage = "intro"
   export let invite = null
@@ -68,6 +69,7 @@
 
     // Start our notifications listener
     listenForNotifications()
+    setChecked("*")
   }
 
   onMount(async () => {

@@ -10,8 +10,8 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
-  import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
+  import {getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
 
   export let pubkeys
   export let channelId
@@ -34,7 +34,7 @@
     const sub = listenForMessages(pubkeys)
 
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
-    markChannelRead(channelId)
+    setChecked("channels/" + channelId)
 
     for (const pubkey of pubkeys) {
       loadInboxRelaySelections(pubkey)
@@ -46,7 +46,7 @@
   })
 
   onDestroy(() => {
-    markChannelRead(channelId)
+    setChecked("channels/" + channelId)
   })
 
   document.title = `Direct Messages`
