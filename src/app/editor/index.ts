@@ -1,6 +1,5 @@
 import {nprofileEncode} from "nostr-tools/nip19"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
-import Code from "@tiptap/extension-code"
 import CodeBlock from "@tiptap/extension-code-block"
 import Document from "@tiptap/extension-document"
 import Dropcursor from "@tiptap/extension-dropcursor"
@@ -22,7 +21,7 @@ import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {toNostrURI} from "@welshman/util"
 import {signer, profileSearch, RelayMode} from "@welshman/app"
-import {createSuggestions} from "./Suggestions"
+import {createSuggestions} from "src/app/editor/Suggestions"
 import EditMention from "src/app/editor/EditMention.svelte"
 import EditEvent from "src/app/editor/EditEvent.svelte"
 import EditBolt11 from "src/app/editor/EditBolt11.svelte"
@@ -34,6 +33,7 @@ import {WordCount} from "src/app/editor/wordcounts"
 import {FileUploadExtension} from "src/app/editor/FileUpload"
 import {getSetting} from "src/engine"
 import {Hashtag} from "src/app/editor/Hashtag"
+import {Code} from "./Code"
 
 export {createSuggestions, EditMention, EditEvent, EditBolt11, EditMedia, Suggestions}
 export * from "./util"
@@ -74,8 +74,18 @@ export const getEditorOptions = ({
   element,
   content,
   extensions: [
-    Code,
-    CodeBlock,
+    Code.extend({
+      renderText(props) {
+        console.log("to text")
+        // Wrap the text with backticks for the Code mark
+        return `\`${props.node.textContent}\``
+      },
+    }),
+    CodeBlock.extend({
+      renderText(props) {
+        return `\n\`\`\`\n${props.node.textContent}\n \`\`\`\n`
+      },
+    }),
     Document,
     Dropcursor,
     Gapcursor,

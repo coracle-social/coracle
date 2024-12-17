@@ -63,61 +63,63 @@
 
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    if (!content) return showWarning("Please provide a description.")
+    console.log(content)
 
-    if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
+    // if (!content) return showWarning("Please provide a description.")
 
-    const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
+    // if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    if (options.warning) {
-      tags.push(["content-warning", options.warning])
-    }
+    // const tags = [...tagsFromContent(content), ...getClientTags(), ...editor.commands.getMetaTags()]
 
-    if (quote) {
-      tags.push(tagPubkey(quote.pubkey))
-    }
+    // if (options.warning) {
+    //   tags.push(["content-warning", options.warning])
+    // }
 
-    const template = createEvent(1, {content, tags})
-    const signedTemplate = await sign(template, options)
+    // if (quote) {
+    //   tags.push(tagPubkey(quote.pubkey))
+    // }
 
-    signaturePending = false
+    // const template = createEvent(1, {content, tags})
+    // const signedTemplate = await sign(template, options)
 
-    drafts.set("notecreate", editor.getHTML())
+    // signaturePending = false
 
-    router.clearModals()
+    // drafts.set("notecreate", editor.getHTML())
 
-    const thunk = publish({
-      event: signedTemplate,
-      relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
-      delay: $userSettings.send_delay,
-    })
+    // router.clearModals()
 
-    thunk.result.finally(() => {
-      charCount.set(0)
-      wordCount.set(0)
-      drafts.delete("notecreate")
-    })
+    // const thunk = publish({
+    //   event: signedTemplate,
+    //   relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
+    //   delay: $userSettings.send_delay,
+    // })
 
-    if ($userSettings.send_delay > 0) {
-      showToast({
-        id: "send-delay",
-        type: "delay",
-        timeout: $userSettings.send_delay / 1000,
-        onCancel: () => {
-          thunk.controller.abort()
-          router.at("notes/create").open()
-        },
-      })
-    }
+    // thunk.result.finally(() => {
+    //   charCount.set(0)
+    //   wordCount.set(0)
+    //   drafts.delete("notecreate")
+    // })
 
-    thunk.status.subscribe(status => {
-      if (
-        Object.values(status).length === thunk.request.relays.length &&
-        Object.values(status).every(s => s.status === PublishStatus.Pending)
-      ) {
-        showPublishInfo(thunk)
-      }
-    })
+    // if ($userSettings.send_delay > 0) {
+    //   showToast({
+    //     id: "send-delay",
+    //     type: "delay",
+    //     timeout: $userSettings.send_delay / 1000,
+    //     onCancel: () => {
+    //       thunk.controller.abort()
+    //       router.at("notes/create").open()
+    //     },
+    //   })
+    // }
+
+    // thunk.status.subscribe(status => {
+    //   if (
+    //     Object.values(status).length === thunk.request.relays.length &&
+    //     Object.values(status).every(s => s.status === PublishStatus.Pending)
+    //   ) {
+    //     showPublishInfo(thunk)
+    //   }
+    // })
   }
 
   const togglePreview = () => {
