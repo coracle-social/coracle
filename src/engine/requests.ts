@@ -56,7 +56,7 @@ import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {race} from "src/util/misc"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, load, subscribePersistent, type MySubscribeRequest} from "src/engine/state"
+import {env, subscribe, load, type MySubscribeRequest} from "src/engine/state"
 
 // Utils
 
@@ -266,8 +266,7 @@ export const loadNotifications = () => {
 export const listenForNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
-  subscribePersistent({
-    timeout: 30_000,
+  subscribe({
     skipCache: true,
     relays: ctx.app.router.ForUser().getUrls(),
     filters: [addSinceToFilter(filter)],
@@ -328,7 +327,7 @@ export const loadMessages = () =>
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
 
-  return subscribePersistent({
+  return subscribe({
     skipCache: true,
     forcePlatform: false,
     // TODO, stop using non-inbox relays
