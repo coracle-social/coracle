@@ -1,6 +1,6 @@
 <script lang="ts">
   import {closure} from "hurdak"
-  import {prop, uniq} from "@welshman/lib"
+  import {pluck, uniq} from "@welshman/lib"
   import {pubkey, tracker} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -34,7 +34,7 @@
 {#if $event?.pubkey === $pubkey}
   <div class="my-4 flex flex-col gap-4">
     <PeopleAction
-      pubkeys={uniq(interactions.map(prop("pubkey")))}
+      pubkeys={uniq(pluck("pubkey", interactions))}
       actionText={`${actionText} your note`} />
     <Card interactive class="flex w-full flex-col gap-2 text-left" on:click={goToNote}>
       <button type="button" on:click|stopPropagation class="flex justify-between text-sm">

@@ -50,11 +50,10 @@ import {
   take,
   uniq,
   uniqBy,
-  equals,
   partition,
   prop,
   sortBy,
-  without,
+  max,
 } from "@welshman/lib"
 import type {Connection, PublishRequest, Target} from "@welshman/net"
 import {
@@ -101,7 +100,7 @@ import {
   readList,
 } from "@welshman/util"
 import Fuse from "fuse.js"
-import {batch, doPipe, seconds, sleep} from "hurdak"
+import {batch, doPipe, seconds} from "hurdak"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -449,7 +448,7 @@ export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER
 export const lists = deriveEventsMapped<PublishedUserList>(repository, {
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readUserList(event) : null),
-  itemToEvent: prop("event") as any,
+  itemToEvent: prop<TrustedEvent>("event"),
 })
 
 export const userLists = derived(
@@ -467,7 +466,7 @@ export const listSearch = derived(lists, $lists => new UserListSearch($lists))
 
 export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
   filters: [{kinds: [FEED]}],
-  itemToEvent: prop("event") as any,
+  itemToEvent: prop<TrustedEvent>("event"),
   eventToItem: readFeed,
 })
 
@@ -548,7 +547,7 @@ export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readUserList(event)) : undefined,
-  itemToEvent: prop("event") as any,
+  itemToEvent: prop<TrustedEvent>("event"),
 })
 
 export const userListFeeds = derived(
@@ -613,7 +612,7 @@ export const collectionSearch = derived(
 // Network
 
 export const getExecutor = (urls: string[]) => {
-  const [localUrls, remoteUrls] = partition(url => equals(LOCAL_RELAY_URL, url), urls)
+  const [localUrls, remoteUrls] = partition(url => LOCAL_RELAY_URL === url, urls)
 
   let target: Target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
 
@@ -827,7 +826,10 @@ export class ThreadLoader {
 
     if (ancestors.length > 0) {
       this.ancestors.update($xs =>
-        sortBy(prop("created_at"), uniqBy(prop("id"), ancestors.concat($xs))),
+        sortBy<TrustedEvent>(
+          prop("created_at"),
+          uniqBy<TrustedEvent>(prop<string>("id"), ancestors.concat($xs)),
+        ),
       )
     }
   }

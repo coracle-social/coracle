@@ -1,4 +1,4 @@
-import {identity} from "@welshman/lib"
+import {identity, mergeLeft} from "@welshman/lib"
 import {first, randomId, filterVals} from "hurdak"
 import {get, derived, writable} from "svelte/store"
 import logger from "src/util/logger"
@@ -208,9 +208,9 @@ class RouterExtension {
     return this.clone({queryParams: data})
   }
 
-  cx = context => this.clone(updateIn("context", (c: object) => ({...c, ...context}))(this.params))
+  cx = context => this.clone(updateIn("context", c => mergeLeft(context, c))(this.params))
 
-  cg = config => this.clone(updateIn("config", (c: object) => ({...c, ...config}))(this.params))
+  cg = config => this.clone(updateIn("config", c => mergeLeft(config, c))(this.params))
 
   toString = () => {
     let path = this.path

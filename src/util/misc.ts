@@ -8,8 +8,8 @@ import {
   last,
   sum,
   identity,
-  prop,
   throttle,
+  pluck,
 } from "@welshman/lib"
 import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
@@ -251,7 +251,7 @@ export const fuzzy = <T>(data: T[], opts = {}): ((q: string) => any[]) => {
 
   // Slice pattern because the docs warn that it"ll crash if too long
   return (q: string) => {
-    return q ? (fuse.search(q.slice(0, 32)) as any[]).map(prop("item")) : data
+    return q ? pluck("item", fuse.search(q.slice(0, 32)) as any[]) : data
   }
 }
 

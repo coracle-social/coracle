@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {uniq, prop} from "@welshman/lib"
+  import {uniq, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import PersonLink from "src/app/shared/PersonLink.svelte"
 
   export let note: TrustedEvent
   export let reposts: Map<string, TrustedEvent[]>
 
-  const repostPubkeys = uniq((reposts.get(note.id) || []).map(prop("pubkey")))
+  const repostPubkeys = uniq(pluck("pubkey", reposts.get(note.id) || []))
 </script>
 
 {#if repostPubkeys.length > 0}

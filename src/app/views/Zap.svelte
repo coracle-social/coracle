@@ -15,13 +15,13 @@
   export let splits
   export let id = null
   export let anonymous = false
-  export let amount = getSetting("default_zap") as string
+  export let amount = getSetting<number>("default_zap")
 
   let zaps = []
   let message = ""
   let loading = false
 
-  const updateZaps = (message, amount) => {
+  const updateZaps = (message: string, amount: number) => {
     let totalWeight = 0
     const percent = getSetting("platform_zap_split") as number
 
@@ -32,7 +32,7 @@
       }
       // format the split
       const [pubkey, relay, weight] = [split[1], split[2], parseFloat(split[3])]
-      if (weight == 0) continue
+      if (weight === 0) continue
       // make sure we do not zap the same pubkey twice
       if (zaps.some(z => z[0] === pubkey)) continue
       totalWeight += weight

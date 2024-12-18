@@ -157,7 +157,7 @@ export const currencyOptions = [
   {name: "Zambian kwacha", symbol: "K", code: "ZMW"},
 ]
 
-export const defaultCurrencyOption = currencyOptions.find(c => c.code == "SAT")
+export const defaultCurrencyOption = currencyOptions.find(c => c.code === "SAT")
 
 export const getCurrencyOption = code =>
-  currencyOptions.find(c => c.code == code) || {name: code, symbol: "$", code}
+  currencyOptions.find(c => c.code === code) || {name: code, symbol: "$", code}

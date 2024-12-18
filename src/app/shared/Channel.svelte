@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {sleep, prop, sortBy, max, last} from "@welshman/lib"
+  import {sleep, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import {getListTags, type TrustedEvent} from "@welshman/util"
   import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import {pluralize} from "hurdak"
@@ -85,12 +85,12 @@
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
 
   const stickToBottom = async () => {
-    const lastMessage = max(groupedMessages.map(prop("created_at")) as number[])
+    const lastMessage = max(pluck<number>("created_at", groupedMessages))
     const shouldStick = element?.scrollTop > -200
 
     if (shouldStick) {
       scrollToBottom()
-    } else if (lastMessage < max(groupedMessages.map(prop("created_at")) as number[])) {
+    } else if (lastMessage < max(pluck<number>("created_at", groupedMessages))) {
       showNewMessages = true
     }
   }

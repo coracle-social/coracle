@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {sum, prop} from "@welshman/lib"
+  import {sum, pluck} from "@welshman/lib"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
@@ -116,7 +116,6 @@
 
   const startZap = () => {
     const zapTags = note.tags.filter(nthEq(0, "zap"))
-    console.log("zap tags", zapTags)
     const defaultSplit = tagZapSplit(note.pubkey)
     const splits = zapTags.length > 0 ? zapTags : [defaultSplit]
 
@@ -164,7 +163,7 @@
   $: like = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $likesCount = likes.length
   $: zap = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
-  $: $zapsTotal = sum(zaps.map(prop("invoiceAmount"))) / 1000
+  $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
   $: canZap = zapper?.allowsNostr && note.pubkey !== $sessionWithMeta?.pubkey
   $: reply = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $repliesCount = replies.length

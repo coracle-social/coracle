@@ -8,7 +8,7 @@
 
   const onClick = option => {
     if (multiple) {
-      value = value.includes(option) ? value.filter(v => v != option) : [...value, option]
+      value = value.includes(option) ? value.filter(v => v !== option) : [...value, option]
     } else {
       value = option
     }

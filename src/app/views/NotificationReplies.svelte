@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq, prop} from "@welshman/lib"
+  import {uniq, pluck} from "@welshman/lib"
   import {pubkey} from "@welshman/app"
   import {isShareableRelayUrl} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
@@ -22,11 +22,11 @@
 
 <div class="my-4 flex flex-col gap-4">
   <div class="flex items-center justify-between">
-    <PeopleAction pubkeys={uniq(interactions.map(prop("pubkey")))} {actionText} />
+    <PeopleAction pubkeys={uniq(pluck("pubkey", interactions))} {actionText} />
     <small>{formatTimestamp(timestamp)}</small>
   </div>
   {#if $event}
-    <Note topLevel depth={1} note={$event} filters={[{ids: interactions.map(prop("id"))}]} />
+    <Note topLevel depth={1} note={$event} filters={[{ids: pluck("id", interactions)}]} />
   {:else}
     <Spinner />
   {/if}
