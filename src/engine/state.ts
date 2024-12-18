@@ -31,11 +31,9 @@ import {
   setPlaintext,
   signer,
   storageAdapters,
-  tagPubkey,
   tracker,
   zappers,
 } from "@welshman/app"
-import * as Content from "@welshman/content"
 import {
   Worker,
   ctx,
@@ -713,26 +711,6 @@ export const createAndPublish = async ({
   const event = await sign(template, {anonymous, sk})
 
   return publish({event, relays, verb, timeout, forcePlatform})
-}
-
-export const tagsFromContent = (content: string) => {
-  const tags = []
-
-  for (const parsed of Content.parse({content, tags: []})) {
-    if (Content.isTopic(parsed)) {
-      tags.push(["t", parsed.value])
-    }
-
-    if (Content.isEvent(parsed)) {
-      tags.push(["q", parsed.value.id, parsed.value.relays?.[0] || ""])
-    }
-
-    if (Content.isProfile(parsed)) {
-      tags.push(tagPubkey(parsed.value.pubkey))
-    }
-  }
-
-  return tags
 }
 
 export const getClientTags = () => {

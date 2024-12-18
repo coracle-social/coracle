@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {onDestroy} from "svelte"
-  import {Editor} from "svelte-tiptap"
+  import {Editor} from "@tiptap/core"
 
   export let element: HTMLElement
   export let editor: Editor

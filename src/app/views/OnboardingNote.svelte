@@ -1,19 +1,18 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {NOTE} from "@welshman/util"
-  import {getEditorOptions} from "src/app/editor"
   import Compose from "src/app/shared/Compose.svelte"
-  import {createAndPublish, tagsFromContent} from "src/engine"
+  import {createAndPublish} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
-  import {onMount} from "svelte"
-  import {Editor} from "svelte-tiptap"
+  import {getEditor} from "src/app/editor"
 
   export let signup
   export let setStage
 
   let loading = false
   let element: HTMLElement
-  let editor: Editor
+  let editor: ReturnType<typeof getEditor>
 
   const prev = () => setStage("follows")
 
@@ -23,14 +22,14 @@
     loading = true
 
     try {
-      const content = editor.getText({blockSeparator: "\n"}).trim()
+      const content = $editor.getText({blockSeparator: "\n"}).trim()
 
       // Publish our welcome note
       if (content) {
         await createAndPublish({
           kind: NOTE,
           content,
-          tags: tagsFromContent(content),
+          tags: $editor.storage.welshman.getEditorTags(),
           relays: ctx.app.router.FromUser().getUrls(),
         })
       }
@@ -42,14 +41,12 @@
   }
 
   onMount(() => {
-    editor = new Editor(
-      getEditorOptions({
-        submit: next,
-        element,
-        autofocus: true,
-        content: "Hello world! #introductions",
-      }),
-    )
+    editor = getEditor({
+      submit: next,
+      element,
+      autofocus: true,
+      content: "Hello world! #introductions",
+    })
   })
 </script>
 
@@ -66,7 +63,7 @@
 </p>
 <p>Now is a great time to introduce yourself to the Nostr network!</p>
 <div class="border-l-2 border-solid border-neutral-600 pl-4">
-  <Compose bind:element {editor} class="min-h-24" />
+  <Compose bind:element editor={$editor} class="min-h-24" />
 </div>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>

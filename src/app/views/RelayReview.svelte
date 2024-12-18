@@ -6,19 +6,18 @@
   import Compose from "src/app/shared/Compose.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
-  import {createAndPublish, getClientTags, tagsFromContent} from "src/engine"
-  import {Editor} from "svelte-tiptap"
-  import {getEditorOptions} from "src/app/editor"
+  import {createAndPublish, getClientTags} from "src/engine"
+  import {getEditor} from "src/app/editor"
   import {onMount} from "svelte"
 
   export let url
 
-  let editor: Editor
+  let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
   let rating
 
   const onSubmit = () => {
-    const content = editor.getText({blockSeparator: "\n"}).trim()
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     createAndPublish({
       relays: ctx.app.router.FromUser().getUrls(),
@@ -26,7 +25,7 @@
       content,
       tags: [
         ...getClientTags(),
-        ...tagsFromContent(content),
+        ...$editor.storage.welshman.getEditorTags(),
         ["L", "review"],
         ["l", "review/relay", "review"],
         ["rating", rating],
@@ -38,14 +37,12 @@
   }
 
   onMount(() => {
-    editor = new Editor(
-      getEditorOptions({
-        submit: onSubmit,
-        element,
-        submitOnEnter: true,
-        autofocus: true,
-      }),
-    )
+    editor = getEditor({
+      element,
+      autofocus: true,
+      placeholder: "Write a review...",
+      submit: onSubmit,
+    })
   })
 </script>
 
@@ -60,7 +57,7 @@
         </div>
       </div>
       <Compose
-        {editor}
+        editor={$editor}
         bind:element
         class="shadow-inset rounded bg-tinted-200 px-2 py-2 text-black"
         style="min-height: 6rem" />

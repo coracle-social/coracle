@@ -3,7 +3,6 @@
 <script lang="ts">
   import {fly, slide} from "svelte/transition"
   import {throttle, clamp} from "@welshman/lib"
-  import {theme} from "src/partials/state"
 
   export let term
   export let search
@@ -19,7 +18,7 @@
   $: populateItems(term)
 
   const populateItems = throttle(300, term => {
-    items = $search.searchValues(term).slice(0, 5)
+    items = $search(term).slice(0, 5)
   })
 
   const setIndex = (newIndex: number, block: any) => {
@@ -60,7 +59,6 @@
 
 {#if term}
   <div
-    data-theme={$theme}
     bind:this={element}
     transition:fly|local={{duration: 200}}
     class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class} bg-alt"

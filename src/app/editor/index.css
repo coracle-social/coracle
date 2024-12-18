@@ -1,0 +1,40 @@
+:root {
+  --tiptap-object-bg: #ddd;
+  --tiptap-object-fg: #111;
+  --tiptap-selected-bg: #222;
+  --tiptap-selected-fg: #eee;
+}
+
+.tiptap .tiptap-object,
+.tiptap [tag] {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 2px;
+  padding: 0 0.25rem;
+  background-color: var(--tiptap-object-bg);
+  color: var(--tiptap-object-fg);
+}
+
+.tiptap .tiptap-selected {
+  background-color: var(--tiptap-selected-bg);
+  color: var(--tiptap-selected-fg);
+}
+
+.tiptap .tiptap-uploading {
+  animation: blurPulse 1.5s infinite;
+}
+
+@keyframes blurPulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
