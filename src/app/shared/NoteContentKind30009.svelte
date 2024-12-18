@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
+  import {fromPairs} from "@welshman/lib"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia

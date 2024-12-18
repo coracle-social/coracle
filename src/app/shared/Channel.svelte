@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {sleep} from "@welshman/lib"
+  import {sleep, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import {getListTags, type TrustedEvent} from "@welshman/util"
   import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import {pluralize} from "hurdak"
-  import {prop, max, reverse, pluck, sortBy, last} from "ramda"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {Editor} from "svelte-tiptap"
@@ -86,12 +85,12 @@
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
 
   const stickToBottom = async () => {
-    const lastMessage = pluck("created_at", groupedMessages).reduce(max, 0)
+    const lastMessage = max(pluck<number>("created_at", groupedMessages))
     const shouldStick = element?.scrollTop > -200
 
     if (shouldStick) {
       scrollToBottom()
-    } else if (lastMessage < pluck("created_at", groupedMessages).reduce(max, 0)) {
+    } else if (lastMessage < max(pluck<number>("created_at", groupedMessages))) {
       showNewMessages = true
     }
   }
@@ -131,11 +130,11 @@
       scroller?.stop()
     }
 
-    const result = reverse(
-      sortBy(prop("created_at"), messages).reduce((mx, m) => {
+    const result = sortBy(prop("created_at"), messages)
+      .reduce((mx, m) => {
         return mx.concat({...m, showProfile: m.pubkey !== last(mx)?.pubkey})
-      }, []),
-    )
+      }, [])
+      .reverse()
 
     setTimeout(stickToBottom, 100)
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {toTitle} from "hurdak"
-  import {without} from "ramda"
+  import {without} from "@welshman/lib"
   import {Scope, isScopeFeed, isAuthorFeed, makeAuthorFeed, makeScopeFeed} from "@welshman/feeds"
   import SelectButton from "src/partials/SelectButton.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
@@ -14,7 +14,7 @@
     if (isScopeFeed(feed) && scopes.includes("custom")) {
       onChange(makeAuthorFeed())
     } else {
-      onChange(makeScopeFeed(...(without(["custom"], scopes) as Scope[])))
+      onChange(makeScopeFeed(...without<Scope>(["custom" as any], scopes)))
     }
   }
 

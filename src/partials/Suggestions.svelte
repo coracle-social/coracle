@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {identity} from "ramda"
+  import {identity} from "@welshman/lib"
   import {slide} from "src/util/transition"
 
   export let select

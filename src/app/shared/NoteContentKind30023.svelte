@@ -3,7 +3,7 @@
   import {marked} from "marked"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {fromPairs} from "ramda"
+  import {fromPairs} from "@welshman/lib"
   import {switcherFn} from "hurdak"
   import {urlIsMedia} from "@welshman/content"
   import {fromNostrURI, getTopicTagValues} from "@welshman/util"

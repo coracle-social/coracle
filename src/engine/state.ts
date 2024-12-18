@@ -50,6 +50,9 @@ import {
   take,
   uniq,
   uniqBy,
+  partition,
+  prop,
+  sortBy,
   max,
 } from "@welshman/lib"
 import type {Connection, PublishRequest, Target} from "@welshman/net"
@@ -98,7 +101,6 @@ import {
 } from "@welshman/util"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds} from "hurdak"
-import {equals, partition, prop, sortBy} from "ramda"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -285,7 +287,7 @@ export const userSettings = withGetter<typeof defaultSettings>(
   }),
 )
 
-export const getSetting = k => prop(k, userSettings.get())
+export const getSetting = <T = any>(k: string): T => prop(k)(userSettings.get()) as T
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
@@ -446,7 +448,7 @@ export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER
 export const lists = deriveEventsMapped<PublishedUserList>(repository, {
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readUserList(event) : null),
-  itemToEvent: prop("event"),
+  itemToEvent: prop<TrustedEvent>("event"),
 })
 
 export const userLists = derived(
@@ -464,7 +466,7 @@ export const listSearch = derived(lists, $lists => new UserListSearch($lists))
 
 export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
   filters: [{kinds: [FEED]}],
-  itemToEvent: prop("event"),
+  itemToEvent: prop<TrustedEvent>("event"),
   eventToItem: readFeed,
 })
 
@@ -545,7 +547,7 @@ export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readUserList(event)) : undefined,
-  itemToEvent: prop("event"),
+  itemToEvent: prop<TrustedEvent>("event"),
 })
 
 export const userListFeeds = derived(
@@ -610,7 +612,7 @@ export const collectionSearch = derived(
 // Network
 
 export const getExecutor = (urls: string[]) => {
-  const [localUrls, remoteUrls] = partition(equals(LOCAL_RELAY_URL), urls)
+  const [localUrls, remoteUrls] = partition(url => LOCAL_RELAY_URL === url, urls)
 
   let target: Target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
 
@@ -824,7 +826,10 @@ export class ThreadLoader {
 
     if (ancestors.length > 0) {
       this.ancestors.update($xs =>
-        sortBy(prop("created_at"), uniqBy(prop("id"), ancestors.concat($xs))),
+        sortBy<TrustedEvent>(
+          prop("created_at"),
+          uniqBy<TrustedEvent>(prop<string>("id"), ancestors.concat($xs)),
+        ),
       )
     }
   }

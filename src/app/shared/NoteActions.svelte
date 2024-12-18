@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {sum, pluck} from "ramda"
+  import {sum, pluck} from "@welshman/lib"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"

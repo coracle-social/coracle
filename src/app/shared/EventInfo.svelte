@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
   import {getTagValue} from "@welshman/util"
   import {deriveIsDeletedByAddress} from "@welshman/store"
   import {repository} from "@welshman/app"
+  import {fromPairs} from "@welshman/lib"
   import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {equals} from "ramda"
-  import {ctx, identity} from "@welshman/lib"
+  import {ctx, identity, equals} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
   import {topicSearch, tagPubkey} from "@welshman/app"
   import {appName} from "src/partials/state"
