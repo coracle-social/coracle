@@ -29,7 +29,7 @@
   )
 
   let loading
-  let opts = {warning: "", anonymous: false}
+  let options = {warning: "", anonymous: false}
   let editorElement: HTMLElement
   let editor: Editor
   let editorLoading: Writable<boolean>
@@ -47,8 +47,8 @@
     showOptions = false
   }
 
-  const setOpts = values => {
-    opts = {...opts, ...values}
+  const setOptions = values => {
+    options = {...options, ...values}
     showOptions = false
   }
 
@@ -83,8 +83,8 @@
       ...getClientTags(),
     ])
 
-    if (opts.warning) {
-      tags.push(["content-warning", opts.warning])
+    if (options.warning) {
+      tags.push(["content-warning", options.warning])
     }
 
     // Re-broadcast the note we're replying to
@@ -95,7 +95,7 @@
     loading = true
 
     const template = createEvent(1, {content, tags})
-    const event = await sign(template, opts)
+    const event = await sign(template, options)
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),
@@ -131,8 +131,11 @@
     editorLoading = editor.storage.fileUpload.loading
   }
 
-  // eslint-disable-next-line
-  $: editorElement && createEditor()
+  $: {
+    if (editorElement) {
+      createEditor()
+    }
+  }
 
   $: isOpen = $openReplies[parent?.id]
 </script>
@@ -191,7 +194,7 @@
 {/if}
 
 {#if showOptions}
-  <NoteOptions onClose={closeOptions} onSubmit={setOpts} initialValues={opts} />
+  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
 {/if}
 
 {#if $nsecWarning}
