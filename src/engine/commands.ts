@@ -10,13 +10,16 @@ import {
   session,
   sessions,
   signer,
+  subscribe,
   tagPubkey,
   userInboxRelaySelections,
   userRelaySelections,
 } from "@welshman/app"
-import {identity, append, cached, ctx, groupBy, now, nthEq, remove} from "@welshman/lib"
+import {DVMEvent, type DVMRequestOptions} from "@welshman/dvm"
+import {identity, append, cached, ctx, groupBy, now, nthEq, remove, Emitter} from "@welshman/lib"
+import {SubscriptionEvent} from "@welshman/net"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
-import type {Profile, TrustedEvent} from "@welshman/util"
+import type {Filter, Profile, TrustedEvent} from "@welshman/util"
 import {
   Address,
   FEEDS,
@@ -99,6 +102,30 @@ export const nip98Fetch = async (url, method, body = null) => {
   const headers = {Authorization: `Nostr ${auth}`}
 
   return Fetch.fetchJson(url, {body, method, headers})
+}
+
+export const makeDvmRequest = (request: DVMRequestOptions & {delay?: number}) => {
+  const emitter = new Emitter()
+  const {event, relays, timeout = 30_000, autoClose = true, reportProgress = true} = request
+  const kind = event.kind + 1000
+  const kinds = reportProgress ? [kind, 7000] : [kind]
+  const filters: Filter[] = [{kinds, since: now() - 60, "#e": [event.id]}]
+
+  const sub = subscribe({relays, timeout, filters})
+  const thunk = publish({event, relays, timeout, delay: request.delay})
+
+  sub.emitter.on(SubscriptionEvent.Event, (url: string, event: TrustedEvent) => {
+    if (event.kind === 7000) {
+      emitter.emit(DVMEvent.Progress, url, event)
+    } else {
+      emitter.emit(DVMEvent.Result, url, event)
+
+      if (autoClose) {
+        sub.close()
+      }
+    }
+  })
+  return {request, emitter, sub, thunk}
 }
 
 export const getMediaProviderURL = cached({

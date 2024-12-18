@@ -8,17 +8,29 @@
   import Modal from "src/partials/Modal.svelte"
   import Toggle from "src/partials/Toggle.svelte"
 
+  export let publishAt = false
   export let onClose
   export let onSubmit
   export let initialValues: {
     warning: string
     anonymous: boolean
-    delay?: string
+    publish_at?: number
   }
 
-  const values = {...initialValues}
+  const TZOffset = new Date().getTimezoneOffset() * 60_000
 
-  const submit = () => onSubmit(values)
+  const values = {
+    ...initialValues,
+    publish_at:
+      initialValues?.publish_at &&
+      new Date(initialValues?.publish_at * 1000 - TZOffset).toISOString().slice(0, 16),
+  }
+
+  const submit = () =>
+    onSubmit({
+      ...values,
+      publish_at: values.publish_at && Math.floor(new Date(values.publish_at).getTime() / 1000),
+    })
 </script>
 
 <Modal onEscape={onClose}>
@@ -30,9 +42,14 @@
       <Field icon="fa-warning" label="Content warnings">
         <Input bind:value={values.warning} placeholder="Why might people want to skip this post?" />
       </Field>
-      <Field icon="fa-hourglass-half" label="Schedule post">
-        <Input type="datetime-local" bind:value={values.delay} />
-      </Field>
+      {#if publishAt}
+        <Field icon="fa-hourglass-half" label="Schedule post">
+          <Input
+            type="datetime-local"
+            min={new Date().toISOString().slice(0, 16)}
+            bind:value={values.publish_at} />
+        </Field>
+      {/if}
       <FieldInline icon="fa-user-secret" label="Post anonymously">
         <Toggle bind:value={values.anonymous} />
         <p slot="info">Enable this to create an anonymous note.</p>
