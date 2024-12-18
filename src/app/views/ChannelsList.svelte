@@ -10,7 +10,6 @@
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Content from "src/partials/Content.svelte"
-  import ChatEnable from "src/partials/ChatEnable.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
   import {canDecrypt, channels, hasNewMessages, setChecked} from "src/engine"
@@ -34,6 +33,9 @@
   let limit = 20
 
   onMount(() => {
+    if (!$canDecrypt) {
+      router.at("chatenable").open({mini: true, noEscape: true})
+    }
     const scroller = createScroller(loadMore, {element, delay: 300})
 
     return () => {
@@ -81,7 +83,3 @@
     <Content size="lg" class="text-center">No messages found.</Content>
   {/each}
 </FlexColumn>
-
-{#if !$canDecrypt}
-  <ChatEnable />
-{/if}
