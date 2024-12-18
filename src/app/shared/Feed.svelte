@@ -39,7 +39,6 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Note from "src/app/shared/Note.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {router} from "src/app/util"
   import type {Feed} from "src/domain"
@@ -51,6 +50,7 @@
     isEventMuted,
     unwrapRepost,
   } from "src/engine"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
   export let anchor = null
@@ -241,10 +241,10 @@
   </FeedControls>
 {/if}
 
-<FlexColumn xl bind:element>
+<FlexColumn bind:element>
   {#each events as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <Note {filters} {reposts} {depth} {anchor} {note} />
+      <FeedItem {filters} {reposts} {depth} {anchor} {note} />
     </div>
     {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
       <Card class="group flex items-center justify-between">
