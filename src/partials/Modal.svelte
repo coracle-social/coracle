@@ -100,7 +100,7 @@
               <div
                 class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                      border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
-                on:click={tryClose}>
+                on:click|stopPropagation={tryClose}>
                 <i class="fa fa-times fa-lg cy-modal-close" />
               </div>
               <div

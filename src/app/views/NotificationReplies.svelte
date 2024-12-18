@@ -6,7 +6,7 @@
   import {formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
-  import Note from "src/app/shared/Note.svelte"
+  import FeedItem from "src/app/shared/FeedItem.svelte"
   import type {Notification} from "src/engine"
   import {deriveEvent} from "src/engine"
 
@@ -27,7 +27,7 @@
     <small>{formatTimestamp(timestamp)}</small>
   </div>
   {#if $event}
-    <Note topLevel depth={1} note={$event} filters={[{ids: pluck("id", interactions)}]} />
+    <FeedItem topLevel depth={1} note={$event} filters={[{ids: pluck("id", interactions)}]} />
   {:else}
     <Spinner />
   {/if}
