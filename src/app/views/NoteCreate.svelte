@@ -1,10 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {ctx, last} from "@welshman/lib"
-  import {createEvent, toNostrURI} from "@welshman/util"
-  import {session, tagPubkey} from "@welshman/app"
+  import {
+    createEvent,
+    toNostrURI,
+    HANDLER_INFORMATION,
+    DVM_REQUEST_PUBLISH_SCHEDULE,
+    type TrustedEvent,
+  } from "@welshman/util"
+  import {session, repository, tagPubkey, signer} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
-  import {makeDvmRequest} from "@welshman/dvm"
+  import {DVMEvent} from "@welshman/dvm"
   import {deriveEvents} from "@welshman/store"
   import {commaFormat} from "hurdak"
   import {writable} from "svelte/store"
@@ -13,7 +19,7 @@
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import {showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
+  import {showInfo, showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -36,21 +42,16 @@
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
-  let options = {warning: "", anonymous: false, delay: null}
+  let options = {warning: "", anonymous: false, publish_at: null}
 
   const DVM_HANDLER_FILTER = {
     kinds: [HANDLER_INFORMATION],
     "#k": [DVM_REQUEST_PUBLISH_SCHEDULE.toString()],
   }
-  const DVM_REQUEST_FILTER = {kinds: [DVM_REQUEST_PUBLISH_SCHEDULE]}
 
   const handlers = deriveEvents(repository, {
     filters: [DVM_HANDLER_FILTER],
   })
-
-  // const requests = deriveEvents(repository, {
-  //   filters: [DVM_REQUEST_FILTER],
-  // })
 
   const nsecWarning = writable(null)
 
@@ -97,7 +98,7 @@
     const template = createEvent(1, {
       content,
       tags,
-      created_at: options?.delay && Math.floor(options?.delay.getTime() / 1000),
+      created_at: options?.publish_at,
     })
     const signedTemplate = await sign(template, options)
 
@@ -106,8 +107,10 @@
     drafts.set("notecreate", $editor.getHTML())
 
     // if a delay is set, send the event through the DVM
-    if (opts?.delay) {
-      const dvmPubkey = $handlers[0].pubkey
+    router.clearModals()
+    if (options?.publish_at && dvmPubkey) {
+      // take the first DVM Handler found
+
       const dvmContent = await $signer.nip04.encrypt(
         dvmPubkey,
         JSON.stringify([
@@ -125,50 +128,55 @@
       const dvmRequest = makeDvmRequest({
         event: dvmEvent,
         relays: env.DVM_RELAYS,
+        reportProgress: true,
+        delay: $userSettings.send_delay,
       })
 
-      dvmRequest.pub.emitter.on("*", (a, b, c) => {
-        console.log("pub", a, b, c)
-      })
-
-      dvmRequest.sub.emitter.on("*", (a, b, c) => {
-        console.log("sub", a, b, c)
-      })
+      thunk = dvmRequest.thunk
+      emitter = dvmRequest.emitter
     } else {
       router.clearModals()
 
       // send the event
-      const thunk = publish({
+      thunk = publish({
         event: signedTemplate,
         relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
         delay: $userSettings.send_delay,
       })
+    }
 
-      thunk.result.finally(() => {
-        charCount.set(0)
-        wordCount.set(0)
-        drafts.delete("notecreate")
+    thunk.result.finally(() => {
+      charCount.set(0)
+      wordCount.set(0)
+      drafts.delete("notecreate")
+    })
+
+    if ($userSettings.send_delay > 0) {
+      showToast({
+        id: "send-delay",
+        type: "delay",
+        timeout: $userSettings.send_delay / 1000,
+        onCancel: () => {
+          thunk.controller.abort()
+          router.at("notes/create").open()
+        },
       })
+    }
 
-      if ($userSettings.send_delay > 0) {
-        showToast({
-          id: "send-delay",
-          type: "delay",
-          timeout: $userSettings.send_delay / 1000,
-          onCancel: () => {
-            thunk.controller.abort()
-            router.at("notes/create").open()
-          },
-        })
+    thunk.status.subscribe(status => {
+      if (
+        Object.values(status).length === thunk.request.relays.length &&
+        Object.values(status).every((s: any) => s.status === PublishStatus.Pending)
+      ) {
+        showPublishInfo(thunk)
       }
-
-      thunk.status.subscribe(status => {
-        if (
-          Object.values(status).length === thunk.request.relays.length &&
-          Object.values(status).every(s => s.status === PublishStatus.Pending)
-        ) {
-          showPublishInfo(thunk)
-        }
+    })
+    if (emitter) {
+      emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {
+        $signer.nip04.decrypt(dvmPubkey, event.content).then(data => {
+          data = JSON.parse(data)[0]
+          showInfo(data[2] || "You note is " + data[1])
+        })
       })
     }
   }
@@ -264,11 +272,13 @@
           disabled={$uploading || signaturePending}>
           {#if $uploading || signaturePending}
             <i class="fa fa-circle-notch fa-spin" />
-          {:else if options?.delay}
-            {#if new Date(options.delay).toDateString() === new Date().toDateString()}
-              Scheduled for {options.delay.toLocaleTimeString()}
+          {:else if options?.publish_at && options?.publish_at > now()}
+            {#if new Date(options.publish_at * 1000).toDateString() === new Date().toDateString()}
+              Scheduled for {new Date(options.publish_at * 1000).toLocaleTimeString()}
             {:else}
-              Scheduled for {options.delay.toLocaleDateString()} at {options.delay.toLocaleTimeString()}
+              Scheduled for {new Date(options.publish_at * 1000).toLocaleDateString()} at {new Date(
+                options.publish_at * 1000,
+              ).toLocaleTimeString()}
             {/if}
           {:else}
             Send
@@ -283,7 +293,7 @@
       <button
         type="button"
         class="flex cursor-pointer items-center justify-end gap-4 text-sm"
-        on:click={() => options.setView("settings")}>
+        on:click={() => (showOptions = true)}>
         <span><i class="fa fa-warning" /> {options.warning || 0}</span>
       </button>
     </FlexColumn>
@@ -291,7 +301,7 @@
 </form>
 
 {#if showOptions}
-  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
+  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} publishAt />
 {/if}
 
 {#if $nsecWarning}
