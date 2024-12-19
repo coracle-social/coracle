@@ -1,5 +1,6 @@
 <script lang="ts">
   import Anchor from "src/partials/Anchor.svelte"
+  import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -17,19 +18,13 @@
     publish_at?: number
   }
 
-  const TZOffset = new Date().getTimezoneOffset() * 60_000
-
   const values = {
     ...initialValues,
-    publish_at:
-      initialValues?.publish_at &&
-      new Date(initialValues?.publish_at * 1000 - TZOffset).toISOString().slice(0, 16),
   }
 
   const submit = () =>
     onSubmit({
       ...values,
-      publish_at: values.publish_at && Math.floor(new Date(values.publish_at).getTime() / 1000),
     })
 </script>
 
@@ -44,10 +39,7 @@
       </Field>
       {#if publishAt}
         <Field icon="fa-hourglass-half" label="Schedule post">
-          <Input
-            type="datetime-local"
-            min={new Date().toISOString().slice(0, 16)}
-            bind:value={values.publish_at} />
+          <DateTimeInput bind:value={values.publish_at} />
         </Field>
       {/if}
       <FieldInline icon="fa-user-secret" label="Post anonymously">
