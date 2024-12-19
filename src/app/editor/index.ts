@@ -76,7 +76,6 @@ export const getEditorOptions = ({
   extensions: [
     Code.extend({
       renderText(props) {
-        console.log("to text")
         // Wrap the text with backticks for the Code mark
         return `\`${props.node.textContent}\``
       },

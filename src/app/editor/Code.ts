@@ -1,14 +1,9 @@
-import {inputRegex, pasteRegex, type CodeOptions} from "@tiptap/extension-code"
-import {
-  Mark,
-  markInputRule,
-  mergeAttributes,
-  Node,
-  nodeInputRule,
-  nodePasteRule,
-  textblockTypeInputRule,
-  textInputRule,
-} from "@tiptap/core"
+import {InputRule, mergeAttributes, Node, PasteRule} from "@tiptap/core"
+import type {CodeOptions} from "@tiptap/extension-code"
+
+const inputRegex = /(?:^|\s)(`(?!\s+`)((?:[^`]+))`(?!\s+`))$/
+
+const pasteRegex = /(?:^|\s)(`(?!\s+`)((?:[^`]+))`(?!\s+`))/g
 
 export const Code = Node.create<CodeOptions>({
   name: "code",
@@ -19,58 +14,57 @@ export const Code = Node.create<CodeOptions>({
     }
   },
 
-  excludes: "_",
-
-  code: true,
-
   content: "text*",
 
   marks: "",
 
-  exitable: true,
+  group: "inline",
+
+  inline: true,
+
+  code: true,
+
+  defining: true,
 
   parseHTML() {
     return [{tag: "code"}]
   },
 
-  renderHTML({HTMLAttributes, node}) {
-    console.log("renderHTML", node.textContent)
-    return ["code", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), node.textContent]
-  },
-
-  addCommands() {
-    return {
-      setCode:
-        () =>
-        ({commands}) => {
-          return commands.setMark(this.name)
-        },
-      toggleCode:
-        () =>
-        ({commands}) => {
-          return commands.toggleMark(this.name)
-        },
-      unsetCode:
-        () =>
-        ({commands}) => {
-          return commands.unsetMark(this.name)
-        },
-    }
+  renderHTML({HTMLAttributes}) {
+    return ["code", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-e": () => this.editor.commands.toggleCode(),
+      // remove code block when at start of document or code block is empty
+      Backspace: () => {
+        const {empty, $anchor, $from} = this.editor.state.selection
+
+        const isAtEnd = $from.parentOffset === $from.parent.nodeSize - 2
+
+        if (!empty || $anchor.parent.type.name !== this.name) {
+          return false
+        }
+
+        if (isAtEnd) {
+          const {tr} = this.editor.state
+          tr.delete($from.start(), $from.end() + 1)
+          this.editor.view.dispatch(tr)
+        }
+
+        return false
+      },
     }
   },
 
   addInputRules() {
     return [
-      textblockTypeInputRule({
+      new InputRule({
         find: inputRegex,
-        type: this.type,
-        getAttributes: match => {
-          return {content: match[1]} // Capture content inside backticks
+        handler: ({state, range, match}) => {
+          const textNode = state.schema.text(match[2])
+          const codeNode = this.type.create(null, textNode)
+          state.tr.replaceWith(range.from, range.to, codeNode).insertText(" ")
         },
       }),
     ]
@@ -78,9 +72,13 @@ export const Code = Node.create<CodeOptions>({
 
   addPasteRules() {
     return [
-      nodePasteRule({
+      new PasteRule({
         find: pasteRegex,
-        type: this.type,
+        handler: ({state, range, match}) => {
+          const textNode = state.schema.text(match[2])
+          const codeNode = this.type.create(null, textNode)
+          state.tr.replaceWith(range.from, range.to, codeNode).insertText(" ")
+        },
       }),
     ]
   },
