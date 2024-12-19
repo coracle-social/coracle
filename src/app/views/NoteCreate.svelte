@@ -1,17 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {ctx, last} from "@welshman/lib"
+  import {now} from "@welshman/signer"
   import {
     createEvent,
     toNostrURI,
-    HANDLER_INFORMATION,
     DVM_REQUEST_PUBLISH_SCHEDULE,
     type TrustedEvent,
   } from "@welshman/util"
-  import {session, repository, tagPubkey, signer} from "@welshman/app"
+  import {session, tagPubkey, signer, type ThunkStatusByUrl, type ThunkStatus} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
-  import {deriveEvents} from "@welshman/store"
   import {commaFormat} from "hurdak"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
@@ -44,15 +43,7 @@
   let element: HTMLElement
   let options = {warning: "", anonymous: false, publish_at: null}
 
-  const DVM_HANDLER_FILTER = {
-    kinds: [HANDLER_INFORMATION],
-    "#k": [DVM_REQUEST_PUBLISH_SCHEDULE.toString()],
-  }
-
-  const handlers = deriveEvents(repository, {
-    filters: [DVM_HANDLER_FILTER],
-  })
-
+  const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
   const nsecWarning = writable(null)
 
   const openOptions = () => {
@@ -98,7 +89,7 @@
     const template = createEvent(1, {
       content,
       tags,
-      created_at: options?.publish_at,
+      created_at: options.publish_at && Math.floor(options.publish_at.getTime() / 1000),
     })
     const signedTemplate = await sign(template, options)
 
@@ -108,11 +99,11 @@
 
     // if a delay is set, send the event through the DVM
     router.clearModals()
-    if (options?.publish_at && dvmPubkey) {
+    if (options.publish_at) {
       // take the first DVM Handler found
 
       const dvmContent = await $signer.nip04.encrypt(
-        dvmPubkey,
+        SHIPYARD_PUBKEY,
         JSON.stringify([
           ["i", JSON.stringify(signedTemplate), "text"],
           ["param", "relays", ...ctx.app.router.FromUser().getUrls()],
@@ -121,7 +112,7 @@
       const dvmEvent = await sign(
         createEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
           content: dvmContent,
-          tags: [["p", dvmPubkey], ["encrypted"]],
+          tags: [["p", SHIPYARD_PUBKEY], ["encrypted"]],
         }),
       )
 
@@ -163,19 +154,23 @@
       })
     }
 
-    thunk.status.subscribe(status => {
+    thunk.status.subscribe((status: ThunkStatusByUrl) => {
       if (
         Object.values(status).length === thunk.request.relays.length &&
-        Object.values(status).every((s: any) => s.status === PublishStatus.Pending)
+        Object.values(status).every((s: ThunkStatus) => s.status === PublishStatus.Pending)
       ) {
         showPublishInfo(thunk)
       }
     })
     if (emitter) {
       emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {
-        $signer.nip04.decrypt(dvmPubkey, event.content).then(data => {
-          data = JSON.parse(data)[0]
-          showInfo(data[2] || "You note is " + data[1])
+        $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+          try {
+            data = JSON.parse(data)[0]
+            showInfo(data[2] || "Your note is " + data[1] + "!")
+          } catch (e) {
+            warn(e)
+          }
         })
       })
     }
@@ -272,14 +267,8 @@
           disabled={$uploading || signaturePending}>
           {#if $uploading || signaturePending}
             <i class="fa fa-circle-notch fa-spin" />
-          {:else if options?.publish_at && options?.publish_at > now()}
-            {#if new Date(options.publish_at * 1000).toDateString() === new Date().toDateString()}
-              Scheduled for {new Date(options.publish_at * 1000).toLocaleTimeString()}
-            {:else}
-              Scheduled for {new Date(options.publish_at * 1000).toLocaleDateString()} at {new Date(
-                options.publish_at * 1000,
-              ).toLocaleTimeString()}
-            {/if}
+          {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
+            Schedule
           {:else}
             Send
           {/if}
@@ -290,12 +279,6 @@
           <i class="fa fa-upload" />
         </button>
       </div>
-      <button
-        type="button"
-        class="flex cursor-pointer items-center justify-end gap-4 text-sm"
-        on:click={() => (showOptions = true)}>
-        <span><i class="fa fa-warning" /> {options.warning || 0}</span>
-      </button>
     </FlexColumn>
   </Content>
 </form>
