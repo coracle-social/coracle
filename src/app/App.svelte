@@ -432,7 +432,7 @@
         ])
 
         if (lastActivity && lastActivity < ago(30)) {
-          ctx.net.pool.remove(connection.url)
+          ctx.net.pool.get(connection.url).socket.close()
         }
       }
     }, 5_000)
