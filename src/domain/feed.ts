@@ -1,5 +1,5 @@
 import {fromPairs, randomId} from "@welshman/lib"
-import {FEED, Tags, Address} from "@welshman/util"
+import {FEED, Address} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
   feedFromTags,
@@ -49,7 +49,7 @@ export const mapListToFeed = (list: PublishedUserList) =>
     title: list.title,
     identifier: list.identifier,
     description: list.description,
-    definition: feedFromTags(Tags.fromEvent(list.event)),
+    definition: feedFromTags(list.event.tags),
   }) as PublishedListFeed
 
 export const readFeed = (event: TrustedEvent) => {
@@ -72,12 +72,13 @@ export const createFeed = ({identifier, definition, title, description}: Feed) =
 
 export const editFeed = (feed: PublishedFeed) => ({
   kind: FEED,
-  tags: Tags.fromEvent(feed.event)
-    .setTag("alt", feed.title)
-    .setTag("title", feed.title)
-    .setTag("description", feed.description)
-    .setTag("feed", JSON.stringify(feed.definition))
-    .unwrap(),
+  tags: Object.entries({
+    ...fromPairs(feed.event.tags),
+    title: feed.title,
+    alt: feed.title,
+    description: feed.description,
+    feed: JSON.stringify(feed.definition),
+  }),
 })
 
 export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"

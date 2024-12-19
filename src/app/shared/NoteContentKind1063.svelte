@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {Tags} from "@welshman/util"
+  import {getTagValue} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
 
-  const url = Tags.fromEvent(note).get("url").value()
+  const url = getTagValue("url", note.tags)
 </script>
 
 {#if url}

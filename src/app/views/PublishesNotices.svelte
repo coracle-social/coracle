@@ -70,7 +70,7 @@
           <span class="shrink-0 text-neutral-400">{formatTimestamp(notice.created_at)}</span>
           <strong class={colorFromVerb(notice.notice[0])}>from {notice.url}</strong>
           <span class="shrink-0">[{notice.notice[0]}]</span>
-          {#each notice.notice.slice(1).filter(n => typeof n == "string") as item}
+          {#each notice.notice.slice(1).filter(n => typeof n === "string") as item}
             <span class="text-neutral-300">{item}</span>
           {/each}
         </div>

@@ -1,3 +1,4 @@
+import {last, nthEq} from "@welshman/lib"
 import {
   fromNostrURI,
   GENERIC_REPOST,
@@ -7,13 +8,15 @@ import {
   REACTION,
   REPOST,
   ZAP_RESPONSE,
-  Tags,
   Address,
   RELAYS,
   PROFILE,
   INBOX_RELAYS,
   FOLLOWS,
   MUTES,
+  getTags,
+  getTagValue,
+  getTopicTagValues,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
@@ -68,23 +71,10 @@ export const toHex = (data: string): string | null => {
   }
 }
 
-export const getRating = (event: TrustedEvent) => {
-  if (event.kind === 1985) {
-    const json = parseJson(
-      Tags.fromEvent(event).whereKey("l").whereValue("review/relay").first()?.last(),
-    )
-
-    return json?.quality
-  } else {
-    return parseInt(
-      Tags.fromEvent(event)
-        .whereKey("rating")
-        .filter(t => t.count() === 2)
-        .first()
-        ?.value(),
-    )
-  }
-}
+export const getRating = (event: TrustedEvent) =>
+  event.kind === 1985
+    ? parseJson(last(getTags("l", event.tags).find(nthEq(1, "review/relay")) || []))?.quality
+    : parseInt(getTags("rating", event.tags).find(t => t.length === 2)?.[1])
 
 export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
@@ -103,16 +93,9 @@ const WARN_TAGS = new Set([
   "fuck",
 ])
 
-export const getContentWarning = e => {
-  const tags = Tags.fromEvent(e)
-  const warning = tags.get("content-warning")?.value()
-
-  if (warning) {
-    return warning
-  }
-
-  return tags.topics().find(t => WARN_TAGS.has(t.toLowerCase()))
-}
+export const getContentWarning = e =>
+  getTagValue("content-warning", e.tags) ||
+  getTopicTagValues(e.tags).some(t => WARN_TAGS.has(t.toLowerCase()))
 
 export const parseAnything = async entity => {
   if (entity.includes("@")) {

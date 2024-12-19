@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {uniq, nth} from "@welshman/lib"
-  import {Tags, getAddress, Address, getIdFilters} from "@welshman/util"
+  import {getPubkeyTagValues, getAddress, Address, getIdFilters} from "@welshman/util"
   import {session, userRelaySelections, getWriteRelayUrls} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -19,6 +19,7 @@
     broadcastUserData,
   } from "src/engine"
   import {router} from "src/app/util/router"
+  import {setChecked} from "src/engine"
 
   export let stage = "intro"
   export let invite = null
@@ -68,6 +69,7 @@
 
     // Start our notifications listener
     listenForNotifications()
+    setChecked("*")
   }
 
   onMount(async () => {
@@ -84,7 +86,7 @@
           state.onboardingLists = state.onboardingLists.concat(e)
         }
 
-        loadPubkeys(Tags.fromEvent(e).values("p").valueOf())
+        loadPubkeys(getPubkeyTagValues(e.tags))
       },
     })
   })

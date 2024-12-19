@@ -1,16 +1,18 @@
 <script lang="ts">
+  import {first} from "@welshman/lib"
+  import {getTagValues} from "@welshman/util"
   import Media from "src/partials/Media.svelte"
 
   export let compose
   export let value = []
   export let includeInContent = false
 
-  const getUrl = imeta => imeta.get("url").value()
+  const getUrl = imeta => first(getTagValues("url", imeta))
 
   export const getValue = () => value
 
   export const addImage = imeta => {
-    value = value.concat(imeta)
+    value = [...value, imeta]
 
     if (includeInContent) {
       compose.write("\n" + getUrl(imeta))
@@ -34,7 +36,7 @@
   <div class="columns-2 gap-2 lg:columns-3">
     {#each value as imeta, i (getUrl(imeta) + i)}
       <div class="pb-2">
-        <Media {imeta} url={getUrl(imeta)} onClose={() => removeImage(i)} />
+        <Media tags={imeta} url={getUrl(imeta)} onClose={() => removeImage(i)} />
       </div>
     {/each}
   </div>

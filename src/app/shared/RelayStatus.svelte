@@ -25,16 +25,14 @@
   <div
     slot="trigger"
     class="h-2 w-2 cursor-pointer rounded-full bg-neutral-600"
-    class:bg-neutral-600={ConnectionType.NotConnected == status}
-    class:bg-danger={[ConnectionType.LoginFailed, ConnectionType.ConnectFailed].some(
-      s => s == status,
-    )}
-    class:bg-success={ConnectionType.Connected == status}
+    class:bg-neutral-600={ConnectionType.NotConnected === status}
+    class:bg-danger={[ConnectionType.LoginFailed, ConnectionType.ConnectFailed].includes(status)}
+    class:bg-success={ConnectionType.Connected === status}
     class:bg-warning={[
       ConnectionType.Logging,
       ConnectionType.WaitReconnect,
       ConnectionType.UnstableConnection,
-    ].some(s => s == status)} />
+    ].includes(status)} />
   <div slot="tooltip" class="transition-all sm:block">
     {displayConnectionType(status)}
   </div>

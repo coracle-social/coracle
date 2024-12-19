@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {getTagValue} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -28,16 +29,16 @@
           loading = true
 
           try {
-            for (const tags of await uploadFiles(urls, inputFiles, {
+            const tags = await uploadFiles(urls, inputFiles, {
               maxWidth,
               maxHeight,
-            })) {
-              // For inputs that only want one file
-              value = tags.get("url")?.value()
+            })
 
-              if (value) {
-                dispatch("change", tags)
-              }
+            // For inputs that only want one file
+            value = getTagValue("url", tags)
+
+            if (value) {
+              dispatch("change", value)
             }
           } finally {
             isOpen = false

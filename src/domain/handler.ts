@@ -1,5 +1,5 @@
-import {fromPairs} from "@welshman/lib"
-import {getAddress, Tags} from "@welshman/util"
+import {fromPairs, last, first} from "@welshman/lib"
+import {getAddress, getTags, getTagValues} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {SearchHelper, parseJson} from "src/util/misc"
 
@@ -32,11 +32,12 @@ export const readHandlers = (event: TrustedEvent) => {
     return []
   }
 
-  return Tags.fromEvent(event)
-    .whereKey("k")
-    .values()
-    .valueOf()
-    .map(kind => ({...normalizedMeta, kind: parseInt(kind), identifier, event})) as Handler[]
+  return getTagValues("k", event.tags).map(kind => ({
+    ...normalizedMeta,
+    kind: parseInt(kind),
+    identifier,
+    event,
+  })) as Handler[]
 }
 
 export const getHandlerKey = (handler?: Handler) => `${handler.kind}:${getAddress(handler.event)}`
@@ -50,8 +51,8 @@ export class HandlerSearch extends SearchHelper<Handler, string> {
 }
 
 export const getHandlerAddress = (event: TrustedEvent) => {
-  const tags = Tags.fromEvent(event).whereKey("a")
-  const tag = tags.filter(t => t.last() === "web").first() || tags.first()
+  const tags = getTags("a", event.tags)
+  const tag = tags.find(t => last(t) === "web") || first(tags)
 
-  return tag?.value()
+  return tag?.[1]
 }

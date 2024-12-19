@@ -93,9 +93,9 @@
             <span>{opt}</span>
             <div
               class:!bg-danger={opt.includes("Failed") || opt.includes("Not")}
-              class:!bg-warning={opt == "Logging in" ||
-                o == ConnectionType.WaitReconnect ||
-                o == ConnectionType.UnstableConnection}
+              class:!bg-warning={opt === "Logging in" ||
+                o === ConnectionType.WaitReconnect ||
+                o === ConnectionType.UnstableConnection}
               class="h-3 w-3 rounded-full bg-success" />
           </div>
         {/each}

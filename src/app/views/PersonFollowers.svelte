@@ -30,7 +30,7 @@
   })
 </script>
 
-{#if !pubkeys.length && loaded == false}
+{#if !pubkeys.length && !loaded}
   <div class="flex h-64 items-center justify-center">
     <Spinner />
   </div>

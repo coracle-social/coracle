@@ -1,7 +1,9 @@
 <script lang="ts">
   import {ctx, identity} from "@welshman/lib"
   import {
-    Tags,
+    getPubkeyTagValues,
+    getRelayTagValues,
+    getTopicTagValues,
     NAMED_PEOPLE,
     NAMED_RELAYS,
     NAMED_TOPICS,
@@ -94,14 +96,11 @@
     {#if !hide.includes("tags")}
       <Field label="List contents">
         {#if list.kind === NAMED_PEOPLE}
-          <PersonSelect
-            multiple
-            value={Tags.wrap(list.tags).whereKey("p").values().valueOf()}
-            onChange={onPubkeysChange} />
+          <PersonSelect multiple value={getPubkeyTagValues(list.tags)} onChange={onPubkeysChange} />
         {:else if list.kind === NAMED_RELAYS}
           <SearchSelect
             multiple
-            value={Tags.wrap(list.tags).whereKey("r").values().valueOf()}
+            value={getRelayTagValues(list.tags)}
             search={$relaySearch.searchValues}
             termToItem={normalizeRelayUrl}
             onChange={onRelaysChange}>
@@ -110,7 +109,7 @@
         {:else if list.kind === NAMED_TOPICS}
           <SearchSelect
             multiple
-            value={Tags.wrap(list.tags).whereKey("t").values().valueOf()}
+            value={getTopicTagValues(list.tags)}
             search={$topicSearch.searchValues}
             termToItem={identity}
             onChange={onTopicsChange}>

@@ -22,7 +22,6 @@ import {
   GROUPS,
   TOPICS,
   getAddress,
-  Tags,
 } from "@welshman/util"
 import {SearchHelper} from "src/util/misc"
 
@@ -93,22 +92,24 @@ export const readUserList = (event: TrustedEvent) => {
 
 export const createUserList = ({kind, title, description, identifier, tags}: UserList) => ({
   kind,
-  tags: Tags.wrap(tags)
-    .setTag("d", identifier)
-    .setTag("alt", title)
-    .setTag("title", title)
-    .setTag("description", description)
-    .unwrap(),
+  tags: Object.entries({
+    ...fromPairs(tags),
+    title,
+    alt: title,
+    d: identifier,
+    description: description,
+  }),
 })
 
 export const editUserList = ({kind, title, description, identifier, tags}: UserList) => ({
   kind: kind,
-  tags: Tags.wrap(tags)
-    .setTag("d", identifier)
-    .setTag("alt", title)
-    .setTag("title", title)
-    .setTag("description", description)
-    .unwrap(),
+  tags: Object.entries({
+    ...fromPairs(tags),
+    title,
+    alt: title,
+    d: identifier,
+    description: description,
+  }),
 })
 
 export const displayUserList = (list?: UserList) => {

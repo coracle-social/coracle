@@ -32,6 +32,7 @@ export default [
   },
   {
     rules: {
+      eqeqeq: "error",
       "a11y-click-events-have-key-events": "off",
       "a11y-autofocus": "off",
       "no-constant-condition": "off",

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {quantify} from "hurdak"
   import {first} from "@welshman/lib"
-  import {Tags, toNostrURI, Address} from "@welshman/util"
+  import {getTags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
   import {repository} from "@welshman/app"
   import {slide} from "src/util/transition"
@@ -22,7 +22,6 @@
   const tagTypes = defaultTagFeedMappings.map(first) as string[]
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
-  const tags = Tags.fromEvent(event)
   const list = readUserList(event)
 
   const loadFeed = () => {
@@ -65,7 +64,7 @@
       <p>{list.description}</p>
     {/if}
     <div class="flex items-center justify-between">
-      {quantify(tags.filterByKey(tagTypes).count(), "item")}
+      {quantify(getTags(tagTypes, event.tags).length, "item")}
       <div class="flex gap-1">
         <div
           class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"

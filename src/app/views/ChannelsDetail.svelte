@@ -10,8 +10,8 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
-  import {markChannelRead, getChannelIdFromEvent, listenForMessages} from "src/engine"
   import Popover from "src/partials/Popover.svelte"
+  import {getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
 
   export let pubkeys
   export let channelId
@@ -31,18 +31,22 @@
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   onMount(() => {
+    const sub = listenForMessages(pubkeys)
+
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
-    markChannelRead(channelId)
+    setChecked("channels/" + channelId)
 
     for (const pubkey of pubkeys) {
       loadInboxRelaySelections(pubkey)
     }
 
-    return listenForMessages(pubkeys)
+    return () => {
+      sub.close()
+    }
   })
 
   onDestroy(() => {
-    markChannelRead(channelId)
+    setChecked("channels/" + channelId)
   })
 
   document.title = `Direct Messages`
@@ -57,7 +61,7 @@
           href={"/channels" + (isAccepted ? "" : "/requests")} />
         <PersonCircles {pubkeys} />
       </div>
-      <div class:h-16={pubkeys.length == 1} class="flex flex-col items-start overflow-hidden pt-2">
+      <div class:h-16={pubkeys.length === 1} class="flex flex-col items-start overflow-hidden pt-2">
         <div>
           {#each pubkeys as pubkey, i (pubkey)}
             {#if i > 0}&bullet;{/if}

@@ -1,8 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {deriveIsDeletedByAddress} from "@welshman/store"
-  import {ctx} from "@welshman/lib"
-  import {Tags, Address} from "@welshman/util"
+  import {ctx, fromPairs} from "@welshman/lib"
+  import {getTagValues, getTagValue, Address} from "@welshman/util"
   import {repository, pubkey} from "@welshman/app"
   import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -19,10 +19,9 @@
   export let showMedia = false
   export let showEntire = false
 
-  const tags = Tags.fromEvent(note)
-  const images = tags.values("image").valueOf()
-  const {title, summary, location, status} = tags.asObject()
-  const [price, code = "SAT"] = tags.get("price")?.drop(1).valueOf() || []
+  const images = getTagValues("image", note.tags)
+  const {title, summary, location, status} = fromPairs(note.tags)
+  const [price, code = "SAT"] = getTagValue("price", note.tags)?.slice(1) || []
   const address = Address.fromEvent(note, ctx.app.router.Event(note).getUrls())
   const editLink = router.at("listings").of(address.toString()).at("edit").toString()
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
