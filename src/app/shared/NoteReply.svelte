@@ -1,19 +1,18 @@
 <script lang="ts">
-  import {displayProfileByPubkey, session, tagPubkey, tagReplyTo} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
+  import {session, displayProfileByPubkey, tagReplyTo, tagPubkey} from "@welshman/app"
+  import {ctx, without, uniq} from "@welshman/lib"
   import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
-  import {uniq, without} from "ramda"
   import {Editor} from "svelte-tiptap"
   import {writable, type Writable} from "svelte/store"
-  import {getEditorOptions} from "src/app/editor"
+  import {slide} from "src/util/transition"
+  import AltColor from "src/partials/AltColor.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
+  import {getEditorOptions} from "src/app/editor"
   import {drafts, openReplies} from "src/app/state"
   import {getClientTags, publish, sign, tagsFromContent, userSettings} from "src/engine"
-  import AltColor from "src/partials/AltColor.svelte"
-  import Chip from "src/partials/Chip.svelte"
-  import {slide} from "src/util/transition"
 
   export let parent
   export let showBorder = false

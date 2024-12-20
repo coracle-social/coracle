@@ -1,8 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {onMount} from "svelte"
-  import {reject, equals} from "ramda"
-  import {uniq, identity} from "@welshman/lib"
+  import {uniq, identity, equals} from "@welshman/lib"
   import Input from "src/partials/Input.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
@@ -47,7 +46,7 @@
   }
 
   const remove = item => {
-    value = multiple ? reject(equals(item), value) : null
+    value = multiple ? value.filter(v => !equals(item, v)) : null
     onChange?.(value)
   }
 

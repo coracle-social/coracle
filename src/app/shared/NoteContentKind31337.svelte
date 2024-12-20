@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
+  import {fromPairs} from "@welshman/lib"
   import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"

@@ -38,7 +38,7 @@
   const context = deriveEvents(repository, {filters: getReplyFilters([event])})
 
   $: children = $context.filter(e => isChildOf(e, event))
-  $: replies = sortEventsDesc(children.filter(e => e.kind == NOTE))
+  $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
   $: replyIsActive = $openReplies[event.id]
 
   let mutedReplies, hiddenReplies, visibleReplies

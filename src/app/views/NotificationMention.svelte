@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, uniq} from "ramda"
+  import {pluck, uniq} from "@welshman/lib"
   import {ctx} from "@welshman/lib"
   import {getAncestorTagValues} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"

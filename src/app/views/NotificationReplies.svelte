@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {pluck} from "ramda"
-  import {uniq} from "@welshman/lib"
+  import {uniq, pluck} from "@welshman/lib"
   import {pubkey} from "@welshman/app"
   import {isShareableRelayUrl} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
