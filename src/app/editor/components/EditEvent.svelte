@@ -7,8 +7,8 @@
   export let selected: NodeViewProps["selected"]
 </script>
 
-<NodeViewWrapper>
-  <button class="tiptap-object {selected ? 'tiptap-selected' : ''}">
+<NodeViewWrapper as="span">
+  <button class="tiptap-object {selected ? 'tiptap-active' : ''}">
     {fromNostrURI(node.attrs.nevent).slice(0, 16)}...
   </button>
 </NodeViewWrapper>

@@ -4,11 +4,11 @@
 
   export let node: NodeViewProps["node"]
   export let selected: NodeViewProps["selected"]
+
+  $: selectedClass = selected ? "tiptap-active" : ""
+  $: uploadingClass = node.attrs.uploading ? "tiptap-uploading" : ""
 </script>
 
-<NodeViewWrapper
-  class="tiptap-object {selected ? 'tiptap-selected' : ''} {node.attrs.uploading
-    ? 'tiptap-uploading'
-    : ''}">
+<NodeViewWrapper as="span" class="tiptap-object {selectedClass} {uploadingClass}">
   {node.attrs.file?.name || node.attrs.src}
 </NodeViewWrapper>

@@ -6,8 +6,8 @@
   export let selected: NodeViewProps["selected"]
 </script>
 
-<NodeViewWrapper class="inline">
-  <button class="we-object {selected ? 'we-selected' : ''}">
+<NodeViewWrapper as="span">
+  <button class="tiptap-object {selected ? 'tiptap-active' : ''}">
     {node.attrs.lnbc.slice(0, 16)}...
   </button>
 </NodeViewWrapper>

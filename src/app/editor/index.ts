@@ -1,8 +1,11 @@
 import type {Writable} from "svelte/store"
+import {derived} from "svelte/store"
 import {createEditor} from "svelte-tiptap"
+import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
-import {signer} from "@welshman/app"
+import {signer, profileSearch} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
+import {MentionSuggestion} from "src/app/editor/plugins"
 import {WelshmanExtension} from "src/app/editor/extensions"
 import "./index.css"
 
@@ -71,6 +74,19 @@ export const getEditor = ({
               },
               onComplete() {
                 uploading?.set(false)
+              },
+            },
+          },
+          nprofile: {
+            extend: {
+              addProseMirrorPlugins() {
+                return [
+                  MentionSuggestion({
+                    editor: (this as any).editor,
+                    search: derived(profileSearch, s => s.searchValues),
+                    getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+                  }),
+                ]
               },
             },
           },

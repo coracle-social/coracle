@@ -48,6 +48,8 @@ export type ChildExtensionOptions<C = any, E = any> =
       config?: Partial<C>
     }
 
+export type EmptyOptions = object
+
 export type WelshmanExtensionOptions = {
   bolt11?: false
   breakOrSubmit: ChildExtensionOptions<BreakOrSubmitOptions>
@@ -60,9 +62,9 @@ export type WelshmanExtensionOptions = {
   history?: ChildExtensionOptions<HistoryOptions>
   image?: ChildExtensionOptions<ImageOptions>
   link?: ChildExtensionOptions<LinkOptions>
-  naddr?: false
-  nevent?: false
-  nprofile?: false
+  naddr?: ChildExtensionOptions<EmptyOptions>
+  nevent?: ChildExtensionOptions<EmptyOptions>
+  nprofile?: ChildExtensionOptions<EmptyOptions>
   nsecReject?: ChildExtensionOptions<NSecRejectOptions>
   paragraph?: ChildExtensionOptions<ParagraphOptions>
   placeholder?: ChildExtensionOptions<PlaceholderOptions>

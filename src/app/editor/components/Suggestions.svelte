@@ -1,14 +1,13 @@
 <svelte:options accessors />
 
 <script lang="ts">
-  import {fly, slide} from "svelte/transition"
+  import {fly} from "svelte/transition"
   import {throttle, clamp} from "@welshman/lib"
 
   export let term
   export let search
   export let select
   export let component
-  export let loading = false
   export let allowCreate = false
 
   let index = 0
@@ -58,45 +57,28 @@
 </script>
 
 {#if term}
-  <div
-    bind:this={element}
-    transition:fly|local={{duration: 200}}
-    class="mt-2 max-h-[350px] overflow-y-auto overflow-x-hidden shadow-xl {$$props.class} bg-alt"
-    style={$$props.style}>
-    {#if term && allowCreate && !items.includes(term)}
-      <button
-        class="white-space-nowrap block w-full min-w-0 cursor-pointer overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
-        on:mousedown|preventDefault|stopPropagation
-        on:click|preventDefault|stopPropagation={() => select(term)}>
-        Use "<svelte:component this={component} value={term} />"
-      </button>
+  <div bind:this={element} transition:fly|local={{duration: 200}} class="tiptap-suggestions">
+    <div class="tiptap-suggestions__content">
+      {#if term && allowCreate && !items.includes(term)}
+        <button
+          class="tiptap-suggestions__create"
+          on:mousedown|preventDefault|stopPropagation
+          on:click|preventDefault|stopPropagation={() => select(term)}>
+          Use "<svelte:component this={component} value={term} />"
+        </button>
+      {/if}
+      {#each items as value, i (value)}
+        <button
+          class="tiptap-suggestions__item"
+          class:tiptap-suggestions__selected={index === i}
+          on:mousedown|preventDefault|stopPropagation
+          on:click|preventDefault|stopPropagation={() => select(value)}>
+          <svelte:component this={component} {value} />
+        </button>
+      {/each}
+    </div>
+    {#if items.length === 0}
+      <div class="tiptap-suggestions__empty">No results</div>
     {/if}
-    {#each items as value, i (value)}
-      <button
-        class="white-space-nowrap flex w-full min-w-0 cursor-pointer items-center overflow-x-hidden text-ellipsis px-4 py-2 text-left transition-all hover:brightness-150"
-        class:brightness-150={index === i}
-        class:dark:bg-neutral-700-d={index === i}
-        class:bg-neutral-400-d={index === i}
-        on:mousedown|preventDefault|stopPropagation
-        on:click|preventDefault|stopPropagation={() => select(value)}>
-        <svelte:component this={component} {value} />
-      </button>
-    {/each}
   </div>
-  {#if loading}
-    <div transition:slide|local class="flex gap-2 px-4 py-2">
-      <div>
-        <i class="fa fa-circle-notch fa-spin" />
-      </div>
-      Loading more options...
-    </div>
-  {/if}
-  {#if !items.length && !loading}
-    <div class="flex gap-2 px-4 py-2 text-base">
-      <div>
-        <i class="fa fa-exclamation-circle" />
-      </div>
-      No results
-    </div>
-  {/if}
 {/if}

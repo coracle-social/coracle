@@ -1,8 +1,8 @@
 :root {
-  --tiptap-object-bg: #ddd;
+  --tiptap-object-bg: #eee;
   --tiptap-object-fg: #111;
-  --tiptap-selected-bg: #222;
-  --tiptap-selected-fg: #eee;
+  --tiptap-active-bg: #ddd;
+  --tiptap-active-fg: #111;
 }
 
 .tiptap {
@@ -39,13 +39,55 @@
   color: var(--tiptap-object-fg);
 }
 
-.tiptap .tiptap-selected {
-  background-color: var(--tiptap-selected-bg);
-  color: var(--tiptap-selected-fg);
+.tiptap .tiptap-active {
+  background-color: var(--tiptap-active-bg);
+  color: var(--tiptap-active-fg);
 }
 
 .tiptap .tiptap-uploading {
   animation: tiptapFileUpload 1.5s infinite;
+}
+
+.tiptap-suggestions {
+  margin-top: 0.5rem;
+  max-height: 350px;
+}
+
+.tiptap-suggestions__content {
+  border-radius: 3px;
+  box-shadow: 0px 5px 8px 0px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tiptap-suggestions__create,
+.tiptap-suggestions__item {
+  white-space: nowrap;
+  display: block;
+  width: 100%;
+  min-width: 0px;
+  cursor: pointer;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  transition-duration: 100ms;
+  transition-property: color background-color;
+  background-color: var(--tiptap-object-bg);
+  color: var(--tiptap-object-fg);
+}
+
+.tiptap-suggestions__selected,
+.tiptap-suggestions__create:hover,
+.tiptap-suggestions__item:hover {
+  background-color: var(--tiptap-active-bg);
+  color: var(--tiptap-active-fg);
+}
+
+.tiptap-suggestions__empty {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
 }
 
 @keyframes tiptapFileUpload {
