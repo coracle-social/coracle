@@ -4,6 +4,7 @@ import type {StampedEvent} from "@welshman/util"
 import {signer} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
 import {WelshmanExtension} from "src/app/editor/extensions"
+import "./index.css"
 
 export const getUploadType = () => getSetting("upload_type")
 

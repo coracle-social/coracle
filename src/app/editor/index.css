@@ -5,13 +5,35 @@
   --tiptap-selected-fg: #eee;
 }
 
+.tiptap {
+  outline: none;
+  min-height: 0;
+  height: 100%;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap pre code {
+  display: block;
+  max-width: 100%;
+  overflow: auto;
+  padding: 0.25rem;
+}
+
 .tiptap .tiptap-object,
+.tiptap p code,
 .tiptap [tag] {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border-radius: 2px;
+  border-radius: 3px;
   padding: 0 0.25rem;
   background-color: var(--tiptap-object-bg);
   color: var(--tiptap-object-fg);
@@ -23,10 +45,10 @@
 }
 
 .tiptap .tiptap-uploading {
-  animation: blurPulse 1.5s infinite;
+  animation: tiptapFileUpload 1.5s infinite;
 }
 
-@keyframes blurPulse {
+@keyframes tiptapFileUpload {
   0% {
     opacity: 0.2;
   }
@@ -37,4 +59,3 @@
     opacity: 0.2;
   }
 }
-
