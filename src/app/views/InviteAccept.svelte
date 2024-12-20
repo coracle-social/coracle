@@ -1,7 +1,6 @@
 <script lang="ts">
   import {session} from "@welshman/app"
   import {normalizeRelayUrl} from "@welshman/util"
-  import {zipObj} from "ramda"
   import PersonList from "src/app/shared/PersonList.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
@@ -16,7 +15,7 @@
   export let relays = []
 
   const parsedRelays = relays
-    .map(s => zipObj(["url", "claim"], s.split("|")))
+    .map(s => ({url: s.split("|")[0], claim: s.split("|")[1]}))
     .map(updateIn("url", normalizeRelayUrl))
 </script>
 
