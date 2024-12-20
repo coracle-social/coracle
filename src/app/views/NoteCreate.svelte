@@ -220,7 +220,7 @@
         </Anchor>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
-          on:click|preventDefault={$editor.commands.selectFiles}>
+          on:click|preventDefault={() => $editor.chain().selectFiles().run()}>
           <i class="fa fa-upload" />
         </button>
       </div>

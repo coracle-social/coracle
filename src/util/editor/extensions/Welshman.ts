@@ -178,7 +178,15 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
         config: {
           sign,
           immediateUpload: true,
-          allowedMimeTypes: ["image/*", "video/*"],
+          allowedMimeTypes: [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+            "video/mp4",
+            "video/mpeg",
+            "video/webm",
+          ],
         },
       },
     }) as WelshmanExtensionOptions

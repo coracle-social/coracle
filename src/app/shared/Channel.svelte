@@ -180,7 +180,7 @@
         <button
           class="flex cursor-pointer flex-col justify-center gap-2 p-3
                  py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white"
-          on:click={() => $editor.commands.selectFiles()}>
+          on:click={() => $editor.chain().selectFiles().run()}>
           <i class="fa-solid fa-paperclip fa-lg" />
         </button>
         <button
