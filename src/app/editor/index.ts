@@ -1,6 +1,6 @@
 import type {Writable} from "svelte/store"
 import {derived} from "svelte/store"
-import {createEditor} from "svelte-tiptap"
+import {createEditor, SvelteNodeViewRenderer} from "svelte-tiptap"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
@@ -9,6 +9,7 @@ import {MentionSuggestion} from "src/util/editor/plugins"
 import {WelshmanExtension} from "src/util/editor/extensions"
 import "src/util/editor/index.css"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
+import EditMention from "./EditMention.svelte"
 
 export const getUploadType = () => getSetting("upload_type")
 
@@ -80,6 +81,7 @@ export const getEditor = ({
           },
           nprofile: {
             extend: {
+              addNodeView: () => SvelteNodeViewRenderer(EditMention),
               addProseMirrorPlugins() {
                 return [
                   MentionSuggestion({
