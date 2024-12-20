@@ -1,9 +1,8 @@
 import type {StampedEvent, SignedEvent} from "@welshman/util"
+import {toNostrURI} from "@welshman/util"
 import {deepMergeLeft} from "@welshman/lib"
 import {SvelteNodeViewRenderer} from "svelte-tiptap"
 import type {Extensions, AnyExtension} from "@tiptap/core"
-import {Code} from "@tiptap/extension-code"
-import type {CodeOptions} from "@tiptap/extension-code"
 import {CodeBlock} from "@tiptap/extension-code-block"
 import type {CodeBlockOptions} from "@tiptap/extension-code-block"
 import {Document} from "@tiptap/extension-document"
@@ -38,6 +37,7 @@ import {
   NSecRejectExtension,
 } from "nostr-editor"
 import {WordCount} from "./WordCount.js"
+import {CodeInline, type CodeInlineOptions} from "./CodeInline.js"
 import {BreakOrSubmit, type BreakOrSubmitOptions} from "./BreakOrSubmit.js"
 import {EditBolt11, EditMedia, EditEvent, EditMention} from "../components/index.js"
 
@@ -53,7 +53,7 @@ export type EmptyOptions = object
 export type WelshmanExtensionOptions = {
   bolt11?: false
   breakOrSubmit: ChildExtensionOptions<BreakOrSubmitOptions>
-  code?: ChildExtensionOptions<CodeOptions>
+  codeInline?: ChildExtensionOptions<CodeInlineOptions>
   codeBlock?: ChildExtensionOptions<CodeBlockOptions>
   document?: false
   dropcursor?: ChildExtensionOptions<DropcursorOptions>
@@ -102,6 +102,16 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
     if (!submit) throw new Error("submit is a required argument to WelshmanExtension")
 
     const extensionOptions = deepMergeLeft(this.options.extensions || {}, {
+      codeInline: {
+        extend: {
+          renderText: (props: any) => "`" + props.node.textContent + "`",
+        },
+      },
+      codeBlock: {
+        extend: {
+          renderText: (props: any) => "```" + props.node.textContent + "```",
+        },
+      },
       bolt11: {
         config: {
           inline: true,
@@ -139,6 +149,7 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
           group: "inline",
         },
         extend: {
+          renderText: (props: any) => toNostrURI(props.node.attrs.nevent),
           addNodeView: () => SvelteNodeViewRenderer(EditEvent),
         },
       },
@@ -148,11 +159,13 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
           group: "inline",
         },
         extend: {
+          renderText: (props: any) => toNostrURI(props.node.attrs.naddr),
           addNodeView: () => SvelteNodeViewRenderer(EditEvent),
         },
       },
       nprofile: {
         extend: {
+          renderText: (props: any) => toNostrURI(props.node.attrs.nprofile),
           addNodeView: () => SvelteNodeViewRenderer(EditMention),
         },
       },
@@ -191,7 +204,7 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
     addExtension(Paragraph, extensionOptions.paragraph)
     addExtension(History, extensionOptions.history)
     addExtension(CodeBlock, extensionOptions.codeBlock)
-    addExtension(Code, extensionOptions.code)
+    addExtension(CodeInline, extensionOptions.codeInline)
     addExtension(Dropcursor, extensionOptions.dropcursor)
     addExtension(FileUploadExtension, extensionOptions.fileUpload)
     addExtension(Gapcursor, extensionOptions.gapcursor)
@@ -210,24 +223,4 @@ export const WelshmanExtension = NostrExtension.extend<WelshmanOptions>({
 
     return extensions
   },
-
-  // addStorage() {
-  //   return {
-  //     ...this.parent.addStorage(),
-  //   }
-  // },
-
-  // onBeforeCreate() {
-  //   this.parent.onBeforeCreate()
-
-  //   this.storage.getEditorTags = (hints = true): string[][] => {
-  //     return [
-  //       ...this.storage.getPtags(hints),
-  //       ...this.storage.getQtags(hints),
-  //       ...this.storage.getAtags(hints),
-  //       ...this.storage.getImetaTags(),
-  //       ...this.storage.getTtags(),
-  //     ]
-  //   }
-  // },
 })

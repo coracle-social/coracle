@@ -78,6 +78,8 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
+    return console.log({content, tags})
+
     const template = createEvent(1, {content, tags})
     const signedTemplate = await sign(template, options)
 
