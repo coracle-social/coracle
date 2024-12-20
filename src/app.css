@@ -239,3 +239,19 @@ body,
 .react-switch-bg {
   border: 1px solid var(--neutral-600);
 }
+
+/* tiptap */
+
+.tiptap {
+  --tiptap-object-bg: var(--neutral-100);
+  --tiptap-object-fg: var(--neutral-800);
+  --tiptap-active-bg: var(--neutral-200);
+  --tiptap-active-fg: var(--neutral-800);
+}
+
+.tiptap-suggestions {
+  --tiptap-object-bg: var(--neutral-800);
+  --tiptap-object-fg: var(--neutral-200);
+  --tiptap-active-bg: var(--neutral-700);
+  --tiptap-active-fg: var(--neutral-200);
+}

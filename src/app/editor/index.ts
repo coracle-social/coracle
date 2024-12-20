@@ -5,9 +5,10 @@ import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
-import {MentionSuggestion} from "src/app/editor/plugins"
-import {WelshmanExtension} from "src/app/editor/extensions"
-import "./index.css"
+import {MentionSuggestion} from "src/util/editor/plugins"
+import {WelshmanExtension} from "src/util/editor/extensions"
+import "src/util/editor/index.css"
+import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
 export const getUploadType = () => getSetting("upload_type")
 
@@ -85,6 +86,7 @@ export const getEditor = ({
                     editor: (this as any).editor,
                     search: derived(profileSearch, s => s.searchValues),
                     getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+                    component: ProfileSuggestion,
                   }),
                 ]
               },
