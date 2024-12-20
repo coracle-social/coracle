@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq, pluck} from "ramda"
+  import {uniq, pluck} from "@welshman/lib"
   import {pluralize} from "hurdak"
   import {getAddress} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"

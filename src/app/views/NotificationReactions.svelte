@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {pluck, uniq} from "ramda"
   import {closure} from "hurdak"
+  import {pluck, uniq} from "@welshman/lib"
   import {pubkey, tracker} from "@welshman/app"
   import {formatTimestamp} from "src/util/misc"
   import Card from "src/partials/Card.svelte"

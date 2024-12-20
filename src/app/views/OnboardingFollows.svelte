@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {reject} from "ramda"
   import {quantify} from "hurdak"
-  import {ctx, fromPairs, uniq, without, remove, append, nth, nthEq} from "@welshman/lib"
+  import {ctx, fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
   import {relaySearch, profileSearch, tagPubkey} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
@@ -83,7 +82,7 @@
   }
 
   const removeRelay = url => {
-    state.relays = reject(nthEq(1, url), state.relays)
+    state.relays = state.relays.filter(nthNe(1, url))
   }
 
   const addRelay = url => {

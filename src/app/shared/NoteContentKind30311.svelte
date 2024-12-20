@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {fromPairs} from "ramda"
+  import {fromPairs} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
   import {ctx} from "@welshman/lib"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {uniq, pluck} from "ramda"
+  import {uniq, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import PersonLink from "src/app/shared/PersonLink.svelte"
 

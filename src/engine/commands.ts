@@ -14,7 +14,21 @@ import {
   userInboxRelaySelections,
   userRelaySelections,
 } from "@welshman/app"
-import {identity, append, cached, ctx, groupBy, now, nthEq, remove} from "@welshman/lib"
+import {
+  append,
+  cached,
+  ctx,
+  groupBy,
+  now,
+  nthNe,
+  remove,
+  assoc,
+  flatten,
+  identity,
+  omit,
+  prop,
+  uniq,
+} from "@welshman/lib"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
@@ -39,7 +53,6 @@ import {
 } from "@welshman/util"
 import crypto from "crypto"
 import {Fetch, sleep, tryFunc} from "hurdak"
-import {assoc, flatten, omit, prop, reject, uniq} from "ramda"
 import {
   addClientTags,
   anonymous,
@@ -108,7 +121,7 @@ export const getMediaProviderURL = cached({
 })
 
 const fetchMediaProviderURL = async host =>
-  prop("api_url", await Fetch.fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
+  prop("api_url")(await Fetch.fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
 
 const fileToFormData = file => {
   const formData = new FormData()
@@ -118,7 +131,7 @@ const fileToFormData = file => {
   return formData
 }
 
-export const uploadFileToHost = async (url, file) => {
+export const uploadFileToHost = async <T = any>(url: string, file: File): Promise<T> => {
   const startTime = now()
   const apiUrl = await getMediaProviderURL(url)
   const response = await nip98Fetch(apiUrl, "POST", fileToFormData(file))
@@ -141,14 +154,14 @@ export const uploadFileToHost = async (url, file) => {
   return response.nip94_event
 }
 
-export const uploadFilesToHost = (url, files) =>
-  Promise.all(files.map(file => tryFunc(async () => await uploadFileToHost(url, file))))
+export const uploadFilesToHost = <T = any>(url: string, files: File[]): Promise<T[]> =>
+  Promise.all(files.map(file => tryFunc(async () => await uploadFileToHost<T>(url, file))))
 
-export const uploadFileToHosts = (urls, file) =>
-  Promise.all(urls.map(url => tryFunc(async () => await uploadFileToHost(url, file))))
+export const uploadFileToHosts = <T = any>(urls: string[], file: File): Promise<T[]> =>
+  Promise.all(urls.map(url => tryFunc(async () => await uploadFileToHost<T>(url, file))))
 
-export const uploadFilesToHosts = async (urls, files) =>
-  flatten(await Promise.all(urls.map(url => uploadFilesToHost(url, files)))).filter(identity)
+export const uploadFilesToHosts = async <T = any>(urls: string[], files: File[]): Promise<T[]> =>
+  flatten(await Promise.all(urls.map(url => uploadFilesToHost<T>(url, files)))).filter(identity)
 
 export const compressFiles = (files, opts) =>
   Promise.all(
@@ -174,7 +187,7 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
   const compressedFiles = await compressFiles(files, compressorOpts)
   const nip94Events = await uploadFilesToHosts(urls, compressedFiles)
 
-  return eventsToMeta(nip94Events)
+  return eventsToMeta(nip94Events as TrustedEvent[])
 }
 
 // Key state management
@@ -227,7 +240,7 @@ export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) =
 export const unfollow = async (value: string) =>
   signer.get()
     ? baseUnfollow(value)
-    : anonymous.update($a => ({...$a, follows: reject(nthEq(1, value), $a.follows)}))
+    : anonymous.update($a => ({...$a, follows: $a.follows.filter(nthNe(1, value))}))
 
 export const follow = async (tag: string[]) =>
   signer.get()
@@ -417,7 +430,7 @@ export const logoutPubkey = pubkey => {
     throw new Error("Can't destroy the current session, use logout instead")
   }
 
-  sessions.update(omit([pubkey]))
+  sessions.update(s => omit([pubkey], s))
 }
 
 export const logout = () => {

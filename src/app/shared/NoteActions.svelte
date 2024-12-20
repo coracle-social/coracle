@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {sum, pluck} from "ramda"
+  import {sum, pluck} from "@welshman/lib"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
@@ -195,7 +195,7 @@
     .filter(e => e.kind === 9735)
     .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
-  $: replies = sortEventsDesc(children.filter(e => e.kind == NOTE))
+  $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
 
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
@@ -206,14 +206,14 @@
   $: replied = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
   $: $repliesCount = replies.length
   $: handlers =
-    event.kind != 1 &&
+    event.kind !== 1 &&
     $kindHandlers.filter(
       h =>
         h.name.toLowerCase() !== "coracle" &&
         h.event.tags.some(
           t =>
             ["web", os].includes(t[0]) &&
-            (t.length == 2 || ["note", "nevent", ""].includes(last(t))),
+            (t.length === 2 || ["note", "nevent", ""].includes(last(t))),
         ),
     )
 
