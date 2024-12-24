@@ -5,7 +5,18 @@
   import {get, derived} from "svelte/store"
   import {dev} from "$app/environment"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
-  import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, Worker} from "@welshman/lib"
+  import {
+    identity,
+    sleep,
+    take,
+    sortBy,
+    ago,
+    now,
+    HOUR,
+    WEEK,
+    Worker,
+    throttle,
+  } from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     PROFILE,
@@ -18,7 +29,7 @@
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
-  import {throttled} from "@welshman/store"
+  import {throttled, custom} from "@welshman/store"
   import {
     relays,
     handles,
@@ -136,6 +147,58 @@
       )
     }
 
+    const migrate = (data: any[], options: any) => (options.migrate ? options.migrate(data) : data)
+
+    // TODO: remove this
+    const fromRepositoryAndTracker = (repository: any, tracker: any, options: any = {}) => ({
+      options,
+      keyPath: "id",
+      store: custom(
+        setter => {
+          let onUpdate = () => {
+            const events = migrate(repository.dump(), options)
+
+            setter(
+              events.map((event: any) => {
+                const relays = Array.from(tracker.getRelays(event.id))
+
+                return {id: event.id, event, relays}
+              }),
+            )
+          }
+
+          if (options.throttle) {
+            onUpdate = throttle(options.throttle, onUpdate)
+          }
+
+          onUpdate()
+          tracker.on("update", onUpdate)
+          repository.on("update", onUpdate)
+
+          return () => {
+            tracker.off("update", onUpdate)
+          }
+        },
+        {
+          set: (items: {event: TrustedEvent; relays: string[]}[]) => {
+            const events: TrustedEvent[] = []
+            const relaysById = new Map<string, Set<string>>()
+
+            for (const {event, relays} of items) {
+              if (!event) {
+                continue
+              }
+              events.push(event)
+              relaysById.set(event.id, new Set(relays))
+            }
+
+            repository.load(events)
+            tracker.load(relaysById)
+          },
+        },
+      ),
+    })
+
     if (!db) {
       setupTracking()
       setupAnalytics()
@@ -151,7 +214,7 @@
           throttle: 3000,
           migrate: migratePlaintext,
         }),
-        events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
+        events: fromRepositoryAndTracker(repository, tracker, {
           throttle: 3000,
           migrate: migrateEvents,
         }),
