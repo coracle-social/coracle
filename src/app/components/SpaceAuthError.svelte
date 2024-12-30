@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {displayRelayUrl} from "@welshman/util"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -47,7 +48,9 @@
     <div slot="title">Access Error</div>
     <div slot="info">We couldn't connect you to this space.</div>
   </ModalHeader>
-  <p>We received an error from the relay indicating you don't have access to this space.</p>
+  <p>
+    We received an error from the relay indicating you don't have access to {displayRelayUrl(url)}.
+  </p>
   <p class="border-l border-solid border-error pl-4 text-error">
     {error}
   </p>

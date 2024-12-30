@@ -1,5 +1,5 @@
 import {get} from "svelte/store"
-import {ctx, sample, uniq, sleep, chunk, equals, choice} from "@welshman/lib"
+import {ctx, sample, uniq, sleep, chunk, equals} from "@welshman/lib"
 import {
   DELETE,
   PROFILE,
@@ -84,19 +84,6 @@ export const getPubkeyPetname = (pubkey: string) => {
 
   return display
 }
-
-export const makeMention = (pubkey: string, hints?: string[]) => [
-  "p",
-  pubkey,
-  choice(hints || getPubkeyHints(pubkey)),
-  getPubkeyPetname(pubkey),
-]
-
-export const makeIMeta = (url: string, data: Record<string, string>) => [
-  "imeta",
-  `url ${url}`,
-  ...Object.entries(data).map(([k, v]) => [k, v].join(" ")),
-]
 
 export const getThunkError = async (thunk: Thunk) => {
   const result = await thunk.result
@@ -342,7 +329,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
 
   const result = await thunk.result
 
-  if (result[url].status !== PublishStatus.Success) {
+  if (result[url].status === PublishStatus.Failure) {
     const message =
       connection.auth.message?.replace(/^.*: /, "") ||
       result[url].message?.replace(/^.*: /, "") ||
