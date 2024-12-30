@@ -1,9 +1,9 @@
-import {partition, assoc, now} from "@welshman/lib"
-import {MESSAGE, REACTION, DELETE, THREAD, COMMENT} from "@welshman/util"
+import {partition, assoc, now, ago, MONTH} from "@welshman/lib"
+import {MESSAGE, DELETE, THREAD, COMMENT} from "@welshman/util"
 import type {Subscription} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, repository, load, pull, hasNegentropy} from "@welshman/app"
-import {userRoomsByUrl, LEGACY_MESSAGE, GENERAL, getEventsForUrl} from "@app/state"
+import {subscribe, repository, pull, hasNegentropy} from "@welshman/app"
+import {userRoomsByUrl, getEventsForUrl} from "@app/state"
 
 // Utils
 
@@ -29,16 +29,15 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
 // Application requests
 
 export const listenForNotifications = () => {
-  const since = now()
   const subs: Subscription[] = []
 
   for (const [url, rooms] of userRoomsByUrl.get()) {
-    load({
+    pullConservatively({
       relays: [url],
       filters: [
-        {kinds: [THREAD], limit: 1},
-        {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
-        ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
+        {kinds: [THREAD, DELETE], since: ago(MONTH)},
+        {kinds: [COMMENT], "#K": [String(THREAD)], since: ago(MONTH)},
+        ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], since: ago(MONTH)})),
       ],
     })
 
@@ -46,9 +45,9 @@ export const listenForNotifications = () => {
       subscribe({
         relays: [url],
         filters: [
-          {kinds: [THREAD], since},
-          {kinds: [COMMENT], "#K": [String(THREAD)], since},
-          {kinds: [MESSAGE], "#h": Array.from(rooms), since},
+          {kinds: [THREAD], since: now()},
+          {kinds: [COMMENT], "#K": [String(THREAD)], since: now()},
+          {kinds: [MESSAGE], "#h": Array.from(rooms), since: now()},
         ],
       }),
     )
@@ -59,20 +58,4 @@ export const listenForNotifications = () => {
       sub.close()
     }
   }
-}
-
-export const listenForChannelMessages = (url: string, room: string) => {
-  const since = now()
-  const relays = [url]
-  const kinds = [MESSAGE, REACTION, DELETE]
-  const legacyRoom = room === GENERAL ? "general" : room
-
-  // Load legacy immediate so our request doesn't get rejected by nip29 relays
-  load({relays, filters: [{kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]}], delay: 0})
-
-  // Load historical state with negentropy if available
-  pullConservatively({relays, filters: [{kinds, "#h": [room]}]})
-
-  // Listen for new messages
-  return subscribe({relays, filters: [{kinds, "#h": [room], since}]})
 }

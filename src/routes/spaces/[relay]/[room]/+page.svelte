@@ -9,7 +9,6 @@
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {createEvent, MESSAGE} from "@welshman/util"
-  import type {Subscription} from "@welshman/net"
   import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
@@ -34,7 +33,6 @@
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {nip29, addRoomMembership, removeRoomMembership, getThunkError} from "@app/commands"
-  import {listenForChannelMessages} from "@app/requests"
   import {PROTECTED, hasNip29} from "@app/state"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
@@ -92,7 +90,6 @@
 
   let limit = 30
   let loading = sleep(5000)
-  let sub: Subscription
   let element: HTMLElement
   let scroller: Scroller
   let editor: Readable<Editor>
@@ -138,14 +135,11 @@
         loading = sleep(5000)
       },
     })
-
-    sub = listenForChannelMessages(url, room)
   })
 
   onDestroy(() => {
     setChecked($page.url.pathname)
     scroller?.stop()
-    sub?.close()
   })
 </script>
 
