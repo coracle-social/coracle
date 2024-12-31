@@ -1,6 +1,6 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {onMount, onDestroy} from "svelte"
+  import {onDestroy} from "svelte"
   import type {Readable} from "svelte/store"
   import {derived} from "svelte/store"
   import type {Editor} from "svelte-tiptap"
@@ -122,20 +122,20 @@
     return $elements.reverse().slice(0, limit)
   })
 
-  onMount(async () => {
-    // Sveltekiiit
-    await sleep(100)
-
-    scroller = createScroller({
-      element,
-      delay: 300,
-      threshold: 3000,
-      onScroll: () => {
-        limit += 30
-        loading = sleep(5000)
-      },
-    })
-  })
+  // Sveltekit doesn't set element in onMount for some reason
+  $: {
+    if (element) {
+      scroller = createScroller({
+        element,
+        delay: 300,
+        threshold: 3000,
+        onScroll: () => {
+          limit += 30
+          loading = sleep(5000)
+        },
+      })
+    }
+  }
 
   onDestroy(() => {
     setChecked($page.url.pathname)
