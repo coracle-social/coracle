@@ -65,6 +65,10 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 - Customize configuration in `.env` (optional, see below)
 - Start the development server: `npm run dev`
 
+# Linking welshman
+
+When developing Welshman via Coracle, I use `npx link`. However, @welshman/editor doesn't link correctly. Plus, `npm link` has some bugs I'm not sure are replicated with `npx link`, so I generally remove node_modules and re-install whenever linking (links get nuked when running any npm install). This is all encapsulated in `clean_and_link.sh`, which should take care of most things. If using a local version of welshman, run that before developing.
+
 # Tests
 
 - Run all tests: `npm run test`
