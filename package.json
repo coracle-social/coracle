@@ -1,6 +1,6 @@
 {
   "name": "flotilla",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "vite dev",
@@ -62,12 +62,12 @@
     "@welshman/content": "~0.0.15",
     "@welshman/dvm": "~0.0.13",
     "@welshman/editor": "~0.0.4",
-    "@welshman/feeds": "~0.0.29",
+    "@welshman/feeds": "~0.0.30",
     "@welshman/lib": "~0.0.37",
     "@welshman/net": "~0.0.45",
     "@welshman/signer": "~0.0.19",
     "@welshman/store": "~0.0.15",
-    "@welshman/util": "~0.0.54",
+    "@welshman/util": "~0.0.55",
     "daisyui": "^4.12.10",
     "date-picker-svelte": "^2.13.0",
     "dotenv": "^16.4.5",
