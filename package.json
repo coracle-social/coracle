@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
+    "@sentry/cli": "^2.40.0",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/eslint": "^9.6.0",
