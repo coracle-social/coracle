@@ -45,7 +45,7 @@
         ["location", location],
         ["start", dateToSeconds(start).toString()],
         ["end", dateToSeconds(end).toString()],
-        ...$editor.storage.welshman.getEditorTags(),
+        ...$editor.storage.nostr.getEditorTags(),
         PROTECTED,
       ],
     })

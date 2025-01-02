@@ -22,7 +22,7 @@
     if ($uploading) return
 
     const content = $editor.getText({blockSeparator: "\n"}).trim()
-    const tags = [...$editor.storage.welshman.getEditorTags(), tagRoom(GENERAL, url), PROTECTED]
+    const tags = [...$editor.storage.nostr.getEditorTags(), tagRoom(GENERAL, url), PROTECTED]
 
     if (!content) {
       return pushToast({

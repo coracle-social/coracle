@@ -21,7 +21,7 @@
 
     onSubmit({
       content: $editor!.getText({blockSeparator: "\n"}).trim(),
-      tags: $editor!.storage.welshman.getEditorTags(),
+      tags: $editor!.storage.nostr.getEditorTags(),
     })
 
     $editor!.chain().clearContent().run()

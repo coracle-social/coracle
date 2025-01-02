@@ -39,7 +39,7 @@
     }
 
     const tags = [
-      ...$editor.storage.welshman.getEditorTags(),
+      ...$editor.storage.nostr.getEditorTags(),
       tagRoom(GENERAL, url),
       ["title", title],
       PROTECTED,
