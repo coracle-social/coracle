@@ -4,41 +4,8 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="script-src 'self' plausible.coracle.social glitchtip.coracle.social 'nonce-A132076C'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-src open.spotify.com embed.tidal.com; child-src 'none'; form-action 'none';" />
+      content="script-src 'self' plausible.coracle.social glitchtip.coracle.social; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-src open.spotify.com embed.tidal.com; child-src 'none'; form-action 'none';" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script nonce="A132076C">
-      // Migration: TODO: remove this
-      const oldSessions = {}
-      const newSessions = {}
-
-      try {
-        Object.assign(oldSessions, JSON.parse(localStorage['sessions']))
-      } catch (e) {
-        // Pass
-      }
-
-      for (const [key, session] of Object.entries(oldSessions)) {
-        const {method, privkey, secret, connectKey, connectToken, connectHandler, ...extra} = session
-
-        if (method === "extension") {
-          newSessions[key] = {method: 'nip07', ...extra}
-        } else if (method === "privkey") {
-          newSessions[key] = {method: 'nip01', secret: privkey, ...extra}
-        } else if (method === "connect") {
-          newSessions[key] = {
-            ...extra,
-            method: "nip46",
-            secret: connectKey,
-            token: connectToken,
-            handler: connectHandler,
-          }
-        } else {
-          newSessions[key] = session
-        }
-      }
-
-      localStorage["sessions"] = JSON.stringify(newSessions)
-    </script>
   </head>
   <body class="w-full">
     <div id="app"></div>
