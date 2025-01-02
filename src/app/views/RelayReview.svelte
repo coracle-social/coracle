@@ -25,7 +25,7 @@
       content,
       tags: [
         ...getClientTags(),
-        ...$editor.storage.welshman.getEditorTags(),
+        ...$editor.storage.nostr.getEditorTags(),
         ["L", "review"],
         ["l", "review/relay", "review"],
         ["rating", rating],
