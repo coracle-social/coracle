@@ -15,7 +15,6 @@
     HOUR,
     WEEK,
     Worker,
-    throttle,
   } from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -29,7 +28,6 @@
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
-  import {custom} from "@welshman/store"
   import {
     relays,
     handles,
@@ -91,114 +89,6 @@
       ...notifications,
     })
 
-    const getScoreEvent = () => {
-      const ALWAYS_KEEP = Infinity
-      const NEVER_KEEP = 0
-
-      const reactionKinds = [REACTION, ZAP_RESPONSE]
-      const metaKinds = [PROFILE, FOLLOWS, RELAYS, INBOX_RELAYS]
-      const $sessionKeys = new Set(Object.keys(app.sessions.get()))
-      const $userFollows = new Set(getPubkeyTagValues(getListTags(get(app.userFollows))))
-      const $maxWot = get(app.maxWot)
-
-      return (e: TrustedEvent) => {
-        const isFollowing = $userFollows.has(e.pubkey)
-
-        // No need to keep a record of everyone who follows the current user
-        if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
-
-        // Always keep stuff by or tagging a signed in user
-        if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
-        if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
-
-        // Get rid of irrelevant messages, reactions, and likes
-        if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
-        if (reactionKinds.includes(e.kind)) return NEVER_KEEP
-
-        // If the user follows this person, use max wot score
-        let score = isFollowing ? $maxWot : app.getUserWotScore(e.pubkey)
-
-        // Inflate the score for profiles/relays/follows to avoid redundant fetches
-        // Demote non-metadata type events, and introduce recency bias
-        score *= metaKinds.includes(e.kind) ? 2 : e.created_at / now()
-
-        return score
-      }
-    }
-
-    const migrateFreshness = (data: {key: string; value: number}[]) => {
-      const cutoff = ago(HOUR)
-
-      return data.filter(({value}) => value > cutoff)
-    }
-
-    const migratePlaintext = (data: {key: string; value: number}[]) => data.slice(0, 10_000)
-
-    const migrateEvents = (events: TrustedEvent[]) => {
-      if (events.length < 50_000) {
-        return events
-      }
-
-      const scoreEvent = getScoreEvent()
-
-      return take(
-        30_000,
-        sortBy(e => -scoreEvent(e), events),
-      )
-    }
-
-    const migrate = (data: any[], options: any) => (options.migrate ? options.migrate(data) : data)
-
-    // TODO: remove this
-    const fromRepositoryAndTracker = (repository: any, tracker: any, options: any = {}) => ({
-      options,
-      keyPath: "id",
-      store: custom(
-        setter => {
-          let onUpdate = () => {
-            const events = migrate(repository.dump(), options)
-
-            setter(
-              events.map((event: any) => {
-                const relays = Array.from(tracker.getRelays(event.id))
-
-                return {id: event.id, event, relays}
-              }),
-            )
-          }
-
-          if (options.throttle) {
-            onUpdate = throttle(options.throttle, onUpdate)
-          }
-
-          onUpdate()
-          tracker.on("update", onUpdate)
-          repository.on("update", onUpdate)
-
-          return () => {
-            tracker.off("update", onUpdate)
-          }
-        },
-        {
-          set: (items: {event: TrustedEvent; relays: string[]}[]) => {
-            const events: TrustedEvent[] = []
-            const relaysById = new Map<string, Set<string>>()
-
-            for (const {event, relays} of items) {
-              if (!event) {
-                continue
-              }
-              events.push(event)
-              relaysById.set(event.id, new Set(relays))
-            }
-
-            repository.load(events)
-            tracker.load(relaysById)
-          },
-        },
-      ),
-    })
-
     if (!db) {
       setupTracking()
       setupAnalytics()
@@ -208,15 +98,60 @@
         handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
           throttle: 3000,
-          migrate: migrateFreshness,
+          migrate: (data: {key: string; value: number}[]) => {
+            const cutoff = ago(HOUR)
+
+            return data.filter(({value}) => value > cutoff)
+          },
         }),
         plaintext: storageAdapters.fromObjectStore(plaintext, {
           throttle: 3000,
-          migrate: migratePlaintext,
+          migrate: (data: {key: string; value: number}[]) => data.slice(0, 10_000),
         }),
-        events: fromRepositoryAndTracker(repository, tracker, {
+        events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
           throttle: 3000,
-          migrate: migrateEvents,
+          migrate: (events: TrustedEvent[]) => {
+            if (events.length < 50_000) {
+              return events
+            }
+
+            const NEVER_KEEP = 0
+            const ALWAYS_KEEP = Infinity
+            const reactionKinds = [REACTION, ZAP_RESPONSE]
+            const metaKinds = [PROFILE, FOLLOWS, RELAYS, INBOX_RELAYS]
+            const $sessionKeys = new Set(Object.keys(app.sessions.get()))
+            const $userFollows = new Set(getPubkeyTagValues(getListTags(get(app.userFollows))))
+            const $maxWot = get(app.maxWot)
+
+            const scoreEvent = (e: TrustedEvent) => {
+              const isFollowing = $userFollows.has(e.pubkey)
+
+              // No need to keep a record of everyone who follows the current user
+              if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
+
+              // Always keep stuff by or tagging a signed in user
+              if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
+              if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
+
+              // Get rid of irrelevant messages, reactions, and likes
+              if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
+              if (reactionKinds.includes(e.kind)) return NEVER_KEEP
+
+              // If the user follows this person, use max wot score
+              let score = isFollowing ? $maxWot : app.getUserWotScore(e.pubkey)
+
+              // Inflate the score for profiles/relays/follows to avoid redundant fetches
+              // Demote non-metadata type events, and introduce recency bias
+              score *= metaKinds.includes(e.kind) ? 2 : e.created_at / now()
+
+              return score
+            }
+
+            return take(
+              30_000,
+              sortBy(e => -scoreEvent(e), events),
+            )
+          },
         }),
       }).then(() => sleep(300))
 
@@ -251,7 +186,6 @@
       let unsubSpaces: any
 
       userMembership.subscribe($membership => {
-        console.log("subscribe")
         unsubSpaces?.()
         unsubSpaces = listenForNotifications()
       })

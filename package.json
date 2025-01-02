@@ -61,7 +61,7 @@
     "@welshman/app": "~0.0.36",
     "@welshman/content": "~0.0.15",
     "@welshman/dvm": "~0.0.13",
-    "@welshman/editor": "~0.0.3",
+    "@welshman/editor": "~0.0.4",
     "@welshman/feeds": "~0.0.29",
     "@welshman/lib": "~0.0.37",
     "@welshman/net": "~0.0.45",
