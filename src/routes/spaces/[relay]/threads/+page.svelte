@@ -5,7 +5,7 @@
   import {sortBy, min, nthEq, sleep} from "@welshman/lib"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
   import {throttled} from "@welshman/store"
-  import {feedsFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
+  import {feedFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
   import {createFeedController, userMutes} from "@welshman/app"
   import {createScroller, type Scroller} from "@lib/html"
   import {fly} from "@lib/transition"
@@ -21,7 +21,7 @@
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
-  const feeds = feedsFromFilters([THREAD_FILTER, COMMENT_FILTER])
+  const feed = feedFromFilters([THREAD_FILTER, COMMENT_FILTER])
   const threads = deriveEventsForUrl(url, [THREAD_FILTER])
   const comments = deriveEventsForUrl(url, [COMMENT_FILTER])
   const mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
@@ -50,7 +50,7 @@
 
   const ctrl = createFeedController({
     useWindowing: true,
-    feed: makeIntersectionFeed(makeRelayFeed(url), feeds),
+    feed: makeIntersectionFeed(makeRelayFeed(url), feed),
     onExhausted: () => {
       loading = false
     },

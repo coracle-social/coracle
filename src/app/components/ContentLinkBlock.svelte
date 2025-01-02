@@ -22,7 +22,7 @@
   const expand = () => pushModal(ContentLinkDetail, {url}, {fullscreen: true})
 </script>
 
-<Link external href={url} class="my-2 flex">
+<Link external href={url} class="my-2 inline-block">
   <div class="overflow-hidden rounded-box leading-[0]">
     {#if url.match(/\.(mov|webm|mp4)$/)}
       <video controls src={url} class="max-h-96 object-contain object-center">

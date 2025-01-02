@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {now} from "@welshman/lib"
+  import {ago, WEEK} from "@welshman/lib"
+  import {GROUPS, MESSAGE, DELETE} from "@welshman/util"
   import {subscribe} from "@welshman/app"
-  import {DELETE, REACTION, GROUPS} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -12,10 +12,13 @@
   import {pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
-  import {decodeRelay} from "@app/state"
+  import {decodeRelay, userRoomsByUrl, THREAD_FILTER, COMMENT_FILTER} from "@app/state"
+  import {pullConservatively} from "@app/requests"
   import {notifications} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
+
+  const rooms = Array.from($userRoomsByUrl.get(url) || [])
 
   const checkConnection = async () => {
     const connectionError = await checkRelayConnection(url)
@@ -43,10 +46,26 @@
   onMount(() => {
     checkConnection()
 
-    const sub = subscribe({
-      relays: [url],
-      filters: [{kinds: [GROUPS]}, {kinds: [DELETE, REACTION], since: now()}],
+    const relays = [url]
+    const since = ago(WEEK)
+
+    // Load all groups for this space to populate navigation
+    pullConservatively({relays, filters: [{kinds: [GROUPS]}]})
+
+    // Load threads and comments
+    pullConservatively({
+      relays,
+      filters: [
+        {...THREAD_FILTER, since},
+        {...COMMENT_FILTER, since},
+      ],
     })
+
+    // Load recent messages for user rooms to help with a quick page transition
+    pullConservatively({relays, filters: rooms.map(r => ({kinds: [MESSAGE], "#h": [r], since}))})
+
+    // Listen for deletes that would apply to messages we already have
+    const sub = subscribe({relays, filters: [{kinds: [DELETE], since}]})
 
     return () => {
       sub.close()

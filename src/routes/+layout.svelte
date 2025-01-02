@@ -5,20 +5,12 @@
   import {get, derived} from "svelte/store"
   import {dev} from "$app/environment"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
-  import {
-    identity,
-    sleep,
-    take,
-    sortBy,
-    ago,
-    now,
-    HOUR,
-    WEEK,
-    Worker,
-  } from "@welshman/lib"
+  import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, MONTH, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
+    MESSAGE,
     PROFILE,
+    DELETE,
     REACTION,
     ZAP_RESPONSE,
     FOLLOWS,
@@ -111,13 +103,13 @@
         events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
           throttle: 3000,
           migrate: (events: TrustedEvent[]) => {
-            if (events.length < 50_000) {
+            if (events.length < 15_000) {
               return events
             }
 
             const NEVER_KEEP = 0
             const ALWAYS_KEEP = Infinity
-            const reactionKinds = [REACTION, ZAP_RESPONSE]
+            const reactionKinds = [REACTION, ZAP_RESPONSE, DELETE]
             const metaKinds = [PROFILE, FOLLOWS, RELAYS, INBOX_RELAYS]
             const $sessionKeys = new Set(Object.keys(app.sessions.get()))
             const $userFollows = new Set(getPubkeyTagValues(getListTags(get(app.userFollows))))
@@ -128,6 +120,9 @@
 
               // No need to keep a record of everyone who follows the current user
               if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
+
+              // Drop room messages after a month, re-load on demand
+              if (e.kind === MESSAGE && e.created_at < ago(MONTH)) return NEVER_KEEP
 
               // Always keep stuff by or tagging a signed in user
               if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
@@ -148,7 +143,7 @@
             }
 
             return take(
-              30_000,
+              10_000,
               sortBy(e => -scoreEvent(e), events),
             )
           },
@@ -193,11 +188,11 @@
       // Listen for chats, populate chat-based notifications
       let chatsSub: any
 
-      derived([pubkey, userInboxRelaySelections], identity).subscribe(
-        ([$pubkey, $userInboxRelaySelections]) => {
+      derived([pubkey, canDecrypt, userInboxRelaySelections], identity).subscribe(
+        ([$pubkey, $canDecrypt, $userInboxRelaySelections]) => {
           chatsSub?.close()
 
-          if ($pubkey) {
+          if ($pubkey && $canDecrypt) {
             chatsSub = subscribe({
               filters: [
                 {kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)},

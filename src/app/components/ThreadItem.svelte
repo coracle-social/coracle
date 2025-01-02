@@ -27,7 +27,7 @@
       </p>
     </div>
   {:else}
-    <p class="-mb-3 h-0 text-end text-xs opacity-75">
+    <p class="mb-3 h-0 text-xs opacity-75">
       {formatTimestamp(event.created_at)}
     </p>
   {/if}

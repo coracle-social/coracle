@@ -1,13 +1,20 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
-  import {onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {page} from "$app/stores"
-  import {sleep, ctx} from "@welshman/lib"
+  import {sleep, now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
-  import {createEvent, MESSAGE} from "@welshman/util"
-  import {formatTimestampAsDate, publishThunk, deriveRelay} from "@welshman/app"
+  import {feedsFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
+  import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
+  import {
+    formatTimestampAsDate,
+    createFeedController,
+    subscribe,
+    publishThunk,
+    deriveRelay,
+  } from "@welshman/app"
   import {slide} from "@lib/transition"
   import {createScroller, type Scroller} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -41,6 +48,8 @@
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
   const legacyRoom = room === GENERAL ? "general" : room
+  const feeds = feedsFromFilter({kinds: [MESSAGE], "#h": [room]})
+
   const events = throttled(
     300,
     deriveEventsForUrl(url, [
@@ -48,6 +57,14 @@
       {kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]},
     ]),
   )
+
+  const ctrl = createFeedController({
+    useWindowing: true,
+    feed: makeIntersectionFeed(makeRelayFeed(url), ...feeds),
+    onExhausted: () => {
+      loading = false
+    },
+  })
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -87,8 +104,9 @@
       delay: $userSettingValues.send_delay,
     })
 
-  let limit = 30
-  let loading = sleep(5000)
+  let limit = 100
+  let loading = true
+  let unmounted = false
   let element: HTMLElement
   let scroller: Scroller
   let editor: ReturnType<typeof getEditor>
@@ -118,27 +136,39 @@
       previousPubkey = pubkey
     }
 
-    return $elements.reverse().slice(0, limit)
+    return $elements.reverse()
   })
 
-  // Sveltekit doesn't set element in onMount for some reason
-  $: {
-    if (element) {
-      scroller = createScroller({
-        element,
-        delay: 300,
-        threshold: 3000,
-        onScroll: () => {
-          limit += 30
-          loading = sleep(5000)
-        },
-      })
-    }
-  }
+  onMount(() => {
+    // Element is frequently not defined. I don't know why
+    sleep(1000).then(() => {
+      if (!unmounted) {
+        scroller = createScroller({
+          element,
+          delay: 300,
+          threshold: 10_000,
+          onScroll: () => {
+            limit += 100
 
-  onDestroy(() => {
-    setChecked($page.url.pathname)
-    scroller?.stop()
+            if ($events.length - limit < 100) {
+              ctrl.load(200)
+            }
+          },
+        })
+      }
+    })
+
+    const sub = subscribe({
+      relays: [url],
+      filters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
+    })
+
+    return () => {
+      unmounted = true
+      setChecked($page.url.pathname)
+      scroller?.stop()
+      sub.close()
+    }
   })
 </script>
 
@@ -170,7 +200,7 @@
   <div
     class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-auto py-2"
     bind:this={element}>
-    {#each $elements as { type, id, value, showPubkey } (id)}
+    {#each $elements.slice(0, limit) as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
@@ -180,11 +210,11 @@
       {/if}
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
-      {#await loading}
+      {#if loading}
         <Spinner loading>Looking for messages...</Spinner>
-      {:then}
+      {:else}
         <Spinner>End of message history</Spinner>
-      {/await}
+      {/if}
     </p>
   </div>
   <ChannelCompose bind:editor {content} {onSubmit} />

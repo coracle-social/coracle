@@ -607,8 +607,7 @@ export const userSettingValues = withGetter(
   derived(userSettings, $s => $s?.values || defaultSettings),
 )
 
-export const getSetting = <T = any>(key: keyof Settings["values"]) =>
-  userSettingValues.get()[key] as T
+export const getSetting = <T>(key: keyof Settings["values"]) => userSettingValues.get()[key] as T
 
 export const userMembership = withGetter(
   derived([pubkey, membershipByPubkey], ([$pubkey, $membershipByPubkey]) => {

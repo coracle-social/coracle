@@ -1,9 +1,9 @@
 import {get} from "svelte/store"
-import {partition, assoc, now, ago, MONTH} from "@welshman/lib"
-import {MESSAGE, DELETE, THREAD, COMMENT} from "@welshman/util"
+import {partition, assoc, now} from "@welshman/lib"
+import {MESSAGE, THREAD, COMMENT} from "@welshman/util"
 import type {Subscription} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, repository, pull, hasNegentropy} from "@welshman/app"
+import {subscribe, load, repository, pull, hasNegentropy} from "@welshman/app"
 import {userRoomsByUrl, getUrlsForEvent} from "@app/state"
 
 // Utils
@@ -35,12 +35,12 @@ export const listenForNotifications = () => {
   const subs: Subscription[] = []
 
   for (const [url, rooms] of userRoomsByUrl.get()) {
-    pullConservatively({
+    load({
       relays: [url],
       filters: [
-        {kinds: [THREAD, DELETE], since: ago(MONTH)},
-        {kinds: [COMMENT], "#K": [String(THREAD)], since: ago(MONTH)},
-        ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], since: ago(MONTH)})),
+        {kinds: [THREAD], limit: 1},
+        {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
+        ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
       ],
     })
 
