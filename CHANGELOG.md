@@ -2,11 +2,11 @@
 
 # 0.2.1
 
-- [x] Improve performance, as well as scrolling and loading
-- [x] Integrate @welshman/editor
-- [x] Improve NIP 29 compatibility
-- [x] Fix incorrect connection errors
-- [x] Refine notifications
-- [x] Add room menu to space homepage
-- [x] Fix storage bugs
-- [x] Add join space CTA
+* Improve performance, as well as scrolling and loading
+* Integrate @welshman/editor
+* Improve NIP 29 compatibility
+* Fix incorrect connection errors
+* Refine notifications
+* Add room menu to space homepage
+* Fix storage bugs
+* Add join space CTA
