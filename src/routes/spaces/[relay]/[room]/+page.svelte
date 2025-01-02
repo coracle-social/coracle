@@ -1,9 +1,7 @@
 <script lang="ts">
   import {nip19} from "nostr-tools"
   import {onDestroy} from "svelte"
-  import type {Readable} from "svelte/store"
   import {derived} from "svelte/store"
-  import type {Editor} from "svelte-tiptap"
   import {page} from "$app/stores"
   import {sleep, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
@@ -17,6 +15,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
+  import type {getEditor} from "@app/editor"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
@@ -92,7 +91,7 @@
   let loading = sleep(5000)
   let element: HTMLElement
   let scroller: Scroller
-  let editor: Readable<Editor>
+  let editor: ReturnType<typeof getEditor>
 
   const elements = derived(events, $events => {
     const $elements = []

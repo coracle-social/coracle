@@ -3,18 +3,16 @@
   import {
     userFollows,
     deriveUserWotScore,
-    deriveProfile,
     deriveHandleForPubkey,
     displayHandle,
     deriveProfileDisplay,
   } from "@welshman/app"
-  import Avatar from "@lib/components/Avatar.svelte"
   import WotScore from "@lib/components/WotScore.svelte"
+  import ProfileCircle from "@app/components/ProfileCircle.svelte"
 
   export let value
 
   const pubkey = value
-  const profile = deriveProfile(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
@@ -24,11 +22,11 @@
 
 <div class="flex max-w-full gap-3">
   <div class="py-1">
-    <Avatar src={$profile?.picture} size={10} />
+    <ProfileCircle {pubkey} />
   </div>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
-      <div class="text-bold overflow-hidden text-ellipsis">
+      <div class="text-bold overflow-hidden text-ellipsis text-base">
         {$profileDisplay}
       </div>
       <WotScore score={$score} active={following} />

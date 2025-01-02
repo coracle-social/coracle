@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import type {Readable} from "svelte/store"
-  import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {writable} from "svelte/store"
   import {createEvent, THREAD} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
@@ -12,15 +11,16 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
-  import {getPubkeyHints} from "@app/commands"
-  import {getEditorOptions, getEditorTags} from "@lib/editor"
+  import {getEditor} from "@app/editor"
 
   export let url
+
+  const uploading = writable(false)
 
   const back = () => history.back()
 
   const submit = () => {
-    if ($loading) return
+    if ($uploading) return
 
     if (!title) {
       return pushToast({
@@ -29,7 +29,7 @@
       })
     }
 
-    const content = $editor.getText({blockSeparator: "\n"})
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content.trim()) {
       return pushToast({
@@ -38,7 +38,12 @@
       })
     }
 
-    const tags = [["title", title], tagRoom(GENERAL, url), ...getEditorTags($editor), PROTECTED]
+    const tags = [
+      ...$editor.storage.welshman.getEditorTags(),
+      tagRoom(GENERAL, url),
+      ["title", title],
+      PROTECTED,
+    ]
 
     publishThunk({
       relays: [url],
@@ -49,14 +54,11 @@
   }
 
   let title: string
-  let editor: Readable<Editor>
-
-  $: loading = $editor?.storage.fileUpload.loading
+  let element: HTMLElement
+  let editor: ReturnType<typeof getEditor>
 
   onMount(() => {
-    editor = createEditor(
-      getEditorOptions({submit, getPubkeyHints, placeholder: "What's on your mind?"}),
-    )
+    editor = getEditor({submit, element, uploading, placeholder: "What's on your mind?"})
   })
 </script>
 
@@ -81,14 +83,14 @@
     <Field>
       <p slot="label">Message*</p>
       <div slot="input" class="note-editor flex-grow overflow-hidden">
-        <EditorContent editor={$editor} />
+        <div bind:this={element} />
       </div>
     </Field>
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
       on:click={$editor.commands.selectFiles}>
-      {#if $loading}
+      {#if $uploading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}
         <Icon icon="paperclip" size={3} />

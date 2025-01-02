@@ -1,15 +1,14 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import type {Readable} from "svelte/store"
-  import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {writable} from "svelte/store"
   import {isMobile} from "@lib/html"
   import {fly, slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {getEditorOptions, getEditorTags} from "@lib/editor"
-  import {getPubkeyHints, publishComment} from "@app/commands"
+  import {publishComment} from "@app/commands"
   import {tagRoom, GENERAL, PROTECTED} from "@app/state"
+  import {getEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
   export let url
@@ -17,13 +16,15 @@
   export let onClose
   export let onSubmit
 
+  const uploading = writable(false)
+
   const submit = () => {
-    if ($loading) return
+    if ($uploading) return
 
-    const content = $editor.getText({blockSeparator: "\n"})
-    const tags = [...getEditorTags($editor), tagRoom(GENERAL, url), PROTECTED]
+    const content = $editor.getText({blockSeparator: "\n"}).trim()
+    const tags = [...$editor.storage.welshman.getEditorTags(), tagRoom(GENERAL, url), PROTECTED]
 
-    if (!content.trim()) {
+    if (!content) {
       return pushToast({
         theme: "error",
         message: "Please provide a message for your reply.",
@@ -33,12 +34,11 @@
     onSubmit(publishComment({event, content, tags, relays: [url]}))
   }
 
-  let editor: Readable<Editor>
-
-  $: loading = $editor?.storage.fileUpload.loading
+  let editor: ReturnType<typeof getEditor>
+  let element: HTMLElement
 
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, getPubkeyHints, autofocus: !isMobile}))
+    editor = getEditor({element, submit, uploading, autofocus: !isMobile})
   })
 </script>
 
@@ -49,13 +49,13 @@
   class="card2 sticky bottom-2 z-feature mx-2 mt-4 bg-neutral">
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">
-      <EditorContent editor={$editor} />
+      <div bind:this={element} />
     </div>
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
       on:click={$editor.commands.selectFiles}>
-      {#if $loading}
+      {#if $uploading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}
         <Icon icon="paperclip" size={3} />

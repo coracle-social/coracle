@@ -3,11 +3,11 @@
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
   import {profileSearch} from "@welshman/app"
+  import {Suggestions} from "@welshman/editor"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Suggestions from "@lib/editor/Suggestions.svelte"
-  import SuggestionProfile from "@lib/editor/SuggestionProfile.svelte"
+  import ProfileSuggestion from "@app/editor/ProfileSuggestion.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
@@ -78,7 +78,7 @@
       term,
       select: selectPubkey,
       search: profileSearch,
-      component: SuggestionProfile,
+      component: ProfileSuggestion,
       class: "rounded-box",
       style: `left: 4px; width: ${input?.clientWidth + 12}px`,
     }}

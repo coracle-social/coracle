@@ -4,10 +4,9 @@
   import {type Instance} from "tippy.js"
   import {identity} from "@welshman/lib"
   import {createSearch} from "@welshman/app"
+  import {Suggestions, SuggestionString} from "@welshman/editor"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import Suggestions from "@lib/editor/Suggestions.svelte"
-  import SuggestionString from "@lib/editor/SuggestionString.svelte"
 
   export let value: string
   export let options: string[]

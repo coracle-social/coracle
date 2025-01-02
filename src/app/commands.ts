@@ -108,7 +108,7 @@ export const loginWithNip46 = async ({
   connectSecret?: string
 }) => {
   const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
-  const result = await broker.connect(signerPubkey, connectSecret, NIP46_PERMS)
+  const result = await broker.connect(connectSecret, NIP46_PERMS)
 
   // TODO: remove ack result
   if (!["ack", connectSecret].includes(result)) return false

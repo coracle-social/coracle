@@ -1,56 +1,54 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {createEditor, EditorContent} from "svelte-tiptap"
+  import {writable} from "svelte/store"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {getEditorOptions, getEditorTags} from "@lib/editor"
-  import {getPubkeyHints} from "@app/commands"
+  import {getEditor} from "@app/editor"
 
   export let onSubmit: any
   export let content = ""
-  export let editor = createEditor(
-    getEditorOptions({
-      submit,
-      getPubkeyHints,
-      submitOnEnter: true,
-      autofocus: !isMobile,
-    }),
-  )
+  export let editor: ReturnType<typeof getEditor> | undefined = undefined
 
-  function submit() {
-    if ($loading) return
+  const uploading = writable(false)
+
+  let element: HTMLElement
+
+  const uploadFiles = () => $editor!.chain().selectFiles().run()
+
+  const submit = () => {
+    if ($uploading) return
 
     onSubmit({
-      content: $editor.getText({blockSeparator: "\n"}),
-      tags: getEditorTags($editor),
+      content: $editor!.getText({blockSeparator: "\n"}).trim(),
+      tags: $editor!.storage.welshman.getEditorTags(),
     })
 
-    $editor.chain().clearContent().run()
+    $editor!.chain().clearContent().run()
   }
 
-  $: loading = $editor?.storage.fileUpload.loading
-
   onMount(() => {
-    $editor.commands.setContent(content)
+    editor = getEditor({autofocus: !isMobile, aggressive: true, element, submit, uploading})
+
+    $editor!.chain().setContent(content).run()
   })
 </script>
 
 <form
   class="relative z-feature flex gap-2 p-2"
-  on:submit|preventDefault={$loading ? undefined : submit}>
+  on:submit|preventDefault={$uploading ? undefined : submit}>
   <Button
     data-tip="Add an image"
     class="center tooltip tooltip-right h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
-    disabled={$loading}
-    on:click={$editor.commands.selectFiles}>
-    {#if $loading}
+    disabled={$uploading}
+    on:click={uploadFiles}>
+    {#if $uploading}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}
       <Icon icon="gallery-send" />
     {/if}
   </Button>
   <div class="chat-editor flex-grow overflow-hidden">
-    <EditorContent editor={$editor} />
+    <div bind:this={element} />
   </div>
 </form>

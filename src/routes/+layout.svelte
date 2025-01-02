@@ -29,7 +29,7 @@
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
-  import {throttled, custom} from "@welshman/store"
+  import {custom} from "@welshman/store"
   import {
     relays,
     handles,
@@ -204,8 +204,8 @@
       setupAnalytics()
 
       ready = initStorage("flotilla", 4, {
-        relays: {keyPath: "url", store: throttled(3000, relays)},
-        handles: {keyPath: "nip05", store: throttled(3000, handles)},
+        relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),
+        handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
           throttle: 3000,
           migrate: migrateFreshness,
@@ -251,6 +251,7 @@
       let unsubSpaces: any
 
       userMembership.subscribe($membership => {
+        console.log("subscribe")
         unsubSpaces?.()
         unsubSpaces = listenForNotifications()
       })

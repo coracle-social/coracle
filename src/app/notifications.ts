@@ -1,7 +1,7 @@
 import {derived} from "svelte/store"
-import {synced} from "@welshman/store"
+import {synced, throttled} from "@welshman/store"
 import {pubkey} from "@welshman/app"
-import {prop, sortBy, now} from "@welshman/lib"
+import {prop, identity, now} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {MESSAGE} from "@welshman/util"
 import {makeSpacePath, makeChatPath, makeThreadPath, makeRoomPath} from "@app/routes"
@@ -9,7 +9,7 @@ import {
   THREAD_FILTER,
   COMMENT_FILTER,
   chats,
-  getEventsForUrl,
+  getUrlsForEvent,
   userRoomsByUrl,
   repositoryStore,
 } from "@app/state"
@@ -25,11 +25,12 @@ export const setChecked = (key: string) => checked.update(state => ({...state, [
 // Derived notifications state
 
 export const notifications = derived(
-  [pubkey, checked, chats, userRoomsByUrl, repositoryStore],
-  ([$pubkey, $checked, $chats, $userRoomsByUrl, $repository]) => {
-    const hasNotification = (path: string, events: TrustedEvent[]) => {
-      const [latestEvent] = sortBy($e => -$e.created_at, events)
-
+  throttled(
+    1000,
+    derived([pubkey, checked, chats, userRoomsByUrl, repositoryStore, getUrlsForEvent], identity),
+  ),
+  ([$pubkey, $checked, $chats, $userRoomsByUrl, $repository, $getUrlsForEvent]) => {
+    const hasNotification = (path: string, latestEvent: TrustedEvent | undefined) => {
       if (!latestEvent || latestEvent.pubkey === $pubkey) {
         return false
       }
@@ -50,29 +51,33 @@ export const notifications = derived(
     for (const {pubkeys, messages} of $chats) {
       const chatPath = makeChatPath(pubkeys)
 
-      if (hasNotification(chatPath, messages)) {
+      if (hasNotification(chatPath, messages[0])) {
         paths.add("/chat")
         paths.add(chatPath)
       }
     }
 
+    const allThreadEvents = $repository.query([THREAD_FILTER, COMMENT_FILTER])
+    const allMessageEvents = $repository.query([{kinds: [MESSAGE]}])
+
     for (const [url, rooms] of $userRoomsByUrl.entries()) {
       const spacePath = makeSpacePath(url)
       const threadPath = makeThreadPath(url)
-      const threadFilters = [THREAD_FILTER, COMMENT_FILTER]
-      const threadEvents = getEventsForUrl($repository, url, threadFilters)
+      const latestEvent = allThreadEvents.find(e => $getUrlsForEvent(e.id).includes(url))
 
-      if (hasNotification(threadPath, threadEvents)) {
+      if (hasNotification(threadPath, latestEvent)) {
         paths.add(spacePath)
         paths.add(threadPath)
       }
 
       for (const room of rooms) {
         const roomPath = makeRoomPath(url, room)
-        const roomFilters = [{kinds: [MESSAGE], "#h": [room]}]
-        const roomEvents = getEventsForUrl($repository, url, roomFilters)
+        const latestEvent = allMessageEvents.find(
+          e =>
+            $getUrlsForEvent(e.id).includes(url) && e.tags.find(t => t[0] === "h" && t[1] === room),
+        )
 
-        if (hasNotification(roomPath, roomEvents)) {
+        if (hasNotification(roomPath, latestEvent)) {
           paths.add(spacePath)
           paths.add(roomPath)
         }

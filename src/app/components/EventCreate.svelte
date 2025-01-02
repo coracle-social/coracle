@@ -1,9 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import type {Readable} from "svelte/store"
-  import {createEditor, type Editor, EditorContent} from "svelte-tiptap"
+  import {writable} from "svelte/store"
   import {randomId} from "@welshman/lib"
-  import {createEvent, EVENT_DATE, EVENT_TIME} from "@welshman/util"
+  import {createEvent, EVENT_TIME} from "@welshman/util"
   import {publishThunk, dateToSeconds} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -12,16 +11,17 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {PROTECTED} from "@app/state"
-  import {getPubkeyHints} from "@app/commands"
-  import {getEditorOptions, getEditorTags} from "@lib/editor"
+  import {getEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
   export let url
 
+  const uploading = writable(false)
+
   const back = () => history.back()
 
   const submit = () => {
-    if ($loading) return
+    if ($uploading) return
 
     if (!title) {
       return pushToast({
@@ -37,16 +37,15 @@
       })
     }
 
-    const kind = isAllDay ? EVENT_DATE : EVENT_TIME
-    const event = createEvent(kind, {
-      content: $editor.getText({blockSeparator: "\n"}),
+    const event = createEvent(EVENT_TIME, {
+      content: $editor.getText({blockSeparator: "\n"}).trim(),
       tags: [
         ["d", randomId()],
         ["title", title],
         ["location", location],
         ["start", dateToSeconds(start).toString()],
         ["end", dateToSeconds(end).toString()],
-        ...getEditorTags($editor),
+        ...$editor.storage.welshman.getEditorTags(),
         PROTECTED,
       ],
     })
@@ -55,17 +54,15 @@
     history.back()
   }
 
-  let editor: Readable<Editor>
-  const isAllDay = false
+  let element: HTMLElement
+  let editor: ReturnType<typeof getEditor>
   let title = ""
   let location = ""
   let start: Date
   let end: Date
 
-  $: loading = $editor?.storage.fileUpload.loading
-
   onMount(() => {
-    editor = createEditor(getEditorOptions({submit, getPubkeyHints}))
+    editor = getEditor({submit, element, uploading})
   })
 </script>
 
@@ -86,13 +83,13 @@
       slot="input"
       class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
       <div class="input-editor flex-grow overflow-hidden">
-        <EditorContent editor={$editor} />
+        <div bind:this={element} />
       </div>
       <Button
         data-tip="Add an image"
         class="center btn tooltip"
-        on:click={$editor.commands.selectFiles}>
-        {#if $loading}
+        on:click={() => $editor.chain().selectFiles().run()}>
+        {#if $uploading}
           <span class="loading loading-spinner loading-xs"></span>
         {:else}
           <Icon icon="gallery-send" />
