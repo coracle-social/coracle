@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.2
+
+* Fix bug with sending messages
+
 # 0.2.1
 
 * Improve performance, as well as scrolling and loading
