@@ -29,7 +29,7 @@
         await createAndPublish({
           kind: NOTE,
           content,
-          tags: $editor.storage.welshman.getEditorTags(),
+          tags: $editor.storage.nostr.getEditorTags(),
           relays: ctx.app.router.FromUser().getUrls(),
         })
       }

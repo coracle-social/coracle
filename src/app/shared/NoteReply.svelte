@@ -74,7 +74,7 @@
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
     const tags = uniqTags([
-      ...$editor.storage.welshman.getEditorTags(),
+      ...$editor.storage.nostr.getEditorTags(),
       ...tagReplyTo(parent),
       ...getClientTags(),
     ])

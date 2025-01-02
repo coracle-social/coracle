@@ -60,7 +60,7 @@
     // prevent sending before media are uploaded
     if ($uploading) return
 
-    //  signaturePending = true
+    signaturePending = true
 
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
@@ -68,7 +68,7 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = [...$editor.storage.welshman.getEditorTags(content), ...getClientTags()]
+    const tags = [...$editor.storage.nostr.getEditorTags(), ...getClientTags()]
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])

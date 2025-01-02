@@ -64,7 +64,7 @@ import {
   ConnectionEvent,
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import {deriveEvents, deriveEventsMapped, throttled, withGetter} from "@welshman/store"
+import {deriveEvents, deriveEventsMapped, withGetter} from "@welshman/store"
 import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
 import {
   APP_DATA,
@@ -111,6 +111,7 @@ import {
   readFeed,
   readHandlers,
   readUserList,
+  subscriptionNotices,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import logger from "src/util/logger"
@@ -815,12 +816,6 @@ export class ThreadLoader {
 
 // Storage
 
-// Remove the old database. TODO remove this
-import {deleteDB} from "idb"
-import {subscriptionNotices} from "src/domain/connection"
-
-deleteDB("nostr-engine/Storage")
-
 let ready: Promise<any> = Promise.resolve()
 
 const migrateFreshness = (data: {key: string; value: number}[]) => {
@@ -935,15 +930,15 @@ if (!db) {
   })
 
   ready = initStorage("coracle", 3, {
-    relays: {keyPath: "url", store: throttled(1000, relays)},
-    handles: {keyPath: "nip05", store: throttled(1000, handles)},
-    zappers: {keyPath: "lnurl", store: throttled(1000, zappers)},
-    checked: storageAdapters.fromObjectStore(checked, {throttle: 1000}),
+    relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),
+    handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
+    zappers: storageAdapters.fromCollectionStore("lnurl", zappers, {throttle: 3000}),
+    checked: storageAdapters.fromObjectStore(checked, {throttle: 3000}),
     freshness: storageAdapters.fromObjectStore(freshness, {
-      throttle: 1000,
+      throttle: 3000,
       migrate: migrateFreshness,
     }),
-    plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 1000}),
+    plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 3000}),
     repository: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
   }).then(() => Promise.all(initialRelays.map(loadRelay)))
 }
