@@ -50,7 +50,7 @@ export const listenForNotifications = () => {
         filters: [
           {kinds: [THREAD], since: now()},
           {kinds: [COMMENT], "#K": [String(THREAD)], since: now()},
-          {kinds: [MESSAGE], "#h": Array.from(rooms), since: now()},
+          ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
         ],
       }),
     )

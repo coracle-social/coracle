@@ -64,8 +64,8 @@
     // Load recent messages for user rooms to help with a quick page transition
     pullConservatively({relays, filters: rooms.map(r => ({kinds: [MESSAGE], "#h": [r], since}))})
 
-    // Listen for deletes that would apply to messages we already have
-    const sub = subscribe({relays, filters: [{kinds: [DELETE], since}]})
+    // Listen for deletes that would apply to messages we already have, and new groups
+    const sub = subscribe({relays, filters: [{kinds: [DELETE, GROUPS], since}]})
 
     return () => {
       sub.close()
