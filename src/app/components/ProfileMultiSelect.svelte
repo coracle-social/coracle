@@ -1,5 +1,6 @@
 <script lang="ts">
   import type {SvelteComponent} from "svelte"
+  import {derived} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
   import {profileSearch} from "@welshman/app"
@@ -19,6 +20,8 @@
   let input: Element
   let popover: Instance
   let instance: SvelteComponent
+
+  const search = derived(profileSearch, $profileSearch => $profileSearch.searchValues)
 
   const selectPubkey = (pubkey: string) => {
     term = ""
@@ -76,8 +79,8 @@
     component={Suggestions}
     props={{
       term,
+      search,
       select: selectPubkey,
-      search: profileSearch,
       component: ProfileSuggestion,
       class: "rounded-box",
       style: `left: 4px; width: ${input?.clientWidth + 12}px`,
