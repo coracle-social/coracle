@@ -1,7 +1,13 @@
 <script lang="ts">
   import {sleep, prop, sortBy, max, last, pluck} from "@welshman/lib"
-  import {getListTags, type TrustedEvent} from "@welshman/util"
-  import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
+  import type {TrustedEvent} from "@welshman/util"
+  import {isShareableRelayUrl} from "@welshman/util"
+  import {
+    session,
+    getRelayUrls,
+    displayProfileByPubkey,
+    inboxRelaySelectionsByPubkey,
+  } from "@welshman/app"
   import {pluralize} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
@@ -50,8 +56,10 @@
   let showNewMessages = false
   let groupedMessages = []
 
-  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
-    pubkeys.filter(pubkey => !getListTags($inboxRelayPoliciesByPubkey.get(pubkey)).length),
+  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
+    pubkeys.filter(
+      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+    ),
   )
 
   onMount(() => {

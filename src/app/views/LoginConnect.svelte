@@ -6,7 +6,7 @@
     PROFILE,
     LOCAL_RELAY_URL,
     normalizeRelayUrl,
-    isShareableRelayUrl,
+    isRelayUrl,
   } from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {session, repository} from "@welshman/app"
@@ -43,7 +43,7 @@
   const confirmCustomRelay = () => {
     const url = normalizeRelayUrl(customRelay)
 
-    if (isShareableRelayUrl(url)) {
+    if (isRelayUrl(url)) {
       searchRelays([url])
       customRelay = ""
       closeModal()
