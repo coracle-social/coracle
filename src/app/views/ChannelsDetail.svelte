@@ -2,9 +2,15 @@
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
-  import {DIRECT_MESSAGE} from "@welshman/util"
-  import {inboxRelaySelectionsByPubkey, session} from "@welshman/app"
-  import {repository, displayProfileByPubkey, loadInboxRelaySelections} from "@welshman/app"
+  import {DIRECT_MESSAGE, isShareableRelayUrl} from "@welshman/util"
+  import {
+    inboxRelaySelectionsByPubkey,
+    session,
+    repository,
+    displayProfileByPubkey,
+    loadInboxRelaySelections,
+    getRelayUrls,
+  } from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Channel from "src/app/shared/Channel.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
@@ -22,8 +28,10 @@
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
-  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
-    pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
+  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
+    pubkeys.filter(
+      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+    ),
   )
 
   let isAccepted

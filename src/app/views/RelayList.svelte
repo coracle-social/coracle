@@ -43,7 +43,9 @@
       }
 
       for (const url of getWriteRelayUrls($relaySelectionsByPubkey.get(pk))) {
-        pushToMapKey(m, url, pk)
+        if (isShareableRelayUrl(url)) {
+          pushToMapKey(m, url, pk)
+        }
       }
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+# Current
+
+- [x] Add support for tor/local relays
+
 # 0.5.0
 
 Contributors: @hodlbod, @dtonon, @thibaut

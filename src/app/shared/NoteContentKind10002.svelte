@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getRelayTagValues} from "@welshman/util"
+  import {getRelayTagValues, isShareableRelayUrl} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
 
@@ -8,7 +8,7 @@
 
 <FlexColumn small>
   <p>New relay selections:</p>
-  {#each getRelayTagValues(note.tags) as url}
+  {#each getRelayTagValues(note.tags).filter(isShareableRelayUrl) as url}
     <RelayCard {url} />
   {/each}
 </FlexColumn>

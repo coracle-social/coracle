@@ -71,15 +71,15 @@
 
 <AltColor background class="justify-between rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
-    <div class="flex min-w-0 shrink-0 items-center gap-3">
+    <div class="flex min-w-0 items-center gap-3">
       {#if $relay?.profile?.icon}
-        <img class="h-9 w-9 rounded-full border" src={$relay.profile.icon} />
+        <img class="h-9 w-9 min-w-9 rounded-full border" src={$relay.profile.icon} />
       {:else}
-        <div class="flex h-9 w-9 items-center justify-center rounded-full border">
+        <div class="flex h-9 w-9 min-w-9 items-center justify-center rounded-full border">
           <i class="fa fa-server text-xl text-neutral-100"></i>
         </div>
       {/if}
-      <div>
+      <div class="flex min-w-0 flex-col pr-8">
         <div class="flex items-center gap-2">
           <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
             {displayRelayUrl(url)}

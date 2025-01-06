@@ -1,7 +1,13 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
-  import {pubkey, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
+  import {isShareableRelayUrl} from "@welshman/util"
+  import {
+    pubkey,
+    getRelayUrls,
+    displayProfileByPubkey,
+    inboxRelaySelectionsByPubkey,
+  } from "@welshman/app"
   import {pluralize} from "hurdak"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -16,8 +22,10 @@
   const submit = () => router.at("channels").of(pubkeys).push()
 
   $: pubkeys = uniq(value.concat($pubkey))
-  $: pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelayPoliciesByPubkey =>
-    pubkeys.filter(pubkey => !$inboxRelayPoliciesByPubkey.has(pubkey)),
+  $: pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
+    pubkeys.filter(
+      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+    ),
   )
   $: nip44Disabled = pubkeys.length > 2 && !$hasNip44
   $: missingInbox = pubkeys.length > 2 && $pubkeysWithoutInbox.length > 0
