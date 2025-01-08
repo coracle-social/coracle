@@ -97,7 +97,8 @@
     const template = createEvent(1, {
       content,
       tags,
-      created_at: options.publish_at && Math.floor(options.publish_at.getTime() / 1000),
+      created_at:
+        (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
     })
     const signedTemplate = await sign(template, options)
 
