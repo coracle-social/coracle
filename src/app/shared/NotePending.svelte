@@ -29,6 +29,8 @@
 
   export let event: TrustedEvent
 
+  let innerWidth = 0
+
   $: ancestors = getAncestorTagValues(event.tags || [])
   $: parent = ancestors.replies[0]
   $: thunk = $thunks[event.id] as Thunk
@@ -56,7 +58,10 @@
 
   $: isPending = pendings > 0
   $: isCompleted = total === success + failed + timeout
+  $: isMobile = innerWidth < 720
 </script>
+
+<svelte:window bind:innerWidth />
 
 <div
   class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
@@ -74,10 +79,10 @@
     {:else}
       <span
         >Published to {success}/{total}
-        {#if failed > 0 || timeout > 0}
-          ({failed > 0 ? failed + " failed" : ""}{timeout > 0
-            ? (failed > 0 ? ", " : "") + timeout + " timed out"
-            : ""})
+        {#if (failed > 0 || timeout > 0) && !isMobile}
+          ({#if failed > 0}{failed} failed{/if}
+          {#if failed > 0 && timeout > 0},{/if}
+          {#if timeout > 0}{timeout} timed out{/if})
         {/if}
       </span>
       <Anchor
@@ -86,8 +91,11 @@
         href="/publishes">See details</Anchor>
     {/if}
   {:else if $userSettings.send_delay > 0}
-    <span
-      >Sending reply in {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1} seconds</span>
+    <span>
+      {isMobile ? "Sending in" : "Sending reply in"}
+      {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}
+      {isMobile ? "s" : "seconds"}
+    </span>
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
       on:click={() => {
