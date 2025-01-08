@@ -23,7 +23,7 @@
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
-  import {openReplies} from "../state"
+  import {openReplies} from "src/app/state"
 
   const rendered = now()
 
@@ -69,25 +69,35 @@
       class="loading-bar absolute left-0 top-0 h-full bg-accent"
       style="width: {20 + $completed}%" />
     {#if isPending}
-      <span>Publishing...</span>
-      <span>{total - pendings} of {total} relays</span>
+      <span class="sm:hidden">
+        {success}/{total} relays
+      </span>
+      <span class="hidden sm:inline">
+        Publishing... {total - pendings} of {total} relays
+      </span>
     {:else}
-      <span
-        >Published to {success}/{total}
-        {#if failed > 0 || timeout > 0}
-          ({failed > 0 ? failed + " failed" : ""}{timeout > 0
-            ? (failed > 0 ? ", " : "") + timeout + " timed out"
-            : ""})
-        {/if}
+      <span class="sm:hidden">
+        {success}/{total} relays
+      </span>
+      <span class="hidden sm:inline">
+        Published to {success}/{total} relays
       </span>
       <Anchor
         class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
         modal
-        href="/publishes">See details</Anchor>
+        href="/publishes">
+        <span class="sm:hidden"> Details </span>
+        <span class="hidden sm:inline"> See details </span>
+      </Anchor>
     {/if}
   {:else if $userSettings.send_delay > 0}
-    <span
-      >Sending reply in {rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1} seconds</span>
+    {@const seconds = rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}
+    <span class="hidden sm:inline">
+      Sending reply in {seconds} seconds
+    </span>
+    <span class="sm:hidden">
+      Sending in {seconds}s
+    </span>
     <button
       class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
       on:click={() => {
