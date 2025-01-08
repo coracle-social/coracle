@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx, last} from "@welshman/lib"
+  import {ctx, last, type Emitter} from "@welshman/lib"
   import {now} from "@welshman/signer"
   import {
     createEvent,
@@ -8,7 +8,14 @@
     DVM_REQUEST_PUBLISH_SCHEDULE,
     type TrustedEvent,
   } from "@welshman/util"
-  import {session, tagPubkey, signer, type ThunkStatusByUrl, type ThunkStatus} from "@welshman/app"
+  import {
+    session,
+    tagPubkey,
+    signer,
+    type ThunkStatusByUrl,
+    type ThunkStatus,
+    type Thunk,
+  } from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
   import {commaFormat} from "hurdak"
@@ -26,7 +33,8 @@
   import {getEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {getClientTags, publish, sign, userSettings} from "src/engine"
+  import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
+  import {warn} from "src/util/logger"
 
   export let quote = null
   export let pubkey = null
@@ -96,6 +104,7 @@
     signaturePending = false
 
     drafts.set("notecreate", $editor.getHTML())
+    let thunk: Thunk, emitter: Emitter
 
     // if a delay is set, send the event through the DVM
     router.clearModals()
