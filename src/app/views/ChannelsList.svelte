@@ -34,7 +34,7 @@
 
   onMount(() => {
     if (!$canDecrypt) {
-      router.at("chatenable").open({mini: true, noEscape: true})
+      router.at("channels/enable").open({mini: true, noEscape: true})
     }
     const scroller = createScroller(loadMore, {element, delay: 300})
 

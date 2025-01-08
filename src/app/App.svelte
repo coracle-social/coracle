@@ -21,7 +21,7 @@
   import {slowConnections, loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Toast from "src/partials/Toast.svelte"
-  import ChatEnable from "src/partials/ChatEnable.svelte"
+  import ChatEnable from "src/app/views/ChatEnable.svelte"
   import Menu from "src/app/Menu.svelte"
   import Routes from "src/app/Routes.svelte"
   import Nav from "src/app/Nav.svelte"
@@ -99,11 +99,10 @@
   router.register("/about", About)
   router.register("/search", Search)
 
-  router.register("/chatenable", ChatEnable, {
+  router.register("/channels", ChannelsList, {
     requireSigner: true,
   })
-
-  router.register("/channels", ChannelsList, {
+  router.register("/channels/enable", ChatEnable, {
     requireSigner: true,
   })
   router.register("/channels/create", ChannelCreate, {
