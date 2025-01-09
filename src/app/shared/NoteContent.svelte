@@ -3,6 +3,8 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContentKind0 from "src/app/shared/NoteContentKind0.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
+  import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
+  import NoteContentKind20 from "src/app/shared/NoteContentKind20.svelte"
   import NoteContentKind40 from "src/app/shared/NoteContentKind40.svelte"
   import NoteContentKind1808 from "src/app/shared/NoteContentKind1808.svelte"
   import NoteContentKind1985 from "src/app/shared/NoteContentKind1985.svelte"
@@ -23,7 +25,6 @@
   import NoteContentKindRelay from "src/app/shared/NoteContentKindRelay.svelte"
   import {getSetting, env} from "src/engine"
   import {CUSTOM_LIST_KINDS} from "src/domain"
-  import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
 
   export let note
   export let depth = 0
@@ -38,7 +39,7 @@
   }
 </script>
 
-<div class:blur-sm={env.BLUR_CONTENT}>
+<div class:blur-sm={env.BLUR_CONTENT} class="overflow-hidden text-ellipsis">
   {#if warning}
     <div class="flex gap-2 text-neutral-300">
       <i class="fa fa-warning m-1" />
@@ -51,6 +52,8 @@
     <NoteContentKind0 {note} />
   {:else if note.kind === 3}
     <NoteContentKind3 {note} {showEntire} />
+  {:else if note.kind === 20}
+    <NoteContentKind20 {note} {showEntire} />
   {:else if [40, 41].includes(note.kind)}
     <NoteContentKind40 {note} />
   {:else if note.kind === 1808}
