@@ -3,6 +3,7 @@ import {
   fromNostrURI,
   GENERIC_REPOST,
   HIGHLIGHT,
+  PICTURE_NOTE,
   LONG_FORM,
   NOTE,
   REACTION,
@@ -56,7 +57,7 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT]
+export const noteKinds = [NOTE, PICTURE_NOTE, LONG_FORM, HIGHLIGHT]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
