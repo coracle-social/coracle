@@ -16,5 +16,5 @@
 <Carrousel items={images} let:item>
   <img src={getTagValue("url", item)} alt={getTagValue("alt", item)} class="min-w-full" />
 </Carrousel>
-<br />
+<div class="h-2" />
 <NoteContentKind1 {note} {showEntire} />
