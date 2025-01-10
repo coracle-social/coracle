@@ -1,15 +1,16 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
-  import {getIdOrAddress} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import Anchor from "src/partials/Anchor.svelte"
-  import Card from "src/partials/Card.svelte"
-  import {getSetting, isEventMuted} from "src/engine"
-  import {router} from "src/app/util"
+  import {getIdOrAddress} from "@welshman/util"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteHeader from "src/app/shared/NoteHeader.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Card from "src/partials/Card.svelte"
+  import {router} from "src/app/util"
+  import {HEADERLESS_KIND} from "src/domain"
+  import {getSetting, isEventMuted} from "src/engine"
 
   export let note: TrustedEvent
   export let depth = 0
@@ -36,7 +37,7 @@
 
 <div class="group relative">
   <Card stopPropagation class="relative" on:click={onClick} {interactive}>
-    {#if note.kind !== 31890}
+    {#if !HEADERLESS_KIND.includes(note.kind)}
       <NoteHeader event={note} {showParent} />
     {/if}
     {#if hidden && !showHidden}
@@ -49,10 +50,10 @@
           }}>Show</Anchor>
       </p>
     {:else}
-      <div class:!pl-0={note.kind === 31890} class="mt-2 pl-14">
+      <div class:!pl-0={HEADERLESS_KIND.includes(note.kind)} class="mt-2 pl-14">
         <NoteContent {note} {depth} {showEntire} {showMedia} />
       </div>
-      <div class:!pl-10={note.kind === 31890} class="pl-14 pt-4">
+      <div class:!pl-10={HEADERLESS_KIND.includes(note.kind)} class="pl-14 pt-4">
         <NoteActions event={note} />
       </div>
     {/if}

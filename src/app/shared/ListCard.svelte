@@ -3,11 +3,10 @@
   import {first} from "@welshman/lib"
   import {getTags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
-  import {repository} from "@welshman/app"
+  import {formatTimestamp, repository} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
@@ -34,13 +33,16 @@
   }
 </script>
 
-<Card class="flex gap-3">
+<div class="flex justify-end text-xs">
+  {formatTimestamp(event.created_at)}
+</div>
+<div class="flex gap-3">
   <div class="mt-[6px]">
     <i class="fa fa-list fa-2xl" />
   </div>
   <FlexColumn small>
-    <div class="flex justify-between">
-      <span class="flex items-start gap-3">
+    <div class="flex items-center justify-between">
+      <span class="flex items-center gap-3">
         <div>
           <span
             class="staatliches text-xl"
@@ -89,4 +91,4 @@
         )}</pre>
     {/if}
   </FlexColumn>
-</Card>
+</div>

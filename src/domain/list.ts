@@ -1,6 +1,7 @@
 import {fromPairs, randomId} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
+  FEED,
   FOLLOWS,
   NAMED_PEOPLE,
   NAMED_RELAYS,
@@ -44,6 +45,27 @@ export const CUSTOM_LIST_KINDS = [
   CHANNELS,
   BLOCKED_RELAYS,
   SEARCH_RELAYS,
+  GROUPS,
+  TOPICS,
+]
+
+export const HEADERLESS_KIND = [
+  GROUPS,
+  FEED,
+  NAMED_PEOPLE,
+  NAMED_RELAYS,
+  NAMED_CURATIONS,
+  NAMED_WIKI_AUTHORS,
+  NAMED_WIKI_RELAYS,
+  NAMED_EMOJIS,
+  NAMED_TOPICS,
+  NAMED_ARTIFACTS,
+  NAMED_COMMUNITIES,
+  MUTES,
+  PINS,
+  BOOKMARKS,
+  COMMUNITIES,
+  CHANNELS,
   GROUPS,
   TOPICS,
 ]
