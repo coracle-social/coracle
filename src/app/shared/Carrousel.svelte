@@ -64,7 +64,8 @@
       {/each}
     </div>
     {#if currentIndex > 0}
-      <div class="absolute inset-y-0 left-0 hidden items-center group-hover:flex">
+      <div
+        class="absolute inset-y-0 left-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
         <button
           class="bg-primary rounded-full p-2 text-white"
           on:click|stopPropagation={() => scrollToIndex(Math.max(currentIndex - 1, 0))}>
@@ -73,7 +74,8 @@
       </div>
     {/if}
     {#if currentIndex < items.length - 1}
-      <div class="absolute inset-y-0 right-0 hidden items-center group-hover:flex">
+      <div
+        class="absolute inset-y-0 right-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
         <button
           class="bg-primary rounded-full p-2 text-white"
           on:click|stopPropagation={() =>
@@ -84,7 +86,7 @@
     {/if}
   {/if}
   <button
-    class="bg-red-500 absolute right-2 top-2 hidden rounded-full p-2 text-white group-hover:block"
+    class="bg-red-500 absolute right-0 top-0 rounded-full p-2 text-white opacity-0 transition-opacity group-hover:opacity-100"
     on:click|stopPropagation={() => (container.style.display = "none")}>
     <i class="fas fa-times text-2xl"></i>
   </button>
