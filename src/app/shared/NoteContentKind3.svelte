@@ -13,12 +13,17 @@
   }
 
   let limit = showEntire ? Infinity : 5
+
+  $: isSliced = getPubkeyTagValues(note.tags).length > limit
 </script>
 
 <FlexColumn small>
-  <div style={!showEntire && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
+  <div
+    style={!showEntire &&
+      isSliced &&
+      "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
     <div class="mb-4 border-l-2 border-solid border-neutral-600 pl-4 text-lg">
-      Updated follows list:
+      Updated follow list:
     </div>
     <div>
       {#each take(limit, getPubkeyTagValues(note.tags)) as pubkey}
@@ -28,7 +33,7 @@
       {/each}
     </div>
   </div>
-  {#if !showEntire}
+  {#if !showEntire && isSliced}
     <NoteContentEllipsis on:click={expand} />
   {/if}
 </FlexColumn>
