@@ -86,8 +86,9 @@
     {/if}
   {/if}
   <button
-    class="bg-red-500 absolute right-0 top-0 rounded-full p-2 text-white opacity-0 transition-opacity group-hover:opacity-100"
+    class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
+           rounded-full border border-solid border-neutral-600 bg-white text-black opacity-0 shadow transition-opacity group-hover:opacity-50"
     on:click|stopPropagation={() => (container.style.display = "none")}>
-    <i class="fas fa-times text-2xl"></i>
+    <i class="fas fa-times"></i>
   </button>
 </div>
