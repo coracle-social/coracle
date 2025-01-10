@@ -2,6 +2,7 @@
   import {ctx} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import {deriveProfileDisplay} from "@welshman/app"
+  import {headerlessKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -49,17 +50,19 @@
         <Anchor underline stopPropagation on:click={unmute}>Show</Anchor>
       </p>
     {:else if $quote}
-      <div class="mb-4 flex items-center gap-4">
-        <PersonCircle class="h-6 w-6" pubkey={$quote.pubkey} />
-        <Anchor
-          modal
-          stopPropagation
-          type="unstyled"
-          class="flex items-center gap-2"
-          href={router.at("people").of($quote.pubkey).toString()}>
-          <h2 class="text-lg">{$profileDisplay}</h2>
-        </Anchor>
-      </div>
+      {#if !headerlessKinds.includes($quote.kind)}
+        <div class="mb-4 flex items-center gap-4">
+          <PersonCircle class="h-6 w-6" pubkey={$quote.pubkey} />
+          <Anchor
+            modal
+            stopPropagation
+            type="unstyled"
+            class="flex items-center gap-2"
+            href={router.at("people").of($quote.pubkey).toString()}>
+            <h2 class="text-lg">{$profileDisplay}</h2>
+          </Anchor>
+        </div>
+      {/if}
       <slot name="note-content" quote={$quote} {depth} />
     {:else}
       <div class="px-20">
