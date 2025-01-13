@@ -1,9 +1,23 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx, last} from "@welshman/lib"
-  import {createEvent, toNostrURI} from "@welshman/util"
-  import {session, tagPubkey} from "@welshman/app"
+  import {ctx, last, type Emitter} from "@welshman/lib"
+  import {now} from "@welshman/signer"
+  import {
+    createEvent,
+    toNostrURI,
+    DVM_REQUEST_PUBLISH_SCHEDULE,
+    type TrustedEvent,
+  } from "@welshman/util"
+  import {
+    session,
+    tagPubkey,
+    signer,
+    type ThunkStatusByUrl,
+    type ThunkStatus,
+    type Thunk,
+  } from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
+  import {DVMEvent} from "@welshman/dvm"
   import {commaFormat} from "hurdak"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
@@ -11,7 +25,7 @@
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import {showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
+  import {showInfo, showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -19,7 +33,8 @@
   import {getEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {getClientTags, publish, sign, userSettings} from "src/engine"
+  import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
+  import {warn} from "src/util/logger"
 
   export let quote = null
   export let pubkey = null
@@ -34,8 +49,9 @@
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
-  let options = {warning: "", anonymous: false}
+  let options = {warning: "", anonymous: false, publish_at: null}
 
+  const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
   const nsecWarning = writable(null)
 
   const openOptions = () => {
@@ -78,20 +94,57 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const template = createEvent(1, {content, tags})
+    const template = createEvent(1, {
+      content,
+      tags,
+      created_at:
+        (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
+    })
     const signedTemplate = await sign(template, options)
 
     signaturePending = false
 
     drafts.set("notecreate", $editor.getHTML())
+    let thunk: Thunk, emitter: Emitter
 
+    // if a delay is set, send the event through the DVM
     router.clearModals()
+    if (options.publish_at) {
+      // take the first DVM Handler found
 
-    const thunk = publish({
-      event: signedTemplate,
-      relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
-      delay: $userSettings.send_delay,
-    })
+      const dvmContent = await $signer.nip04.encrypt(
+        SHIPYARD_PUBKEY,
+        JSON.stringify([
+          ["i", JSON.stringify(signedTemplate), "text"],
+          ["param", "relays", ...ctx.app.router.FromUser().getUrls()],
+        ]),
+      )
+      const dvmEvent = await sign(
+        createEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
+          content: dvmContent,
+          tags: [["p", SHIPYARD_PUBKEY], ["encrypted"]],
+        }),
+      )
+
+      const dvmRequest = makeDvmRequest({
+        event: dvmEvent,
+        relays: env.DVM_RELAYS,
+        reportProgress: true,
+        delay: $userSettings.send_delay,
+      })
+
+      thunk = dvmRequest.thunk
+      emitter = dvmRequest.emitter
+    } else {
+      router.clearModals()
+
+      // send the event
+      thunk = publish({
+        event: signedTemplate,
+        relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
+        delay: $userSettings.send_delay,
+      })
+    }
 
     thunk.result.finally(() => {
       charCount.set(0)
@@ -111,14 +164,26 @@
       })
     }
 
-    thunk.status.subscribe(status => {
+    thunk.status.subscribe((status: ThunkStatusByUrl) => {
       if (
         Object.values(status).length === thunk.request.relays.length &&
-        Object.values(status).every(s => s.status === PublishStatus.Pending)
+        Object.values(status).every((s: ThunkStatus) => s.status === PublishStatus.Pending)
       ) {
         showPublishInfo(thunk)
       }
     })
+    if (emitter) {
+      emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {
+        $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+          try {
+            data = JSON.parse(data)[0]
+            showInfo(data[2] || "Your note is " + data[1] + "!")
+          } catch (e) {
+            warn(e)
+          }
+        })
+      })
+    }
   }
 
   const togglePreview = () => {
@@ -212,6 +277,8 @@
           disabled={$uploading || signaturePending}>
           {#if $uploading || signaturePending}
             <i class="fa fa-circle-notch fa-spin" />
+          {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
+            Schedule
           {:else}
             Send
           {/if}
@@ -227,7 +294,7 @@
 </form>
 
 {#if showOptions}
-  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} />
+  <NoteOptions onClose={closeOptions} onSubmit={setOptions} initialValues={options} publishAt />
 {/if}
 
 {#if $nsecWarning}
