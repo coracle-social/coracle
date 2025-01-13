@@ -38,8 +38,8 @@ export function swipe(
     const lateral = deltaX > 0 ? "right" : "left"
     const vertical = deltaY > 0 ? "top" : "bottom"
 
-    const swipeX = lateral == direction
-    const swipeY = vertical == direction
+    const swipeX = lateral === direction
+    const swipeY = vertical === direction
 
     if (!swipeX && !swipeY) return
 
@@ -52,7 +52,7 @@ export function swipe(
     node.dispatchEvent(
       new CustomEvent("swipe", {
         detail: {
-          isTop: node.scrollTop == 0,
+          isTop: node.scrollTop === 0,
           startX,
           startY,
           deltaX,
@@ -74,8 +74,8 @@ export function swipe(
     const lateral = deltaX > 0 ? "right" : "left"
     const vertical = deltaY > 0 ? "top" : "bottom"
 
-    const swipeX = lateral == direction
-    const swipeY = vertical == direction
+    const swipeX = lateral === direction
+    const swipeY = vertical === direction
 
     if (swipeX && swipeY) return
 
@@ -88,7 +88,7 @@ export function swipe(
     node.dispatchEvent(
       new CustomEvent("end", {
         detail: {
-          isTop: node.scrollTop == 0,
+          isTop: node.scrollTop === 0,
           startX,
           startY,
           deltaX,

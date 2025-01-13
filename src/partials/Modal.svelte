@@ -1,10 +1,12 @@
 <script lang="ts">
+  // Disable ts errors in this file because on:swipe type declarations aren't working
+  // @ts-nocheck
+
   import cx from "classnames"
   import {randomId} from "hurdak"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {fly, fade} from "src/util/transition"
-  import AltColor from "src/partials/AltColor.svelte"
   import {router} from "src/app/util/router"
   import {swipe} from "src/util/swipe"
   import {cubicOut} from "svelte/easing"
@@ -138,13 +140,12 @@
             </div>
           {/if}
           <div on:click|stopPropagation class="">
-            <AltColor
-              background
-              class={cx("relative m-auto h-full min-h-screen w-full cursor-auto overflow-hidden")}>
+            <div
+              class="relative m-auto h-full min-h-screen w-full cursor-auto overflow-hidden bg-neutral-800">
               <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-4">
                 <slot />
               </div>
-            </AltColor>
+            </div>
           </div>
         </div>
       </div>
