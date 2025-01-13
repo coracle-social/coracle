@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {signer, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
+  import {isMobile} from "src/util/html"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
@@ -54,13 +55,7 @@
       }
     }
   }
-
-  let innerWidth
-
-  $: isMobile = innerWidth < 768
 </script>
-
-<svelte:window bind:innerWidth />
 
 {#key $pubkey}
   <div

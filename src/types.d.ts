@@ -12,7 +12,7 @@ declare module "@welshman/lib" {
 }
 
 declare namespace svelteHTML {
-  interface HTMLAttributes<T> {
+  interface HTMLAttributes {
     "on:swipe"?: (event: SwipeCustomEvent) => any
   }
 }
