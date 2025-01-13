@@ -10,6 +10,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Note from "src/app/shared/Note.svelte"
   import {formatTimestamp} from "src/util/misc"
   import {fly, slide} from "src/util/transition"
 
@@ -60,6 +61,7 @@
             <span>Kind {event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
             <Anchor underline modal class="text-sm" on:click={() => open(event)}>View Note</Anchor>
           </div>
+          <Note note={event} />
           <div class="flex justify-between text-sm">
             <div class="hidden gap-4 sm:flex">
               <span class="flex items-center gap-2">
