@@ -125,7 +125,9 @@
           <AltColor background class="absolute -bottom-2 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
-      <Note note={event} {showEntire} {showParent} {showMedia} />
+      <div class="pt-4">
+        <Note note={event} {showEntire} {showParent} {showMedia} />
+      </div>
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor

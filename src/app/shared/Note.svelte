@@ -34,7 +34,7 @@
   $: hidden = $isEventMuted(note, true)
 </script>
 
-<div class="group relative pt-4">
+<div class="group relative">
   <Card stopPropagation class="relative" on:click={onClick} {interactive}>
     {#if note.kind !== 31890}
       <NoteHeader event={note} {showParent} />
