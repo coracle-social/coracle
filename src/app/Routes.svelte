@@ -2,6 +2,7 @@
   import cx from "classnames"
   import {signer, pubkey} from "@welshman/app"
   import logger from "src/util/logger"
+  import {isMobile} from "src/util/html"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
@@ -75,7 +76,7 @@
 
 {#each [...$modals].reverse().filter(m => !m.virtual) as m, i (router.getKey(m) + i)}
   {@const {component} = router.getMatch(m.path).route}
-  <Modal mini={m.mini} virtual={false} canClose={!m.noEscape}>
+  <Modal mini={m.mini} drawer={!isMobile && m.drawer} virtual={false} canClose={!m.noEscape}>
     <svelte:component this={component} {...router.getProps(m)} />
   </Modal>
 {/each}
