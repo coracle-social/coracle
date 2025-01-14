@@ -17,6 +17,22 @@ import {
   getTags,
   getTagValue,
   getTopicTagValues,
+  GROUPS,
+  FEED,
+  NAMED_PEOPLE,
+  NAMED_RELAYS,
+  NAMED_CURATIONS,
+  NAMED_WIKI_AUTHORS,
+  NAMED_WIKI_RELAYS,
+  NAMED_EMOJIS,
+  NAMED_TOPICS,
+  NAMED_ARTIFACTS,
+  NAMED_COMMUNITIES,
+  PINS,
+  BOOKMARKS,
+  COMMUNITIES,
+  CHANNELS,
+  TOPICS,
 } from "@welshman/util"
 import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
@@ -44,6 +60,26 @@ export const noteKinds = [NOTE, LONG_FORM, HIGHLIGHT]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
+export const headerLessKinds = [
+  GROUPS,
+  FEED,
+  NAMED_PEOPLE,
+  NAMED_RELAYS,
+  NAMED_CURATIONS,
+  NAMED_WIKI_AUTHORS,
+  NAMED_WIKI_RELAYS,
+  NAMED_EMOJIS,
+  NAMED_TOPICS,
+  NAMED_ARTIFACTS,
+  NAMED_COMMUNITIES,
+  MUTES,
+  PINS,
+  BOOKMARKS,
+  COMMUNITIES,
+  CHANNELS,
+  GROUPS,
+  TOPICS,
+]
 
 export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",

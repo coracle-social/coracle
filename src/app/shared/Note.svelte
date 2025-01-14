@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util"
-  import {HEADERLESS_KIND} from "src/domain"
+  import {headerLessKinds} from "src/util/nostr"
   import {getSetting, isEventMuted} from "src/engine"
 
   export let note: TrustedEvent
@@ -37,7 +37,7 @@
 
 <div class="group relative">
   <Card stopPropagation class="relative" on:click={onClick} {interactive}>
-    {#if !HEADERLESS_KIND.includes(note.kind)}
+    {#if !headerLessKinds.includes(note.kind)}
       <NoteHeader event={note} {showParent} />
     {/if}
     {#if hidden && !showHidden}
@@ -50,10 +50,10 @@
           }}>Show</Anchor>
       </p>
     {:else}
-      <div class:!pl-0={HEADERLESS_KIND.includes(note.kind)} class="mt-2 pl-14">
+      <div class:!pl-0={headerLessKinds.includes(note.kind)} class="mt-2 pl-14">
         <NoteContent {note} {depth} {showEntire} {showMedia} />
       </div>
-      <div class:!pl-10={HEADERLESS_KIND.includes(note.kind)} class="pl-14 pt-4">
+      <div class:!pl-10={headerLessKinds.includes(note.kind)} class="pl-14 pt-4">
         <NoteActions event={note} />
       </div>
     {/if}
