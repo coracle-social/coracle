@@ -150,7 +150,7 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 
-export const canDecrypt = synced("canDecrypt", false)
+export const canDecrypt = withGetter(synced("canDecrypt", false))
 
 // Plaintext
 
@@ -238,7 +238,7 @@ repository.on("update", ({added}: {added: TrustedEvent[]}) => {
     }
 
     if (event.kind === WRAP) {
-      if (get(canDecrypt)) {
+      if (canDecrypt.get()) {
         unwrapper.push(event)
       }
     }
