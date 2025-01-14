@@ -1,8 +1,8 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
-  import NoteContentKind1 from "./NoteContentKind1.svelte"
-  import {fromPairs} from "@welshman/lib"
+  import {ensureNumber, fromPairs} from "@welshman/lib"
   import {formatTimestamp} from "src/util/misc"
+  import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
 
   export let note: TrustedEvent
 
@@ -10,7 +10,10 @@
 </script>
 
 <div>
-  Raising <strong class="text-accent">{amount} Sats</strong> by {formatTimestamp(Number(closed_at))}
+  Raising <strong class="text-accent">{amount} Sats</strong>
+  {#if closed_at}
+    by {formatTimestamp(ensureNumber(closed_at))}
+  {/if}
 </div>
 {#if note.content}
   <div class="mt-2 flex space-x-2">
