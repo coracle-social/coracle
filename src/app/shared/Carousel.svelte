@@ -11,7 +11,10 @@
 </style>
 
 <script lang="ts">
+  import {getSetting} from "src/engine"
+  import Anchor from "src/partials/Anchor.svelte"
   export let items: any[] = []
+  export let showMedia = getSetting("show_media")
 
   let carouselElement: HTMLElement
   let container: HTMLElement
@@ -47,10 +50,17 @@
     {#each items as item, index}
       <div
         class="w-full shrink-0 snap-always overflow-hidden rounded-xl bg-opacity-50"
+        class:blur-3xl={!showMedia}
         class:snap-start={index == 0}
         class:snap-center={index != 0}>
         <slot {item}>Missing template</slot>
       </div>
+      {#if !showMedia}
+        <div class="absolute w-full text-center text-black">
+          <Anchor href="/settings/content" button accent class="m-auto max-w-48"
+            >Enable media content</Anchor>
+        </div>
+      {/if}
     {/each}
   </div>
 
