@@ -14,20 +14,16 @@
 
     canDecrypt.set(true)
   }
-  const submit = async () => {
+  const submit = () => {
     loading = true
 
-    try {
-      await enableChat()
-    } finally {
-      loading = false
-      router.at("channels").push()
-    }
+    enableChat()
+    loading = false
+    router.pop()
   }
 
   const back = () => {
-    router.pop()
-    router.pop()
+    router.back(2)
   }
 </script>
 
