@@ -85,7 +85,7 @@
       setupTracking()
       setupAnalytics()
 
-      ready = initStorage("flotilla", 4, {
+      ready = initStorage("flotilla", 5, {
         relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),
         handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
@@ -100,7 +100,7 @@
           throttle: 3000,
           migrate: (data: {key: string; value: number}[]) => data.slice(0, 10_000),
         }),
-        events: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
+        events2: storageAdapters.fromRepositoryAndTracker(repository, tracker, {
           throttle: 3000,
           migrate: (events: TrustedEvent[]) => {
             if (events.length < 15_000) {
