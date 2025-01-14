@@ -23,7 +23,8 @@
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
-  import {openReplies} from "../state"
+  import {isMobile} from "src/util/html"
+  import {openReplies} from "src/app/state"
 
   const rendered = now()
 
@@ -58,7 +59,6 @@
 
   $: isPending = pendings > 0
   $: isCompleted = total === success + failed + timeout
-  $: isMobile = innerWidth < 720
 </script>
 
 <svelte:window bind:innerWidth />
