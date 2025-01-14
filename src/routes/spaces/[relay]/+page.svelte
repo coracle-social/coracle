@@ -1,6 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import type {TrustedEvent} from "@welshman/util"
+  import {displayRelayUrl} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
   import {fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -79,11 +80,11 @@
             </div>
           </div>
         </div>
-        <div>
+        <div class="min-w-0">
           <h2 class="ellipsize whitespace-nowrap text-xl">
             <RelayName {url} />
           </h2>
-          <p class="text-sm opacity-75">{url}</p>
+          <p class="ellipsize text-sm opacity-75">{displayRelayUrl(url)}</p>
         </div>
       </div>
       <RelayDescription {url} />

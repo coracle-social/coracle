@@ -71,7 +71,7 @@
   <SecondaryNavSection class="max-h-screen">
     <div>
       <SecondaryNavItem class="w-full !justify-between" on:click={openMenu}>
-        <strong>{displayRelayUrl(url)}</strong>
+        <strong class="ellipsize">{displayRelayUrl(url)}</strong>
         <Icon icon="alt-arrow-down" />
       </SecondaryNavItem>
       {#if showMenu}

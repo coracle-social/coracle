@@ -119,6 +119,10 @@
   @apply overflow-hidden text-ellipsis;
 }
 
+[data-tip]::before {
+  @apply ellipsize;
+}
+
 .content-padding-x {
   @apply px-4 sm:px-8 md:px-12;
 }

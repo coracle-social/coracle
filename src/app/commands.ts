@@ -376,7 +376,6 @@ export const checkRelayAuth = async (url: string, timeout = 3000) => {
 
 export const attemptRelayAccess = async (url: string, claim = "") => {
   const checks = [
-    () => checkRelayProfile(url),
     () => checkRelayConnection(url),
     () => checkRelayAccess(url, claim),
     () => checkRelayAuth(url),
