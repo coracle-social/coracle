@@ -8,10 +8,12 @@
   const profile = deriveProfile(pubkey)
 </script>
 
-<NoteContentKind1
-  note={{content: $profile?.about || "", tags: []}}
-  class={$$props.class}
-  minLength={200}
-  maxLength={300}
-  expandable={false}
-  showEntire={!truncate} />
+{#key $profile.about}
+  <NoteContentKind1
+    note={{content: $profile.about, tags: []}}
+    class={$$props.class}
+    minLength={200}
+    maxLength={300}
+    expandable={false}
+    showEntire={!truncate} />
+{/key}
