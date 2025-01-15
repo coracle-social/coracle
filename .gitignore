@@ -17,6 +17,9 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Android
+.idea
+
 # Generated assets
 static/favicon.ico
 static/pwa-64x64.png
