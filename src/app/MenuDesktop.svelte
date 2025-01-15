@@ -40,10 +40,11 @@
       for (const status of $statuses) {
         const statuses = Object.values(omit([LOCAL_RELAY_URL], status))
         const pubStatus = statuses.map(s => s.status)
-        if (pubStatus.includes(PublishStatus.Success)) {
-          success += 1
-        } else if (pubStatus.every(p => p === PublishStatus.Pending)) {
+
+        if (pubStatus.includes(PublishStatus.Pending)) {
           pending += 1
+        } else if (pubStatus.includes(PublishStatus.Success)) {
+          success += 1
         }
       }
 
