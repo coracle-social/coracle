@@ -11,11 +11,7 @@
 </style>
 
 <script lang="ts">
-  import {getSetting} from "src/engine"
-  import Anchor from "src/partials/Anchor.svelte"
-
   export let items: any[] = []
-  export let showMedia = getSetting("show_media")
 
   let carouselElement: HTMLElement
   let container: HTMLElement
