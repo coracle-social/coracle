@@ -81,6 +81,9 @@
   class="border-top fixed bottom-0 left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="content-padding-x content-sizing flex justify-between px-2">
     <div class="flex gap-2 sm:gap-8">
+      <PrimaryNavItem title="Home" href="/home">
+        <Avatar icon="home-smile" class="!h-10 !w-10" />
+      </PrimaryNavItem>
       <PrimaryNavItem title="Search" href="/people">
         <Avatar icon="magnifer" class="!h-10 !w-10" />
       </PrimaryNavItem>
@@ -98,7 +101,7 @@
       </PrimaryNavItem>
     </div>
     <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
-      <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
+      <Avatar icon="settings" src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>
 </div>
