@@ -41,7 +41,7 @@
       <NoteHeader event={note} {showParent} />
     {/if}
     {#if hidden && !showHidden}
-      <p class="border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
+      <p class="ml-14 mt-4 border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
         You have hidden this note.
         <Anchor
           underline
