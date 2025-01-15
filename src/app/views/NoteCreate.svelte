@@ -45,7 +45,7 @@
 
   let showPreview = false
   let showOptions = false
-  let signaturePending = false
+  let publishing = false
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
@@ -74,9 +74,9 @@
 
   const onSubmit = async ({skipNsecWarning = false} = {}) => {
     // prevent sending before media are uploaded
-    if ($uploading) return
+    if ($uploading || publishing) return
 
-    signaturePending = true
+    publishing = true
 
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
@@ -100,22 +100,23 @@
       created_at:
         (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
     })
-    const signedTemplate = await sign(template, options)
 
-    signaturePending = false
+    const event = await sign(template, options)
 
     drafts.set("notecreate", $editor.getHTML())
+
     let thunk: Thunk, emitter: Emitter
 
     // if a delay is set, send the event through the DVM
     router.clearModals()
+
     if (options.publish_at) {
       // take the first DVM Handler found
 
       const dvmContent = await $signer.nip04.encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
-          ["i", JSON.stringify(signedTemplate), "text"],
+          ["i", JSON.stringify(event), "text"],
           ["param", "relays", ...ctx.app.router.FromUser().getUrls()],
         ]),
       )
@@ -138,10 +139,9 @@
     } else {
       router.clearModals()
 
-      // send the event
       thunk = publish({
-        event: signedTemplate,
-        relays: ctx.app.router.PublishEvent(signedTemplate).getUrls(),
+        event,
+        relays: ctx.app.router.PublishEvent(event).getUrls(),
         delay: $userSettings.send_delay,
       })
     }
@@ -172,6 +172,7 @@
         showPublishInfo(thunk)
       }
     })
+
     if (emitter) {
       emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {
         $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
@@ -184,6 +185,8 @@
         })
       })
     }
+
+    publishing = false
   }
 
   const togglePreview = () => {
@@ -274,8 +277,8 @@
           tag="button"
           type="submit"
           class="flex-grow"
-          disabled={$uploading || signaturePending}>
-          {#if $uploading || signaturePending}
+          disabled={$uploading || publishing}>
+          {#if $uploading || publishing}
             <i class="fa fa-circle-notch fa-spin" />
           {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
             Schedule
