@@ -178,7 +178,9 @@
         {#if $zapper && zapDisplay}
           <Anchor modal class="flex items-center gap-2" href={zapLink}>
             <i class="fa fa-bolt w-4 text-accent" />
-            {zapDisplay}
+            <div class="overflow-hidden overflow-ellipsis">
+              {zapDisplay}
+            </div>
           </Anchor>
         {/if}
         {#if $profile?.website}
