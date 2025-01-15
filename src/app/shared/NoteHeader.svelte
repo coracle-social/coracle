@@ -60,7 +60,7 @@
         </Anchor>
       </div>
     </div>
-    <div class="-ml-14 flex flex-col gap-2 sm:ml-0">
+    <div class="flex flex-col gap-2">
       <div class="flex gap-2">
         {#if showReply}
           <small class="text-neutral-100">
