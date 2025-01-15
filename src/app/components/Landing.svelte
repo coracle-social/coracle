@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Dialog from "@lib/components/Dialog.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import LogIn from "@app/components/LogIn.svelte"
@@ -33,5 +34,10 @@
         <div slot="info">Just a few questions and you'll be on your way.</div>
       </CardButton>
     </Button>
+    <p class="text-center text-xs opacity-75">
+      By using {PLATFORM_NAME}, you consent to our
+      <Link external class="link" href="/terms.html">Terms of Service</Link> and
+      <Link external class="link" href="/privacy.html">Privacy Policy</Link>.
+    </p>
   </div>
 </Dialog>
