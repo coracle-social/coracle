@@ -1,6 +1,6 @@
 <script lang="ts">
   import {seconds} from "hurdak"
-  import {derived, get} from "svelte/store"
+  import {derived} from "svelte/store"
   import {now, omit} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
@@ -27,29 +27,29 @@
 
   const {page} = router
 
-  const hud = derived(thunks, $thunks => {
-    const pending = []
-    const success = []
-    const failure = []
+  $: recent = (Object.values($thunks) as Thunk[]).filter(
+    t => t.event.created_at > now() - seconds(5, "minute") && t.event.pubkey === $pubkey,
+  )
 
-    for (const {event, request, status} of Object.values($thunks) as Thunk[]) {
-      if (event.created_at < now() - seconds(5, "minute")) {
-        continue
+  $: hud = derived(
+    recent.map(t => t.status),
+    $statuses => {
+      let pending = 0
+      let success = 0
+
+      for (const status of $statuses) {
+        const statuses = Object.values(omit([LOCAL_RELAY_URL], status))
+        const pubStatus = statuses.map(s => s.status)
+        if (pubStatus.includes(PublishStatus.Success)) {
+          success += 1
+        } else if (pubStatus.every(p => p === PublishStatus.Pending)) {
+          pending += 1
+        }
       }
 
-      const statuses = Object.values(omit([LOCAL_RELAY_URL], get(status))).map(s => s.status)
-
-      if (statuses.includes(PublishStatus.Success)) {
-        success.push(request.event)
-      } else if (statuses.includes(PublishStatus.Pending)) {
-        pending.push(request.event)
-      } else if (statuses.length > 0) {
-        failure.push(request.event)
-      }
-    }
-
-    return {pending, success, failure}
-  })
+      return {pending, success, failure: $statuses.length - pending - success}
+    },
+  )
 
   const closeSubMenu = () => {
     subMenu = null
@@ -199,20 +199,20 @@
         modal
         href="/publishes"
         class="flex h-12 cursor-pointer items-center justify-between border-t border-solid border-neutral-600 pl-7 pr-12">
-        <div class="flex items-center gap-1" class:text-tinted-500={$hud.pending.length === 0}>
+        <div class="flex items-center gap-1" class:text-tinted-500={$hud.pending === 0}>
           <i class="fa fa-hourglass" />
-          {$hud.pending.length}
+          {$hud.pending}
         </div>
-        <div class="flex items-center gap-1" class:text-tinted-500={$hud.success.length === 0}>
+        <div class="flex items-center gap-1" class:text-tinted-500={$hud.success === 0}>
           <i class="fa fa-cloud-arrow-up" />
-          {$hud.success.length}
+          {$hud.success}
         </div>
         <div
           class="flex items-center gap-1"
-          class:text-accent={$hud.failure.length > 0}
-          class:text-tinted-500={$hud.failure.length === 0}>
+          class:text-accent={$hud.failure > 0}
+          class:text-tinted-500={$hud.failure === 0}>
           <i class="fa fa-triangle-exclamation" />
-          {$hud.failure.length}
+          {$hud.failure}
         </div>
       </Anchor>
       <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">

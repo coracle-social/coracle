@@ -1,30 +1,42 @@
 <script lang="ts">
   import {thunks, type Thunk} from "@welshman/app"
-  import {assoc, now, remove, sortBy} from "@welshman/lib"
+  import {assoc, now, omit, remove, sortBy} from "@welshman/lib"
+  import {PublishStatus} from "@welshman/net"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
+  import {derived} from "svelte/store"
   import {pluralize, seconds} from "hurdak"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
-  import {PublishStatus} from "@welshman/net"
-  import {get} from "svelte/store"
-
-  const hasStatus = (thunk: Thunk, statuses: PublishStatus[]) =>
-    Object.values(get(thunk.status)).some(s => statuses.includes(s.status))
 
   $: recent = (Object.values($thunks) as Thunk[]).filter(
-    t =>
-      remove(LOCAL_RELAY_URL, t.request.relays).length > 0 &&
-      t.event.created_at > now() - seconds(24, "hour"),
+    t => t.event.created_at > now() - seconds(24, "hour"),
   )
+
   $: relays = new Set(
     remove(
       LOCAL_RELAY_URL,
       recent.flatMap(({request}) => request.relays),
     ),
   )
-  $: success = recent.filter(t => hasStatus(t, [PublishStatus.Success]))
-  $: pending = recent.filter(
-    t => hasStatus(t, [PublishStatus.Pending]) && !hasStatus(t, [PublishStatus.Success]),
+
+  $: hud = derived(
+    recent.map(t => t.status),
+    $statuses => {
+      let pending = 0
+      let success = 0
+
+      for (const status of $statuses) {
+        const statuses = Object.values(omit([LOCAL_RELAY_URL], status))
+        const pubStatus = statuses.map(s => s.status)
+        if (pubStatus.includes(PublishStatus.Success)) {
+          success += 1
+        } else if (pubStatus.every(p => p === PublishStatus.Pending)) {
+          pending += 1
+        }
+      }
+
+      return {pending, success, failure: $statuses.length - pending - success}
+    },
   )
 
   // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
@@ -51,15 +63,15 @@
     <span class="text-sm">{pluralize(relays.size, "Relay")}</span>
   </Tile>
   <Tile background lass="hidden sm:block">
-    <p class="text-lg sm:text-2xl">{pending.length}</p>
+    <p class="text-lg sm:text-2xl">{$hud.pending}</p>
     <span class="text-sm">Pending</span>
   </Tile>
   <Tile background>
-    <p class="text-lg sm:text-2xl">{success.length}</p>
+    <p class="text-lg sm:text-2xl">{$hud.success}</p>
     <span class="text-sm">Succeeded</span>
   </Tile>
   <Tile background>
-    <p class="text-lg sm:text-2xl">{recent.length - pending.length - success.length}</p>
+    <p class="text-lg sm:text-2xl">{$hud.failure}</p>
     <span class="text-sm">Failed</span>
   </Tile>
 </div>
