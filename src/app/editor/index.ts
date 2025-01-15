@@ -26,7 +26,6 @@ export const signWithAssert = async (template: StampedEvent) => {
 }
 
 export const getEditor = ({
-  aggressive = false,
   autofocus = false,
   charCount,
   content = "",
@@ -36,7 +35,6 @@ export const getEditor = ({
   uploading,
   wordCount,
 }: {
-  aggressive?: boolean
   autofocus?: boolean
   charCount?: Writable<number>
   content?: string
@@ -60,11 +58,6 @@ export const getEditor = ({
           placeholder: {
             config: {
               placeholder,
-            },
-          },
-          breakOrSubmit: {
-            config: {
-              aggressive,
             },
           },
           fileUpload: {

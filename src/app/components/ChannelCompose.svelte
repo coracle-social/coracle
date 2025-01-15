@@ -19,16 +19,18 @@
   const submit = () => {
     if ($uploading) return
 
-    onSubmit({
-      content: $editor!.getText({blockSeparator: "\n"}).trim(),
-      tags: $editor!.storage.nostr.getEditorTags(),
-    })
+    const content = $editor!.getText({blockSeparator: "\n"}).trim()
+    const tags = $editor!.storage.nostr.getEditorTags()
+
+    if (!content) return
+
+    onSubmit({content, tags})
 
     $editor!.chain().clearContent().run()
   }
 
   onMount(() => {
-    editor = getEditor({autofocus: !isMobile, aggressive: true, element, submit, uploading})
+    editor = getEditor({autofocus: !isMobile, element, submit, uploading})
 
     $editor!.chain().setContent(content).run()
   })
@@ -51,4 +53,11 @@
   <div class="chat-editor flex-grow overflow-hidden">
     <div bind:this={element} />
   </div>
+  <Button
+    data-tip="{window.navigator.platform.includes('Mac') ? 'cmd' : 'ctrl'}+enter to send"
+    class="center tooltip tooltip-left absolute right-4 h-10 w-10 min-w-10 rounded-full"
+    disabled={$uploading}
+    on:click={submit}>
+    <Icon icon="plain" />
+  </Button>
 </form>
