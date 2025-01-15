@@ -36,7 +36,10 @@ export const notifications = derived(
       }
 
       for (const [entryPath, ts] of Object.entries($checked)) {
-        const isMatch = entryPath === "*" || entryPath.startsWith(path)
+        const isMatch =
+          entryPath === "*" ||
+          entryPath.startsWith(path) ||
+          (entryPath === "/chat/*" && path.startsWith("/chat/"))
 
         if (isMatch && ts > latestEvent.created_at) {
           return false

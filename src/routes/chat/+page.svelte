@@ -6,6 +6,7 @@
   import ContentSearch from "@lib/components/ContentSearch.svelte"
   import ChatItem from "@app/components/ChatItem.svelte"
   import ChatStart from "@app/components/ChatStart.svelte"
+  import ChatMenuMobile from "@app/components/ChatMenuMobile.svelte"
   import {chatSearch} from "@app/state"
   import {pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
@@ -13,6 +14,8 @@
   let term = ""
 
   const startChat = () => pushModal(ChatStart)
+
+  const openMenu = () => pushModal(ChatMenuMobile)
 
   $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
 
@@ -41,8 +44,8 @@
       <Icon icon="magnifer" />
       <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
     </label>
-    <Button class="btn btn-primary" on:click={startChat}>
-      <Icon icon="add-circle" />
+    <Button class="btn btn-primary" on:click={openMenu}>
+      <Icon icon="menu-dots" />
     </Button>
   </div>
   <div slot="content" class="col-2">
