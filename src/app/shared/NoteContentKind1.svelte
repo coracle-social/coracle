@@ -36,8 +36,6 @@
   export let expandable = true
   export let depth = 0
 
-  const fullContent = parse(note)
-
   const expand = () => {
     showEntire = true
   }
@@ -64,6 +62,8 @@
   }
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
+
+  $: fullContent = parse(note)
 
   $: shortContent = showEntire
     ? fullContent
