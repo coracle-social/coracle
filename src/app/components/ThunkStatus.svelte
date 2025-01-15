@@ -42,9 +42,9 @@
   }
 </script>
 
-<div class="flex justify-end px-1 text-xs {$$props.class}">
-  {#if isFailure && failure}
-    {@const [url, {message, status}] = failure}
+{#if isFailure && failure}
+  {@const [url, {message, status}] = failure}
+  <div class="flex justify-end px-1 text-xs {$$props.class}">
     <Tippy
       class="flex items-center {$$props.class}"
       component={ThunkStatusDetail}
@@ -55,7 +55,9 @@
         <span>Failed to send!</span>
       </span>
     </Tippy>
-  {:else if canCancel || isPending}
+  </div>
+{:else if canCancel || isPending}
+  <div class="flex justify-end px-1 text-xs {$$props.class}">
     <span class="flex items-center gap-1 {$$props.class}">
       <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
       <span class="opacity-50">Sending...</span>
@@ -63,5 +65,5 @@
         <Button class="link" on:click={abort}>Cancel</Button>
       {/if}
     </span>
-  {/if}
-</div>
+  </div>
+{/if}

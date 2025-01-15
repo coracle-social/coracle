@@ -4,6 +4,7 @@
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
+  import EventReport from "@app/components/EventReport.svelte"
   import ThreadShare from "@app/components/ThreadShare.svelte"
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {pushModal} from "@app/modal"
@@ -13,6 +14,11 @@
   export let onClick
 
   const isRoot = event.kind !== COMMENT
+
+  const report = () => {
+    onClick()
+    pushModal(EventReport, {url, event})
+  }
 
   const showInfo = () => {
     onClick()
@@ -50,6 +56,13 @@
       <Button on:click={showDelete} class="text-error">
         <Icon size={4} icon="trash-bin-2" />
         Delete Message
+      </Button>
+    </li>
+  {:else}
+    <li>
+      <Button class="text-error" on:click={report}>
+        <Icon size={4} icon="danger" />
+        Report Content
       </Button>
     </li>
   {/if}

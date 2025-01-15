@@ -29,7 +29,7 @@
 <NoteCard {event} class="card2 bg-alt">
   <Content {event} expandMode="inline" />
   <div class="flex w-full justify-between gap-2">
-    <ReactionSummary relays={[url]} {event} {onReactionClick} reactionClass="tooltip-right">
+    <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right">
       <EmojiButton {onEmoji} class="btn btn-neutral btn-xs h-[26px] rounded-box">
         <Icon icon="smile-circle" size={4} />
       </EmojiButton>

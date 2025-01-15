@@ -1,23 +1,34 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {groupBy, uniqBy, batch} from "@welshman/lib"
-  import {REACTION, DELETE} from "@welshman/util"
+  import {groupBy, uniq, uniqBy, batch} from "@welshman/lib"
+  import {REACTION, getTag, REPORT, DELETE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {pubkey, repository, load, displayProfileByPubkey} from "@welshman/app"
   import {displayList} from "@lib/util"
   import {isMobile} from "@lib/html"
+  import Icon from "@lib/components/Icon.svelte"
+  import EventReportDetails from "@app/components/EventReportDetails.svelte"
   import {displayReaction} from "@app/state"
+  import {pushModal} from "@app/modal"
 
   export let event
   export let onReactionClick
-  export let relays: string[] = []
+  export let url = ""
   export let reactionClass = ""
   export let noTooltip = false
+
+  const reports = deriveEvents(repository, {
+    filters: [{kinds: [REPORT], "#e": [event.id]}],
+  })
 
   const reactions = deriveEvents(repository, {
     filters: [{kinds: [REACTION], "#e": [event.id]}],
   })
+
+  const onReportClick = () => pushModal(EventReportDetails, {url, event})
+
+  $: reportReasons = uniq($reports.map(e => getTag("e", e.tags)?.[2]))
 
   $: groupedReactions = groupBy(
     e => e.content,
@@ -26,11 +37,11 @@
 
   onMount(() => {
     load({
-      relays,
-      filters: [{kinds: [REACTION, DELETE], "#e": [event.id]}],
+      relays: [url],
+      filters: [{kinds: [REACTION, REPORT, DELETE], "#e": [event.id]}],
       onEvent: batch(300, (events: TrustedEvent[]) => {
         load({
-          relays,
+          relays: [url],
           filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
         })
       }),
@@ -38,8 +49,19 @@
   })
 </script>
 
-{#if $reactions.length > 0}
+{#if $reactions.length > 0 || $reports.length > 0}
   <div class="flex min-w-0 flex-wrap gap-2">
+    {#if url && $reports.length > 0}
+      <button
+        type="button"
+        data-tip={`This content has been reported as "${displayList(reportReasons)}".`}}
+        class="btn btn-error btn-xs tooltip-right flex items-center gap-1 rounded-full"
+        class:tooltip={!noTooltip && !isMobile}
+        on:click|preventDefault|stopPropagation={onReportClick}>
+        <Icon icon="danger" />
+        <span>{$reports.length}</span>
+      </button>
+    {/if}
     {#each groupedReactions.entries() as [content, events]}
       {@const pubkeys = events.map(e => e.pubkey)}
       {@const isOwn = $pubkey && pubkeys.includes($pubkey)}

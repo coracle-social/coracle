@@ -56,7 +56,7 @@
 
 <div class="flex flex-wrap items-center justify-between gap-2">
   <div class="flex flex-grow flex-wrap justify-end gap-2">
-    <ReactionSummary relays={[url]} {event} {onReactionClick} reactionClass="tooltip-left" />
+    <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-left" />
     {#if $deleted}
       <div class="btn btn-error btn-xs rounded-full">Deleted</div>
     {:else if thunk}

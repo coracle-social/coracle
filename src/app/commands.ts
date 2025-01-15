@@ -2,6 +2,7 @@ import {get} from "svelte/store"
 import {ctx, sample, uniq, sleep, chunk, equals} from "@welshman/lib"
 import {
   DELETE,
+  REPORT,
   PROFILE,
   INBOX_RELAYS,
   RELAYS,
@@ -428,6 +429,29 @@ export const makeDelete = ({event}: {event: TrustedEvent}) => {
 
 export const publishDelete = ({relays, event}: {relays: string[]; event: TrustedEvent}) =>
   publishThunk({event: makeDelete({event}), relays})
+
+export type ReportParams = {
+  event: TrustedEvent
+  content: string
+  reason: string
+}
+
+export const makeReport = ({event, reason, content}: ReportParams) => {
+  const tags = [
+    ["p", event.pubkey],
+    ["e", event.id, reason],
+  ]
+
+  return createEvent(REPORT, {content, tags})
+}
+
+export const publishReport = ({
+  relays,
+  event,
+  reason,
+  content,
+}: ReportParams & {relays: string[]}) =>
+  publishThunk({event: makeReport({event, reason, content}), relays})
 
 export type ReactionParams = {
   event: TrustedEvent
