@@ -158,9 +158,9 @@
           </div>
         </Link>
       {/each}
-      <Button on:click={addRoom} class="btn btn-neutral">
+      <Button on:click={addRoom} class="btn btn-neutral whitespace-nowrap">
         <Icon icon="add-circle" />
-        Create Room
+        Create
       </Button>
     </div>
     {#if pubkey}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
-  import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
   import {addSession} from "@welshman/app"
   import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -62,6 +62,15 @@
   let url = ""
   let input = ""
   let loading = false
+
+  $: {
+    // For testing and for play store reviewers
+    if (input === "reviewkey") {
+      const secret = makeSecret()
+
+      addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+    }
+  }
 
   onMount(async () => {
     url = await broker.makeNostrconnectUrl({

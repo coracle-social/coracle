@@ -41,10 +41,10 @@
 <form class="column gap-4" on:submit|preventDefault={submit}>
   <ModalHeader>
     <div slot="title">Enable Messages</div>
-    <div slot="info">Do you want to enable notes and direct messages?</div>
+    <div slot="info">Do you want to enable direct messages?</div>
   </ModalHeader>
   <p>
-    By default, notes and direct messages are disabled, since loading them requires
+    By default, direct messages are disabled, since loading them requires
     {PLATFORM_NAME} to download and decrypt a lot of data.
   </p>
   <p>

@@ -21,8 +21,6 @@
 
   const showSettingsMenu = () => pushModal(MenuSettings)
 
-  const openNotes = () => ($canDecrypt ? goto("/notes") : pushModal(ChatEnable, {next: "/notes"}))
-
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 
   $: spaceUrls = Array.from($userRoomsByUrl.keys())
@@ -58,9 +56,6 @@
         class="tooltip-right">
         <Avatar src={$userProfile?.picture} class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Notes" on:click={openNotes} class="tooltip-right">
-        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
-      </PrimaryNavItem>
       <PrimaryNavItem
         title="Messages"
         on:click={openChat}
@@ -83,12 +78,6 @@
     <div class="flex gap-2 sm:gap-8">
       <PrimaryNavItem title="Home" href="/home">
         <Avatar icon="home-smile" class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="Search" href="/people">
-        <Avatar icon="magnifer" class="!h-10 !w-10" />
-      </PrimaryNavItem>
-      <PrimaryNavItem title="Notes" on:click={openNotes}>
-        <Avatar icon="notes-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
       <PrimaryNavItem
         title="Messages"
