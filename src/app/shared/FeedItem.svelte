@@ -4,7 +4,7 @@
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters, NOTE} from "@welshman/util"
   import {quantify} from "hurdak"
-  import {onMount} from "svelte"
+  import {onMount, setContext} from "svelte"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
@@ -25,6 +25,8 @@
   export let showParent = true
   export let showLoading = false
   export let showMedia = getSetting("show_media")
+
+  setContext("topLevel", topLevel)
 
   let ready = false
   let event = note

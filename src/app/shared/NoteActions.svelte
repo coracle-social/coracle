@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {sum, pluck} from "@welshman/lib"
-  import {onMount} from "svelte"
+  import {getContext, onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {ctx, nth, nthEq, remove, last, sortBy, uniqBy, prop, identity} from "@welshman/lib"
@@ -97,6 +97,7 @@
   const seenOn = derived(trackerStore, $t =>
     remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
   )
+  const topLevel = getContext("topLevel")
 
   const setView = v => {
     view = v
@@ -278,7 +279,7 @@
   })
 </script>
 
-{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey}
+{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel}
   <NotePending {event} />
 {:else}
   <button
