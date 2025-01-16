@@ -123,6 +123,12 @@
   @apply ellipsize;
 }
 
+@media (max-width: 639px) {
+  [data-tip]::before {
+    display: none;
+  }
+}
+
 .content-padding-x {
   @apply px-4 sm:px-8 md:px-12;
 }
