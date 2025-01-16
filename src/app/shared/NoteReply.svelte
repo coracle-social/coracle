@@ -83,11 +83,6 @@
       tags.push(["content-warning", options.warning])
     }
 
-    // Re-broadcast the note we're replying to
-    if (!parent.wrap) {
-      publish({event: parent, relays: ctx.app.router.PublishEvent(parent).getUrls()})
-    }
-
     loading = true
 
     const template = createEvent(1, {content, tags})
