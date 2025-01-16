@@ -244,7 +244,7 @@
 <FlexColumn bind:element>
   {#each events as note, i (note.id)}
     <div in:fly={{y: 20}}>
-      <FeedItem {filters} {reposts} {depth} {anchor} {note} />
+      <FeedItem topLevel {filters} {reposts} {depth} {anchor} {note} />
     </div>
     {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
       <Card class="group flex items-center justify-between">
