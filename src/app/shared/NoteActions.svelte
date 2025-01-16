@@ -122,10 +122,6 @@
     router.at("notes").of(event.id).at("delete").qp({kind: event.kind}).open()
 
   const react = async content => {
-    if (isSignedEvent(event)) {
-      publish({event: event, relays: ctx.app.router.PublishEvent(event).getUrls()})
-    }
-
     const tags = [...tagReactionTo(event), ...getClientTags()]
     const template = createEvent(7, {content, tags})
     await signAndPublish(template)
