@@ -1,5 +1,15 @@
 # Changelog
 
+# 0.2.3
+
+* Add NIP 56 reports for messages and threads
+* Add ToS and privacy policy
+* Add avatar fallback icons
+* Add mark as read to chats
+* Add send button to chat compose
+* Accommodate onion URLs
+* Improve loading and notifications
+
 # 0.2.2
 
 * Fix bug with sending messages
