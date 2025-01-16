@@ -94,6 +94,10 @@ export const SIGNER_RELAYS = ["wss://relay.nsec.app/", "wss://bucket.coracle.soc
 
 export const PLATFORM_URL = window.location.origin
 
+export const PLATFORM_TERMS = import.meta.env.VITE_PLATFORM_TERMS
+
+export const PLATFORM_PRIVACY = import.meta.env.VITE_PLATFORM_PRIVACY
+
 export const PLATFORM_LOGO = PLATFORM_URL + "/pwa-192x192.png"
 
 export const PLATFORM_NAME = import.meta.env.VITE_PLATFORM_NAME

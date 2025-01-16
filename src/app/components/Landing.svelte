@@ -6,7 +6,7 @@
   import CardButton from "@lib/components/CardButton.svelte"
   import LogIn from "@app/components/LogIn.svelte"
   import SignUp from "@app/components/SignUp.svelte"
-  import {PLATFORM_NAME} from "@app/state"
+  import {PLATFORM_TERMS, PLATFORM_PRIVACY, PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
 
   const logIn = () => pushModal(LogIn)
@@ -36,8 +36,8 @@
     </Button>
     <p class="text-center text-xs opacity-75">
       By using {PLATFORM_NAME}, you consent to our
-      <Link external class="link" href="/terms.html">Terms of Service</Link> and
-      <Link external class="link" href="/privacy.html">Privacy Policy</Link>.
+      <Link external class="link" href={PLATFORM_TERMS}>Terms of Service</Link> and
+      <Link external class="link" href={PLATFORM_PRIVACY}>Privacy Policy</Link>.
     </p>
   </div>
 </Dialog>
