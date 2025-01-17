@@ -58,51 +58,53 @@
   $: isCompleted = total === success + failed + timeout
 </script>
 
-<div
-  class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
-  class:bg-neutral-500={thunk && (isPending || isCompleted)}
-  class:border={!(isPending || isCompleted)}
-  class:px-4={thunk && isPending}
-  on:click|stopPropagation>
-  {#if thunk && (isPending || isCompleted)}
-    <div
-      class="loading-bar absolute left-0 top-0 h-full bg-accent"
-      style="width: {20 + $completed}%" />
-    {#if isPending}
-      <span class="sm:hidden">
-        {success}/{total} relays
-      </span>
+{#if thunk}
+  <div
+    class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
+    class:bg-neutral-500={thunk && (isPending || isCompleted)}
+    class:border={!(isPending || isCompleted)}
+    class:px-4={thunk && isPending}
+    on:click|stopPropagation>
+    {#if isPending || isCompleted}
+      <div
+        class="loading-bar absolute left-0 top-0 h-full bg-accent"
+        style="width: {20 + $completed}%" />
+      {#if isPending}
+        <span class="sm:hidden">
+          {success}/{total} relays
+        </span>
+        <span class="hidden sm:inline">
+          Publishing... {total - pendings} of {total} relays
+        </span>
+      {:else}
+        <span class="sm:hidden">
+          {success}/{total} relays
+        </span>
+        <span class="hidden sm:inline">
+          Published to {success}/{total} relays
+        </span>
+        <Anchor
+          class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
+          modal
+          href="/publishes">
+          <span class="sm:hidden"> Details </span>
+          <span class="hidden sm:inline"> See details </span>
+        </Anchor>
+      {/if}
+    {:else if $userSettings.send_delay > 0}
+      {@const seconds = rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}
       <span class="hidden sm:inline">
-        Publishing... {total - pendings} of {total} relays
+        Sending reply in {seconds} seconds
       </span>
-    {:else}
       <span class="sm:hidden">
-        {success}/{total} relays
+        Sending in {seconds}s
       </span>
-      <span class="hidden sm:inline">
-        Published to {success}/{total} relays
-      </span>
-      <Anchor
-        class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
-        modal
-        href="/publishes">
-        <span class="sm:hidden"> Details </span>
-        <span class="hidden sm:inline"> See details </span>
-      </Anchor>
+      <button
+        class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
+        on:click={() => {
+          thunk.controller.abort()
+          $openReplies[parent] = true
+        }}>Cancel</button>
     {/if}
-  {:else if $userSettings.send_delay > 0}
-    {@const seconds = rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}
-    <span class="hidden sm:inline">
-      Sending reply in {seconds} seconds
-    </span>
-    <span class="sm:hidden">
-      Sending in {seconds}s
-    </span>
-    <button
-      class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
-      on:click={() => {
-        thunk.controller.abort()
-        $openReplies[parent] = true
-      }}>Cancel</button>
-  {/if}
-</div>
+  </div>
+{/if}

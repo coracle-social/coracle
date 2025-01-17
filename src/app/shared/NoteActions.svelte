@@ -16,6 +16,7 @@
     mute,
     pubkey,
     unmute,
+    thunks,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
@@ -279,7 +280,7 @@
   })
 </script>
 
-{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel}
+{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && $thunks[event.id]}
   <NotePending {event} />
 {:else}
   <button
