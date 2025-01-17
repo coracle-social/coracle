@@ -421,19 +421,22 @@ export const chats = derived(
       pushToMapKey(messagesByChatId, chatId, message)
     }
 
+    const displayPubkey = (pubkey: string) => {
+      const profile = $profilesByPubkey.get(pubkey)
+
+      return profile ? displayProfile(profile) : ""
+    }
+
     return sortBy(
       c => -c.last_activity,
       Array.from(messagesByChatId.entries()).map(([id, events]): Chat => {
-        const pubkeys = splitChatId(id)
+        const pubkeys = remove($pubkey!, splitChatId(id))
         const messages = sortBy(e => -e.created_at, events)
         const last_activity = messages[0].created_at
-        const search_text = remove($pubkey as string, pubkeys)
-          .map(pubkey => {
-            const profile = $profilesByPubkey.get(pubkey)
-
-            return profile ? displayProfile(profile) : ""
-          })
-          .join(" ")
+        const search_text =
+          pubkeys.length === 0
+            ? displayPubkey($pubkey!) + " note to self"
+            : pubkeys.map(displayPubkey).join(" ")
 
         return {id, pubkeys, messages, last_activity, search_text}
       }),

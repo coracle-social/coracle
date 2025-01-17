@@ -17,7 +17,7 @@
 
   const openMenu = () => pushModal(ChatMenuMobile)
 
-  $: chats = $chatSearch.searchOptions(term).filter(c => c.pubkeys.length > 1)
+  $: chats = $chatSearch.searchOptions(term)
 
   onDestroy(() => {
     setChecked($page.url.pathname)

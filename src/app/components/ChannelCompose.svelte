@@ -30,7 +30,7 @@
   }
 
   onMount(() => {
-    editor = getEditor({autofocus: !isMobile, element, submit, uploading})
+    editor = getEditor({autofocus: !isMobile, element, submit, uploading, aggressive: true})
 
     $editor!.chain().setContent(content).run()
   })

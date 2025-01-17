@@ -36,16 +36,18 @@
   )
 
   onMount(() => {
-    load({
-      relays: [url],
-      filters: [{kinds: [REACTION, REPORT, DELETE], "#e": [event.id]}],
-      onEvent: batch(300, (events: TrustedEvent[]) => {
-        load({
-          relays: [url],
-          filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
-        })
-      }),
-    })
+    if (url) {
+      load({
+        relays: [url],
+        filters: [{kinds: [REACTION, REPORT, DELETE], "#e": [event.id]}],
+        onEvent: batch(300, (events: TrustedEvent[]) => {
+          load({
+            relays: [url],
+            filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
+          })
+        }),
+      })
+    }
   })
 </script>
 

@@ -112,7 +112,8 @@
               </div>
             </Button>
           {/if}
-          <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
+          <span class="whitespace-nowrap text-xs opacity-50"
+            >{formatTimestampAsTime(event.created_at)}</span>
         </div>
       {/if}
       <div class="text-sm">

@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {first, sortBy, ctx} from "@welshman/lib"
-  import {getAncestorTags} from "@welshman/util"
+  import {ctx} from "@welshman/lib"
   import type {Filter} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {repository, load, loadRelaySelections, formatTimestampRelative} from "@welshman/app"
@@ -13,10 +12,8 @@
 
   export let pubkey
 
-  const filters: Filter[] = [{authors: [pubkey]}]
+  const filters: Filter[] = [{authors: [pubkey], limit: 1}]
   const events = deriveEvents(repository, {filters})
-
-  $: roots = $events.filter(e => getAncestorTags(e.tags).replies.length === 0)
 
   onMount(async () => {
     // Make sure we have their relay selections before we load their posts
@@ -39,10 +36,9 @@
     </Link>
   </div>
   <ProfileInfo {pubkey} />
-  {#if roots.length > 0}
-    {@const event = first(sortBy(e => -e.created_at, roots))}
+  {#if $events.length > 0}
     <div class="bg-alt badge badge-neutral border-none">
-      Last active {formatTimestampRelative(event.created_at)}
+      Last active {formatTimestampRelative($events[0].created_at)}
     </div>
   {/if}
   <Link class="btn btn-primary sm:hidden" href={makeChatPath([pubkey])}>
