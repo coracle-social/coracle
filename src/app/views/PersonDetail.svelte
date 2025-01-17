@@ -1,6 +1,7 @@
 <script lang="ts">
-  import {stripProtocol, identity} from "@welshman/lib"
+  import {stripProtocol} from "@welshman/lib"
   import {
+    PINS,
     REACTION,
     PROFILE,
     RELAYS,
@@ -9,6 +10,8 @@
     isShareableRelayUrl,
     getPubkeyTagValues,
     getListTags,
+    getIdFilters,
+    getTagValues,
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
@@ -26,7 +29,10 @@
     maxWot,
     session,
     tagPubkey,
+    repository,
+    pinsByPubkey,
   } from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
   import {ensureProto} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -53,6 +59,8 @@
   import {derived} from "svelte/store"
   import {toTitle} from "hurdak"
   import WotScore from "src/partials/WotScore.svelte"
+  import FeedItem from "../shared/FeedItem.svelte"
+  import {fly} from "svelte/transition"
 
   export let pubkey
   export let relays = []
@@ -61,43 +69,44 @@
   const profile = deriveProfile(pubkey, {relays})
   const zapper = deriveZapperForPubkey(pubkey, {relays})
   const relaySelections = deriveRelaySelections(pubkey, {relays})
-
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
-
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const followsCount = tweened(0, {interpolate, duration: 1000})
   const followersCount = tweened(0, {interpolate, duration: 1300})
   const follows = deriveFollows(pubkey)
   const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getUserWotScore(pubkey)
+  const npub = nip19.npubEncode(pubkey)
+  const profileDisplay = deriveProfileDisplay(pubkey)
+  const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
+
+  const setActiveTab = tab => {
+    activeTab = tab
+  }
 
   let activeTab = "notes"
 
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
-
   $: ({rgb, rgba} = $themeBackgroundGradient)
   $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
+  $: pinnedIds = getTagValues(["e"], getListTags($pinsByPubkey.get(pubkey)))
+  $: pinnedEvents = deriveEvents(repository, {filters: getIdFilters(pinnedIds)})
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
   $: zapLink = router
     .at("zap")
     .qp({splits: [tagZapSplit(pubkey)]})
     .toString()
 
-  $: tabs = ["notes", "likes", "collections", "relays", "following", "followers"].filter(identity)
-
-  document.title = displayProfileByPubkey(pubkey)
+  $: {
+    load({filters: getIdFilters(pinnedIds)})
+  }
 
   // Force load profile when the user visits the detail page
-  load({filters: [{kinds: [PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}]})
+  load({filters: [{kinds: [PINS, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}]})
 
-  const npub = nip19.npubEncode(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
-
-  const setActiveTab = tab => {
-    activeTab = tab
-  }
+  document.title = displayProfileByPubkey(pubkey)
 </script>
 
 <div
@@ -218,6 +227,11 @@
 {#if $userMutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
+  {#each $pinnedEvents as event (event.id)}
+    <div transition:fly={{y: 150}}>
+      <FeedItem note={event} pinned />
+    </div>
+  {/each}
   <Feed forcePlatform={false} feed={notesFeed} />
 {:else if activeTab === "likes"}
   <Feed forcePlatform={false} feed={likesFeed} />

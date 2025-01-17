@@ -17,6 +17,8 @@
     pubkey,
     unmute,
     thunks,
+    pin,
+    unpin,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
@@ -66,10 +68,10 @@
     loadPubkeys,
     getClientTags,
     trackerStore,
-    sessionWithMeta,
     userMutes,
     sortEventsDesc,
     load,
+    userPins,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
   import {openReplies} from "src/app/state"
@@ -185,6 +187,7 @@
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
+  $: pinned = $userPins.has(event.id)
   // Split out likes, uniqify by pubkey since a like can be duplicated across groups
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
 
@@ -196,12 +199,12 @@
   $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
 
   $: disableActions = !$signer || (muted && !showHidden)
-  $: liked = likes.find(e => e.pubkey === $sessionWithMeta?.pubkey)
+  $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length
-  $: zapped = zaps.find(e => e.request.pubkey === $sessionWithMeta?.pubkey)
+  $: zapped = zaps.find(e => e.request.pubkey === $pubkey)
   $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
-  $: canZap = $zapper?.allowsNostr && event.pubkey !== $sessionWithMeta?.pubkey
-  $: replied = replies.find(e => e.pubkey === $sessionWithMeta?.pubkey)
+  $: canZap = $zapper?.allowsNostr && event.pubkey !== $pubkey
+  $: replied = replies.find(e => e.pubkey === $pubkey)
   $: $repliesCount = replies.length
   $: handlers =
     event.kind !== 1 &&
@@ -240,11 +243,29 @@
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
-    if (event.pubkey === $sessionWithMeta?.pubkey) {
+    if (event.pubkey === $pubkey) {
       actions.push({
         label: "Delete",
         icon: "trash",
         onClick: deleteNote,
+      })
+    }
+
+    if (!pinned) {
+      actions.push({
+        label: "Pin",
+        icon: "thumbtack",
+        onClick: () => {
+          pin(["e", event.id])
+        },
+      })
+    } else {
+      actions.push({
+        label: "Unpin",
+        icon: "thumbtack-slash",
+        onClick: () => {
+          unpin(event.id)
+        },
       })
     }
 
@@ -317,8 +338,7 @@
       {#if noteActions.includes("reactions")}
         <button
           class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-            "pointer-events-none opacity-50":
-              disableActions || event.pubkey === $sessionWithMeta?.pubkey,
+            "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
           })}
           on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
           <Icon

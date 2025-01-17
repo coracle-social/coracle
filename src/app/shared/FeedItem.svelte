@@ -20,6 +20,7 @@
   export let reposts = new Map()
   export let depth = 0
   export let anchor = null
+  export let pinned = false
   export let topLevel = false
   export let isLastReply = false
   export let showParent = true
@@ -128,7 +129,7 @@
         {/if}
       {/if}
       <div class="pt-4">
-        <Note note={event} {showEntire} {showParent} {showMedia} />
+        <Note note={event} {showEntire} {showParent} {showMedia} {pinned} />
       </div>
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
