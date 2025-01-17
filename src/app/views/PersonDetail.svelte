@@ -83,7 +83,7 @@
   let activeTab = "notes"
 
   $: pins = deriveEvents(repository, {
-    filters: [{ids: getTagValues(["e"], $pinsByPubkey.get(pubkey).event.tags)}],
+    filters: [{ids: getTagValues(["e"], $pinsByPubkey.get(pubkey)?.event?.tags || [])}],
   })
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
