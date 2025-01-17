@@ -16,6 +16,8 @@
     mute,
     pubkey,
     unmute,
+    pin,
+    unpin,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
@@ -69,6 +71,7 @@
     userMutes,
     sortEventsDesc,
     load,
+    userPins,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
   import {openReplies} from "src/app/state"
@@ -184,6 +187,7 @@
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
+  $: pinned = event.pubkey === $pubkey && $userPins.has(event.id)
   // Split out likes, uniqify by pubkey since a like can be duplicated across groups
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
 
@@ -245,6 +249,26 @@
         icon: "trash",
         onClick: deleteNote,
       })
+    }
+
+    if (event.pubkey === $pubkey) {
+      if (!pinned) {
+        actions.push({
+          label: "Pin",
+          icon: "thumbtack",
+          onClick: () => {
+            pin(["e", event.id])
+          },
+        })
+      } else {
+        actions.push({
+          label: "Unpin",
+          icon: "thumbtack-slash",
+          onClick: () => {
+            unpin(event.id)
+          },
+        })
+      }
     }
 
     actions.push({

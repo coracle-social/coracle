@@ -21,6 +21,7 @@ import {
   maxWot,
   mutesByPubkey,
   plaintext,
+  pinsByPubkey,
   pubkey,
   publishThunk,
   relay,
@@ -336,6 +337,10 @@ export const userMutes = derived(
   userMuteList,
   l => new Set(getTagValues(["p", "e"], getListTags(l))),
 )
+
+export const userPinList = derived([pinsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
+
+export const userPins = derived(userPinList, l => new Set(getTagValues(["e"], getListTags(l))))
 
 export const isEventMuted = withGetter(
   derived(
