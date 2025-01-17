@@ -16,7 +16,6 @@ eval "$temp_env"
 
 if [[ $VITE_PLATFORM_LOGO =~ ^https://* ]]; then
   curl $VITE_PLATFORM_LOGO > static/logo.png
-  cp static/logo.png assets/logo.png
   export VITE_PLATFORM_LOGO=static/logo.png
 fi
 
@@ -28,3 +27,10 @@ perl -i -pe"s|{DESCRIPTION}|$VITE_PLATFORM_DESCRIPTION|g" build/index.html
 perl -i -pe"s|{ACCENT}|$VITE_PLATFORM_ACCENT|g" build/index.html
 perl -i -pe"s|{NAME}|$VITE_PLATFORM_NAME|g" build/index.html
 perl -i -pe"s|{URL}|$VITE_PLATFORM_URL|g" build/index.html
+
+npx cap sync
+npx @capacitor/assets generate \
+  --iconBackgroundColor '#eeeeee' \
+  --iconBackgroundColorDark '#222222' \
+  --splashBackgroundColor '#ffffff' \
+  --splashBackgroundColorDark '#191E24'

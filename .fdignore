@@ -1,3 +1,13 @@
 src/assets
-android
 build
+.idea
+.gradle
+*.png
+*.ttf
+gradlew*
+_app
+release
+android/capacitor-cordova-android-plugins
+android/app/src/androidTest
+android/app/src/test
+
