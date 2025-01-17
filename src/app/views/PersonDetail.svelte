@@ -9,6 +9,9 @@
     isShareableRelayUrl,
     getPubkeyTagValues,
     getListTags,
+    getIdFilters,
+    getTagValue,
+    getTagValues,
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
@@ -26,7 +29,10 @@
     maxWot,
     session,
     tagPubkey,
+    repository,
+    pinsByPubkey,
   } from "@welshman/app"
+  import {deriveEvents} from "@welshman/store"
   import {ensureProto} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
   import {themeBackgroundGradient} from "src/partials/state"
@@ -53,6 +59,8 @@
   import {derived} from "svelte/store"
   import {toTitle} from "hurdak"
   import WotScore from "src/partials/WotScore.svelte"
+  import FeedItem from "../shared/FeedItem.svelte"
+  import {fly} from "svelte/transition"
 
   export let pubkey
   export let relays = []
@@ -74,6 +82,9 @@
 
   let activeTab = "notes"
 
+  $: pins = deriveEvents(repository, {
+    filters: [{ids: getTagValues(["e"], $pinsByPubkey.get(pubkey).event.tags)}],
+  })
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
 
@@ -218,6 +229,11 @@
 {#if $userMutes.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
+  {#each $pins as pin (pin.id)}
+    <div transition:fly={{y: 150}}>
+      <FeedItem note={pin} pinned />
+    </div>
+  {/each}
   <Feed forcePlatform={false} feed={notesFeed} />
 {:else if activeTab === "likes"}
   <Feed forcePlatform={false} feed={likesFeed} />

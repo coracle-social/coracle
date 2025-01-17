@@ -14,6 +14,7 @@
 
   export let note: TrustedEvent
   export let depth = 0
+  export let pinned = false
   export let showEntire = false
   export let showMedia = getSetting("show_media")
   export let showParent = true
@@ -37,6 +38,9 @@
 
 <div class="group relative">
   <Card stopPropagation class="relative" on:click={onClick} {interactive}>
+    {#if pinned}
+      <i class="fa fa-thumbtack absolute -right-1 -top-1 rotate-45 text-accent" />
+    {/if}
     {#if !headerlessKinds.includes(note.kind)}
       <NoteHeader event={note} {showParent} />
     {/if}

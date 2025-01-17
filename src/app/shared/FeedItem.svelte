@@ -24,6 +24,7 @@
   export let isLastReply = false
   export let showParent = true
   export let showLoading = false
+  export let pinned = false
   export let showMedia = getSetting("show_media")
 
   setContext("topLevel", topLevel)
@@ -128,7 +129,7 @@
         {/if}
       {/if}
       <div class="pt-4">
-        <Note note={event} {showEntire} {showParent} {showMedia} />
+        <Note note={event} {showEntire} {showParent} {showMedia} {pinned} />
       </div>
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
