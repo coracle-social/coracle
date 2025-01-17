@@ -1,7 +1,12 @@
 <script lang="ts">
-  import {session, displayProfileByPubkey, tagReplyTo} from "@welshman/app"
   import {ctx, without, uniq} from "@welshman/lib"
-  import {getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
+  import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
+  import {
+    session,
+    displayProfileByPubkey,
+    tagEventForReply,
+    tagEventForComment,
+  } from "@welshman/app"
   import {writable} from "svelte/store"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
@@ -66,18 +71,19 @@
 
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
+
     saveDraft()
+
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = uniqTags([
-      ...$editor.storage.nostr.getEditorTags(),
-      ...tagReplyTo(parent),
-      ...getClientTags(),
-    ])
+    const kind = parent.kind === NOTE ? NOTE : COMMENT
+    const parentTags = kind === NOTE ? tagEventForReply(parent) : tagEventForComment(parent)
+    const editorTags = $editor.storage.nostr.getEditorTags()
+    const tags = uniqTags([...editorTags, ...parentTags, ...getClientTags()])
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])
@@ -85,7 +91,7 @@
 
     loading = true
 
-    const template = createEvent(1, {content, tags})
+    const template = createEvent(kind, {content, tags})
     const event = await sign(template, options)
     const thunk = publish({
       event,

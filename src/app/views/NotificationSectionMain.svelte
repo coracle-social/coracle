@@ -3,7 +3,7 @@
   import {derived} from "svelte/store"
   import {max, ago, int, HOUR, pushToMapKey} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getAncestorTagValues} from "@welshman/util"
+  import {getParentIdOrAddr} from "@welshman/util"
   import NotificationList from "src/app/views/NotificationList.svelte"
   import NotificationMention from "src/app/views/NotificationMention.svelte"
   import NotificationReplies from "src/app/views/NotificationReplies.svelte"
@@ -17,11 +17,12 @@
     const eventsByKey = new Map<string, TrustedEvent[]>()
 
     for (const event of $events) {
-      const [parentId] = getAncestorTagValues(event.tags).replies
+      const parentId = getParentIdOrAddr(event)
+      const type = parentId ? "reply" : "mention"
 
       // Group and sort by time/event so we can cluster interactions with the same event
       const date = Math.round(ago(event.created_at) / int(HOUR, 3)).toString()
-      const key = [parentId ? "reply" : "mention", parentId || event.id, date].join(DELIMITER)
+      const key = [type, parentId || event.id, date].join(DELIMITER)
 
       pushToMapKey(eventsByKey, key, event)
     }

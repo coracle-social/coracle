@@ -1,7 +1,7 @@
 <script lang="ts">
   import {pluck, uniq} from "@welshman/lib"
   import {ctx} from "@welshman/lib"
-  import {getAncestorTagValues} from "@welshman/util"
+  import {getParentIdOrAddr} from "@welshman/util"
   import {formatTimestamp} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
@@ -12,7 +12,7 @@
   export let notification: Notification
 
   const {timestamp, interactions} = notification
-  const root = getAncestorTagValues(interactions[0].tags).replies[0] || interactions[0].id
+  const root = getParentIdOrAddr(interactions[0]) || interactions[0].id
   const event = deriveEvent(root)
 </script>
 

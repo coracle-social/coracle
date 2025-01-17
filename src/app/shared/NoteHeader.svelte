@@ -1,6 +1,6 @@
 <script lang="ts">
   import {ctx} from "@welshman/lib"
-  import {getAncestorTagValues, getIdOrAddress, type TrustedEvent} from "@welshman/util"
+  import {getReplyTagValues, getIdOrAddress, type TrustedEvent} from "@welshman/util"
   import Anchor from "src/partials/Anchor.svelte"
   import {formatTimestamp} from "src/util/misc"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -11,7 +11,7 @@
   export let showParent = true
   export let anchor = null
 
-  $: ancestors = getAncestorTagValues(event.tags || [])
+  $: ancestors = getReplyTagValues(event.tags || [])
   $: reply = ancestors.replies[0]
   $: root = ancestors.roots[0]
 

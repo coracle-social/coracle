@@ -65,7 +65,13 @@ import {
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
-import type {EventTemplate, PublishedList, SignedEvent, TrustedEvent} from "@welshman/util"
+import type {
+  EventTemplate,
+  PublishedList,
+  SignedEvent,
+  TrustedEvent,
+  HashedEvent,
+} from "@welshman/util"
 import {
   APP_DATA,
   DIRECT_MESSAGE,
@@ -83,7 +89,7 @@ import {
   createEvent,
   getAddress,
   getAddressTagValues,
-  getAncestorTagValues,
+  getParentIdsAndAddrs,
   getIdAndAddress,
   getIdFilters,
   getIdOrAddress,
@@ -96,6 +102,7 @@ import {
   makeList,
   normalizeRelayUrl,
   readList,
+  getReplyTagValues,
 } from "@welshman/util"
 import Fuse from "fuse.js"
 import {batch, doPipe, seconds} from "hurdak"
@@ -348,10 +355,10 @@ export const isEventMuted = withGetter(
           ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
           : null
 
-      return (e: Partial<TrustedEvent>, strict = false) => {
+      return (e: HashedEvent, strict = false) => {
         if (!$pubkey || !e.pubkey) return false
 
-        const {roots, replies} = getAncestorTagValues(e.tags || [])
+        const {roots, replies} = getReplyTagValues(e.tags)
 
         if ([e.id, e.pubkey, ...roots, ...replies].some(x => $userMutes.has(x))) return true
 
@@ -740,12 +747,6 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
 
 // Thread
 
-const getAncestorIds = e => {
-  const {roots, replies} = getAncestorTagValues(e.tags)
-
-  return [...roots, ...replies]
-}
-
 export class ThreadLoader {
   stopped = false
   parent = withGetter(writable<TrustedEvent>(null))
@@ -756,7 +757,7 @@ export class ThreadLoader {
     readonly note: TrustedEvent,
     readonly relays: string[],
   ) {
-    this.loadNotes(getAncestorIds(note))
+    this.loadNotes(getParentIdsAndAddrs(note))
   }
 
   stop() {
@@ -777,7 +778,7 @@ export class ThreadLoader {
         relays: ctx.app.router.FromRelays(this.relays).getUrls(),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           this.addToThread(events)
-          this.loadNotes(events.flatMap(getAncestorIds))
+          this.loadNotes(events.flatMap(getParentIdsAndAddrs))
         }),
       })
     }
@@ -793,7 +794,7 @@ export class ThreadLoader {
 
   addToThread(events) {
     const ancestors = []
-    const {roots, replies} = getAncestorTagValues(this.note.tags)
+    const {roots, replies} = getReplyTagValues(this.note.tags)
 
     for (const event of events) {
       const ids = getIdOrAddress(event)

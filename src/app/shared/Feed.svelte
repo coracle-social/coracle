@@ -19,7 +19,7 @@
     REACTION,
     getIdOrAddress,
     getIdAndAddress,
-    getAncestorTagValues,
+    getParentIdsAndAddrs,
     unionFilters,
   } from "@welshman/util"
   import type {Filter, TrustedEvent} from "@welshman/util"
@@ -97,13 +97,13 @@
         if (repository.isDeleted(e)) return false
         if ($isEventMuted(e, true)) return false
 
-        const {replies} = getAncestorTagValues(e.tags)
+        const parentIds = getParentIdsAndAddrs(e)
 
-        if ($shouldHideReplies && replies.length > 0) return false
+        if ($shouldHideReplies && parentIds.length > 0) return false
 
-        if (replies.length > 0 && !replies.find(id => repository.getEvent(id))) {
+        if (parentIds.length > 0 && !parentIds.find(id => repository.getEvent(id))) {
           await load({
-            filters: getIdFilters(replies),
+            filters: getIdFilters(parentIds),
             relays: ctx.app.router.EventParents(e).getUrls(),
           })
         }
@@ -143,7 +143,7 @@
 
     const isSeen = (e: TrustedEvent) => {
       if (getIdAndAddress(e).some(v => seen.has(v))) return true
-      if (getAncestorTagValues(e.tags).replies.some(v => seen.has(v))) return true
+      if (getParentIdsAndAddrs(e).some(v => seen.has(v))) return true
 
       return false
     }
@@ -170,8 +170,8 @@
         if (isSeen(e)) return undefined
 
         Array.from(range(0, depth - 1)).forEach(() => {
-          const parent = getAncestorTagValues(e.tags)
-            .replies.map(v => repository.getEvent(v))
+          const parent = getParentIdsAndAddrs(e)
+            .map(v => repository.getEvent(v))
             .find(identity)
 
           // If we have a parent, show that instead, with replies grouped underneath
