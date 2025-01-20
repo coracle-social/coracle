@@ -1,10 +1,11 @@
-import {Address} from "@welshman/util"
+import {tryFunc, switcherFn} from "hurdak"
+import {fromNostrURI, Address} from "@welshman/util"
 import {ctx, last, identity} from "@welshman/lib"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"
-import {decodeEvent, getChannelId} from "src/engine"
+import {getChannelId} from "src/engine"
 
 // Decoders
 
@@ -43,7 +44,30 @@ export const asEntity = {
 
 export const asNote = {
   encode: nip19.noteEncode,
-  decode: decodeEvent,
+  decode: entity => {
+    const annotateEvent = id => ({
+      id,
+      relays: [],
+      note: tryFunc(() => nip19.noteEncode(id)),
+      nevent: tryFunc(() => nip19.neventEncode({id, relays: []})),
+    })
+
+    entity = fromNostrURI(entity)
+
+    let type, data
+    try {
+      ;({type, data} = nip19.decode(entity))
+    } catch (e) {
+      return annotateEvent(entity)
+    }
+
+    return switcherFn(type, {
+      nevent: () => ({...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)}),
+      naddr: () => ({...data, address: Address.fromNaddr(entity).toString()}),
+      note: () => annotateEvent(data),
+      default: () => annotateEvent(entity),
+    })
+  },
 }
 
 export const asPerson = {

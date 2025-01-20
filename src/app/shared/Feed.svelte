@@ -1,27 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
-  import {
-    WEEK,
-    ctx,
-    randomId,
-    now,
-    ago,
-    identity,
-    uniqBy,
-    range,
-    hash,
-    pushToMapKey,
-  } from "@welshman/lib"
-  import {
-    neverFilter,
-    getIdFilters,
-    REACTION,
-    getIdOrAddress,
-    getIdAndAddress,
-    getParentIdsAndAddrs,
-    unionFilters,
-  } from "@welshman/util"
+  import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
+  import {neverFilter, unionFilters} from "@welshman/util"
   import type {Filter, TrustedEvent} from "@welshman/util"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
   import {
@@ -31,9 +12,8 @@
     isKindFeed,
     walkFeed,
   } from "@welshman/feeds"
-  import {repository} from "@welshman/app"
   import {createScroller, synced} from "src/util/misc"
-  import {noteKinds, repostKinds, reactionKinds, isLike} from "src/util/nostr"
+  import {noteKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -43,14 +23,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {router} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {
-    env,
-    load,
-    createFeedController,
-    sortEventsDesc,
-    isEventMuted,
-    unwrapRepost,
-  } from "src/engine"
+  import {env, createFeedController, sortEventsDesc} from "src/engine"
   import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
@@ -59,8 +32,6 @@
   export let forcePlatform = true
   export let hideSpinner = false
 
-  const reposts = new Map<string, TrustedEvent[]>()
-
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
   const promptDismissed = synced("feed/promptDismissed", 0)
@@ -68,9 +39,8 @@
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
   const reload = () => {
-    const thisId = randomId()
+    const thisKey = Math.random()
 
-    id = thisId
     exhausted = false
     useWindowing = true
     events = []
@@ -92,24 +62,10 @@
       feed: definition,
       forcePlatform,
       useWindowing,
-      onEvent: async e => {
-        if (id !== thisId) return false
-        if (e.kind === REACTION && !isLike(e)) return false
-        if (repository.isDeleted(e)) return false
-        if ($isEventMuted(e, true)) return false
-
-        const parentIds = getParentIdsAndAddrs(e)
-
-        if ($shouldHideReplies && parentIds.length > 0) return false
-
-        if (parentIds.length > 0 && !parentIds.find(id => repository.getEvent(id))) {
-          await load({
-            filters: getIdFilters(parentIds),
-            relays: ctx.app.router.EventParents(e).getUrls(),
-          })
+      onEvent: e => {
+        if (key === thisKey) {
+          buffer.push(e)
         }
-
-        buffer.push(e)
       },
       onExhausted: () => {
         exhausted = true
@@ -127,6 +83,8 @@
     if (!useWindowing) {
       ctrl.load(1000)
     }
+
+    key = thisKey
   }
 
   const toggleReplies = () => {
@@ -139,83 +97,29 @@
     reload()
   }
 
-  const getNewEvents = () => {
-    const seen = new Set(events.map(getIdOrAddress))
-
-    const isSeen = (e: TrustedEvent) => {
-      if (getIdAndAddress(e).some(v => seen.has(v))) return true
-      if (getParentIdsAndAddrs(e).some(v => seen.has(v))) return true
-
-      return false
-    }
-
-    const unwrap = (e: TrustedEvent) => {
-      if (repostKinds.includes(e.kind)) {
-        const wrappedEvent = unwrapRepost(e)
-
-        if (wrappedEvent) {
-          pushToMapKey(reposts, wrappedEvent.id, e)
-          e = wrappedEvent
-        }
-      }
-
-      return e
-    }
-
-    return buffer
-      .splice(0, 10)
-      .map((e: TrustedEvent) => {
-        // If we have a repost, use its contents instead
-        e = unwrap(e)
-
-        if (isSeen(e)) return undefined
-
-        Array.from(range(0, depth - 1)).forEach(() => {
-          const parent = getParentIdsAndAddrs(e)
-            .map(v => repository.getEvent(v))
-            .find(identity)
-
-          // If we have a parent, show that instead, with replies grouped underneath
-          if (parent) {
-            e = unwrap(parent)
-          }
-        })
-
-        if (isSeen(e)) return undefined
-        if (repostKinds.includes(e.kind)) return undefined
-        if (reactionKinds.includes(e.kind)) return undefined
-        if ($isEventMuted(e, true)) return undefined
-
-        for (const v of getIdAndAddress(e)) {
-          seen.add(v)
-        }
-
-        return e
-      })
-      .filter(identity)
-  }
-
   const loadMore = async () => {
     buffer = uniqBy(e => e.id, sortEventsDesc(buffer))
-    events = [...events, ...getNewEvents()]
+    events = [...events, ...buffer.splice(0, 10)]
 
     if (useWindowing && buffer.length < 25) {
       ctrl.load(25)
     }
   }
 
-  let id
   let element
+  let depth = 0
   let exhausted = false
   let useWindowing = true
+  let key = Math.random()
   let ctrl: FeedController
   let events: TrustedEvent[] = []
   let buffer: TrustedEvent[] = []
   let filters: Filter[] = [neverFilter]
 
-  $: depth = $shouldHideReplies ? 0 : 2
-
-  reload()
+  $: {
+    depth = $shouldHideReplies ? 0 : 2
+    reload()
+  }
 
   onMount(() => {
     const scroller = createScroller(loadMore, {
@@ -243,26 +147,28 @@
 {/if}
 
 <FlexColumn bind:element>
-  <NoteReducer {events} let:event let:context let:i>
-    <div in:fly={{y: 20}}>
-      <FeedItem topLevel {filters} {context} {depth} {anchor} note={event} />
-    </div>
-    {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
-      <Card class="group flex items-center justify-between">
-        <p class="text-xl">Enjoying Coracle?</p>
-        <div class="flex gap-2">
-          <Anchor
-            class="hidden text-neutral-400 opacity-0 transition-all group-hover:opacity-100 sm:visible"
-            on:click={() => promptDismissed.set(now())}>
-            Dismiss
-          </Anchor>
-          <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
-            Zap the developer
-          </Anchor>
-        </div>
-      </Card>
-    {/if}
-  </NoteReducer>
+  {#key key}
+    <NoteReducer {events} hideReplies={$shouldHideReplies} {depth} let:event let:context let:i>
+      <div in:fly={{y: 20}}>
+        <FeedItem topLevel {filters} {context} {depth} {anchor} note={event} />
+      </div>
+      {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
+        <Card class="group flex items-center justify-between">
+          <p class="text-xl">Enjoying Coracle?</p>
+          <div class="flex gap-2">
+            <Anchor
+              class="hidden text-neutral-400 opacity-0 transition-all group-hover:opacity-100 sm:visible"
+              on:click={() => promptDismissed.set(now())}>
+              Dismiss
+            </Anchor>
+            <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
+              Zap the developer
+            </Anchor>
+          </div>
+        </Card>
+      {/if}
+    </NoteReducer>
+  {/key}
 </FlexColumn>
 
 {#if !hideSpinner}

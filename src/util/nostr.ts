@@ -6,6 +6,7 @@ import {
   PICTURE_NOTE,
   LONG_FORM,
   NOTE,
+  COMMENT,
   REACTION,
   REPOST,
   ZAP_RESPONSE,
@@ -37,6 +38,7 @@ import {
 } from "@welshman/util"
 import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
+import {getParentIdOrAddr} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {hexToBytes} from "@noble/hashes/utils"
 import {nip05, nip19} from "nostr-tools"
@@ -87,8 +89,11 @@ export const appDataKeys = {
 }
 
 export const isLike = (e: TrustedEvent) =>
-  e.kind === 7 &&
+  e.kind === REACTION &&
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
+
+export const isReply = (e: TrustedEvent) =>
+  Boolean([NOTE, COMMENT].includes(e.kind) && getParentIdOrAddr(e))
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {

@@ -124,14 +124,12 @@
           </svg>
         </AltColor>
         {#if isLastReply}
-          <AltColor background class="absolute -left-4 h-[20px] w-1" let:isAlt />
+          <AltColor background class="absolute -left-4 -top-4 h-10 w-1" let:isAlt />
         {:else}
-          <AltColor background class="absolute -bottom-2 -left-4 top-0 w-1" let:isAlt />
+          <AltColor background class="absolute -bottom-4 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
-      <div class="pt-4">
-        <Note note={event} {showEntire} {showParent} {showMedia} {pinned} />
-      </div>
+      <Note note={event} {showEntire} {showParent} {showMedia} {pinned} />
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor
@@ -159,12 +157,12 @@
 
       {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
         <div
-          class="note-children relative ml-4 flex flex-col"
+          class="note-children relative ml-4 mt-4 flex flex-col gap-4"
           in:fly|local={{y: 20}}
           out:slide|local>
           {#if hiddenReplies.length > 0}
             <button
-              class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
+              class="cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showHiddenReplies = true
               }}>
@@ -179,8 +177,8 @@
           {/if}
           {#if visibleReplies.length}
             {#key showHiddenReplies}
-              <div in:fly={{y: 20}}>
-                {#each visibleReplies as r, i (r.id)}
+              {#each visibleReplies as r, i (r.id)}
+                <div in:fly={{y: 20}}>
                   <svelte:self
                     isLastReply={i === visibleReplies.length - 1}
                     showParent={false}
@@ -189,13 +187,13 @@
                     depth={depth - 1}
                     {filters}
                     {anchor} />
-                {/each}
-              </div>
+                </div>
+              {/each}
             {/key}
           {/if}
           {#if showHiddenReplies && mutedReplies.length > 0}
             <button
-              class="mt-4 cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
+              class="cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
                 showMutedReplies = true
               }}>
