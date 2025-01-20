@@ -1,12 +1,18 @@
 <script lang="ts">
   import {uniq, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {repostKinds} from "src/util/nostr"
   import PersonLink from "src/app/shared/PersonLink.svelte"
 
-  export let note: TrustedEvent
-  export let reposts: Map<string, TrustedEvent[]>
+  export let event: TrustedEvent
+  export let context: TrustedEvent[]
 
-  const repostPubkeys = uniq(pluck("pubkey", reposts.get(note.id) || []))
+  $: repostPubkeys = uniq(
+    pluck(
+      "pubkey",
+      context.filter(e => repostKinds.includes(e.kind)),
+    ),
+  )
 </script>
 
 {#if repostPubkeys.length > 0}

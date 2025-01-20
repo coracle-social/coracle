@@ -39,6 +39,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
+  import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {router} from "src/app/util"
   import type {Feed} from "src/domain"
@@ -242,11 +243,11 @@
 {/if}
 
 <FlexColumn bind:element>
-  {#each events as note, i (note.id)}
+  <NoteReducer {events} let:event let:context let:i>
     <div in:fly={{y: 20}}>
-      <FeedItem topLevel {filters} {reposts} {depth} {anchor} {note} />
+      <FeedItem topLevel {filters} {context} {depth} {anchor} note={event} />
     </div>
-    {#if i > 20 && parseInt(hash(note.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
+    {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
       <Card class="group flex items-center justify-between">
         <p class="text-xl">Enjoying Coracle?</p>
         <div class="flex gap-2">
@@ -261,7 +262,7 @@
         </div>
       </Card>
     {/if}
-  {/each}
+  </NoteReducer>
 </FlexColumn>
 
 {#if !hideSpinner}

@@ -5,6 +5,7 @@
   import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters, NOTE} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount, setContext} from "svelte"
+  import {derived} from "svelte/store"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
@@ -17,7 +18,7 @@
   export let note
   export let relays = []
   export let filters = null
-  export let reposts = new Map()
+  export let context = []
   export let depth = 0
   export let anchor = null
   export let pinned = false
@@ -38,10 +39,10 @@
 
   const showEntire = showHiddenReplies
 
-  const context = deriveEvents(repository, {filters: getReplyFilters([event])})
+  const replies = derived(deriveEvents(repository, {filters: getReplyFilters([event])}), events =>
+    sortEventsDesc(events.filter(e => e.kind === NOTE && isChildOf(e, event))),
+  )
 
-  $: children = $context.filter(e => isChildOf(e, event))
-  $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
   $: replyIsActive = $openReplies[event.id]
 
   let mutedReplies, hiddenReplies, visibleReplies
@@ -51,7 +52,7 @@
     hiddenReplies = []
     visibleReplies = []
 
-    for (const e of replies) {
+    for (const e of $replies) {
       if ($isEventMuted(e)) {
         mutedReplies.push(e)
       } else if (collapsed) {
@@ -105,7 +106,7 @@
 
 {#if ready}
   <div>
-    <NoteMeta {reposts} note={event} />
+    <NoteMeta {context} {event} />
     <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>
