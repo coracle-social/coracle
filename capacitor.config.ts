@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'social.flotilla',
   appName: 'Flotilla',
   webDir: 'build'
+  server: {
+    androidScheme: "https"
+  },
   plugins: {
     SplashScreen: {
       androidSplashResourceName: "splash"
