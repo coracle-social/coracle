@@ -35,6 +35,8 @@
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
   import {warn} from "src/util/logger"
   import {commaFormat} from "src/util/misc"
+  import type {PoWEvent} from "src/workers/pow"
+  import PowWorker from "src/workers/pow?worker"
 
   export let quote = null
   export let pubkey = null
@@ -45,7 +47,7 @@
 
   let showPreview = false
   let showOptions = false
-  let publishing = false
+  let publishing: "signing" | "pow"
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
@@ -76,8 +78,6 @@
     // prevent sending before media are uploaded
     if ($uploading || publishing) return
 
-    publishing = true
-
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
@@ -101,9 +101,30 @@
         (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
     })
 
-    const event = await sign(template, options)
+    publishing = "signing"
+
+    let event = await sign(template, options)
 
     drafts.set("notecreate", $editor.getHTML())
+
+    if ($userSettings.pow_difficulty > 0) {
+      publishing = "pow"
+      const worker = new PowWorker()
+      const powPromise = new Promise<PoWEvent>((resolve, reject) => {
+        worker.onmessage = (e: MessageEvent<PoWEvent>) => {
+          resolve(e.data)
+        }
+        worker.onerror = e => {
+          reject(e)
+        }
+      })
+      worker.postMessage({difficulty: $userSettings.pow_difficulty, event})
+      try {
+        event = await powPromise
+      } catch (error) {
+        warn(error)
+      }
+    }
 
     let thunk: Thunk, emitter: Emitter
 
@@ -186,7 +207,7 @@
       })
     }
 
-    publishing = false
+    publishing = null
   }
 
   const togglePreview = () => {
@@ -277,9 +298,13 @@
           tag="button"
           type="submit"
           class="flex-grow"
-          disabled={$uploading || publishing}>
-          {#if $uploading || publishing}
-            <i class="fa fa-circle-notch fa-spin" />
+          disabled={$uploading || !!publishing}>
+          {#if $uploading || !!publishing}
+            {#if publishing == "signing"}
+              <i class="fa fa-circle-notch fa-spin" /> Signing your note...
+            {:else if publishing == "pow"}
+              <i class="fa fa-circle-notch fa-spin" /> Generating PoW...
+            {/if}
           {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
             Schedule
           {:else}
