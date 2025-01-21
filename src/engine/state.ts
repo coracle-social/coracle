@@ -259,6 +259,7 @@ export const defaultSettings = {
   default_zap: 21,
   show_media: true,
   send_delay: 0, // undo send delay in ms
+  pow_difficulty: 0,
   muted_words: [],
   hide_sensitive: true,
   report_analytics: true,
