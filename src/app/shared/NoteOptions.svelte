@@ -7,6 +7,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
+  import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import Toggle from "src/partials/Toggle.svelte"
 
   export let publishAt = false
@@ -15,6 +16,7 @@
   export let initialValues: {
     warning: string
     anonymous: boolean
+    pow_difficulty: number
     publish_at?: number
   }
 
@@ -42,6 +44,16 @@
           <DateTimeInput bind:value={values.publish_at} />
         </Field>
       {/if}
+      <Field>
+        <div slot="label" class="flex justify-between">
+          <strong>Proof Of Work</strong>
+          <div>
+            difficulty {values.pow_difficulty} (<WorkEstimate difficulty={values.pow_difficulty} />)
+          </div>
+        </div>
+        <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32}></Input>
+        <p slot="info">Add a proof-of-work stamp to your notes to increase your reach.</p>
+      </Field>
       <FieldInline icon="fa-user-secret" label="Post anonymously">
         <Toggle bind:value={values.anonymous} />
         <p slot="info">Enable this to create an anonymous note.</p>

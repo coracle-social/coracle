@@ -100,8 +100,10 @@ import {
   normalizeRelayUrl,
   readList,
   getReplyTagValues,
+  getTag,
 } from "@welshman/util"
 import Fuse from "fuse.js"
+import {getPow} from "nostr-tools/nip13"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -259,10 +261,12 @@ export const defaultSettings = {
   default_zap: 21,
   show_media: true,
   send_delay: 0, // undo send delay in ms
+  pow_difficulty: 0,
   muted_words: [],
   hide_sensitive: true,
   report_analytics: true,
   min_wot_score: 0,
+  min_pow_difficulty: 0,
   enable_client_tag: false,
   auto_authenticate: false,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
@@ -350,6 +354,7 @@ export const isEventMuted = withGetter(
     ([$userMutes, $userFollows, $userSettings, $pubkey]) => {
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
+      const minPow = $userSettings.min_pow_difficulty
       const regex =
         words.length > 0
           ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
@@ -370,8 +375,10 @@ export const isEventMuted = withGetter(
         if (strict || $userFollows.has(e.pubkey)) return false
 
         const wotScore = getUserWotScore(e.pubkey)
+        const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
+        const isValidPow = getPow(e.id) >= powDifficulty
 
-        return wotScore < minWot
+        return wotScore < minWot && (powDifficulty < minPow || !isValidPow)
       }
     },
   ),

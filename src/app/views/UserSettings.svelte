@@ -9,9 +9,10 @@
   import Input from "src/partials/Input.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, userSettings, publishSettings} from "src/engine"
-  import SearchSelect from "src/partials/SearchSelect.svelte"
   import {fuzzy, pluralize} from "src/util/misc"
+  import WorkEstimate from "src/partials/WorkEstimate.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
+  import {env, userSettings, publishSettings} from "src/engine"
   import Select from "src/partials/Select.svelte"
 
   const values = {...$userSettings}
@@ -62,6 +63,16 @@
       </div>
       <Input type="range" step="1000" bind:value={values.send_delay} min={0} max={15_000}></Input>
       <p slot="info">A delay period allowing you to cancel a reply or note creation, in seconds.</p>
+    </Field>
+    <Field>
+      <div slot="label" class="flex justify-between">
+        <strong>Proof Of Work</strong>
+        <div>
+          difficulty {values.pow_difficulty} (<WorkEstimate difficulty={values.pow_difficulty} />)
+        </div>
+      </div>
+      <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32}></Input>
+      <p slot="info">Add a proof-of-work stamp to your notes to increase your reach.</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">

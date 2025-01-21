@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {ctx, without, uniq} from "@welshman/lib"
+  import {onDestroy} from "svelte"
+  import {ctx, without, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {
     session,
@@ -8,7 +9,10 @@
     tagEventForComment,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
+  import {own, hash} from "@welshman/signer"
   import {writable} from "svelte/store"
+  import {makePow} from "src/util/pow"
+  import type {ProofOfWork} from "src/util/pow"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -33,8 +37,9 @@
   )
 
   let loading
+  let pow: ProofOfWork
   let showOptions = false
-  let options = {warning: "", anonymous: false}
+  let options = {warning: "", anonymous: false, pow_difficulty: $userSettings.pow_difficulty}
   let element: HTMLElement
   let editor: ReturnType<typeof getEditor>
 
@@ -91,17 +96,30 @@
     loading = true
     clearDraft()
 
-    const template = createEvent(kind, {content, tags})
-    const event = await sign(template, options)
+    const ownedEvent = own(createEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
+
+    let hashedEvent = hash(ownedEvent)
+
+    if (options.pow_difficulty) {
+      pow?.worker.terminate()
+      pow = makePow(ownedEvent, options.pow_difficulty)
+
+      hashedEvent = await pow.result
+    }
+
     const thunk = publish({
-      event,
-      relays: ctx.app.router.PublishEvent(event).getUrls(),
+      event: await sign(hashedEvent, options),
+      relays: ctx.app.router.PublishEvent(hashedEvent).getUrls(),
       delay: $userSettings.send_delay,
     })
 
     loading = false
     onReplyPublish(thunk)
   }
+
+  onDestroy(() => {
+    pow?.worker.terminate()
+  })
 
   const onBodyClick = e => {
     saveDraft()

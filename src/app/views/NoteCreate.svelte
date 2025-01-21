@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {ctx, last, type Emitter} from "@welshman/lib"
-  import {now} from "@welshman/signer"
+  import {now, own, hash} from "@welshman/signer"
   import {
     createEvent,
     toNostrURI,
@@ -14,6 +14,10 @@
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
+  import {makePow} from "src/util/pow"
+  import type {ProofOfWork} from "src/util/pow"
+  import {warn} from "src/util/logger"
+  import {commaFormat} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
@@ -27,8 +31,6 @@
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
-  import {warn} from "src/util/logger"
-  import {commaFormat} from "src/util/misc"
 
   export let quote = null
   export let pubkey = null
@@ -39,11 +41,18 @@
 
   let showPreview = false
   let showOptions = false
-  let publishing = false
+  let publishing: "signing" | "pow"
+
+  let pow: ProofOfWork
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
-  let options = {warning: "", anonymous: false, publish_at: null}
+  let options = {
+    warning: "",
+    anonymous: false,
+    publish_at: null,
+    pow_difficulty: $userSettings.pow_difficulty,
+  }
 
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
   const nsecWarning = writable(null)
@@ -70,8 +79,6 @@
     // prevent sending before media are uploaded
     if ($uploading || publishing) return
 
-    publishing = true
-
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
@@ -88,16 +95,32 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const template = createEvent(1, {
-      content,
-      tags,
-      created_at:
-        (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
-    })
-
-    const event = await sign(template, options)
+    const ownedEvent = own(
+      createEvent(1, {
+        content,
+        tags,
+        created_at:
+          (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
+      }),
+      $session.pubkey,
+    )
 
     drafts.set("notecreate", $editor.getHTML())
+
+    let hashedEvent = hash(ownedEvent)
+
+    if (options.pow_difficulty) {
+      publishing = "pow"
+
+      pow?.worker.terminate()
+      pow = makePow(ownedEvent, options.pow_difficulty)
+
+      hashedEvent = await pow.result
+    }
+
+    publishing = "signing"
+
+    const signedEvent = await sign(hashedEvent, options)
 
     let thunk: Thunk, emitter: Emitter
 
@@ -105,12 +128,10 @@
     router.clearModals()
 
     if (options.publish_at) {
-      // take the first DVM Handler found
-
       const dvmContent = await $signer.nip04.encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
-          ["i", JSON.stringify(event), "text"],
+          ["i", JSON.stringify(signedEvent), "text"],
           ["param", "relays", ...ctx.app.router.FromUser().getUrls()],
         ]),
       )
@@ -134,8 +155,8 @@
       router.clearModals()
 
       thunk = publish({
-        event,
-        relays: ctx.app.router.PublishEvent(event).getUrls(),
+        event: signedEvent,
+        relays: ctx.app.router.PublishEvent(signedEvent).getUrls(),
         delay: $userSettings.send_delay,
       })
     }
@@ -180,7 +201,7 @@
       })
     }
 
-    publishing = false
+    publishing = null
   }
 
   const togglePreview = () => {
@@ -224,6 +245,10 @@
       })
 
       $editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
+    }
+
+    return () => {
+      pow?.worker.terminate()
     }
   })
 </script>
@@ -271,9 +296,13 @@
           tag="button"
           type="submit"
           class="flex-grow"
-          disabled={$uploading || publishing}>
-          {#if $uploading || publishing}
-            <i class="fa fa-circle-notch fa-spin" />
+          disabled={$uploading || Boolean(publishing)}>
+          {#if $uploading || !!publishing}
+            {#if publishing === "signing"}
+              <i class="fa fa-circle-notch fa-spin" /> Signing your note...
+            {:else if publishing === "pow"}
+              <i class="fa fa-circle-notch fa-spin" /> Generating Work...
+            {/if}
           {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
             Schedule
           {:else}
