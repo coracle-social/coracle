@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx, max, pushToMapKey, parseJson} from "@welshman/lib"
+  import {ctx, pushToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -19,7 +19,7 @@
   export let showDeleted = false
   export let items: TrustedEvent[] = []
 
-  const seenAtDepth = new Map<string, number[]>()
+  const seen = new Set<string>()
 
   const context = new Map<string, TrustedEvent[]>()
 
@@ -31,64 +31,64 @@
     return false
   }
 
-  const addItem = (event: TrustedEvent, currentDepth = depth) => {
-    if (shouldSkip(event)) return
+  const getParent = async (event: TrustedEvent) => {
+    if (repostKinds.includes(event.kind)) {
+      const parent = parseJson(event.content)
 
-    const idOrAddress = getIdOrAddress(event)
+      if (parent && hasValidSignature(parent)) {
+        return parent
+      }
+    }
+
     const parentIds = getParentIdsAndAddrs(event)
 
-    // Force loading parents of reactions/reposts
-    if ([...repostKinds, ...reactionKinds].includes(event.kind)) {
-      currentDepth = Math.max(1, currentDepth)
-    }
-
-    // If we have no parents, or we're at depth 0, we're done
-    if (parentIds.length === 0 || currentDepth === 0) {
-      const parentDepth = max(parentIds.flatMap(id => seenAtDepth.get(id) || []))
-
-      // Only add the note if we haven't seen it before elsewhere
-      if (parentDepth === 0 && !seenAtDepth.has(idOrAddress)) {
-        items = [...items, event]
-      }
-    } else {
-      for (const id of parentIds) {
-        pushToMapKey(context, id, event)
-      }
-
-      // Otherwise, load our parent and show that instead
-      load({
-        filters: getIdFilters(parentIds),
-        relays: ctx.app.router.EventParents(event).getUrls(),
-        onEvent: (parentEvent: TrustedEvent) => {
-          addItem(parentEvent, currentDepth - 1)
-        },
+    if (parentIds.length > 0) {
+      return new Promise(resolve => {
+        load({
+          filters: getIdFilters(parentIds),
+          relays: ctx.app.router.EventParents(event).getUrls(),
+          onEvent: resolve,
+        })
       })
     }
-
-    pushToMapKey(seenAtDepth, idOrAddress, currentDepth)
   }
 
-  const addRepost = (repost: TrustedEvent) => {
-    const event = parseJson(repost.content)
+  const addEvent = async (event: TrustedEvent) => {
+    let currentDepth = depth
+    let original = event
 
-    if (event && hasValidSignature(event)) {
-      pushToMapKey(context, getIdOrAddress(event), repost)
-      addItem(event)
+    while (currentDepth-- > 0) {
+      const parent = await getParent(event)
+
+      if (!parent) {
+        break
+      }
+
+      pushToMapKey(context, getIdOrAddress(parent), event)
+      event = parent
+    }
+
+    const id = getIdOrAddress(event)
+
+    // If we've already seen it, or it's not displayable, skip it
+    if (seen.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
+
+    items = [...items, event]
+    seen.add(id)
+  }
+
+  const addEvents = async (events: TrustedEvent[]) => {
+    for (const event of events) {
+      if (!shouldSkip(event)) {
+        addEvent(event)
+      }
     }
   }
 
   let i = 0
 
   $: {
-    for (const event of events.slice(i)) {
-      if (shouldSkip(event)) continue
-
-      if (repostKinds.includes(event.kind)) {
-        addRepost(event)
-      } else {
-        addItem(event)
-      }
-    }
+    addEvents(events.slice(i))
 
     // Don't process the same events multiple times
     i = events.length - 1
