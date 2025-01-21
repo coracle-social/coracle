@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx, pushToMapKey, parseJson} from "@welshman/lib"
+  import {ctx, max, pushToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -19,7 +19,7 @@
   export let showDeleted = false
   export let items: TrustedEvent[] = []
 
-  const seen = new Set<string>()
+  const seenAtDepth = new Map<string, number[]>()
 
   const context = new Map<string, TrustedEvent[]>()
 
@@ -44,11 +44,12 @@
 
     // If we have no parents, or we're at depth 0, we're done
     if (parentIds.length === 0 || currentDepth === 0) {
-      if (!seen.has(idOrAddress)) {
+      const parentDepth = max(parentIds.flatMap(id => seenAtDepth.get(id) || []))
+
+      // Only add the note if we haven't seen it before elsewhere
+      if (parentDepth === 0 && !seenAtDepth.has(idOrAddress)) {
         items = [...items, event]
       }
-
-      seen.add(idOrAddress)
     } else {
       for (const id of parentIds) {
         pushToMapKey(context, id, event)
@@ -63,6 +64,8 @@
         },
       })
     }
+
+    pushToMapKey(seenAtDepth, idOrAddress, currentDepth)
   }
 
   const addRepost = (repost: TrustedEvent) => {
