@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pluck, uniq, ago} from "@welshman/lib"
+  import {pluck, max, uniq, ago} from "@welshman/lib"
   import {getIdFilters} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import {formatTimestampAsDate, formatTimestamp} from "src/util/misc"
@@ -16,8 +16,7 @@
 
   let items = []
 
-  $: timestamp = ago(notifications[i][0], interval)
-  $: date = formatTimestampAsDate(timestamp)
+  $: date = formatTimestampAsDate(ago(notifications[i][0], interval))
 </script>
 
 {#if i > 0 && formatTimestampAsDate(ago(notifications[i - 1][0], interval)) !== date && items.length > 0}
@@ -38,7 +37,7 @@
         pubkeys={uniq(pluck("pubkey", context))}
         actionText="{verb} to a note mentioning you" />
     {/if}
-    <small>{formatTimestamp(timestamp)}</small>
+    <small>{formatTimestamp(max(pluck('created_at', [event, ...context])))}</small>
   </div>
-  <FeedItem topLevel showLoading note={event} {depth} filters={getIdFilters(pluck("id", events))} />
+  <FeedItem topLevel showLoading note={event} {depth} filters={getIdFilters(pluck("id", context))} />
 </NoteReducer>
