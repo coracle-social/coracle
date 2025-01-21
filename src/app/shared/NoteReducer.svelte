@@ -9,7 +9,7 @@
     hasValidSignature,
   } from "@welshman/util"
   import {load, repository} from "@welshman/app"
-  import {repostKinds} from "src/util/nostr"
+  import {repostKinds, reactionKinds} from "src/util/nostr"
   import {isEventMuted} from "src/engine"
 
   export let events: TrustedEvent[]
@@ -35,12 +35,17 @@
     if (shouldSkip(event)) return
 
     const idOrAddress = getIdOrAddress(event)
+    const parentIds = getParentIdsAndAddrs(event)
+    const shouldLoadParent =
+      parentIds.length > 0 &&
+      !parentIds.some(id => seen.has(id)) &&
+      (currentDepth > 0 || [...repostKinds, ...reactionKinds].includes(event.kind))
 
     // Keep working our way up the reply chain if we're working with a reply
-    if (currentDepth > 0 && getParentIdOrAddr(event)) {
+    if (shouldLoadParent) {
       load({
         relays: ctx.app.router.EventParents(event).getUrls(),
-        filters: getIdFilters(getParentIdsAndAddrs(event)),
+        filters: getIdFilters(parentIds),
         onEvent: (parentEvent: TrustedEvent) => {
           addItem(parentEvent, event, currentDepth - 1)
         },

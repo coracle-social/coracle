@@ -1,17 +1,17 @@
 <script lang="ts">
   import type {Thunk, ThunkStatusByUrl} from "@welshman/app"
-  import {ctx, first, nthEq, remove} from "@welshman/lib"
+  import {first, nthEq, remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
-  import {getTagValue, LOCAL_RELAY_URL, REACTION} from "@welshman/util"
-  import {type Readable} from "svelte/store"
+  import {LOCAL_RELAY_URL} from "@welshman/util"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
-  import {deriveEvent, ensureUnwrapped, publish} from "src/engine"
+  import {ensureUnwrapped, publish} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
+  import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import {formatTimestamp} from "src/util/misc"
   import {fly, slide} from "src/util/transition"
 
@@ -20,15 +20,6 @@
   $: status = thunk.status
 
   const promise = ensureUnwrapped(thunk.event)
-
-  let likedNote: Readable<TrustedEvent>
-
-  $: {
-    if (thunk.event.kind === REACTION) {
-      const relays = ctx.app.router.Event(thunk.event).getUrls()
-      likedNote = deriveEvent(getTagValue("e", thunk.event.tags), {relays, forcePlatform: false})
-    }
-  }
 
   const retry = (url: string, event: TrustedEvent) =>
     publish({relays: [url], event: thunk.event as SignedEvent})
@@ -71,11 +62,9 @@
             <span>Kind {event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
             <Anchor underline modal class="text-sm" on:click={() => open(event)}>View Note</Anchor>
           </div>
-          {#if $likedNote}
-            <Note note={$likedNote} />
-          {:else}
+          <NoteReducer events={[event]} let:event>
             <Note note={event} />
-          {/if}
+          </NoteReducer>
           <div class="flex justify-between text-sm">
             <div class="hidden gap-4 sm:flex">
               <span class="flex items-center gap-2">
