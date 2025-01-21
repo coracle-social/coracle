@@ -100,6 +100,7 @@ import {
   normalizeRelayUrl,
   readList,
   getReplyTagValues,
+  getTag,
 } from "@welshman/util"
 import Fuse from "fuse.js"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
@@ -264,6 +265,7 @@ export const defaultSettings = {
   hide_sensitive: true,
   report_analytics: true,
   min_wot_score: 0,
+  min_pow_difficulty: 0,
   enable_client_tag: false,
   auto_authenticate: false,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
@@ -351,6 +353,7 @@ export const isEventMuted = withGetter(
     ([$userMutes, $userFollows, $userSettings, $pubkey]) => {
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
+      const minPow = $userSettings.min_pow_difficulty
       const regex =
         words.length > 0
           ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
@@ -371,8 +374,11 @@ export const isEventMuted = withGetter(
         if (strict || $userFollows.has(e.pubkey)) return false
 
         const wotScore = getUserWotScore(e.pubkey)
+        const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
 
-        return wotScore < minWot
+        const isValidPow = e.id.startsWith("0".repeat(Math.ceil(powDifficulty / 4)))
+
+        return wotScore < minWot && (powDifficulty < minPow || !isValidPow)
       }
     },
   ),

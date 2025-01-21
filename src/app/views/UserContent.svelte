@@ -77,6 +77,16 @@
         score. Notes from accounts with a lower score will be automatically hidden.
       </p>
     </Field>
+    <Field>
+      <div slot="label" class="flex justify-between">
+        <strong>Minimum PoW</strong>
+        <div>{values.min_pow_difficulty}</div>
+      </div>
+      <Input type="range" bind:value={values.min_pow_difficulty} step="4" min={0} max={32} />
+      <p slot="info">
+        Select a minimum proof-of-work difficulty. Notes with a lower Web Of Trust and PoW difficulty will be hidden.
+      </p>
+    </Field>
     <Field label="Muted accounts">
       <PersonSelect multiple bind:value={mutedPubkeys} />
       <p slot="info">Notes from these people will be hidden by default.</p>
