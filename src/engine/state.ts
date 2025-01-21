@@ -48,7 +48,6 @@ import {
   sort,
   take,
   uniq,
-  uniqBy,
   partition,
   prop,
   sortBy,
@@ -90,10 +89,6 @@ import {
   createEvent,
   getAddress,
   getAddressTagValues,
-  getParentIdsAndAddrs,
-  getIdAndAddress,
-  getIdFilters,
-  getIdOrAddress,
   getIdentifier,
   getListTags,
   getPubkeyTagValues,
@@ -106,7 +101,7 @@ import {
   getReplyTagValues,
 } from "@welshman/util"
 import Fuse from "fuse.js"
-import {batch, doPipe, seconds} from "hurdak"
+import {doPipe, seconds} from "hurdak"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -749,80 +744,6 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
   ...event,
   tags: tags.filter(t => t[0] !== "client").concat(getClientTags()),
 })
-
-// Thread
-
-export class ThreadLoader {
-  stopped = false
-  parent = withGetter(writable<TrustedEvent>(null))
-  ancestors = withGetter(writable<TrustedEvent[]>([]))
-  root = withGetter(writable<TrustedEvent>(null))
-
-  constructor(
-    readonly note: TrustedEvent,
-    readonly relays: string[],
-  ) {
-    this.loadNotes(getParentIdsAndAddrs(note))
-  }
-
-  stop() {
-    this.stopped = true
-  }
-
-  loadNotes(ids) {
-    if (this.stopped) {
-      return
-    }
-
-    const seen = new Set(this.getThread().flatMap(getIdAndAddress))
-    const filteredIds = ids.filter(id => id && !seen.has(id))
-
-    if (filteredIds.length > 0) {
-      load({
-        filters: getIdFilters(filteredIds),
-        relays: ctx.app.router.FromRelays(this.relays).getUrls(),
-        onEvent: batch(300, (events: TrustedEvent[]) => {
-          this.addToThread(events)
-          this.loadNotes(events.flatMap(getParentIdsAndAddrs))
-        }),
-      })
-    }
-  }
-
-  // Thread building
-
-  getThread() {
-    const {root, ancestors, parent} = this
-
-    return [root.get(), ...ancestors.get(), parent.get()].filter(identity)
-  }
-
-  addToThread(events) {
-    const ancestors = []
-    const {roots, replies} = getReplyTagValues(this.note.tags)
-
-    for (const event of events) {
-      const ids = getIdOrAddress(event)
-
-      if (replies.find(id => ids.includes(id))) {
-        this.parent.set(event)
-      } else if (roots.find(id => ids.includes(id))) {
-        this.root.set(event)
-      } else {
-        ancestors.push(event)
-      }
-    }
-
-    if (ancestors.length > 0) {
-      this.ancestors.update($xs =>
-        sortBy<TrustedEvent>(
-          prop("created_at"),
-          uniqBy<TrustedEvent>(prop<string>("id"), ancestors.concat($xs)),
-        ),
-      )
-    }
-  }
-}
 
 // Storage
 
