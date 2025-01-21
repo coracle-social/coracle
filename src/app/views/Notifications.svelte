@@ -18,12 +18,12 @@
   const setActiveTab = tab => router.at("notifications").at(tab).push()
 
   const loadMore = async () => {
-    limit += 4
+    limit += 2
   }
 
   export let activeTab = allTabs[0]
 
-  let limit = 4
+  let limit = 2
   let innerWidth = 0
   let element = null
 

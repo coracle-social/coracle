@@ -1,34 +1,17 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
-  import {max, pushToMapKey} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
-  import {getParentIdOrAddr} from "@welshman/util"
-  import {formatTimestampAsDate} from "src/util/misc"
-  import NotificationList from "src/app/views/NotificationList.svelte"
-  import NotificationReactions from "src/app/views/NotificationReactions.svelte"
+  import {groupBy, ago, int, DAY} from "@welshman/lib"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import NotificationItem from "src/app/shared/NotificationItem.svelte"
   import {reactionNotifications, setChecked} from "src/engine"
 
   export let limit
 
-  const notifications = derived(reactionNotifications, $events => {
-    const eventsByKey = new Map<string, TrustedEvent[]>()
+  const interval = int(DAY)
 
-    for (const event of $events) {
-      // Group and sort by day/event so we can cluster interactions with the same event
-      const date = formatTimestampAsDate(event.created_at)
-      const key = ["reaction", getParentIdOrAddr(event), date].join(":")
-
-      pushToMapKey(eventsByKey, key, event)
-    }
-
-    return Array.from(eventsByKey.entries()).map(([key, interactions]) => {
-      const [type, root] = key.split(":")
-      const timestamp = max(interactions.map(e => e.created_at))
-
-      return {key, type, root, timestamp, interactions}
-    })
-  })
+  $: notifications = Array.from(
+    groupBy(e => Math.round(ago(e.created_at) / interval), $reactionNotifications).entries(),
+  ).slice(0, limit)
 
   onMount(() => {
     setChecked("reactions/*")
@@ -39,8 +22,10 @@
   })
 </script>
 
-<NotificationList notifications={$notifications} {limit}>
-  <div slot="notification" let:notification>
-    <NotificationReactions {notification} />
-  </div>
-</NotificationList>
+<FlexColumn>
+  {#each notifications as [seconds, events], i (seconds)}
+    <NotificationItem verb="reacted" depth={0} {notifications} {interval} {events} {i} />
+  {:else}
+    <p class="py-12 text-center">No notifications found - check back later!</p>
+  {/each}
+</FlexColumn>

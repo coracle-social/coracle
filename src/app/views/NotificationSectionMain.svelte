@@ -1,39 +1,17 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
-  import {max, ago, int, HOUR, pushToMapKey} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
-  import {getParentIdOrAddr} from "@welshman/util"
-  import NotificationList from "src/app/views/NotificationList.svelte"
-  import NotificationMention from "src/app/views/NotificationMention.svelte"
-  import NotificationReplies from "src/app/views/NotificationReplies.svelte"
+  import {groupBy, ago, int, HOUR} from "@welshman/lib"
+  import FlexColumn from "src/partials/FlexColumn.svelte"
+  import NotificationItem from "src/app/shared/NotificationItem.svelte"
   import {mainNotifications, setChecked} from "src/engine"
 
   export let limit
 
-  const DELIMITER = "--"
+  const interval = int(HOUR, 3)
 
-  const notifications = derived(mainNotifications, $events => {
-    const eventsByKey = new Map<string, TrustedEvent[]>()
-
-    for (const event of $events) {
-      const parentId = getParentIdOrAddr(event)
-      const type = parentId ? "reply" : "mention"
-
-      // Group and sort by time/event so we can cluster interactions with the same event
-      const date = Math.round(ago(event.created_at) / int(HOUR, 3)).toString()
-      const key = [type, parentId || event.id, date].join(DELIMITER)
-
-      pushToMapKey(eventsByKey, key, event)
-    }
-
-    return Array.from(eventsByKey.entries()).map(([key, interactions]) => {
-      const [type, root] = key.split(DELIMITER)
-      const timestamp = max(interactions.map(e => e.created_at))
-
-      return {key, type, root, timestamp, interactions}
-    })
-  })
+  $: notifications = Array.from(
+    groupBy(e => Math.round(ago(e.created_at) / interval), $mainNotifications).entries(),
+  ).slice(0, limit)
 
   onMount(() => {
     setChecked("notes/*")
@@ -44,12 +22,10 @@
   })
 </script>
 
-<NotificationList notifications={$notifications} {limit}>
-  <div slot="notification" let:notification>
-    {#if notification.type === "mention"}
-      <NotificationMention {notification} />
-    {:else}
-      <NotificationReplies {notification} />
-    {/if}
-  </div>
-</NotificationList>
+<FlexColumn>
+  {#each notifications as [seconds, events], i (seconds)}
+    <NotificationItem verb="replied" depth={1} {notifications} {interval} {events} {i} />
+  {:else}
+    <p class="py-12 text-center">No notifications found - check back later!</p>
+  {/each}
+</FlexColumn>

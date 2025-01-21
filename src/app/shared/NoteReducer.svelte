@@ -17,8 +17,10 @@
   export let showMuted = false
   export let hideReplies = false
   export let showDeleted = false
+  export let items: TrustedEvent[] = []
 
   const seen = new Set<string>()
+
   const context = new Map<string, TrustedEvent[]>()
 
   const shouldSkip = (event: TrustedEvent) => {
@@ -44,7 +46,7 @@
         },
       })
     } else if (!seen.has(idOrAddress)) {
-      items.push(event)
+      items = [...items, event]
     }
 
     seen.add(idOrAddress)
@@ -63,7 +65,6 @@
   }
 
   let i = 0
-  let items: TrustedEvent[] = []
 
   $: {
     for (const event of events.slice(i)) {
@@ -76,8 +77,7 @@
       }
     }
 
-    // Trigger render
-    items = items
+    // Don't process the same events multiple times
     i = events.length - 1
   }
 </script>
