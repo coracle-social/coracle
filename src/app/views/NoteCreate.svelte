@@ -97,7 +97,7 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    let template = createEvent(1, {
+    const template = createEvent(1, {
       content,
       tags,
       created_at:
@@ -288,9 +288,9 @@
           class="flex-grow"
           disabled={$uploading || !!publishing}>
           {#if $uploading || !!publishing}
-            {#if publishing == "signing"}
+            {#if publishing === "signing"}
               <i class="fa fa-circle-notch fa-spin" /> Signing your note...
-            {:else if publishing == "pow"}
+            {:else if publishing === "pow"}
               <i class="fa fa-circle-notch fa-spin" /> Generating PoW...
             {/if}
           {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}

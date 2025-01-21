@@ -17,7 +17,7 @@
   import {drafts, openReplies} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
   import {getEditor} from "src/app/editor"
-  import { powEvent } from "src/util/pow"
+  import {powEvent} from "src/util/pow"
 
   export let parent
   export let showBorder = false
@@ -94,10 +94,10 @@
 
     const template = createEvent(kind, {content, tags})
     let event = await sign(template, options)
-    if ($userSettings.pow_difficulty || options.pow_difficulty) {
+    if ($userSettings.pow_difficulty || options.pow_difficulty) {
       event = await powEvent(event, $userSettings.pow_difficulty || options.pow_difficulty)
     }
-    
+
     const thunk = publish({
       event,
       relays: ctx.app.router.PublishEvent(event).getUrls(),

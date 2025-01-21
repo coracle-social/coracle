@@ -1,4 +1,3 @@
-import crypto from "crypto"
 import {getEventHash} from "nostr-tools"
 import type {SignedEvent} from "@welshman/util"
 import {} from "nostr-tools"
