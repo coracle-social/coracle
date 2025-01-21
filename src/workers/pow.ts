@@ -1,5 +1,7 @@
 import crypto from "crypto"
+import {getEventHash} from "nostr-tools"
 import type {SignedEvent} from "@welshman/util"
+import {} from "nostr-tools"
 
 type In = {
   event: SignedEvent
@@ -17,22 +19,17 @@ self.onmessage = (event: MessageEvent<In>) => {
   self.postMessage(result)
 }
 
-// Convert event to JSON and hash with SHA-256
-function hashEvent(event, nonce) {
-  const eventWithNonce = {...event, nonce} // Add nonce to the event
-  const eventString = JSON.stringify(eventWithNonce)
-  return crypto.createHash("sha256").update(eventString).digest("hex")
-}
-
 export const generatePoW = (event: SignedEvent, difficulty: number) => {
   let nonce = 0
   let hash
   const target = "0".repeat(Math.ceil(difficulty / 4)) // Hex leading zero target
-
+  // add the nonce tag to the event
+  event.tags.push(["nonce", "0", difficulty.toString()])
   do {
-    hash = hashEvent(event, nonce)
+    hash = getEventHash(event)
     nonce++
+    event.tags[event.tags.length - 1][1] = nonce.toString()
   } while (!hash.startsWith(target))
 
-  return {...event, nonce, hash}
+  return {...event, id: hash}
 }
