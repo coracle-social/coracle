@@ -31,33 +31,37 @@
     return false
   }
 
-  const addItem = (event: TrustedEvent, interaction?: TrustedEvent, currentDepth = depth) => {
+  const addItem = (event: TrustedEvent, currentDepth = depth) => {
     if (shouldSkip(event)) return
 
     const idOrAddress = getIdOrAddress(event)
     const parentIds = getParentIdsAndAddrs(event)
-    const shouldLoadParent =
-      parentIds.length > 0 &&
-      !parentIds.some(id => seen.has(id)) &&
-      (currentDepth > 0 || [...repostKinds, ...reactionKinds].includes(event.kind))
 
-    // Keep working our way up the reply chain if we're working with a reply
-    if (shouldLoadParent) {
-      load({
-        relays: ctx.app.router.EventParents(event).getUrls(),
-        filters: getIdFilters(parentIds),
-        onEvent: (parentEvent: TrustedEvent) => {
-          addItem(parentEvent, event, currentDepth - 1)
-        },
-      })
-    } else if (!seen.has(idOrAddress)) {
-      items = [...items, event]
+    // Force loading parents of reactions/reposts
+    if ([...repostKinds, ...reactionKinds].includes(event.kind)) {
+      currentDepth = Math.max(1, currentDepth)
     }
 
-    seen.add(idOrAddress)
+    // If we have no parents, or we're at depth 0, we're done
+    if (parentIds.length === 0 || currentDepth === 0) {
+      if (!seen.has(idOrAddress)) {
+        items = [...items, event]
+      }
 
-    if (interaction) {
-      pushToMapKey(context, idOrAddress, interaction)
+      seen.add(idOrAddress)
+    } else {
+      for (const id of parentIds) {
+        pushToMapKey(context, id, event)
+      }
+
+      // Otherwise, load our parent and show that instead
+      load({
+        filters: getIdFilters(parentIds),
+        relays: ctx.app.router.EventParents(event).getUrls(),
+        onEvent: (parentEvent: TrustedEvent) => {
+          addItem(parentEvent, currentDepth - 1)
+        },
+      })
     }
   }
 
@@ -65,7 +69,8 @@
     const event = parseJson(repost.content)
 
     if (event && hasValidSignature(event)) {
-      addItem(event, repost)
+      pushToMapKey(context, getIdOrAddress(event), repost)
+      addItem(event)
     }
   }
 
