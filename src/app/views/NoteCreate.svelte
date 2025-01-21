@@ -34,9 +34,7 @@
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
   import {warn} from "src/util/logger"
-  import {commaFormat} from "src/util/misc"
-  import type {PoWEvent} from "src/workers/pow"
-  import PowWorker from "src/workers/pow?worker"
+  import {powEvent} from "src/util/pow"
 
   export let quote = null
   export let pubkey = null
@@ -51,7 +49,12 @@
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
-  let options = {warning: "", anonymous: false, publish_at: null}
+  let options = {
+    warning: "",
+    anonymous: false,
+    publish_at: null,
+    pow_difficulty: $userSettings.pow_difficulty || 0,
+  }
 
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
   const nsecWarning = writable(null)
@@ -94,36 +97,22 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const template = createEvent(1, {
+    let template = createEvent(1, {
       content,
       tags,
       created_at:
         (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
     })
 
+    drafts.set("notecreate", $editor.getHTML())
+
     publishing = "signing"
 
     let event = await sign(template, options)
 
-    drafts.set("notecreate", $editor.getHTML())
-
-    if ($userSettings.pow_difficulty > 0) {
+    if ($userSettings.pow_difficulty || options.pow_difficulty) {
       publishing = "pow"
-      const worker = new PowWorker()
-      const powPromise = new Promise<PoWEvent>((resolve, reject) => {
-        worker.onmessage = (e: MessageEvent<PoWEvent>) => {
-          resolve(e.data)
-        }
-        worker.onerror = e => {
-          reject(e)
-        }
-      })
-      worker.postMessage({difficulty: $userSettings.pow_difficulty, event})
-      try {
-        event = await powPromise
-      } catch (error) {
-        warn(error)
-      }
+      event = await powEvent(event, $userSettings.pow_difficulty || options.pow_difficulty)
     }
 
     let thunk: Thunk, emitter: Emitter
@@ -133,7 +122,6 @@
 
     if (options.publish_at) {
       // take the first DVM Handler found
-
       const dvmContent = await $signer.nip04.encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
