@@ -182,7 +182,6 @@
                   <svelte:self
                     isLastReply={i === visibleReplies.length - 1}
                     showParent={false}
-                    showHidden
                     note={r}
                     depth={depth - 1}
                     {filters}

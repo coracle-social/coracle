@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx, pushToMapKey, parseJson} from "@welshman/lib"
+  import {ctx, insert, pushToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -17,6 +17,7 @@
   export let showMuted = false
   export let hideReplies = false
   export let showDeleted = false
+  export let shouldSort = false
   export let items: TrustedEvent[] = []
 
   const seen = new Set<string>()
@@ -54,10 +55,10 @@
   }
 
   const addEvent = async (event: TrustedEvent) => {
+    const original = event
     let currentDepth = depth
-    let original = event
 
-    while (currentDepth-- > 0) {
+    while (currentDepth > 0) {
       const parent = await getParent(event)
 
       if (!parent) {
@@ -65,6 +66,7 @@
       }
 
       pushToMapKey(context, getIdOrAddress(parent), event)
+      currentDepth--
       event = parent
     }
 
@@ -73,7 +75,22 @@
     // If we've already seen it, or it's not displayable, skip it
     if (seen.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
 
-    items = [...items, event]
+    let inserted = false
+
+    if (shouldSort) {
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].created_at < original.created_at) {
+          items = insert(i, event, items)
+          inserted = true
+          break
+        }
+      }
+    }
+
+    if (!inserted) {
+      items = [...items, event]
+    }
+
     seen.add(id)
   }
 
@@ -85,14 +102,7 @@
     }
   }
 
-  let i = 0
-
-  $: {
-    addEvents(events.slice(i))
-
-    // Don't process the same events multiple times
-    i = events.length - 1
-  }
+  $: addEvents(events)
 </script>
 
 {#each items as event, i (event.id)}

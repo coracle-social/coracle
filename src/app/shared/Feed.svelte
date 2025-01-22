@@ -31,6 +31,7 @@
   export let showControls = false
   export let forcePlatform = true
   export let hideSpinner = false
+  export let shouldSort = false
   export let maxDepth = 2
 
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
@@ -149,7 +150,14 @@
 
 <FlexColumn bind:element>
   {#key key}
-    <NoteReducer {depth} {events} hideReplies={$shouldHideReplies} let:event let:context let:i>
+    <NoteReducer
+      {shouldSort}
+      {depth}
+      {events}
+      hideReplies={$shouldHideReplies}
+      let:event
+      let:context
+      let:i>
       <div in:fly={{y: 20}}>
         <FeedItem topLevel {filters} {context} {depth} {anchor} note={event} />
       </div>
