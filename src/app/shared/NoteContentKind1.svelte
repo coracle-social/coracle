@@ -26,6 +26,7 @@
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
+  import ImageGrid from "./ImageGrid.svelte"
 
   export let note
   export let minLength = 500
@@ -41,7 +42,7 @@
   }
 
   const isBoundary = i => {
-    const parsed = fullContent[i]
+    const parsed = shortContent[i]
 
     if (!parsed || isNewline(parsed)) return true
     if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
@@ -55,7 +56,7 @@
 
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
-
+    if (!parsed) return true
     if (isLink(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
 
     return isEvent(parsed) || isAddress(parsed)
@@ -65,18 +66,22 @@
 
   $: fullContent = parse(note)
 
-  $: shortContent = showEntire
-    ? fullContent
-    : truncate(
-        fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
-        {
-          minLength,
-          maxLength,
-          mediaLength: showMedia ? 200 : 50,
-        },
-      )
+  $: shortContent = (
+    showEntire
+      ? fullContent
+      : truncate(
+          fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
+          {
+            minLength,
+            maxLength,
+            mediaLength: showMedia ? 200 : 50,
+          },
+        )
+  ).filter(p => !(isLink(p) && p.value.isMedia))
 
   $: ellipsize = expandable && shortContent.find(isEllipsis)
+
+  $: images = fullContent.filter(p => isLink(p) && p.value.isMedia)
 </script>
 
 <div
@@ -122,6 +127,8 @@
     {/if}
   {/each}
 </div>
+
+<ImageGrid {images} />
 
 {#if ellipsize}
   <NoteContentEllipsis on:click={expand} />
