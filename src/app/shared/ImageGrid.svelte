@@ -1,10 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
-  import type {Parsed} from "@welshman/content"
+  import type {ParsedLink} from "@welshman/content"
   import {imgproxy} from "src/engine"
   import Carousel from "src/app/shared/Carousel.svelte"
 
-  export let images: Parsed[]
+  export let images: ParsedLink[]
 
   let zoomed: number
 
