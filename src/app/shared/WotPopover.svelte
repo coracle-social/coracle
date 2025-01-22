@@ -60,7 +60,9 @@
       {/if}
       <Anchor modal class="mt-4 flex items-center gap-2" href={zapLink}>
         <i class="fa fa-bolt" />
-        {zapDisplay}
+        <div class="overflow-hidden overflow-ellipsis">
+          {zapDisplay}
+        </div>
       </Anchor>
       {#if $profile?.website}
         <Anchor
