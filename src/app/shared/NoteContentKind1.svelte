@@ -16,6 +16,7 @@
     isEllipsis,
     isAddress,
     isNewline,
+    type ParsedLink,
   } from "@welshman/content"
   import QRCode from "src/partials/QRCode.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -81,7 +82,7 @@
 
   $: ellipsize = expandable && shortContent.find(isEllipsis)
 
-  $: images = fullContent.filter(p => isLink(p) && p.value.isMedia)
+  $: images = fullContent.filter(p => isLink(p) && p.value.isMedia) as ParsedLink[]
 </script>
 
 <div
