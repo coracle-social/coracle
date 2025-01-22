@@ -11,11 +11,15 @@
 </style>
 
 <script lang="ts">
+  import {onMount} from "svelte"
+
   export let items: any[] = []
+  export let onClose: () => void = undefined
+  export let currentIndex = 0
+  export let keyboardShortcut = false
 
   let carouselElement: HTMLElement
   let container: HTMLElement
-  let currentIndex = 0
 
   function scrollToIndex(index: number) {
     if (carouselElement) {
@@ -35,18 +39,40 @@
       currentIndex = Math.round(carouselElement.scrollLeft / carouselElement.offsetWidth)
     }
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    console.log("keydown")
+    if (!keyboardShortcut) return
+
+    if (event.key === "ArrowLeft") {
+      scrollToIndex(Math.max(currentIndex - 1, 0))
+    } else if (event.key === "ArrowRight") {
+      scrollToIndex(Math.min(currentIndex + 1, items.length - 1))
+    } else if (event.key === "Escape") {
+      onClose()
+    }
+  }
+
+  onMount(() => {
+    carouselElement.scrollTo({
+      left: currentIndex * carouselElement.offsetWidth,
+      behavior: "instant",
+    })
+    window.addEventListener("keydown", handleKeydown)
+    return () => window.removeEventListener("keydown", handleKeydown)
+  })
 </script>
 
-<div class="group relative w-full" bind:this={container}>
+<div class="group relative h-full w-full" bind:this={container}>
   <div
-    class="bg-base-200 scrollbar-hide flex snap-x snap-mandatory items-center gap-4 overflow-x-scroll scroll-smooth rounded-xl"
+    class="bg-base-200 scrollbar-hide flex h-full snap-x snap-mandatory items-center gap-4 overflow-x-scroll scroll-smooth rounded-xl"
     bind:this={carouselElement}
     on:wheel={handleScroll}
     on:touchmove={handleScroll}
     on:touchend={handleScroll}>
     {#each items as item, index}
       <div
-        class="w-full shrink-0 snap-always overflow-hidden rounded-xl bg-opacity-50"
+        class="h-full w-full shrink-0 snap-always overflow-hidden rounded-xl bg-opacity-50"
         class:snap-start={index === 0}
         class:snap-center={index !== 0}>
         <slot {item}>Missing template</slot>
@@ -88,7 +114,7 @@
   <button
     class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
            rounded-full border border-solid border-neutral-600 bg-white text-black opacity-0 shadow transition-opacity group-hover:opacity-50"
-    on:click|stopPropagation={() => (container.style.display = "none")}>
+    on:click|stopPropagation={() => (onClose ? onClose() : (container.style.display = "none"))}>
     <i class="fas fa-times"></i>
   </button>
 </div>
