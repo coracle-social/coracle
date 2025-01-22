@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx, insert, pushToMapKey, parseJson} from "@welshman/lib"
+  import {ctx, insert, addToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -22,7 +22,7 @@
 
   const seen = new Set<string>()
 
-  const context = new Map<string, TrustedEvent[]>()
+  const context = new Map<string, Set<TrustedEvent>>()
 
   const shouldSkip = (event: TrustedEvent) => {
     if (!showMuted && $isEventMuted(event, true)) return true
@@ -65,7 +65,12 @@
         break
       }
 
-      pushToMapKey(context, getIdOrAddress(parent), event)
+      // Hide replies to deleted/muted parents
+      if (shouldSkip(parent)) {
+        return
+      }
+
+      addToMapKey(context, getIdOrAddress(parent), event)
       currentDepth--
       event = parent
     }
@@ -102,9 +107,11 @@
     }
   }
 
+  const getContext = (event: TrustedEvent) => Array.from(context.get(getIdOrAddress(event)) || [])
+
   $: addEvents(events)
 </script>
 
 {#each items as event, i (event.id)}
-  <slot {i} {event} context={context.get(event.id) || []} />
+  <slot {i} {event} {getContext} />
 {/each}

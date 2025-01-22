@@ -26,18 +26,20 @@
   </div>
 {/if}
 
-<NoteReducer {events} depth={1} bind:items let:event let:context>
+<NoteReducer {events} depth={1} bind:items let:event let:getContext>
   <div class="flex items-center justify-between">
-    {#if context.length === 0}
+    {#if getContext(event).length === 0}
       <PeopleAction pubkeys={[event.pubkey]} actionText="mentioned you" />
     {:else if event.pubkey === $pubkey}
-      <PeopleAction pubkeys={uniq(pluck("pubkey", context))} actionText="{verb} to your note" />
+      <PeopleAction
+        pubkeys={uniq(pluck("pubkey", getContext(event)))}
+        actionText="{verb} to your note" />
     {:else}
       <PeopleAction
-        pubkeys={uniq(pluck("pubkey", context))}
+        pubkeys={uniq(pluck("pubkey", getContext(event)))}
         actionText="{verb} to a note mentioning you" />
     {/if}
-    <small>{formatTimestamp(max(pluck('created_at', [event, ...context])))}</small>
+    <small>{formatTimestamp(max(pluck("created_at", [event, ...getContext(event)])))}</small>
   </div>
-  <FeedItem topLevel showLoading note={event} {depth} filters={getIdFilters(pluck("id", context))} />
+  <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>

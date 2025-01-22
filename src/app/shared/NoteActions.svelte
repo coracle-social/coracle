@@ -188,16 +188,12 @@
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
   $: pinned = $userPins.has(event.id)
-  // Split out likes, uniqify by pubkey since a like can be duplicated across groups
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
-
-  // Split out zaps
   $: zaps = children
     .filter(e => e.kind === 9735)
     .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
   $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
-
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length

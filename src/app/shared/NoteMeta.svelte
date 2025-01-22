@@ -7,7 +7,6 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
 
-  export let event: TrustedEvent
   export let context: TrustedEvent[]
 
   const getPubkeys = (events: TrustedEvent[]) => uniq(pluck("pubkey", events))

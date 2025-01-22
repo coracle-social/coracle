@@ -1,8 +1,9 @@
 <script lang="ts">
   import {repository} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
+  import {ctx, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters, NOTE} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
@@ -17,8 +18,7 @@
 
   export let note
   export let relays = []
-  export let filters = null
-  export let context = []
+  export let getContext: (event: TrustedEvent) => TrustedEvent[] = () => []
   export let depth = 0
   export let anchor = null
   export let pinned = false
@@ -43,9 +43,9 @@
     sortEventsDesc(events.filter(e => e.kind === NOTE && isChildOf(e, event))),
   )
 
-  $: replyIsActive = $openReplies[event.id]
-
   let mutedReplies, hiddenReplies, visibleReplies
+
+  $: replyIsActive = $openReplies[event.id]
 
   $: {
     mutedReplies = []
@@ -59,9 +59,8 @@
         hiddenReplies.push(e)
       } else if (
         !showHiddenReplies &&
-        filters &&
-        !matchFilters(filters, e) &&
-        draftEventId !== e.id
+        draftEventId !== e.id &&
+        !getContext(event).some(spec({id: e.id}))
       ) {
         hiddenReplies.push(e)
       } else {
@@ -106,7 +105,7 @@
 
 {#if ready}
   <div>
-    <NoteMeta {context} {event} />
+    <NoteMeta context={getContext(note)} />
     <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>
@@ -184,7 +183,7 @@
                     showParent={false}
                     note={r}
                     depth={depth - 1}
-                    {filters}
+                    {getContext}
                     {anchor} />
                 </div>
               {/each}

@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
-  import {neverFilter, unionFilters} from "@welshman/util"
+  import {neverFilter, unionFilters, getIdFilters, getIdAndAddress} from "@welshman/util"
   import type {Filter, TrustedEvent} from "@welshman/util"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
   import {
@@ -47,7 +47,6 @@
     useWindowing = true
     events = []
     buffer = []
-    filters = [neverFilter]
 
     let hasKinds = false
 
@@ -72,14 +71,6 @@
       onExhausted: () => {
         exhausted = true
       },
-    })
-
-    ctrl.getRequestItems().then($requestItems => {
-      const filterOnlyRequestItems = $requestItems?.filter(ri => !ri.relays?.length)
-
-      if (filterOnlyRequestItems) {
-        filters = unionFilters(filterOnlyRequestItems.flatMap(item => item.filters))
-      }
     })
 
     if (!useWindowing) {
@@ -116,7 +107,6 @@
   let ctrl: FeedController
   let events: TrustedEvent[] = []
   let buffer: TrustedEvent[] = []
-  let filters: Filter[] = [neverFilter]
 
   $: {
     depth = $shouldHideReplies ? 0 : maxDepth
@@ -156,10 +146,10 @@
       {events}
       hideReplies={$shouldHideReplies}
       let:event
-      let:context
+      let:getContext
       let:i>
       <div in:fly={{y: 20}}>
-        <FeedItem topLevel {filters} {context} {depth} {anchor} note={event} />
+        <FeedItem topLevel {getContext} {depth} {anchor} note={event} />
       </div>
       {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
         <Card class="group flex items-center justify-between">
