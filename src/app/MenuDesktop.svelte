@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {seconds} from "hurdak"
   import {derived} from "svelte/store"
   import {now, omit} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/util"

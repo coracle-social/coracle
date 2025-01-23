@@ -1,6 +1,6 @@
 <script lang="ts">
+  import {range} from "@welshman/lib"
   import cx from "classnames"
-  import {range} from "hurdak"
 
   export let inert = false
   export let value = 1

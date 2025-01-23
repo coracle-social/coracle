@@ -1,5 +1,4 @@
 <script context="module" lang="ts">
-  import {randomId} from "hurdak"
   import {get, writable} from "svelte/store"
 
   export const toast = writable(null)
@@ -48,6 +47,7 @@
   import {fly} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"
   import ThunkStatus from "src/partials/ThunkStatus.svelte"
+  import {randomId} from "@welshman/lib"
 
   let touchStart = 0
   let startOffset = 0

@@ -31,6 +31,9 @@ import {
   uniq,
   assoc,
   omit,
+  fetchJson,
+  sleep,
+  tryCatch,
 } from "@welshman/lib"
 import {SubscriptionEvent} from "@welshman/net"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
@@ -56,7 +59,6 @@ import {
   uniqTags,
 } from "@welshman/util"
 import crypto from "crypto"
-import {Fetch, sleep, tryFunc} from "hurdak"
 import {
   addClientTags,
   anonymous,
@@ -115,7 +117,7 @@ export const nip98Fetch = async (url, method, body = null) => {
   const auth = btoa(JSON.stringify(event))
   const headers = {Authorization: `Nostr ${auth}`}
 
-  return Fetch.fetchJson(url, {body, method, headers})
+  return fetchJson(url, {body, method, headers})
 }
 
 export const makeDvmRequest = (request: DVMRequestOptions & {delay?: number}) => {
@@ -149,7 +151,7 @@ export const getMediaProviderURL = cached({
 })
 
 const fetchMediaProviderURL = async host =>
-  prop("api_url")(await Fetch.fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
+  prop("api_url")(await fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
 
 const fileToFormData = file => {
   const formData = new FormData()
@@ -183,10 +185,10 @@ export const uploadFileToHost = async <T = any>(url: string, file: File): Promis
 }
 
 export const uploadFilesToHost = <T = any>(url: string, files: File[]): Promise<T[]> =>
-  Promise.all(files.map(file => tryFunc(async () => await uploadFileToHost<T>(url, file))))
+  Promise.all(files.map(file => tryCatch(async () => await uploadFileToHost<T>(url, file))))
 
 export const uploadFileToHosts = <T = any>(urls: string[], file: File): Promise<T[]> =>
-  Promise.all(urls.map(url => tryFunc(async () => await uploadFileToHost<T>(url, file))))
+  Promise.all(urls.map(url => tryCatch(async () => await uploadFileToHost<T>(url, file))))
 
 export const uploadFilesToHosts = async <T = any>(urls: string[], files: File[]): Promise<T[]> =>
   flatten(await Promise.all(urls.map(url => uploadFilesToHost<T>(url, files)))).filter(identity)

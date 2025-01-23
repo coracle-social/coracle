@@ -3,8 +3,7 @@
   import {marked} from "marked"
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
-  import {fromPairs} from "@welshman/lib"
-  import {switcherFn} from "hurdak"
+  import {fromPairs, switcher} from "@welshman/lib"
   import {urlIsMedia} from "@welshman/content"
   import {fromNostrURI, getTopicTagValues} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
@@ -33,10 +32,10 @@
         warn(e)
       }
 
-      const display = switcherFn(type, {
-        npub: () => "@" + displayProfileByPubkey(data),
-        nprofile: () => "@" + displayProfileByPubkey(data.pubkey),
-        default: () => entity.slice(0, 16) + "...",
+      const display = switcher(type, {
+        npub: "@" + displayProfileByPubkey(data),
+        nprofile: "@" + displayProfileByPubkey(data.pubkey),
+        default: entity.slice(0, 16) + "...",
       })
 
       markdown = markdown.replace(uri, `[${display}](${entity})`)

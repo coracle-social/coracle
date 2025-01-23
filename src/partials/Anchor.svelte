@@ -1,8 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {randomId} from "hurdak"
   import {createEventDispatcher} from "svelte"
   import {router} from "src/app/util/router"
+  import {randomId} from "@welshman/lib"
 
   export let stopPropagation = false
   export let randomizeKey = false

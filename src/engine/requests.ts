@@ -1,6 +1,5 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import {noop, sleep} from "hurdak"
 import type {RequestOpts, Feed} from "@welshman/feeds"
 import {FeedController} from "@welshman/feeds"
 import {
@@ -17,6 +16,8 @@ import {
   HOUR,
   WEEK,
   sortBy,
+  noop,
+  sleep,
 } from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {

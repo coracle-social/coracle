@@ -1,6 +1,5 @@
-import {tryFunc, switcherFn} from "hurdak"
 import {fromNostrURI, Address} from "@welshman/util"
-import {ctx, last, identity} from "@welshman/lib"
+import {ctx, last, identity, tryCatch, switcher} from "@welshman/lib"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
@@ -48,8 +47,8 @@ export const asNote = {
     const annotateEvent = id => ({
       id,
       relays: [],
-      note: tryFunc(() => nip19.noteEncode(id)),
-      nevent: tryFunc(() => nip19.neventEncode({id, relays: []})),
+      note: tryCatch(() => nip19.noteEncode(id)),
+      nevent: tryCatch(() => nip19.neventEncode({id, relays: []})),
     })
 
     entity = fromNostrURI(entity)
@@ -61,11 +60,11 @@ export const asNote = {
       return annotateEvent(entity)
     }
 
-    return switcherFn(type, {
-      nevent: () => ({...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)}),
-      naddr: () => ({...data, address: Address.fromNaddr(entity).toString()}),
-      note: () => annotateEvent(data),
-      default: () => annotateEvent(entity),
+    return switcher(type, {
+      nevent: {...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)},
+      naddr: {...data, address: Address.fromNaddr(entity).toString()},
+      note: annotateEvent(data),
+      default: annotateEvent(entity),
     })
   },
 }

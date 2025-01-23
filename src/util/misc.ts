@@ -10,8 +10,15 @@ import {
   identity,
   throttle,
   pluck,
+  tryCatch,
+  ensurePlural,
+  getJson,
+  setJson,
+  MINUTE,
+  HOUR,
+  DAY,
 } from "@welshman/lib"
-import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
+import {round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
@@ -54,17 +61,17 @@ export const formatTimestampAsDate = (ts: number) => {
 export const formatTimestampRelative = (ts: number) => {
   let unit
   let delta = now() - ts
-  if (delta < seconds(1, "minute")) {
+  if (delta < MINUTE) {
     unit = "second"
-  } else if (delta < seconds(1, "hour")) {
+  } else if (delta < HOUR) {
     unit = "minute"
-    delta = Math.round(delta / seconds(1, "minute"))
-  } else if (delta < seconds(2, "day")) {
+    delta = Math.round(delta / MINUTE)
+  } else if (delta < 2 * DAY) {
     unit = "hour"
-    delta = Math.round(delta / seconds(1, "hour"))
+    delta = Math.round(delta / HOUR)
   } else {
     unit = "day"
-    delta = Math.round(delta / seconds(1, "day"))
+    delta = Math.round(delta / DAY)
   }
 
   const locale = new Intl.RelativeTimeFormat().resolvedOptions().locale
@@ -155,7 +162,7 @@ export const parseJson = (json: string) => {
 }
 
 export const tryFetch = <T>(f: () => T) =>
-  tryFunc(f, (e: Error) => {
+  tryCatch(f, (e: Error) => {
     if (!e.toString().includes("fetch")) {
       logger.warn(e)
     }
@@ -314,10 +321,10 @@ export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") =
 // Local storage
 
 export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
-  const init = Storage.getJson(key)
+  const init = getJson(key)
   const store = writable<T>(init === null ? defaultValue : init)
 
-  store.subscribe(throttle(delay, ($value: T) => Storage.setJson(key, $value)))
+  store.subscribe(throttle(delay, ($value: T) => setJson(key, $value)))
 
   return store
 }

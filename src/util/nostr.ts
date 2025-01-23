@@ -1,4 +1,4 @@
-import {last, nthEq} from "@welshman/lib"
+import {avg, last, nthEq} from "@welshman/lib"
 import {
   fromNostrURI,
   GENERIC_REPOST,
@@ -42,7 +42,6 @@ import {getParentIdOrAddr} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {hexToBytes} from "@noble/hashes/utils"
 import {nip05, nip19} from "nostr-tools"
-import {avg} from "hurdak"
 import {parseJson} from "src/util/misc"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
