@@ -41,9 +41,8 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
-    console.log("keydown")
     if (!keyboardShortcut) return
-
+    event.preventDefault()
     if (event.key === "ArrowLeft") {
       scrollToIndex(Math.max(currentIndex - 1, 0))
     } else if (event.key === "ArrowRight") {
