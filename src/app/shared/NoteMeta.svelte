@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {uniq, spec, groupBy, pluck, uniqBy, prop} from "@welshman/lib"
+  import {uniq, identity, spec, groupBy, pluck, uniqBy, prop} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
+  import {REACTION, ZAP_RESPONSE, getTagValue} from "@welshman/util"
   import {repostKinds} from "src/util/nostr"
   import Icon from "src/partials/Icon.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
@@ -17,9 +17,9 @@
 </script>
 
 {#if zaps.length > 0}
-  {@const pubkeys = getPubkeys(zaps)}
+  {@const pubkeys = uniq(zaps.map(e => getTagValue("P", e.tags)).filter(identity))}
   <p class="flex items-center gap-1 pb-2 text-sm text-neutral-300">
-    <i class="fa fa-rotate" />
+    <Icon icon="bolt" />
     Zapped by
     {#if pubkeys.length === 1}
       <PersonLink pubkey={pubkeys[0]} />
@@ -53,7 +53,11 @@
       {reactions.length} people reacted:
       {#each groupBy(e => e.content, reactions) as [content, events] (content)}
         <span class="flex items-center gap-1">
-          {content}
+          {#if content === "+"}
+            <Icon icon="heart" />
+          {:else}
+            {content}
+          {/if}
           <PersonCircles class="h-5 w-5" pubkeys={getPubkeys(events)} />
         </span>
       {/each}

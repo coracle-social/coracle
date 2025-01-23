@@ -69,8 +69,7 @@ export const reactionNotifications = derived(
         e =>
           e.pubkey !== $pubkey &&
           e.tags.some(t => t[0] === "p" && t[1] === $pubkey) &&
-          !$isEventMuted(e) &&
-          isLike(e),
+          !$isEventMuted(e),
       ),
     ),
 )
