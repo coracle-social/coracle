@@ -5,7 +5,6 @@
   import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
   import {ctx, ago, max, sleep, memoize, isNil} from "@welshman/lib"
-  import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as content from "@welshman/content"
   import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
@@ -325,7 +324,6 @@
     content,
     ...nostr,
     ...misc,
-    ...lib,
     ...signer,
     ...util,
     ...net,
