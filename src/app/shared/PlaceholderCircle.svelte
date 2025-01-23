@@ -1,23 +1,27 @@
 <script lang="ts">
+  import {now} from "@welshman/lib"
   import cx from "classnames"
-  import {stringToHue, hsl} from "src/util/misc"
-  import LogoSvg from "src/partials/LogoSvg.svelte"
+  import {stringToHue, hsl, timestamp1} from "src/util/misc"
 
   export let pubkey
+
+  let mount = now()
 
   const hue = stringToHue(pubkey || "")
   const primary = hsl(hue, {lightness: 80})
   const secondary = hsl(hue, {saturation: 30, lightness: 30})
+
+  $: loading = mount > $timestamp1 - 3
 </script>
 
 <div
-  class={cx(
+  class="{cx(
     $$props.class,
-    `relative inline-block shrink-0 overflow-hidden rounded-full border border-solid
-     border-neutral-100 bg-cover bg-center`,
-  )}
-  style="--logo-color: {primary}; --logo-bg-color: {secondary}; background-color: var(--logo-bg-color);">
-  <LogoSvg
-    class="logo absolute left-2/4 top-2/4 -translate-x-1/2 -translate-y-1/2"
-    style="height: 85%; width: 85%;" />
+    `flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-solid border-neutral-100 bg-cover bg-center`,
+  )}}">
+  <i
+    class="fa fa-user text-xl"
+    class:animate-pulse={loading}
+    style="background: linear-gradient(to right, {primary}, {secondary}); -webkit-background-clip: text; color: transparent;"
+  ></i>
 </div>
