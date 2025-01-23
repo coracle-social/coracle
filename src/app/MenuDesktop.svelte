@@ -74,7 +74,7 @@
   $: userDisplay = deriveProfileDisplay($pubkey)
 </script>
 
-<div class="fixed bottom-0 left-0 top-0 z-modal w-72 bg-tinted-700 transition-colors">
+<div class="fixed bottom-0 left-0 top-0 z-nav w-72 bg-tinted-700 transition-colors">
   <Anchor
     external
     class="mb-4 mt-4 flex items-center gap-2 px-6"
