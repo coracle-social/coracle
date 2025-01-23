@@ -92,7 +92,10 @@
       $translateY = 0
     }
   }
+  let innerWidth = 0
 </script>
+
+<svelte:window bind:innerWidth />
 
 <svelte:body
   on:keydown={e => {
@@ -103,12 +106,16 @@
 
 <div bind:this={root} class={cx($$props.class, "modal group absolute")}>
   <slot name="wrapper">
-    <div transition:fade class="fixed inset-0 z-modal" class:pointer-events-none={closing}>
+    <div
+      transition:fade
+      class:ml-72={innerWidth >= 1024}
+      class="fixed inset-0 z-modal"
+      class:pointer-events-none={closing}>
       <div
-        class="fixed inset-0 cursor-pointer bg-black opacity-50"
+        class="absolute inset-0 cursor-pointer bg-black opacity-50"
         on:click|stopPropagation={tryClose} />
       <div
-        class="modal-content ml-0 h-full overflow-auto lg:ml-72"
+        class="modal-content ml-0 h-full overflow-auto"
         class:overflow-hidden={mini}
         class:pointer-events-none={mini}
         use:swipe
