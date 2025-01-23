@@ -17,6 +17,7 @@
     isAddress,
     isNewline,
     type ParsedLink,
+    type Parsed,
   } from "@welshman/content"
   import QRCode from "src/partials/QRCode.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -28,6 +29,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
   import ImageGrid from "./ImageGrid.svelte"
+  import {onMount} from "svelte"
 
   export let note
   export let minLength = 500
@@ -44,7 +46,7 @@
 
   const isBoundary = i => {
     const parsed = shortContent[i]
-
+    if (parsed instanceof Array) return false
     if (!parsed || isNewline(parsed)) return true
     if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
 
@@ -58,6 +60,7 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
     if (!parsed) return true
+    if (parsed instanceof Array) return showMedia
     if (isLink(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
 
     return isEvent(parsed) || isAddress(parsed)
@@ -65,31 +68,69 @@
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
 
-  $: fullContent = parse(note)
+  function isImage(parsed: Parsed) {
+    return isLink(parsed) && parsed.value.url.toString().match(/\.(jpe?g|png|gif|webp)$/)
+  }
 
-  $: shortContent = (
-    showEntire
-      ? fullContent
-      : truncate(
-          fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
-          {
-            minLength,
-            maxLength,
-            mediaLength: showMedia ? 200 : 50,
-          },
-        )
-  ).filter(p => !(isLink(p) && p.value.isMedia))
+  let fullContent: (Parsed | ParsedLink[])[] = []
 
-  $: ellipsize = expandable && shortContent.find(isEllipsis)
+  onMount(() => {
+    let images: ParsedLink[] = []
+    let newLines = []
+    let emptyText = []
+    const parseContent = []
+    for (const parsed of parse(note)) {
+      if (isImage(parsed)) {
+        images.push(parsed as ParsedLink)
+      } else {
+        if (images.length && isNewline(parsed)) {
+          newLines.push(parsed)
+        } else if (images.length && isText(parsed) && !parsed.value.trim()) {
+          emptyText.push(parsed)
+        } else if (images.length) {
+          parseContent.push(images)
+          if (newLines.length) {
+            parseContent.push(newLines[0])
+            newLines = []
+          } else if (emptyText.length) {
+            parseContent.push(emptyText[0])
+            emptyText = []
+          }
+          images = []
+        } else {
+          parseContent.push(parsed)
+        }
+      }
+    }
+    if (images.length) {
+      parseContent.push(images)
+    }
+    fullContent = parseContent
+  })
 
-  $: images = fullContent.filter(p => isLink(p) && p.value.isMedia) as ParsedLink[]
+  $: shortContent = showEntire
+    ? fullContent
+    : truncate(
+        fullContent
+          .map(p => (Array.isArray(p) ? p[0] : p))
+          .filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
+        {
+          minLength,
+          maxLength,
+          mediaLength: showMedia ? 200 : 50,
+        },
+      ).map((p, i) => (isImage(p) ? fullContent[i] : p))
+
+  $: ellipsize = expandable && shortContent.map(c => (Array.isArray(c) ? c[0] : c)).find(isEllipsis)
 </script>
 
 <div
   class={cx($$props.class, "note-content overflow-hidden text-ellipsis")}
   style={ellipsize && "mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
-    {#if isNewline(parsed)}
+    {#if Array.isArray(parsed)}
+      <ImageGrid images={parsed} />
+    {:else if isNewline(parsed)}
       <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
       <NoteContentTopic value={parsed.value} />
@@ -128,8 +169,6 @@
     {/if}
   {/each}
 </div>
-
-<ImageGrid {images} />
 
 {#if ellipsize}
   <NoteContentEllipsis on:click={expand} />
