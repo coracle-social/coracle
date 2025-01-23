@@ -7,16 +7,24 @@
   export let images: ParsedLink[]
 
   let zoomed: number
+  let grid: HTMLElement
 
   $: columns = Math.ceil(Math.sqrt(images.length))
 </script>
 
 <div
   on:click|preventDefault|stopPropagation
+  bind:this={grid}
   class={cx(
     "grid-cols-" + columns,
-    "grid cursor-pointer gap-1 overflow-hidden rounded-lg bg-black",
+    "relative grid cursor-pointer gap-1 overflow-hidden rounded-lg bg-black",
   )}>
+  <button
+    class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
+         rounded-full border border-solid border-neutral-600 bg-white text-black opacity-50 shadow"
+    on:click|stopPropagation={() => (grid.style.display = "none")}>
+    <i class="fas fa-times"></i>
+  </button>
   {#each images as image, i}
     <img
       class="h-full max-h-96 w-full object-cover"
