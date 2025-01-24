@@ -5,7 +5,7 @@ import {type TrustedEvent} from "@welshman/util"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsDesc} from "src/engine/utils"
 import {checked, getSeenAt, isEventMuted, sessionWithMeta} from "src/engine/state"
-import {isLike, noteKinds, reactionKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds} from "src/util/nostr"
 import {derived} from "svelte/store"
 
 export const isSeen = derived(

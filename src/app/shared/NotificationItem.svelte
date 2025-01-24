@@ -1,6 +1,5 @@
 <script lang="ts">
   import {pluck, max, uniq, ago} from "@welshman/lib"
-  import {getIdFilters} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import {formatTimestampAsDate, formatTimestamp} from "src/util/misc"
   import FeedItem from "src/app/shared/FeedItem.svelte"

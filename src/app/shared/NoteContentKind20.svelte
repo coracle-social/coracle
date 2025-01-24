@@ -9,21 +9,32 @@
   export let showEntire = true
   export let showMedia = getSetting("show_media")
 
-  const images = getTags("imeta", note.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
   const title = getTagValue("title", note.tags)
+
+  let images = getTags("imeta", note.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
+
+  const onError = item => {
+    images = images.filter(i => i !== item)
+  }
 </script>
 
 {#if title}
   <h1 class="staatliches text-2xl">{title}</h1>
 {/if}
-{#if showMedia}
-  <Carousel items={images} let:item>
-    <img src={getTagValue("url", item)} alt={getTagValue("alt", item)} class="min-w-full" />
-  </Carousel>
-{:else}
-  {#each images as item}
-    <NoteContentLink value={{url: getTagValue("url", item)}} {showMedia} />
-  {/each}
+{#if images.length > 0}
+  {#if showMedia}
+    <Carousel items={images} let:item>
+      <img
+        src={getTagValue("url", item)}
+        alt={getTagValue("alt", item)}
+        on:error={() => onError(item)}
+        class="min-w-full" />
+    </Carousel>
+  {:else}
+    {#each images as item}
+      <NoteContentLink value={{url: getTagValue("url", item)}} {showMedia} />
+    {/each}
+  {/if}
 {/if}
 {#if note.content}
   <div class="h-2" />

@@ -2,7 +2,7 @@
   import {repository} from "@welshman/app"
   import {ctx, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
-  import {getIdOrAddress, getReplyFilters, isChildOf, matchFilters, NOTE} from "@welshman/util"
+  import {getIdOrAddress, getReplyFilters, isChildOf, NOTE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {quantify} from "hurdak"
   import {onMount, setContext} from "svelte"

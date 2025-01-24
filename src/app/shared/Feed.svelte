@@ -2,8 +2,7 @@
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
-  import {neverFilter, unionFilters, getIdFilters, getIdAndAddress} from "@welshman/util"
-  import type {Filter, TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
   import {
     isRelayFeed,
