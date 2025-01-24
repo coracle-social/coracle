@@ -99,7 +99,7 @@
       ownedEvent = await addPoWStamp(ownedEvent, options.pow_difficulty)
     }
 
-    let event = await sign(ownedEvent, options)
+    const event = await sign(ownedEvent, options)
 
     const thunk = publish({
       event,
