@@ -3,6 +3,7 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {get, derived} from "svelte/store"
+  import {App} from "@capacitor/app"
   import {dev} from "$app/environment"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, MONTH, Worker} from "@welshman/lib"
@@ -84,6 +85,14 @@
     if (!db) {
       setupTracking()
       setupAnalytics()
+
+      App.addListener("backButton", () => {
+        if (window.history.length > 1) {
+          window.history.back()
+        } else {
+          App.exitApp()
+        }
+      })
 
       ready = initStorage("flotilla", 5, {
         relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),

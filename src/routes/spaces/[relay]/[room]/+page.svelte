@@ -33,7 +33,6 @@
     deriveEventsForUrl,
     GENERAL,
     tagRoom,
-    LEGACY_MESSAGE,
     userRoomsByUrl,
     displayChannel,
   } from "@app/state"
@@ -47,16 +46,9 @@
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-  const legacyRoom = room === GENERAL ? "general" : room
   const feeds = feedsFromFilter({kinds: [MESSAGE], "#h": [room]})
 
-  const events = throttled(
-    300,
-    deriveEventsForUrl(url, [
-      {kinds: [MESSAGE], "#h": [room]},
-      {kinds: [LEGACY_MESSAGE], "#~": [legacyRoom]},
-    ]),
-  )
+  const events = throttled(300, deriveEventsForUrl(url, [{kinds: [MESSAGE], "#h": [room]}]))
 
   const ctrl = createFeedController({
     useWindowing: true,

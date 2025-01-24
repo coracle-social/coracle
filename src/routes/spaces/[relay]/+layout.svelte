@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, WEEK} from "@welshman/lib"
-  import {GROUPS, MESSAGE, DELETE} from "@welshman/util"
+  import {GROUPS, THREAD, COMMENT, MESSAGE, DELETE} from "@welshman/util"
   import {subscribe} from "@welshman/app"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
@@ -12,7 +12,7 @@
   import {pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
-  import {decodeRelay, userRoomsByUrl, THREAD_FILTER, COMMENT_FILTER} from "@app/state"
+  import {decodeRelay, userRoomsByUrl} from "@app/state"
   import {pullConservatively} from "@app/requests"
   import {notifications} from "@app/notifications"
 
@@ -56,8 +56,8 @@
     pullConservatively({
       relays,
       filters: [
-        {...THREAD_FILTER, since},
-        {...COMMENT_FILTER, since},
+        {kinds: [THREAD], since},
+        {kinds: [COMMENT], "#K": [String(THREAD)], since},
       ],
     })
 

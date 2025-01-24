@@ -3,16 +3,9 @@ import {synced, throttled} from "@welshman/store"
 import {pubkey} from "@welshman/app"
 import {prop, spec, identity, now, groupBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {MESSAGE, COMMENT, getTagValue} from "@welshman/util"
+import {MESSAGE, THREAD, COMMENT, getTagValue} from "@welshman/util"
 import {makeSpacePath, makeChatPath, makeThreadPath, makeRoomPath} from "@app/routes"
-import {
-  THREAD_FILTER,
-  COMMENT_FILTER,
-  chats,
-  getUrlsForEvent,
-  userRoomsByUrl,
-  repositoryStore,
-} from "@app/state"
+import {chats, getUrlsForEvent, userRoomsByUrl, repositoryStore} from "@app/state"
 
 // Checked state
 
@@ -60,7 +53,10 @@ export const notifications = derived(
       }
     }
 
-    const allThreadEvents = $repository.query([THREAD_FILTER, COMMENT_FILTER])
+    const allThreadEvents = $repository.query([
+      {kinds: [THREAD]},
+      {kinds: [COMMENT], "#K": [String(THREAD)]},
+    ])
     const allMessageEvents = $repository.query([{kinds: [MESSAGE]}])
 
     for (const [url, rooms] of $userRoomsByUrl.entries()) {
