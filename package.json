@@ -13,6 +13,9 @@
     "format": "prettier --write src",
     "prepare": "husky"
   },
+  "overrides": {
+    "@capacitor/core": "^7.0.1"
+  },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@sentry/cli": "^2.40.0",

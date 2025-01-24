@@ -1,12 +1,14 @@
 <script lang="ts">
   import {hash} from "@welshman/lib"
+  import {now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     thunks,
+    pubkey,
     deriveProfile,
     deriveProfileDisplay,
+    formatTimestampAsDate,
     formatTimestampAsTime,
-    pubkey,
   } from "@welshman/app"
   import {isMobile} from "@lib/html"
   import LongPress from "@lib/components/LongPress.svelte"
@@ -31,6 +33,7 @@
   export let inert = false
 
   const thunk = $thunks[event.id]
+  const today = formatTimestampAsDate(now())
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
@@ -70,7 +73,14 @@
           <Button on:click={openProfile} class="text-sm font-bold" style="color: {colorValue}">
             {$profileDisplay}
           </Button>
-          <span class="text-xs opacity-50">{formatTimestampAsTime(event.created_at)}</span>
+          <span class="text-xs opacity-50">
+            {#if formatTimestampAsDate(event.created_at) === today}
+              Today
+            {:else}
+              {formatTimestampAsDate(event.created_at)}
+            {/if}
+            at {formatTimestampAsTime(event.created_at)}
+          </span>
         </div>
       {/if}
       <div class="text-sm">

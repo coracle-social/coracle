@@ -3,7 +3,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {page} from "$app/stores"
-  import {sleep, now, ctx} from "@welshman/lib"
+  import {sleep, ago, MONTH, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {feedsFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
@@ -152,7 +152,7 @@
 
     const sub = subscribe({
       relays: [url],
-      filters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
+      filters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: ago(MONTH)}],
     })
 
     return () => {
@@ -190,7 +190,7 @@
     </div>
   </PageBar>
   <div
-    class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-auto py-2"
+    class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden py-2"
     bind:this={element}>
     {#each $elements.slice(0, limit) as { type, id, value, showPubkey } (id)}
       {#if type === "date"}

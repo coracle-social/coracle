@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ago, WEEK} from "@welshman/lib"
+  import {ago, MONTH} from "@welshman/lib"
   import {GROUPS, THREAD, COMMENT, MESSAGE, DELETE} from "@welshman/util"
-  import {subscribe} from "@welshman/app"
+  import {subscribe, load} from "@welshman/app"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -47,22 +47,21 @@
     checkConnection()
 
     const relays = [url]
-    const since = ago(WEEK)
+    const since = ago(MONTH)
 
-    // Load all groups for this space to populate navigation
-    pullConservatively({relays, filters: [{kinds: [GROUPS]}]})
+    // Load all groups for this space to populate navigation. It would be nice to sync, but relay29
+    // is too picky about how requests are built.
+    load({relays, filters: [{kinds: [GROUPS]}], delay: 0})
 
-    // Load threads and comments
+    // Load threads, comments, and recent messages for user rooms to help with a quick page transition
     pullConservatively({
       relays,
       filters: [
         {kinds: [THREAD], since},
         {kinds: [COMMENT], "#K": [String(THREAD)], since},
+        ...rooms.map(r => ({kinds: [MESSAGE], "#h": [r], since})),
       ],
     })
-
-    // Load recent messages for user rooms to help with a quick page transition
-    pullConservatively({relays, filters: rooms.map(r => ({kinds: [MESSAGE], "#h": [r], since}))})
 
     // Listen for deletes that would apply to messages we already have, and new groups
     const sub = subscribe({relays, filters: [{kinds: [DELETE, GROUPS], since}]})
