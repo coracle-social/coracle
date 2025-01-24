@@ -5,7 +5,6 @@ self.onmessage = async function (ev: MessageEvent) {
   const {event, difficulty, start = 0, step = 1} = ev.data
 
   let count = start
-  let i = 0
 
   const tag = ["nonce", count.toString(), difficulty.toString()]
 
@@ -14,7 +13,6 @@ self.onmessage = async function (ev: MessageEvent) {
   const hasher = await createSHA256()
 
   while (true) {
-    i++
     count += step
     tag[1] = count.toString()
 
