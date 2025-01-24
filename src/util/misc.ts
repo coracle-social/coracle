@@ -18,6 +18,7 @@ import {
   HOUR,
   DAY,
   round,
+  int,
 } from "@welshman/lib"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
@@ -66,7 +67,7 @@ export const formatTimestampRelative = (ts: number) => {
   } else if (delta < HOUR) {
     unit = "minute"
     delta = Math.round(delta / MINUTE)
-  } else if (delta < 2 * DAY) {
+  } else if (delta < int(2, DAY)) {
     unit = "hour"
     delta = Math.round(delta / HOUR)
   } else {

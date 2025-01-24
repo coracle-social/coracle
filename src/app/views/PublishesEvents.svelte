@@ -1,6 +1,6 @@
 <script lang="ts">
   import {thunks, type Thunk} from "@welshman/app"
-  import {assoc, HOUR, MINUTE, now, omit, remove, sortBy} from "@welshman/lib"
+  import {assoc, DAY, MINUTE, now, omit, remove, sortBy} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {derived} from "svelte/store"
@@ -8,9 +8,7 @@
   import PublishCard from "src/app/shared/PublishCard.svelte"
   import {pluralize} from "src/util/misc"
 
-  $: recent = (Object.values($thunks) as Thunk[]).filter(
-    t => t.event.created_at > now() - 24 * HOUR,
-  )
+  $: recent = (Object.values($thunks) as Thunk[]).filter(t => t.event.created_at > now() - DAY)
 
   $: relays = new Set(
     remove(
@@ -42,7 +40,7 @@
   // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
   $: {
     for (const t of recent) {
-      if (t.event.created_at < now() - 1 * MINUTE) {
+      if (t.event.created_at < now() - MINUTE) {
         for (const [url, s] of Object.entries(t.status)) {
           if (s.status === PublishStatus.Pending) {
             t.status.update(assoc(url, {status: PublishStatus.Failure, message: ""}))
