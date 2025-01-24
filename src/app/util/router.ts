@@ -1,5 +1,5 @@
 import {fromNostrURI, Address} from "@welshman/util"
-import {ctx, last, identity, tryCatch, switcher} from "@welshman/lib"
+import {ctx, last, identity, tryCatch} from "@welshman/lib"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
@@ -60,12 +60,16 @@ export const asNote = {
       return annotateEvent(entity)
     }
 
-    return switcher(type, {
-      nevent: {...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)},
-      naddr: {...data, address: Address.fromNaddr(entity).toString()},
-      note: annotateEvent(data),
-      default: annotateEvent(entity),
-    })
+    switch (type) {
+      case "nevent":
+        return {...data, note: nip19.noteEncode(data.id), nevent: nip19.neventEncode(data)}
+      case "naddr":
+        return {...data, address: Address.fromNaddr(entity).toString()}
+      case "note":
+        return annotateEvent(data)
+      default:
+        return annotateEvent(entity)
+    }
   },
 }
 

@@ -148,7 +148,7 @@
       let:getContext
       let:i>
       <div in:fly={{y: 20}}>
-        <FeedItem topLevel {getContext} {depth} {anchor} note={event} />
+        <FeedItem showMeta topLevel {getContext} {depth} {anchor} note={event} />
       </div>
       {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
         <Card class="group flex items-center justify-between">

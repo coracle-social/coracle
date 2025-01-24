@@ -18,12 +18,13 @@
 
   export let note
   export let relays = []
-  export let getContext: (event: TrustedEvent) => TrustedEvent[] = () => []
+  export let getContext = (event: TrustedEvent) => repository.query(getReplyFilters([event]))
   export let depth = 0
   export let anchor = null
   export let pinned = false
   export let topLevel = false
   export let isLastReply = false
+  export let showMeta = false
   export let showParent = true
   export let showLoading = false
   export let showMedia = getSetting("show_media")
@@ -105,7 +106,9 @@
 
 {#if ready}
   <div>
-    <NoteMeta context={getContext(note)} />
+    {#if showMeta}
+      <NoteMeta context={getContext(note)} />
+    {/if}
     <div class="note relative">
       {#if !showParent && !topLevel}
         <AltColor let:isAlt>
