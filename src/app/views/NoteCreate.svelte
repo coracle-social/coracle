@@ -18,7 +18,6 @@
   } from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
-  import {commaFormat} from "hurdak"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
   import Anchor from "src/partials/Anchor.svelte"
@@ -35,6 +34,7 @@
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
   import {warn} from "src/util/logger"
+  import {commaFormat} from "src/util/misc"
 
   export let quote = null
   export let pubkey = null

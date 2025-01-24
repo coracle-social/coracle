@@ -1,10 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {toTitle} from "hurdak"
   import {derived} from "svelte/store"
   import {signer} from "@welshman/app"
   import {now} from "@welshman/lib"
-  import {createScroller} from "src/util/misc"
+  import {createScroller, toTitle} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Popover from "src/partials/Popover.svelte"

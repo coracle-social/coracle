@@ -4,7 +4,6 @@
   import {ctx, fromPairs} from "@welshman/lib"
   import {getTagValues, getTagValue, Address} from "@welshman/util"
   import {repository, pubkey} from "@welshman/app"
-  import {commaFormat} from "hurdak"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
@@ -14,6 +13,7 @@
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
+  import {commaFormat} from "src/util/misc"
 
   export let note
   export let showMedia = false

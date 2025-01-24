@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {toTitle} from "hurdak"
+  import {toTitle} from "src/util/misc"
 
   export let tabs: string[]
   export let activeTab

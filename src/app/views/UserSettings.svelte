@@ -11,9 +11,8 @@
   import Heading from "src/partials/Heading.svelte"
   import {env, userSettings, publishSettings} from "src/engine"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {fuzzy} from "src/util/misc"
+  import {fuzzy, pluralize} from "src/util/misc"
   import Select from "src/partials/Select.svelte"
-  import {pluralize} from "hurdak"
 
   const values = {...$userSettings}
 

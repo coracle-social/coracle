@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {toTitle} from "hurdak"
   import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {toTitle} from "src/util/misc"
 
   export let topic
 

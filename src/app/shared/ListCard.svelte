@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {quantify} from "hurdak"
   import {first} from "@welshman/lib"
   import {getTags, toNostrURI, Address} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
@@ -13,6 +12,7 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readUserList, displayUserList, mapListToFeed} from "src/domain"
   import {router} from "src/app/util"
+  import {quantify} from "src/util/misc"
 
   export let address
   export let inert = false

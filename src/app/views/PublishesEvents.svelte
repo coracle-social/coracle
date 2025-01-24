@@ -4,9 +4,9 @@
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {derived} from "svelte/store"
-  import {pluralize} from "hurdak"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
+  import {pluralize} from "src/util/misc"
 
   $: recent = (Object.values($thunks) as Thunk[]).filter(
     t => t.event.created_at > now() - 24 * HOUR,

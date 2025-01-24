@@ -10,9 +10,8 @@
     userRelaySelections,
     userInboxRelaySelections,
   } from "@welshman/app"
-  import {quantify} from "hurdak"
   import {derived} from "svelte/store"
-  import {displayUrl} from "src/util/misc"
+  import {displayUrl, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"

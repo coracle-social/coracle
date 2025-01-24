@@ -17,8 +17,8 @@ import {
   MINUTE,
   HOUR,
   DAY,
+  round,
 } from "@welshman/lib"
-import {round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
@@ -176,6 +176,32 @@ export const formatSats = (sats: number) => {
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
 }
+
+const toSnake = (x: string) =>
+  x
+    .replace(/[-_ ]+/g, "_")
+    .replace(/([^_])_*([A-Z][a-z]+)/g, "$1_$2")
+    .replace(/\.([A-Z])/g, "_$1")
+    .toLowerCase()
+
+export const toTitle = (x: string) =>
+  toSnake(x)
+    .split("_")
+    .map(([a, ...w]) => [(a || "").toUpperCase(), ...w].join(""))
+    .join(" ")
+
+export const commaFormat = (x: string | number) =>
+  String(x)
+    .split("")
+    .reverse()
+    .reduce((acc, n, i) => n + (i && !(i % 3) ? "," : "") + acc)
+    .replace("-,", "-")
+
+export const pluralize = (n: number, label: string, pluralLabel?: string) =>
+  n === 1 ? label : pluralLabel || `${label}s`
+
+export const quantify = (n: number, label: string, pluralLabel?: string) =>
+  `${commaFormat(n)} ${pluralize(n, label, pluralLabel)}`
 
 export const race = (threshold, promises) => {
   let count = 0

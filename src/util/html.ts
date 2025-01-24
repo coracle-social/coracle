@@ -1,5 +1,3 @@
-import {bytes} from "hurdak"
-
 export const copyToClipboard = text => {
   const {activeElement} = document
   const input = document.createElement("textarea")
@@ -33,7 +31,7 @@ export const stripExifData = async (file, {maxWidth = null, maxHeight = null} = 
     new Compressor(file, {
       maxWidth: maxWidth || 2048,
       maxHeight: maxHeight || 2048,
-      convertSize: bytes(10, "mb"),
+      convertSize: 10 * 1024 * 1024,
       success: resolve,
       error: e => {
         // Non-images break compressor

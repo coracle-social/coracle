@@ -8,11 +8,10 @@
     displayProfileByPubkey,
     inboxRelaySelectionsByPubkey,
   } from "@welshman/app"
-  import {pluralize} from "hurdak"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
-  import {createScroller, displayList} from "src/util/misc"
+  import {createScroller, displayList, pluralize} from "src/util/misc"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

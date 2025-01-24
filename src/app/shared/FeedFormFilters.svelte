@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {toTitle} from "hurdak"
   import {
     getFeedArgs,
     isGlobalFeed,
@@ -19,7 +18,7 @@
     makeListFeed,
     makeDVMFeed,
   } from "@welshman/feeds"
-  import {toSpliced} from "src/util/misc"
+  import {toSpliced, toTitle} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
