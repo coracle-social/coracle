@@ -10,6 +10,12 @@
   let grid: HTMLElement
 
   $: columns = Math.ceil(Math.sqrt(images.length))
+
+  function getSpan(i: number) {
+    // how many slots are left in the row
+    const slots = columns - (i % columns)
+    return slots
+  }
 </script>
 
 <div
@@ -26,10 +32,17 @@
     <i class="fas fa-times"></i>
   </button>
   {#each images as image, i}
-    <img
-      class="h-full max-h-96 w-full object-cover"
-      on:click={() => (zoomed = i)}
-      src={imgproxy(image.value?.url?.toString())} />
+    {#if i === images.length - 1}
+      <img
+        class={cx("col-span-" + getSpan(i), "h-full max-h-96 w-full object-cover")}
+        on:click={() => (zoomed = i)}
+        src={imgproxy(image.value?.url?.toString())} />
+    {:else}
+      <img
+        class="h-full max-h-96 w-full object-cover"
+        on:click={() => (zoomed = i)}
+        src={imgproxy(image.value?.url?.toString())} />
+    {/if}
   {/each}
 </div>
 
