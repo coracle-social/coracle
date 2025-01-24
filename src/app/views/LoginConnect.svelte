@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {sleep} from "hurdak"
   import {
     RELAYS,
     FOLLOWS,
@@ -21,6 +20,7 @@
   import {router} from "src/app/util/router"
   import {env, load} from "src/engine"
   import {loadUserData} from "src/app/state"
+  import {sleep} from "@welshman/lib"
 
   const t = Date.now()
 

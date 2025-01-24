@@ -2,11 +2,11 @@
   import {relaysByUrl} from "@welshman/app"
   import {addToMapKey, ctx} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
-  import {quantify} from "hurdak"
   import {onMount} from "svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {ConnectionType, displayConnectionType, getConnectionStatus} from "src/domain/connection"
+  import {quantify} from "src/util/misc"
 
   export let selected: string
   export let activeTab: string

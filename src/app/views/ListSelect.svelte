@@ -2,7 +2,6 @@
   import {first} from "@welshman/lib"
   import {getAddress, getTags} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
-  import {quantify} from "hurdak"
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -10,6 +9,7 @@
   import {router} from "src/app/util/router"
   import {userLists} from "src/engine"
   import {displayUserList} from "src/domain"
+  import {quantify} from "src/util/misc"
 
   export let type
   export let value

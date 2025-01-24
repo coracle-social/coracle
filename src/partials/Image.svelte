@@ -19,8 +19,8 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ensurePlural} from "hurdak"
   import {imgproxy} from "src/engine"
+  import {ensurePlural} from "@welshman/lib"
 
   export let src
 

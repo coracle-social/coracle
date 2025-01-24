@@ -52,6 +52,7 @@ import {
   prop,
   sortBy,
   max,
+  HOUR,
 } from "@welshman/lib"
 import type {Connection, PublishRequest, Target} from "@welshman/net"
 import {
@@ -101,7 +102,6 @@ import {
   getReplyTagValues,
 } from "@welshman/util"
 import Fuse from "fuse.js"
-import {doPipe, seconds} from "hurdak"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -538,11 +538,10 @@ export class FeedSearch extends SearchHelper<PublishedFeed, string> {
         return sortBy(item => -item.score, options).map(item => item.feed)
       }
 
-      return doPipe(fuse.search(term), [
-        results =>
-          sortBy((r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100), results),
-        results => results.map((r: any) => r.item.feed),
-      ])
+      return sortBy(
+        (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100),
+        fuse.search(term),
+      ).map((r: any) => r.item.feed)
     }
   }
 
@@ -750,7 +749,7 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
 let ready: Promise<any> = Promise.resolve()
 
 const migrateFreshness = (data: {key: string; value: number}[]) => {
-  const cutoff = now() - seconds(1, "hour")
+  const cutoff = now() - HOUR
 
   return data.filter(({value}) => value > cutoff)
 }

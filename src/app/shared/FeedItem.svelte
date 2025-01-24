@@ -4,7 +4,6 @@
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getReplyFilters, isChildOf, NOTE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {quantify} from "hurdak"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
@@ -15,6 +14,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import {fly, slide} from "src/util/transition"
   import {openReplies} from "src/app/state"
+  import {quantify} from "src/util/misc"
 
   export let note
   export let relays = []

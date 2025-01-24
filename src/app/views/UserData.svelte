@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {commaFormat} from "hurdak"
   import {onMount} from "svelte"
   import {ctx} from "@welshman/lib"
   import {repository} from "@welshman/app"
-  import {createScroller, formatTimestamp} from "src/util/misc"
+  import {commaFormat, createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"

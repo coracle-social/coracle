@@ -8,14 +8,13 @@
     displayProfileByPubkey,
     inboxRelaySelectionsByPubkey,
   } from "@welshman/app"
-  import {pluralize} from "hurdak"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {hasNip44} from "src/engine"
-  import {displayList} from "src/util/misc"
+  import {displayList, pluralize} from "src/util/misc"
 
   let value = []
 

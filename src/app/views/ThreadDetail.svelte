@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
-  import {quantify} from "hurdak"
   import {identity, sortBy, uniqBy, ctx} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -15,6 +14,7 @@
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import {deriveEvent} from "src/engine"
+  import {quantify} from "src/util/misc"
 
   export let id = null
   export let address = null

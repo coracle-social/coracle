@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {quantify, pluralize} from "hurdak"
   import {
     isScopeFeed,
     isRelayFeed,
@@ -18,7 +17,7 @@
   } from "@welshman/feeds"
   import {displayRelayUrl} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
-  import {displayList, formatTimestampAsDate} from "src/util/misc"
+  import {displayList, formatTimestampAsDate, pluralize, quantify} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
 
   export let feed

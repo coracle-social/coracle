@@ -3,7 +3,7 @@
   // @ts-nocheck
 
   import cx from "classnames"
-  import {randomId} from "hurdak"
+  import {randomId} from "@welshman/lib"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {fly, fade} from "src/util/transition"

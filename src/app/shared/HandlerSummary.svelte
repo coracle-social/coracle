@@ -1,11 +1,11 @@
 <script lang="ts">
   import {uniq, pluck} from "@welshman/lib"
-  import {pluralize} from "hurdak"
   import {getAddress} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
   import {recommendationsByHandlerAddress} from "src/engine"
+  import {pluralize} from "src/util/misc"
 
   export let handler
 

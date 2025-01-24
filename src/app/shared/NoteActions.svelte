@@ -38,8 +38,7 @@
     isChildOf,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
-  import {formatSats, timestamp1} from "src/util/misc"
-  import {quantify, pluralize} from "hurdak"
+  import {formatSats, pluralize, quantify, timestamp1} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {switcherFn} from "hurdak"
-  import {ctx} from "@welshman/lib"
+  import {ctx, switcher} from "@welshman/lib"
   import {getTag, displayRelayUrl} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
@@ -18,18 +17,18 @@
     const [type, value] = tag
     const relays = ctx.app.router.Event(note).getUrls()
 
-    href = switcherFn(type, {
-      r: () => router.at("relays").of(value).toString(),
-      p: () => router.at("people").of(value, {relays}).toString(),
-      e: () => router.at("notes").of(value, {relays}).toString(),
-      default: () => null,
+    href = switcher(type, {
+      r: router.at("relays").of(value).toString(),
+      p: router.at("people").of(value, {relays}).toString(),
+      e: router.at("notes").of(value, {relays}).toString(),
+      default: null,
     })
 
-    display = switcherFn(type, {
-      r: () => displayRelayUrl(value),
-      p: () => displayProfileByPubkey(value),
-      e: () => "a note",
-      default: () => null,
+    display = switcher(type, {
+      r: displayRelayUrl(value),
+      p: displayProfileByPubkey(value),
+      e: "a note",
+      default: null,
     })
   }
 </script>

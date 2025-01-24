@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {quantify} from "hurdak"
   import {ctx, fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
   import {relaySearch, profileSearch, tagPubkey} from "@welshman/app"
@@ -12,6 +11,7 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {createPeopleLoader, createAndPublish, setOutboxPolicies} from "src/engine"
+  import {quantify} from "src/util/misc"
 
   export let state
   export let setStage

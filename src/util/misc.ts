@@ -10,8 +10,16 @@ import {
   identity,
   throttle,
   pluck,
+  tryCatch,
+  ensurePlural,
+  getJson,
+  setJson,
+  MINUTE,
+  HOUR,
+  DAY,
+  round,
+  int,
 } from "@welshman/lib"
-import {Storage, ensurePlural, seconds, tryFunc, round} from "hurdak"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
@@ -54,17 +62,17 @@ export const formatTimestampAsDate = (ts: number) => {
 export const formatTimestampRelative = (ts: number) => {
   let unit
   let delta = now() - ts
-  if (delta < seconds(1, "minute")) {
+  if (delta < MINUTE) {
     unit = "second"
-  } else if (delta < seconds(1, "hour")) {
+  } else if (delta < HOUR) {
     unit = "minute"
-    delta = Math.round(delta / seconds(1, "minute"))
-  } else if (delta < seconds(2, "day")) {
+    delta = Math.round(delta / MINUTE)
+  } else if (delta < int(2, DAY)) {
     unit = "hour"
-    delta = Math.round(delta / seconds(1, "hour"))
+    delta = Math.round(delta / HOUR)
   } else {
     unit = "day"
-    delta = Math.round(delta / seconds(1, "day"))
+    delta = Math.round(delta / DAY)
   }
 
   const locale = new Intl.RelativeTimeFormat().resolvedOptions().locale
@@ -155,7 +163,7 @@ export const parseJson = (json: string) => {
 }
 
 export const tryFetch = <T>(f: () => T) =>
-  tryFunc(f, (e: Error) => {
+  tryCatch(f, (e: Error) => {
     if (!e.toString().includes("fetch")) {
       logger.warn(e)
     }
@@ -169,6 +177,32 @@ export const formatSats = (sats: number) => {
   if (sats < 100_000_000) return numberFmt.format(round(1, sats / 1_000_000)) + "MM"
   return numberFmt.format(round(2, sats / 100_000_000)) + "BTC"
 }
+
+const toSnake = (x: string) =>
+  x
+    .replace(/[-_ ]+/g, "_")
+    .replace(/([^_])_*([A-Z][a-z]+)/g, "$1_$2")
+    .replace(/\.([A-Z])/g, "_$1")
+    .toLowerCase()
+
+export const toTitle = (x: string) =>
+  toSnake(x)
+    .split("_")
+    .map(([a, ...w]) => [(a || "").toUpperCase(), ...w].join(""))
+    .join(" ")
+
+export const commaFormat = (x: string | number) =>
+  String(x)
+    .split("")
+    .reverse()
+    .reduce((acc, n, i) => n + (i && !(i % 3) ? "," : "") + acc)
+    .replace("-,", "-")
+
+export const pluralize = (n: number, label: string, pluralLabel?: string) =>
+  n === 1 ? label : pluralLabel || `${label}s`
+
+export const quantify = (n: number, label: string, pluralLabel?: string) =>
+  `${commaFormat(n)} ${pluralize(n, label, pluralLabel)}`
 
 export const race = (threshold, promises) => {
   let count = 0
@@ -314,10 +348,10 @@ export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") =
 // Local storage
 
 export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
-  const init = Storage.getJson(key)
+  const init = getJson(key)
   const store = writable<T>(init === null ? defaultValue : init)
 
-  store.subscribe(throttle(delay, ($value: T) => Storage.setJson(key, $value)))
+  store.subscribe(throttle(delay, ($value: T) => setJson(key, $value)))
 
   return store
 }

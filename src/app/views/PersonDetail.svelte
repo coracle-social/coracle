@@ -33,7 +33,7 @@
     pinsByPubkey,
   } from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
-  import {ensureProto} from "src/util/misc"
+  import {ensureProto, toTitle} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
   import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
@@ -57,7 +57,6 @@
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {toTitle} from "hurdak"
   import WotScore from "src/partials/WotScore.svelte"
   import FeedItem from "../shared/FeedItem.svelte"
   import {fly} from "svelte/transition"
