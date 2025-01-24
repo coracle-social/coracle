@@ -32,9 +32,9 @@
     <i class="fas fa-times"></i>
   </button>
   {#each images as image, i}
-    {#if i === images.length - 1}
+    {#if i === 0}
       <img
-        class={cx("col-span-" + getSpan(i), "h-full max-h-96 w-full object-cover")}
+        class={cx("col-span-" + getSpan(images.length - 1), "h-full max-h-96 w-full object-cover")}
         on:click={() => (zoomed = i)}
         src={imgproxy(image.value?.url?.toString())} />
     {:else}
