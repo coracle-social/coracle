@@ -6,7 +6,11 @@ If you would like to be interoperable with Flotilla, please check out this draft
 
 # Deploy
 
-To run your own Flotilla, it's as simple as `npm run build`, then serve the `build` directory.
+To run your own Flotilla, it's as simple as:
+
+- `npm install`
+- `npm run build`
+- `npx serve build`
 
 ## Environment
 
