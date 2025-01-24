@@ -68,7 +68,7 @@
         <strong>Proof Of Work</strong>
         <div>difficulty {values.pow_difficulty}</div>
       </div>
-      <Input type="range" step="4" bind:value={values.pow_difficulty} min={0} max={32}></Input>
+      <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32}></Input>
       <p slot="info">Add a proof-of-work stamp to your notes to avoid being marked as spam..</p>
     </Field>
     <Field>

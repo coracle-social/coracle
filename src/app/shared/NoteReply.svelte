@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx, without, uniq} from "@welshman/lib"
+  import {ctx, without, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {
     session,
@@ -7,6 +7,7 @@
     tagEventForReply,
     tagEventForComment,
   } from "@welshman/app"
+  import {own} from "@welshman/signer"
   import {writable} from "svelte/store"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
@@ -17,7 +18,7 @@
   import {drafts, openReplies} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
   import {getEditor} from "src/app/editor"
-  import {powEvent} from "src/util/pow"
+  import {addPoWStamp} from "src/util/pow"
 
   export let parent
   export let showBorder = false
@@ -34,7 +35,7 @@
   )
 
   let loading
-  let options = {warning: "", anonymous: false, pow_difficulty: $userSettings.pow_difficulty || 0}
+  let options = {warning: "", anonymous: false, pow_difficulty: $userSettings.pow_difficulty}
   let element: HTMLElement
   let editor: ReturnType<typeof getEditor>
 
@@ -92,11 +93,13 @@
 
     loading = true
 
-    const template = createEvent(kind, {content, tags})
-    let event = await sign(template, options)
-    if ($userSettings.pow_difficulty || options.pow_difficulty) {
-      event = await powEvent(event, $userSettings.pow_difficulty || options.pow_difficulty)
+    let ownedEvent = own(createEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
+
+    if (options.pow_difficulty) {
+      ownedEvent = await addPoWStamp(ownedEvent, options.pow_difficulty)
     }
+
+    let event = await sign(ownedEvent, options)
 
     const thunk = publish({
       event,

@@ -1,34 +1,52 @@
-import {getEventHash} from "nostr-tools"
-import type {SignedEvent} from "@welshman/util"
-import {} from "nostr-tools"
+import {createSHA256} from "hash-wasm"
+import {bytesToHex} from "@noble/curves/abstract/utils"
 
-type In = {
-  event: SignedEvent
-  difficulty: number
+self.onmessage = async function (ev: MessageEvent) {
+  const {event, difficulty, start = 0, step = 1} = ev.data
+
+  let count = start
+  let i = 0
+
+  const tag = ["nonce", count.toString(), difficulty.toString()]
+
+  event.tags.push(tag)
+
+  const hasher = await createSHA256()
+
+  while (true) {
+    i++
+    count += step
+    tag[1] = count.toString()
+
+    hasher.init()
+    hasher.update(
+      JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]),
+    )
+
+    const id = hasher.digest("binary")
+    const pow = getPow(id)
+
+    if (pow >= difficulty) {
+      event.id = bytesToHex(id)
+      break
+    }
+  }
+
+  postMessage(event)
 }
 
-export type PoWEvent = SignedEvent & {
-  nonce: number
-  hash: string
-}
+export function getPow(id: Uint8Array): number {
+  let count = 0
 
-self.onmessage = (event: MessageEvent<In>) => {
-  // Perform some computation
-  const result = generatePoW(event.data.event, event.data.difficulty)
-  self.postMessage(result)
-}
+  for (let i = 0; i < 32; i++) {
+    const nibble = id[i]
+    if (nibble === 0) {
+      count += 8
+    } else {
+      count += Math.clz32(nibble) - 24
+      break
+    }
+  }
 
-export const generatePoW = (event: SignedEvent, difficulty: number) => {
-  let nonce = 0
-  let hash
-  const target = "0".repeat(Math.ceil(difficulty / 4)) // Hex leading zero target
-  // add the nonce tag to the event
-  event.tags.push(["nonce", "0", difficulty.toString()])
-  do {
-    hash = getEventHash(event)
-    nonce++
-    event.tags[event.tags.length - 1][1] = nonce.toString()
-  } while (!hash.startsWith(target))
-
-  return {...event, id: hash}
+  return count
 }

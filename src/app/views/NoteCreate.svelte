@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {ctx, last, type Emitter} from "@welshman/lib"
-  import {now} from "@welshman/signer"
+  import {now, own} from "@welshman/signer"
   import {
     createEvent,
     toNostrURI,
@@ -34,7 +34,7 @@
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
   import {warn} from "src/util/logger"
-  import {powEvent} from "src/util/pow"
+  import {addPoWStamp} from "src/util/pow"
 
   export let quote = null
   export let pubkey = null
@@ -53,7 +53,7 @@
     warning: "",
     anonymous: false,
     publish_at: null,
-    pow_difficulty: $userSettings.pow_difficulty || 0,
+    pow_difficulty: $userSettings.pow_difficulty,
   }
 
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
@@ -97,23 +97,26 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const template = createEvent(1, {
-      content,
-      tags,
-      created_at:
-        (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
-    })
+    let ownedEvent = own(
+      createEvent(1, {
+        content,
+        tags,
+        created_at:
+          (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
+      }),
+      $session.pubkey,
+    )
 
     drafts.set("notecreate", $editor.getHTML())
 
+    if (options.pow_difficulty) {
+      publishing = "pow"
+      ownedEvent = await addPoWStamp(ownedEvent, options.pow_difficulty)
+    }
+
     publishing = "signing"
 
-    let event = await sign(template, options)
-
-    if ($userSettings.pow_difficulty || options.pow_difficulty) {
-      publishing = "pow"
-      event = await powEvent(event, $userSettings.pow_difficulty || options.pow_difficulty)
-    }
+    const event = await sign(ownedEvent, options)
 
     let thunk: Thunk, emitter: Emitter
 
@@ -121,7 +124,6 @@
     router.clearModals()
 
     if (options.publish_at) {
-      // take the first DVM Handler found
       const dvmContent = await $signer.nip04.encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
@@ -286,7 +288,7 @@
           tag="button"
           type="submit"
           class="flex-grow"
-          disabled={$uploading || !!publishing}>
+          disabled={$uploading || Boolean(publishing)}>
           {#if $uploading || !!publishing}
             {#if publishing === "signing"}
               <i class="fa fa-circle-notch fa-spin" /> Signing your note...
