@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {now, omit} from "@welshman/lib"
+  import {now, omit, MINUTE} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -27,7 +27,7 @@
   const {page} = router
 
   $: recent = (Object.values($thunks) as Thunk[]).filter(
-    t => t.event.created_at > now() - seconds(5, "minute") && t.event.pubkey === $pubkey,
+    t => t.event.created_at > now() - 5 * MINUTE && t.event.pubkey === $pubkey,
   )
 
   $: hud = derived(
