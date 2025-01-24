@@ -25,5 +25,7 @@
     <NoteContentLink value={{url: getTagValue("url", item)}} {showMedia} />
   {/each}
 {/if}
-<div class="h-2" />
-<NoteContentKind1 {note} {showEntire} />
+{#if note.content}
+  <div class="h-2" />
+  <NoteContentKind1 {note} {showEntire} />
+{/if}
