@@ -103,6 +103,7 @@ import {
   getTag,
 } from "@welshman/util"
 import Fuse from "fuse.js"
+import {getPow} from "nostr-tools/nip13"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   CollectionSearch,
@@ -376,7 +377,7 @@ export const isEventMuted = withGetter(
         const wotScore = getUserWotScore(e.pubkey)
         const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
 
-        const isValidPow = e.id.startsWith("0".repeat(Math.ceil(powDifficulty / 4)))
+        const isValidPow = getPow(e.id) >= powDifficulty
 
         return wotScore < minWot && (powDifficulty < minPow || !isValidPow)
       }

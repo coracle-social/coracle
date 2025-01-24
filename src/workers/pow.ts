@@ -33,7 +33,7 @@ self.onmessage = async function (ev: MessageEvent) {
   postMessage(event)
 }
 
-export function getPow(id: Uint8Array): number {
+function getPow(id: Uint8Array): number {
   let count = 0
 
   for (let i = 0; i < 32; i++) {
