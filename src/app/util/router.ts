@@ -137,11 +137,7 @@ router.extend("notes", (id, {relays = []} = {}) => {
     return Address.from(id, relays).toNaddr()
   }
 
-  if (relays.length > 0) {
-    return nip19.neventEncode({id, relays})
-  }
-
-  return nip19.noteEncode(id)
+  return nip19.neventEncode({id, relays})
 })
 
 router.extend("people", (pubkey, {relays = []} = {}) => {

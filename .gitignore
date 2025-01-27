@@ -38,3 +38,4 @@ public/images/maskable-icon-512x512.png
 public/images/pwa-*
 android/app/release/*
 icons/*
+.aider*
