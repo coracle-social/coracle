@@ -70,7 +70,7 @@
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://coracle.tools">
+          <Anchor external href="https://info.coracle.social">
             <i class="fa fa-earth-americas" />
           </Anchor>
         </div>
