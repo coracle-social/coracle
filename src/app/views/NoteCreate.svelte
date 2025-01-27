@@ -195,7 +195,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = ctx.app.router.FromPubkeys([pubkey]).getUrls()
+      const relays = ctx.app.router.FromPubkeys([pubkey]).limit(3).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return toNostrURI(nprofile)
@@ -226,7 +226,7 @@
         id: quote.id,
         kind: quote.kind,
         author: quote.pubkey,
-        relays: ctx.app.router.Event(quote).getUrls(),
+        relays: ctx.app.router.Event(quote).limit(3).getUrls(),
       })
 
       $editor.commands.insertNEvent({nevent: toNostrURI(nevent)})

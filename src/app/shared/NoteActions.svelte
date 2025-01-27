@@ -84,7 +84,7 @@
     id: event.id,
     kind: event.kind,
     author: event.pubkey,
-    relays: ctx.app.router.Event(event).getUrls(),
+    relays: ctx.app.router.Event(event).limit(3).getUrls(),
   })
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)

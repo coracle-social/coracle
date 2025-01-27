@@ -26,21 +26,19 @@
 {/if}
 
 <NoteReducer {events} depth={1} bind:items let:event let:getContext>
-  <div>
-    <div class="flex items-center justify-between">
-      {#if getContext(event).length === 0}
-        <PeopleAction pubkeys={[event.pubkey]} actionText="mentioned you" />
-      {:else if event.pubkey === $pubkey}
-        <PeopleAction
-          pubkeys={uniq(pluck("pubkey", getContext(event)))}
-          actionText="{verb} to your note" />
-      {:else}
-        <PeopleAction
-          pubkeys={uniq(pluck("pubkey", getContext(event)))}
-          actionText="{verb} to a note mentioning you" />
-      {/if}
-      <small>{formatTimestamp(max(pluck("created_at", [event, ...getContext(event)])))}</small>
-    </div>
-    <FeedItem topLevel showLoading note={event} {depth} {getContext} />
+  <div class="flex items-center justify-between">
+    {#if getContext(event).length === 0}
+      <PeopleAction pubkeys={[event.pubkey]} actionText="mentioned you" />
+    {:else if event.pubkey === $pubkey}
+      <PeopleAction
+        pubkeys={uniq(pluck("pubkey", getContext(event)))}
+        actionText="{verb} to your note" />
+    {:else}
+      <PeopleAction
+        pubkeys={uniq(pluck("pubkey", getContext(event)))}
+        actionText="{verb} to a note mentioning you" />
+    {/if}
+    <small>{formatTimestamp(max(pluck("created_at", [event, ...getContext(event)])))}</small>
   </div>
+  <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>
