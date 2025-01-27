@@ -1,6 +1,6 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
-  import {ctx, now, sortBy, tryCatch, fetchJson} from "@welshman/lib"
+  import {ctx, partition, now, sortBy, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, profilesByPubkey, displayProfileByPubkey, zappersByLnurl} from "@welshman/app"
@@ -104,16 +104,16 @@
     // Close the router once we can show the next modal
     router.pop()
 
-    for (const {invoice, error, relays, zapper, pubkey} of preppedZaps) {
-      if (!invoice) {
-        const profileDisplay = displayProfileByPubkey(pubkey)
-        const message = error || "no error given"
+    const [ok, missingInvoice] = partition(z => z.invoice, preppedZaps)
 
-        alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
+    for (const {pubkey, error} of missingInvoice) {
+      const profileDisplay = displayProfileByPubkey(pubkey)
+      const message = error || "no error given"
 
-        continue
-      }
+      alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
+    }
 
+    for (const {invoice, error, relays, zapper, pubkey} of ok) {
       launchPaymentModal({invoice})
 
       await new Promise<void>(resolve => {
