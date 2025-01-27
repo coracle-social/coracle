@@ -130,7 +130,7 @@ export const makeDvmRequest = (request: DVMRequestOptions & {delay?: number}) =>
   const sub = subscribe({relays, timeout, filters})
   const thunk = publish({event, relays, timeout, delay: request.delay})
 
-  sub.emitter.on(SubscriptionEvent.Event, (url: string, event: TrustedEvent) => {
+  sub.on(SubscriptionEvent.Event, (url: string, event: TrustedEvent) => {
     if (event.kind === 7000) {
       emitter.emit(DVMEvent.Progress, url, event)
     } else {

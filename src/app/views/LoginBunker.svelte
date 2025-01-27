@@ -28,7 +28,7 @@
     loading = true
 
     try {
-      const {signerPubkey, connectSecret, relays} = broker.parseBunkerUrl(input)
+      const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(input)
 
       if (!isKeyValid(signerPubkey)) {
         return showWarning("Sorry, but that's an invalid public key.")

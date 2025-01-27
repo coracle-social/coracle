@@ -218,7 +218,7 @@
     })
 
     if (pubkey && pubkey !== $session.pubkey) {
-      $editor.commands.insertNProfile({nprofile: pubkeyEncoder.encode(pubkey)})
+      $editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
     }
 
     if (quote) {
@@ -229,7 +229,7 @@
         relays: ctx.app.router.Event(quote).limit(3).getUrls(),
       })
 
-      $editor.commands.insertNEvent({nevent: toNostrURI(nevent)})
+      $editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
     }
   })
 </script>

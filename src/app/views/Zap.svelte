@@ -113,7 +113,7 @@
       alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
     }
 
-    for (const {invoice, error, relays, zapper, pubkey} of ok) {
+    for (const {invoice, relays, zapper, pubkey} of ok) {
       launchPaymentModal({invoice})
 
       await new Promise<void>(resolve => {
