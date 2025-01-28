@@ -1,5 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
+  import {fade} from "svelte/transition"
   import type {ParsedLinkValue} from "@welshman/content"
   import Carousel from "src/app/shared/Carousel.svelte"
   import Image from "src/partials/Image.svelte"
@@ -28,7 +29,7 @@
   )}>
   <button
     class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
-         rounded-full border border-solid border-neutral-600 bg-white text-black opacity-50 shadow"
+         rounded-full border border-solid border-neutral-600 bg-white text-black shadow"
     on:click|stopPropagation={() => (grid.style.display = "none")}>
     <i class="fas fa-times"></i>
   </button>
@@ -49,7 +50,8 @@
 
 {#if zoomed !== undefined}
   <div
-    class="fixed left-0 top-0 z-zoom h-full w-full bg-black bg-opacity-80"
+    class="z-zoom fixed left-0 top-0 h-full w-full bg-black"
+    transition:fade
     on:scroll|preventDefault|stopPropagation
     on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
     <Carousel
