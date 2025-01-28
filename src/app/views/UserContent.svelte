@@ -84,7 +84,7 @@
       </div>
       <Input type="range" bind:value={values.min_pow_difficulty} step="4" min={0} max={32} />
       <p slot="info">
-        Select a minimum proof-of-work difficulty. Notes with a lower Web Of Trust and PoW difficulty will be hidden.
+        Select a minimum proof-of-work difficulty for notes from people outside your network. If a note fails to meet both your minimum web of trust score and minimum proof-of-work difficulty, it will be hidden.
       </p>
     </Field>
     <Field label="Muted accounts">
