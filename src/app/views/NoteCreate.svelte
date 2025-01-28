@@ -34,7 +34,9 @@
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
   import {warn} from "src/util/logger"
+  import PoWWorker from "src/workers/pow?worker"
   import {addPoWStamp} from "src/util/pow"
+  import {commaFormat} from "src/util/misc"
 
   export let quote = null
   export let pubkey = null
@@ -46,6 +48,8 @@
   let showPreview = false
   let showOptions = false
   let publishing: "signing" | "pow"
+
+  let powWorker: Worker
 
   let editor: ReturnType<typeof getEditor>
   let element: HTMLElement
@@ -111,7 +115,9 @@
 
     if (options.pow_difficulty) {
       publishing = "pow"
-      ownedEvent = await addPoWStamp(ownedEvent, options.pow_difficulty)
+      if (powWorker) powWorker.terminate()
+      powWorker = new PoWWorker()
+      ownedEvent = await addPoWStamp(powWorker, ownedEvent, options.pow_difficulty)
     }
 
     publishing = "signing"
@@ -241,6 +247,12 @@
       })
 
       $editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
+    }
+
+    return () => {
+      if (powWorker) {
+        powWorker.terminate()
+      }
     }
   })
 </script>

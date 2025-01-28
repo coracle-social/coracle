@@ -19,12 +19,15 @@
   import {getClientTags, publish, sign, userSettings} from "src/engine"
   import {getEditor} from "src/app/editor"
   import {addPoWStamp} from "src/util/pow"
+  import PoWWorker from "src/workers/pow?worker"
+  import {onMount} from "svelte"
 
   export let parent
   export let showBorder = false
   export let forceOpen = false
 
   let showOptions = false
+  let powWorker: Worker
 
   const nsecWarning = writable(null)
   const editorLoading = writable(false)
@@ -96,7 +99,9 @@
     let ownedEvent = own(createEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
 
     if (options.pow_difficulty) {
-      ownedEvent = await addPoWStamp(ownedEvent, options.pow_difficulty)
+      if (powWorker) powWorker.terminate()
+      powWorker = new PoWWorker()
+      ownedEvent = await addPoWStamp(powWorker, ownedEvent, options.pow_difficulty)
     }
 
     const event = await sign(ownedEvent, options)
@@ -114,6 +119,12 @@
       clearDraft()
     })
   }
+
+  onMount(() => {
+    return () => {
+      if (powWorker) powWorker.terminate()
+    }
+  })
 
   const onBodyClick = e => {
     saveDraft()
