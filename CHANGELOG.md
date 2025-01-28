@@ -3,6 +3,7 @@
 # 0.2.6
 
 * Add reply to long-press menu
+* Fix @-mentions
 
 # 0.2.5
 
