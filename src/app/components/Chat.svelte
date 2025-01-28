@@ -10,19 +10,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import type {Readable} from "svelte/store"
-  import type {Editor} from "svelte-tiptap"
-  import {nip19} from "nostr-tools"
-  import {int, nthNe, MINUTE, sortBy, remove, ctx} from "@welshman/lib"
+  import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
-  import {
-    pubkey,
-    formatTimestampAsDate,
-    inboxRelaySelectionsByPubkey,
-    load,
-    tagPubkey,
-  } from "@welshman/app"
+  import {pubkey, formatTimestampAsDate, inboxRelaySelectionsByPubkey, load} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -36,9 +27,10 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
+  import ChatComposeParent from "@app/components/ChannelComposeParent.svelte"
   import {userSettingValues, deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
-  import {sendWrapped} from "@app/commands"
+  import {sendWrapped, prependParent} from "@app/commands"
 
   export let id
 
@@ -57,28 +49,31 @@
     pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
   const replyTo = (event: TrustedEvent) => {
-    const relays = ctx.app.router.Event(event).getUrls()
-    const bech32 = nip19.neventEncode({...event, relays})
-
-    $editor.commands.insertNEvent({bech32})
-    $editor.commands.insertContent("\n")
-    $editor.commands.focus()
+    parent = event
+    compose.focus()
   }
 
-  const onSubmit = async ({content, ...params}: EventContent) => {
-    // Remove p tags since they result in forking the conversation
-    const tags = [...params.tags.filter(nthNe(0, "p")), ...remove($pubkey!, pubkeys).map(tagPubkey)]
+  const clearParent = () => {
+    parent = undefined
+  }
 
+  const onSubmit = async ({content, tags}: EventContent) => {
     await sendWrapped({
       pubkeys,
-      template: createEvent(DIRECT_MESSAGE, {content, tags}),
+      template: createEvent(
+        DIRECT_MESSAGE,
+        prependParent(parent, {content, tags: tags.filter(nthNe(0, "p"))}),
+      ),
       delay: $userSettingValues.send_delay,
     })
+
+    clearParent()
   }
 
   let loading = true
-  let editor: Readable<Editor>
+  let parent: TrustedEvent | undefined
   let elements: Element[] = []
+  let compose: ChatCompose
 
   $: {
     elements = []
@@ -200,5 +195,8 @@
       <slot name="info" />
     </p>
   </div>
-  <ChatCompose bind:editor {onSubmit} />
+  {#if parent}
+    <ChatComposeParent event={parent} clear={clearParent} />
+  {/if}
+  <ChatCompose bind:this={compose} {onSubmit} />
 </div>

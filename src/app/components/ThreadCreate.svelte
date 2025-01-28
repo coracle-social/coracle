@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {writable} from "svelte/store"
+  import {EditorContent} from "svelte-tiptap"
   import {createEvent, THREAD} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {isMobile} from "@lib/html"
@@ -11,7 +11,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
-  import {getEditor} from "@app/editor"
+  import {makeEditor} from "@app/editor"
 
   export let url
 
@@ -53,13 +53,9 @@
     history.back()
   }
 
-  let title: string
-  let element: HTMLElement
-  let editor: ReturnType<typeof getEditor>
+  const editor = makeEditor({submit, uploading, placeholder: "What's on your mind?"})
 
-  onMount(() => {
-    editor = getEditor({submit, element, uploading, placeholder: "What's on your mind?"})
-  })
+  let title: string
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={submit}>
@@ -83,7 +79,7 @@
     <Field>
       <p slot="label">Message*</p>
       <div slot="input" class="note-editor flex-grow overflow-hidden">
-        <div bind:this={element} />
+        <EditorContent editor={$editor} />
       </div>
     </Field>
     <Button

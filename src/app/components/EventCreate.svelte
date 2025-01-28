@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {EditorContent} from "svelte-tiptap"
   import {writable} from "svelte/store"
   import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
@@ -11,7 +11,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import {PROTECTED} from "@app/state"
-  import {getEditor} from "@app/editor"
+  import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
   export let url
@@ -54,16 +54,12 @@
     history.back()
   }
 
-  let element: HTMLElement
-  let editor: ReturnType<typeof getEditor>
+  const editor = makeEditor({submit, uploading})
+
   let title = ""
   let location = ""
   let start: Date
   let end: Date
-
-  onMount(() => {
-    editor = getEditor({submit, element, uploading})
-  })
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={submit}>
@@ -83,7 +79,7 @@
       slot="input"
       class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
       <div class="input-editor flex-grow overflow-hidden">
-        <div bind:this={element} />
+        <EditorContent editor={$editor} />
       </div>
       <Button
         data-tip="Add an image"

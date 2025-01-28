@@ -93,7 +93,7 @@
         mediaLength: hideMedia ? 20 : 200,
       })
 
-  $: hasEllipsis = shortContent.find(isEllipsis)
+  $: hasEllipsis = shortContent.some(isEllipsis)
   $: expandInline = hasEllipsis && expandMode === "inline"
   $: expandBlock = hasEllipsis && expandMode === "block"
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {writable} from "svelte/store"
+  import {EditorContent} from "svelte-tiptap"
   import {isMobile} from "@lib/html"
   import {fly, slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -8,7 +8,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {publishComment} from "@app/commands"
   import {tagRoom, GENERAL, PROTECTED} from "@app/state"
-  import {getEditor} from "@app/editor"
+  import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
   export let url
@@ -34,12 +34,7 @@
     onSubmit(publishComment({event, content, tags, relays: [url]}))
   }
 
-  let editor: ReturnType<typeof getEditor>
-  let element: HTMLElement
-
-  onMount(() => {
-    editor = getEditor({element, submit, uploading, autofocus: !isMobile})
-  })
+  const editor = makeEditor({submit, uploading, autofocus: !isMobile})
 </script>
 
 <form
@@ -49,7 +44,7 @@
   class="card2 sticky bottom-2 z-feature mx-2 mt-4 bg-neutral">
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">
-      <div bind:this={element} />
+      <EditorContent editor={$editor} />
     </div>
     <Button
       data-tip="Add an image"

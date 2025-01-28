@@ -1,3 +1,4 @@
+import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
 import {ctx, sample, uniq, sleep, chunk, equals} from "@welshman/lib"
 import {
@@ -27,8 +28,9 @@ import {
   getRelayTags,
   isShareableRelayUrl,
   getRelayTagValues,
+  toNostrURI,
 } from "@welshman/util"
-import type {TrustedEvent, EventTemplate, List} from "@welshman/util"
+import type {TrustedEvent, EventContent, EventTemplate, List} from "@welshman/util"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
@@ -56,6 +58,7 @@ import {
   clearStorage,
   dropSession,
   tagEventForComment,
+  tagEventForQuote,
 } from "@welshman/app"
 import type {Thunk} from "@welshman/app"
 import {
@@ -94,6 +97,22 @@ export const getThunkError = async (thunk: Thunk) => {
   if (status !== PublishStatus.Success) {
     return message
   }
+}
+
+export const prependParent = (parent: TrustedEvent | undefined, {content, tags}: EventContent) => {
+  if (parent) {
+    const nevent = nip19.neventEncode({
+      id: parent.id,
+      kind: parent.kind,
+      author: parent.pubkey,
+      relays: ctx.app.router.Event(parent).limit(3).getUrls(),
+    })
+
+    tags = [...tags, tagEventForQuote(parent)]
+    content = toNostrURI(nevent) + "\n\n" + content
+  }
+
+  return {content, tags}
 }
 
 // Log in

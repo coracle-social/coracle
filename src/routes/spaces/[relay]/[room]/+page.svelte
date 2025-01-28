@@ -1,31 +1,22 @@
 <script lang="ts">
-  import * as nip19 from "nostr-tools/nip19"
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import type {Readable} from "svelte/store"
-  import {now, ctx} from "@welshman/lib"
+  import {now} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent, toNostrURI, MESSAGE, DELETE, REACTION} from "@welshman/util"
-  import {
-    displayProfileByPubkey,
-    formatTimestampAsDate,
-    tagEventForQuote,
-    publishThunk,
-    deriveRelay,
-    repository,
-  } from "@welshman/app"
+  import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
+  import {formatTimestampAsDate, publishThunk, deriveRelay, repository} from "@welshman/app"
   import {slide, fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
-  import type {getEditor} from "@app/editor"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
-  import Content from "@app/components/Content.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
+  import ChannelComposeParent from "@app/components/ChannelComposeParent.svelte"
   import {
     userSettingValues,
     decodeRelay,
@@ -36,7 +27,13 @@
     getEventsForUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
-  import {nip29, addRoomMembership, removeRoomMembership, getThunkError} from "@app/commands"
+  import {
+    nip29,
+    addRoomMembership,
+    removeRoomMembership,
+    prependParent,
+    getThunkError,
+  } from "@app/commands"
   import {PROTECTED, hasNip29} from "@app/state"
   import {makeFeed} from "@app/requests"
   import {popKey} from "@app/implicit"
@@ -72,6 +69,7 @@
 
   const replyTo = (event: TrustedEvent) => {
     parent = event
+    compose.focus()
   }
 
   const clearParent = () => {
@@ -82,23 +80,13 @@
     tags.push(tagRoom(room, url))
     tags.push(PROTECTED)
 
-    if (parent) {
-      const nevent = nip19.neventEncode({
-        id: parent.id,
-        kind: parent.kind,
-        author: parent.pubkey,
-        relays: ctx.app.router.Event(parent).limit(3).getUrls(),
-      })
-
-      tags.push(tagEventForQuote(parent))
-      content = toNostrURI(nevent) + "\n\n" + content
-    }
-
     publishThunk({
       relays: [url],
-      event: createEvent(MESSAGE, {content, tags}),
+      event: createEvent(MESSAGE, prependParent(parent, {content, tags})),
       delay: $userSettingValues.send_delay,
     })
+
+    clearParent()
   }
 
   const scrollToBottom = () => element.scrollTo({top: 0, behavior: "smooth"})
@@ -107,9 +95,9 @@
   let loading = true
   let element: HTMLElement
   let showScrollButton = false
-  let editor: ReturnType<typeof getEditor>
   let cleanup: () => void
   let events: Readable<TrustedEvent[]>
+  let compose: ChannelCompose
   let elements: any[] = []
 
   $: {
@@ -223,17 +211,9 @@
   </div>
   <div>
     {#if parent}
-      <div
-        class="relative border-l-2 border-solid border-primary bg-base-300 px-2 py-1 text-xs"
-        transition:slide>
-        <p class="text-primary">Replying to @{displayProfileByPubkey(parent.pubkey)}</p>
-        <Content event={parent} minLength={30} maxLength={200} />
-        <Button class="absolute right-2 top-2 cursor-pointer" on:click={clearParent}>
-          <Icon icon="close-circle" />
-        </Button>
-      </div>
+      <ChannelComposeParent event={parent} clear={clearParent} />
     {/if}
-    <ChannelCompose bind:editor {content} {onSubmit} />
+    <ChannelCompose bind:this={compose} {content} {onSubmit} />
   </div>
 </div>
 

@@ -25,12 +25,11 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const getEditor = ({
+export const makeEditor = ({
   aggressive = false,
   autofocus = false,
   charCount,
   content = "",
-  element,
   placeholder = "",
   submit,
   uploading,
@@ -40,14 +39,12 @@ export const getEditor = ({
   autofocus?: boolean
   charCount?: Writable<number>
   content?: string
-  element: HTMLElement
   placeholder?: string
   submit: () => void
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
 }) =>
   createEditor({
-    element,
     content,
     autofocus,
     extensions: [

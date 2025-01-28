@@ -1,18 +1,18 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
+  import {EditorContent} from "svelte-tiptap"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import {getEditor} from "@app/editor"
+  import {makeEditor} from "@app/editor"
 
   export let onSubmit: any
   export let content = ""
-  export let editor: ReturnType<typeof getEditor> | undefined = undefined
+
+  export const focus = () => $editor.chain().focus().run()
 
   const uploading = writable(false)
-
-  let element: HTMLElement
 
   const uploadFiles = () => $editor!.chain().selectFiles().run()
 
@@ -29,9 +29,9 @@
     $editor!.chain().clearContent().run()
   }
 
-  onMount(() => {
-    editor = getEditor({autofocus: !isMobile, element, submit, uploading, aggressive: true})
+  const editor = makeEditor({autofocus: !isMobile, submit, uploading, aggressive: true})
 
+  onMount(() => {
     $editor!.chain().setContent(content).run()
   })
 </script>
@@ -51,7 +51,7 @@
     {/if}
   </Button>
   <div class="chat-editor flex-grow overflow-hidden">
-    <div bind:this={element} />
+    <EditorContent editor={$editor} />
   </div>
   <Button
     data-tip="{window.navigator.platform.includes('Mac') ? 'cmd' : 'ctrl'}+enter to send"
