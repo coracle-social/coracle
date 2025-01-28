@@ -57,12 +57,15 @@
       left: currentIndex * carouselElement.offsetWidth,
       behavior: "instant",
     })
-    window.addEventListener("keydown", handleKeydown)
-    return () => window.removeEventListener("keydown", handleKeydown)
   })
 </script>
 
-<div class="group relative h-full w-full" bind:this={container}>
+<div
+  class="group relative h-full w-full"
+  bind:this={container}
+  on:keydown={handleKeydown}
+  tabindex="-1"
+  autofocus>
   <div
     class="bg-base-200 scrollbar-hide flex h-full snap-x snap-mandatory items-center gap-4 overflow-x-scroll scroll-smooth rounded-xl"
     bind:this={carouselElement}
