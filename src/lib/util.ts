@@ -1,3 +1,6 @@
+import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
+import * as nip19 from "nostr-tools/nip19"
+
 export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") => {
   const stringItems = xs.map(String)
 
@@ -10,4 +13,14 @@ export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") =
   }
 
   return new Intl.ListFormat(locale, {style: "long", type: "conjunction"}).format(stringItems)
+}
+
+export const nsecEncode = (secret: string) => nip19.nsecEncode(hexToBytes(secret))
+
+export const nsecDecode = (nsec: string) => {
+  const {type, data} = nip19.decode(nsec)
+
+  if (type !== "nsec") throw new Error(`Invalid nsec: ${nsec}`)
+
+  return bytesToHex(data)
 }

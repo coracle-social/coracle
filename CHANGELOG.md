@@ -4,6 +4,7 @@
 
 * Add reply to long-press menu
 * Fix @-mentions
+* Replace nsec.app signup with njump.me
 
 # 0.2.5
 

@@ -1,10 +1,11 @@
 <script lang="ts">
   import "@src/app.css"
   import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {get, derived} from "svelte/store"
   import {App} from "@capacitor/app"
   import {dev} from "$app/environment"
+  import {goto} from "$app/navigation"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, MONTH, Worker} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -21,6 +22,7 @@
     getPubkeyTagValues,
     getListTags,
   } from "@welshman/util"
+  import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
   import {
     relays,
     handles,
@@ -39,6 +41,7 @@
     getRelayUrls,
     subscribe,
     userInboxRelaySelections,
+    addSession,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -49,9 +52,10 @@
   import ModalContainer from "@app/components/ModalContainer.svelte"
   import {setupTracking} from "@app/tracking"
   import {setupAnalytics} from "@app/analytics"
+  import {nsecDecode} from "@lib/util"
   import {theme} from "@app/theme"
   import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
-  import {loadUserData} from "@app/commands"
+  import {loadUserData, loginWithNip46} from "@app/commands"
   import {listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
@@ -81,6 +85,34 @@
       ...requests,
       ...notifications,
     })
+
+    // Nstart login
+    if (window.location.hash?.startsWith("#nostr-login")) {
+      const params = new URLSearchParams(window.location.hash.slice(1))
+      const login = params.get("nostr-login")
+
+      let success = false
+
+      try {
+        if (login?.startsWith("bunker://")) {
+          success = await loginWithNip46({
+            clientSecret: makeSecret(),
+            ...Nip46Broker.parseBunkerUrl(login),
+          })
+        } else if (login) {
+          const secret = nsecDecode(login)
+
+          addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+          success = true
+        }
+      } catch (e) {
+        console.error(e)
+      }
+
+      if (success) {
+        goto("/home")
+      }
+    }
 
     if (!db) {
       setupTracking()
