@@ -1,5 +1,19 @@
 # Changelog
 
+# 0.2.5
+
+* Improve room and data loading
+* Use @welshman/editor
+* Drop support for legacy event kinds
+* Add support for back button navigation on android
+* Remove note to self page (still available via chat)
+* Improve chat conversation search
+* Change how reply UI works
+
+# 0.2.4
+
+* Update icons
+
 # 0.2.3
 
 * Add NIP 56 reports for messages and threads
