@@ -1,22 +1,20 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {page} from "$app/stores"
-  import {sleep, ago, MONTH, ctx} from "@welshman/lib"
+  import type {Readable} from "svelte/store"
+  import {now, ctx} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {throttled} from "@welshman/store"
-  import {feedsFromFilter, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
-  import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
+  import {createEvent, toNostrURI, MESSAGE, DELETE, REACTION} from "@welshman/util"
   import {
+    displayProfileByPubkey,
     formatTimestampAsDate,
-    createFeedController,
-    subscribe,
+    tagEventForQuote,
     publishThunk,
     deriveRelay,
+    repository,
   } from "@welshman/app"
-  import {slide} from "@lib/transition"
-  import {createScroller, type Scroller} from "@lib/html"
+  import {slide, fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -24,39 +22,31 @@
   import Divider from "@lib/components/Divider.svelte"
   import type {getEditor} from "@app/editor"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
+  import Content from "@app/components/Content.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import ChannelMessage from "@app/components/ChannelMessage.svelte"
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import {
     userSettingValues,
     decodeRelay,
-    deriveEventsForUrl,
     GENERAL,
     tagRoom,
     userRoomsByUrl,
     displayChannel,
+    getEventsForUrl,
   } from "@app/state"
   import {setChecked} from "@app/notifications"
   import {nip29, addRoomMembership, removeRoomMembership, getThunkError} from "@app/commands"
   import {PROTECTED, hasNip29} from "@app/state"
+  import {makeFeed} from "@app/requests"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
 
   const {room = GENERAL} = $page.params
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
+  const filter = {kinds: [MESSAGE], "#h": [room]}
   const relay = deriveRelay(url)
-  const feeds = feedsFromFilter({kinds: [MESSAGE], "#h": [room]})
-
-  const events = throttled(300, deriveEventsForUrl(url, [{kinds: [MESSAGE], "#h": [room]}]))
-
-  const ctrl = createFeedController({
-    useWindowing: true,
-    feed: makeIntersectionFeed(makeRelayFeed(url), ...feeds),
-    onExhausted: () => {
-      loading = false
-    },
-  })
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -81,85 +71,107 @@
   }
 
   const replyTo = (event: TrustedEvent) => {
-    const relays = ctx.app.router.Event(event).getUrls()
-    const nevent = nip19.neventEncode({...event, relays})
-
-    $editor.commands.insertNEvent({nevent})
-    $editor.commands.insertContent("\n")
-    $editor.commands.focus()
+    parent = event
   }
 
-  const onSubmit = ({content, tags}: EventContent) =>
+  const clearParent = () => {
+    parent = undefined
+  }
+
+  const onSubmit = ({content, tags}: EventContent) => {
+    tags.push(tagRoom(room, url))
+    tags.push(PROTECTED)
+
+    if (parent) {
+      const nevent = nip19.neventEncode({
+        id: parent.id,
+        kind: parent.kind,
+        author: parent.pubkey,
+        relays: ctx.app.router.Event(parent).limit(3).getUrls(),
+      })
+
+      tags.push(tagEventForQuote(parent))
+      content = toNostrURI(nevent) + "\n\n" + content
+    }
+
     publishThunk({
       relays: [url],
-      event: createEvent(MESSAGE, {content, tags: [...tags, tagRoom(room, url), PROTECTED]}),
+      event: createEvent(MESSAGE, {content, tags}),
       delay: $userSettingValues.send_delay,
     })
+  }
 
-  let limit = 100
+  const scrollToBottom = () => element.scrollTo({top: 0, behavior: "smooth"})
+
+  let parent: TrustedEvent | undefined
   let loading = true
-  let unmounted = false
   let element: HTMLElement
-  let scroller: Scroller
+  let showScrollButton = false
   let editor: ReturnType<typeof getEditor>
+  let cleanup: () => void
+  let events: Readable<TrustedEvent[]>
+  let elements: any[] = []
 
-  const elements = derived(events, $events => {
-    const $elements = []
+  $: {
+    elements = []
+
+    const seen = new Set()
 
     let previousDate
     let previousPubkey
 
-    for (const event of $events.toReversed()) {
-      const {id, pubkey, created_at} = event
-      const date = formatTimestampAsDate(created_at)
+    if (events) {
+      for (const event of $events.toReversed()) {
+        const {id, pubkey, created_at} = event
 
-      if (date !== previousDate) {
-        $elements.push({type: "date", value: date, id: date, showPubkey: false})
+        if (seen.has(id)) {
+          continue
+        }
+
+        const date = formatTimestampAsDate(created_at)
+
+        if (date !== previousDate) {
+          elements.push({type: "date", value: date, id: date, showPubkey: false})
+        }
+
+        elements.push({
+          id,
+          type: "note",
+          value: event,
+          showPubkey: date !== previousDate || previousPubkey !== pubkey,
+        })
+
+        previousDate = date
+        previousPubkey = pubkey
+        seen.add(id)
       }
-
-      $elements.push({
-        id,
-        type: "note",
-        value: event,
-        showPubkey: date !== previousDate || previousPubkey !== pubkey,
-      })
-
-      previousDate = date
-      previousPubkey = pubkey
     }
 
-    return $elements.reverse()
-  })
+    elements.reverse()
+  }
+
+  $: {
+    if (element) {
+      element.addEventListener("scroll", () => {
+        showScrollButton = Math.abs(element.scrollTop) > 1500
+      })
+      ;({events, cleanup} = makeFeed({
+        element,
+        relays: [url],
+        feedFilters: [filter],
+        subscriptionFilters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
+        initialEvents: getEventsForUrl(repository, url, [{...filter, limit: 20}]),
+        onExhausted: () => {
+          loading = false
+        },
+      }))
+    }
+  }
 
   onMount(() => {
-    // Element is frequently not defined. I don't know why
-    sleep(1000).then(() => {
-      if (!unmounted) {
-        scroller = createScroller({
-          element,
-          delay: 300,
-          threshold: 10_000,
-          onScroll: () => {
-            limit += 100
-
-            if ($events.length - limit < 100) {
-              ctrl.load(200)
-            }
-          },
-        })
-      }
-    })
-
-    const sub = subscribe({
-      relays: [url],
-      filters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: ago(MONTH)}],
-    })
-
     return () => {
-      unmounted = true
       setChecked($page.url.pathname)
-      scroller?.stop()
-      sub.close()
+      cleanup()
     }
   })
 </script>
@@ -192,11 +204,11 @@
   <div
     class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden py-2"
     bind:this={element}>
-    {#each $elements.slice(0, limit) as { type, id, value, showPubkey } (id)}
+    {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <div in:slide class:-mt-4={!showPubkey}>
+        <div in:slide class:-mt-1={!showPubkey}>
           <ChannelMessage {url} {room} {replyTo} event={assertEvent(value)} {showPubkey} />
         </div>
       {/if}
@@ -209,5 +221,26 @@
       {/if}
     </p>
   </div>
-  <ChannelCompose bind:editor {content} {onSubmit} />
+  <div>
+    {#if parent}
+      <div
+        class="relative border-l-2 border-solid border-primary bg-base-300 px-2 py-1 text-xs"
+        transition:slide>
+        <p class="text-primary">Replying to @{displayProfileByPubkey(parent.pubkey)}</p>
+        <Content event={parent} minLength={30} maxLength={200} />
+        <Button class="absolute right-2 top-2 cursor-pointer" on:click={clearParent}>
+          <Icon icon="close-circle" />
+        </Button>
+      </div>
+    {/if}
+    <ChannelCompose bind:editor {content} {onSubmit} />
+  </div>
 </div>
+
+{#if showScrollButton}
+  <div in:fade class="fixed bottom-14 right-4">
+    <Button class="btn btn-circle btn-neutral" on:click={scrollToBottom}>
+      <Icon icon="alt-arrow-down" />
+    </Button>
+  </div>
+{/if}

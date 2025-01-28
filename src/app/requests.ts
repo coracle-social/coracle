@@ -1,9 +1,12 @@
-import {get} from "svelte/store"
-import {partition, assoc, now} from "@welshman/lib"
-import {MESSAGE, THREAD, COMMENT} from "@welshman/util"
+import {get, writable} from "svelte/store"
+import {partition, insert, sortBy, assoc, now} from "@welshman/lib"
+import {MESSAGE, DELETE, THREAD, COMMENT, matchFilters, getTagValues} from "@welshman/util"
+import type {TrustedEvent, Filter} from "@welshman/util"
+import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
 import type {Subscription} from "@welshman/net"
 import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, load, repository, pull, hasNegentropy} from "@welshman/app"
+import {subscribe, load, repository, pull, hasNegentropy, createFeedController} from "@welshman/app"
+import {createScroller} from "@lib/html"
 import {userRoomsByUrl, getUrlsForEvent} from "@app/state"
 
 // Utils
@@ -27,6 +30,82 @@ export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
   }
 
   return Promise.all(promises)
+}
+
+export const makeFeed = ({
+  relays,
+  feedFilters,
+  subscriptionFilters,
+  element,
+  onExhausted,
+  initialEvents = [],
+}: {
+  relays: string[]
+  feedFilters: Filter[]
+  subscriptionFilters: Filter[]
+  element: HTMLElement
+  onExhausted?: () => void
+  initialEvents?: TrustedEvent[]
+}) => {
+  const buffer = writable<TrustedEvent[]>([])
+  const events = writable(initialEvents)
+
+  const onEvent = (event: TrustedEvent) => {
+    buffer.update($buffer => {
+      for (let i = 0; i < $buffer.length; i++) {
+        if ($buffer[i].id === event.id) return $buffer
+        if ($buffer[i].created_at < event.created_at) return insert(i, event, $buffer)
+      }
+
+      return [...$buffer, event]
+    })
+  }
+
+  const deleteEvent = (e: TrustedEvent) => {
+    const ids = getTagValues(["e", "a"], e.tags)
+
+    buffer.update($buffer => $buffer.filter(e => !ids.includes(e.id)))
+    events.update($events => $events.filter(e => !ids.includes(e.id)))
+  }
+
+  const ctrl = createFeedController({
+    useWindowing: true,
+    feed: makeIntersectionFeed(makeRelayFeed(...relays), feedFromFilters(feedFilters)),
+    onEvent,
+    onExhausted,
+  })
+
+  const sub = subscribe({
+    relays,
+    filters: subscriptionFilters,
+    onEvent: (e: TrustedEvent) => {
+      if (matchFilters(feedFilters, e)) onEvent(e)
+      if (e.kind === DELETE) deleteEvent(e)
+    },
+  })
+
+  const scroller = createScroller({
+    element,
+    delay: 300,
+    threshold: 10_000,
+    onScroll: async () => {
+      const $buffer = get(buffer)
+
+      events.update($events => sortBy(e => -e.created_at, [...$events, ...$buffer.splice(0, 100)]))
+
+      if ($buffer.length < 100) {
+        ctrl.load(100)
+      }
+    },
+  })
+
+  return {
+    events,
+    cleanup: () => {
+      scroller.stop()
+      sub.close()
+    },
+  }
 }
 
 // Application requests

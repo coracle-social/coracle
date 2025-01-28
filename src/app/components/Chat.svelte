@@ -58,9 +58,9 @@
 
   const replyTo = (event: TrustedEvent) => {
     const relays = ctx.app.router.Event(event).getUrls()
-    const nevent = nip19.neventEncode({...event, relays})
+    const bech32 = nip19.neventEncode({...event, relays})
 
-    $editor.commands.insertNEvent({nevent})
+    $editor.commands.insertNEvent({bech32})
     $editor.commands.insertContent("\n")
     $editor.commands.focus()
   }

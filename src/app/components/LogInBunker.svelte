@@ -26,7 +26,7 @@
   const back = () => history.back()
 
   const onSubmit = async () => {
-    const {signerPubkey, connectSecret, relays} = broker.parseBunkerUrl(input)
+    const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(input)
 
     if (loading) {
       return
