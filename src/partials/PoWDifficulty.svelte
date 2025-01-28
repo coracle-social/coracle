@@ -7,11 +7,13 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import PowWorker from "src/workers/pow?worker"
+  import {isMobile} from "src/util/html"
 
   export let value
 
   // pow generation time for a 16 difficulty in ms
   let benchmark = 0
+  const benchmarkDifficulty = isMobile ? 14 : 16
 
   onMount(() => {
     // try to generate a simple pow to estimate the device capacities
@@ -24,13 +26,13 @@
       $session.pubkey,
     )
     const start = Date.now()
-    addPoWStamp(powWorker, ownedEvent, 16).then(_ => {
+    addPoWStamp(powWorker, ownedEvent, benchmarkDifficulty).then(_ => {
       benchmark = Date.now() - start
     })
     return () => powWorker.terminate()
   })
 
-  $: powEstimate = Math.ceil(benchmark * Math.pow(2, value - 16))
+  $: powEstimate = Math.ceil(benchmark * Math.pow(2, value - benchmarkDifficulty))
 </script>
 
 <Field>
