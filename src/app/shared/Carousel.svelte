@@ -42,7 +42,6 @@
 
   function handleKeydown(event: KeyboardEvent) {
     if (!keyboardShortcut) return
-    event.preventDefault()
     if (event.key === "ArrowLeft") {
       scrollToIndex(Math.max(currentIndex - 1, 0))
     } else if (event.key === "ArrowRight") {
@@ -63,7 +62,7 @@
 <div
   class="group relative h-full w-full"
   bind:this={container}
-  on:keydown={handleKeydown}
+  on:keydown|stopPropagation|preventDefault={handleKeydown}
   tabindex="-1"
   autofocus>
   <div
