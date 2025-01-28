@@ -6,6 +6,8 @@
   import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
 
+  const hash = import.meta.env.VITE_BUILD_HASH
+
   const pubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey})
@@ -48,6 +50,9 @@
               class="link"
               href="https://www.figma.com/community/file/1166831539721848736">480 Design</Link>
           </p>
+          {#if hash}
+            <p class="text-xs">Running build {hash.slice(0, 8)}</p>
+          {/if}
         </div>
         <div class="flex justify-center gap-4">
           <div class="tooltip" data-tip="Source Code">

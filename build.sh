@@ -14,6 +14,10 @@ fi
 # https://stackoverflow.com/a/69127685/1467342
 eval "$temp_env"
 
+if [[ -z $VITE_BUILD_HASH ]]; then
+  export VITE_BUILD_HASH=$(git rev-parse --short HEAD)
+fi
+
 if [[ $VITE_PLATFORM_LOGO =~ ^https://* ]]; then
   curl $VITE_PLATFORM_LOGO > static/logo.png
   export VITE_PLATFORM_LOGO=static/logo.png

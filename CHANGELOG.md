@@ -7,6 +7,7 @@
 * Replace nsec.app signup with njump.me
 * Add new messages button in rooms
 * Add media server settings
+* Add build hash to about page
 
 # 0.2.5
 
