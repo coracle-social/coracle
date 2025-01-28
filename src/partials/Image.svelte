@@ -23,6 +23,7 @@
   import {ensurePlural} from "@welshman/lib"
 
   export let src
+  export let onClick
 
   let element
   let i = 0
@@ -47,6 +48,7 @@
   class:hidden={loading}
   bind:this={element}
   on:error={onError}
+  on:click={onClick}
   src={imgproxy(urls[i])} />
 
 {#if loading}
