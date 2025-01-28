@@ -30,7 +30,7 @@
       </video>
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <button type="button" on:click|stopPropagation|preventDefault={expand}>
-        <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96" />
+        <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96 rounded-box" />
       </button>
     {:else}
       {#await loadPreview()}

@@ -9,7 +9,7 @@
   import Tippy from "@lib/components/Tippy.svelte"
 
   export let value: string
-  export let options: string[]
+  export let options: string[] = []
   export let allowCreate = false
 
   let input: Element
@@ -20,7 +20,7 @@
     createSearch(options, {
       getValue: identity,
       fuseOptions: {keys: [""]},
-    }),
+    }).searchValues,
   )
 
   const select = (newValue: string) => {

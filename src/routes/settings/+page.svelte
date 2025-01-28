@@ -4,6 +4,7 @@
   import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
+  import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
   import {pushToast} from "@app/toast"
@@ -79,6 +80,24 @@
         {settings.send_delay === 1000 ? "second" : "seconds"}.
       </p>
     </FieldInline>
+    <Field>
+      <p slot="label">Media Server</p>
+      <div slot="input" class="flex gap-2">
+        <select bind:value={settings.upload_type} class="select select-bordered">
+          <option value="nip96">NIP 96 (default)</option>
+          <option value="blossom">Blossom</option>
+        </select>
+        <label class="input input-bordered flex flex-grow items-center gap-2">
+          <Icon icon="link-round" />
+          {#if settings.upload_type === "nip96"}
+            <input class="grow" bind:value={settings.nip96_urls[0]} />
+          {:else}
+            <input class="grow" bind:value={settings.blossom_urls[0]} />
+          {/if}
+        </label>
+      </div>
+      <p slot="info">Choose a media server type and url for files you upload to flotilla.</p>
+    </Field>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
       <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>
       <Button type="submit" class="btn btn-primary">Save Changes</Button>

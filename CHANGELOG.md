@@ -6,6 +6,7 @@
 * Fix @-mentions
 * Replace nsec.app signup with njump.me
 * Add new messages button in rooms
+* Add media server settings
 
 # 0.2.5
 

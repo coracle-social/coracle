@@ -5,7 +5,7 @@
   import {now} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
-  import {formatTimestampAsDate, publishThunk, deriveRelay, repository} from "@welshman/app"
+  import {formatTimestampAsDate, pubkey, publishThunk, deriveRelay, repository} from "@welshman/app"
   import {slide, fade, fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -142,7 +142,12 @@
 
         const date = formatTimestampAsDate(created_at)
 
-        if (!newMessagesSeen && lastChecked && created_at > lastChecked) {
+        if (
+          !newMessagesSeen &&
+          event.pubkey !== $pubkey &&
+          lastChecked &&
+          created_at > lastChecked
+        ) {
           elements.push({type: "new-messages", id: "new-messages"})
           newMessagesSeen = true
         }
