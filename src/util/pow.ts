@@ -1,9 +1,7 @@
 import type {OwnedEvent} from "@welshman/util"
-import PowWorker from "src/workers/pow?worker"
 import {warn} from "./logger"
 
-export const addPoWStamp = async (event: OwnedEvent, pow_difficulty: number) => {
-  const worker = new PowWorker()
+export const addPoWStamp = async (worker: Worker, event: OwnedEvent, pow_difficulty: number) => {
   const powPromise = new Promise<OwnedEvent>((resolve, reject) => {
     worker.onmessage = (e: MessageEvent<OwnedEvent>) => {
       resolve(e.data)
