@@ -40,7 +40,7 @@
 
   const reply = () => replyTo(event)
 
-  const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event})
+  const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event, reply})
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 

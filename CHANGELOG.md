@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.6
+
+* Add reply to long-press menu
+
 # 0.2.5
 
 * Improve room and data loading

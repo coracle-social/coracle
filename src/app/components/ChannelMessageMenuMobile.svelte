@@ -11,6 +11,7 @@
 
   export let url
   export let event
+  export let reply
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()
@@ -18,6 +19,11 @@
   }
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
+
+  const sendReply = () => {
+    history.back()
+    reply()
+  }
 
   const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
 
@@ -28,6 +34,10 @@
   <Button class="btn btn-primary w-full" on:click={showEmojiPicker}>
     <Icon size={4} icon="smile-circle" />
     Send Reaction
+  </Button>
+  <Button class="btn btn-neutral w-full" on:click={sendReply}>
+    <Icon size={4} icon="reply" />
+    Send Reply
   </Button>
   <Button class="btn btn-neutral" on:click={showInfo}>
     <Icon size={4} icon="code-2" />

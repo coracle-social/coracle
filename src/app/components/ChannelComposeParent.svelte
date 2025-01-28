@@ -15,7 +15,7 @@
   transition:slide>
   <p class="text-primary">Replying to @{displayProfileByPubkey(event.pubkey)}</p>
   {#key event.id}
-    <Content {event} minLength={100} maxLength={300} expandMode="disabled" />
+    <Content {event} hideMedia minLength={100} maxLength={300} expandMode="disabled" />
   {/key}
   <Button class="absolute right-2 top-2 cursor-pointer" on:click={clear}>
     <Icon icon="close-circle" />
