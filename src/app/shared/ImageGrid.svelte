@@ -1,10 +1,11 @@
 <script lang="ts">
   import cx from "classnames"
-  import type {ParsedLink} from "@welshman/content"
-  import {imgproxy} from "src/engine"
+  import type {ParsedLinkValue} from "@welshman/content"
   import Carousel from "src/app/shared/Carousel.svelte"
+  import Image from "src/partials/Image.svelte"
 
-  export let images: ParsedLink[]
+  export let images: ParsedLinkValue[]
+  export let onClick: (e: any) => void
 
   let zoomed: number
   let grid: HTMLElement
@@ -19,7 +20,7 @@
 </script>
 
 <div
-  on:click|preventDefault|stopPropagation
+  on:click|preventDefault|stopPropagation={onClick}
   bind:this={grid}
   class={cx(
     "grid-cols-" + columns,
@@ -33,22 +34,22 @@
   </button>
   {#each images as image, i}
     {#if i === 0}
-      <img
+      <Image
         class={cx("col-span-" + getSpan(images.length - 1), "h-full max-h-96 w-full object-cover")}
-        on:click={() => (zoomed = i)}
-        src={imgproxy(image.value?.url?.toString())} />
+        onClick={() => (zoomed = i)}
+        src={image.url.toString()} />
     {:else}
-      <img
+      <Image
         class="h-full max-h-96 w-full object-cover"
-        on:click={() => (zoomed = i)}
-        src={imgproxy(image.value?.url?.toString())} />
+        onClick={() => (zoomed = i)}
+        src={image.url.toString()} />
     {/if}
   {/each}
 </div>
 
 {#if zoomed !== undefined}
   <div
-    class="z-zoom fixed left-0 top-0 h-full w-full bg-black"
+    class="fixed left-0 top-0 z-zoom h-full w-full bg-black bg-opacity-80"
     on:scroll|preventDefault|stopPropagation
     on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
     <Carousel
@@ -57,10 +58,10 @@
       currentIndex={zoomed}
       let:item
       onClose={() => (zoomed = undefined)}>
-      <img
+      <Image
         class="m-auto h-full max-w-full object-contain"
-        on:click|preventDefault|stopPropagation
-        src={imgproxy(item.value?.url?.toString())} />
+        src={item?.url?.toString()}
+        onClick={e => e.stopPropagation()} />
     </Carousel>
   </div>
 {/if}
