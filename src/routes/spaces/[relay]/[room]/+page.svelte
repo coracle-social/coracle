@@ -6,7 +6,7 @@
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
   import {formatTimestampAsDate, publishThunk, deriveRelay, repository} from "@welshman/app"
-  import {slide, fade} from "@lib/transition"
+  import {slide, fade, fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -26,7 +26,7 @@
     displayChannel,
     getEventsForUrl,
   } from "@app/state"
-  import {setChecked} from "@app/notifications"
+  import {setChecked, checked} from "@app/notifications"
   import {
     nip29,
     addRoomMembership,
@@ -40,6 +40,7 @@
   import {pushToast} from "@app/toast"
 
   const {room = GENERAL} = $page.params
+  const lastChecked = $checked[$page.url.pathname]
   const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const filter = {kinds: [MESSAGE], "#h": [room]}
@@ -89,11 +90,33 @@
     clearParent()
   }
 
+  const onScroll = () => {
+    showScrollButton = Math.abs(element?.scrollTop || 0) > 1500
+
+    if (!newMessages || newMessagesSeen) {
+      showFixedNewMessages = false
+    } else {
+      const {y} = newMessages.getBoundingClientRect()
+
+      if (y > 300) {
+        newMessagesSeen = true
+      } else {
+        showFixedNewMessages = y < 0
+      }
+    }
+  }
+
+  const scrollToNewMessages = () =>
+    newMessages.scrollIntoView({behavior: "smooth", block: "center"})
+
   const scrollToBottom = () => element.scrollTo({top: 0, behavior: "smooth"})
 
   let parent: TrustedEvent | undefined
   let loading = true
   let element: HTMLElement
+  let newMessages: HTMLElement
+  let newMessagesSeen = false
+  let showFixedNewMessages = false
   let showScrollButton = false
   let cleanup: () => void
   let events: Readable<TrustedEvent[]>
@@ -107,6 +130,7 @@
 
     let previousDate
     let previousPubkey
+    let newMessagesSeen = false
 
     if (events) {
       for (const event of $events.toReversed()) {
@@ -117,6 +141,11 @@
         }
 
         const date = formatTimestampAsDate(created_at)
+
+        if (!newMessagesSeen && lastChecked && created_at > lastChecked) {
+          elements.push({type: "new-messages", id: "new-messages"})
+          newMessagesSeen = true
+        }
 
         if (date !== previousDate) {
           elements.push({type: "date", value: date, id: date, showPubkey: false})
@@ -136,13 +165,12 @@
     }
 
     elements.reverse()
+
+    setTimeout(onScroll, 100)
   }
 
   $: {
     if (element) {
-      element.addEventListener("scroll", () => {
-        showScrollButton = Math.abs(element.scrollTop) > 1500
-      })
       ;({events, cleanup} = makeFeed({
         element,
         relays: [url],
@@ -191,9 +219,19 @@
   </PageBar>
   <div
     class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden py-2"
+    on:scroll={onScroll}
     bind:this={element}>
     {#each elements as { type, id, value, showPubkey } (id)}
-      {#if type === "date"}
+      {#if type === "new-messages"}
+        <div
+          bind:this={newMessages}
+          class="flex items-center py-2 text-xs transition-colors"
+          class:opacity-0={showFixedNewMessages}>
+          <div class="h-px flex-grow bg-primary" />
+          <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
+          <div class="h-px flex-grow bg-primary" />
+        </div>
+      {:else if type === "date"}
         <Divider>{value}</Divider>
       {:else}
         <div in:slide class:-mt-1={!showPubkey}>
@@ -209,6 +247,15 @@
       {/if}
     </p>
   </div>
+  {#if showFixedNewMessages}
+    <div class="relative z-feature flex justify-center">
+      <div transition:fly={{duration: 200}} class="fixed top-12">
+        <Button class="btn btn-primary btn-xs rounded-full" on:click={scrollToNewMessages}>
+          New Messages
+        </Button>
+      </div>
+    </div>
+  {/if}
   <div>
     {#if parent}
       <ChannelComposeParent event={parent} clear={clearParent} />
