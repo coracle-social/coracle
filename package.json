@@ -52,7 +52,7 @@
     "@types/qrcode": "^1.5.5",
     "@vite-pwa/assets-generator": "^0.2.6",
     "@vite-pwa/sveltekit": "^0.6.6",
-    "@welshman/app": "~0.0.40",
+    "@welshman/app": "~0.0.41",
     "@welshman/content": "~0.0.15",
     "@welshman/dvm": "~0.0.14",
     "@welshman/editor": "~0.0.8",
