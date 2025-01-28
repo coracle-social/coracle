@@ -23,7 +23,7 @@
   import {ensurePlural} from "@welshman/lib"
 
   export let src
-  export let onClick
+  export let onClick = undefined
 
   let element
   let i = 0
