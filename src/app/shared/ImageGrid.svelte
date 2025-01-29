@@ -1,17 +1,17 @@
 <script lang="ts">
   import cx from "classnames"
   import {fade} from "svelte/transition"
-  import type {ParsedLinkValue} from "@welshman/content"
+  import type {ParsedLinkGridValue} from "@welshman/content"
   import Carousel from "src/app/shared/Carousel.svelte"
   import Image from "src/partials/Image.svelte"
 
-  export let images: ParsedLinkValue[]
+  export let value: ParsedLinkGridValue
   export let onClick: (e: any) => void
 
   let zoomed: number
   let grid: HTMLElement
-
-  $: columns = Math.ceil(Math.sqrt(images.length))
+  $: links = value?.links || []
+  $: columns = Math.ceil(Math.sqrt(links.length))
 
   function getSpan(i: number) {
     // how many slots are left in the row
@@ -33,36 +33,36 @@
     on:click|stopPropagation={() => (grid.style.display = "none")}>
     <i class="fas fa-times"></i>
   </button>
-  {#each images as image, i}
+  {#each links as link, i}
     {#if i === 0}
       <Image
-        class={cx("col-span-" + getSpan(images.length - 1), "h-full max-h-96 w-full object-cover")}
+        class={cx("col-span-" + getSpan(links.length - 1), "h-full max-h-96 w-full object-cover")}
         onClick={() => (zoomed = i)}
-        src={image.url.toString()} />
+        src={link.toString()} />
     {:else}
       <Image
         class="h-full max-h-96 w-full object-cover"
         onClick={() => (zoomed = i)}
-        src={image.url.toString()} />
+        src={link.toString()} />
     {/if}
   {/each}
 </div>
 
 {#if zoomed !== undefined}
   <div
-    class="z-zoom fixed left-0 top-0 h-full w-full bg-black"
-    transition:fade
+    class="fixed left-0 top-0 z-zoom h-full w-full bg-black"
+    transition:fade={{duration: 200}}
     on:scroll|preventDefault|stopPropagation
     on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
     <Carousel
       keyboardShortcut
-      items={images}
+      items={links}
       currentIndex={zoomed}
       let:item
       onClose={() => (zoomed = undefined)}>
       <Image
         class="m-auto h-full max-w-full object-contain"
-        src={item?.url?.toString()}
+        src={item?.toString()}
         onClick={e => e.stopPropagation()} />
     </Carousel>
   </div>
