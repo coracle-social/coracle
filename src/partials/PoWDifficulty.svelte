@@ -8,14 +8,14 @@
   import Input from "src/partials/Input.svelte"
   import PowWorker from "src/workers/pow?worker"
   import {isMobile} from "src/util/html"
+  import {benchmark} from "src/engine"
 
   export let value
 
-  // pow generation time for a 16 difficulty in ms
-  let benchmark = 0
   const benchmarkDifficulty = isMobile ? 14 : 16
 
   onMount(() => {
+    if ($benchmark) return
     // try to generate a simple pow to estimate the device capacities
     const powWorker = new PowWorker()
     const ownedEvent = own(
@@ -27,12 +27,12 @@
     )
     const start = Date.now()
     addPoWStamp(powWorker, ownedEvent, benchmarkDifficulty).then(_ => {
-      benchmark = Date.now() - start
+      $benchmark = Date.now() - start
     })
     return () => powWorker.terminate()
   })
 
-  $: powEstimate = Math.ceil(benchmark * Math.pow(2, value - benchmarkDifficulty))
+  $: powEstimate = Math.ceil($benchmark * Math.pow(2, value - benchmarkDifficulty))
 </script>
 
 <Field>
@@ -40,12 +40,14 @@
     <strong>Proof Of Work</strong>
     <div>
       difficulty {value}
-      ({#if powEstimate < 1000}
-        ~{powEstimate}ms
+      ({#if !$benchmark}
+        <div class="inline-flex items-center space-x-2">Calculating...</div>
+      {:else if powEstimate < 1000}
+        ~{powEstimate} ms
       {:else if powEstimate < 60 * 5 * 1000}
-        ~{Math.ceil(powEstimate / 1000)}seconds
+        ~{Math.ceil(powEstimate / 1000)} seconds
       {:else}
-        ~{Math.ceil(powEstimate / 1000 / 60)}minutes
+        ~{Math.ceil(powEstimate / 1000 / 60)} minutes
       {/if})
     </div>
   </div>

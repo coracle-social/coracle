@@ -157,6 +157,8 @@ export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], r
 
 export const canDecrypt = withGetter(synced("canDecrypt", false))
 
+export const benchmark = withGetter(synced("benchmark", 0))
+
 // Plaintext
 
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
