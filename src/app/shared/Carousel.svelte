@@ -60,7 +60,7 @@
 </script>
 
 <div
-  class="group relative h-full w-full"
+  class="group relative h-full w-full outline-none"
   bind:this={container}
   on:keydown|stopPropagation|preventDefault={handleKeydown}
   tabindex="-1"
