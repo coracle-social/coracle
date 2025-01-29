@@ -1,16 +1,15 @@
 <script lang="ts">
-  import {pluck, max, uniq, ago} from "@welshman/lib"
-  import {pubkey} from "@welshman/app"
-  import {formatTimestampAsDate, formatTimestamp} from "src/util/misc"
+  import {ago} from "@welshman/lib"
   import FeedItem from "src/app/shared/FeedItem.svelte"
+  import NoteActivity from "src/app/shared/NoteActivity.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
-  import PeopleAction from "src/app/shared/PeopleAction.svelte"
+  import {formatTimestampAsDate} from "src/util/misc"
 
   export let i
-  export let verb
   export let depth
   export let events
   export let interval
+  export let kind: "reactions" | "interactions" = "reactions"
   export let notifications
 
   let items = []
@@ -26,19 +25,6 @@
 {/if}
 
 <NoteReducer {events} shouldAwait shouldSort depth={1} bind:items let:event let:getContext>
-  <div class="flex items-center justify-between">
-    {#if getContext(event).length === 0}
-      <PeopleAction pubkeys={[event.pubkey]} actionText="mentioned you" />
-    {:else if event.pubkey === $pubkey}
-      <PeopleAction
-        pubkeys={uniq(pluck("pubkey", getContext(event)))}
-        actionText="{verb} to your note" />
-    {:else}
-      <PeopleAction
-        pubkeys={uniq(pluck("pubkey", getContext(event)))}
-        actionText="{verb} to a note mentioning you" />
-    {/if}
-    <small>{formatTimestamp(max(pluck("created_at", [event, ...getContext(event)])))}</small>
-  </div>
+  <NoteActivity context={getContext(event)} {kind} {event} />
   <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>
