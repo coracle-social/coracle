@@ -83,7 +83,7 @@
   {/if}
   <a href={nstart} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
     <Icon icon="square-share-line" />
-    Get started on njump
+    Get going on nstart
   </a>
   <div class="text-sm">
     Already have an account?
