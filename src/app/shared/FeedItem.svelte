@@ -1,9 +1,10 @@
 <script lang="ts">
-  import {repository} from "@welshman/app"
-  import {ctx, spec} from "@welshman/lib"
+  import {ctx, remove, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getReplyFilters, isChildOf, NOTE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
+  import {repository} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
@@ -32,13 +33,21 @@
 
   let ready = false
   let event = note
-  let replyIsActive = false
+  let replyIsOpen = false
   let showMutedReplies = false
   let collapsed = depth === 0
   let showHiddenReplies = anchor === getIdOrAddress(event)
-  let draftEventId: string
+  let pendingReplies: Thunk[] = []
 
   const showEntire = showHiddenReplies
+
+  const addPendingReply = (thunk: Thunk) => {
+    pendingReplies = [...pendingReplies, thunk]
+  }
+
+  const removePendingReply = (thunk: Thunk) => {
+    pendingReplies = remove(thunk, pendingReplies)
+  }
 
   const replies = derived(deriveEvents(repository, {filters: getReplyFilters([event])}), events =>
     sortEventsDesc(events.filter(e => e.kind === NOTE && isChildOf(e, event))),
@@ -54,13 +63,11 @@
     for (const e of $replies) {
       if ($isEventMuted(e)) {
         mutedReplies.push(e)
+      } else if (pendingReplies.some(thunk => thunk.event.id === e.id)) {
+        visibleReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
-      } else if (
-        !showHiddenReplies &&
-        draftEventId !== e.id &&
-        !getContext(event).some(spec({id: e.id}))
-      ) {
+      } else if (!showHiddenReplies && !getContext(event).some(spec({id: e.id}))) {
         hiddenReplies.push(e)
       } else {
         visibleReplies.push(e)
@@ -130,13 +137,15 @@
         {/if}
       {/if}
       <Note
-        note={event}
+        {event}
+        {pinned}
         {showEntire}
         {showParent}
         {showMedia}
-        {pinned}
-        bind:showReply={replyIsActive} />
-      {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
+        bind:replyIsOpen
+        {addPendingReply}
+        {removePendingReply} />
+      {#if !replyIsOpen && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor
             background

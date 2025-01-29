@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {repository, session, thunks, type Thunk} from "@welshman/app"
+  import {abortThunk, session, thunks, type Thunk} from "@welshman/app"
   import {fly} from "svelte/transition"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
@@ -45,10 +45,7 @@
             {#if message.created_at > $timestamp1 - $userSettings.send_delay / 1000}
               <button
                 class="cursor-pointer py-1 text-tinted-700-d underline"
-                on:click={() => {
-                  thunk.controller.abort()
-                  repository.removeEvent(message.id)
-                }}>Cancel</button>
+                on:click={() => abortThunk(thunk)}>Cancel</button>
             {/if}
           </div>
         {:then}

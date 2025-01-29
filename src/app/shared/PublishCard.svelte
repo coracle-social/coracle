@@ -63,7 +63,7 @@
             <Anchor underline modal class="text-sm" on:click={() => open(event)}>View Note</Anchor>
           </div>
           <NoteReducer events={[event]} let:event>
-            <Note note={event} />
+            <Note {event} />
           </NoteReducer>
           <div class="flex justify-between text-sm">
             <div class="hidden gap-4 sm:flex">

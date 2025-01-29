@@ -15,7 +15,8 @@
 </style>
 
 <script lang="ts">
-  import {thunks, type Thunk} from "@welshman/app"
+  import {thunks, abortThunk} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
   import {LOCAL_RELAY_URL, type TrustedEvent} from "@welshman/util"
@@ -27,13 +28,13 @@
   const rendered = now()
 
   export let event: TrustedEvent
-  export let onAbort: () => void
+  export let onReplyAbort: (thunk: Thunk) => void
 
   const completed = tweened(0)
 
   const abort = () => {
-    thunk.controller.abort()
-    onAbort()
+    abortThunk(thunk)
+    onReplyAbort(thunk)
   }
 
   $: thunk = $thunks[event.id] as Thunk

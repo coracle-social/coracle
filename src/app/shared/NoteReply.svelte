@@ -7,6 +7,7 @@
     tagEventForReply,
     tagEventForComment,
   } from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {writable} from "svelte/store"
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
@@ -19,8 +20,9 @@
   import {getEditor} from "src/app/editor"
 
   export let parent
-  export let isOpen: boolean
-  export let stopReply: () => void
+  export let replyIsOpen: boolean
+  export let onReplyCancel: () => void
+  export let onReplyPublish: (thunk: Thunk) => void
 
   const nsecWarning = writable(null)
   const editorLoading = writable(false)
@@ -71,8 +73,6 @@
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
 
-    saveDraft()
-
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
@@ -89,6 +89,7 @@
     }
 
     loading = true
+    clearDraft()
 
     const template = createEvent(kind, {content, tags})
     const event = await sign(template, options)
@@ -98,17 +99,13 @@
       delay: $userSettings.send_delay,
     })
 
-    stopReply()
     loading = false
-
-    thunk.result.then(() => {
-      clearDraft()
-    })
+    onReplyPublish(thunk)
   }
 
   const onBodyClick = e => {
     saveDraft()
-    stopReply()
+    onReplyCancel()
   }
 
   const createEditor = () => {
@@ -125,11 +122,17 @@
       createEditor()
     }
   }
+
+  $: {
+    if (replyIsOpen) {
+      saveDraft()
+    }
+  }
 </script>
 
 <svelte:body on:click={onBodyClick} />
 
-{#if isOpen}
+{#if replyIsOpen}
   <div
     class="relative transition-colors"
     class:opacity-50={loading}

@@ -8,14 +8,8 @@
     DVM_REQUEST_PUBLISH_SCHEDULE,
     type TrustedEvent,
   } from "@welshman/util"
-  import {
-    session,
-    tagPubkey,
-    signer,
-    type ThunkStatusByUrl,
-    type ThunkStatus,
-    type Thunk,
-  } from "@welshman/app"
+  import type {Thunk, ThunkStatus, ThunkStatusByUrl} from "@welshman/app"
+  import {session, tagPubkey, signer, abortThunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
@@ -158,7 +152,7 @@
         type: "delay",
         timeout: $userSettings.send_delay / 1000,
         onCancel: () => {
-          thunk.controller.abort()
+          abortThunk(thunk)
           router.at("notes/create").open()
         },
       })

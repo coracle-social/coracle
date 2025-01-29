@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {nip19} from "nostr-tools"
   import {sum, pluck} from "@welshman/lib"
-  import {getContext, onMount} from "svelte"
+  import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {ctx, nth, nthEq, remove, last, sortBy, uniqBy, prop, identity} from "@welshman/lib"
@@ -16,7 +16,6 @@
     mute,
     pubkey,
     unmute,
-    thunks,
     pin,
     unpin,
   } from "@welshman/app"
@@ -38,7 +37,7 @@
     isChildOf,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
-  import {formatSats, pluralize, quantify, timestamp1} from "src/util/misc"
+  import {formatSats, pluralize, quantify} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
@@ -55,7 +54,6 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import NotePending from "src/app/shared/NotePending.svelte"
   import {router} from "src/app/util/router"
   import {
     env,
@@ -76,7 +74,7 @@
   import {isLike} from "src/util/nostr"
 
   export let event: TrustedEvent
-  export let startReply: () => void
+  export let onReplyStart: () => void
   export let showHidden = false
 
   const signedEvent = asSignedEvent(event as any)
@@ -99,8 +97,6 @@
   const seenOn = derived(trackerStore, $t =>
     remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
   )
-  const topLevel = getContext("topLevel")
-
   const setView = v => {
     view = v
   }
@@ -296,180 +292,176 @@
   })
 </script>
 
-{#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && $thunks[event.id]}
-  <NotePending {event} onAbort={startReply} />
-{:else}
-  <button
-    tabindex="-1"
-    type="button"
-    class="flex w-full justify-between text-neutral-100"
-    on:click|stopPropagation>
-    <div class="flex gap-8 text-sm">
+<button
+  tabindex="-1"
+  type="button"
+  class="flex w-full justify-between text-neutral-100"
+  on:click|stopPropagation>
+  <div class="flex gap-8 text-sm">
+    <button
+      class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
+        "pointer-events-none opacity-50": disableActions,
+      })}
+      on:click={onReplyStart}>
+      <Icon icon="message" color={replied ? "accent" : "neutral-100"} />
+      {#if $repliesCount > 0 && noteActions.includes("replies")}
+        <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
+      {/if}
+    </button>
+    {#if env.ENABLE_ZAPS && noteActions.includes("zaps")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-          "pointer-events-none opacity-50": disableActions,
+          "pointer-events-none opacity-50": disableActions || !canZap,
         })}
-        on:click={startReply}>
-        <Icon icon="message" color={replied ? "accent" : "neutral-100"} />
-        {#if $repliesCount > 0 && noteActions.includes("replies")}
-          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
+        on:click={startZap}>
+        <Icon icon="bolt" color={zapped ? "accent" : "neutral-100"} />
+        {#if $zapsTotal > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
+            >{formatSats($zapsTotal)}</span>
         {/if}
       </button>
-      {#if env.ENABLE_ZAPS && noteActions.includes("zaps")}
+    {/if}
+    {#if noteActions.includes("reactions")}
+      <button
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
+          "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
+        })}
+        on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
+        <Icon
+          icon="heart"
+          color={liked ? "accent" : "neutral-100"}
+          class={cx("cursor-pointer", {
+            "fa-beat fa-beat-custom": liked,
+          })} />
+        {#if $likesCount > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+        {/if}
+      </button>
+    {/if}
+    {#if handlers.length > 0 && noteActions.includes("recommended_apps")}
+      <Popover theme="transparent" opts={{hideOnClick: true}}>
         <button
-          class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-            "pointer-events-none opacity-50": disableActions || !canZap,
-          })}
-          on:click={startZap}>
-          <Icon icon="bolt" color={zapped ? "accent" : "neutral-100"} />
-          {#if $zapsTotal > 0}
-            <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
-              >{formatSats($zapsTotal)}</span>
-          {/if}
+          slot="trigger"
+          class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
+          <Icon icon="openwith" color="neutral-100" class="cursor-pointer" />
         </button>
+        <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
+          <Menu>
+            <MenuItem inert class="bg-neutral-900">Open with:</MenuItem>
+            {#each handlers as handler}
+              <MenuItem
+                class="flex h-12 items-center justify-between gap-2"
+                on:click={() => openWithHandler(handler)}>
+                <div class="flex gap-2">
+                  <ImageCircle class="h-5 w-5" src={handler.image} />
+                  {handler.name}
+                </div>
+                {#if handler.recommendations.length > 0}
+                  <WotScore accent score={handler.recommendations.length} />
+                {/if}
+              </MenuItem>
+            {/each}
+          </Menu>
+        </div>
+      </Popover>
+    {/if}
+  </div>
+  <div class="flex scale-90 items-center gap-2">
+    {#if event.wrap}
+      <div
+        class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
+        <i class="fa fa-lock text-xs sm:text-accent" />
+        <span class="hidden sm:inline">Encrypted</span>
+      </div>
+    {/if}
+    {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
+      <div
+        class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
+        on:click={() => setView("info")}>
+        <span class="text-accent">{$seenOn.length}</span>
+        {pluralize($seenOn.length, "relay")}
+      </div>
+    {/if}
+    <OverflowMenu {actions} />
+  </div>
+</button>
+
+{#if view}
+  <Modal onEscape={() => setView(null)}>
+    {#if view === "info"}
+      {#if zaps.length > 0}
+        <h1 class="staatliches text-2xl">Zapped By</h1>
+        <div class="grid grid-cols-2 gap-2">
+          {#each zaps as zap}
+            <div class="flex flex-col gap-1">
+              <PersonBadge pubkey={zap.request.pubkey} />
+              <span class="ml-16 text-sm text-neutral-600"
+                >{formatSats(zap.invoiceAmount / 1000)} sats</span>
+            </div>
+          {/each}
+        </div>
       {/if}
-      {#if noteActions.includes("reactions")}
-        <button
-          class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-            "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
-          })}
-          on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
-          <Icon
-            icon="heart"
-            color={liked ? "accent" : "neutral-100"}
-            class={cx("cursor-pointer", {
-              "fa-beat fa-beat-custom": liked,
-            })} />
-          {#if $likesCount > 0}
-            <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
-          {/if}
-        </button>
-      {/if}
-      {#if handlers.length > 0 && noteActions.includes("recommended_apps")}
-        <Popover theme="transparent" opts={{hideOnClick: true}}>
-          <button
-            slot="trigger"
-            class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0 sm:block">
-            <Icon icon="openwith" color="neutral-100" class="cursor-pointer" />
-          </button>
-          <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
-            <Menu>
-              <MenuItem inert class="bg-neutral-900">Open with:</MenuItem>
-              {#each handlers as handler}
-                <MenuItem
-                  class="flex h-12 items-center justify-between gap-2"
-                  on:click={() => openWithHandler(handler)}>
-                  <div class="flex gap-2">
-                    <ImageCircle class="h-5 w-5" src={handler.image} />
-                    {handler.name}
-                  </div>
-                  {#if handler.recommendations.length > 0}
-                    <WotScore accent score={handler.recommendations.length} />
-                  {/if}
-                </MenuItem>
-              {/each}
-            </Menu>
-          </div>
-        </Popover>
-      {/if}
-    </div>
-    <div class="flex scale-90 items-center gap-2">
-      {#if event.wrap}
-        <div
-          class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
-          <i class="fa fa-lock text-xs sm:text-accent" />
-          <span class="hidden sm:inline">Encrypted</span>
+      {#if likes.length > 0}
+        <h1 class="staatliches text-2xl">Liked By</h1>
+        <div class="grid grid-cols-2 gap-2">
+          {#each likes as like}
+            <PersonBadge pubkey={like.pubkey} />
+          {/each}
         </div>
       {/if}
       {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
-        <div
-          class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
-          on:click={() => setView("info")}>
-          <span class="text-accent">{$seenOn.length}</span>
-          {pluralize($seenOn.length, "relay")}
+        <h1 class="staatliches text-2xl">Relays</h1>
+        <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
+        <div class="flex flex-col gap-2">
+          {#each $seenOn as url}
+            <RelayCard {url} />
+          {/each}
         </div>
       {/if}
-      <OverflowMenu {actions} />
-    </div>
-  </button>
-
-  {#if view}
-    <Modal onEscape={() => setView(null)}>
-      {#if view === "info"}
-        {#if zaps.length > 0}
-          <h1 class="staatliches text-2xl">Zapped By</h1>
-          <div class="grid grid-cols-2 gap-2">
-            {#each zaps as zap}
-              <div class="flex flex-col gap-1">
-                <PersonBadge pubkey={zap.request.pubkey} />
-                <span class="ml-16 text-sm text-neutral-600"
-                  >{formatSats(zap.invoiceAmount / 1000)} sats</span>
-              </div>
-            {/each}
-          </div>
-        {/if}
-        {#if likes.length > 0}
-          <h1 class="staatliches text-2xl">Liked By</h1>
-          <div class="grid grid-cols-2 gap-2">
-            {#each likes as like}
-              <PersonBadge pubkey={like.pubkey} />
-            {/each}
-          </div>
-        {/if}
-        {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
-          <h1 class="staatliches text-2xl">Relays</h1>
-          <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
-          <div class="flex flex-col gap-2">
-            {#each $seenOn as url}
-              <RelayCard {url} />
-            {/each}
-          </div>
-        {/if}
-        {#if mentions.length > 0}
-          <h1 class="staatliches text-2xl">In this conversation</h1>
-          <p>{quantify(mentions.length, "person is", "people are")} tagged in this note.</p>
-          <div class="grid grid-cols-2 gap-2">
-            {#each mentions as pubkey}
-              <PersonBadge {pubkey} />
-            {/each}
-          </div>
-        {/if}
-        {#if handlers.length > 0 || handlerEvent}
-          <h1 class="staatliches text-2xl">Apps</h1>
-          {#if handlerEvent}
-            {@const [handler] = readHandlers(handlerEvent)}
-            {#if handler}
-              <p>This note was published using {displayHandler(handler)}.</p>
-              <HandlerCard {handler} />
-            {/if}
-          {/if}
-          {#if handlers.length > 0}
-            <div class="flex justify-between">
-              <p>
-                This note can also be viewed using {quantify(handlers.length, "other nostr app")}.
-              </p>
-              {#if handlersShown}
-                <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
-              {:else}
-                <Anchor underline on:click={showHandlers}>Show apps</Anchor>
-              {/if}
-            </div>
-            {#if handlersShown}
-              <div in:fly={{y: 20}}>
-                <FlexColumn>
-                  {#each handlers as handler (getHandlerKey(handler))}
-                    <HandlerCard {handler} />
-                  {/each}
-                </FlexColumn>
-              </div>
-            {/if}
-          {/if}
-        {/if}
-        <h1 class="staatliches text-2xl">Details</h1>
-        <CopyValue label="Link" value={toNostrURI(nevent)} />
-        <CopyValue label="Event ID" encode={nip19.noteEncode} value={event.id} />
-        <CopyValue label="Event JSON" value={JSON.stringify(signedEvent)} />
+      {#if mentions.length > 0}
+        <h1 class="staatliches text-2xl">In this conversation</h1>
+        <p>{quantify(mentions.length, "person is", "people are")} tagged in this note.</p>
+        <div class="grid grid-cols-2 gap-2">
+          {#each mentions as pubkey}
+            <PersonBadge {pubkey} />
+          {/each}
+        </div>
       {/if}
-    </Modal>
-  {/if}
+      {#if handlers.length > 0 || handlerEvent}
+        <h1 class="staatliches text-2xl">Apps</h1>
+        {#if handlerEvent}
+          {@const [handler] = readHandlers(handlerEvent)}
+          {#if handler}
+            <p>This note was published using {displayHandler(handler)}.</p>
+            <HandlerCard {handler} />
+          {/if}
+        {/if}
+        {#if handlers.length > 0}
+          <div class="flex justify-between">
+            <p>
+              This note can also be viewed using {quantify(handlers.length, "other nostr app")}.
+            </p>
+            {#if handlersShown}
+              <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
+            {:else}
+              <Anchor underline on:click={showHandlers}>Show apps</Anchor>
+            {/if}
+          </div>
+          {#if handlersShown}
+            <div in:fly={{y: 20}}>
+              <FlexColumn>
+                {#each handlers as handler (getHandlerKey(handler))}
+                  <HandlerCard {handler} />
+                {/each}
+              </FlexColumn>
+            </div>
+          {/if}
+        {/if}
+      {/if}
+      <h1 class="staatliches text-2xl">Details</h1>
+      <CopyValue label="Link" value={toNostrURI(nevent)} />
+      <CopyValue label="Event ID" encode={nip19.noteEncode} value={event.id} />
+      <CopyValue label="Event JSON" value={JSON.stringify(signedEvent)} />
+    {/if}
+  </Modal>
 {/if}
