@@ -73,10 +73,10 @@
     userPins,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
-  import {openReplies} from "src/app/state"
   import {isLike} from "src/util/nostr"
 
   export let event: TrustedEvent
+  export let startReply: () => void
   export let showHidden = false
 
   const signedEvent = asSignedEvent(event as any)
@@ -297,7 +297,7 @@
 </script>
 
 {#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && $thunks[event.id]}
-  <NotePending {event} />
+  <NotePending {event} onAbort={startReply} />
 {:else}
   <button
     tabindex="-1"
@@ -309,9 +309,7 @@
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
           "pointer-events-none opacity-50": disableActions,
         })}
-        on:click={_ => {
-          $openReplies[event.id] = true
-        }}>
+        on:click={startReply}>
         <Icon icon="message" color={replied ? "accent" : "neutral-100"} />
         {#if $repliesCount > 0 && noteActions.includes("replies")}
           <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>

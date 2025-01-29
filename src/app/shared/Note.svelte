@@ -17,6 +17,7 @@
   export let pinned = false
   export let showEntire = false
   export let showMedia = getSetting("show_media")
+  export let showReply = false
   export let showParent = true
   export let interactive = true
 
@@ -31,6 +32,14 @@
         .of(getIdOrAddress(note), {relays: ctx.app.router.Event(note).getUrls()})
         .open()
     }
+  }
+
+  const startReply = () => {
+    showReply = true
+  }
+
+  const stopReply = () => {
+    showReply = false
   }
 
   $: hidden = $isEventMuted(note, true)
@@ -58,9 +67,9 @@
         <NoteContent {note} {depth} {showEntire} {showMedia} />
       </div>
       <div class:!pl-10={headerlessKinds.includes(note.kind)} class="pl-14 pt-4">
-        <NoteActions event={note} />
+        <NoteActions event={note} {startReply} />
       </div>
     {/if}
   </Card>
-  <NoteReply parent={note} />
+  <NoteReply parent={note} isOpen={showReply} {stopReply} />
 </div>

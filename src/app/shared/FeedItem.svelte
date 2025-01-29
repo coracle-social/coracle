@@ -13,7 +13,6 @@
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import {fly, slide} from "src/util/transition"
-  import {openReplies} from "src/app/state"
   import {quantify} from "src/util/misc"
 
   export let note
@@ -33,6 +32,7 @@
 
   let ready = false
   let event = note
+  let replyIsActive = false
   let showMutedReplies = false
   let collapsed = depth === 0
   let showHiddenReplies = anchor === getIdOrAddress(event)
@@ -45,8 +45,6 @@
   )
 
   let mutedReplies, hiddenReplies, visibleReplies
-
-  $: replyIsActive = $openReplies[event.id]
 
   $: {
     mutedReplies = []
@@ -131,7 +129,13 @@
           <AltColor background class="absolute -bottom-4 -left-4 top-0 w-1" let:isAlt />
         {/if}
       {/if}
-      <Note note={event} {showEntire} {showParent} {showMedia} {pinned} />
+      <Note
+        note={event}
+        {showEntire}
+        {showParent}
+        {showMedia}
+        {pinned}
+        bind:showReply={replyIsActive} />
       {#if !replyIsActive && (visibleReplies.length > 0 || collapsed) && !showEntire && depth > 0}
         <div class="relative">
           <AltColor

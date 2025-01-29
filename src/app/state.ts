@@ -32,8 +32,6 @@ import {
 
 export const drafts = new Map<string, string>()
 
-export const openReplies = writable<{[key: string]: boolean}>({})
-
 export const menuIsOpen = writable(false)
 
 export const searchTerm = writable("")

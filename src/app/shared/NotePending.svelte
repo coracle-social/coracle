@@ -18,43 +18,45 @@
   import {thunks, type Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
-  import {getParentIdOrAddr, LOCAL_RELAY_URL, type TrustedEvent} from "@welshman/util"
+  import {LOCAL_RELAY_URL, type TrustedEvent} from "@welshman/util"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {timestamp1} from "src/util/misc"
-  import {openReplies} from "src/app/state"
 
   const rendered = now()
 
   export let event: TrustedEvent
+  export let onAbort: () => void
 
-  $: parentId = getParentIdOrAddr(event)
+  const completed = tweened(0)
+
+  const abort = () => {
+    thunk.controller.abort()
+    onAbort()
+  }
+
   $: thunk = $thunks[event.id] as Thunk
-
   $: status = thunk?.status
   $: relays = thunk?.request?.relays.filter(r => r !== LOCAL_RELAY_URL)
   $: statuses = Object.entries($status || {})
     .filter(([k, v]) => k !== LOCAL_RELAY_URL)
     .map(([k, v]) => v)
-  $: pendings = statuses.filter(s => s.status === PublishStatus.Pending).length
+  $: pending = statuses.filter(s => s.status === PublishStatus.Pending).length
   $: failed = statuses.filter(
     s => s.status === PublishStatus.Failure || s.status === PublishStatus.Aborted,
   ).length
   $: timeout = statuses.filter(s => s.status === PublishStatus.Timeout).length
   $: success = statuses.filter(s => s.status === PublishStatus.Success).length
   $: total = relays?.length || 0
-
-  const completed = tweened(0)
+  $: isPending = pending > 0
+  $: isCompleted = total === success + failed + timeout
 
   $: {
     if (thunk && statuses.length > 0) {
-      $completed = ((total - pendings) / total) * 80
+      $completed = ((total - pending) / total) * 80
     }
   }
-
-  $: isPending = pendings > 0
-  $: isCompleted = total === success + failed + timeout
 </script>
 
 {#if thunk}
@@ -73,7 +75,7 @@
           {success}/{total} relays
         </span>
         <span class="hidden sm:inline">
-          Publishing... {total - pendings} of {total} relays
+          Publishing... {total - pending} of {total} relays
         </span>
       {:else}
         <span class="sm:hidden">
@@ -100,10 +102,7 @@
       </span>
       <button
         class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"
-        on:click={() => {
-          thunk.controller.abort()
-          $openReplies[parentId] = true
-        }}>Cancel</button>
+        on:click={abort}>Cancel</button>
     {/if}
   </div>
 {/if}

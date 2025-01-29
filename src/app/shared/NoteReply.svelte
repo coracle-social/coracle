@@ -14,15 +14,13 @@
   import Compose from "src/app/shared/Compose.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
-  import {drafts, openReplies} from "src/app/state"
+  import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
   import {getEditor} from "src/app/editor"
 
   export let parent
-  export let showBorder = false
-  export let forceOpen = false
-
-  let showOptions = false
+  export let isOpen: boolean
+  export let stopReply: () => void
 
   const nsecWarning = writable(null)
   const editorLoading = writable(false)
@@ -33,6 +31,7 @@
   )
 
   let loading
+  let showOptions = false
   let options = {warning: "", anonymous: false}
   let element: HTMLElement
   let editor: ReturnType<typeof getEditor>
@@ -99,7 +98,7 @@
       delay: $userSettings.send_delay,
     })
 
-    $openReplies[parent.id] = false
+    stopReply()
     loading = false
 
     thunk.result.then(() => {
@@ -109,8 +108,7 @@
 
   const onBodyClick = e => {
     saveDraft()
-
-    $openReplies = {}
+    stopReply()
   }
 
   const createEditor = () => {
@@ -127,20 +125,15 @@
       createEditor()
     }
   }
-
-  $: isOpen = $openReplies[parent?.id]
 </script>
 
 <svelte:body on:click={onBodyClick} />
 
-{#if isOpen || forceOpen}
+{#if isOpen}
   <div
     class="relative transition-colors"
     class:opacity-50={loading}
     class:pointer-events-none={loading}>
-    {#if showBorder}
-      <AltColor background class="absolute -top-4 z-none h-5 w-1" />
-    {/if}
     <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
