@@ -20,7 +20,7 @@
   export let shouldSort = false
   export let items: TrustedEvent[] = []
 
-  const seen = new Set<string>()
+  const timestamps = new Map<string, number>()
 
   const context = new Map<string, Set<TrustedEvent>>()
 
@@ -78,13 +78,13 @@
     const id = getIdOrAddress(event)
 
     // If we've already seen it, or it's not displayable, skip it
-    if (seen.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
+    if (timestamps.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
 
     let inserted = false
 
     if (shouldSort) {
       for (let i = 0; i < items.length; i++) {
-        if (items[i].created_at < original.created_at) {
+        if (timestamps.get(getIdOrAddress(items[i])) < original.created_at) {
           items = insert(i, event, items)
           inserted = true
           break
@@ -96,7 +96,7 @@
       items = [...items, event]
     }
 
-    seen.add(id)
+    timestamps.set(id, original.created_at)
   }
 
   const addEvents = async (events: TrustedEvent[]) => {

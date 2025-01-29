@@ -25,7 +25,7 @@
   </div>
 {/if}
 
-<NoteReducer {events} depth={1} bind:items let:event let:getContext>
+<NoteReducer {events} shouldSort depth={1} bind:items let:event let:getContext>
   <div class="flex items-center justify-between">
     {#if getContext(event).length === 0}
       <PeopleAction pubkeys={[event.pubkey]} actionText="mentioned you" />
