@@ -29,6 +29,7 @@
   const {url} = $props()
 
   const threadsPath = makeSpacePath(url, "threads")
+  const calendarPath = makeSpacePath(url, "calendar")
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
 
@@ -116,6 +117,9 @@
       </SecondaryNavItem>
       <SecondaryNavItem href={threadsPath} notification={$notifications.has(threadsPath)}>
         <Icon icon="notes-minimalistic" /> Threads
+      </SecondaryNavItem>
+      <SecondaryNavItem href={calendarPath} notification={$notifications.has(calendarPath)}>
+        <Icon icon="calendar-minimalistic" /> Calendar
       </SecondaryNavItem>
       <div class="h-2"></div>
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
