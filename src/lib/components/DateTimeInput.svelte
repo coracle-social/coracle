@@ -11,29 +11,67 @@
   let {initialValue = undefined, value = $bindable<Date | undefined>(initialValue)}: Props =
     $props()
 
-  const init = () => {
-    if (!value) {
-      value = new Date()
-      value.setMinutes(0, 0, 0)
+  const pad = (n: number) => ("00" + String(n)).slice(-2)
+
+  const defaultTime = `${pad(new Date().getHours())}:00`
+
+  const focusDate = () => element.querySelector("input")?.focus()
+
+  const syncTime = (d: Date) => {
+    if (!time) {
+      time = defaultTime
+    }
+
+    const [hours, minutes] = time.split(":").map(x => parseInt(x))
+
+    d.setHours(hours, minutes, 0, 0)
+
+    return d
+  }
+
+  const onChange = () => {
+    if (value) {
+      value = syncTime(value)
     }
   }
 
   const clear = () => {
     value = undefined
+    time = ""
+  }
+
+  let time = ""
+  let element: HTMLElement
+
+  $: {
+    if (value) {
+      value = syncTime(value)
+    }
   }
 </script>
 
-<Button class="relative" onclick={init}>
-  <DateInput format="yyyy-MM-dd HH:mm" timePrecision="minute" placeholder="" bind:value />
-  <div class="absolute right-2 top-0 flex h-12 cursor-pointer items-center gap-2">
-    {#if value}
-      <Button onclick={clear} class="h-5">
-        <Icon icon="close-circle" />
-      </Button>
-    {:else}
-      <Button class="h-5">
-        <Icon icon="calendar-minimalistic" />
-      </Button>
-    {/if}
+<div class="relative grid grid-cols-2 gap-2" bind:this={element}>
+  <div class="relative">
+    <DateInput format="yyyy-MM-dd" placeholder="" bind:value on:change={onChange} />
+    <div class="absolute right-2 top-0 flex h-12 cursor-pointer items-center gap-2">
+      {#if value}
+        <Button on:click={clear} class="h-5">
+          <Icon icon="close-circle" />
+        </Button>
+      {:else}
+        <Button on:click={focusDate} class="h-5">
+          <Icon icon="calendar-minimalistic" />
+        </Button>
+      {/if}
+    </div>
   </div>
-</Button>
+  <label class="input input-bordered flex items-center">
+    <input
+      list="time-options"
+      class="grow"
+      type="time"
+      step="300"
+      bind:value={time}
+      on:change={onChange} />
+  </label>
+</div>

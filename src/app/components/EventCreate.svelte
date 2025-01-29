@@ -105,17 +105,19 @@
     {/snippet}
   </Field>
   <Field>
+    {#snippet label()}
+      Start
+    {/snippet}
     {#snippet input()}
-      <div class="grid grid-cols-2 gap-2">
-        <div class="flex flex-col gap-1">
-          <strong>Start</strong>
-          <DateTimeInput bind:value={start} />
-        </div>
-        <div class="flex flex-col gap-1">
-          <strong>End</strong>
-          <DateTimeInput bind:value={end} />
-        </div>
-      </div>
+      <DateTimeInput bind:value={start} />
+    {/snippet}
+  </Field>
+  <Field>
+    {#snippet label()}
+      End
+    {/snippet}
+    {#snippet input()}
+      <DateTimeInput bind:value={end} />
     {/snippet}
   </Field>
   <Field>

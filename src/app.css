@@ -294,11 +294,20 @@ html {
 
 /* date input */
 
-.date-time-field {
-  @apply input input-bordered rounded px-0;
+.picker {
+  --date-picker-foreground: var(--base-content);
+  --date-picker-background: var(--base-300);
+  --date-picker-highlight-border: var(--primary);
+  --date-picker-selected-color: var(--primary-content);
+  --date-picker-selected-background: var(--primary);
 }
+
+.date-time-field {
+  @apply input input-bordered rounded-lg px-0;
+}
+
 .date-time-field input {
-  @apply !h-full !w-full !border-none !bg-inherit !text-inherit;
+  @apply !h-full !w-full !rounded-lg !border-none !bg-inherit !px-4 !text-inherit;
 }
 
 /* emoji picker */
