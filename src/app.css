@@ -61,16 +61,13 @@
   font-weight: 400;
 }
 
-body {
-  --bc-color-brand: var(--accent);
-}
-
 .staatliches {
   font-family: Staatliches;
 }
 
 :root {
   font-family: Lato;
+  --bc-color-brand: var(--accent);
 }
 
 html,

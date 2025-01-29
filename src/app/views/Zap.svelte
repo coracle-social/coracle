@@ -1,14 +1,15 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
-  import {ctx, partition, now, sortBy, tryCatch, fetchJson} from "@welshman/lib"
-  import {createEvent} from "@welshman/util"
+  import {ctx, sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
+  import {createEvent, ZAP_REQUEST} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, profilesByPubkey, displayProfileByPubkey, zappersByLnurl} from "@welshman/app"
+  import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
+  import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
   import {env, load, getSetting} from "src/engine"
 
@@ -17,140 +18,115 @@
   export let anonymous = false
   export let amount = getSetting<number>("default_zap")
 
-  let zaps = []
   let message = ""
-  let loading = false
 
-  const updateZaps = (message: string, amount: number) => {
-    let totalWeight = 0
-    const percent = getSetting("platform_zap_split") as number
+  const platformRelay = ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl()
 
-    for (const split of splits) {
-      // validate the split
-      if (split.length < 4 || split[1].length !== 64 || !split[3].match(/\d+(\.\d+)?$/)) {
-        continue
-      }
-      // format the split
-      const [pubkey, relay, weight] = [split[1], split[2], parseFloat(split[3])]
-      if (weight === 0) continue
-      // make sure we do not zap the same pubkey twice
-      if (zaps.some(z => z[0] === pubkey)) continue
-      totalWeight += weight
-      zaps.push({pubkey, relay, weight, status: "pending"})
-      // add the tip zip
-      if (percent > 0) {
-        zaps.push({
-          pubkey: env.PLATFORM_PUBKEY,
-          relay: ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl(),
-          weight: weight * percent,
-          status: "pending",
-          isTip: true,
-        })
-      }
+  const requestZap = async ({pubkey, relay, msats, zapper, relays}) => {
+    const tags = [
+      ["relays", ...relays],
+      ["amount", msats.toString()],
+      ["lnurl", zapper.lnurl],
+      ["p", pubkey],
+    ]
+
+    if (id) {
+      tags.push(["e", id])
     }
 
-    for (const zap of zaps) {
-      zap.content = zap.isTip ? "" : message
-      zap.amount = Math.round(amount * (zap.weight / totalWeight))
-      zap.zapper = $zappersByLnurl.get($profilesByPubkey.get(zap.pubkey)?.lnurl)
-      zap.relays = ctx.app.router
-        .merge([ctx.app.router.ForPubkey(zap.pubkey), ctx.app.router.FromRelays([zap.relay])])
-        .getUrls()
+    if (anonymous) {
+      tags.push(["anon"])
     }
 
-    zaps = sortBy(
-      z => -z.amount,
-      zaps.filter(zip => zip.zapper?.allowsNostr),
-    )
+    const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
+    const content = pubkey === env.PLATFORM_PUBKEY ? "" : message
+    const event = await sig.sign(createEvent(ZAP_REQUEST, {content, tags}))
+    const zapString = encodeURI(JSON.stringify(event))
+    const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
+    const res = await tryCatch(() => fetchJson(zapper.callback + qs))
+
+    return {invoice: res?.pr, error: res?.reason}
   }
 
-  const requestZaps = () =>
-    Promise.all(
-      zaps.map(async (zap: any) => {
-        const {amount, zapper, relays, content, pubkey} = zap
-        const msats = amount * 1000
-        const tags = [
-          ["relays", ...relays],
-          ["amount", msats.toString()],
-          ["lnurl", zapper.lnurl],
-          ["p", pubkey],
-        ]
-
-        if (id) {
-          tags.push(["e", id])
-        }
-
-        if (anonymous) {
-          tags.push(["anon"])
-        }
-
-        const $signer = anonymous ? Nip01Signer.ephemeral() : signer.get()
-        const event = await $signer.sign(createEvent(9734, {content, tags}))
-        const zapString = encodeURI(JSON.stringify(event))
-        const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-        const res = await tryCatch(() => fetchJson(zapper.callback + qs))
-
-        return {...zap, invoice: res?.pr, error: res?.reason}
-      }),
-    )
-
-  const confirmZap = async () => {
-    // Show loading immediately
-    loading = true
-
-    const since = now() - 30
-    const preppedZaps = await requestZaps()
-
-    // Close the router once we can show the next modal
-    router.pop()
-
-    const [ok, missingInvoice] = partition(z => z.invoice, preppedZaps)
-
-    for (const {pubkey, error} of missingInvoice) {
+  const sendZap = async ({pubkey, relays, zapper}, {invoice, error}) => {
+    if (!invoice) {
       const profileDisplay = displayProfileByPubkey(pubkey)
       const message = error || "no error given"
 
-      alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
+      return alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
     }
 
-    for (const {invoice, relays, zapper, pubkey} of ok) {
-      launchPaymentModal({invoice})
+    launchPaymentModal({invoice})
 
-      await new Promise<void>(resolve => {
-        const unsub = onModalClosed(() => {
-          resolve()
-          unsub()
-        })
+    await new Promise<void>(resolve => {
+      const unsub = onModalClosed(() => {
+        resolve()
+        unsub()
       })
+    })
 
-      load({
-        relays,
-        filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since}],
-      })
-    }
+    load({
+      relays,
+      filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since: now() - 30}],
+    })
   }
 
-  // Watch inputs and update zaps
-  $: updateZaps(message, amount)
+  const startZapping = async () => {
+    const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
+    const percent = getSetting("platform_zap_split") as number
+    const platformSplit = ["zap", env.PLATFORM_PUBKEY, platformRelay, percent * totalWeight]
+
+    for (const [_, pubkey, relay, weightString] of [...splits, platformSplit]) {
+      const weight = parseFloat(weightString)
+      const msats = 1000 * amount * (weight / totalWeight)
+
+      if (!weight || pubkey.length !== 64) continue
+
+      const profile = await loadProfile(pubkey)
+
+      if (!profile?.lnurl) continue
+
+      const zapper = await loadZapper(profile.lnurl)
+
+      if (!zapper?.allowsNostr) continue
+
+      const relays = ctx.app.router
+        .merge([ctx.app.router.ForPubkey(pubkey), ctx.app.router.FromRelays([relay])])
+        .getUrls()
+
+      const zap = {pubkey, relay, msats, zapper, relays}
+
+      await sendZap(zap, await requestZap(zap))
+    }
+
+    router.pop()
+  }
 
   // Initialize bitcoin connect
   init({appName: import.meta.env.VITE_APP_NAME})
 </script>
 
-{#if zaps.length > 0}
-  <h1 class="staatliches text-2xl">Send a zap</h1>
-  <Textarea bind:value={message} placeholder="Send a message with your zap (optional)" />
-  <Input bind:value={amount}>
-    <i slot="before" class="fa fa-bolt" />
-    <span slot="after" class="-mt-1">sats</span>
-  </Input>
-  <FieldInline>
-    <div slot="label" class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i class="fa fa-eye-slash" /> Zap anonymously
-      </div>
-      <Toggle bind:value={anonymous} />
+<h1 class="staatliches text-2xl">Send a zap</h1>
+<Textarea bind:value={message} placeholder="Send a message with your zap (optional)" />
+<Input bind:value={amount}>
+  <i slot="before" class="fa fa-bolt" />
+  <span slot="after" class="-mt-1">sats</span>
+</Input>
+<FieldInline>
+  <div slot="label" class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i class="fa fa-eye-slash" /> Zap anonymously
     </div>
-  </FieldInline>
-  <Anchor button accent {loading} on:click={confirmZap}>Zap!</Anchor>
+    <Toggle bind:value={anonymous} />
+  </div>
+</FieldInline>
+{#if splits.length > 1}
+  {@const pubkeys = splits.map(nth(1))}
+  <div class="flex items-center gap-1 text-sm">
+    <p>This note has zap splits enabled. You'll be zapping {splits.length} people:</p>
+    <Anchor modal href={router.at("people/list").qp({pubkeys}).toString()}>
+      <PersonCircles class="h-5 w-5" {pubkeys} />
+    </Anchor>
+  </div>
 {/if}
+<Anchor button accent on:click={startZapping}>Zap!</Anchor>
