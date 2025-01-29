@@ -185,45 +185,53 @@
   @apply -m-1 min-h-12 p-1;
 }
 
-.tiptap[contenteditable="true"] {
+.tiptap {
+  --tiptap-object-bg: var(--base-100);
+  --tiptap-object-fg: var(--base-content);
+  --tiptap-active-bg: var(--primary);
+  --tiptap-active-fg: var(--primary-content);
+}
+
+.tiptap-suggestions {
+  --tiptap-object-bg: var(--base-100);
+  --tiptap-object-fg: var(--base-content);
+  --tiptap-active-bg: var(--base-300);
+  --tiptap-active-fg: var(--base-content);
+}
+
+.tiptap {
   @apply max-h-[350px] overflow-y-auto p-2 px-4;
 }
 
-.chat-editor .tiptap[contenteditable="true"] {
-  @apply rounded-box bg-base-300;
+.tiptap p.is-editor-empty:first-child::before {
+  opacity: 40%;
 }
 
-.input-editor .tiptap[contenteditable="true"] {
-  @apply input input-bordered h-auto p-[.65rem];
+.chat-editor .tiptap {
+  @apply rounded-box bg-base-300 pr-12;
 }
 
-.note-editor .tiptap[contenteditable="true"] {
+.note-editor .tiptap {
+  --tiptap-object-bg: var(--base-200);
   @apply input input-bordered h-auto min-h-32 rounded-box p-[.65rem] pb-6;
 }
 
-.tiptap pre code {
-  @apply link-content block w-full;
+.input-editor .tiptap {
+  --tiptap-object-bg: var(--base-200);
+  @apply input input-bordered h-auto p-[.65rem];
 }
 
-.tiptap p code {
-  @apply link-content;
-}
+/* link-content, based on tiptap */
 
-.link-content,
-.tiptap [tag] {
-  @apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap rounded bg-neutral px-1 text-neutral-content no-underline;
-}
-
-.link-content.link-content-selected {
-  @apply bg-primary text-primary-content;
-}
-
-.tiptap p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-  opacity: 50%;
+.link-content {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 3px;
+  padding: 0 0.25rem;
+  background-color: var(--base-100);
+  color: var(--base-content);
 }
 
 /* date input */
@@ -247,20 +255,4 @@ emoji-picker {
   --input-border-color: var(--base-100);
   --input-font-color: var(--base-content);
   --outline-color: var(--base-100);
-}
-
-/* tiptap */
-
-.tiptap {
-  --tiptap-object-bg: var(--base-100);
-  --tiptap-object-fg: var(--base-content);
-  --tiptap-active-bg: var(--primary);
-  --tiptap-active-fg: var(--primary-content);
-}
-
-.tiptap-suggestions {
-  --tiptap-object-bg: var(--base-100);
-  --tiptap-object-fg: var(--base-content);
-  --tiptap-active-bg: var(--base-300);
-  --tiptap-active-fg: var(--base-content);
 }
