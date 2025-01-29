@@ -24,7 +24,7 @@
 
 <FlexColumn>
   {#each notifications as [seconds, events], i (seconds)}
-    <NotificationItem verb="reacted" depth={0} {notifications} {interval} {events} {i} />
+    <NotificationItem depth={0} {notifications} {interval} {events} {i} />
   {:else}
     <p class="py-12 text-center">No notifications found - check back later!</p>
   {/each}
