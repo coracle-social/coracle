@@ -1,7 +1,8 @@
 <script lang="ts">
   import {ago} from "@welshman/lib"
   import FeedItem from "src/app/shared/FeedItem.svelte"
-  import NoteActivity from "src/app/shared/NoteActivity.svelte"
+  import NoteInteractions from "src/app/shared/NoteInteractions.svelte"
+  import NoteReactions from "src/app/shared/NoteReactions.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import {formatTimestampAsDate} from "src/util/misc"
 
@@ -24,7 +25,11 @@
   </div>
 {/if}
 
-<NoteReducer {events} shouldAwait shouldSort depth={1} bind:items let:event let:getContext>
-  <NoteActivity context={getContext(event)} {kind} {event} />
+<NoteReducer shouldAwait shouldSort {events} depth={1} bind:items let:event let:getContext>
+  {#if kind === "reactions"}
+    <NoteReactions context={getContext(event)} {event} />
+  {:else}
+    <NoteInteractions context={getContext(event)} {event} />
+  {/if}
   <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>
