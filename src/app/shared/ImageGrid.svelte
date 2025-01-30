@@ -29,7 +29,7 @@
     bind:this={grid}
     class={cx(
       "grid-cols-" + columns,
-      "relative grid cursor-pointer gap-1 overflow-hidden rounded-lg bg-black",
+      "relative my-2 grid cursor-pointer gap-1 overflow-hidden rounded-lg bg-black",
     )}>
     <button
       class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
