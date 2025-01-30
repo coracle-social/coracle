@@ -263,7 +263,7 @@ export const defaultSettings = {
   send_delay: 0, // undo send delay in ms
   pow_difficulty: 0,
   muted_words: [],
-  load_muted_replies: true,
+  ignore_muted_content: true,
   hide_sensitive: true,
   report_analytics: true,
   min_wot_score: 0,
@@ -366,7 +366,8 @@ export const isEventMuted = withGetter(
 
         const {roots, replies} = getReplyTagValues(e.tags)
 
-        if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x))) return true
+        if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x)))
+          return true
 
         if (regex) {
           if (e.content?.toLowerCase().match(regex)) return true

@@ -212,7 +212,7 @@
               {/each}
             {/key}
           {/if}
-          {#if showHiddenReplies && mutedReplies.length > 0 && $userSettings.load_muted_replies}
+          {#if showHiddenReplies && mutedReplies.length > 0 && !$userSettings.ignore_muted_content}
             <button
               class="cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {

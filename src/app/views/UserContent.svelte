@@ -66,10 +66,7 @@
         If enabled, content flagged by the author as potentially sensitive will be hidden.
       </p>
     </FieldInline>
-    <FieldInline label="Load muted replies">
-      <Toggle bind:value={values.load_muted_replies} />
-      <p slot="info">If enabled, muted replies will be loaded.</p>
-    </FieldInline>
+
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Minimum WoT score</strong>
@@ -103,6 +100,10 @@
         termToItem={identity} />
       <p slot="info">Notes containing these words will be hidden by default.</p>
     </Field>
+    <FieldInline label="Ignore muted content">
+      <Toggle bind:value={values.ignore_muted_content} />
+      <p slot="info">If enabled, muted replies will not load.</p>
+    </FieldInline>
   </div>
   <Footer>
     <Anchor grow button tag="button" type="submit">Save</Anchor>
