@@ -22,14 +22,12 @@
 
 <script lang="ts">
   import cx from "classnames"
-  import {onMount} from "svelte"
   import {imgproxy} from "src/engine"
   import {ensurePlural} from "@welshman/lib"
 
   export let src
   export let onClick = undefined
 
-  let element
   let i = 0
   let loading = true
   const urls = ensurePlural(src)
@@ -39,19 +37,13 @@
       i++
     }
   }
-
-  onMount(() => {
-    element.addEventListener("load", () => {
-      loading = false
-    })
-  })
 </script>
 
 <img
   {...$$props}
   class:hidden={loading}
-  bind:this={element}
   on:error={onError}
+  on:load={() => (loading = false)}
   on:click={onClick}
   src={imgproxy(urls[i])} />
 
