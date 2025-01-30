@@ -2,13 +2,7 @@
   import {onMount, onDestroy} from "svelte"
   import {identity, sortBy, uniqBy, ctx} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    getParentIdsAndAddrs,
-    getIdAndAddress,
-    getIdOrAddress,
-    getIdFilters,
-    getReplyTagValues,
-  } from "@welshman/util"
+  import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
   import {load} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -27,9 +21,9 @@
       return
     }
 
-    const ids = getParentIdsAndAddrs(event)
+    const {roots, replies} = getReplyTagValues(event.tags)
     const seen = new Set(getThread().flatMap(getIdAndAddress))
-    const filteredIds = ids.filter(id => id && !seen.has(id))
+    const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
       load({
@@ -48,12 +42,12 @@
   const getThread = () => [root, ...ancestors, parent].filter(identity)
 
   const addToThread = (newEvent: TrustedEvent) => {
-    const ids = getIdOrAddress(newEvent)
+    const ids = getIdAndAddress(newEvent)
     const {roots, replies} = getReplyTagValues($event.tags)
 
-    if (replies.find(id => ids.includes(id))) {
+    if (replies.some(id => ids.includes(id))) {
       parent = newEvent
-    } else if (roots.find(id => ids.includes(id))) {
+    } else if (roots.some(id => ids.includes(id))) {
       root = newEvent
     } else {
       ancestors = sortBy(
