@@ -22,6 +22,7 @@
       noScroll>
       <Image
         class="m-auto h-full max-w-full object-contain"
+        style="max-width: 80%;"
         src={item?.toString()}
         onClick={e => e.stopPropagation()} />
     </Carousel>
