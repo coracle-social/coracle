@@ -129,6 +129,7 @@
   const createEditor = () => {
     editor = getEditor({
       element,
+      uploading: editorLoading,
       submit: send,
       autofocus: true,
       content: drafts.get(parent.id) || "",
