@@ -1,23 +1,27 @@
 <style>
-  @keyframes placeholder {
-    0% {
-      opacity: 0.1;
-    }
-
-    100% {
-      opacity: 0.2;
-    }
+  .shimmer {
+    background: linear-gradient(
+      to right,
+      rgba(246, 247, 248, 0.4) 8%,
+      rgba(209, 211, 219, 0.4) 18%,
+      rgba(246, 247, 248, 0.4) 33%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
   }
 
-  .placeholder {
-    animation-name: placeholder;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 </style>
 
 <script lang="ts">
+  import cx from "classnames"
   import {onMount} from "svelte"
   import {imgproxy} from "src/engine"
   import {ensurePlural} from "@welshman/lib"
@@ -53,6 +57,10 @@
 
 {#if loading}
   <slot name="placeholder">
-    <div class="placeholder h-48 rounded bg-neutral-600" />
+    <div
+      {...$$props}
+      on:click={onClick}
+      class={cx($$props.class, "placeholder shimmer h-full min-h-72 bg-neutral-600")}>
+    </div>
   </slot>
 {/if}
