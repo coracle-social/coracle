@@ -102,7 +102,7 @@
     </Field>
     <FieldInline label="Ignore muted content">
       <Toggle bind:value={values.ignore_muted_content} />
-      <p slot="info">If enabled, muted replies will not load.</p>
+      <p slot="info">If enabled, muted replies will be ignored.</p>
     </FieldInline>
   </div>
   <Footer>
