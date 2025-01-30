@@ -366,9 +366,7 @@ export const isEventMuted = withGetter(
 
         const {roots, replies} = getReplyTagValues(e.tags)
 
-        if ([e.id, e.pubkey, ...roots, ...replies].some(x => $userMutes.has(x))) return true
-
-        if ($pubkey === e.pubkey) return false
+        if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x))) return true
 
         if (regex) {
           if (e.content?.toLowerCase().match(regex)) return true
