@@ -9,7 +9,14 @@
   import {derived} from "svelte/store"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {ensureUnwrapped, getSetting, isEventMuted, loadEvent, sortEventsDesc} from "src/engine"
+  import {
+    ensureUnwrapped,
+    getSetting,
+    isEventMuted,
+    loadEvent,
+    sortEventsDesc,
+    userSettings,
+  } from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -205,7 +212,7 @@
               {/each}
             {/key}
           {/if}
-          {#if showHiddenReplies && mutedReplies.length > 0}
+          {#if showHiddenReplies && mutedReplies.length > 0 && !$userSettings.ignore_muted_content}
             <button
               class="cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
               on:click={() => {
