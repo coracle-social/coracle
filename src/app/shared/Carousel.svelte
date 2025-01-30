@@ -1,15 +1,3 @@
-<style>
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* For IE, Edge and Firefox */
-  .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-</style>
-
 <script lang="ts">
   import {onMount} from "svelte"
 
@@ -17,6 +5,7 @@
   export let onClose: () => void = undefined
   export let currentIndex = 0
   export let keyboardShortcut = false
+  export let noScroll = false
 
   let carouselElement: HTMLElement
   let container: HTMLElement
@@ -32,6 +21,7 @@
   }
 
   function handleScroll(event: WheelEvent | TouchEvent) {
+    if (noScroll) return event.preventDefault()
     if (items.length > 1 && currentIndex !== items.length - 1) {
       event.stopPropagation()
     }
