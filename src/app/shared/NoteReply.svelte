@@ -14,6 +14,7 @@
   import {makePow} from "src/util/pow"
   import type {ProofOfWork} from "src/util/pow"
   import {slide} from "src/util/transition"
+  import {showWarning} from "src/partials/Toast.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
@@ -21,7 +22,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
-  import {makeEditor} from "src/app/editor"
+  import {makeEditor, removeBlobs} from "src/app/editor"
 
   export let parent
   export let replyIsOpen: boolean
@@ -29,7 +30,8 @@
   export let onReplyPublish: (thunk: Thunk) => void
 
   const nsecWarning = writable(null)
-  const editorLoading = writable(false)
+  const uploading = writable(false)
+  const uploadError = writable("")
 
   $: mentions = without(
     [$session?.pubkey],
@@ -60,6 +62,8 @@
   }
 
   const saveDraft = () => {
+    $uploading = false
+    removeBlobs(editor)
     drafts.set(parent.id, editor.getHTML())
   }
 
@@ -72,7 +76,7 @@
   }
 
   const send = async ({skipNsecWarning = false} = {}) => {
-    if ($editorLoading) return
+    if ($uploading) return
 
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
@@ -121,12 +125,20 @@
   const editor = makeEditor({
     submit: send,
     autofocus: true,
+    uploading,
+    uploadError,
     content: drafts.get(parent.id) || "",
   })
 
   $: {
     if (replyIsOpen) {
       saveDraft()
+    }
+  }
+
+  $: {
+    if ($uploadError) {
+      showWarning($uploadError)
     }
   }
 
@@ -148,11 +160,11 @@
           <EditorContent {editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
-                disabled={$editorLoading}
+                disabled={$uploading}
                 class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all"
-                class:hover:bg-accent={!$editorLoading}
+                class:hover:bg-accent={!$uploading}
                 on:click={() => send()}>
-                {#if loading || $editorLoading}
+                {#if loading || $uploading}
                   <i class="fa fa-circle-notch fa-spin" />
                 {:else}
                   <i class="fa fa-paper-plane" />
@@ -162,6 +174,7 @@
           </EditorContent>
         </div>
         <div class="h-px" />
+
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">

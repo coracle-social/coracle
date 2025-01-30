@@ -36,6 +36,7 @@
   export let pubkey = null
 
   const uploading = writable(false)
+  const uploadError = writable("")
   const wordCount = writable(0)
   const charCount = writable(0)
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
@@ -207,6 +208,7 @@
 
   const editor = makeEditor({
     uploading,
+    uploadError,
     content: drafts.get("notecreate") || "",
     submit: onSubmit,
     autofocus: true,
@@ -245,6 +247,12 @@
       pow?.worker.terminate()
     }
   })
+
+  $: {
+    if ($uploadError) {
+      showWarning($uploadError)
+    }
+  }
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
@@ -295,9 +303,9 @@
             {#if publishing === "signing"}
               <i class="fa fa-circle-notch fa-spin" /> Signing your note...
             {:else if publishing === "pow"}
-              <i class="fa fa-circle-notch fa-spin" /> Generating work...
+              <i class="fa fa-circle-notch fa-spin" /> Generating Work...
             {:else}
-              <i class="fa fa-circle-notch fa-spin" /> Uploading files...
+              <i class="fa fa-circle-notch fa-spin" /> Uploading media...
             {/if}
           {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
             Schedule
