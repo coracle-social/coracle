@@ -95,7 +95,7 @@
     "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
     {#if isLinkGrid(parsed)}
-      <ImageGrid value={parsed.value} onClick={expand} />
+      <ImageGrid value={parsed.value} onClick={expand} {showMedia} />
     {:else if isNewline(parsed)}
       <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
