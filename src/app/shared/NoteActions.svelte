@@ -37,6 +37,7 @@
     isChildOf,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
+  import {isLike, noteKinds} from "src/util/nostr"
   import {formatSats, pluralize, quantify} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -71,7 +72,6 @@
     userPins,
   } from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
-  import {isLike} from "src/util/nostr"
 
   export let event: TrustedEvent
   export let onReplyStart: () => void
@@ -188,7 +188,7 @@
     .filter(e => e.kind === 9735)
     .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
-  $: replies = sortEventsDesc(children.filter(e => e.kind === NOTE))
+  $: replies = sortEventsDesc(children.filter(e => noteKinds.includes(e.kind)))
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length

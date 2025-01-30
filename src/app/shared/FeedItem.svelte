@@ -1,12 +1,13 @@
 <script lang="ts">
   import {ctx, remove, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
-  import {getIdOrAddress, getReplyFilters, isChildOf, NOTE} from "@welshman/util"
+  import {getIdOrAddress, getReplyFilters, isChildOf} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
+  import {noteKinds} from "src/util/nostr"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {
@@ -57,7 +58,7 @@
   }
 
   const replies = derived(deriveEvents(repository, {filters: getReplyFilters([event])}), events =>
-    sortEventsDesc(events.filter(e => e.kind === NOTE && isChildOf(e, event))),
+    sortEventsDesc(events.filter(e => noteKinds.includes(e.kind) && isChildOf(e, event))),
   )
 
   let mutedReplies, hiddenReplies, visibleReplies
