@@ -62,8 +62,8 @@
 </script>
 
 <div class="flex flex-col gap-4 overflow-hidden text-ellipsis">
-  <h3 class="staatliches text-2xl">{title}</h3>
-  {#if (summary || alt) && (!showEntire || !note.content)}
+  <h3 class="text-2xl">{title}</h3>
+  {#if summary || alt}
     <p>{summary || alt}</p>
   {/if}
   {#if showMedia && image && urlIsMedia(image)}

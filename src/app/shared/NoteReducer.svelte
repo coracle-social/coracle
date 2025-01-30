@@ -18,6 +18,7 @@
   export let hideReplies = false
   export let showDeleted = false
   export let shouldSort = false
+  export let shouldAwait = false
   export let items: TrustedEvent[] = []
 
   const timestamps = new Map<string, number>()
@@ -102,7 +103,11 @@
   const addEvents = async (events: TrustedEvent[]) => {
     for (const event of events) {
       if (!shouldSkip(event)) {
-        addEvent(event)
+        const promise = addEvent(event)
+
+        if (shouldAwait) {
+          await promise
+        }
       }
     }
   }
