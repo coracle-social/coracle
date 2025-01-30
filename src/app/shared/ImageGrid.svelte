@@ -1,12 +1,11 @@
 <script lang="ts">
-  import cx from "classnames"
-  import {fade} from "svelte/transition"
   import type {ParsedLinkGridValue} from "@welshman/content"
-  import {router} from "src/app/util"
-  import Carousel from "src/app/shared/Carousel.svelte"
-  import Image from "src/partials/Image.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import {displayUrl} from "@welshman/lib"
+  import cx from "classnames"
+  import {router} from "src/app/util"
+  import Anchor from "src/partials/Anchor.svelte"
+  import Image from "src/partials/Image.svelte"
+  import ImageZoom from "./ImageZoom.svelte"
 
   export let value: ParsedLinkGridValue
   export let showMedia = false
@@ -67,22 +66,4 @@
   {/each}
 {/if}
 
-{#if zoomed !== undefined}
-  <div
-    class="z-zoom fixed left-0 top-0 h-full w-full bg-black"
-    transition:fade={{duration: 200}}
-    on:scroll|preventDefault|stopPropagation
-    on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
-    <Carousel
-      keyboardShortcut
-      items={links}
-      currentIndex={zoomed}
-      let:item
-      onClose={() => (zoomed = undefined)}>
-      <Image
-        class="m-auto h-full max-w-full object-contain"
-        src={item?.toString()}
-        onClick={e => e.stopPropagation()} />
-    </Carousel>
-  </div>
-{/if}
+<ImageZoom {links} bind:zoomed />
