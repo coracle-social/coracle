@@ -11,6 +11,8 @@
   let scale = 0.1
   let height: number
 
+  const copy = () => clip(code)
+
   onMount(() => {
     QRCode.toCanvas(canvas, code)
 
@@ -22,7 +24,7 @@
   })
 </script>
 
-<Button on:click={() => clip(code)}>
+<Button class="max-w-full" on:click={copy}>
   <div bind:this={wrapper} style={`height: ${height}px`}>
     <canvas
       class="rounded-box"

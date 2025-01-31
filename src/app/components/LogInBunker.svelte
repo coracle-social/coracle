@@ -129,7 +129,7 @@
     </div>
   </ModalHeader>
   {#if !loading && url}
-    <div class="w-xs m-auto" out:slideAndFade>
+    <div class="flex justify-center" out:slideAndFade>
       <QRCode code={url} />
     </div>
   {/if}
