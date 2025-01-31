@@ -24,71 +24,64 @@
     .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
     .filter(identity)
   $: zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
+
+  $: created_at = max(pluck("created_at", context))
 </script>
 
-{#if zaps.length > 0}
-  {@const created_at = max(
-    pluck(
-      "created_at",
-      zaps.map(z => z.request),
-    ),
-  )}
-  {@const pubkeys = uniq(zaps.map(z => z.request.pubkey).filter(identity))}
-  <div class="flex justify-between">
-    {#if pubkeys.length === 1}
-      {@const {pubkey, content} = zaps[0].request}
-      <p class="flex shrink-0 items-center gap-1 text-neutral-300">
-        <Icon icon="bolt" />
-        <strong>{zapsTotal}</strong> sats from
-        <PersonLink {pubkey} />
-        <i>{content.length > 30 ? content.slice(0, 30) + "..." : content}</i>
-      </p>
-    {:else}
-      <div class="flex flex-wrap items-center gap-1 text-neutral-300">
-        <div class="flex items-center gap-1">
-          <Icon icon="bolt" />
-          <strong>{zapsTotal}</strong> sats from {pubkeys.length} people:
-        </div>
-        {#each groupBy(z => z.request.content, zaps) as [content, zapEvents] (content)}
-          {@const pubkeys = zapEvents.map(z => z.request.pubkey)}
-          <Anchor
-            modal
-            href={router.at("people/list").qp({pubkeys}).toString()}
-            class="flex items-center gap-1 rounded-full bg-neutral-700-l text-sm">
-            {content}
-            <PersonCircles class="h-5 w-5" {pubkeys} />
-          </Anchor>
-        {/each}
-      </div>
-    {/if}
-    <small class="shrink-0">{formatTimestamp(created_at)}</small>
-  </div>
-{/if}
-{#if reposts.length > 0}
-  {@const pubkeys = getPubkeys(reposts)}
-  {@const created_at = max(pluck("created_at", reposts))}
-  <div class="flex justify-between">
-    <p class="flex items-center gap-1 text-neutral-300">
-      <i class="fa fa-rotate" />
-      Reposted by
+<div>
+  <small class="float-end">{formatTimestamp(created_at)}</small>
+  <div class="text-sm">
+    {#if zaps.length > 0}
+      {@const pubkeys = uniq(zaps.map(z => z.request.pubkey).filter(identity))}
       {#if pubkeys.length === 1}
-        <PersonLink pubkey={pubkeys[0]} />
+        {@const {pubkey, content} = zaps[0].request}
+        <p class="flex shrink-0 items-center gap-1 text-neutral-300">
+          <Icon icon="bolt" />
+          <strong>{zapsTotal}</strong> sats from
+          <PersonLink {pubkey} />
+          <i>{content.length > 30 ? content.slice(0, 30) + "..." : content}</i>
+        </p>
       {:else}
-        <Anchor modal href={router.at("people/list").qp({pubkeys}).toString()}>
-          {pubkeys.length} people
-        </Anchor>
+        <div class="flex flex-wrap items-center gap-1 text-neutral-300">
+          <div class="flex items-center gap-1">
+            <Icon icon="bolt" />
+            <strong>{zapsTotal}</strong> sats from {pubkeys.length} people:
+          </div>
+          {#each groupBy(z => z.request.content, zaps) as [content, zapEvents] (content)}
+            {@const pubkeys = zapEvents.map(z => z.request.pubkey)}
+            <Anchor
+              modal
+              href={router.at("people/list").qp({pubkeys}).toString()}
+              class="flex items-center gap-1 rounded-full bg-neutral-700-l px-2 py-1 text-sm">
+              {#if !content}
+                <Icon icon="heart" />
+              {:else}
+                {content}
+              {/if}
+              <PersonCircles class="h-5 w-5" {pubkeys} />
+            </Anchor>
+          {/each}
+        </div>
       {/if}
-    </p>
-    <small class="shrink-0">{formatTimestamp(created_at)}</small>
-  </div>
-{/if}
-{#if reactions.length > 0}
-  {@const created_at = max(pluck("created_at", reactions))}
-  <div class="flex items-center justify-between">
-    {#if reactions.length === 1}
-      {@const {pubkey, content} = reactions[0]}
-      <div class="flex items-center justify-between">
-        <p class="flex shrink-0 flex-wrap items-center gap-1 text-neutral-300">
+    {/if}
+    {#if reposts.length > 0}
+      {@const pubkeys = getPubkeys(reposts)}
+      <p class="mt-4 flex items-center gap-1 text-neutral-300 first:mt-0">
+        <i class="fa fa-rotate" />
+        Reposted by
+        {#if pubkeys.length === 1}
+          <PersonLink pubkey={pubkeys[0]} />
+        {:else}
+          <Anchor modal href={router.at("people/list").qp({pubkeys}).toString()}>
+            {pubkeys.length} people
+          </Anchor>
+        {/if}
+      </p>
+    {/if}
+    {#if reactions.length > 0}
+      {#if reactions.length === 1}
+        {@const {pubkey, content} = reactions[0]}
+        <p class="mt-4 flex shrink-0 flex-wrap items-center gap-1 text-neutral-300 first:mt-0">
           <PersonLink {pubkey} />
           reacted with
           {#if content === "+"}
@@ -97,26 +90,25 @@
             {content}
           {/if}
         </p>
-      </div>
-    {:else}
-      <p class="flex flex-wrap items-center gap-1 text-neutral-300">
-        {reactions.length} people reacted:
-        {#each groupBy(e => e.content, reactions) as [content, events] (content)}
-          {@const pubkeys = getPubkeys(events)}
-          <Anchor
-            class="flex items-center gap-1 rounded-full bg-neutral-700-l text-sm"
-            modal
-            href={router.at("people/list").qp({pubkeys}).toString()}>
-            {#if content === "+"}
-              <Icon icon="heart" />
-            {:else}
-              {content}
-            {/if}
-            <PersonCircles class="h-5 w-5" {pubkeys} />
-          </Anchor>
-        {/each}
-      </p>
+      {:else}
+        <p class="mt-4 flex flex-wrap items-center gap-1 text-neutral-300 first:mt-0">
+          {reactions.length} people reacted:
+          {#each groupBy(e => e.content, reactions) as [content, events] (content)}
+            {@const pubkeys = getPubkeys(events)}
+            <Anchor
+              class="flex items-center gap-1 rounded-full bg-neutral-700-l px-2 py-1 text-sm"
+              modal
+              href={router.at("people/list").qp({pubkeys}).toString()}>
+              {#if content === "+"}
+                <Icon icon="heart" />
+              {:else}
+                {content}
+              {/if}
+              <PersonCircles class="h-5 w-5" {pubkeys} />
+            </Anchor>
+          {/each}
+        </p>
+      {/if}
     {/if}
-    <small class="shrink-0">{formatTimestamp(created_at)}</small>
   </div>
-{/if}
+</div>
