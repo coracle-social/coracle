@@ -10,7 +10,7 @@
 
 {#if zoomed !== undefined}
   <div
-    class="fixed left-0 top-0 z-zoom h-full w-full overflow-auto bg-black"
+    class="z-zoom fixed left-0 top-0 h-full w-full overflow-auto bg-black outline-none"
     transition:fade={{duration: 200}}
     on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
     <Carousel
