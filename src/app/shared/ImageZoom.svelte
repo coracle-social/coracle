@@ -10,7 +10,7 @@
 
 {#if zoomed !== undefined}
   <div
-    class="z-zoom fixed left-0 top-0 h-full w-full overflow-auto bg-black"
+    class="fixed left-0 top-0 z-zoom h-full w-full overflow-auto bg-black"
     transition:fade={{duration: 200}}
     on:click|preventDefault|stopPropagation={() => (zoomed = undefined)}>
     <Carousel
@@ -21,7 +21,7 @@
       onClose={() => (zoomed = undefined)}
       noScroll>
       <Image
-        class="m-auto h-full max-w-full object-contain"
+        class="m-auto h-full max-w-full rounded-lg object-contain"
         style="max-width: 80%;"
         src={item?.toString()}
         onClick={e => e.stopPropagation()} />
