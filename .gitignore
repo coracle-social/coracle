@@ -1,24 +1,9 @@
-node_modules
-
-# Output
-.output
-.vercel
-/.svelte-kit
-/build
-
-# OS
-.DS_Store
-Thumbs.db
-
 # Env
 .env.local
 
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-
-# Android
-.idea
 
 # Generated assets
 static/favicon.ico
@@ -29,3 +14,51 @@ static/apple-touch-icon-180x180.png
 static/maskable-icon-512x512.png
 src/assets/icons/*.webp
 manifest.webmanifest
+
+# Capacitor
+ios/App/public/
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/DerivedData/
+android/app/src/main/assets/public/
+
+# Web/JavaScript
+node_modules/
+build/
+.svelte-kit/
+
+# iOS
+xcuserdata/
+*.xcworkspace/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.xcuserstate
+*.dSYM.zip
+*.dSYM
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+.gradle/
+local.properties
+proguard/
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# OS generated
+.DS_Store
+Thumbs.db
