@@ -21,13 +21,13 @@
   }
 
   function handleScroll(event: WheelEvent | TouchEvent) {
-    if (noScroll) return event.preventDefault()
     if (items.length > 1 && currentIndex !== items.length - 1) {
       event.stopPropagation()
     }
     if (carouselElement) {
       currentIndex = Math.round(carouselElement.scrollLeft / carouselElement.offsetWidth)
     }
+    if (noScroll) event.preventDefault()
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -50,7 +50,7 @@
 </script>
 
 <div
-  class="group relative h-full w-full outline-none"
+  class="group relative h-full w-full"
   bind:this={container}
   on:keydown|stopPropagation|preventDefault={handleKeydown}
   tabindex="-1"
@@ -80,27 +80,25 @@
           on:click={() => scrollToIndex(index)} />
       {/each}
     </div>
-    {#if currentIndex > 0}
-      <div
-        class="absolute inset-y-0 left-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
-        <button
-          class="bg-primary rounded-full p-2 text-white"
-          on:click|stopPropagation={() => scrollToIndex(Math.max(currentIndex - 1, 0))}>
-          <i class="fas fa-chevron-left text-2xl"></i>
-        </button>
-      </div>
-    {/if}
-    {#if currentIndex < items.length - 1}
-      <div
-        class="absolute inset-y-0 right-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
-        <button
-          class="bg-primary rounded-full p-2 text-white"
-          on:click|stopPropagation={() =>
-            scrollToIndex(Math.min(currentIndex + 1, items.length - 1))}>
-          <i class="fas fa-chevron-right text-2xl"></i>
-        </button>
-      </div>
-    {/if}
+    <div
+      class="absolute inset-y-0 left-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100"
+      class:group-hover:opacity-0={currentIndex == 0}>
+      <button
+        class="bg-primary rounded-full p-2 text-white"
+        on:click|stopPropagation={() => scrollToIndex(Math.max(currentIndex - 1, 0))}>
+        <i class="fas fa-chevron-left text-2xl"></i>
+      </button>
+    </div>
+    <div
+      class="absolute inset-y-0 right-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100"
+      class:group-hover:opacity-0={currentIndex == items.length - 1}>
+      <button
+        class="bg-primary rounded-full p-2 text-white"
+        on:click|stopPropagation={() =>
+          scrollToIndex(Math.min(currentIndex + 1, items.length - 1))}>
+        <i class="fas fa-chevron-right text-2xl"></i>
+      </button>
+    </div>
   {/if}
   <button
     class="absolute right-0 top-0 m-1 flex h-6 w-6 cursor-pointer items-center justify-center
