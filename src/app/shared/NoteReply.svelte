@@ -21,7 +21,9 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
-  import {getEditor} from "src/app/editor"
+  import {getEditor, removeBlobs} from "src/app/editor"
+  import Anchor from "src/partials/Anchor.svelte"
+  import {fly} from "svelte/transition"
 
   export let parent
   export let replyIsOpen: boolean
@@ -29,7 +31,8 @@
   export let onReplyPublish: (thunk: Thunk) => void
 
   const nsecWarning = writable(null)
-  const editorLoading = writable(false)
+  const uploading = writable(false)
+  const uploadError = writable("")
 
   $: mentions = without(
     [$session?.pubkey],
@@ -63,6 +66,8 @@
 
   const saveDraft = () => {
     if ($editor) {
+      removeBlobs($editor)
+      $uploading = false
       drafts.set(parent.id, $editor.getHTML())
     }
   }
@@ -76,7 +81,7 @@
   }
 
   const send = async ({skipNsecWarning = false} = {}) => {
-    if ($editorLoading) return
+    if ($uploading) return
 
     const content = $editor.getText({blockSeparator: "\n"}).trim()
 
@@ -129,7 +134,8 @@
   const createEditor = () => {
     editor = getEditor({
       element,
-      uploading: editorLoading,
+      uploading,
+      uploadError,
       submit: send,
       autofocus: true,
       content: drafts.get(parent.id) || "",
@@ -162,11 +168,11 @@
           <Compose bind:element editor={$editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
-                disabled={$editorLoading}
+                disabled={$uploading}
                 class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all"
-                class:hover:bg-accent={!$editorLoading}
+                class:hover:bg-accent={!$uploading}
                 on:click={() => send()}>
-                {#if loading || $editorLoading}
+                {#if loading || $uploading}
                   <i class="fa fa-circle-notch fa-spin" />
                 {:else}
                   <i class="fa fa-paper-plane" />
@@ -176,6 +182,17 @@
           </Compose>
         </div>
         <div class="h-px" />
+        {#if $uploadError}
+          <div
+            transition:fly
+            class="flex items-center justify-between bg-accent p-2 text-neutral-100">
+            <div class="flex items-center">
+              <i class="fa fa-exclamation-triangle" />
+              <span class="ml-2">{$uploadError}</span>
+            </div>
+            <Anchor button on:click={() => uploadError.set("")}>Dismiss</Anchor>
+          </div>
+        {/if}
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
