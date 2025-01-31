@@ -31,11 +31,13 @@
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
+  import {fly} from "svelte/transition"
 
   export let quote = null
   export let pubkey = null
 
   const uploading = writable(false)
+  const uploadError = writable("")
   const wordCount = writable(0)
   const charCount = writable(0)
 
@@ -225,6 +227,7 @@
     editor = getEditor({
       element,
       uploading,
+      uploadError,
       content: drafts.get("notecreate") || "",
       submit: onSubmit,
       autofocus: true,
@@ -318,6 +321,17 @@
         </button>
       </div>
     </FlexColumn>
+    {#if $uploadError}
+      <div
+        transition:fly
+        class="flex items-center justify-between rounded-md bg-accent p-2 text-neutral-100">
+        <div class="flex items-center">
+          <i class="fa fa-exclamation-triangle" />
+          <span class="ml-2">{$uploadError}</span>
+        </div>
+        <Anchor button on:click={() => uploadError.set("")}>Dismiss</Anchor>
+      </div>
+    {/if}
   </Content>
 </form>
 
