@@ -192,10 +192,10 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 
 // Feeds
 
-export type FeedRequestHandlerOptions = {forcePlatform: boolean}
+export type FeedRequestHandlerOptions = {forcePlatform: boolean; signal: AbortSignal}
 
 export const makeFeedRequestHandler =
-  ({forcePlatform}: FeedRequestHandlerOptions) =>
+  ({forcePlatform, signal}: FeedRequestHandlerOptions) =>
   async ({relays, filters, onEvent}: RequestOpts) => {
     const tracker = new Tracker()
     const loadOptions = {
@@ -205,16 +205,15 @@ export const makeFeedRequestHandler =
       skipCache: true,
       delay: 0,
     }
-
     if (relays?.length > 0) {
-      await load({...loadOptions, filters, relays, authTimeout: 3000})
+      await load({...loadOptions, filters, relays, signal, authTimeout: 3000})
     } else {
       // Break out selections by relay so we can complete early after a certain number
       // of requests complete for faster load times
       await race(
         filters.every(f => f.search) ? 0.1 : 0.8,
         getFilterSelections(filters).flatMap(({relays, filters}) =>
-          relays.map(relay => load({...loadOptions, relays: [relay], filters})),
+          relays.map(relay => load({...loadOptions, relays: [relay], signal, filters})),
         ),
       )
 
@@ -233,11 +232,11 @@ export type FeedControllerOptions = {
   onExhausted: () => void
   forcePlatform?: boolean
   useWindowing?: boolean
+  signal?: AbortSignal
 }
 
 export const createFeedController = ({forcePlatform = true, ...options}: FeedControllerOptions) => {
-  const request = makeFeedRequestHandler({forcePlatform})
-
+  const request = makeFeedRequestHandler({forcePlatform, signal: options.signal})
   return new FeedController({
     request,
     requestDVM,

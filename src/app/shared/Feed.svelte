@@ -33,6 +33,8 @@
   export let shouldSort = false
   export let maxDepth = 2
 
+  let abortController = new AbortController()
+
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
   const promptDismissed = synced("feed/promptDismissed", 0)
@@ -40,8 +42,8 @@
   const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
 
   const reload = () => {
-    const thisKey = Math.random()
-
+    abortController.abort()
+    abortController = new AbortController()
     exhausted = false
     useWindowing = true
     events = []
@@ -57,15 +59,14 @@
     const definition = hasKinds
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
-
+    const signal = abortController.signal
     ctrl = createFeedController({
       feed: definition,
       forcePlatform,
       useWindowing,
+      signal: abortController.signal,
       onEvent: e => {
-        if (key === thisKey) {
-          buffer.push(e)
-        }
+        buffer.push(e)
       },
       onExhausted: () => {
         exhausted = true
@@ -75,8 +76,6 @@
     if (!useWindowing) {
       ctrl.load(1000)
     }
-
-    key = thisKey
   }
 
   const toggleReplies = () => {
@@ -121,6 +120,7 @@
 
     return () => {
       scroller.stop()
+      abortController.abort()
     }
   })
 </script>
