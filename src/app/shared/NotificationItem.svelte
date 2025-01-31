@@ -1,8 +1,6 @@
 <script lang="ts">
   import {ago} from "@welshman/lib"
   import FeedItem from "src/app/shared/FeedItem.svelte"
-  import NoteInteractions from "src/app/shared/NoteInteractions.svelte"
-  import NoteReactions from "src/app/shared/NoteReactions.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import {formatTimestampAsDate} from "src/util/misc"
 
@@ -10,7 +8,6 @@
   export let depth
   export let events
   export let interval
-  export let kind: "reactions" | "interactions" = "reactions"
   export let notifications
 
   let items = []
@@ -26,10 +23,8 @@
 {/if}
 
 <NoteReducer shouldAwait shouldSort {events} depth={1} bind:items let:event let:getContext>
-  {#if kind === "reactions"}
-    <NoteReactions context={getContext(event)} {event} />
-  {:else}
-    <NoteInteractions context={getContext(event)} {event} />
-  {/if}
+  <slot {event} context={getContext(event)}>
+    <div>Missing child component</div>
+  </slot>
   <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>
