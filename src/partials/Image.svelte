@@ -2,9 +2,9 @@
   .shimmer {
     background: linear-gradient(
       to right,
-      rgba(246, 247, 248, 0.4) 8%,
-      rgba(209, 211, 219, 0.4) 18%,
-      rgba(246, 247, 248, 0.4) 33%
+      var(--tinted-500) 8%,
+      var(--tinted-600) 18%,
+      var(--tinted-500) 33%
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
