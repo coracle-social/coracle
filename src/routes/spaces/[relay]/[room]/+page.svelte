@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onDestroy} from "svelte"
   import {page} from "$app/stores"
   import type {Readable} from "svelte/store"
   import {now} from "@welshman/lib"
@@ -189,11 +189,9 @@
     }
   }
 
-  onMount(() => {
-    return () => {
-      setChecked($page.url.pathname)
-      cleanup()
-    }
+  onDestroy(() => {
+    setChecked($page.url.pathname)
+    cleanup()
   })
 </script>
 
