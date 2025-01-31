@@ -1,6 +1,6 @@
 import type {Writable} from "svelte/store"
 import {derived} from "svelte/store"
-import {createEditor, SvelteNodeViewRenderer} from "svelte-tiptap"
+import {createEditor, Editor, SvelteNodeViewRenderer} from "svelte-tiptap"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
@@ -25,6 +25,17 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
+export const removeBlobs = (editor: Editor) => {
+  editor.view.state.doc.descendants((node, pos) => {
+    if (!(node.type.name === "image" || node.type.name === "video")) {
+      return
+    }
+    if (node.attrs.src.startsWith("blob:")) {
+      editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
+    }
+  })
+}
+
 export const getEditor = ({
   aggressive = false,
   autofocus = false,
@@ -34,6 +45,7 @@ export const getEditor = ({
   placeholder = "",
   submit,
   uploading,
+  uploadError,
   wordCount,
 }: {
   aggressive?: boolean
@@ -44,6 +56,7 @@ export const getEditor = ({
   placeholder?: string
   submit: () => void
   uploading?: Writable<boolean>
+  uploadError?: Writable<string>
   wordCount?: Writable<number>
 }) =>
   createEditor({
@@ -73,6 +86,11 @@ export const getEditor = ({
                 uploading?.set(true)
               },
               onComplete() {
+                uploading?.set(false)
+              },
+              onUploadError(currentEditor, file) {
+                removeBlobs(currentEditor as Editor)
+                uploadError?.set("Failed to upload file: " + file.uploadError)
                 uploading?.set(false)
               },
             },
