@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fonts */
+
 @font-face {
   font-family: "Satoshis";
   font-style: normal;
@@ -38,6 +40,8 @@
     url("/fonts/Italic.ttf") format("truetype");
 }
 
+/* root */
+
 :root {
   font-family: Lato;
   --base-100: oklch(var(--b1));
@@ -49,6 +53,13 @@
   --secondary: oklch(var(--s));
   --secondary-content: oklch(var(--sc));
 }
+
+body,
+html {
+  @apply bg-base-300;
+}
+
+/* utilities */
 
 .bg-alt,
 .bg-alt .bg-alt .bg-alt,

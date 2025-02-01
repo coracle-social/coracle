@@ -28,6 +28,8 @@ build/
 .svelte-kit/
 
 # iOS
+ios/App/App/public
+ios/DerivedData
 xcuserdata/
 *.xcworkspace/
 *.mode1v3

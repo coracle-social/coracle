@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
     SplashScreen: {
       androidSplashResourceName: "splash"
     }
-  }
+  },
 };
 
 export default config;

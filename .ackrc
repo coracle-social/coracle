@@ -1,3 +1,6 @@
 --ignore-dir=.svelte-kit
 --ignore-dir=android
 --ignore-dir=build
+--ignore-dir=ios/DerivedData
+--ignore-dir=ios/App/App/public
+

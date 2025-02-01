@@ -82,7 +82,7 @@
     </FieldInline>
     <Field>
       <p slot="label">Media Server</p>
-      <div slot="input" class="flex gap-2">
+      <div slot="input" class="flex flex-col gap-2 sm:flex-row">
         <select bind:value={settings.upload_type} class="select select-bordered">
           <option value="nip96">NIP 96 (default)</option>
           <option value="blossom">Blossom</option>

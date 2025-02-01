@@ -15,7 +15,7 @@ def capacitor_pods
   pod 'NostrSignerCapacitorPlugin', :path => '../../node_modules/nostr-signer-capacitor-plugin'
 end
 
-target 'App' do
+target 'Flotilla Chat' do
   capacitor_pods
   # Add your Pods here
 end
