@@ -195,7 +195,7 @@
   })
 </script>
 
-<div class="relative flex h-full flex-col">
+<div class="saib relative flex h-full flex-col">
   <PageBar>
     <div slot="icon" class="center">
       <Icon icon="hashtag" />
@@ -259,7 +259,7 @@
       </div>
     </div>
   {/if}
-  <div>
+  <div class="saib">
     {#if parent}
       <ChannelComposeParent event={parent} clear={clearParent} />
     {/if}
