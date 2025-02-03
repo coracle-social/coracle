@@ -31,7 +31,6 @@
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
-  import {fly} from "svelte/transition"
 
   export let quote = null
   export let pubkey = null
@@ -254,6 +253,12 @@
       pow?.worker.terminate()
     }
   })
+
+  $: {
+    if ($uploadError) {
+      showWarning($uploadError)
+    }
+  }
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
@@ -321,17 +326,6 @@
         </button>
       </div>
     </FlexColumn>
-    {#if $uploadError}
-      <div
-        transition:fly
-        class="flex items-center justify-between rounded-md bg-accent p-2 text-neutral-100">
-        <div class="flex items-center">
-          <i class="fa fa-exclamation-triangle" />
-          <span class="ml-2">{$uploadError}</span>
-        </div>
-        <Anchor button on:click={() => uploadError.set("")}>Dismiss</Anchor>
-      </div>
-    {/if}
   </Content>
 </form>
 

@@ -16,14 +16,13 @@
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Compose from "src/app/shared/Compose.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {getClientTags, publish, sign, userSettings} from "src/engine"
   import {getEditor, removeBlobs} from "src/app/editor"
-  import Anchor from "src/partials/Anchor.svelte"
-  import {fly} from "svelte/transition"
+  import {getClientTags, publish, sign, userSettings} from "src/engine"
 
   export let parent
   export let replyIsOpen: boolean
@@ -153,6 +152,12 @@
       saveDraft()
     }
   }
+
+  $: {
+    if ($uploadError) {
+      showWarning($uploadError)
+    }
+  }
 </script>
 
 <svelte:body on:click={onBodyClick} />
@@ -182,17 +187,7 @@
           </Compose>
         </div>
         <div class="h-px" />
-        {#if $uploadError}
-          <div
-            transition:fly
-            class="flex items-center justify-between bg-accent p-2 text-neutral-100">
-            <div class="flex items-center">
-              <i class="fa fa-exclamation-triangle" />
-              <span class="ml-2">{$uploadError}</span>
-            </div>
-            <Anchor button on:click={() => uploadError.set("")}>Dismiss</Anchor>
-          </div>
-        {/if}
+
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
