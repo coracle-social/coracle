@@ -25,12 +25,13 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const removeBlobs = (editor: Editor) => {
+export const removeBlobs = (editor: Editor, errorsOnly = false) => {
   editor.view.state.doc.descendants((node, pos) => {
     if (!(node.type.name === "image" || node.type.name === "video")) {
       return
     }
     if (node.attrs.src.startsWith("blob:")) {
+      if (errorsOnly && !node.attrs.uploadError) return
       editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
     }
   })
@@ -89,8 +90,8 @@ export const getEditor = ({
                 uploading?.set(false)
               },
               onUploadError(currentEditor, file) {
-                removeBlobs(currentEditor as Editor)
-                uploadError?.set("Failed to upload file: " + file.uploadError)
+                removeBlobs(currentEditor as Editor, true)
+                uploadError?.set(`Failed to upload file to ${getUploadUrl()}: ${file.uploadError}`)
                 uploading?.set(false)
               },
             },
