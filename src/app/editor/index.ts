@@ -1,4 +1,4 @@
-import type {Component} from "svelte"
+import {asClassComponent} from "svelte/legacy"
 import type {Writable} from "svelte/store"
 import {derived} from "svelte/store"
 import {createEditor, SvelteNodeViewRenderer} from "svelte-tiptap"
@@ -84,7 +84,7 @@ export const makeEditor = ({
                     editor: (this as any).editor,
                     search: derived(profileSearch, s => s.searchValues),
                     getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
-                    component: ProfileSuggestion,
+                    component: asClassComponent(ProfileSuggestion),
                   }),
                 ]
               },

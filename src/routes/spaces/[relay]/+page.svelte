@@ -143,7 +143,8 @@
             <ChannelName {url} {room} />
           </div>
           {#if $notifications.has(roomPath)}
-            <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" transition:fade></div>
+            <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" transition:fade>
+            </div>
           {/if}
         </Link>
       {/each}

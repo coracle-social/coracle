@@ -4,29 +4,35 @@
   import tippy from "tippy.js"
   import {onMount, mount, unmount} from "svelte"
 
-  let {component, children = undefined, props = {}, params = {}, popover = $bindable(), instance = $bindable(), ...restProps} = $props()
+  let {
+    component,
+    children = undefined,
+    props = {},
+    params = {},
+    popover = $bindable(),
+    instance = $bindable(),
+    ...restProps
+  } = $props()
 
-  let reactiveProps = $derived(props)
+  const reactiveProps = $derived(props)
 
   let element: Element
 
   onMount(() => {
-    if (element) {
-      const target = document.createElement("div")
+    const target = document.createElement("div")
 
-      popover = tippy(element, {
-        content: target,
-        animation: "shift-away",
-        appendTo: document.querySelector(".tippy-target")!,
-        ...params,
-      })
+    popover = tippy(element, {
+      content: target,
+      animation: "shift-away",
+      appendTo: document.querySelector(".tippy-target")!,
+      ...params,
+    })
 
-      instance = mount(component, {target, props: reactiveProps})
+    instance = mount(component, {target, props: reactiveProps})
 
-      return () => {
-        popover?.destroy()
-        unmount(instance)
-      }
+    return () => {
+      popover?.destroy()
+      unmount(instance)
     }
   })
 </script>

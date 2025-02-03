@@ -28,7 +28,7 @@
   }
 
   const loginWithNip07 = async () => {
-    loading = 'nip07'
+    loading = "nip07"
 
     try {
       const pubkey = await getNip07()?.getPublicKey()
@@ -47,7 +47,7 @@
   }
 
   const loginWithNip55 = async (app: any) => {
-    loading = 'nip55'
+    loading = "nip55"
 
     try {
       const signer = new Nip55Signer(app.packageName)

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onDestroy} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
   import type {Readable} from "svelte/store"
   import {now} from "@welshman/lib"
@@ -172,20 +172,18 @@
     setTimeout(onScroll, 100)
   }
 
-  $: {
-    if (element) {
-      ;({events, cleanup} = makeFeed({
-        element,
-        relays: [url],
-        feedFilters: [filter],
-        subscriptionFilters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
-        initialEvents: getEventsForUrl(repository, url, [{...filter, limit: 20}]),
-        onExhausted: () => {
-          loading = false
-        },
-      }))
-    }
-  }
+  onMount(() => {
+    ;({events, cleanup} = makeFeed({
+      element,
+      relays: [url],
+      feedFilters: [filter],
+      subscriptionFilters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
+      initialEvents: getEventsForUrl(repository, url, [{...filter, limit: 20}]),
+      onExhausted: () => {
+        loading = false
+      },
+    }))
+  })
 
   onDestroy(() => {
     setChecked($page.url.pathname)
