@@ -1,13 +1,13 @@
 <script lang="ts">
-  import {deriveZapper, deriveZapperForPubkey} from "@welshman/app"
-  import {groupBy, identity, nthEq, pluck, prop, spec, sum, uniq, uniqBy} from "@welshman/lib"
-  import {getLnUrl, REACTION, ZAP_RESPONSE, zapFromEvent, type TrustedEvent} from "@welshman/util"
-  import {router} from "src/app/util"
+  import {groupBy, identity, pluck, prop, spec, sum, uniq, uniqBy} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
+  import {REACTION, ZAP_RESPONSE} from "@welshman/util"
+  import {repostKinds} from "src/util/nostr"
+  import Icon from "src/partials/Icon.svelte"
+  import Anchor from "src/partials/Anchor.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
-  import Icon from "src/partials/Icon.svelte"
-  import {repostKinds} from "src/util/nostr"
-  import Anchor from "src/partials/Anchor.svelte"
+  import {router, deriveValidZaps} from "src/app/util"
 
   export let context: TrustedEvent[]
   export let event: TrustedEvent
@@ -16,21 +16,15 @@
 
   $: reactions = uniqBy(prop("pubkey"), context.filter(spec({kind: REACTION})))
   $: reposts = context.filter(e => repostKinds.includes(e.kind))
-
-  $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
-  $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
-  $: zaps = context
-    .filter(spec({kind: ZAP_RESPONSE}))
-    .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
-    .filter(identity)
-  $: zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
+  $: zaps = deriveValidZaps(context.filter(spec({kind: ZAP_RESPONSE})), event)
+  $: zapsTotal = sum(pluck("invoiceAmount", $zaps)) / 1000
 </script>
 
 <div class="text-sm">
-  {#if zaps.length > 0}
-    {@const pubkeys = uniq(zaps.map(z => z.request.pubkey).filter(identity))}
+  {#if $zaps.length > 0}
+    {@const pubkeys = uniq($zaps.map(z => z.request.pubkey).filter(identity))}
     {#if pubkeys.length === 1}
-      {@const {pubkey, content} = zaps[0].request}
+      {@const {pubkey, content} = $zaps[0].request}
       <p class="flex shrink-0 items-center gap-1 text-neutral-300">
         <Icon icon="bolt" />
         <strong>{zapsTotal}</strong> sats from
@@ -43,7 +37,7 @@
           <Icon icon="bolt" />
           <strong>{zapsTotal}</strong> sats from {pubkeys.length} people:
         </div>
-        {#each groupBy(z => z.request.content, zaps) as [content, zapEvents] (content)}
+        {#each groupBy(z => z.request.content, $zaps) as [content, zapEvents] (content)}
           {@const pubkeys = zapEvents.map(z => z.request.pubkey)}
           <Anchor
             modal

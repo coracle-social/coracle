@@ -7,10 +7,12 @@
     getParentIdsAndAddrs,
     getParentIdOrAddr,
     hasValidSignature,
+    ZAP_RESPONSE,
   } from "@welshman/util"
   import {load, repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {isEventMuted} from "src/engine"
+  import {getValidZap} from "src/app/util"
 
   export let events: TrustedEvent[]
   export let depth = 0
@@ -68,6 +70,11 @@
 
       // Hide replies to deleted/muted parents
       if (shouldSkip(parent)) {
+        return
+      }
+
+      // Skip zaps that fail our zapper check
+      if (event.kind === ZAP_RESPONSE && !(await getValidZap(event, parent))) {
         return
       }
 

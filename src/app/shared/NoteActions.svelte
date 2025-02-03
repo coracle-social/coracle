@@ -1,11 +1,22 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {sum, pluck} from "@welshman/lib"
   import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {ctx, nth, nthEq, remove, last, sortBy, uniqBy, prop, identity} from "@welshman/lib"
+  import {
+    ctx,
+    sum,
+    pluck,
+    spec,
+    nth,
+    nthEq,
+    remove,
+    last,
+    sortBy,
+    uniqBy,
+    prop,
+  } from "@welshman/lib"
   import {
     deriveZapper,
     deriveZapperForPubkey,
@@ -29,7 +40,6 @@
     createEvent,
     getPubkeyTagValues,
     getLnUrl,
-    zapFromEvent,
     NOTE,
     REACTION,
     ZAP_RESPONSE,
@@ -55,7 +65,7 @@
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {router} from "src/app/util/router"
+  import {router, deriveValidZaps} from "src/app/util"
   import {
     env,
     publish,
@@ -184,16 +194,13 @@
   $: muted = $userMutes.has(event.id)
   $: pinned = $userPins.has(event.id)
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
-  $: zaps = children
-    .filter(e => e.kind === 9735)
-    .map(e => ($zapper ? zapFromEvent(e, $zapper) : null))
-    .filter(identity)
+  $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(children.filter(e => noteKinds.includes(e.kind)))
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length
-  $: zapped = zaps.find(e => e.request.pubkey === $pubkey)
-  $: $zapsTotal = sum(pluck("invoiceAmount", zaps)) / 1000
+  $: zapped = $zaps.find(e => e.request.pubkey === $pubkey)
+  $: $zapsTotal = sum(pluck("invoiceAmount", $zaps)) / 1000
   $: canZap = $zapper?.allowsNostr && event.pubkey !== $pubkey
   $: replied = replies.find(e => e.pubkey === $pubkey)
   $: $repliesCount = replies.length
@@ -389,10 +396,10 @@
 {#if view}
   <Modal onEscape={() => setView(null)}>
     {#if view === "info"}
-      {#if zaps.length > 0}
+      {#if $zaps.length > 0}
         <h1 class="staatliches text-2xl">Zapped By</h1>
         <div class="grid grid-cols-2 gap-2">
-          {#each zaps as zap}
+          {#each $zaps as zap}
             <div class="flex flex-col gap-1">
               <PersonBadge pubkey={zap.request.pubkey} />
               <span class="ml-16 text-sm text-neutral-600"
