@@ -57,7 +57,7 @@
   </Field>
   <Field>
     <p slot="label">Details</p>
-    <textarea slot="input" class="textarea textarea-bordered" bind:value={content} />
+    <textarea slot="input" class="textarea textarea-bordered" bind:value={content}></textarea>
     <p slot="info">Please provide any additional details relevant to your report.</p>
   </Field>
   <ModalFooter>

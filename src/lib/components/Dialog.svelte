@@ -12,9 +12,11 @@
 
 <div class="center fixed inset-0 z-modal">
   <button
+    aria-label="Close dialog"
     class="absolute inset-0 cursor-pointer bg-black opacity-75"
     transition:fade={{duration: 300}}
-    on:click={onClose} />
+    on:click={onClose}>
+  </button>
   <div class="scroll-container relative {extraClass}" transition:fly={{duration: 300}}>
     <slot />
   </div>

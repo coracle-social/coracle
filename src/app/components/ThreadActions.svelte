@@ -69,7 +69,7 @@
       </div>
       <div class="btn btn-neutral btn-xs relative hidden rounded-full sm:flex">
         {#if $notifications.has(path)}
-          <div class="h-2 w-2 rounded-full bg-primary" />
+          <div class="h-2 w-2 rounded-full bg-primary"></div>
         {/if}
         Active {formatTimestampRelative(lastActive)}
       </div>

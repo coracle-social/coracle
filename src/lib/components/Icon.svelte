@@ -174,4 +174,5 @@
 
 <div
   class={cx("inline-block", $$props.class)}
-  style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px; background-color: currentcolor;" />
+  style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px; background-color: currentcolor;">
+</div>

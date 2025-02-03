@@ -44,7 +44,7 @@
     class:bg-base-100={active}>
     <slot />
     {#if !active && notification}
-      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade />
+      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade></div>
     {/if}
   </a>
 {:else}
@@ -58,7 +58,7 @@
     class:text-base-content={active}
     class:bg-base-100={active}>
     {#if !active && notification}
-      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade />
+      <div class="absolute right-2 top-5 h-2 w-2 rounded-full bg-primary" transition:fade></div>
     {/if}
     <slot />
   </button>

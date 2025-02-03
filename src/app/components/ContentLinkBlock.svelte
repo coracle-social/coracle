@@ -35,7 +35,7 @@
     {:else}
       {#await loadPreview()}
         <div class="center my-12 w-full">
-          <span class="loading loading-spinner" />
+          <span class="loading loading-spinner"></span>
         </div>
       {:then preview}
         <div class="bg-alt flex max-w-xl flex-col leading-normal">

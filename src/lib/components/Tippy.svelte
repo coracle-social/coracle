@@ -2,14 +2,14 @@
   import "tippy.js/animations/shift-away.css"
 
   import {onMount} from "svelte"
-  import type {SvelteComponent, ComponentType, ComponentProps} from "svelte"
+  import type {Component, ComponentProps} from "svelte"
   import tippy, {type Instance, type Props} from "tippy.js"
 
-  export let component: ComponentType
+  export let component: Component
   export let props: ComponentProps<any> = {}
   export let params: Partial<Props> = {}
   export let popover: Instance | undefined = undefined
-  export let instance: SvelteComponent | undefined = undefined
+  export let instance: Component | undefined = undefined
 
   let element: Element
 

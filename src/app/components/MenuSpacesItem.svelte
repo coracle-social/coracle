@@ -18,7 +18,7 @@
     <div slot="title" class="flex gap-1">
       <RelayName {url} />
       {#if $notifications.has(path)}
-        <div class="relative top-1 h-2 w-2 rounded-full bg-primary" />
+        <div class="relative top-1 h-2 w-2 rounded-full bg-primary"></div>
       {/if}
     </div>
     <div slot="info"><RelayDescription {url} /></div>

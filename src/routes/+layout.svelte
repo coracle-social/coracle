@@ -255,13 +255,13 @@
 </svelte:head>
 
 {#await ready}
-  <div data-theme={$theme} />
+  <div data-theme={$theme}></div>
 {:then}
   <div data-theme={$theme}>
     <AppContainer>
       <slot />
     </AppContainer>
     <ModalContainer />
-    <div class="tippy-target" />
+    <div class="tippy-target"></div>
   </div>
 {/await}

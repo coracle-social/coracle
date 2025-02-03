@@ -50,7 +50,7 @@
           {/if}
         </div>
         {#if !active && $notifications.has(path)}
-          <div class="h-2 w-2 rounded-full bg-primary" transition:fade />
+          <div class="h-2 w-2 rounded-full bg-primary" transition:fade></div>
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">

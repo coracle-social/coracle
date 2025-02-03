@@ -115,13 +115,13 @@
       <SecondaryNavItem href={threadsPath} notification={$notifications.has(threadsPath)}>
         <Icon icon="notes-minimalistic" /> Threads
       </SecondaryNavItem>
-      <div class="h-2" />
+      <div class="h-2"></div>
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
       {#each $userRooms as room, i (room)}
         <MenuSpaceRoomItem notify {url} {room} />
       {/each}
       {#if $otherRooms.length > 0}
-        <div class="h-2" />
+        <div class="h-2"></div>
         <SecondaryNavHeader>
           {#if $userRooms.length > 0}
             Other Rooms

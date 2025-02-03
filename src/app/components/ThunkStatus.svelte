@@ -59,7 +59,7 @@
 {:else if canCancel || isPending}
   <div class="flex justify-end px-1 text-xs {$$props.class}">
     <span class="flex items-center gap-1 {$$props.class}">
-      <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px" />
+      <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px"></span>
       <span class="opacity-50">Sending...</span>
       {#if canCancel}
         <Button class="link" on:click={abort}>Cancel</Button>

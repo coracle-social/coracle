@@ -16,6 +16,6 @@
 <Button on:click={openMenu} class="btn btn-neutral btn-sm relative md:hidden">
   <Icon icon="menu-dots" />
   {#if $notifications.has(path)}
-    <div class="absolute right-0 top-0 -mr-1 -mt-1 h-2 w-2 rounded-full bg-primary" />
+    <div class="absolute right-0 top-0 -mr-1 -mt-1 h-2 w-2 rounded-full bg-primary"></div>
   {/if}
 </Button>

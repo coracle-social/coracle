@@ -22,4 +22,4 @@
   })
 </script>
 
-<emoji-picker bind:this={element} />
+<emoji-picker bind:this={element}></emoji-picker>

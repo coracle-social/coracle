@@ -19,7 +19,7 @@
       data-tip={title}>
       <slot />
       {#if !active && notification}
-        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary"></div>
       {/if}
     </div>
   </a>
@@ -32,7 +32,7 @@
       data-tip={title}>
       <slot />
       {#if !active && notification}
-        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+        <div class="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary"></div>
       {/if}
     </div>
   </Button>

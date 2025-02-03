@@ -50,7 +50,8 @@
       class="textarea textarea-bordered leading-4"
       rows="3"
       bind:value={values.about}
-      slot="input" />
+      slot="input">
+    </textarea>
   </Field>
   <Field>
     <p slot="label">Nostr Address</p>

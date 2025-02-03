@@ -65,7 +65,7 @@
         <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
       </Button>
     {:else}
-      <div class="w-8 min-w-8 max-w-8" />
+      <div class="w-8 min-w-8 max-w-8"></div>
     {/if}
     <div class="min-w-0 flex-grow pr-1">
       {#if showPubkey}

@@ -73,7 +73,7 @@
 <slot />
 
 <!-- a little extra something for ios -->
-<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden" />
+<div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden"></div>
 <div
   class="border-top bottom-sai fixed left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="content-padding-x content-sizing flex justify-between px-2">
