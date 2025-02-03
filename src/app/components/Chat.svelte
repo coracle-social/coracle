@@ -13,7 +13,13 @@
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
-  import {pubkey, formatTimestampAsDate, inboxRelaySelectionsByPubkey, load} from "@welshman/app"
+  import {
+    pubkey,
+    tagPubkey,
+    formatTimestampAsDate,
+    inboxRelaySelectionsByPubkey,
+    load,
+  } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -57,13 +63,13 @@
     parent = undefined
   }
 
-  const onSubmit = async ({content, tags}: EventContent) => {
+  const onSubmit = async (params: EventContent) => {
+    // Remove p tags since they result in forking the conversation
+    const tags = [...params.tags.filter(nthNe(0, "p")), ...remove($pubkey!, pubkeys).map(tagPubkey)]
+
     await sendWrapped({
       pubkeys,
-      template: createEvent(
-        DIRECT_MESSAGE,
-        prependParent(parent, {content, tags: tags.filter(nthNe(0, "p"))}),
-      ),
+      template: createEvent(DIRECT_MESSAGE, prependParent(parent, {...params, tags})),
       delay: $userSettingValues.send_delay,
     })
 
