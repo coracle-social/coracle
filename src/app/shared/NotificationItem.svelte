@@ -23,8 +23,6 @@
 {/if}
 
 <NoteReducer shouldAwait shouldSort {events} depth={1} bind:items let:event let:getContext>
-  <slot {event} context={getContext(event)}>
-    <div>Missing child component</div>
-  </slot>
+  <slot {event} context={getContext(event)} />
   <FeedItem topLevel showLoading note={event} {depth} {getContext} />
 </NoteReducer>
