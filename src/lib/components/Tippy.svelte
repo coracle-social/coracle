@@ -1,19 +1,14 @@
 <script lang="ts">
   import "tippy.js/animations/shift-away.css"
 
-  import {onMount} from "svelte"
-  import type {Component, ComponentProps} from "svelte"
-  import tippy, {type Instance, type Props} from "tippy.js"
+  import tippy from "tippy.js"
+  import {onMount, mount, unmount} from "svelte"
 
-  export let component: Component
-  export let props: ComponentProps<any> = {}
-  export let params: Partial<Props> = {}
-  export let popover: Instance | undefined = undefined
-  export let instance: Component | undefined = undefined
+  let {component, children = undefined, props = {}, params = {}, popover = $bindable(), instance = $bindable(), ...restProps} = $props()
+
+  let reactiveProps = $derived(props)
 
   let element: Element
-
-  $: instance?.$set(props)
 
   onMount(() => {
     if (element) {
@@ -26,16 +21,16 @@
         ...params,
       })
 
-      instance = new component({target, props})
+      instance = mount(component, {target, props: reactiveProps})
 
       return () => {
         popover?.destroy()
-        instance?.$destroy()
+        unmount(instance)
       }
     }
   })
 </script>
 
-<div bind:this={element} class={$$props.class}>
-  <slot />
+<div bind:this={element} class={restProps.class}>
+  {@render children?.()}
 </div>

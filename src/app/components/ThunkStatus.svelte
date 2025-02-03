@@ -50,10 +50,12 @@
       component={ThunkStatusDetail}
       props={{url, message, status, retry}}
       params={{interactive: true}}>
-      <span class="flex cursor-pointer items-center gap-1 text-error">
-        <Icon icon="danger" size={3} />
-        <span>Failed to send!</span>
-      </span>
+      {#snippet children()}
+        <span class="flex cursor-pointer items-center gap-1 text-error">
+          <Icon icon="danger" size={3} />
+          <span>Failed to send!</span>
+        </span>
+      {/snippet}
     </Tippy>
   </div>
 {:else if canCancel || isPending}

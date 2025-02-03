@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {SvelteComponent} from "svelte"
   import {readable} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {identity} from "@welshman/lib"
@@ -14,7 +13,7 @@
 
   let input: Element
   let popover: Instance
-  let instance: SvelteComponent
+  let instance: any
 
   const search = readable(
     createSearch(options, {

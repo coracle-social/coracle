@@ -84,7 +84,7 @@ export const makeEditor = ({
                     editor: (this as any).editor,
                     search: derived(profileSearch, s => s.searchValues),
                     getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
-                    component: ProfileSuggestion as unknown as Component,
+                    component: ProfileSuggestion,
                   }),
                 ]
               },

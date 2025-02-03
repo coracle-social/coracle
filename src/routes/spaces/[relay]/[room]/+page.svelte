@@ -134,19 +134,17 @@
 
     if (events) {
       for (const event of $events.toReversed()) {
-        const {id, pubkey, created_at} = event
-
-        if (seen.has(id)) {
+        if (seen.has(event.id)) {
           continue
         }
 
-        const date = formatTimestampAsDate(created_at)
+        const date = formatTimestampAsDate(event.created_at)
 
         if (
           !newMessagesSeen &&
           event.pubkey !== $pubkey &&
           lastChecked &&
-          created_at > lastChecked
+          event.created_at > lastChecked
         ) {
           elements.push({type: "new-messages", id: "new-messages"})
           newMessagesSeen = true
@@ -157,15 +155,15 @@
         }
 
         elements.push({
-          id,
+          id: event.id,
           type: "note",
           value: event,
-          showPubkey: date !== previousDate || previousPubkey !== pubkey,
+          showPubkey: date !== previousDate || previousPubkey !== event.pubkey,
         })
 
         previousDate = date
-        previousPubkey = pubkey
-        seen.add(id)
+        previousPubkey = event.pubkey
+        seen.add(event.id)
       }
     }
 
@@ -230,9 +228,9 @@
           bind:this={newMessages}
           class="flex items-center py-2 text-xs transition-colors"
           class:opacity-0={showFixedNewMessages}>
-          <div class="h-px flex-grow bg-primary" />
+          <div class="h-px flex-grow bg-primary"></div>
           <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
-          <div class="h-px flex-grow bg-primary" />
+          <div class="h-px flex-grow bg-primary"></div>
         </div>
       {:else if type === "date"}
         <Divider>{value}</Divider>

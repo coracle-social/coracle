@@ -22,7 +22,7 @@ export const emitter = new Emitter()
 export const modals = writable<Record<string, Modal>>({})
 
 export const pushModal = (
-  component: Component,
+  component: Component<any>,
   props: Record<string, any> = {},
   options: ModalOptions = {},
 ) => {
@@ -37,7 +37,7 @@ export const pushModal = (
 }
 
 export const pushDrawer = (
-  component: Component,
+  component: Component<any>,
   props: Record<string, any> = {},
   options: ModalOptions = {},
 ) => pushModal(component, props, {...options, drawer: true})

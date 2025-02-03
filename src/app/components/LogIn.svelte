@@ -18,18 +18,6 @@
 
   const signUp = () => pushModal(SignUp)
 
-  const withLoading =
-    (s: string, cb: (...args: any[]) => any) =>
-    async (...args: any[]) => {
-      loading = s
-
-      try {
-        await cb(...args)
-      } finally {
-        loading = undefined
-      }
-    }
-
   const onSuccess = async (session: Session, relays: string[] = []) => {
     await loadUserData(session.pubkey, {relays})
 
@@ -39,32 +27,44 @@
     clearModals()
   }
 
-  const loginWithNip07 = withLoading("nip07", async () => {
-    const pubkey = await getNip07()?.getPublicKey()
+  const loginWithNip07 = async () => {
+    loading = 'nip07'
 
-    if (pubkey) {
-      await onSuccess({method: "nip07", pubkey})
-    } else {
-      pushToast({
-        theme: "error",
-        message: "Something went wrong! Please try again.",
-      })
+    try {
+      const pubkey = await getNip07()?.getPublicKey()
+
+      if (pubkey) {
+        await onSuccess({method: "nip07", pubkey})
+      } else {
+        pushToast({
+          theme: "error",
+          message: "Something went wrong! Please try again.",
+        })
+      }
+    } finally {
+      loading = undefined
     }
-  })
+  }
 
-  const loginWithNip55 = withLoading("nip55", async (app: any) => {
-    const signer = new Nip55Signer(app.packageName)
-    const pubkey = await signer.getPubkey()
+  const loginWithNip55 = async (app: any) => {
+    loading = 'nip55'
 
-    if (pubkey) {
-      await onSuccess({method: "nip55", pubkey, signer: app.packageName})
-    } else {
-      pushToast({
-        theme: "error",
-        message: "Something went wrong! Please try again.",
-      })
+    try {
+      const signer = new Nip55Signer(app.packageName)
+      const pubkey = await signer.getPubkey()
+
+      if (pubkey) {
+        await onSuccess({method: "nip55", pubkey, signer: app.packageName})
+      } else {
+        pushToast({
+          theme: "error",
+          message: "Something went wrong! Please try again.",
+        })
+      }
+    } finally {
+      loading = undefined
     }
-  })
+  }
 
   const loginWithPassword = () => pushModal(LogInPassword)
 
@@ -92,7 +92,7 @@
   {#if getNip07()}
     <Button disabled={loading} on:click={loginWithNip07} class="btn btn-primary">
       {#if loading === "nip07"}
-        <span class="loading loading-spinner mr-3" />
+        <span class="loading loading-spinner mr-3"></span>
       {:else}
         <Icon icon="widget" />
       {/if}
@@ -102,7 +102,7 @@
   {#each signers as app}
     <Button disabled={loading} class="btn btn-primary" on:click={() => loginWithNip55(app)}>
       {#if loading === "nip55"}
-        <span class="loading loading-spinner mr-3" />
+        <span class="loading loading-spinner mr-3"></span>
       {:else}
         <img src={app.iconUrl} alt={app.name} width="20" height="20" />
       {/if}
@@ -112,7 +112,7 @@
   {#if BURROW_URL && !hasSigner}
     <Button disabled={loading} on:click={loginWithPassword} class="btn btn-primary">
       {#if loading === "password"}
-        <span class="loading loading-spinner mr-3" />
+        <span class="loading loading-spinner mr-3"></span>
       {:else}
         <Icon icon="key" />
       {/if}
@@ -129,7 +129,7 @@
   {#if BURROW_URL && hasSigner}
     <Button disabled={loading} on:click={loginWithPassword} class="btn">
       {#if loading === "password"}
-        <span class="loading loading-spinner mr-3" />
+        <span class="loading loading-spinner mr-3"></span>
       {:else}
         <Icon icon="key" />
       {/if}
