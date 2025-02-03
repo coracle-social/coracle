@@ -59,7 +59,6 @@
     const definition = hasKinds
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
-    const signal = abortController.signal
     ctrl = createFeedController({
       feed: definition,
       forcePlatform,
@@ -101,7 +100,6 @@
   let depth = 0
   let exhausted = false
   let useWindowing = true
-  let key = Math.random()
   let ctrl: FeedController
   let events: TrustedEvent[] = []
   let buffer: TrustedEvent[] = []
@@ -138,7 +136,7 @@
 {/if}
 
 <FlexColumn bind:element>
-  {#key key}
+  {#key feed.identifier}
     <NoteReducer
       {shouldSort}
       {depth}
