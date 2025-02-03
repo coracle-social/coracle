@@ -67,7 +67,7 @@
     "fuse.js": "^7.0.0",
     "husky": "^9.1.6",
     "idb": "^8.0.0",
-    "nostr-signer-capacitor-plugin": "^0.0.3",
+    "nostr-signer-capacitor-plugin": "coracle-social/nostr-signer-capacitor-plugin#9fbe4f8",
     "nostr-tools": "^2.7.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "qrcode": "^1.5.4"
