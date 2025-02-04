@@ -59,32 +59,25 @@
   })
 
   let limit = 10
-  let loading = true
-  let unmounted = false
-  let element: Element
+  let loading = $state(true)
+  let element: Element | undefined = $state()
   let scroller: Scroller
 
   onMount(() => {
-    // Element is frequently not defined. I don't know why
-    sleep(1000).then(() => {
-      if (!unmounted) {
-        scroller = createScroller({
-          element,
-          delay: 300,
-          threshold: 3000,
-          onScroll: () => {
-            limit += 10
+    scroller = createScroller({
+      element: element!,
+      delay: 300,
+      threshold: 3000,
+      onScroll: () => {
+        limit += 10
 
-            if ($events.length - limit < 10) {
-              ctrl.load(50)
-            }
-          },
-        })
-      }
+        if ($events.length - limit < 10) {
+          ctrl.load(50)
+        }
+      },
     })
 
     return () => {
-      unmounted = true
       scroller?.stop()
       setChecked($page.url.pathname)
     }
@@ -93,17 +86,23 @@
 
 <div class="relative flex h-screen flex-col" bind:this={element}>
   <PageBar>
-    <div slot="icon" class="center">
-      <Icon icon="notes-minimalistic" />
-    </div>
-    <strong slot="title">Threads</strong>
-    <div slot="action" class="row-2">
-      <Button class="btn btn-primary btn-sm" on:click={createThread}>
+    {#snippet icon()}
+      <div class="center">
         <Icon icon="notes-minimalistic" />
-        Create a Thread
-      </Button>
-      <MenuSpaceButton {url} />
-    </div>
+      </div>
+    {/snippet}
+    {#snippet title()}
+      <strong>Threads</strong>
+    {/snippet}
+    {#snippet action()}
+      <div class="row-2">
+        <Button class="btn btn-primary btn-sm" on:click={createThread}>
+          <Icon icon="notes-minimalistic" />
+          Create a Thread
+        </Button>
+        <MenuSpaceButton {url} />
+      </div>
+    {/snippet}
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each $events as event (event.id)}

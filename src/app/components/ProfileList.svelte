@@ -3,15 +3,23 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import Profile from "@app/components/Profile.svelte"
 
-  export let title
-  export let subtitle = ""
-  export let pubkeys
+  interface Props {
+    title: any
+    subtitle?: string
+    pubkeys: any
+  }
+
+  let {title, subtitle = "", pubkeys}: Props = $props()
 </script>
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">{title}</div>
-    <div slot="info">{subtitle}</div>
+    {#snippet title()}
+      <div>{title}</div>
+    {/snippet}
+    {#snippet info()}
+      <div>{subtitle}</div>
+    {/snippet}
   </ModalHeader>
   {#each pubkeys as pubkey (pubkey)}
     <div class="card2 bg-alt">

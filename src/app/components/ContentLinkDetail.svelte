@@ -2,7 +2,7 @@
   import Button from "@lib/components/Button.svelte"
   import {imgproxy} from "@app/state"
 
-  export let url
+  let {url} = $props()
 
   const back = () => history.back()
 </script>

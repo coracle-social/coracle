@@ -3,8 +3,12 @@
   import {NodeViewWrapper} from "svelte-tiptap"
   import {deriveProfileDisplay} from "@welshman/app"
 
-  export let node: NodeViewProps["node"]
-  export let selected: NodeViewProps["selected"]
+  interface Props {
+    node: NodeViewProps["node"]
+    selected: NodeViewProps["selected"]
+  }
+
+  let {node, selected}: Props = $props()
 
   const display = deriveProfileDisplay(node.attrs.pubkey)
 </script>

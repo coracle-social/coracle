@@ -1,7 +1,7 @@
 <script lang="ts">
   import {deriveProfileDisplay} from "@welshman/app"
 
-  export let pubkey
+  let {pubkey} = $props()
 
   const profileDisplay = deriveProfileDisplay(pubkey)
 </script>

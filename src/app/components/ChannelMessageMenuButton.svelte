@@ -6,24 +6,26 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import ChannelMessageMenu from "@app/components/ChannelMessageMenu.svelte"
 
-  export let url, event
+  let {url, event} = $props()
 
-  const open = () => popover.show()
+  const open = () => popover?.show()
 
-  const onClick = () => popover.hide()
+  const onClick = () => popover?.hide()
 
   const onMouseMove = ({clientX, clientY}: any) => {
-    const {x, y, width, height} = popover.popper.getBoundingClientRect()
+    if (popover) {
+      const {x, y, width, height} = popover.popper.getBoundingClientRect()
 
-    if (!between([x, x + width], clientX) || !between([y, y + height + 30], clientY)) {
-      popover.hide()
+      if (!between([x, x + width], clientX) || !between([y, y + height + 30], clientY)) {
+        popover.hide()
+      }
     }
   }
 
-  let popover: Instance
+  let popover: Instance | undefined = $state()
 </script>
 
-<svelte:document on:mousemove={onMouseMove} />
+<svelte:document onmousemove={onMouseMove} />
 
 <div class="flex">
   <Button class="btn join-item btn-xs" on:click={open}>

@@ -3,7 +3,11 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import {deriveRelay} from "@welshman/app"
 
-  export let url = ""
+  interface Props {
+    url?: string
+  }
+
+  let {url = ""}: Props = $props()
 
   const relay = deriveRelay(url)
 </script>

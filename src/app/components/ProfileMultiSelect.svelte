@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {SvelteComponent} from "svelte"
+  import type {Component} from "svelte"
   import {derived} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
@@ -13,19 +13,23 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  export let value: string[]
-  export let autofocus = false
+  interface Props {
+    value: string[]
+    autofocus?: boolean
+  }
 
-  let term = ""
-  let input: Element
-  let popover: Instance
-  let instance: SvelteComponent
+  let {value = $bindable(), autofocus = false}: Props = $props()
+
+  let term = $state("")
+  let input: Element | undefined = $state()
+  let popover: Instance | undefined = $state()
+  let instance: any = $state()
 
   const search = derived(profileSearch, $profileSearch => $profileSearch.searchValues)
 
   const selectPubkey = (pubkey: string) => {
     term = ""
-    popover.hide()
+    popover?.hide()
     value = uniq(append(pubkey, value))
   }
 
@@ -39,13 +43,13 @@
     }
   }
 
-  $: {
+  $effect(() => {
     if (term) {
       popover?.show()
     } else {
       popover?.hide()
     }
-  }
+  })
 </script>
 
 <div class="flex flex-col gap-2">
@@ -64,14 +68,14 @@
   </div>
   <label class="input input-bordered flex w-full items-center gap-2" bind:this={input}>
     <Icon icon="magnifer" />
-    <!-- svelte-ignore a11y-autofocus -->
+    <!-- svelte-ignore a11y_autofocus -->
     <input
       {autofocus}
       class="grow"
       type="text"
       placeholder="Search for profiles..."
       bind:value={term}
-      on:keydown={onKeyDown} />
+      onkeydown={onKeyDown} />
   </label>
   <Tippy
     bind:popover
@@ -89,6 +93,6 @@
       trigger: "manual",
       interactive: true,
       maxWidth: "none",
-      getReferenceClientRect: () => input.getBoundingClientRect(),
+      getReferenceClientRect: () => input!.getBoundingClientRect(),
     }} />
 </div>

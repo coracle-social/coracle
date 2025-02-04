@@ -7,7 +7,19 @@
   import {dev} from "$app/environment"
   import {goto} from "$app/navigation"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
-  import {identity, sleep, take, sortBy, ago, now, HOUR, WEEK, MONTH, Worker} from "@welshman/lib"
+  import {
+    identity,
+    sleep,
+    take,
+    sortBy,
+    defer,
+    ago,
+    now,
+    HOUR,
+    WEEK,
+    MONTH,
+    Worker,
+  } from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     MESSAGE,
@@ -60,14 +72,16 @@
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
   import * as notifications from "@app/notifications"
-  import * as state from "@app/state"
+  import * as appState from "@app/state"
 
   // Migration: old nostrtalk instance used different sessions
   if ($session && !$signer) {
     dropSession($session.pubkey)
   }
 
-  let ready: Promise<unknown> = Promise.resolve()
+  let {children} = $props()
+
+  let ready = $state(defer<void>())
 
   onMount(async () => {
     Object.assign(window, {
@@ -80,7 +94,7 @@
       ...util,
       ...net,
       ...app,
-      ...state,
+      ...appState,
       ...commands,
       ...requests,
       ...notifications,
@@ -126,7 +140,7 @@
         }
       })
 
-      ready = initStorage("flotilla", 5, {
+      initStorage("flotilla", 5, {
         relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),
         handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
         freshness: storageAdapters.fromObjectStore(freshness, {
@@ -152,12 +166,12 @@
             const ALWAYS_KEEP = Infinity
             const reactionKinds = [REACTION, ZAP_RESPONSE, DELETE]
             const metaKinds = [PROFILE, FOLLOWS, RELAYS, INBOX_RELAYS]
-            const $sessionKeys = new Set(Object.keys(app.sessions.get()))
-            const $userFollows = new Set(getPubkeyTagValues(getListTags(get(app.userFollows))))
-            const $maxWot = get(app.maxWot)
+            const sessionKeys = new Set(Object.keys(app.sessions.get()))
+            const userFollows = new Set(getPubkeyTagValues(getListTags(get(app.userFollows))))
+            const maxWot = get(app.maxWot)
 
             const scoreEvent = (e: TrustedEvent) => {
-              const isFollowing = $userFollows.has(e.pubkey)
+              const isFollowing = userFollows.has(e.pubkey)
 
               // No need to keep a record of everyone who follows the current user
               if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
@@ -166,15 +180,15 @@
               if (e.kind === MESSAGE && e.created_at < ago(MONTH)) return NEVER_KEEP
 
               // Always keep stuff by or tagging a signed in user
-              if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
-              if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
+              if (sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
+              if (e.tags.some(t => sessionKeys.has(t[1]))) return ALWAYS_KEEP
 
               // Get rid of irrelevant messages, reactions, and likes
               if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
               if (reactionKinds.includes(e.kind)) return NEVER_KEEP
 
               // If the user follows this person, use max wot score
-              let score = isFollowing ? $maxWot : app.getUserWotScore(e.pubkey)
+              let score = isFollowing ? maxWot : app.getUserWotScore(e.pubkey)
 
               // Inflate the score for profiles/relays/follows to avoid redundant fetches
               // Demote non-metadata type events, and introduce recency bias
@@ -189,7 +203,10 @@
             )
           },
         }),
-      }).then(() => sleep(300))
+      }).then(async () => {
+        await sleep(300)
+        ready.resolve()
+      })
 
       // Unwrap gift wraps as they come in, but throttled
       const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
@@ -259,7 +276,7 @@
 {:then}
   <div data-theme={$theme}>
     <AppContainer>
-      <slot />
+      {@render children()}
     </AppContainer>
     <ModalContainer />
     <div class="tippy-target"></div>

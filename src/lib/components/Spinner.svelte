@@ -1,7 +1,12 @@
 <script lang="ts">
   import {slide, fade} from "svelte/transition"
 
-  export let loading = false
+  interface Props {
+    loading?: boolean
+    children?: import("svelte").Snippet
+  }
+
+  let {loading = false, children}: Props = $props()
 </script>
 
 <span class="flex min-h-10 items-center">
@@ -10,5 +15,5 @@
       <span class="loading loading-spinner" transition:fade|local={{duration: 100}}></span>
     </span>
   {/if}
-  <slot />
+  {@render children?.()}
 </span>

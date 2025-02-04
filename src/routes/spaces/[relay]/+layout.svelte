@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {run} from "svelte/legacy"
+
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, MONTH} from "@welshman/lib"
@@ -15,6 +17,11 @@
   import {decodeRelay, userRoomsByUrl} from "@app/state"
   import {pullConservatively} from "@app/requests"
   import {notifications} from "@app/notifications"
+  interface Props {
+    children?: import("svelte").Snippet
+  }
+
+  let {children}: Props = $props()
 
   const url = decodeRelay($page.params.relay)
 
@@ -37,11 +44,11 @@
   }
 
   // We have to watch this one, since on mobile the badge will be visible when active
-  $: {
+  run(() => {
     if ($notifications.has($page.url.pathname)) {
       setChecked($page.url.pathname)
     }
-  }
+  })
 
   onMount(() => {
     checkConnection()
@@ -77,6 +84,6 @@
 </SecondaryNav>
 <Page>
   {#key $page.url.pathname}
-    <slot />
+    {@render children?.()}
   {/key}
 </Page>

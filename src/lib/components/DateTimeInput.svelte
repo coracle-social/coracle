@@ -3,8 +3,13 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
 
-  export let initialValue: Date | undefined = undefined
-  export let value: Date | undefined = initialValue
+  interface Props {
+    initialValue?: Date | undefined
+    value?: Date | undefined
+  }
+
+  let {initialValue = undefined, value = $bindable<Date | undefined>(initialValue)}: Props =
+    $props()
 
   const init = () => {
     if (!value) {

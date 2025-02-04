@@ -13,30 +13,54 @@
 <div class="column menu gap-2">
   <Link replaceState href="/settings/profile">
     <CardButton>
-      <div slot="icon"><Icon icon="user-rounded" size={7} /></div>
-      <div slot="title">Profile</div>
-      <div slot="info">Customize your user profile</div>
+      {#snippet icon()}
+        <div><Icon icon="user-rounded" size={7} /></div>
+      {/snippet}
+      {#snippet title()}
+        <div>Profile</div>
+      {/snippet}
+      {#snippet info()}
+        <div>Customize your user profile</div>
+      {/snippet}
     </CardButton>
   </Link>
   <Link replaceState href="/settings/relays">
     <CardButton>
-      <div slot="icon"><Icon icon="server" size={7} /></div>
-      <div slot="title">Relays</div>
-      <div slot="info">Control how {PLATFORM_NAME} talks to the network</div>
+      {#snippet icon()}
+        <div><Icon icon="server" size={7} /></div>
+      {/snippet}
+      {#snippet title()}
+        <div>Relays</div>
+      {/snippet}
+      {#snippet info()}
+        <div>Control how {PLATFORM_NAME} talks to the network</div>
+      {/snippet}
     </CardButton>
   </Link>
   <Link replaceState href="/settings">
     <CardButton>
-      <div slot="icon"><Icon icon="settings" size={7} /></div>
-      <div slot="title">Settings</div>
-      <div slot="info">Get into the details about how {PLATFORM_NAME} works</div>
+      {#snippet icon()}
+        <div><Icon icon="settings" size={7} /></div>
+      {/snippet}
+      {#snippet title()}
+        <div>Settings</div>
+      {/snippet}
+      {#snippet info()}
+        <div>Get into the details about how {PLATFORM_NAME} works</div>
+      {/snippet}
     </CardButton>
   </Link>
   <Link replaceState href="/settings/about">
     <CardButton>
-      <div slot="icon"><Icon icon="code-2" size={7} /></div>
-      <div slot="title">About</div>
-      <div slot="info">Learn about {PLATFORM_NAME} and support the developer</div>
+      {#snippet icon()}
+        <div><Icon icon="code-2" size={7} /></div>
+      {/snippet}
+      {#snippet title()}
+        <div>About</div>
+      {/snippet}
+      {#snippet info()}
+        <div>Learn about {PLATFORM_NAME} and support the developer</div>
+      {/snippet}
     </CardButton>
   </Link>
   <Button on:click={logout} class="btn btn-neutral">

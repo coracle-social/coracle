@@ -14,6 +14,11 @@
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
+  interface Props {
+    children?: import("svelte").Snippet
+  }
+
+  let {children}: Props = $props()
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -23,10 +28,10 @@
 
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 
-  $: spaceUrls = Array.from($userRoomsByUrl.keys())
-  $: spacePaths = spaceUrls.map(url => makeSpacePath(url))
-  $: anySpaceNotifications = spacePaths.some(
-    path => !$page.url.pathname.startsWith(path) && $notifications.has(path),
+  let spaceUrls = $derived(Array.from($userRoomsByUrl.keys()))
+  let spacePaths = $derived(spaceUrls.map(url => makeSpacePath(url)))
+  let anySpaceNotifications = $derived(
+    spacePaths.some(path => !$page.url.pathname.startsWith(path) && $notifications.has(path)),
   )
 </script>
 
@@ -70,7 +75,7 @@
   </div>
 </div>
 
-<slot />
+{@render children?.()}
 
 <!-- a little extra something for ios -->
 <div class="fixed bottom-0 left-0 right-0 z-nav h-14 bg-base-100 md:hidden"></div>

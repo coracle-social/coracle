@@ -5,8 +5,12 @@
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import {makeReaction, sendWrapped} from "@app/commands"
 
-  export let event: TrustedEvent
-  export let pubkeys: string[]
+  interface Props {
+    event: TrustedEvent
+    pubkeys: string[]
+  }
+
+  let {event, pubkeys}: Props = $props()
 
   const onEmoji = (emoji: NativeEmoji) =>
     sendWrapped({template: makeReaction({event, content: emoji.unicode}), pubkeys})

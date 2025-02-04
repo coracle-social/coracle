@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {nip19} from "nostr-tools"
   import {goto} from "$app/navigation"
   import {ctx} from "@welshman/lib"
@@ -12,8 +14,7 @@
   import {makeRoomPath} from "@app/routes"
   import {setKey} from "@app/implicit"
 
-  export let url
-  export let event
+  let {url, event} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
@@ -29,13 +30,17 @@
     selection = room === selection ? "" : room
   }
 
-  let selection = ""
+  let selection = $state("")
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={onSubmit}>
+<form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
   <ModalHeader>
-    <div slot="title">Share Thread</div>
-    <div slot="info">Which room would you like to share this thread to?</div>
+    {#snippet title()}
+      <div>Share Thread</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Which room would you like to share this thread to?</div>
+    {/snippet}
   </ModalHeader>
   <div class="grid grid-cols-3 gap-2">
     {#each $channelsByUrl.get(url) || [] as channel (channel.room)}
@@ -44,7 +49,7 @@
         class="btn"
         class:btn-neutral={selection !== channel.room}
         class:btn-primary={selection === channel.room}
-        on:click={() => toggleRoom(channel.room)}>
+        onclick={() => toggleRoom(channel.room)}>
         #<ChannelName {...channel} />
       </button>
     {/each}

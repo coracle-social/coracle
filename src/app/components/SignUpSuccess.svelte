@@ -3,7 +3,7 @@
   import LogInPassword from "@app/components/LogInPassword.svelte"
   import {pushModal} from "@app/modal"
 
-  export let email
+  let {email} = $props()
 
   const login = () => pushModal(LogInPassword)
 </script>

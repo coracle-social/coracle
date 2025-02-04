@@ -1,6 +1,5 @@
 <script lang="ts">
-  export let value
-  export let isBlock
+  let {value, isBlock} = $props()
 </script>
 
 <code

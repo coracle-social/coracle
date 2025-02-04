@@ -42,14 +42,16 @@
     window.location.href = "/"
   }
 
-  let password = ""
-  let success = false
-  let loading = false
+  let password = $state("")
+  let success = $state(false)
+  let loading = $state(false)
 </script>
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">Export your keys</div>
+    {#snippet title()}
+      <div>Export your keys</div>
+    {/snippet}
   </ModalHeader>
   <p>Here's what the process looks like:</p>
   <ul class="flex list-inside list-decimal flex-col gap-4">
@@ -74,11 +76,15 @@
   {#if !success}
     <div out:slideAndFade>
       <Field>
-        <p slot="label">To confirm, please enter your password below:</p>
-        <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-          <Icon icon="key" />
-          <input type="password" disabled={loading} bind:value={password} class="grow" />
-        </label>
+        {#snippet label()}
+          <p>To confirm, please enter your password below:</p>
+        {/snippet}
+        {#snippet input()}
+          <label class="input input-bordered flex w-full items-center gap-2">
+            <Icon icon="key" />
+            <input type="password" disabled={loading} bind:value={password} class="grow" />
+          </label>
+        {/snippet}
       </Field>
     </div>
   {/if}

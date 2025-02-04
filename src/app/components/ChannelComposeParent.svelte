@@ -6,8 +6,12 @@
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
 
-  export let event: TrustedEvent
-  export let clear: () => void
+  interface Props {
+    event: TrustedEvent
+    clear: () => void
+  }
+
+  let {event, clear}: Props = $props()
 </script>
 
 <div

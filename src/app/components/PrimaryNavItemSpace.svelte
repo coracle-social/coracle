@@ -5,7 +5,7 @@
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
 
-  export let url
+  let {url} = $props()
 
   const path = makeSpacePath(url)
 </script>

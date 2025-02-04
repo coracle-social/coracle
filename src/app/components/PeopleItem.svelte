@@ -10,7 +10,7 @@
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import {makeChatPath} from "@app/routes"
 
-  export let pubkey
+  let {pubkey} = $props()
 
   const filters: Filter[] = [{authors: [pubkey], limit: 1}]
   const events = deriveEvents(repository, {filters})

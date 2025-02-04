@@ -16,7 +16,9 @@
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">What is a private key?</div>
+    {#snippet title()}
+      <div>What is a private key?</div>
+    {/snippet}
   </ModalHeader>
   <p>
     Most online services keep track of users by giving them a username and password. This gives the

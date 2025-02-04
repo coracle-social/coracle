@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {goto} from "$app/navigation"
   import {WRAP} from "@welshman/util"
   import {repository} from "@welshman/app"
@@ -10,9 +12,9 @@
   import {canDecrypt, PLATFORM_NAME, ensureUnwrapped} from "@app/state"
   import {clearModals} from "@app/modal"
 
-  export let next
+  let {next} = $props()
 
-  let loading = false
+  let loading = $state(false)
 
   const enableChat = async () => {
     canDecrypt.set(true)
@@ -38,10 +40,14 @@
   const back = () => history.back()
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={submit}>
+<form class="column gap-4" onsubmit={preventDefault(submit)}>
   <ModalHeader>
-    <div slot="title">Enable Messages</div>
-    <div slot="info">Do you want to enable direct messages?</div>
+    {#snippet title()}
+      <div>Enable Messages</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Do you want to enable direct messages?</div>
+    {/snippet}
   </ModalHeader>
   <p>
     By default, direct messages are disabled, since loading them requires

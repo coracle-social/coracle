@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import InputProfilePicture from "@lib/components/InputProfilePicture.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -13,36 +15,50 @@
 
   const next = () => pushModal(SpaceCreateFinish)
 
-  let file: File
-  let name = ""
-  let relay = ""
+  let file: File | undefined = $state()
+  let name = $state("")
+  let relay = $state("")
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={next}>
+<form class="column gap-4" onsubmit={preventDefault(next)}>
   <ModalHeader>
-    <div slot="title">Customize your Space</div>
-    <div slot="info">Give people a few details to go on. You can always change this later.</div>
+    {#snippet title()}
+      <div>Customize your Space</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Give people a few details to go on. You can always change this later.</div>
+    {/snippet}
   </ModalHeader>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file />
   </div>
   <Field>
-    <p slot="label">Space Name</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="fire-minimalistic" />
-      <input bind:value={name} class="grow" type="text" />
-    </label>
+    {#snippet label()}
+      <p>Space Name</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="fire-minimalistic" />
+        <input bind:value={name} class="grow" type="text" />
+      </label>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">Relay</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="server" />
-      <input bind:value={relay} class="grow" type="text" />
-    </label>
-    <p slot="info">
-      This can be any nostr relay where you'd like to host your space.
-      <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
-    </p>
+    {#snippet label()}
+      <p>Relay</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="server" />
+        <input bind:value={relay} class="grow" type="text" />
+      </label>
+    {/snippet}
+    {#snippet info()}
+      <p>
+        This can be any nostr relay where you'd like to host your space.
+        <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
+      </p>
+    {/snippet}
   </Field>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

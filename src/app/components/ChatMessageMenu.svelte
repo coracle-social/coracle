@@ -5,10 +5,7 @@
   import EventInfo from "@app/components/EventInfo.svelte"
   import {pushModal} from "@app/modal"
 
-  export let event
-  export let pubkeys
-  export let popover
-  export let replyTo
+  let {event, pubkeys, popover, replyTo} = $props()
 
   const reply = () => replyTo(event)
 

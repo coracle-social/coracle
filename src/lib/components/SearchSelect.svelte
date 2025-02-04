@@ -7,13 +7,16 @@
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
 
-  export let value: string
-  export let options: string[] = []
-  export let allowCreate = false
+  interface Props {
+    value: string
+    options: string[]
+    allowCreate?: boolean
+  }
 
-  let input: Element
-  let popover: Instance
-  let instance: any
+  let {value, options, allowCreate = false, ...restProps} = $props()
+  let input: Element | undefined = $state()
+  let popover: Instance | undefined = $state()
+  let instance: any = $state()
 
   const search = readable(
     createSearch(options, {
@@ -23,26 +26,26 @@
   )
 
   const select = (newValue: string) => {
-    popover.hide()
+    popover?.hide()
     value = newValue
   }
 
   const onKeyDown = (e: Event) => {
-    if (instance.onKeyDown(e)) {
+    if (instance?.onKeyDown(e)) {
       e.preventDefault()
     }
   }
 
   const onFocus = () => {
-    popover.show()
+    popover?.show()
   }
 
   const onBlur = () => {
-    popover.hide()
+    popover?.hide()
   }
 </script>
 
-<div class={$$props.class}>
+<div class={restProps.class}>
   <label class="input input-bordered flex w-full items-center gap-3" bind:this={input}>
     <slot name="before" />
     <input
@@ -71,6 +74,6 @@
       trigger: "manual",
       interactive: true,
       maxWidth: "none",
-      getReferenceClientRect: () => input.getBoundingClientRect(),
+      getReferenceClientRect: () => input!.getBoundingClientRect(),
     }} />
 </div>

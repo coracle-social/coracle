@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {postJson, sleep} from "@welshman/lib"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -10,8 +12,7 @@
   import {pushToast} from "@app/toast"
   import {BURROW_URL} from "@app/state"
 
-  export let email
-  export let reset_token
+  let {email, reset_token} = $props()
 
   const onSubmit = async () => {
     loading = true
@@ -33,27 +34,37 @@
     }
   }
 
-  let loading = false
-  let password = ""
+  let loading = $state(false)
+  let password = $state("")
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={onSubmit}>
+<form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
   <ModalHeader>
-    <div slot="title">Reset your password</div>
+    {#snippet title()}
+      <div>Reset your password</div>
+    {/snippet}
   </ModalHeader>
   <FieldInline disabled={loading}>
-    <p slot="label">Email Address</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="user-rounded" />
-      <input readonly value={email} class="grow" />
-    </label>
+    {#snippet label()}
+      <p>Email Address</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="user-rounded" />
+        <input readonly value={email} class="grow" />
+      </label>
+    {/snippet}
   </FieldInline>
   <FieldInline disabled={loading}>
-    <p slot="label">New Password</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="key" />
-      <input bind:value={password} class="grow" type="password" />
-    </label>
+    {#snippet label()}
+      <p>New Password</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="key" />
+        <input bind:value={password} class="grow" type="password" />
+      </label>
+    {/snippet}
   </FieldInline>
   <Button type="submit" class="btn btn-primary" disabled={loading}>
     <Spinner {loading}>Reset password</Spinner>

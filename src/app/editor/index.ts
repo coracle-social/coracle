@@ -77,7 +77,7 @@ export const makeEditor = ({
           },
           nprofile: {
             extend: {
-              addNodeView: () => SvelteNodeViewRenderer(EditMention),
+              addNodeView: () => SvelteNodeViewRenderer(asClassComponent(EditMention)),
               addProseMirrorPlugins() {
                 return [
                   MentionSuggestion({

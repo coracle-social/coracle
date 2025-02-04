@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {onMount} from "svelte"
   import {goto} from "$app/navigation"
   import {ctx, sleep} from "@welshman/lib"
@@ -13,7 +15,7 @@
   import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
-  export let url
+  let {url} = $props()
 
   const back = () => history.back()
 
@@ -31,8 +33,8 @@
     }
   }
 
-  let error: string | undefined
-  let loading = true
+  let error: string | undefined = $state()
+  let loading = $state(true)
 
   onMount(async () => {
     ;[error] = await Promise.all([attemptRelayAccess(url), sleep(3000)])
@@ -40,12 +42,16 @@
   })
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={next}>
+<form class="column gap-4" onsubmit={preventDefault(next)}>
   <ModalHeader>
-    <div slot="title">Checking Space...</div>
-    <div slot="info">
-      Connecting you to to <span class="text-primary">{displayRelayUrl(url)}</span>
-    </div>
+    {#snippet title()}
+      <div>Checking Space...</div>
+    {/snippet}
+    {#snippet info()}
+      <div>
+        Connecting you to to <span class="text-primary">{displayRelayUrl(url)}</span>
+      </div>
+    {/snippet}
   </ModalHeader>
   <div class="m-auto flex flex-col gap-4">
     {#if loading}

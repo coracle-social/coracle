@@ -1,27 +1,35 @@
 <script lang="ts">
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
+  interface Props {
+    title?: import("svelte").Snippet
+    description?: import("svelte").Snippet
+    children?: import("svelte").Snippet
+    [key: string]: any
+  }
+
+  let {...props}: Props = $props()
 
   const toggle = () => {
     isOpen = !isOpen
   }
 
-  let isOpen = false
+  let isOpen = $state(false)
 </script>
 
-<div class="relative flex flex-col gap-4 {$$props.class}">
+<div class="relative flex flex-col gap-4 {props.class}">
   <button
     type="button"
     class="absolute right-8 top-8 h-4 w-4 cursor-pointer transition-all"
     class:rotate-90={!isOpen}
-    on:click={toggle}>
+    onclick={toggle}>
     <Icon icon="alt-arrow-down" />
   </button>
-  <slot name="title" />
-  <slot name="description" />
+  {@render props.title?.()}
+  {@render props.description?.()}
   {#if isOpen}
     <div transition:slide>
-      <slot />
+      {@render props.children?.()}
     </div>
   {/if}
 </div>

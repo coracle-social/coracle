@@ -1,11 +1,13 @@
 <script lang="ts">
+  import {preventDefault, stopPropagation} from "svelte/legacy"
+
   import {ellipsize, postJson} from "@welshman/lib"
   import {dufflepud, imgproxy} from "@app/state"
   import Link from "@lib/components/Link.svelte"
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  export let value
+  let {value} = $props()
 
   const url = value.url.toString()
 
@@ -29,7 +31,7 @@
         <track kind="captions" />
       </video>
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
-      <button type="button" on:click|stopPropagation|preventDefault={expand}>
+      <button type="button" onclick={stopPropagation(preventDefault(expand))}>
         <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96 rounded-box" />
       </button>
     {:else}

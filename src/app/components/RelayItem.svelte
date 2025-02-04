@@ -5,11 +5,11 @@
   import {displayRelayUrl} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
 
-  export let url
+  let {url, children} = $props()
 
   const relay = deriveRelay(url)
 
-  $: connections = $relay?.stats?.open_count || 0
+  let connections = $derived($relay?.stats?.open_count || 0)
 </script>
 
 <div class="card2 card2-sm bg-alt column gap-2">
@@ -18,7 +18,7 @@
       <Icon icon="server" />
       <p class="ellipsize">{displayRelayUrl(url)}</p>
     </div>
-    <slot />
+    {@render children?.()}
   </div>
   {#if $relay?.profile?.description}
     <p class="ellipsize">{$relay?.profile.description}</p>

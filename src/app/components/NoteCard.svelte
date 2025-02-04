@@ -11,9 +11,13 @@
   import ProfileName from "@app/components/ProfileName.svelte"
   import {entityLink} from "@app/state"
 
-  export let event
-  export let minimal = false
-  export let hideProfile = false
+  interface Props {
+    event: TrustedEvent
+    minimal: boolean
+    hideProfile: boolean
+  }
+
+  let {event, children, minimal = false, hideProfile = false, ...restProps} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
@@ -25,7 +29,7 @@
   let muted = getPubkeyTagValues(getListTags($userMutes)).includes(event.pubkey)
 </script>
 
-<div class="flex flex-col gap-2 {$$props.class}">
+<div class="flex flex-col gap-2 {restProps.class}">
   {#if muted}
     <div class="flex items-center justify-between">
       <div class="row-2 relative">
@@ -50,6 +54,6 @@
         {formatTimestamp(event.created_at)}
       </Link>
     </div>
-    <slot />
+    {@render children()}
   {/if}
 </div>

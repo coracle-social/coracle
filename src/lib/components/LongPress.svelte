@@ -1,9 +1,12 @@
 <script lang="ts">
-  export let onLongPress
+  import {createBubbler} from "svelte/legacy"
+
+  const bubble = createBubbler()
+  let {...props} = $props()
 
   const onTouchStart = (event: any) => {
     touch = event.touches[0]
-    timeout = setTimeout(onLongPress, 500)
+    timeout = setTimeout(props.onLongPress, 500)
   }
 
   const onTouchMove = (event: any) => {
@@ -27,10 +30,10 @@
 <div
   role="button"
   tabindex="0"
-  on:click
-  on:touchstart={onTouchStart}
-  on:touchmove={onTouchMove}
-  on:touchend={onTouchEnd}
-  {...$$props}>
-  <slot />
+  onclick={bubble("click")}
+  ontouchstart={onTouchStart}
+  ontouchmove={onTouchMove}
+  ontouchend={onTouchEnd}
+  {...props}>
+  {@render props.children?.()}
 </div>

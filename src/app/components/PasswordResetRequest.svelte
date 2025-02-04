@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {postJson, sleep} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -11,7 +13,11 @@
   import {pushToast} from "@app/toast"
   import {BURROW_URL} from "@app/state"
 
-  export let email: string
+  interface Props {
+    email: string
+  }
+
+  let {email = $bindable()}: Props = $props()
 
   const back = () => history.back()
 
@@ -35,20 +41,28 @@
     }
   }
 
-  let loading = false
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={onSubmit}>
+<form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
   <ModalHeader>
-    <div slot="title">Reset your password</div>
+    {#snippet title()}
+      <div>Reset your password</div>
+    {/snippet}
   </ModalHeader>
   <FieldInline disabled={loading}>
-    <p slot="label">Email Address</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="user-rounded" />
-      <input bind:value={email} class="grow" />
-    </label>
-    <p slot="info">You'll be sent an email with a password reset link.</p>
+    {#snippet label()}
+      <p>Email Address</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="user-rounded" />
+        <input bind:value={email} class="grow" />
+      </label>
+    {/snippet}
+    {#snippet info()}
+      <p>You'll be sent an email with a password reset link.</p>
+    {/snippet}
   </FieldInline>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

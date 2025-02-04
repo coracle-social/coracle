@@ -8,8 +8,7 @@
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 
-  export let event
-  export let pubkeys
+  let {event, pubkeys} = $props()
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()

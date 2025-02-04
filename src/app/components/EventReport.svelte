@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
@@ -8,8 +10,7 @@
   import {pushToast} from "@app/toast"
   import {publishReport} from "@app/commands"
 
-  export let url
-  export let event
+  let {url, event} = $props()
 
   const back = () => history.back()
 
@@ -31,34 +32,50 @@
     return pushToast({message: "Your report has been sent!"})
   }
 
-  let reason = ""
-  let content = ""
-  let loading = false
+  let reason = $state("")
+  let content = $state("")
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={confirm}>
+<form class="column gap-4" onsubmit={preventDefault(confirm)}>
   <ModalHeader>
-    <div slot="title">Report Content</div>
-    <div slot="info">Flag inappropriate content.</div>
+    {#snippet title()}
+      <div>Report Content</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Flag inappropriate content.</div>
+    {/snippet}
   </ModalHeader>
   <Field>
-    <p slot="label">Reason*</p>
-    <select slot="input" class="select select-bordered" bind:value={reason}>
-      <option disabled selected>Choose a reason</option>
-      <option>Nudity</option>
-      <option>Malware</option>
-      <option>Profanity</option>
-      <option>Illegal</option>
-      <option>Spam</option>
-      <option>Impersonation</option>
-      <option>Other</option>
-    </select>
-    <p slot="info">Please select a reason for your report.</p>
+    {#snippet label()}
+      <p>Reason*</p>
+    {/snippet}
+    {#snippet input()}
+      <select class="select select-bordered" bind:value={reason}>
+        <option disabled selected>Choose a reason</option>
+        <option>Nudity</option>
+        <option>Malware</option>
+        <option>Profanity</option>
+        <option>Illegal</option>
+        <option>Spam</option>
+        <option>Impersonation</option>
+        <option>Other</option>
+      </select>
+    {/snippet}
+    {#snippet info()}
+      <p>Please select a reason for your report.</p>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">Details</p>
-    <textarea slot="input" class="textarea textarea-bordered" bind:value={content}></textarea>
-    <p slot="info">Please provide any additional details relevant to your report.</p>
+    {#snippet label()}
+      <p>Details</p>
+    {/snippet}
+    {#snippet input()}
+      <textarea class="textarea textarea-bordered" bind:value={content}></textarea>
+    {/snippet}
+    {#snippet info()}
+      <p>Please provide any additional details relevant to your report.</p>
+    {/snippet}
   </Field>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {writable} from "svelte/store"
   import {EditorContent} from "svelte-tiptap"
   import {isMobile} from "@lib/html"
@@ -11,10 +13,7 @@
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
-  export let url
-  export let event
-  export let onClose
-  export let onSubmit
+  let {url, event, onClose, onSubmit} = $props()
 
   const uploading = writable(false)
 
@@ -40,7 +39,7 @@
 <form
   in:fly
   out:slideAndFade
-  on:submit|preventDefault={submit}
+  onsubmit={preventDefault(submit)}
   class="card2 sticky bottom-2 z-feature mx-2 mt-4 bg-neutral">
   <div class="relative">
     <div class="note-editor flex-grow overflow-hidden">

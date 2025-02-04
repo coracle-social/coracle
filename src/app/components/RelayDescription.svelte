@@ -1,11 +1,11 @@
 <script lang="ts">
   import {deriveRelay} from "@welshman/app"
 
-  export let url
+  let {...props} = $props()
 
-  const relay = deriveRelay(url)
+  const relay = deriveRelay(props.url)
 </script>
 
 {#if $relay?.profile?.description}
-  <p class={$$props.class}>{$relay?.profile.description}</p>
+  <p class={props.class}>{$relay?.profile.description}</p>
 {/if}

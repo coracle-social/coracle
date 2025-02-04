@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {EditorContent} from "svelte-tiptap"
   import {writable} from "svelte/store"
   import {randomId} from "@welshman/lib"
@@ -14,7 +16,7 @@
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
-  export let url
+  let {url} = $props()
 
   const uploading = writable(false)
 
@@ -56,61 +58,77 @@
 
   const editor = makeEditor({submit, uploading})
 
-  let title = ""
-  let location = ""
-  let start: Date
-  let end: Date
+  let title = $state("")
+  let location = $state("")
+  let start: Date | undefined = $state()
+  let end: Date | undefined = $state()
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={submit}>
+<form class="column gap-4" onsubmit={preventDefault(submit)}>
   <ModalHeader>
-    <div slot="title">Create an Event</div>
-    <div slot="info">Invite other group members to events online or in real life.</div>
+    {#snippet title()}
+      <div>Create an Event</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Invite other group members to events online or in real life.</div>
+    {/snippet}
   </ModalHeader>
   <Field>
-    <p slot="label">Title*</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <input bind:value={title} class="grow" type="text" />
-    </label>
+    {#snippet label()}
+      <p>Title*</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <input bind:value={title} class="grow" type="text" />
+      </label>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">Summary</p>
-    <div
-      slot="input"
-      class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
-      <div class="input-editor flex-grow overflow-hidden">
-        <EditorContent editor={$editor} />
+    {#snippet label()}
+      <p>Summary</p>
+    {/snippet}
+    {#snippet input()}
+      <div class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
+        <div class="input-editor flex-grow overflow-hidden">
+          <EditorContent editor={$editor} />
+        </div>
+        <Button
+          data-tip="Add an image"
+          class="center btn tooltip"
+          on:click={() => $editor.chain().selectFiles().run()}>
+          {#if $uploading}
+            <span class="loading loading-spinner loading-xs"></span>
+          {:else}
+            <Icon icon="gallery-send" />
+          {/if}
+        </Button>
       </div>
-      <Button
-        data-tip="Add an image"
-        class="center btn tooltip"
-        on:click={() => $editor.chain().selectFiles().run()}>
-        {#if $uploading}
-          <span class="loading loading-spinner loading-xs"></span>
-        {:else}
-          <Icon icon="gallery-send" />
-        {/if}
-      </Button>
-    </div>
+    {/snippet}
   </Field>
   <Field>
-    <div slot="input" class="grid grid-cols-2 gap-2">
-      <div class="flex flex-col gap-1">
-        <strong>Start</strong>
-        <DateTimeInput bind:value={start} />
+    {#snippet input()}
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex flex-col gap-1">
+          <strong>Start</strong>
+          <DateTimeInput bind:value={start} />
+        </div>
+        <div class="flex flex-col gap-1">
+          <strong>End</strong>
+          <DateTimeInput bind:value={end} />
+        </div>
       </div>
-      <div class="flex flex-col gap-1">
-        <strong>End</strong>
-        <DateTimeInput bind:value={end} />
-      </div>
-    </div>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">Location (optional)</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="map-point" />
-      <input bind:value={location} class="grow" type="text" />
-    </label>
+    {#snippet label()}
+      <p>Location (optional)</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="map-point" />
+        <input bind:value={location} class="grow" type="text" />
+      </label>
+    {/snippet}
   </Field>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {deriveRelayDisplay} from "@welshman/app"
 
-  export let url
+  let {url} = $props()
 
   const display = deriveRelayDisplay(url)
 </script>

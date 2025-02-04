@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {readable} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
   import type {Readable} from "svelte/store"
@@ -70,7 +71,7 @@
 
   const replyTo = (event: TrustedEvent) => {
     parent = event
-    compose.focus()
+    compose?.focus()
   }
 
   const clearParent = () => {
@@ -107,25 +108,23 @@
   }
 
   const scrollToNewMessages = () =>
-    newMessages.scrollIntoView({behavior: "smooth", block: "center"})
+    newMessages?.scrollIntoView({behavior: "smooth", block: "center"})
 
-  const scrollToBottom = () => element.scrollTo({top: 0, behavior: "smooth"})
+  const scrollToBottom = () => element?.scrollTo({top: 0, behavior: "smooth"})
 
-  let parent: TrustedEvent | undefined
-  let loading = true
-  let element: HTMLElement
-  let newMessages: HTMLElement
+  let loading = $state(true)
+  let parent: TrustedEvent | undefined = $state()
+  let element: HTMLElement | undefined = $state()
+  let newMessages: HTMLElement | undefined = $state()
   let newMessagesSeen = false
-  let showFixedNewMessages = false
-  let showScrollButton = false
+  let showFixedNewMessages = $state(false)
+  let showScrollButton = $state(false)
   let cleanup: () => void
-  let events: Readable<TrustedEvent[]>
-  let compose: ChannelCompose
-  let elements: any[] = []
+  let events: Readable<TrustedEvent[]> = $state(readable([]))
+  let compose: ChannelCompose | undefined = $state()
 
-  $: {
-    elements = []
-
+  const elements = $derived.by(() => {
+    const elements = []
     const seen = new Set()
 
     let previousDate
@@ -170,11 +169,13 @@
     elements.reverse()
 
     setTimeout(onScroll, 100)
-  }
+
+    return elements
+  })
 
   onMount(() => {
     ;({events, cleanup} = makeFeed({
-      element,
+      element: element!,
       relays: [url],
       feedFilters: [filter],
       subscriptionFilters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
@@ -193,32 +194,38 @@
 
 <div class="saib relative flex h-full flex-col">
   <PageBar>
-    <div slot="icon" class="center">
-      <Icon icon="hashtag" />
-    </div>
-    <strong slot="title">
-      <ChannelName {url} {room} />
-    </strong>
-    <div slot="action" class="row-2">
-      {#if room !== GENERAL}
-        {#if $userRoomsByUrl.get(url)?.has(room)}
-          <Button class="btn btn-neutral btn-sm" on:click={leaveRoom}>
-            <Icon icon="arrows-a-logout-2" />
-            Leave Room
-          </Button>
-        {:else}
-          <Button class="btn btn-neutral btn-sm" on:click={joinRoom}>
-            <Icon icon="login-2" />
-            Join Room
-          </Button>
+    {#snippet icon()}
+      <div class="center">
+        <Icon icon="hashtag" />
+      </div>
+    {/snippet}
+    {#snippet title()}
+      <strong>
+        <ChannelName {url} {room} />
+      </strong>
+    {/snippet}
+    {#snippet action()}
+      <div class="row-2">
+        {#if room !== GENERAL}
+          {#if $userRoomsByUrl.get(url)?.has(room)}
+            <Button class="btn btn-neutral btn-sm" on:click={leaveRoom}>
+              <Icon icon="arrows-a-logout-2" />
+              Leave Room
+            </Button>
+          {:else}
+            <Button class="btn btn-neutral btn-sm" on:click={joinRoom}>
+              <Icon icon="login-2" />
+              Join Room
+            </Button>
+          {/if}
         {/if}
-      {/if}
-      <MenuSpaceButton {url} />
-    </div>
+        <MenuSpaceButton {url} />
+      </div>
+    {/snippet}
   </PageBar>
   <div
     class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden py-2"
-    on:scroll={onScroll}
+    onscroll={onScroll}
     bind:this={element}>
     {#each elements as { type, id, value, showPubkey } (id)}
       {#if type === "new-messages"}

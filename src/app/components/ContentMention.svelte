@@ -5,7 +5,7 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  export let value
+  let {value} = $props()
 
   const profile = deriveProfile(value.pubkey)
 

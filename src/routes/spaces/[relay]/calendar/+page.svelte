@@ -30,28 +30,30 @@
     parseInt(event.tags.find(t => t[0] === "start")?.[1] || "")
 
   const limit = 5
-  let loading = true
+  let loading = $state(true)
 
   type Item = {
     event: TrustedEvent
     dateDisplay?: string
   }
 
-  $: items = sortBy(e => -getStart(e), $events)
-    .reduce<Item[]>((r, event) => {
-      const end = getEnd(event)
-      const start = getStart(event)
+  let items = $derived(
+    sortBy(e => -getStart(e), $events)
+      .reduce<Item[]>((r, event) => {
+        const end = getEnd(event)
+        const start = getStart(event)
 
-      if (isNaN(start) || isNaN(end)) return r
+        if (isNaN(start) || isNaN(end)) return r
 
-      const prevDateDisplay =
-        r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-      const newDateDisplay = formatTimestampAsDate(start)
-      const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+        const prevDateDisplay =
+          r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
+        const newDateDisplay = formatTimestampAsDate(start)
+        const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
 
-      return [...r, {event, dateDisplay}]
-    }, [])
-    .slice(0, limit)
+        return [...r, {event, dateDisplay}]
+      }, [])
+      .slice(0, limit),
+  )
 
   onMount(() => {
     const sub = subscribe({filters: [{kinds, since: ago(30)}]})
@@ -72,13 +74,19 @@
 
 <div class="relative flex h-screen flex-col">
   <PageBar>
-    <div slot="icon" class="center">
-      <Icon icon="calendar-minimalistic" />
-    </div>
-    <strong slot="title">Calendar</strong>
-    <div slot="action" class="md:hidden">
-      <MenuSpaceButton {url} />
-    </div>
+    {#snippet icon()}
+      <div class="center">
+        <Icon icon="calendar-minimalistic" />
+      </div>
+    {/snippet}
+    {#snippet title()}
+      <strong>Calendar</strong>
+    {/snippet}
+    {#snippet action()}
+      <div class="md:hidden">
+        <MenuSpaceButton {url} />
+      </div>
+    {/snippet}
   </PageBar>
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each items as { event, dateDisplay }, i (event.id)}

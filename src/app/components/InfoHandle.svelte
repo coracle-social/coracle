@@ -7,7 +7,9 @@
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">What is a nostr address?</div>
+    {#snippet title()}
+      <div>What is a nostr address?</div>
+    {/snippet}
   </ModalHeader>
   <p>
     {PLATFORM_NAME} hosts spaces on the <Link external href="https://nostr.com/" class="underline"

@@ -31,23 +31,41 @@
         <div class="col-3">
           <Button on:click={addSpace}>
             <CardButton>
-              <div slot="icon"><Icon icon="add-circle" size={7} /></div>
-              <div slot="title">Add a space</div>
-              <div slot="info">Use an invite link, or create your own space.</div>
+              {#snippet icon()}
+                <div><Icon icon="add-circle" size={7} /></div>
+              {/snippet}
+              {#snippet title()}
+                <div>Add a space</div>
+              {/snippet}
+              {#snippet info()}
+                <div>Use an invite link, or create your own space.</div>
+              {/snippet}
             </CardButton>
           </Button>
           <Link href="/people">
             <CardButton>
-              <div slot="icon"><Icon icon="compass" size={7} /></div>
-              <div slot="title">Browse the network</div>
-              <div slot="info">Find your people on the nostr network.</div>
+              {#snippet icon()}
+                <div><Icon icon="compass" size={7} /></div>
+              {/snippet}
+              {#snippet title()}
+                <div>Browse the network</div>
+              {/snippet}
+              {#snippet info()}
+                <div>Find your people on the nostr network.</div>
+              {/snippet}
             </CardButton>
           </Link>
           <Button on:click={startChat}>
             <CardButton>
-              <div slot="icon"><Icon icon="chat-round" size={7} /></div>
-              <div slot="title">Start a conversation</div>
-              <div slot="info">Use nostr's encrypted group chats to stay in touch.</div>
+              {#snippet icon()}
+                <div><Icon icon="chat-round" size={7} /></div>
+              {/snippet}
+              {#snippet title()}
+                <div>Start a conversation</div>
+              {/snippet}
+              {#snippet info()}
+                <div>Use nostr's encrypted group chats to stay in touch.</div>
+              {/snippet}
             </CardButton>
           </Button>
         </div>

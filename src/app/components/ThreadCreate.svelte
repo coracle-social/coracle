@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {writable} from "svelte/store"
   import {EditorContent} from "svelte-tiptap"
   import {createEvent, THREAD} from "@welshman/util"
@@ -13,7 +15,7 @@
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
 
-  export let url
+  let {url} = $props()
 
   const uploading = writable(false)
 
@@ -55,32 +57,44 @@
 
   const editor = makeEditor({submit, uploading, placeholder: "What's on your mind?"})
 
-  let title: string
+  let title: string = $state("")
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={submit}>
+<form class="column gap-4" onsubmit={preventDefault(submit)}>
   <ModalHeader>
-    <div slot="title">Create a Thread</div>
-    <div slot="info">Share a link, or start a discussion.</div>
+    {#snippet title()}
+      <div>Create a Thread</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Share a link, or start a discussion.</div>
+    {/snippet}
   </ModalHeader>
   <div class="col-8 relative">
     <Field>
-      <p slot="label">Title*</p>
-      <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-        <!-- svelte-ignore a11y-autofocus -->
-        <input
-          autofocus={!isMobile}
-          bind:value={title}
-          class="grow"
-          type="text"
-          placeholder="What is this thread about?" />
-      </label>
+      {#snippet label()}
+        <p>Title*</p>
+      {/snippet}
+      {#snippet input()}
+        <label class="input input-bordered flex w-full items-center gap-2">
+          <!-- svelte-ignore a11y_autofocus -->
+          <input
+            autofocus={!isMobile}
+            bind:value={title}
+            class="grow"
+            type="text"
+            placeholder="What is this thread about?" />
+        </label>
+      {/snippet}
     </Field>
     <Field>
-      <p slot="label">Message*</p>
-      <div slot="input" class="note-editor flex-grow overflow-hidden">
-        <EditorContent editor={$editor} />
-      </div>
+      {#snippet label()}
+        <p>Message*</p>
+      {/snippet}
+      {#snippet input()}
+        <div class="note-editor flex-grow overflow-hidden">
+          <EditorContent editor={$editor} />
+        </div>
+      {/snippet}
     </Field>
     <Button
       data-tip="Add an image"

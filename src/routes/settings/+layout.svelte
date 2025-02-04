@@ -7,6 +7,11 @@
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import LogOut from "@app/components/LogOut.svelte"
   import {pushModal} from "@app/modal"
+  interface Props {
+    children?: import("svelte").Snippet
+  }
+
+  let {children}: Props = $props()
 
   const logout = () => pushModal(LogOut)
 </script>
@@ -42,5 +47,5 @@
 </SecondaryNav>
 
 <Page>
-  <slot />
+  {@render children?.()}
 </Page>

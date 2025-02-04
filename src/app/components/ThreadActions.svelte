@@ -18,9 +18,13 @@
   import {notifications} from "@app/notifications"
   import {makeSpacePath} from "@app/routes"
 
-  export let url
-  export let event
-  export let showActivity = false
+  interface Props {
+    url: any
+    event: any
+    showActivity?: boolean
+  }
+
+  let {url, event, showActivity = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const deleted = deriveIsDeleted(repository, event)
@@ -28,9 +32,9 @@
   const filters = [{kinds: [COMMENT], "#E": [event.id]}]
   const replies = deriveEvents(repository, {filters})
 
-  const showPopover = () => popover.show()
+  const showPopover = () => popover?.show()
 
-  const hidePopover = () => popover.hide()
+  const hidePopover = () => popover?.hide()
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -45,9 +49,9 @@
   const onEmoji = (emoji: NativeEmoji) =>
     publishReaction({event, content: emoji.unicode, relays: [url]})
 
-  let popover: Instance
+  let popover: Instance | undefined = $state()
 
-  $: lastActive = max([...$replies, event].map(e => e.created_at))
+  let lastActive = $derived(max([...$replies, event].map(e => e.created_at)))
 
   onMount(() => {
     load({relays: [url], filters})

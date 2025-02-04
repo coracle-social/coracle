@@ -12,13 +12,18 @@
   import {makeChatPath} from "@app/routes"
   import {notifications} from "@app/notifications"
 
-  export let id: string
-  export let pubkeys: string[]
-  export let messages: TrustedEvent[]
+  interface Props {
+    id: string
+    pubkeys: string[]
+    messages: TrustedEvent[]
+    [key: string]: any
+  }
 
-  const others = remove($pubkey!, pubkeys)
-  const active = $page.params.chat === id
-  const path = makeChatPath(pubkeys)
+  let {...props}: Props = $props()
+
+  const others = remove($pubkey!, props.pubkeys)
+  const active = $page.params.chat === props.id
+  const path = makeChatPath(props.pubkeys)
 
   onMount(() => {
     for (const pk of others) {
@@ -27,9 +32,9 @@
   })
 </script>
 
-<Link class="flex flex-col justify-start gap-1" href={makeChatPath(pubkeys)}>
+<Link class="flex flex-col justify-start gap-1" href={makeChatPath(props.pubkeys)}>
   <div
-    class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100 {$$props.class}"
+    class="cursor-pointer border-t border-solid border-base-100 px-6 py-2 transition-colors hover:bg-base-100 {props.class}"
     class:bg-base-100={active}>
     <div class="flex flex-col justify-start gap-1">
       <div class="flex items-center justify-between gap-2">
@@ -54,7 +59,7 @@
         {/if}
       </div>
       <p class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-        {messages[0].content}
+        {props.messages[0].content}
       </p>
     </div>
   </div>

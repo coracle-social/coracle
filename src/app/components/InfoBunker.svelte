@@ -7,7 +7,9 @@
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">What is a bunker link?</div>
+    {#snippet title()}
+      <div>What is a bunker link?</div>
+    {/snippet}
   </ModalHeader>
   <p>
     <Link external class="link" href="https://nostr.com/">Nostr</Link> uses "keys" instead of passwords

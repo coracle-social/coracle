@@ -1,11 +1,17 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {fly} from "@lib/transition"
 
-  export let onClose
-  export let hideOnClick = false
+  interface Props {
+    onClose: any
+    hideOnClick?: boolean
+    children?: Snippet
+  }
+
+  let {onClose, hideOnClick = false, children}: Props = $props()
 
   const onMouseUp = (e: any) => {
-    if (hideOnClick || !element.contains(e.target)) {
+    if (hideOnClick || !element?.contains(e.target)) {
       setTimeout(onClose)
     }
   }
@@ -16,13 +22,13 @@
     }
   }
 
-  let element: HTMLElement
+  let element: HTMLElement | undefined = $state()
 </script>
 
-<svelte:window on:mouseup={onMouseUp} on:keydown={onKeyDown} />
+<svelte:window onmouseup={onMouseUp} onkeydown={onKeyDown} />
 
 <div class="relative w-full" bind:this={element}>
   <div transition:fly|local class="absolute z-popover w-full">
-    <slot />
+    {@render children?.()}
   </div>
 </div>

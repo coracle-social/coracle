@@ -84,8 +84,12 @@
   import WidgetAdd from "@assets/icons/Widget Add.svg?dataurl"
   import WiFiRouterRound from "@assets/icons/Wi-Fi Router Round.svg?dataurl"
 
-  export let icon
-  export let size = 5
+  interface Props {
+    icon: string
+    size: number
+  }
+
+  let {icon, size = 5, ...restProps} = $props()
 
   const px = size * 4
 
@@ -173,6 +177,6 @@
 </script>
 
 <div
-  class={cx("inline-block", $$props.class)}
+  class="inline-block {restProps.class}"
   style="mask-image: url({data}); width: {px}px; height: {px}px; min-width: {px}px; min-height: {px}px; background-color: currentcolor;">
 </div>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -19,12 +21,14 @@
     }
   }
 
-  let loading = false
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={doLogout}>
+<form class="column gap-4" onsubmit={preventDefault(doLogout)}>
   <ModalHeader>
-    <div slot="title">Are you sure you want<br />to log out?</div>
+    {#snippet title()}
+      <div>Are you sure you want<br />to log out?</div>
+    {/snippet}
   </ModalHeader>
   <p class="text-center">Your local database will be cleared.</p>
   <ModalFooter>

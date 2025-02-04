@@ -11,13 +11,13 @@
   import {pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
 
-  let term = ""
+  let term = $state("")
 
   const startChat = () => pushModal(ChatStart)
 
   const openMenu = () => pushModal(ChatMenuMobile)
 
-  $: chats = $chatSearch.searchOptions(term)
+  let chats = $derived($chatSearch.searchOptions(term))
 
   onDestroy(() => {
     setChecked($page.url.pathname)
@@ -39,26 +39,34 @@
 </div>
 
 <ContentSearch class="md:hidden">
-  <div slot="input" class="row-2 min-w-0 flex-grow items-center">
-    <label class="input input-bordered flex flex-grow items-center gap-2">
-      <Icon icon="magnifer" />
-      <input bind:value={term} class="grow" type="text" placeholder="Search for conversations..." />
-    </label>
-    <Button class="btn btn-primary" on:click={openMenu}>
-      <Icon icon="menu-dots" />
-    </Button>
-  </div>
-  <div slot="content" class="col-2">
-    {#each chats as { id, pubkeys, messages } (id)}
-      <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
-    {:else}
-      <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
-        <p>No chats found! Try starting one up.</p>
-        <Button class="btn btn-primary" on:click={startChat}>
-          <Icon icon="add-circle" />
-          Start a Chat
-        </Button>
-      </div>
-    {/each}
-  </div>
+  {#snippet input()}
+    <div class="row-2 min-w-0 flex-grow items-center">
+      <label class="input input-bordered flex flex-grow items-center gap-2">
+        <Icon icon="magnifer" />
+        <input
+          bind:value={term}
+          class="grow"
+          type="text"
+          placeholder="Search for conversations..." />
+      </label>
+      <Button class="btn btn-primary" on:click={openMenu}>
+        <Icon icon="menu-dots" />
+      </Button>
+    </div>
+  {/snippet}
+  {#snippet content()}
+    <div class="col-2">
+      {#each chats as { id, pubkeys, messages } (id)}
+        <ChatItem {id} {pubkeys} {messages} class="bg-alt card2" />
+      {:else}
+        <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
+          <p>No chats found! Try starting one up.</p>
+          <Button class="btn btn-primary" on:click={startChat}>
+            <Icon icon="add-circle" />
+            Start a Chat
+          </Button>
+        </div>
+      {/each}
+    </div>
+  {/snippet}
 </ContentSearch>

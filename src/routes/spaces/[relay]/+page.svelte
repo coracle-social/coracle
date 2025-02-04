@@ -39,31 +39,37 @@
 
   const addRoom = () => pushModal(RoomCreate, {url})
 
-  let relayAdminEvents: TrustedEvent[] = []
+  let relayAdminEvents: TrustedEvent[] = $state([])
 
-  $: pubkey = $relay?.profile?.pubkey
+  let pubkey = $derived($relay?.profile?.pubkey)
 </script>
 
 <div class="relative flex flex-col">
   <PageBar>
-    <div slot="icon" class="center">
-      <Icon icon="home-smile" />
-    </div>
-    <strong slot="title">Home</strong>
-    <div slot="action" class="row-2">
-      {#if !$userRoomsByUrl.has(url)}
-        <Button class="btn btn-primary btn-sm" on:click={joinSpace}>
-          <Icon icon="login-2" />
-          Join Space
-        </Button>
-      {:else if pubkey}
-        <Link class="btn btn-primary btn-sm" href={makeChatPath([pubkey])}>
-          <Icon icon="letter" />
-          Contact Owner
-        </Link>
-      {/if}
-      <MenuSpaceButton {url} />
-    </div>
+    {#snippet icon()}
+      <div class="center">
+        <Icon icon="home-smile" />
+      </div>
+    {/snippet}
+    {#snippet title()}
+      <strong>Home</strong>
+    {/snippet}
+    {#snippet action()}
+      <div class="row-2">
+        {#if !$userRoomsByUrl.has(url)}
+          <Button class="btn btn-primary btn-sm" on:click={joinSpace}>
+            <Icon icon="login-2" />
+            Join Space
+          </Button>
+        {:else if pubkey}
+          <Link class="btn btn-primary btn-sm" href={makeChatPath([pubkey])}>
+            <Icon icon="letter" />
+            Contact Owner
+          </Link>
+        {/if}
+        <MenuSpaceButton {url} />
+      </div>
+    {/snippet}
   </PageBar>
   <div class="col-2 p-2">
     <div class="card2 bg-alt col-4 text-left">

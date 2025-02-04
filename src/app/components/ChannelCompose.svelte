@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {EditorContent} from "svelte-tiptap"
@@ -7,8 +9,12 @@
   import Button from "@lib/components/Button.svelte"
   import {makeEditor} from "@app/editor"
 
-  export let onSubmit: any
-  export let content = ""
+  interface Props {
+    onSubmit: any
+    content?: string
+  }
+
+  let {onSubmit, content = ""}: Props = $props()
 
   export const focus = () => $editor.chain().focus().run()
 
@@ -36,9 +42,7 @@
   })
 </script>
 
-<form
-  class="relative z-feature flex gap-2 p-2"
-  on:submit|preventDefault={$uploading ? undefined : submit}>
+<form class="relative z-feature flex gap-2 p-2" onsubmit={preventDefault(submit)}>
   <Button
     data-tip="Add an image"
     class="center tooltip tooltip-right h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"

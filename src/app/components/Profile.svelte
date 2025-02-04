@@ -15,7 +15,7 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  export let pubkey
+  let {pubkey} = $props()
 
   const profile = deriveProfile(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
@@ -24,8 +24,9 @@
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey})
 
-  $: following =
-    pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
+  let following = $derived(
+    pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey),
+  )
 </script>
 
 <div class="flex max-w-full gap-3">

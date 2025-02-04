@@ -6,7 +6,9 @@
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">What is nostr?</div>
+    {#snippet title()}
+      <div>What is nostr?</div>
+    {/snippet}
   </ModalHeader>
   <p>
     <Link external href="https://nostr.com/" class="link">Nostr</Link> is way to build social apps that

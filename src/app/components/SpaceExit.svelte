@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {goto} from "$app/navigation"
   import {displayRelayUrl} from "@welshman/util"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -8,7 +10,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {removeSpaceMembership} from "@app/commands"
 
-  export let url
+  let {url} = $props()
 
   const back = () => history.back()
 
@@ -24,14 +26,16 @@
     goto("/home")
   }
 
-  let loading = false
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={exit}>
+<form class="column gap-4" onsubmit={preventDefault(exit)}>
   <ModalHeader>
-    <div slot="title">
-      You are leaving<br /><span class="text-primary">{displayRelayUrl(url)}</span>
-    </div>
+    {#snippet title()}
+      <div>
+        You are leaving<br /><span class="text-primary">{displayRelayUrl(url)}</span>
+      </div>
+    {/snippet}
   </ModalHeader>
   <p class="text-center">Are you sure you want to leave?</p>
   <ModalFooter>

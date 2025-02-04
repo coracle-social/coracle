@@ -10,15 +10,15 @@
 
   const defaultPubkeys = getDefaultPubkeys()
 
-  let term = ""
-  let limit = 10
-  let element: Element
+  let term = $state("")
+  let limit = $state(10)
+  let element: Element | undefined = $state()
 
-  $: pubkeys = term ? $profileSearch.searchValues(term) : defaultPubkeys
+  let pubkeys = $derived(term ? $profileSearch.searchValues(term) : defaultPubkeys)
 
   onMount(() => {
     const scroller = createScroller({
-      element,
+      element: element!,
       onScroll: () => {
         limit += 10
       },
@@ -30,20 +30,24 @@
 
 <Page>
   <ContentSearch>
-    <label slot="input" class="row-2 input input-bordered">
-      <Icon icon="magnifer" />
-      <!-- svelte-ignore a11y-autofocus -->
-      <input
-        autofocus={!isMobile}
-        bind:value={term}
-        class="grow"
-        type="text"
-        placeholder="Search for people..." />
-    </label>
-    <div slot="content" class="col-2" bind:this={element}>
-      {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
-        <PeopleItem {pubkey} />
-      {/each}
-    </div>
+    {#snippet input()}
+      <label class="row-2 input input-bordered">
+        <Icon icon="magnifer" />
+        <!-- svelte-ignore a11y_autofocus -->
+        <input
+          autofocus={!isMobile}
+          bind:value={term}
+          class="grow"
+          type="text"
+          placeholder="Search for people..." />
+      </label>
+    {/snippet}
+    {#snippet content()}
+      <div class="col-2" bind:this={element}>
+        {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
+          <PeopleItem {pubkey} />
+        {/each}
+      </div>
+    {/snippet}
   </ContentSearch>
 </Page>

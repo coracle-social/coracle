@@ -7,20 +7,26 @@
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
 
-  export let url
+  let {url} = $props()
 
   const path = makeSpacePath(url)
 </script>
 
 <Link replaceState href={path}>
   <CardButton>
-    <div slot="icon"><SpaceAvatar {url} /></div>
-    <div slot="title" class="flex gap-1">
-      <RelayName {url} />
-      {#if $notifications.has(path)}
-        <div class="relative top-1 h-2 w-2 rounded-full bg-primary"></div>
-      {/if}
-    </div>
-    <div slot="info"><RelayDescription {url} /></div>
+    {#snippet icon()}
+      <div><SpaceAvatar {url} /></div>
+    {/snippet}
+    {#snippet title()}
+      <div class="flex gap-1">
+        <RelayName {url} />
+        {#if $notifications.has(path)}
+          <div class="relative top-1 h-2 w-2 rounded-full bg-primary"></div>
+        {/if}
+      </div>
+    {/snippet}
+    {#snippet info()}
+      <div><RelayDescription {url} /></div>
+    {/snippet}
   </CardButton>
 </Link>

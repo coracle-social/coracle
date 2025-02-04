@@ -9,18 +9,22 @@
   import Button from "@lib/components/Button.svelte"
   import RelayItem from "@app/components/RelayItem.svelte"
 
-  export let relays: Readable<string[]>
-  export let addRelay: (url: string) => void
+  interface Props {
+    relays: Readable<string[]>
+    addRelay: (url: string) => void
+  }
 
-  let term = ""
-  let limit = 20
-  let element: Element
+  let {relays, addRelay}: Props = $props()
 
-  $: customUrl = tryCatch(() => normalizeRelayUrl(term))
+  let term = $state("")
+  let limit = $state(20)
+  let element: Element | undefined = $state()
+
+  let customUrl = $derived(tryCatch(() => normalizeRelayUrl(term)))
 
   onMount(() => {
     const scroller = createScroller({
-      element,
+      element: element!,
       delay: 300,
       onScroll: () => {
         limit += 20

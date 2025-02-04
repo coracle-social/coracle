@@ -1,14 +1,20 @@
 <script lang="ts">
+  import {run} from "svelte/legacy"
+
   import {PublishStatus} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
 
-  export let url: string
-  export let status: string
-  export let message: string
-  export let retry: () => void
+  interface Props {
+    url: string
+    status: string
+    message: string
+    retry: () => void
+  }
 
-  $: {
+  let {url, status, message = $bindable(), retry}: Props = $props()
+
+  run(() => {
     if (!message && status === PublishStatus.Timeout) {
       message = "request timed out"
     }
@@ -16,7 +22,7 @@
     if (!message) {
       message = "no details recieved"
     }
-  }
+  })
 </script>
 
 <div class="card2 bg-alt col-2 shadow-2xl">

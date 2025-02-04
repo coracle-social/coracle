@@ -32,7 +32,6 @@
 
     return () => {
       popover?.destroy()
-      unmount(instance)
     }
   })
 </script>

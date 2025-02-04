@@ -9,9 +9,7 @@
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  export let url
-  export let event
-  export let reply
+  let {url, event, reply} = $props()
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()

@@ -1,15 +1,19 @@
 <script lang="ts">
-  export let type: "button" | "submit" = "button"
+  interface Props {
+    type?: "button" | "submit"
+  }
 
-  $: className = `text-left ${$$props.class}`
+  let {type = "button", ...restProps} = $props()
+
+  const className = $derived(`text-left ${restProps.class}`)
 </script>
 
 {#if type === "submit"}
-  <button {...$$props} {type} class={className}>
+  <button {...restProps} {type} class={className}>
     <slot />
   </button>
 {:else}
-  <button on:click|stopPropagation|preventDefault {...$$props} {type} class={className}>
+  <button on:click|stopPropagation|preventDefault {...restProps} {type} class={className}>
     <slot />
   </button>
 {/if}

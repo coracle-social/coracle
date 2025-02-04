@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {postJson} from "@welshman/lib"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -43,12 +45,12 @@
     }
   }
 
-  let email = ""
-  let password = ""
-  let loading = false
+  let email = $state("")
+  let password = $state("")
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={signup}>
+<form class="column gap-4" onsubmit={preventDefault(signup)}>
   <h1 class="heading">Sign up with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
     {PLATFORM_NAME} is built using the
@@ -57,18 +59,26 @@
   </p>
   {#if BURROW_URL}
     <FieldInline>
-      <p slot="label">Email</p>
-      <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-        <Icon icon="user-rounded" />
-        <input bind:value={email} />
-      </label>
+      {#snippet label()}
+        <p>Email</p>
+      {/snippet}
+      {#snippet input()}
+        <label class="input input-bordered flex w-full items-center gap-2">
+          <Icon icon="user-rounded" />
+          <input bind:value={email} />
+        </label>
+      {/snippet}
     </FieldInline>
     <FieldInline>
-      <p slot="label">Password</p>
-      <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-        <Icon icon="key" />
-        <input bind:value={password} type="password" />
-      </label>
+      {#snippet label()}
+        <p>Password</p>
+      {/snippet}
+      {#snippet input()}
+        <label class="input input-bordered flex w-full items-center gap-2">
+          <Icon icon="key" />
+          <input bind:value={password} type="password" />
+        </label>
+      {/snippet}
     </FieldInline>
     <Button type="submit" class="btn btn-primary" disabled={loading || !email || !password}>
       <Spinner {loading}>Sign Up</Spinner>

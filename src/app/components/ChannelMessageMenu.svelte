@@ -7,9 +7,7 @@
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {pushModal} from "@app/modal"
 
-  export let url
-  export let event
-  export let onClick
+  let {url, event, onClick} = $props()
 
   const report = () => {
     onClick()

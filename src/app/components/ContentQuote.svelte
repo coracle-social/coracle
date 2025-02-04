@@ -10,11 +10,7 @@
   import {deriveEvent, entityLink, ROOM} from "@app/state"
   import {makeThreadPath, makeRoomPath} from "@app/routes"
 
-  export let value
-  export let event
-  export let depth = 0
-  export let relays: string[] = []
-  export let minimal = false
+  let props = ({value, event, depth = 0, relays = [], minimal = false, ...restProps} = $props())
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
@@ -100,7 +96,7 @@
 <Button class="my-2 block max-w-full text-left" on:click={onClick}>
   {#if $quote}
     <NoteCard {minimal} event={$quote} class="bg-alt rounded-box p-4">
-      <slot name="note-content" event={$quote} {depth} />
+      {@render noteContent({event: $quote, depth})}
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">

@@ -21,25 +21,20 @@
 </style>
 
 <script lang="ts">
-  import cx from "classnames"
   import {fade} from "@lib/transition"
   import {page} from "$app/stores"
 
-  export let href: string = ""
-  export let notification = false
+  let {href = "", notification = "false", ...restProps} = $props()
 
-  $: active = $page.url.pathname === href
+  const active = $derived($page.url.pathname === href)
 </script>
 
 {#if href}
   <a
-    {...$$props}
+    {...restProps}
     {href}
     on:click
-    class={cx(
-      $$props.class,
-      "relative flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
-    )}
+    class="{restProps.class} relative flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content"
     class:text-base-content={active}
     class:bg-base-100={active}>
     <slot />
@@ -49,12 +44,9 @@
   </a>
 {:else}
   <button
-    {...$$props}
+    {...restProps}
     on:click
-    class={cx(
-      $$props.class,
-      "relative flex w-full items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content",
-    )}
+    class="{restProps.class} relative flex w-full items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content"
     class:text-base-content={active}
     class:bg-base-100={active}>
     {#if !active && notification}

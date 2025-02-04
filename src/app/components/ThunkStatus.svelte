@@ -10,7 +10,11 @@
   import ThunkStatusDetail from "@app/components/ThunkStatusDetail.svelte"
   import {userSettingValues} from "@app/state"
 
-  export let thunk: Thunk | MergedThunk
+  interface Props {
+    thunk: Thunk | MergedThunk
+  }
+
+  let {thunk} = $props()
 
   const {Pending, Failure, Timeout} = PublishStatus
 

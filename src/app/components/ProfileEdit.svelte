@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {ctx} from "@welshman/lib"
   import {
     createEvent,
@@ -16,7 +18,7 @@
   import {pushModal, clearModals} from "@app/modal"
   import {pushToast} from "@app/toast"
 
-  const values = {...($profilesByPubkey.get($pubkey!) || makeProfile())}
+  const values = $state({...($profilesByPubkey.get($pubkey!) || makeProfile())})
 
   const back = () => history.back()
 
@@ -30,38 +32,49 @@
     clearModals()
   }
 
-  let file: File
+  let file: File | undefined = $state()
 </script>
 
-<form class="col-4" on:submit|preventDefault={saveEdit}>
+<form class="col-4" onsubmit={preventDefault(saveEdit)}>
   <div class="flex justify-center py-2">
     <InputProfilePicture bind:file bind:url={values.picture} />
   </div>
   <Field>
-    <p slot="label">Username</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="user-circle" />
-      <input bind:value={values.name} class="grow" type="text" />
-    </label>
+    {#snippet label()}
+      <p>Username</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="user-circle" />
+        <input bind:value={values.name} class="grow" type="text" />
+      </label>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">About You</p>
-    <textarea
-      class="textarea textarea-bordered leading-4"
-      rows="3"
-      bind:value={values.about}
-      slot="input">
-    </textarea>
+    {#snippet label()}
+      <p>About You</p>
+    {/snippet}
+    {#snippet input()}
+      <textarea class="textarea textarea-bordered leading-4" rows="3" bind:value={values.about}>
+      </textarea>
+    {/snippet}
   </Field>
   <Field>
-    <p slot="label">Nostr Address</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="map-point" />
-      <input bind:value={values.nip05} class="grow" type="text" />
-    </label>
-    <p slot="info">
-      <Button class="link" on:click={() => pushModal(InfoHandle)}>What is a nostr address?</Button>
-    </p>
+    {#snippet label()}
+      <p>Nostr Address</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="map-point" />
+        <input bind:value={values.nip05} class="grow" type="text" />
+      </label>
+    {/snippet}
+    {#snippet info()}
+      <p>
+        <Button class="link" on:click={() => pushModal(InfoHandle)}
+          >What is a nostr address?</Button>
+      </p>
+    {/snippet}
   </Field>
   <div class="mt-4 flex flex-row items-center justify-between gap-4">
     <Button class="btn btn-neutral" on:click={back}>Discard Changes</Button>

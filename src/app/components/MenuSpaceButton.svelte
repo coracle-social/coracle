@@ -6,7 +6,7 @@
   import {makeSpacePath} from "@app/routes"
   import {pushDrawer} from "@app/modal"
 
-  export let url
+  let {url} = $props()
 
   const path = makeSpacePath(url)
 

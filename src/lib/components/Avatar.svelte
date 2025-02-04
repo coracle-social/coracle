@@ -2,13 +2,11 @@
   import {onMount} from "svelte"
   import Icon from "@lib/components/Icon.svelte"
 
-  export let src = ""
-  export let size = 7
-  export let icon = "user-rounded"
+  let {src = "", size = 7, icon = "user-rounded", style = "", ...restProps} = $props()
 
   let element: HTMLElement
 
-  $: rem = size * 4
+  const rem = $derived(size * 4)
 
   onMount(() => {
     if (src) {
@@ -25,8 +23,7 @@
 
 <div
   bind:this={element}
-  class="{$$props.class} relative !flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-cover bg-center"
-  style="width: {rem}px; height: {rem}px; min-width: {rem}px; background-image: url({src}); {$$props.style ||
-    ''}">
+  class="{restProps.class} relative !flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-cover bg-center"
+  style="width: {rem}px; height: {rem}px; min-width: {rem}px; background-image: url({src}); {style}">
   <Icon {icon} class={src ? "hidden" : ""} size={Math.round(size * 0.8)} />
 </div>

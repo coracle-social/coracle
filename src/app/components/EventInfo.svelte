@@ -7,7 +7,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import {clip} from "@app/toast"
 
-  export let event
+  let {event} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent1 = nip19.neventEncode({...event, relays})
@@ -20,28 +20,40 @@
 
 <div class="column gap-4">
   <ModalHeader>
-    <div slot="title">Event Details</div>
-    <div slot="info">The full details of this event are shown below.</div>
+    {#snippet title()}
+      <div>Event Details</div>
+    {/snippet}
+    {#snippet info()}
+      <div>The full details of this event are shown below.</div>
+    {/snippet}
   </ModalHeader>
   <FieldInline>
-    <p slot="label">Event Link</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="file" />
-      <input type="text" class="ellipsize min-w-0 grow" value={nevent1} />
-      <Button on:click={copyLink} class="flex items-center">
-        <Icon icon="copy" />
-      </Button>
-    </label>
+    {#snippet label()}
+      <p>Event Link</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="file" />
+        <input type="text" class="ellipsize min-w-0 grow" value={nevent1} />
+        <Button on:click={copyLink} class="flex items-center">
+          <Icon icon="copy" />
+        </Button>
+      </label>
+    {/snippet}
   </FieldInline>
   <FieldInline>
-    <p slot="label">Author Pubkey</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="user-circle" />
-      <input type="text" class="ellipsize min-w-0 grow" value={npub1} />
-      <Button on:click={copyPubkey} class="flex items-center">
-        <Icon icon="copy" />
-      </Button>
-    </label>
+    {#snippet label()}
+      <p>Author Pubkey</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="user-circle" />
+        <input type="text" class="ellipsize min-w-0 grow" value={npub1} />
+        <Button on:click={copyPubkey} class="flex items-center">
+          <Icon icon="copy" />
+        </Button>
+      </label>
+    {/snippet}
   </FieldInline>
   <div class="relative">
     <pre class="card2 card2-sm bg-alt overflow-auto text-xs"><code>{json}</code></pre>

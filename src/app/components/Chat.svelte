@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   type Element = {
     id: string
     type: "date" | "note"
@@ -9,7 +9,6 @@
 
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
@@ -38,14 +37,12 @@
   import {pushModal} from "@app/modal"
   import {sendWrapped, prependParent} from "@app/commands"
 
-  export let id
+  let {id, info = undefined} = $props()
 
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
   const others = remove($pubkey!, pubkeys)
-  const missingInboxes = derived(inboxRelaySelectionsByPubkey, $m =>
-    pubkeys.filter(pk => !$m.has(pk)),
-  )
+  const missingInboxes = $derived(pubkeys.filter(pk => !$inboxRelaySelectionsByPubkey.has(pk)))
 
   const assertEvent = (e: any) => e as TrustedEvent
 
@@ -56,7 +53,7 @@
 
   const replyTo = (event: TrustedEvent) => {
     parent = event
-    compose.focus()
+    compose?.focus()
   }
 
   const clearParent = () => {
@@ -76,13 +73,12 @@
     clearParent()
   }
 
-  let loading = true
-  let parent: TrustedEvent | undefined
-  let elements: Element[] = []
-  let compose: ChatCompose
+  let loading = $state(true)
+  let compose: ChatCompose | undefined = $state()
+  let parent: TrustedEvent | undefined = $state()
 
-  $: {
-    elements = []
+  const elements = $derived.by(() => {
+    const elements = []
 
     let previousDate
     let previousPubkey
@@ -108,8 +104,8 @@
       previousCreatedAt = created_at
     }
 
-    elements.reverse()
-  }
+    return elements.reverse()
+  })
 
   onMount(() => {
     // Don't use loadInboxRelaySelection because we want to force reload
@@ -124,50 +120,54 @@
 <div class="relative flex h-full w-full flex-col">
   {#if others.length > 0}
     <PageBar>
-      <div slot="title" class="flex flex-col gap-1 sm:flex-row sm:gap-2">
-        {#if others.length === 1}
-          {@const pubkey = others[0]}
-          {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
-          <Button on:click={onClick} class="row-2">
-            <ProfileCircle {pubkey} size={5} />
-            <ProfileName {pubkey} />
-          </Button>
-        {:else}
-          <div class="flex items-center gap-2">
-            <ProfileCircles pubkeys={others} size={5} />
-            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-              <ProfileName pubkey={others[0]} />
-              and
-              {#if others.length === 2}
-                <ProfileName pubkey={others[1]} />
-              {:else}
-                {others.length - 1}
-                {others.length > 2 ? "others" : "other"}
-              {/if}
-            </p>
-          </div>
-          {#if others.length > 2}
-            <Button on:click={showMembers} class="btn btn-link hidden sm:block"
-              >Show all members</Button>
+      {#snippet title()}
+        <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
+          {#if others.length === 1}
+            {@const pubkey = others[0]}
+            {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
+            <Button on:click={onClick} class="row-2">
+              <ProfileCircle {pubkey} size={5} />
+              <ProfileName {pubkey} />
+            </Button>
+          {:else}
+            <div class="flex items-center gap-2">
+              <ProfileCircles pubkeys={others} size={5} />
+              <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+                <ProfileName pubkey={others[0]} />
+                and
+                {#if others.length === 2}
+                  <ProfileName pubkey={others[1]} />
+                {:else}
+                  {others.length - 1}
+                  {others.length > 2 ? "others" : "other"}
+                {/if}
+              </p>
+            </div>
+            {#if others.length > 2}
+              <Button on:click={showMembers} class="btn btn-link hidden sm:block"
+                >Show all members</Button>
+            {/if}
           {/if}
-        {/if}
-      </div>
-      <div slot="action">
-        {#if remove($pubkey, $missingInboxes).length > 0}
-          {@const count = remove($pubkey, $missingInboxes).length}
-          {@const label = count > 1 ? "inboxes are" : "inbox is"}
-          <div
-            class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
-            data-tip="{count} {label} not configured.">
-            <Icon icon="danger" />
-            {count}
-          </div>
-        {/if}
-      </div>
+        </div>
+      {/snippet}
+      {#snippet action()}
+        <div>
+          {#if remove($pubkey, missingInboxes).length > 0}
+            {@const count = remove($pubkey, missingInboxes).length}
+            {@const label = count > 1 ? "inboxes are" : "inbox is"}
+            <div
+              class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
+              data-tip="{count} {label} not configured.">
+              <Icon icon="danger" />
+              {count}
+            </div>
+          {/if}
+        </div>
+      {/snippet}
     </PageBar>
   {/if}
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
-    {#if $missingInboxes.includes(assertNotNil($pubkey))}
+    {#if missingInboxes.includes(assertNotNil($pubkey))}
       <div class="py-12">
         <div class="card2 col-2 m-auto max-w-md items-center text-center">
           <p class="row-2 text-lg text-error">
@@ -198,7 +198,7 @@
           End of message history
         {/if}
       </Spinner>
-      <slot name="info" />
+      {@render info?.()}
     </p>
   </div>
   {#if parent}

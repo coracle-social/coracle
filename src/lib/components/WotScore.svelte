@@ -16,17 +16,21 @@
 <script lang="ts">
   import {clamp} from "@welshman/lib"
 
-  export let score
-  export let max = 100
-  export let active = false
+  interface Props {
+    score: any
+    max?: number
+    active?: boolean
+  }
+
+  let {score, max = 100, active = false}: Props = $props()
 
   const radius = 6
   const center = radius + 1
 
-  $: normalizedScore = clamp([0, max], score) / max
-  $: dashOffset = 100 - 44 * normalizedScore
-  $: style = `transform: rotate(${135 - normalizedScore * 180}deg)`
-  $: stroke = active ? "var(--primary)" : "var(--base-content)"
+  let normalizedScore = $derived(clamp([0, max], score) / max)
+  let dashOffset = $derived(100 - 44 * normalizedScore)
+  let style = $derived(`transform: rotate(${135 - normalizedScore * 180}deg)`)
+  let stroke = $derived(active ? "var(--primary)" : "var(--base-content)")
 </script>
 
 <div class="relative h-[14px] w-[14px]">

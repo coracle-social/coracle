@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {run, preventDefault} from "svelte/legacy"
+
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
   import {addSession} from "@welshman/app"
@@ -59,18 +61,18 @@
     clearModals()
   }
 
-  let url = ""
-  let input = ""
-  let loading = false
+  let url = $state("")
+  let input = $state("")
+  let loading = $state(false)
 
-  $: {
+  run(() => {
     // For testing and for play store reviewers
     if (input === "reviewkey") {
       const secret = makeSecret()
 
       addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
     }
-  }
+  })
 
   onMount(async () => {
     url = await broker.makeNostrconnectUrl({
@@ -121,12 +123,14 @@
   })
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={onSubmit}>
+<form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
   <ModalHeader>
-    <div slot="title">Log In</div>
-    <div slot="info">
-      Connect your signer by scanning the QR code below or pasting a bunker link.
-    </div>
+    {#snippet title()}
+      <div>Log In</div>
+    {/snippet}
+    {#snippet info()}
+      <div>Connect your signer by scanning the QR code below or pasting a bunker link.</div>
+    {/snippet}
   </ModalHeader>
   {#if !loading && url}
     <div class="flex justify-center" out:slideAndFade>
@@ -134,15 +138,21 @@
     </div>
   {/if}
   <Field>
-    <p slot="label">Bunker Link*</p>
-    <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-      <Icon icon="cpu" />
-      <input disabled={loading} bind:value={input} class="grow" placeholder="bunker://" />
-    </label>
-    <p slot="info">
-      A login link provided by a nostr signing app.
-      <Button class="link" on:click={() => pushModal(InfoBunker)}>What is a bunker link?</Button>
-    </p>
+    {#snippet label()}
+      <p>Bunker Link*</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="cpu" />
+        <input disabled={loading} bind:value={input} class="grow" placeholder="bunker://" />
+      </label>
+    {/snippet}
+    {#snippet info()}
+      <p>
+        A login link provided by a nostr signing app.
+        <Button class="link" on:click={() => pushModal(InfoBunker)}>What is a bunker link?</Button>
+      </p>
+    {/snippet}
   </Field>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back} disabled={loading}>

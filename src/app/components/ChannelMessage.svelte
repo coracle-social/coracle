@@ -1,4 +1,7 @@
 <script lang="ts">
+  import {createBubbler, stopPropagation} from "svelte/legacy"
+
+  const bubble = createBubbler()
   import {hash} from "@welshman/lib"
   import {now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -26,11 +29,16 @@
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  export let url, room
-  export let event: TrustedEvent
-  export let replyTo: any = undefined
-  export let showPubkey = false
-  export let inert = false
+  interface Props {
+    url: any
+    room: any
+    event: TrustedEvent
+    replyTo?: any
+    showPubkey?: boolean
+    inert?: boolean
+  }
+
+  let {url, room, event, replyTo = undefined, showPubkey = false, inert = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
@@ -97,7 +105,7 @@
   <button
     class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
     class:group-hover:opacity-100={!isMobile}
-    on:click|stopPropagation>
+    onclick={stopPropagation(bubble("click"))}>
     <ChannelMessageEmojiButton {url} {room} {event} />
     {#if replyTo}
       <Button class="btn join-item btn-xs" on:click={reply}>

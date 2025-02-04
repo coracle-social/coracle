@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {nthEq} from "@welshman/lib"
   import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
@@ -9,9 +11,13 @@
   import {makeThreadPath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
-  export let url
-  export let event
-  export let hideActions = false
+  interface Props {
+    url: any
+    event: any
+    hideActions?: boolean
+  }
+
+  let {url, event, hideActions = false}: Props = $props()
 
   const title = event.tags.find(nthEq(0, "title"))?.[1]
 
@@ -35,7 +41,7 @@
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <span class="whitespace-nowrap py-1 text-sm opacity-75">
       Posted by
-      <button type="button" on:click|preventDefault={openProfile} class="link-content">
+      <button type="button" onclick={preventDefault(openProfile)} class="link-content">
         @<ProfileName pubkey={event.pubkey} />
       </button>
     </span>

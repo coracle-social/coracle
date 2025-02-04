@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {run} from "svelte/legacy"
+
   import {page} from "$app/stores"
   import Drawer from "@lib/components/Drawer.svelte"
   import Dialog from "@lib/components/Dialog.svelte"
@@ -10,25 +12,29 @@
     }
   }
 
-  let modal: any
+  let modal: any = $state()
+  let hash = $derived($page.url.hash.slice(1))
+  let hashIsValid = $derived(Boolean($modals[hash]))
 
-  $: hash = $page.url.hash.slice(1)
-  $: hashIsValid = Boolean($modals[hash])
-  $: modal = $modals[hash] || modal
+  $effect(() => {
+    if ($modals[hash]) {
+      modal = $modals[hash]
+    }
+  })
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 {#if hashIsValid && modal?.options?.drawer}
   <Drawer onClose={clearModals} {...modal.options}>
     {#key modal.id}
-      <svelte:component this={modal.component} {...modal.props} />
+      <modal.component {...modal.props} />
     {/key}
   </Drawer>
 {:else if hashIsValid && modal}
   <Dialog onClose={clearModals} {...modal.options}>
     {#key modal.id}
-      <svelte:component this={modal.component} {...modal.props} />
+      <modal.component {...modal.props} />
     {/key}
   </Dialog>
 {/if}

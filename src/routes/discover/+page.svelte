@@ -1,6 +1,5 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {derived} from "svelte/store"
   import {addToMapKey, dec, gt} from "@welshman/lib"
   import type {Relay} from "@welshman/app"
   import {relays, createSearch} from "@welshman/app"
@@ -24,11 +23,11 @@
   import {discoverRelays} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  const wotGraph = derived(membershipByPubkey, $m => {
+  const wotGraph = $derived.by(() => {
     const scores = new Map<string, Set<string>>()
 
     for (const pubkey of getDefaultPubkeys()) {
-      for (const url of getMembershipUrls($m.get(pubkey))) {
+      for (const url of getMembershipUrls($membershipByPubkey.get(pubkey))) {
         addToMapKey(scores, url, pubkey)
       }
     }
@@ -36,26 +35,28 @@
     return scores
   })
 
+  const relaySearch = $derived(
+    createSearch($relays, {
+      getValue: (relay: Relay) => relay.url,
+      sortFn: ({score, item}) => {
+        if (score && score > 0.1) return -score!
+
+        const wotScore = wotGraph.get(item.url)?.size || 0
+
+        return score ? dec(score) * wotScore : -wotScore
+      },
+      fuseOptions: {
+        keys: ["url", "name", {name: "description", weight: 0.3}],
+        shouldSort: false,
+      },
+    }),
+  )
+
   const openSpace = (url: string) => pushModal(SpaceCheck, {url})
 
-  let term = ""
-  let limit = 20
+  let term = $state("")
+  let limit = $state(20)
   let element: Element
-
-  $: relaySearch = createSearch($relays, {
-    getValue: (relay: Relay) => relay.url,
-    sortFn: ({score, item}) => {
-      if (score && score > 0.1) return -score!
-
-      const wotScore = $wotGraph.get(item.url)?.size || 0
-
-      return score ? dec(score) * wotScore : -wotScore
-    },
-    fuseOptions: {
-      keys: ["url", "name", {name: "description", weight: 0.3}],
-      shouldSort: false,
-    },
-  })
 
   onMount(() => {
     const scroller = createScroller({
@@ -74,8 +75,12 @@
 <Page>
   <div class="content column gap-4" bind:this={element}>
     <PageHeader>
-      <div slot="title">Discover Spaces</div>
-      <div slot="info">Find communities all across the nostr network</div>
+      {#snippet title()}
+        Discover Spaces
+      {/snippet}
+      {#snippet info()}
+        Find communities all across the nostr network
+      {/snippet}
     </PageHeader>
     <label class="input input-bordered flex w-full items-center gap-2">
       <Icon icon="magnifer" />
@@ -115,10 +120,10 @@
           </div>
           <RelayDescription url={relay.url} />
         </div>
-        {#if gt($wotGraph.get(relay.url)?.size, 0)}
+        {#if gt(wotGraph.get(relay.url)?.size, 0)}
           <div class="row-2 card2 card2-sm bg-alt">
             Members:
-            <ProfileCircles pubkeys={Array.from($wotGraph.get(relay.url) || [])} />
+            <ProfileCircles pubkeys={Array.from(wotGraph.get(relay.url) || [])} />
           </div>
         {/if}
       </Button>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {preventDefault} from "svelte/legacy"
+
   import {displayRelayUrl} from "@welshman/util"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -8,7 +10,7 @@
   import {clearModals} from "@app/modal"
   import {addSpaceMembership} from "@app/commands"
 
-  export let url
+  let {url} = $props()
 
   const back = () => history.back()
 
@@ -28,15 +30,19 @@
     }
   }
 
-  let loading = false
+  let loading = $state(false)
 </script>
 
-<form class="column gap-4" on:submit|preventDefault={join}>
+<form class="column gap-4" onsubmit={preventDefault(join)}>
   <ModalHeader>
-    <div slot="title">
-      Joining <span class="text-primary">{displayRelayUrl(url)}</span>
-    </div>
-    <div slot="info">Are you sure you'd like to join this space?</div>
+    {#snippet title()}
+      <div>
+        Joining <span class="text-primary">{displayRelayUrl(url)}</span>
+      </div>
+    {/snippet}
+    {#snippet info()}
+      <div>Are you sure you'd like to join this space?</div>
+    {/snippet}
   </ModalHeader>
   <ModalFooter>
     <Button class="btn btn-link" on:click={back}>

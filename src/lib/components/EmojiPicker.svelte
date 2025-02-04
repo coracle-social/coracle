@@ -13,12 +13,16 @@
   import type {Emoji} from "emoji-picker-element/shared"
   import {onMount} from "svelte"
 
-  export let onClick: (emoji: Emoji) => void
+  interface Props {
+    onClick: (emoji: Emoji) => void
+  }
 
-  let element: Element
+  let {onClick}: Props = $props()
+
+  let element: Element | undefined = $state()
 
   onMount(() => {
-    element.addEventListener("emoji-click", (event: any) => onClick(event.detail as Emoji))
+    element?.addEventListener("emoji-click", (event: any) => onClick(event.detail as Emoji))
   })
 </script>
 

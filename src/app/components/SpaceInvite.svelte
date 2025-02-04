@@ -12,16 +12,20 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {clip} from "@app/toast"
 
-  export let url
+  let {url} = $props()
 
   const back = () => history.back()
 
   const copyInvite = () => clip(invite)
 
-  let claim = ""
-  let loading = true
+  let claim = $state("")
+  let loading = $state(true)
 
-  $: invite = [displayRelayUrl(url), claim].filter(identity).join("|")
+  let invite = $state("")
+
+  $effect(() => {
+    invite = [displayRelayUrl(url), claim].filter(identity).join("|")
+  })
 
   onMount(async () => {
     const [[event]] = await Promise.all([
@@ -36,11 +40,15 @@
 
 <div class="col-4">
   <ModalHeader>
-    <div slot="title">Create an Invite</div>
-    <div slot="info">
-      Get a link that you can use to invite people to
-      <span class="text-primary">{displayRelayUrl(url)}</span>
-    </div>
+    {#snippet title()}
+      <div>Create an Invite</div>
+    {/snippet}
+    {#snippet info()}
+      <div>
+        Get a link that you can use to invite people to
+        <span class="text-primary">{displayRelayUrl(url)}</span>
+      </div>
+    {/snippet}
   </ModalHeader>
   <div>
     {#if loading}
@@ -50,20 +58,24 @@
     {:else}
       <div in:slide>
         <Field>
-          <label class="input input-bordered flex w-full items-center gap-2" slot="input">
-            <Icon icon="link-round" />
-            <input bind:value={invite} class="grow" type="text" />
-            <Button on:click={copyInvite}>
-              <Icon icon="copy" />
-            </Button>
-          </label>
-          <p slot="info">
-            This invite link can be used by clicking "Add Space" and pasting it there.
-            {#if !claim}
-              This space did not issue a claim for this link, so additional steps might be required
-              for people using this invite link.
-            {/if}
-          </p>
+          {#snippet input()}
+            <label class="input input-bordered flex w-full items-center gap-2">
+              <Icon icon="link-round" />
+              <input bind:value={invite} class="grow" type="text" />
+              <Button on:click={copyInvite}>
+                <Icon icon="copy" />
+              </Button>
+            </label>
+          {/snippet}
+          {#snippet info()}
+            <p>
+              This invite link can be used by clicking "Add Space" and pasting it there.
+              {#if !claim}
+                This space did not issue a claim for this link, so additional steps might be
+                required for people using this invite link.
+              {/if}
+            </p>
+          {/snippet}
         </Field>
       </div>
     {/if}

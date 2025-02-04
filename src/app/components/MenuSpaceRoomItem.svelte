@@ -6,9 +6,13 @@
   import {deriveChannel, channelIsLocked} from "@app/state"
   import {notifications} from "@app/notifications"
 
-  export let url
-  export let room
-  export let notify = false
+  interface Props {
+    url: any
+    room: any
+    notify?: boolean
+  }
+
+  let {url, room, notify = false}: Props = $props()
 
   const path = makeRoomPath(url, room)
   const channel = deriveChannel(url, room)

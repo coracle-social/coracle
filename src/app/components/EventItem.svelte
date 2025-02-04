@@ -3,14 +3,14 @@
   import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
 
-  export let event
+  let {event} = $props()
 
-  $: meta = fromPairs(event.tags) as Record<string, string>
-  $: end = parseInt(meta.end)
-  $: start = parseInt(meta.start)
-  $: startDateDisplay = formatTimestampAsDate(start)
-  $: endDateDisplay = formatTimestampAsDate(end)
-  $: isSingleDay = startDateDisplay === endDateDisplay
+  let meta = $derived(fromPairs(event.tags) as Record<string, string>)
+  let end = $derived(parseInt(meta.end))
+  let start = $derived(parseInt(meta.start))
+  let startDateDisplay = $derived(formatTimestampAsDate(start))
+  let endDateDisplay = $derived(formatTimestampAsDate(end))
+  let isSingleDay = $derived(startDateDisplay === endDateDisplay)
 </script>
 
 <div class="card2 flex items-center justify-between gap-2">

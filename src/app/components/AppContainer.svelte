@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {page} from "$app/stores"
   import {pubkey} from "@welshman/app"
   import Landing from "@app/components/Landing.svelte"
@@ -8,6 +9,12 @@
   import PasswordReset from "@app/components/PasswordReset.svelte"
   import {BURROW_URL} from "@app/state"
   import {modals, pushModal} from "@app/modal"
+
+  interface Props {
+    children: Snippet
+  }
+
+  let {children}: Props = $props()
 
   if (BURROW_URL && !$pubkey) {
     if ($page.url.pathname === "/confirm-email") {
@@ -29,7 +36,7 @@
 <div class="flex h-screen overflow-hidden">
   {#if $pubkey}
     <PrimaryNav>
-      <slot />
+      {@render children?.()}
     </PrimaryNav>
   {:else if !$modals[$page.url.hash.slice(1)]}
     <Landing />

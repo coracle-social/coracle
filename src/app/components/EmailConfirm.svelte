@@ -7,15 +7,14 @@
   import {pushModal} from "@app/modal"
   import {BURROW_URL} from "@app/state"
 
-  export let email
-  export let confirm_token
+  let {email, confirm_token} = $props()
 
   const login = () => {
     pushModal(LogInPassword, {email}, {path: "/"})
   }
 
-  let error: string
-  let loading = true
+  let error = $state("")
+  let loading = $state(true)
 
   onMount(async () => {
     const [res] = await Promise.all([

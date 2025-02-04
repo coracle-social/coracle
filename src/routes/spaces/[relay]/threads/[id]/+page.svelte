@@ -37,10 +37,10 @@
     showAll = true
   }
 
-  let showAll = false
-  let showReply = false
+  let showAll = $state(false)
+  let showReply = $state(false)
 
-  $: title = $event?.tags.find(nthEq(0, "title"))?.[1] || ""
+  let title = $derived($event?.tags.find(nthEq(0, "title"))?.[1] || "")
 
   onMount(() => {
     const sub = subscribe({relays: [url], filters})
@@ -93,16 +93,22 @@
     {/await}
   {/if}
   <PageBar class="mx-0">
-    <div slot="icon">
-      <Button class="btn btn-neutral btn-sm" on:click={back}>
-        <Icon icon="alt-arrow-left" />
-        Go back
-      </Button>
-    </div>
-    <h1 slot="title" class="text-xl">{title}</h1>
-    <div slot="action">
-      <MenuSpaceButton {url} />
-    </div>
+    {#snippet icon()}
+      <div>
+        <Button class="btn btn-neutral btn-sm" on:click={back}>
+          <Icon icon="alt-arrow-left" />
+          Go back
+        </Button>
+      </div>
+    {/snippet}
+    {#snippet title()}
+      <h1 class="text-xl">{title}</h1>
+    {/snippet}
+    {#snippet action()}
+      <div>
+        <MenuSpaceButton {url} />
+      </div>
+    {/snippet}
   </PageBar>
 </div>
 {#if showReply}

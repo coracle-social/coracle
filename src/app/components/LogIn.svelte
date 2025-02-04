@@ -70,10 +70,10 @@
 
   const loginWithBunker = () => pushModal(LogInBunker)
 
-  let signers: any[] = []
-  let loading: string | undefined
+  let signers: any[] = $state([])
+  let loading: string | undefined = $state()
 
-  $: hasSigner = getNip07() || signers.length > 0
+  let hasSigner = $derived(getNip07() || signers.length > 0)
 
   onMount(async () => {
     if (Capacitor.isNativePlatform()) {

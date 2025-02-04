@@ -53,15 +53,19 @@
 
 <div class="content column gap-4">
   <Collapse class="card2 bg-alt column gap-4">
-    <h2 slot="title" class="flex items-center gap-3 text-xl">
-      <Icon icon="earth" />
-      Outbox Relays
-    </h2>
-    <p slot="description" class="text-sm">
-      These relays will be advertised on your profile as places where you send your public notes. Be
-      sure to select relays that will accept your notes, and which will let people who follow you
-      read them.
-    </p>
+    {#snippet title()}
+      <h2 class="flex items-center gap-3 text-xl">
+        <Icon icon="earth" />
+        Outbox Relays
+      </h2>
+    {/snippet}
+    {#snippet description()}
+      <p class="text-sm">
+        These relays will be advertised on your profile as places where you send your public notes.
+        Be sure to select relays that will accept your notes, and which will let people who follow
+        you read them.
+      </p>
+    {/snippet}
     <div class="column gap-2">
       {#each $writeRelayUrls.sort() as url (url)}
         <RelayItem {url}>
@@ -82,14 +86,18 @@
     </div>
   </Collapse>
   <Collapse class="card2 bg-alt column gap-4">
-    <h2 slot="title" class="flex items-center gap-3 text-xl">
-      <Icon icon="inbox" />
-      Inbox Relays
-    </h2>
-    <p slot="description" class="text-sm">
-      These relays will be advertised on your profile as places where other people should send notes
-      intended for you. Be sure to select relays that will accept notes that tag you.
-    </p>
+    {#snippet title()}
+      <h2 class="flex items-center gap-3 text-xl">
+        <Icon icon="inbox" />
+        Inbox Relays
+      </h2>
+    {/snippet}
+    {#snippet description()}
+      <p class="text-sm">
+        These relays will be advertised on your profile as places where other people should send
+        notes intended for you. Be sure to select relays that will accept notes that tag you.
+      </p>
+    {/snippet}
     <div class="column gap-2">
       {#each $readRelayUrls.sort() as url (url)}
         <RelayItem {url}>
@@ -110,15 +118,19 @@
     </div>
   </Collapse>
   <Collapse class="card2 bg-alt column gap-4">
-    <h2 slot="title" class="flex items-center gap-3 text-xl">
-      <Icon icon="mailbox" />
-      Messaging Relays
-    </h2>
-    <p slot="description" class="text-sm">
-      These relays will be advertised on your profile as places you use to send and receive direct
-      messages. Be sure to select relays that will accept your messages and messages from people
-      you'd like to be in contact with.
-    </p>
+    {#snippet title()}
+      <h2 class="flex items-center gap-3 text-xl">
+        <Icon icon="mailbox" />
+        Messaging Relays
+      </h2>
+    {/snippet}
+    {#snippet description()}
+      <p class="text-sm">
+        These relays will be advertised on your profile as places you use to send and receive direct
+        messages. Be sure to select relays that will accept your messages and messages from people
+        you'd like to be in contact with.
+      </p>
+    {/snippet}
     <div class="column gap-2">
       {#each $inboxRelayUrls.sort() as url (url)}
         <RelayItem {url}>

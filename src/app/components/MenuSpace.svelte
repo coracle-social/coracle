@@ -26,7 +26,7 @@
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
-  export let url
+  let {url} = $props()
 
   const threadsPath = makeSpacePath(url, "threads")
   const userRooms = deriveUserRooms(url)
@@ -55,14 +55,16 @@
 
   const addRoom = () => pushModal(RoomCreate, {url}, {replaceState})
 
-  let showMenu = false
+  let showMenu = $state(false)
   let replaceState = false
-  let element: Element
+  let element: Element | undefined = $state()
 
-  $: members = $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey)
+  let members = $derived(
+    $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey),
+  )
 
   onMount(async () => {
-    replaceState = Boolean(element.closest(".drawer"))
+    replaceState = Boolean(element?.closest(".drawer"))
     pullConservatively({relays: [url], filters: [{kinds: [GROUP_META]}]})
   })
 </script>
