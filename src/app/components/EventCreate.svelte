@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {EditorContent} from "svelte-tiptap"
   import {writable} from "svelte/store"
   import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
@@ -11,6 +10,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
+  import EditorContent from "@lib/components/EditorContent.svelte"
   import {PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
@@ -39,14 +39,14 @@
     }
 
     const event = createEvent(EVENT_TIME, {
-      content: $editor.getText({blockSeparator: "\n"}).trim(),
+      content: editor.getText({blockSeparator: "\n"}).trim(),
       tags: [
         ["d", randomId()],
         ["title", title],
         ["location", location],
         ["start", dateToSeconds(start).toString()],
         ["end", dateToSeconds(end).toString()],
-        ...$editor.storage.nostr.getEditorTags(),
+        ...editor.storage.nostr.getEditorTags(),
         PROTECTED,
       ],
     })
@@ -89,12 +89,12 @@
     {#snippet input()}
       <div class="relative z-feature flex gap-2 border-t border-solid border-base-100 bg-base-100">
         <div class="input-editor flex-grow overflow-hidden">
-          <EditorContent editor={$editor} />
+          <EditorContent {editor} />
         </div>
         <Button
           data-tip="Add an image"
           class="center btn tooltip"
-          onclick={() => $editor.chain().selectFiles().run()}>
+          onclick={() => editor.chain().selectFiles().run()}>
           {#if $uploading}
             <span class="loading loading-spinner loading-xs"></span>
           {:else}

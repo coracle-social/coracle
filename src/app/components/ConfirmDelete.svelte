@@ -6,7 +6,9 @@
   const {url, event} = $props()
 
   const confirm = async () => {
-    await publishDelete({event, relays: [url]})
+    const snapshot = $state.snapshot(event)
+
+    await publishDelete({event: snapshot, relays: [url]})
 
     clearModals()
   }

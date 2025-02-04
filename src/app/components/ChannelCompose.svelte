@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {onMount} from "svelte"
+  import {onMount, onDestroy} from "svelte"
   import {writable} from "svelte/store"
-  import {EditorContent} from "svelte-tiptap"
   import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import EditorContent from "@lib/components/EditorContent.svelte"
   import {makeEditor} from "@app/editor"
 
   interface Props {
@@ -14,29 +14,35 @@
 
   const {onSubmit, content = ""}: Props = $props()
 
-  export const focus = () => $editor.chain().focus().run()
+  const autofocus = !isMobile
 
   const uploading = writable(false)
 
-  const uploadFiles = () => $editor!.chain().selectFiles().run()
+  export const focus = () => editor.chain().focus().run()
+
+  const uploadFiles = () => editor.chain().selectFiles().run()
 
   const submit = () => {
     if ($uploading) return
 
-    const content = $editor!.getText({blockSeparator: "\n"}).trim()
-    const tags = $editor!.storage.nostr.getEditorTags()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
+    const tags = editor.storage.nostr.getEditorTags()
 
     if (!content) return
 
     onSubmit({content, tags})
 
-    $editor!.chain().clearContent().run()
+    editor.chain().clearContent().run()
   }
 
-  const editor = makeEditor({autofocus: !isMobile, submit, uploading, aggressive: true})
+  const editor = makeEditor({autofocus, submit, uploading, aggressive: true})
 
   onMount(() => {
-    $editor!.chain().setContent(content).run()
+    editor.chain().setContent(content).run()
+  })
+
+  onDestroy(() => {
+    editor.destroy()
   })
 </script>
 
@@ -53,7 +59,7 @@
     {/if}
   </Button>
   <div class="chat-editor flex-grow overflow-hidden">
-    <EditorContent editor={$editor} />
+    <EditorContent {editor} />
   </div>
   <Button
     data-tip="{window.navigator.platform.includes('Mac') ? 'cmd' : 'ctrl'}+enter to send"

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {writable} from "svelte/store"
-  import {EditorContent} from "svelte-tiptap"
   import {createEvent, THREAD} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {isMobile, preventDefault} from "@lib/html"
@@ -9,6 +8,7 @@
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
+  import EditorContent from "@lib/components/EditorContent.svelte"
   import {pushToast} from "@app/toast"
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
@@ -29,7 +29,7 @@
       })
     }
 
-    const content = $editor.getText({blockSeparator: "\n"}).trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content.trim()) {
       return pushToast({
@@ -39,7 +39,7 @@
     }
 
     const tags = [
-      ...$editor.storage.nostr.getEditorTags(),
+      ...editor.storage.nostr.getEditorTags(),
       tagRoom(GENERAL, url),
       ["title", title],
       PROTECTED,
@@ -90,14 +90,14 @@
       {/snippet}
       {#snippet input()}
         <div class="note-editor flex-grow overflow-hidden">
-          <EditorContent editor={$editor} />
+          <EditorContent {editor} />
         </div>
       {/snippet}
     </Field>
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
-      onclick={$editor.commands.selectFiles}>
+      onclick={editor.commands.selectFiles}>
       {#if $uploading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}
