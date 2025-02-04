@@ -16,9 +16,11 @@
 
   const {url} = $props()
 
+  const path = makeSpacePath(url)
+
   const back = () => history.back()
 
-  const confirm = () => goto(makeSpacePath(url), {replaceState: true})
+  const confirm = () => goto(path, {replaceState: true})
 
   const next = () => {
     if (!error && ctx.net.pool.get(url).stats.lastAuth === 0) {

@@ -37,8 +37,6 @@
 
   const assertEvent = (e: any) => e as TrustedEvent
 
-  const assertNotNil = <T,>(x: T | undefined) => x!
-
   const showMembers = () =>
     pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
@@ -158,7 +156,7 @@
     </PageBar>
   {/if}
   <div class="-mt-2 flex flex-grow flex-col-reverse overflow-auto py-2">
-    {#if missingInboxes.includes(assertNotNil($pubkey))}
+    {#if missingInboxes.includes($pubkey!)}
       <div class="py-12">
         <div class="card2 col-2 m-auto max-w-md items-center text-center">
           <p class="row-2 text-lg text-error">
@@ -169,6 +167,19 @@
             In order to deliver messages, {PLATFORM_NAME} needs to know where to send them. Please visit
             your <Link class="link" href="/settings/relays">relay settings page</Link> to set up your
             inbox.
+          </p>
+        </div>
+      </div>
+    {:else if missingInboxes.length > 0}
+      <div class="py-12">
+        <div class="card2 col-2 m-auto max-w-md items-center text-center">
+          <p class="row-2 text-lg text-error">
+            <Icon icon="danger" />
+            {missingInboxes.length} {missingInboxes.length > 1 ? 'inboxes are' : 'inbox is'} not configured.
+          </p>
+          <p>
+            In order to deliver messages, {PLATFORM_NAME} needs to know where to send them. Please make
+            sure everyone in this conversation has set up their inbox relays.
           </p>
         </div>
       </div>
