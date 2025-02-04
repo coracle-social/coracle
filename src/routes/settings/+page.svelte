@@ -17,10 +17,11 @@
   }
 
   const onsubmit = preventDefault(async () => {
+    const json = JSON.stringify($state.snapshot(settings))
+    const content = await $signer!.nip04.encrypt($pubkey!, json)
+
     publishThunk({
-      event: createEvent(SETTINGS, {
-        content: await $signer!.nip04.encrypt($pubkey!, JSON.stringify(settings)),
-      }),
+      event: createEvent(SETTINGS, {content}),
       relays: ctx.app.router.FromUser().getUrls(),
     })
 
@@ -102,7 +103,7 @@
         <p>Media Server</p>
       {/snippet}
       {#snippet input()}
-        <div class="flex flex-col gap-2 sm:flex-row">
+        <div class="flex flex-col gap-2 lg:flex-row">
           <select bind:value={settings.upload_type} class="select select-bordered">
             <option value="nip96">NIP 96 (default)</option>
             <option value="blossom">Blossom</option>

@@ -1,7 +1,7 @@
 import {asClassComponent} from "svelte/legacy"
 import type {Writable} from "svelte/store"
-import {derived} from "svelte/store"
-import {createEditor, SvelteNodeViewRenderer} from "svelte-tiptap"
+import {derived, readable} from "svelte/store"
+import {Editor, SvelteNodeViewRenderer} from "svelte-tiptap"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
@@ -44,8 +44,10 @@ export const makeEditor = ({
   submit: () => void
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
-}) =>
-  createEditor({
+}) => {
+  let setter: (editor: Editor) => void
+
+  const _editor = new Editor({
     content,
     autofocus,
     extensions: [
@@ -94,7 +96,15 @@ export const makeEditor = ({
       }),
     ],
     onUpdate({editor}) {
+      setter?.(editor)
       wordCount?.set(editor.storage.wordCount.words)
       charCount?.set(editor.storage.wordCount.chars)
     },
   })
+
+  return readable(_editor, set => {
+    setter = set
+
+    return () => _editor.destroy()
+  })
+}

@@ -23,7 +23,9 @@
 
   const saveEdit = () => {
     const relays = ctx.app.router.FromUser().getUrls()
-    const template = isPublishedProfile(values) ? editProfile(values) : createProfile(values)
+    const template = isPublishedProfile(values)
+      ? editProfile($state.snapshot(values))
+      : createProfile($state.snapshot(values))
     const event = createEvent(template.kind, template)
 
     publishThunk({event, relays})
