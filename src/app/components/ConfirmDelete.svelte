@@ -3,7 +3,7 @@
   import {publishDelete} from "@app/commands"
   import {clearModals} from "@app/modal"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const confirm = async () => {
     await publishDelete({event, relays: [url]})

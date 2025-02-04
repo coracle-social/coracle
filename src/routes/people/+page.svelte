@@ -14,7 +14,7 @@
   let limit = $state(10)
   let element: Element | undefined = $state()
 
-  let pubkeys = $derived(term ? $profileSearch.searchValues(term) : defaultPubkeys)
+  const pubkeys = $derived(term ? $profileSearch.searchValues(term) : defaultPubkeys)
 
   onMount(() => {
     const scroller = createScroller({

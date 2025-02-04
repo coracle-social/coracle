@@ -123,7 +123,7 @@
       {/snippet}
     </Field>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
-      <Button class="btn btn-neutral" on:click={reset}>Discard Changes</Button>
+      <Button class="btn btn-neutral" onclick={reset}>Discard Changes</Button>
       <Button type="submit" class="btn btn-primary">Save Changes</Button>
     </div>
   </div>

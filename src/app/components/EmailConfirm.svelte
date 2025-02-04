@@ -7,7 +7,7 @@
   import {pushModal} from "@app/modal"
   import {BURROW_URL} from "@app/state"
 
-  let {email, confirm_token} = $props()
+  const {email, confirm_token} = $props()
 
   const login = () => {
     pushModal(LogInPassword, {email}, {path: "/"})
@@ -48,5 +48,5 @@
       {/if}
     </Spinner>
   </p>
-  <Button class="btn btn-primary" on:click={login} disabled={loading}>Continue to Login</Button>
+  <Button class="btn btn-primary" onclick={login} disabled={loading}>Continue to Login</Button>
 </div>

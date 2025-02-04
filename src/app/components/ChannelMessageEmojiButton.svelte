@@ -5,7 +5,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import {publishReaction} from "@app/commands"
 
-  let {url, room, event} = $props()
+  const {url, room, event} = $props()
 
   // Tell svelte-check to shut up
   noop(room)

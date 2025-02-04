@@ -1,7 +1,7 @@
 <script lang="ts">
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
 
-  let {...props} = $props()
+  const {...props} = $props()
 </script>
 
 <div class="flex pr-3">

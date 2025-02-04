@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {Component} from "svelte"
   import {derived} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
@@ -57,10 +56,10 @@
     {#each value as pubkey (pubkey)}
       {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
       <div class="flex-inline badge badge-neutral mr-1 gap-1">
-        <Button class="flex items-center" on:click={() => removePubkey(pubkey)}>
+        <Button class="flex items-center" onclick={() => removePubkey(pubkey)}>
           <Icon icon="close-circle" size={4} class="-ml-1 mt-px" />
         </Button>
-        <Button on:click={onClick}>
+        <Button onclick={onClick}>
           <ProfileName {pubkey} />
         </Button>
       </div>

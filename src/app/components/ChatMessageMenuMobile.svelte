@@ -8,7 +8,7 @@
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 
-  let {event, pubkeys} = $props()
+  const {event, pubkeys} = $props()
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()
@@ -26,15 +26,15 @@
 </script>
 
 <div class="col-2">
-  <Button class="btn btn-primary w-full" on:click={showEmojiPicker}>
+  <Button class="btn btn-primary w-full" onclick={showEmojiPicker}>
     <Icon size={4} icon="smile-circle" />
     Send Reaction
   </Button>
-  <Button class="btn btn-neutral w-full" on:click={copyText}>
+  <Button class="btn btn-neutral w-full" onclick={copyText}>
     <Icon size={4} icon="copy" />
     Copy Text
   </Button>
-  <Button class="btn btn-neutral" on:click={showInfo}>
+  <Button class="btn btn-neutral" onclick={showInfo}>
     <Icon size={4} icon="code-2" />
     Message Details
   </Button>

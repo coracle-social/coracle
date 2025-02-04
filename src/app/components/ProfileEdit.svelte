@@ -71,13 +71,12 @@
     {/snippet}
     {#snippet info()}
       <p>
-        <Button class="link" on:click={() => pushModal(InfoHandle)}
-          >What is a nostr address?</Button>
+        <Button class="link" onclick={() => pushModal(InfoHandle)}>What is a nostr address?</Button>
       </p>
     {/snippet}
   </Field>
   <div class="mt-4 flex flex-row items-center justify-between gap-4">
-    <Button class="btn btn-neutral" on:click={back}>Discard Changes</Button>
+    <Button class="btn btn-neutral" onclick={back}>Discard Changes</Button>
     <Button type="submit" class="btn btn-primary">Save Changes</Button>
   </div>
 </form>

@@ -11,7 +11,7 @@
     clear: () => void
   }
 
-  let {event, clear}: Props = $props()
+  const {event, clear}: Props = $props()
 </script>
 
 <div
@@ -21,7 +21,7 @@
   {#key event.id}
     <Content {event} hideMedia minLength={100} maxLength={300} expandMode="disabled" />
   {/key}
-  <Button class="absolute right-2 top-2 cursor-pointer" on:click={clear}>
+  <Button class="absolute right-2 top-2 cursor-pointer" onclick={clear}>
     <Icon icon="close-circle" />
   </Button>
 </div>

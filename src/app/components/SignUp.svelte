@@ -54,7 +54,7 @@
   <h1 class="heading">Sign up with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
     {PLATFORM_NAME} is built using the
-    <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
+    <Button class="link" onclick={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>
   {#if BURROW_URL}
@@ -97,6 +97,6 @@
   </a>
   <div class="text-sm">
     Already have an account?
-    <Button class="link" on:click={login}>Log in instead</Button>
+    <Button class="link" onclick={login}>Log in instead</Button>
   </div>
 </form>

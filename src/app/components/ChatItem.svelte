@@ -19,7 +19,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 
   const others = remove($pubkey!, props.pubkeys)
   const active = $page.params.chat === props.id

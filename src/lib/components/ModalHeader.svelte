@@ -4,7 +4,7 @@
     info?: import("svelte").Snippet
   }
 
-  let {title, info}: Props = $props()
+  const {title, info}: Props = $props()
 </script>
 
 <div class="column m-auto max-w-xs gap-2 py-4">

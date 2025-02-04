@@ -20,7 +20,7 @@
       <h1 class="heading">Welcome to {PLATFORM_NAME}!</h1>
       <p class="text-center">The chat app built for self-hosted communities.</p>
     </div>
-    <Button on:click={logIn}>
+    <Button onclick={logIn}>
       <CardButton class="!btn-primary">
         {#snippet icon()}
           <div><Icon icon="login-2" size={7} /></div>
@@ -33,7 +33,7 @@
         {/snippet}
       </CardButton>
     </Button>
-    <Button on:click={signUp}>
+    <Button onclick={signUp}>
       <CardButton>
         {#snippet icon()}
           <div><Icon icon="add-circle" size={7} /></div>

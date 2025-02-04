@@ -10,7 +10,7 @@
   import {deriveEvent, entityLink, ROOM} from "@app/state"
   import {makeThreadPath, makeRoomPath} from "@app/routes"
 
-  let props = ({value, event, depth = 0, relays = [], minimal = false, ...restProps} = $props())
+  const {value, event, noteContent, relays = [], minimal = false} = $props()
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
@@ -56,7 +56,7 @@
     return Boolean(event)
   }
 
-  const onClick = (e: Event) => {
+  const onclick = () => {
     if ($quote) {
       if ($quote.kind === DIRECT_MESSAGE) {
         return scrollToEvent($quote.id)
@@ -93,10 +93,10 @@
   }
 </script>
 
-<Button class="my-2 block max-w-full text-left" on:click={onClick}>
+<Button class="my-2 block max-w-full text-left" {onclick}>
   {#if $quote}
     <NoteCard {minimal} event={$quote} class="bg-alt rounded-box p-4">
-      {@render noteContent({event: $quote, depth})}
+      {@render noteContent({event: $quote})}
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">

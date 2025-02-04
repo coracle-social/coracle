@@ -35,7 +35,7 @@
       {/snippet}
     </CardButton>
   </Link>
-  <Button on:click={startJoin}>
+  <Button onclick={startJoin}>
     <CardButton>
       {#snippet icon()}
         <div><Icon icon="login-2" size={7} /></div>
@@ -48,7 +48,7 @@
       {/snippet}
     </CardButton>
   </Button>
-  <Button on:click={startCreate}>
+  <Button onclick={startCreate}>
     <CardButton>
       {#snippet icon()}
         <div><Icon icon="add-circle" size={7} /></div>

@@ -2,7 +2,7 @@
   import {deriveProfile} from "@welshman/app"
   import Content from "@app/components/Content.svelte"
 
-  let {pubkey} = $props()
+  const {pubkey} = $props()
 
   const profile = deriveProfile(pubkey)
 </script>

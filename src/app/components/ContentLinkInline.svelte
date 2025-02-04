@@ -7,7 +7,7 @@
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  let {value} = $props()
+  const {value} = $props()
 
   const url = value.url.toString()
 

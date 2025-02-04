@@ -73,7 +73,7 @@
   let signers: any[] = $state([])
   let loading: string | undefined = $state()
 
-  let hasSigner = $derived(getNip07() || signers.length > 0)
+  const hasSigner = $derived(getNip07() || signers.length > 0)
 
   onMount(async () => {
     if (Capacitor.isNativePlatform()) {
@@ -86,11 +86,11 @@
   <h1 class="heading">Log in with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
     {PLATFORM_NAME} is built using the
-    <Button class="link" on:click={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
+    <Button class="link" onclick={() => pushModal(InfoNostr)}>nostr protocol</Button>, which allows
     you to own your social identity.
   </p>
   {#if getNip07()}
-    <Button disabled={loading} on:click={loginWithNip07} class="btn btn-primary">
+    <Button disabled={Boolean(loading)} onclick={loginWithNip07} class="btn btn-primary">
       {#if loading === "nip07"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -100,7 +100,7 @@
     </Button>
   {/if}
   {#each signers as app}
-    <Button disabled={loading} class="btn btn-primary" on:click={() => loginWithNip55(app)}>
+    <Button disabled={Boolean(loading)} class="btn btn-primary" onclick={() => loginWithNip55(app)}>
       {#if loading === "nip55"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -110,7 +110,7 @@
     </Button>
   {/each}
   {#if BURROW_URL && !hasSigner}
-    <Button disabled={loading} on:click={loginWithPassword} class="btn btn-primary">
+    <Button disabled={Boolean(loading)} onclick={loginWithPassword} class="btn btn-primary">
       {#if loading === "password"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -120,14 +120,14 @@
     </Button>
   {/if}
   <Button
-    disabled={loading}
-    on:click={loginWithBunker}
+    onclick={loginWithBunker}
+    disabled={Boolean(loading)}
     class="btn {hasSigner || BURROW_URL ? 'btn-neutral' : 'btn-primary'}">
     <Icon icon="cpu" />
     Log in with Remote Signer
   </Button>
   {#if BURROW_URL && hasSigner}
-    <Button disabled={loading} on:click={loginWithPassword} class="btn">
+    <Button disabled={Boolean(loading)} onclick={loginWithPassword} class="btn">
       {#if loading === "password"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -139,7 +139,7 @@
   {#if !hasSigner || !BURROW_URL}
     <Link
       external
-      disabled={loading}
+      disabled={Boolean(loading)}
       href="https://nostrapps.com#signers"
       class="btn {hasSigner || BURROW_URL ? '' : 'btn-neutral'}">
       <Icon icon="compass" />
@@ -148,6 +148,6 @@
   {/if}
   <div class="text-sm">
     Need an account?
-    <Button class="link" on:click={signUp}>Register instead</Button>
+    <Button class="link" onclick={signUp}>Register instead</Button>
   </div>
 </div>

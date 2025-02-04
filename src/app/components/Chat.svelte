@@ -1,12 +1,3 @@
-<script lang="ts" module>
-  type Element = {
-    id: string
-    type: "date" | "note"
-    value: string | TrustedEvent
-    showPubkey: boolean
-  }
-</script>
-
 <script lang="ts">
   import {onMount} from "svelte"
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
@@ -37,7 +28,7 @@
   import {pushModal} from "@app/modal"
   import {sendWrapped, prependParent} from "@app/commands"
 
-  let {id, info = undefined} = $props()
+  const {id, info = undefined} = $props()
 
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
@@ -125,7 +116,7 @@
           {#if others.length === 1}
             {@const pubkey = others[0]}
             {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
-            <Button on:click={onClick} class="row-2">
+            <Button onclick={onClick} class="row-2">
               <ProfileCircle {pubkey} size={5} />
               <ProfileName {pubkey} />
             </Button>
@@ -144,7 +135,7 @@
               </p>
             </div>
             {#if others.length > 2}
-              <Button on:click={showMembers} class="btn btn-link hidden sm:block"
+              <Button onclick={showMembers} class="btn btn-link hidden sm:block"
                 >Show all members</Button>
             {/if}
           {/if}

@@ -12,7 +12,7 @@
   import {clearModals} from "@app/modal"
   import {attemptRelayAccess} from "@app/commands"
 
-  let {url, error} = $props()
+  const {url, error} = $props()
 
   const back = () => history.back()
 
@@ -75,7 +75,7 @@
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

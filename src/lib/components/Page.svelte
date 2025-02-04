@@ -4,7 +4,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 </script>
 
 <div

@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, nthEq, sleep} from "@welshman/lib"
-  import {COMMENT} from "@welshman/util"
+  import {sortBy, sleep} from "@welshman/lib"
+  import {COMMENT, getTagValue} from "@welshman/util"
   import {repository, subscribe} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
@@ -40,8 +40,6 @@
   let showAll = $state(false)
   let showReply = $state(false)
 
-  let title = $derived($event?.tags.find(nthEq(0, "title"))?.[1] || "")
-
   onMount(() => {
     const sub = subscribe({relays: [url], filters})
 
@@ -57,7 +55,7 @@
   {#if $event}
     {#if !showReply}
       <div class="flex justify-end px-2 pb-2">
-        <Button class="btn btn-primary" on:click={openReply}>
+        <Button class="btn btn-primary" onclick={openReply}>
           <Icon icon="reply" />
           Reply to thread
         </Button>
@@ -73,7 +71,7 @@
     {/each}
     {#if !showAll && $replies.length > 4}
       <div class="flex justify-center">
-        <Button class="btn btn-link" on:click={expand}>
+        <Button class="btn btn-link" onclick={expand}>
           <Icon icon="sort-vertical" />
           Show all {$replies.length} replies
         </Button>
@@ -95,14 +93,14 @@
   <PageBar class="mx-0">
     {#snippet icon()}
       <div>
-        <Button class="btn btn-neutral btn-sm" on:click={back}>
+        <Button class="btn btn-neutral btn-sm" onclick={back}>
           <Icon icon="alt-arrow-left" />
           Go back
         </Button>
       </div>
     {/snippet}
     {#snippet title()}
-      <h1 class="text-xl">{title}</h1>
+      <h1 class="text-xl">{getTagValue("title", $event?.tags || []) || ""}</h1>
     {/snippet}
     {#snippet action()}
       <div>

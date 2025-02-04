@@ -19,7 +19,7 @@
     children?: import("svelte").Snippet
   }
 
-  let {children}: Props = $props()
+  const {children}: Props = $props()
 
   const startChat = () => pushModal(ChatStart)
 
@@ -30,14 +30,14 @@
 
   let term = $state("")
 
-  let chats = $derived($chatSearch.searchOptions(term))
+  const chats = $derived($chatSearch.searchOptions(term))
 </script>
 
 <SecondaryNav>
   <SecondaryNavSection>
     <SecondaryNavHeader>
       Chats
-      <Button on:click={startChat}>
+      <Button onclick={startChat}>
         <Icon icon="add-circle" />
       </Button>
     </SecondaryNavHeader>

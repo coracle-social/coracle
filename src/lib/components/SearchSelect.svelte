@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {readable} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {identity} from "@welshman/lib"
@@ -10,10 +11,12 @@
   interface Props {
     value: string
     options: string[]
+    before?: Snippet
     allowCreate?: boolean
+    class?: string
   }
 
-  let {value, options, allowCreate = false, ...restProps} = $props()
+  let {value, options, before, allowCreate = false, ...restProps}: Props = $props()
   let input: Element | undefined = $state()
   let popover: Instance | undefined = $state()
   let instance: any = $state()
@@ -47,14 +50,14 @@
 
 <div class={restProps.class}>
   <label class="input input-bordered flex w-full items-center gap-3" bind:this={input}>
-    <slot name="before" />
+    {@render before?.()}
     <input
       class="grow"
       type="text"
       bind:value
-      on:keydown={onKeyDown}
-      on:focus={onFocus}
-      on:blur={onBlur} />
+      onkeydown={onKeyDown}
+      onfocus={onFocus}
+      onblur={onBlur} />
     <Icon icon="alt-arrow-down" class="cursor-pointer" />
   </label>
   <Tippy

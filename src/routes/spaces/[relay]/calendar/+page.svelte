@@ -37,7 +37,7 @@
     dateDisplay?: string
   }
 
-  let items = $derived(
+  const items = $derived(
     sortBy(e => -getStart(e), $events)
       .reduce<Item[]>((r, event) => {
         const end = getEnd(event)
@@ -108,7 +108,7 @@
   <Button
     class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"
     data-tip="Create an Event"
-    on:click={createEvent}>
+    onclick={createEvent}>
     <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
       <Icon icon="calendar-add" />
     </div>

@@ -10,7 +10,7 @@
     pubkeys: string[]
   }
 
-  let {event, pubkeys}: Props = $props()
+  const {event, pubkeys}: Props = $props()
 
   const onEmoji = (emoji: NativeEmoji) =>
     sendWrapped({template: makeReaction({event, content: emoji.unicode}), pubkeys})

@@ -10,14 +10,14 @@
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
 
-  let {value} = $props()
+  const {value} = $props()
 
   const pubkey = value
   const profileDisplay = deriveProfileDisplay(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
-  let following = $derived(getPubkeyTagValues(getListTags($userFollows)).includes(pubkey))
+  const following = $derived(getPubkeyTagValues(getListTags($userFollows)).includes(pubkey))
 </script>
 
 <div class="flex max-w-full gap-3">

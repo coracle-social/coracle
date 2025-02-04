@@ -37,7 +37,7 @@
     Once you've created a relay of your own, come back here to link {PLATFORM_NAME} with your new relay.
   </p>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

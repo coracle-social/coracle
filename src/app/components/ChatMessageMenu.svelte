@@ -5,7 +5,7 @@
   import EventInfo from "@app/components/EventInfo.svelte"
   import {pushModal} from "@app/modal"
 
-  let {event, pubkeys, popover, replyTo} = $props()
+  const {event, pubkeys, popover, replyTo} = $props()
 
   const reply = () => replyTo(event)
 
@@ -18,11 +18,11 @@
 <div class="join border border-solid border-neutral text-xs">
   <ChatMessageEmojiButton {event} {pubkeys} />
   {#if replyTo}
-    <Button class="btn join-item btn-xs" on:click={reply}>
+    <Button class="btn join-item btn-xs" onclick={reply}>
       <Icon size={4} icon="reply" />
     </Button>
   {/if}
-  <Button class="btn join-item btn-xs" on:click={showInfo}>
+  <Button class="btn join-item btn-xs" onclick={showInfo}>
     <Icon size={4} icon="code-2" />
   </Button>
 </div>

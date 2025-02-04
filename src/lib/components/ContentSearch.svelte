@@ -5,7 +5,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 </script>
 
 <div class="col-2 content-padding-t content-padding-x h-full {props.class}">

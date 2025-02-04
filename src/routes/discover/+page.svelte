@@ -89,7 +89,7 @@
     {#each relaySearch.searchOptions(term).slice(0, limit) as relay (relay.url)}
       <Button
         class="card2 bg-alt col-4 text-left shadow-xl transition-all hover:shadow-2xl hover:brightness-[1.1]"
-        on:click={() => openSpace(relay.url)}>
+        onclick={() => openSpace(relay.url)}>
         <div class="col-2">
           <div class="relative flex gap-4">
             <div class="relative">

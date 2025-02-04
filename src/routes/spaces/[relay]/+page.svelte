@@ -41,7 +41,7 @@
 
   let relayAdminEvents: TrustedEvent[] = $state([])
 
-  let pubkey = $derived($relay?.profile?.pubkey)
+  const pubkey = $derived($relay?.profile?.pubkey)
 </script>
 
 <div class="relative flex flex-col">
@@ -57,7 +57,7 @@
     {#snippet action()}
       <div class="row-2">
         {#if !$userRoomsByUrl.has(url)}
-          <Button class="btn btn-primary btn-sm" on:click={joinSpace}>
+          <Button class="btn btn-primary btn-sm" onclick={joinSpace}>
             <Icon icon="login-2" />
             Join Space
           </Button>
@@ -166,7 +166,7 @@
           </div>
         </Link>
       {/each}
-      <Button on:click={addRoom} class="btn btn-neutral whitespace-nowrap">
+      <Button onclick={addRoom} class="btn btn-neutral whitespace-nowrap">
         <Icon icon="add-circle" />
         Create
       </Button>

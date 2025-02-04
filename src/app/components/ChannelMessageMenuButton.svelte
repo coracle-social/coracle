@@ -6,7 +6,7 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import ChannelMessageMenu from "@app/components/ChannelMessageMenu.svelte"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const open = () => popover?.show()
 
@@ -28,7 +28,7 @@
 <svelte:document onmousemove={onMouseMove} />
 
 <div class="flex">
-  <Button class="btn join-item btn-xs" on:click={open}>
+  <Button class="btn join-item btn-xs" onclick={open}>
     <Icon icon="menu-dots" size={4} />
   </Button>
   <Tippy

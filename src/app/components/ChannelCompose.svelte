@@ -14,7 +14,7 @@
     content?: string
   }
 
-  let {onSubmit, content = ""}: Props = $props()
+  const {onSubmit, content = ""}: Props = $props()
 
   export const focus = () => $editor.chain().focus().run()
 
@@ -47,7 +47,7 @@
     data-tip="Add an image"
     class="center tooltip tooltip-right h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
     disabled={$uploading}
-    on:click={uploadFiles}>
+    onclick={uploadFiles}>
     {#if $uploading}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}
@@ -61,7 +61,7 @@
     data-tip="{window.navigator.platform.includes('Mac') ? 'cmd' : 'ctrl'}+enter to send"
     class="center tooltip tooltip-left absolute right-4 h-10 w-10 min-w-10 rounded-full"
     disabled={$uploading}
-    on:click={submit}>
+    onclick={submit}>
     <Icon icon="plain" />
   </Button>
 </form>

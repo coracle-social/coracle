@@ -56,12 +56,12 @@
     {#snippet info()}
       <p>
         This can be any nostr relay where you'd like to host your space.
-        <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
+        <Button class="link" onclick={() => pushModal(InfoRelay)}>What is a relay?</Button>
       </p>
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

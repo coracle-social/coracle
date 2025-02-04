@@ -10,7 +10,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {removeSpaceMembership} from "@app/commands"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const back = () => history.back()
 
@@ -39,7 +39,7 @@
   </ModalHeader>
   <p class="text-center">Are you sure you want to leave?</p>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

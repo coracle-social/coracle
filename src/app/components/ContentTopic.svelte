@@ -1,5 +1,5 @@
 <script lang="ts">
-  let {value} = $props()
+  const {value} = $props()
 </script>
 
 <span class="link-content">

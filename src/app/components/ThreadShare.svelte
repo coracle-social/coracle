@@ -14,7 +14,7 @@
   import {makeRoomPath} from "@app/routes"
   import {setKey} from "@app/implicit"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
@@ -55,7 +55,7 @@
     {/each}
   </div>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

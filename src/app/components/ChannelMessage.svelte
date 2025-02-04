@@ -38,7 +38,7 @@
     inert?: boolean
   }
 
-  let {url, room, event, replyTo = undefined, showPubkey = false, inert = false}: Props = $props()
+  const {url, room, event, replyTo = undefined, showPubkey = false, inert = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
@@ -69,7 +69,7 @@
   class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left">
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
-      <Button on:click={openProfile} class="flex items-start">
+      <Button onclick={openProfile} class="flex items-start">
         <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
       </Button>
     {:else}
@@ -78,7 +78,7 @@
     <div class="min-w-0 flex-grow pr-1">
       {#if showPubkey}
         <div class="flex items-center gap-2">
-          <Button on:click={openProfile} class="text-sm font-bold" style="color: {colorValue}">
+          <Button onclick={openProfile} class="text-sm font-bold" style="color: {colorValue}">
             {$profileDisplay}
           </Button>
           <span class="text-xs opacity-50">
@@ -108,7 +108,7 @@
     onclick={stopPropagation(bubble("click"))}>
     <ChannelMessageEmojiButton {url} {room} {event} />
     {#if replyTo}
-      <Button class="btn join-item btn-xs" on:click={reply}>
+      <Button class="btn join-item btn-xs" onclick={reply}>
         <Icon icon="reply" size={4} />
       </Button>
     {/if}

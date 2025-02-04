@@ -2,6 +2,7 @@
   import Content from "./Content.svelte"
   import {preventDefault, stopPropagation} from "svelte/legacy"
 
+  import type {TrustedEvent} from "@welshman/util"
   import {fromNostrURI} from "@welshman/util"
   import {nthEq} from "@welshman/lib"
   import {
@@ -102,7 +103,7 @@
     $userSettingValues.hide_sensitive && event.tags.find(nthEq(0, "content-warning"))?.[1],
   )
 
-  let shortContent = $derived(
+  const shortContent = $derived(
     showEntire
       ? fullContent
       : truncate(fullContent, {
@@ -112,9 +113,9 @@
         }),
   )
 
-  let hasEllipsis = $derived(shortContent.some(isEllipsis))
-  let expandInline = $derived(hasEllipsis && expandMode === "inline")
-  let expandBlock = $derived(hasEllipsis && expandMode === "block")
+  const hasEllipsis = $derived(shortContent.some(isEllipsis))
+  const expandInline = $derived(hasEllipsis && expandMode === "inline")
+  const expandBlock = $derived(hasEllipsis && expandMode === "block")
 </script>
 
 <div class="relative">
@@ -123,7 +124,7 @@
       <Icon icon="danger" />
       <p>
         This note has been flagged by the author as "{warning}".<br />
-        <Button class="link" on:click={ignoreWarning}>Show anyway</Button>
+        <Button class="link" onclick={ignoreWarning}>Show anyway</Button>
       </p>
     </div>
   {:else}
@@ -151,8 +152,8 @@
           <ContentMention value={parsed.value} />
         {:else if isEvent(parsed) || isAddress(parsed)}
           {#if isBlock(i)}
-            <ContentQuote {...quoteProps} value={parsed.value} {depth} {event}>
-              {#snippet noteContent({event})}
+            <ContentQuote {...quoteProps} value={parsed.value} {event}>
+              {#snippet noteContent({event}: {event: TrustedEvent})}
                 <Content {quoteProps} {hideMedia} {event} depth={depth + 1} />
               {/snippet}
             </ContentQuote>

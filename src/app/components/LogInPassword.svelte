@@ -139,11 +139,11 @@
   </FieldInline>
   <p class="text-sm">
     Your email and password only work to log in to {PLATFORM_NAME}. To use your key on other nostr
-    applications, visit your settings page. <Button class="link" on:click={startReset}
+    applications, visit your settings page. <Button class="link" onclick={startReset}
       >Forgot your password?</Button>
   </p>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back} disabled={loading}>
+    <Button class="btn btn-link" onclick={back} disabled={loading}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

@@ -17,7 +17,7 @@
     hideActions?: boolean
   }
 
-  let {url, event, hideActions = false}: Props = $props()
+  const {url, event, hideActions = false}: Props = $props()
 
   const title = event.tags.find(nthEq(0, "title"))?.[1]
 

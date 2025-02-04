@@ -16,7 +16,7 @@
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const uploading = writable(false)
 
@@ -95,7 +95,7 @@
         <Button
           data-tip="Add an image"
           class="center btn tooltip"
-          on:click={() => $editor.chain().selectFiles().run()}>
+          onclick={() => $editor.chain().selectFiles().run()}>
           {#if $uploading}
             <span class="loading loading-spinner loading-xs"></span>
           {:else}
@@ -131,7 +131,7 @@
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

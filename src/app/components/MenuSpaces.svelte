@@ -22,7 +22,7 @@
     <Divider />
   {/if}
   {#if !PLATFORM_RELAY}
-    <Button on:click={addSpace}>
+    <Button onclick={addSpace}>
       <CardButton>
         {#snippet icon()}
           <div><Icon icon="login-2" size={7} /></div>

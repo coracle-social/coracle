@@ -8,7 +8,7 @@
   import Profile from "@app/components/Profile.svelte"
   import {publishDelete} from "@app/commands"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const reports = deriveEvents(repository, {
     filters: [{kinds: [REPORT], "#e": [event.id]}],
@@ -46,7 +46,7 @@
           <span>Reported this event as "{reason}"</span>
         </div>
         {#if report.pubkey === $pubkey}
-          <Button class="btn-default btn" on:click={remove}>Delete Report</Button>
+          <Button class="btn-default btn" onclick={remove}>Delete Report</Button>
         {/if}
       </div>
       {#if report.content}
@@ -54,5 +54,5 @@
       {/if}
     </div>
   {/each}
-  <Button class="btn btn-primary" on:click={back}>Got it</Button>
+  <Button class="btn btn-primary" onclick={back}>Got it</Button>
 </div>

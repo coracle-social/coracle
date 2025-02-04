@@ -45,7 +45,7 @@
           </div>
         </div>
       </div>
-      <Button class="center btn btn-circle btn-neutral -mr-4 -mt-4 h-12 w-12" on:click={startEdit}>
+      <Button class="center btn btn-circle btn-neutral -mr-4 -mt-4 h-12 w-12" onclick={startEdit}>
         <Icon icon="pen-new-square" />
       </Button>
     </div>
@@ -68,7 +68,7 @@
         {#snippet info()}
           <p>
             Your email and password can only be used to log into {PLATFORM_NAME}.
-            <Button class="link" on:click={startEject}>Start holding your own keys</Button>
+            <Button class="link" onclick={startEject}>Start holding your own keys</Button>
           </p>
         {/snippet}
       </FieldInline>
@@ -85,7 +85,7 @@
             <Icon icon="link-round" />
             <input readonly class="ellipsize flex-grow" value={$session?.pubkey} />
           </div>
-          <Button class="flex items-center" on:click={copyNpub}>
+          <Button class="flex items-center" onclick={copyNpub}>
             <Icon icon="copy" />
           </Button>
         </label>
@@ -106,7 +106,7 @@
           <label class="input input-bordered flex w-full items-center gap-2">
             <Icon icon="link-round" />
             <input readonly value={$session.secret} class="grow" type="password" />
-            <Button class="flex items-center" on:click={copyNsec}>
+            <Button class="flex items-center" onclick={copyNsec}>
               <Icon icon="copy" />
             </Button>
           </label>

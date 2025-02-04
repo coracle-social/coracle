@@ -15,7 +15,7 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  let {pubkey} = $props()
+  const {pubkey} = $props()
 
   const profile = deriveProfile(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
@@ -24,18 +24,18 @@
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey})
 
-  let following = $derived(
+  const following = $derived(
     pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey),
   )
 </script>
 
 <div class="flex max-w-full gap-3">
-  <Button on:click={openProfile} class="py-1">
+  <Button onclick={openProfile} class="py-1">
     <Avatar src={$profile?.picture} size={10} />
   </Button>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
-      <Button on:click={openProfile} class="text-bold overflow-hidden text-ellipsis">
+      <Button onclick={openProfile} class="text-bold overflow-hidden text-ellipsis">
         {$profileDisplay}
       </Button>
       <WotScore score={$score} active={following} />

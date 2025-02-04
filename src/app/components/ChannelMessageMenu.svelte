@@ -7,7 +7,7 @@
   import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
   import {pushModal} from "@app/modal"
 
-  let {url, event, onClick} = $props()
+  const {url, event, onClick} = $props()
 
   const report = () => {
     onClick()
@@ -27,21 +27,21 @@
 
 <ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl">
   <li>
-    <Button on:click={showInfo}>
+    <Button onclick={showInfo}>
       <Icon size={4} icon="code-2" />
       Message Details
     </Button>
   </li>
   {#if event.pubkey === $pubkey}
     <li>
-      <Button on:click={showDelete} class="text-error">
+      <Button onclick={showDelete} class="text-error">
         <Icon size={4} icon="trash-bin-2" />
         Delete Message
       </Button>
     </li>
   {:else}
     <li>
-      <Button class="text-error" on:click={report}>
+      <Button class="text-error" onclick={report}>
         <Icon size={4} icon="danger" />
         Report Content
       </Button>

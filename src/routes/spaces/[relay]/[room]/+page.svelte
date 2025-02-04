@@ -208,12 +208,12 @@
       <div class="row-2">
         {#if room !== GENERAL}
           {#if $userRoomsByUrl.get(url)?.has(room)}
-            <Button class="btn btn-neutral btn-sm" on:click={leaveRoom}>
+            <Button class="btn btn-neutral btn-sm" onclick={leaveRoom}>
               <Icon icon="arrows-a-logout-2" />
               Leave Room
             </Button>
           {:else}
-            <Button class="btn btn-neutral btn-sm" on:click={joinRoom}>
+            <Button class="btn btn-neutral btn-sm" onclick={joinRoom}>
               <Icon icon="login-2" />
               Join Room
             </Button>
@@ -256,7 +256,7 @@
   {#if showFixedNewMessages}
     <div class="relative z-feature flex justify-center">
       <div transition:fly={{duration: 200}} class="fixed top-12">
-        <Button class="btn btn-primary btn-xs rounded-full" on:click={scrollToNewMessages}>
+        <Button class="btn btn-primary btn-xs rounded-full" onclick={scrollToNewMessages}>
           New Messages
         </Button>
       </div>
@@ -272,7 +272,7 @@
 
 {#if showScrollButton}
   <div in:fade class="fixed bottom-14 right-4">
-    <Button class="btn btn-circle btn-neutral" on:click={scrollToBottom}>
+    <Button class="btn btn-circle btn-neutral" onclick={scrollToBottom}>
       <Icon icon="alt-arrow-down" />
     </Button>
   </div>

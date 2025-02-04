@@ -7,7 +7,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 </script>
 
 <div class="btn btn-neutral flex h-[unset] w-full flex-nowrap py-4 text-left {props.class}">

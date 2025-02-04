@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import Icon from "@lib/components/Icon.svelte"
 
-  let {src = "", size = 7, icon = "user-rounded", style = "", ...restProps} = $props()
+  const {src = "", size = 7, icon = "user-rounded", style = "", ...restProps} = $props()
 
   let element: HTMLElement
 

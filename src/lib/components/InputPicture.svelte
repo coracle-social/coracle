@@ -5,11 +5,11 @@
   import Icon from "@lib/components/Icon.svelte"
 
   interface Props {
-    file?: File | null
-    url?: string | null
+    file?: File | undefined
+    url?: string | undefined
   }
 
-  let {file = $bindable(null), url = $bindable(null)}: Props = $props()
+  let {file = $bindable(undefined), url = $bindable(undefined)}: Props = $props()
 
   const id = randomId()
 
@@ -36,9 +36,9 @@
   }
 
   const onClear = () => {
-    initialUrl = null
-    file = null
-    url = null
+    initialUrl = undefined
+    file = undefined
+    url = undefined
   }
 
   let active = $state(false)

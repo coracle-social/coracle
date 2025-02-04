@@ -10,7 +10,7 @@
   import {pushToast} from "@app/toast"
   import {publishReport} from "@app/commands"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const back = () => history.back()
 
@@ -78,7 +78,7 @@
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

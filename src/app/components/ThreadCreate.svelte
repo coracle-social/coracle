@@ -15,7 +15,7 @@
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const uploading = writable(false)
 
@@ -99,7 +99,7 @@
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
-      on:click={$editor.commands.selectFiles}>
+      onclick={$editor.commands.selectFiles}>
       {#if $uploading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}
@@ -108,7 +108,7 @@
     </Button>
   </div>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

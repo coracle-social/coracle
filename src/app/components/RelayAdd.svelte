@@ -14,13 +14,13 @@
     addRelay: (url: string) => void
   }
 
-  let {relays, addRelay}: Props = $props()
+  const {relays, addRelay}: Props = $props()
 
   let term = $state("")
   let limit = $state(20)
   let element: Element | undefined = $state()
 
-  let customUrl = $derived(tryCatch(() => normalizeRelayUrl(term)))
+  const customUrl = $derived(tryCatch(() => normalizeRelayUrl(term)))
 
   onMount(() => {
     const scroller = createScroller({
@@ -44,7 +44,7 @@
 <div class="column -m-6 mt-0 h-[50vh] gap-2 overflow-auto p-6 pt-2" bind:this={element}>
   {#if customUrl && isShareableRelayUrl(customUrl) && !$relays.includes(normalizeRelayUrl(customUrl))}
     <RelayItem url={term}>
-      <Button class="btn btn-outline btn-sm flex items-center" on:click={() => addRelay(customUrl)}>
+      <Button class="btn btn-outline btn-sm flex items-center" onclick={() => addRelay(customUrl)}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
@@ -55,7 +55,7 @@
     .filter(url => !$relays.includes(url))
     .slice(0, limit) as url (url)}
     <RelayItem {url}>
-      <Button class="btn btn-outline btn-sm flex items-center" on:click={() => addRelay(url)}>
+      <Button class="btn btn-outline btn-sm flex items-center" onclick={() => addRelay(url)}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>

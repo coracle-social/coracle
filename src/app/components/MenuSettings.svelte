@@ -63,7 +63,7 @@
       {/snippet}
     </CardButton>
   </Link>
-  <Button on:click={logout} class="btn btn-neutral">
+  <Button onclick={logout} class="btn btn-neutral">
     <Icon icon="exit" /> Log Out
   </Button>
 </div>

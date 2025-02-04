@@ -9,7 +9,7 @@
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
 
-  let {url, event} = $props()
+  const {url, event} = $props()
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)

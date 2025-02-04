@@ -2,7 +2,7 @@
   import {deriveProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
 
-  let {...props} = $props()
+  const {...props} = $props()
 
   const profile = deriveProfile(props.pubkey)
 </script>

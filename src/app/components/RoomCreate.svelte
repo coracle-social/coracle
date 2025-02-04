@@ -16,7 +16,7 @@
   import {makeSpacePath} from "@app/routes"
   import {pushToast} from "@app/toast"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const room = randomId()
   const relay = deriveRelay(url)
@@ -85,7 +85,7 @@
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

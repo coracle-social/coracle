@@ -23,7 +23,7 @@
     children?: import("svelte").Snippet
   }
 
-  let {
+  const {
     event,
     onReactionClick,
     url = "",
@@ -42,9 +42,9 @@
 
   const onReportClick = () => pushModal(EventReportDetails, {url, event})
 
-  let reportReasons = $derived(uniq($reports.map(e => getTag("e", e.tags)?.[2])))
+  const reportReasons = $derived(uniq($reports.map(e => getTag("e", e.tags)?.[2])))
 
-  let groupedReactions = $derived(
+  const groupedReactions = $derived(
     groupBy(
       e => e.content,
       uniqBy(e => e.pubkey + e.content, $reactions),

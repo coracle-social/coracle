@@ -8,7 +8,7 @@
     children?: Snippet
   }
 
-  let {onClose, hideOnClick = false, children}: Props = $props()
+  const {onClose, hideOnClick = false, children}: Props = $props()
 
   const onMouseUp = (e: any) => {
     if (hideOnClick || !element?.contains(e.target)) {

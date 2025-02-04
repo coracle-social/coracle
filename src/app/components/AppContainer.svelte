@@ -14,7 +14,7 @@
     children: Snippet
   }
 
-  let {children}: Props = $props()
+  const {children}: Props = $props()
 
   if (BURROW_URL && !$pubkey) {
     if ($page.url.pathname === "/confirm-email") {

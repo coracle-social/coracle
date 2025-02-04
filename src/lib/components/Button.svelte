@@ -1,19 +1,37 @@
 <script lang="ts">
-  interface Props {
-    type?: "button" | "submit"
-  }
+  import type {Snippet} from "svelte"
 
-  let {type = "button", ...restProps} = $props()
+  const {
+    children,
+    onclick,
+    type = "button",
+    ...restProps
+  }: {
+    children: Snippet
+    onclick?: (...args: unknown[]) => any
+    type?: "button" | "submit"
+    class?: string
+    style?: string
+    disabled?: boolean
+    "data-tip"?: string
+  } = $props()
 
   const className = $derived(`text-left ${restProps.class}`)
+
+  const onClick = (e: Event) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    onclick?.()
+  }
 </script>
 
 {#if type === "submit"}
   <button {...restProps} {type} class={className}>
-    <slot />
+    {@render children?.()}
   </button>
 {:else}
-  <button on:click|stopPropagation|preventDefault {...restProps} {type} class={className}>
-    <slot />
+  <button {...restProps} onclick={onClick} type={type as "button" | "submit"} class={className}>
+    {@render children?.()}
   </button>
 {/if}

@@ -12,7 +12,7 @@
   import {canDecrypt, PLATFORM_NAME, ensureUnwrapped} from "@app/state"
   import {clearModals} from "@app/modal"
 
-  let {next} = $props()
+  const {next} = $props()
 
   let loading = $state(false)
 
@@ -58,7 +58,7 @@
     to decrypt data.
   </p>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

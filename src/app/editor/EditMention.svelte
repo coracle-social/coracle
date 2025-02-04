@@ -8,7 +8,7 @@
     selected: NodeViewProps["selected"]
   }
 
-  let {node, selected}: Props = $props()
+  const {node, selected}: Props = $props()
 
   const display = deriveProfileDisplay(node.attrs.pubkey)
 </script>

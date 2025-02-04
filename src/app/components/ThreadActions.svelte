@@ -24,7 +24,7 @@
     showActivity?: boolean
   }
 
-  let {url, event, showActivity = false}: Props = $props()
+  const {url, event, showActivity = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const deleted = deriveIsDeleted(repository, event)
@@ -51,7 +51,7 @@
 
   let popover: Instance | undefined = $state()
 
-  let lastActive = $derived(max([...$replies, event].map(e => e.created_at)))
+  const lastActive = $derived(max([...$replies, event].map(e => e.created_at)))
 
   onMount(() => {
     load({relays: [url], filters})
@@ -87,7 +87,7 @@
         component={ThreadMenu}
         props={{url, event, onClick: hidePopover}}
         params={{trigger: "manual", interactive: true}}>
-        <Button class="btn join-item btn-neutral btn-xs" on:click={showPopover}>
+        <Button class="btn join-item btn-neutral btn-xs" onclick={showPopover}>
           <Icon icon="menu-dots" size={4} />
         </Button>
       </Tippy>

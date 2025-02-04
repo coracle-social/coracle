@@ -12,7 +12,7 @@
     notify?: boolean
   }
 
-  let {url, room, notify = false}: Props = $props()
+  const {url, room, notify = false}: Props = $props()
 
   const path = makeRoomPath(url, room)
   const channel = deriveChannel(url, room)

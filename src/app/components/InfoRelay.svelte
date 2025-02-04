@@ -22,5 +22,5 @@
     Different relays have different policies for access control and content retention. Be sure to
     double check that you have access to the relays you try to use by visiting their website.
   </p>
-  <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
+  <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>
 </div>

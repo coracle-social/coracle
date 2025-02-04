@@ -6,7 +6,6 @@
 </style>
 
 <script lang="ts">
-  import cx from "classnames"
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import ArrowsALogout2 from "@assets/icons/Arrows ALogout 2.svg?dataurl"
@@ -84,12 +83,15 @@
   import WidgetAdd from "@assets/icons/Widget Add.svg?dataurl"
   import WiFiRouterRound from "@assets/icons/Wi-Fi Router Round.svg?dataurl"
 
-  interface Props {
+  const {
+    icon,
+    size = 5,
+    ...restProps
+  }: {
     icon: string
-    size: number
-  }
-
-  let {icon, size = 5, ...restProps} = $props()
+    size?: number
+    class?: string
+  } = $props()
 
   const px = size * 4
 

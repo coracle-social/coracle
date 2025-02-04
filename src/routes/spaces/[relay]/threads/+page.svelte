@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {page} from "$app/stores"
-  import {sortBy, min, nthEq, sleep} from "@welshman/lib"
+  import {sortBy, min, nthEq} from "@welshman/lib"
   import {THREAD, COMMENT, getListTags, getPubkeyTagValues} from "@welshman/util"
   import {throttled} from "@welshman/store"
   import {feedFromFilters, makeIntersectionFeed, makeRelayFeed} from "@welshman/feeds"
@@ -96,7 +96,7 @@
     {/snippet}
     {#snippet action()}
       <div class="row-2">
-        <Button class="btn btn-primary btn-sm" on:click={createThread}>
+        <Button class="btn btn-primary btn-sm" onclick={createThread}>
           <Icon icon="notes-minimalistic" />
           Create a Thread
         </Button>

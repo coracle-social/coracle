@@ -9,13 +9,13 @@
     pubkeys: any
   }
 
-  let {title, subtitle = "", pubkeys}: Props = $props()
+  const {subtitle = "", pubkeys, ...restProps}: Props = $props()
 </script>
 
 <div class="column gap-4">
   <ModalHeader>
     {#snippet title()}
-      <div>{title}</div>
+      <div>{restProps.title}</div>
     {/snippet}
     {#snippet info()}
       <div>{subtitle}</div>
@@ -26,5 +26,5 @@
       <Profile {pubkey} />
     </div>
   {/each}
-  <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
+  <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>
 </div>

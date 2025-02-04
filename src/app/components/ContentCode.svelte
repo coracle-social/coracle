@@ -1,5 +1,5 @@
 <script lang="ts">
-  let {value, isBlock} = $props()
+  const {value, isBlock} = $props()
 </script>
 
 <code

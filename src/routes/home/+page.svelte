@@ -29,7 +29,7 @@
         <h1 class="text-center text-5xl">Welcome to</h1>
         <h1 class="mb-4 text-center text-5xl font-bold uppercase">{PLATFORM_NAME}</h1>
         <div class="col-3">
-          <Button on:click={addSpace}>
+          <Button onclick={addSpace}>
             <CardButton>
               {#snippet icon()}
                 <div><Icon icon="add-circle" size={7} /></div>
@@ -55,7 +55,7 @@
               {/snippet}
             </CardButton>
           </Link>
-          <Button on:click={startChat}>
+          <Button onclick={startChat}>
             <CardButton>
               {#snippet icon()}
                 <div><Icon icon="chat-round" size={7} /></div>

@@ -26,7 +26,7 @@
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const threadsPath = makeSpacePath(url, "threads")
   const userRooms = deriveUserRooms(url)
@@ -59,7 +59,7 @@
   let replaceState = false
   let element: Element | undefined = $state()
 
-  let members = $derived(
+  const members = $derived(
     $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey),
   )
 
@@ -72,7 +72,7 @@
 <div bind:this={element}>
   <SecondaryNavSection class="max-h-screen">
     <div>
-      <SecondaryNavItem class="w-full !justify-between" on:click={openMenu}>
+      <SecondaryNavItem class="w-full !justify-between" onclick={openMenu}>
         <strong class="ellipsize">{displayRelayUrl(url)}</strong>
         <Icon icon="alt-arrow-down" />
       </SecondaryNavItem>
@@ -82,25 +82,25 @@
             transition:fly
             class="menu absolute z-popover mt-2 w-full rounded-box bg-base-100 p-2 shadow-xl">
             <li>
-              <Button on:click={showMembers}>
+              <Button onclick={showMembers}>
                 <Icon icon="user-rounded" />
                 View Members ({members.length})
               </Button>
             </li>
             <li>
-              <Button on:click={createInvite}>
+              <Button onclick={createInvite}>
                 <Icon icon="link-round" />
                 Create Invite
               </Button>
             </li>
             <li>
               {#if $userRoomsByUrl.has(url)}
-                <Button on:click={leaveSpace} class="text-error">
+                <Button onclick={leaveSpace} class="text-error">
                   <Icon icon="exit" />
                   Leave Space
                 </Button>
               {:else}
-                <Button on:click={joinSpace} class="bg-primary text-primary-content">
+                <Button onclick={joinSpace} class="bg-primary text-primary-content">
                   <Icon icon="login-2" />
                   Join Space
                 </Button>
@@ -135,7 +135,7 @@
       {#each $otherRooms as room, i (room)}
         <MenuSpaceRoomItem {url} {room} />
       {/each}
-      <SecondaryNavItem on:click={addRoom}>
+      <SecondaryNavItem onclick={addRoom}>
         <Icon icon="add-circle" />
         Create room
       </SecondaryNavItem>

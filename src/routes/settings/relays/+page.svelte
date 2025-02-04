@@ -72,14 +72,14 @@
           <Button
             class="tooltip flex items-center"
             data-tip="Stop using this relay"
-            on:click={() => removeWriteRelay(url)}>
+            onclick={() => removeWriteRelay(url)}>
             <Icon icon="close-circle" />
           </Button>
         </RelayItem>
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={addWriteRelay}>
+      <Button class="btn btn-primary mt-2" onclick={addWriteRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
@@ -104,14 +104,14 @@
           <Button
             class="tooltip flex items-center"
             data-tip="Stop using this relay"
-            on:click={() => removeReadRelay(url)}>
+            onclick={() => removeReadRelay(url)}>
             <Icon icon="close-circle" />
           </Button>
         </RelayItem>
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={addReadRelay}>
+      <Button class="btn btn-primary mt-2" onclick={addReadRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>
@@ -137,14 +137,14 @@
           <Button
             class="tooltip flex items-center"
             data-tip="Stop using this relay"
-            on:click={() => removeInboxRelay(url)}>
+            onclick={() => removeInboxRelay(url)}>
             <Icon icon="close-circle" />
           </Button>
         </RelayItem>
       {:else}
         <p class="text-center text-sm">No relays found</p>
       {/each}
-      <Button class="btn btn-primary mt-2" on:click={addInboxRelay}>
+      <Button class="btn btn-primary mt-2" onclick={addInboxRelay}>
         <Icon icon="add-circle" />
         Add Relay
       </Button>

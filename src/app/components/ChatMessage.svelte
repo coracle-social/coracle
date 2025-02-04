@@ -32,7 +32,7 @@
     showPubkey?: boolean
   }
 
-  let {event, replyTo = undefined, pubkeys, showPubkey = false}: Props = $props()
+  const {event, replyTo = undefined, pubkeys, showPubkey = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const isOwn = event.pubkey === $pubkey
@@ -101,16 +101,13 @@
       {#if showPubkey}
         <div class="flex items-center gap-2">
           {#if !isOwn}
-            <Button on:click={openProfile} class="flex items-center gap-1">
+            <Button onclick={openProfile} class="flex items-center gap-1">
               <Avatar
                 src={$profile?.picture}
                 class="border border-solid border-base-content"
                 size={4} />
               <div class="flex items-center gap-2">
-                <Button
-                  on:click={openProfile}
-                  class="text-sm font-bold"
-                  style="color: {colorValue}">
+                <Button onclick={openProfile} class="text-sm font-bold" style="color: {colorValue}">
                   {$profileDisplay}
                 </Button>
               </div>

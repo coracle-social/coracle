@@ -64,7 +64,7 @@
   let url = $state("")
   let loading = $state(false)
 
-  let linkIsValid = $derived(
+  const linkIsValid = $derived(
     Boolean(tryCatch(() => isRelayUrl(normalizeRelayUrl(url.split("|")[0])))),
   )
 </script>
@@ -91,12 +91,12 @@
     {#snippet info()}
       <p>
         You can also directly join any relay by entering its URL here.
-        <Button class="link" on:click={() => pushModal(InfoRelay)}>What is a relay?</Button>
+        <Button class="link" onclick={() => pushModal(InfoRelay)}>What is a relay?</Button>
       </p>
     {/snippet}
   </Field>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

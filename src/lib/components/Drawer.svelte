@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fade, translate} from "@lib/transition"
 
-  let {onClose, children} = $props()
+  const {onClose, children} = $props()
 </script>
 
 <div class="drawer fixed inset-0 z-modal">

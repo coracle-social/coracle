@@ -79,9 +79,9 @@
     dropSession($session.pubkey)
   }
 
-  let {children} = $props()
+  const {children} = $props()
 
-  let ready = $state(defer<void>())
+  const ready = $state(defer<void>())
 
   onMount(async () => {
     Object.assign(window, {

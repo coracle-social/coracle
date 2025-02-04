@@ -23,11 +23,11 @@
   }
 </script>
 
-<Button class="relative" on:click={init}>
+<Button class="relative" onclick={init}>
   <DateInput format="yyyy-MM-dd HH:mm" timePrecision="minute" placeholder="" bind:value />
   <div class="absolute right-2 top-0 flex h-12 cursor-pointer items-center gap-2">
     {#if value}
-      <Button on:click={clear} class="h-5">
+      <Button onclick={clear} class="h-5">
         <Icon icon="close-circle" />
       </Button>
     {:else}

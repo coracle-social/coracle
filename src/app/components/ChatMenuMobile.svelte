@@ -14,11 +14,11 @@
 </script>
 
 <div class="col-2">
-  <Button class="btn btn-primary" on:click={startChat}>
+  <Button class="btn btn-primary" onclick={startChat}>
     <Icon size={4} icon="add-circle" />
     Start chat
   </Button>
-  <Button class="btn btn-neutral" on:click={markAsRead}>
+  <Button class="btn btn-neutral" onclick={markAsRead}>
     <Icon size={4} icon="check-circle" />
     Mark all read
   </Button>

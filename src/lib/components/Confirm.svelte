@@ -14,7 +14,7 @@
     confirm: any
   }
 
-  let {title = "Are you sure?", subtitle = "", message, confirm}: Props = $props()
+  const {subtitle = "", message, confirm, ...restProps}: Props = $props()
 
   let loading = $state(false)
 
@@ -34,7 +34,7 @@
 <form class="column gap-4" onsubmit={preventDefault(tryConfirm)}>
   <ModalHeader>
     {#snippet title()}
-      <div>{title}</div>
+      <div>{restProps.title || "Are you sure?"}</div>
     {/snippet}
     {#snippet info()}
       <div>{subtitle}</div>
@@ -42,7 +42,7 @@
   </ModalHeader>
   <p>{message}</p>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

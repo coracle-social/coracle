@@ -22,15 +22,15 @@
     active?: boolean
   }
 
-  let {score, max = 100, active = false}: Props = $props()
+  const {score, max = 100, active = false}: Props = $props()
 
   const radius = 6
   const center = radius + 1
 
-  let normalizedScore = $derived(clamp([0, max], score) / max)
-  let dashOffset = $derived(100 - 44 * normalizedScore)
-  let style = $derived(`transform: rotate(${135 - normalizedScore * 180}deg)`)
-  let stroke = $derived(active ? "var(--primary)" : "var(--base-content)")
+  const normalizedScore = $derived(clamp([0, max], score) / max)
+  const dashOffset = $derived(100 - 44 * normalizedScore)
+  const style = $derived(`transform: rotate(${135 - normalizedScore * 180}deg)`)
+  const stroke = $derived(active ? "var(--primary)" : "var(--base-content)")
 </script>
 
 <div class="relative h-[14px] w-[14px]">

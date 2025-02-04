@@ -6,7 +6,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 </script>
 
 <div class="flex flex-col gap-2 {props.class}">

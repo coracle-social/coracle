@@ -3,7 +3,7 @@
   import LogInPassword from "@app/components/LogInPassword.svelte"
   import {pushModal} from "@app/modal"
 
-  let {email} = $props()
+  const {email} = $props()
 
   const login = () => pushModal(LogInPassword)
 </script>
@@ -14,5 +14,5 @@
     A confirmation email has been sent to {email}.
   </p>
   <p>Once you've confirmed your account you'll be redirected to the login page.</p>
-  <Button class="btn btn-primary" on:click={login}>Back to Login</Button>
+  <Button class="btn btn-primary" onclick={login}>Back to Login</Button>
 </div>

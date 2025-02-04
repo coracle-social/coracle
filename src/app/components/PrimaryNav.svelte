@@ -18,7 +18,7 @@
     children?: import("svelte").Snippet
   }
 
-  let {children}: Props = $props()
+  const {children}: Props = $props()
 
   const addSpace = () => pushModal(SpaceAdd)
 
@@ -28,9 +28,9 @@
 
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 
-  let spaceUrls = $derived(Array.from($userRoomsByUrl.keys()))
-  let spacePaths = $derived(spaceUrls.map(url => makeSpacePath(url)))
-  let anySpaceNotifications = $derived(
+  const spaceUrls = $derived(Array.from($userRoomsByUrl.keys()))
+  const spacePaths = $derived(spaceUrls.map(url => makeSpacePath(url)))
+  const anySpaceNotifications = $derived(
     spacePaths.some(path => !$page.url.pathname.startsWith(path) && $notifications.has(path)),
   )
 </script>
@@ -48,7 +48,7 @@
         {#each spaceUrls as url (url)}
           <PrimaryNavItemSpace {url} />
         {/each}
-        <PrimaryNavItem title="Add Space" on:click={addSpace} class="tooltip-right">
+        <PrimaryNavItem title="Add Space" onclick={addSpace} class="tooltip-right">
           <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
         </PrimaryNavItem>
       {/if}
@@ -63,7 +63,7 @@
       </PrimaryNavItem>
       <PrimaryNavItem
         title="Messages"
-        on:click={openChat}
+        onclick={openChat}
         class="tooltip-right"
         notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
@@ -88,15 +88,15 @@
       </PrimaryNavItem>
       <PrimaryNavItem
         title="Messages"
-        on:click={openChat}
+        onclick={openChat}
         notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Spaces" on:click={showSpacesMenu} notification={anySpaceNotifications}>
+      <PrimaryNavItem title="Spaces" onclick={showSpacesMenu} notification={anySpaceNotifications}>
         <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
       </PrimaryNavItem>
     </div>
-    <PrimaryNavItem title="Settings" on:click={showSettingsMenu}>
+    <PrimaryNavItem title="Settings" onclick={showSettingsMenu}>
       <Avatar icon="settings" src={$userProfile?.picture} class="!h-10 !w-10" />
     </PrimaryNavItem>
   </div>

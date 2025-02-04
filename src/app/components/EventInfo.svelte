@@ -7,7 +7,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import {clip} from "@app/toast"
 
-  let {event} = $props()
+  const {event} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent1 = nip19.neventEncode({...event, relays})
@@ -35,7 +35,7 @@
       <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="file" />
         <input type="text" class="ellipsize min-w-0 grow" value={nevent1} />
-        <Button on:click={copyLink} class="flex items-center">
+        <Button onclick={copyLink} class="flex items-center">
           <Icon icon="copy" />
         </Button>
       </label>
@@ -49,7 +49,7 @@
       <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="user-circle" />
         <input type="text" class="ellipsize min-w-0 grow" value={npub1} />
-        <Button on:click={copyPubkey} class="flex items-center">
+        <Button onclick={copyPubkey} class="flex items-center">
           <Icon icon="copy" />
         </Button>
       </label>
@@ -58,10 +58,10 @@
   <div class="relative">
     <pre class="card2 card2-sm bg-alt overflow-auto text-xs"><code>{json}</code></pre>
     <p class="absolute right-2 top-2 flex flex-grow items-center justify-between">
-      <Button on:click={copyJson} class="btn btn-neutral btn-sm flex items-center">
+      <Button onclick={copyJson} class="btn btn-neutral btn-sm flex items-center">
         <Icon icon="copy" /> Copy
       </Button>
     </p>
   </div>
-  <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
+  <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>
 </div>

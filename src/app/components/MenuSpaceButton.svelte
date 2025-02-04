@@ -6,14 +6,14 @@
   import {makeSpacePath} from "@app/routes"
   import {pushDrawer} from "@app/modal"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const path = makeSpacePath(url)
 
   const openMenu = () => pushDrawer(MenuSpace, {url})
 </script>
 
-<Button on:click={openMenu} class="btn btn-neutral btn-sm relative md:hidden">
+<Button onclick={openMenu} class="btn btn-neutral btn-sm relative md:hidden">
   <Icon icon="menu-dots" />
   {#if $notifications.has(path)}
     <div class="absolute right-0 top-0 -mr-1 -mt-1 h-2 w-2 rounded-full bg-primary"></div>

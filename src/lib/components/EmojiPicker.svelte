@@ -17,7 +17,7 @@
     onClick: (emoji: Emoji) => void
   }
 
-  let {onClick}: Props = $props()
+  const {onClick}: Props = $props()
 
   let element: Element | undefined = $state()
 

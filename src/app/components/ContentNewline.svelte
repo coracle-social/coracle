@@ -1,5 +1,5 @@
 <script lang="ts">
-  let {value} = $props()
+  const {value} = $props()
 </script>
 
 {#each value as _}

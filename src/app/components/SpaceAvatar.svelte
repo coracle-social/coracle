@@ -7,7 +7,7 @@
     url?: string
   }
 
-  let {url = ""}: Props = $props()
+  const {url = ""}: Props = $props()
 
   const relay = deriveRelay(url)
 </script>

@@ -9,7 +9,7 @@
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  let {url, event, reply} = $props()
+  const {url, event, reply} = $props()
 
   const onEmoji = (emoji: NativeEmoji) => {
     history.back()
@@ -29,20 +29,20 @@
 </script>
 
 <div class="col-2">
-  <Button class="btn btn-primary w-full" on:click={showEmojiPicker}>
+  <Button class="btn btn-primary w-full" onclick={showEmojiPicker}>
     <Icon size={4} icon="smile-circle" />
     Send Reaction
   </Button>
-  <Button class="btn btn-neutral w-full" on:click={sendReply}>
+  <Button class="btn btn-neutral w-full" onclick={sendReply}>
     <Icon size={4} icon="reply" />
     Send Reply
   </Button>
-  <Button class="btn btn-neutral" on:click={showInfo}>
+  <Button class="btn btn-neutral" onclick={showInfo}>
     <Icon size={4} icon="code-2" />
     Message Details
   </Button>
   {#if event.pubkey === $pubkey}
-    <Button class="btn btn-neutral text-error" on:click={showDelete}>
+    <Button class="btn btn-neutral text-error" onclick={showDelete}>
       <Icon size={4} icon="trash-bin-2" />
       Delete Message
     </Button>

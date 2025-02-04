@@ -2,7 +2,7 @@
   import {createBubbler} from "svelte/legacy"
 
   const bubble = createBubbler()
-  let {...props} = $props()
+  const {...props} = $props()
 
   const onTouchStart = (event: any) => {
     touch = event.touches[0]

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {run} from "svelte/legacy"
-
   import {page} from "$app/stores"
   import Drawer from "@lib/components/Drawer.svelte"
   import Dialog from "@lib/components/Dialog.svelte"
@@ -13,8 +11,8 @@
   }
 
   let modal: any = $state()
-  let hash = $derived($page.url.hash.slice(1))
-  let hashIsValid = $derived(Boolean($modals[hash]))
+  const hash = $derived($page.url.hash.slice(1))
+  const hashIsValid = $derived(Boolean($modals[hash]))
 
   $effect(() => {
     if ($modals[hash]) {

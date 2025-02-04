@@ -12,7 +12,7 @@
   import {pushToast} from "@app/toast"
   import {BURROW_URL} from "@app/state"
 
-  let {email, reset_token} = $props()
+  const {email, reset_token} = $props()
 
   const onSubmit = async () => {
     loading = true

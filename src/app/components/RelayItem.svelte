@@ -5,11 +5,11 @@
   import {displayRelayUrl} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
 
-  let {url, children} = $props()
+  const {url, children} = $props()
 
   const relay = deriveRelay(url)
 
-  let connections = $derived($relay?.stats?.open_count || 0)
+  const connections = $derived($relay?.stats?.open_count || 0)
 </script>
 
 <div class="card2 card2-sm bg-alt column gap-2">

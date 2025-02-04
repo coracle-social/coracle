@@ -89,17 +89,17 @@
     </div>
   {/if}
   <ModalFooter>
-    <Button class="btn btn-link" disabled={loading || success} on:click={back}>
+    <Button class="btn btn-link" disabled={loading || success} onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
     {#if success}
-      <Button class="btn btn-primary" disabled={loading} on:click={reload}>
+      <Button class="btn btn-primary" disabled={loading} onclick={reload}>
         <Icon icon="check-circle" />
         <Spinner {loading}>Refresh the page</Spinner>
       </Button>
     {:else}
-      <Button class="btn btn-error" disabled={loading} on:click={confirm}>
+      <Button class="btn btn-error" disabled={loading} onclick={confirm}>
         <Icon icon="check-circle" />
         <Spinner {loading}>I understand, send me my private key</Spinner>
       </Button>

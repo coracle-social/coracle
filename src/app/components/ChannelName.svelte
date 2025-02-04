@@ -1,7 +1,7 @@
 <script lang="ts">
   import {GENERAL, channelsById, makeChannelId} from "@app/state"
 
-  let {url, room} = $props()
+  const {url, room} = $props()
 </script>
 
 {#if room === GENERAL}

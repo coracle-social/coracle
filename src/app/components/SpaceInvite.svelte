@@ -12,7 +12,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {clip} from "@app/toast"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const back = () => history.back()
 
@@ -62,7 +62,7 @@
             <label class="input input-bordered flex w-full items-center gap-2">
               <Icon icon="link-round" />
               <input bind:value={invite} class="grow" type="text" />
-              <Button on:click={copyInvite}>
+              <Button onclick={copyInvite}>
                 <Icon icon="copy" />
               </Button>
             </label>
@@ -81,6 +81,6 @@
     {/if}
   </div>
   <ModalFooter>
-    <Button class="btn btn-primary flex-grow" on:click={back}>Done</Button>
+    <Button class="btn btn-primary flex-grow" onclick={back}>Done</Button>
   </ModalFooter>
 </div>

@@ -17,7 +17,7 @@
 
   const openMenu = () => pushModal(ChatMenuMobile)
 
-  let chats = $derived($chatSearch.searchOptions(term))
+  const chats = $derived($chatSearch.searchOptions(term))
 
   onDestroy(() => {
     setChecked($page.url.pathname)
@@ -31,7 +31,7 @@
       No conversation selected.
     </p>
     <p>
-      Click on a conversation in the sidebar, or <Button class="link" on:click={startChat}
+      Click on a conversation in the sidebar, or <Button class="link" onclick={startChat}
         >start a new one</Button
       >.
     </p>
@@ -49,7 +49,7 @@
           type="text"
           placeholder="Search for conversations..." />
       </label>
-      <Button class="btn btn-primary" on:click={openMenu}>
+      <Button class="btn btn-primary" onclick={openMenu}>
         <Icon icon="menu-dots" />
       </Button>
     </div>
@@ -61,7 +61,7 @@
       {:else}
         <div class="py-20 max-w-sm col-4 items-center m-auto text-center">
           <p>No chats found! Try starting one up.</p>
-          <Button class="btn btn-primary" on:click={startChat}>
+          <Button class="btn btn-primary" onclick={startChat}>
             <Icon icon="add-circle" />
             Start a Chat
           </Button>

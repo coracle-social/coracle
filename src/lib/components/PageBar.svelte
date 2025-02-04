@@ -6,7 +6,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 </script>
 
 <div class="relative z-feature mx-2 rounded-xl pt-4 {props.class}">

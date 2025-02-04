@@ -25,5 +25,5 @@
       class="underline">nostr.how</Link
     >.
   </p>
-  <Button class="btn btn-primary" on:click={() => history.back()}>Got it</Button>
+  <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>
 </div>

@@ -15,7 +15,7 @@
   import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
-  let {url} = $props()
+  const {url} = $props()
 
   const back = () => history.back()
 
@@ -71,7 +71,7 @@
     {/if}
   </div>
   <ModalFooter>
-    <Button class="btn btn-link" on:click={back}>
+    <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

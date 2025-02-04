@@ -2,7 +2,7 @@
   import "tippy.js/animations/shift-away.css"
 
   import tippy from "tippy.js"
-  import {onMount, mount, unmount} from "svelte"
+  import {onMount, mount} from "svelte"
 
   let {
     component,

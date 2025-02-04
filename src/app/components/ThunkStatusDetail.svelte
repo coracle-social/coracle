@@ -29,5 +29,5 @@
   <p>
     Failed to publish to {displayRelayUrl(url)}: {message}.
   </p>
-  <Button class="link" on:click={retry}>Retry</Button>
+  <Button class="link" onclick={retry}>Retry</Button>
 </div>

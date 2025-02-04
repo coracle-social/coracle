@@ -1,7 +1,7 @@
 <script lang="ts">
   import {deriveRelay} from "@welshman/app"
 
-  let {...props} = $props()
+  const {...props} = $props()
 
   const relay = deriveRelay(props.url)
 </script>

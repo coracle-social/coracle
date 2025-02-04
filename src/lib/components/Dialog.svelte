@@ -8,9 +8,9 @@
     children?: import("svelte").Snippet
   }
 
-  let {onClose = noop, fullscreen = false, children}: Props = $props()
+  const {onClose = noop, fullscreen = false, children}: Props = $props()
 
-  let extraClass = $derived(
+  const extraClass = $derived(
     !fullscreen &&
       "card2 bg-alt max-h-[90vh] w-[90vw] overflow-auto text-base-content sm:w-[520px] shadow-xl",
   )

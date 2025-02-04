@@ -8,7 +8,7 @@
     [key: string]: any
   }
 
-  let {...props}: Props = $props()
+  const {...props}: Props = $props()
 
   const toggle = () => {
     isOpen = !isOpen
