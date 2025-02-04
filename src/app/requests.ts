@@ -4,8 +4,16 @@ import {MESSAGE, DELETE, THREAD, COMMENT, matchFilters, getTagValues} from "@wel
 import type {TrustedEvent, Filter} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
 import type {Subscription} from "@welshman/net"
-import type {AppSyncOpts} from "@welshman/app"
-import {subscribe, load, repository, pull, hasNegentropy, createFeedController} from "@welshman/app"
+import type {AppSyncOpts, Thunk} from "@welshman/app"
+import {
+  subscribe,
+  load,
+  repository,
+  pull,
+  hasNegentropy,
+  thunkWorker,
+  createFeedController,
+} from "@welshman/app"
 import {createScroller} from "@lib/html"
 import {userRoomsByUrl, getUrlsForEvent} from "@app/state"
 
@@ -50,7 +58,7 @@ export const makeFeed = ({
   const buffer = writable<TrustedEvent[]>([])
   const events = writable(initialEvents)
 
-  const onEvent = (event: TrustedEvent) => {
+  const insertEvent = (event: TrustedEvent) => {
     buffer.update($buffer => {
       for (let i = 0; i < $buffer.length; i++) {
         if ($buffer[i].id === event.id) return $buffer
@@ -61,17 +69,29 @@ export const makeFeed = ({
     })
   }
 
-  const deleteEvent = (e: TrustedEvent) => {
-    const ids = getTagValues(["e", "a"], e.tags)
-
+  const removeEvents = (ids: string[]) => {
     buffer.update($buffer => $buffer.filter(e => !ids.includes(e.id)))
     events.update($events => $events.filter(e => !ids.includes(e.id)))
+  }
+
+  const handleDelete = (e: TrustedEvent) => removeEvents(getTagValues(["e", "a"], e.tags))
+
+  const onThunk = (thunk: Thunk) => {
+    if (matchFilters(feedFilters, thunk.event)) {
+      insertEvent(thunk.event)
+
+      thunk.controller.signal.addEventListener("abort", () => {
+        removeEvents([thunk.event.id])
+      })
+    } else if (thunk.event.kind === DELETE) {
+      handleDelete(thunk.event)
+    }
   }
 
   const ctrl = createFeedController({
     useWindowing: true,
     feed: makeIntersectionFeed(makeRelayFeed(...relays), feedFromFilters(feedFilters)),
-    onEvent,
+    onEvent: insertEvent,
     onExhausted,
   })
 
@@ -79,8 +99,8 @@ export const makeFeed = ({
     relays,
     filters: subscriptionFilters,
     onEvent: (e: TrustedEvent) => {
-      if (matchFilters(feedFilters, e)) onEvent(e)
-      if (e.kind === DELETE) deleteEvent(e)
+      if (matchFilters(feedFilters, e)) insertEvent(e)
+      if (e.kind === DELETE) handleDelete(e)
     },
   })
 
@@ -99,11 +119,14 @@ export const makeFeed = ({
     },
   })
 
+  thunkWorker.addGlobalHandler(onThunk)
+
   return {
     events,
     cleanup: () => {
-      scroller.stop()
       sub.close()
+      scroller.stop()
+      thunkWorker.removeGlobalHandler(onThunk)
     },
   }
 }
