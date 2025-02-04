@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {ctx} from "@welshman/lib"
   import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
   import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Icon from "@lib/components/Icon.svelte"
@@ -17,7 +16,7 @@
     settings = {...$userSettingValues}
   }
 
-  const onSubmit = async () => {
+  const onsubmit = preventDefault(async () => {
     publishThunk({
       event: createEvent(SETTINGS, {
         content: await $signer!.nip04.encrypt($pubkey!, JSON.stringify(settings)),
@@ -31,13 +30,13 @@
     })
 
     pushToast({message: "Your settings have been saved!"})
-  }
+  })
 
   let settings = $state({...$userSettingValues})
   let mutedPubkeys = $state(getPubkeyTagValues(getListTags($userMutes)))
 </script>
 
-<form class="content column gap-4" onsubmit={preventDefault(onSubmit)}>
+<form class="content column gap-4" {onsubmit}>
   <div class="card2 bg-alt col-4 shadow-xl">
     <p class="text-lg">Content Settings</p>
     <FieldInline>

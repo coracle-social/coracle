@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {EditorContent} from "svelte-tiptap"
   import {writable} from "svelte/store"
   import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
   import {publishThunk, dateToSeconds} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"

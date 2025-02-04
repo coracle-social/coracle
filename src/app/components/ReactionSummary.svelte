@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {preventDefault, stopPropagation} from "svelte/legacy"
-
   import {onMount} from "svelte"
   import {groupBy, uniq, uniqBy, batch} from "@welshman/lib"
   import {REACTION, getTag, REPORT, DELETE} from "@welshman/util"
@@ -8,7 +6,7 @@
   import {deriveEvents} from "@welshman/store"
   import {pubkey, repository, load, displayProfileByPubkey} from "@welshman/app"
   import {displayList} from "@lib/util"
-  import {isMobile} from "@lib/html"
+  import {isMobile, preventDefault, stopPropagation} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import EventReportDetails from "@app/components/EventReportDetails.svelte"
   import {displayReaction} from "@app/state"

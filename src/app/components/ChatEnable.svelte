@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {goto} from "$app/navigation"
   import {WRAP} from "@welshman/util"
   import {repository} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"

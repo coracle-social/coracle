@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {postJson, sleep} from "@welshman/lib"
+  import {preventDefault} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import Icon from "@lib/components/Icon.svelte"

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {run} from "svelte/legacy"
-
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, MONTH} from "@welshman/lib"
@@ -44,7 +42,7 @@
   }
 
   // We have to watch this one, since on mobile the badge will be visible when active
-  run(() => {
+  $effect(() => {
     if ($notifications.has($page.url.pathname)) {
       setChecked($page.url.pathname)
     }

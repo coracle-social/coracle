@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {nthEq} from "@welshman/lib"
   import {formatTimestamp} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"

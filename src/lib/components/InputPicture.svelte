@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {run, preventDefault, stopPropagation} from "svelte/legacy"
-
   import {randomId} from "@welshman/lib"
+  import {preventDefault, stopPropagation} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
 
   interface Props {
@@ -44,7 +43,7 @@
   let active = $state(false)
   let initialUrl = $state(url)
 
-  run(() => {
+  $effect(() => {
     if (file) {
       const reader = new FileReader()
 
@@ -55,6 +54,7 @@
         },
         false,
       )
+
       reader.readAsDataURL(file)
     } else {
       url = initialUrl

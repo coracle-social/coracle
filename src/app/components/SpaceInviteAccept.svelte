@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {goto} from "$app/navigation"
   import {ctx, tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
+  import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"

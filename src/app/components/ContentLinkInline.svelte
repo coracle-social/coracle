@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {displayUrl} from "@welshman/lib"
+  import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
+  import {preventDefault} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"

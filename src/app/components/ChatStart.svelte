@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {goto} from "$app/navigation"
   import {pubkey} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"

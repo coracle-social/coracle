@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {onMount, onDestroy} from "svelte"
   import {postJson, stripProtocol} from "@welshman/lib"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import {normalizeRelayUrl} from "@welshman/util"
   import {addSession} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"

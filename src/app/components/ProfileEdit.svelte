@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {ctx} from "@welshman/lib"
   import {
     createEvent,
@@ -10,6 +8,7 @@
     isPublishedProfile,
   } from "@welshman/util"
   import {pubkey, profilesByPubkey, publishThunk} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"

@@ -1,15 +1,12 @@
 <script lang="ts">
-  import {createBubbler} from "svelte/legacy"
+  const {children, onLongPress, ...restProps} = $props()
 
-  const bubble = createBubbler()
-  const {...props} = $props()
-
-  const onTouchStart = (event: any) => {
+  const ontouchstart = (event: any) => {
     touch = event.touches[0]
-    timeout = setTimeout(props.onLongPress, 500)
+    timeout = setTimeout(onLongPress, 500)
   }
 
-  const onTouchMove = (event: any) => {
+  const ontouchmove = (event: any) => {
     const curTouch = event.touches[0]
 
     if (Math.abs(curTouch.clientX - touch.clientX) > 30) {
@@ -21,19 +18,12 @@
     }
   }
 
-  const onTouchEnd = () => clearTimeout(timeout)
+  const ontouchend = () => clearTimeout(timeout)
 
   let touch: Touch
   let timeout: any
 </script>
 
-<div
-  role="button"
-  tabindex="0"
-  onclick={bubble("click")}
-  ontouchstart={onTouchStart}
-  ontouchmove={onTouchMove}
-  ontouchend={onTouchEnd}
-  {...props}>
-  {@render props.children?.()}
+<div role="button" tabindex="0" {ontouchstart} {ontouchmove} {ontouchend} {...restProps}>
+  {@render children()}
 </div>

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {displayRelayUrl} from "@welshman/util"
+  import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"

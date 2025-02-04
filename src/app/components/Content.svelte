@@ -1,7 +1,4 @@
 <script lang="ts">
-  import Content from "./Content.svelte"
-  import {preventDefault, stopPropagation} from "svelte/legacy"
-
   import type {TrustedEvent} from "@welshman/util"
   import {fromNostrURI} from "@welshman/util"
   import {nthEq} from "@welshman/lib"
@@ -21,9 +18,11 @@
     isAddress,
     isNewline,
   } from "@welshman/content"
+  import {preventDefault, stopPropagation} from "@lib/html"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Content from "@app/components/Content.svelte"
   import ContentToken from "@app/components/ContentToken.svelte"
   import ContentCode from "@app/components/ContentCode.svelte"
   import ContentLinkInline from "@app/components/ContentLinkInline.svelte"

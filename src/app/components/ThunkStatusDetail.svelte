@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {run} from "svelte/legacy"
-
   import {PublishStatus} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
@@ -14,7 +12,7 @@
 
   let {url, status, message = $bindable(), retry}: Props = $props()
 
-  run(() => {
+  $effect(() => {
     if (!message && status === PublishStatus.Timeout) {
       message = "request timed out"
     }

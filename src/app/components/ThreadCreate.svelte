@@ -1,11 +1,9 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {writable} from "svelte/store"
   import {EditorContent} from "svelte-tiptap"
   import {createEvent, THREAD} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
-  import {isMobile} from "@lib/html"
+  import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"

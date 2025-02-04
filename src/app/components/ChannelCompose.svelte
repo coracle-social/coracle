@@ -1,10 +1,8 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {EditorContent} from "svelte-tiptap"
-  import {isMobile} from "@lib/html"
+  import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import {makeEditor} from "@app/editor"

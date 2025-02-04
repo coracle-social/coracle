@@ -1,7 +1,4 @@
 <script lang="ts">
-  import {createBubbler, stopPropagation} from "svelte/legacy"
-
-  const bubble = createBubbler()
   import {hash} from "@welshman/lib"
   import {now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
@@ -104,8 +101,7 @@
   </div>
   <button
     class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
-    class:group-hover:opacity-100={!isMobile}
-    onclick={stopPropagation(bubble("click"))}>
+    class:group-hover:opacity-100={!isMobile}>
     <ChannelMessageEmojiButton {url} {room} {event} />
     {#if replyTo}
       <Button class="btn join-item btn-xs" onclick={reply}>

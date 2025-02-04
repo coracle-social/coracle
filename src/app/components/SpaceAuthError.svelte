@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {displayRelayUrl} from "@welshman/util"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
   import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
+  import {preventDefault} from "@lib/html"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"

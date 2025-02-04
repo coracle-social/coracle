@@ -1,4 +1,5 @@
 import {sleep} from "@welshman/lib"
+export {preventDefault, stopPropagation} from "svelte/legacy"
 
 export const copyToClipboard = (text: string) => {
   const {activeElement} = document

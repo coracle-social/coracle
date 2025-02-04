@@ -1,8 +1,6 @@
 <script lang="ts">
-  import {preventDefault} from "svelte/legacy"
-
   import {postJson} from "@welshman/lib"
-  import {isMobile} from "@lib/html"
+  import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"

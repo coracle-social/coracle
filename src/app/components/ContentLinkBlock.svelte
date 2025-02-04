@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {preventDefault, stopPropagation} from "svelte/legacy"
-
   import {ellipsize, postJson} from "@welshman/lib"
   import {dufflepud, imgproxy} from "@app/state"
+  import {preventDefault, stopPropagation} from "@lib/html"
   import Link from "@lib/components/Link.svelte"
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
   import {pushModal} from "@app/modal"

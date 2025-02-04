@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {Snippet} from "svelte"
-  import {stopPropagation} from "svelte/legacy"
   import {goto} from "$app/navigation"
+  import {stopPropagation} from "@lib/html"
 
   const {
     children,

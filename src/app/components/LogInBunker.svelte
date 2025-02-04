@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {run, preventDefault} from "svelte/legacy"
-
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
   import {addSession} from "@welshman/app"
+  import {preventDefault} from "@lib/html"
   import {slideAndFade} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -65,7 +64,7 @@
   let bunker = $state("")
   let loading = $state(false)
 
-  run(() => {
+  $effect(() => {
     // For testing and for play store reviewers
     if (bunker === "reviewkey") {
       const secret = makeSecret()
