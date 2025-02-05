@@ -152,8 +152,8 @@
         {:else if isEvent(parsed) || isAddress(parsed)}
           {#if isBlock(i)}
             <ContentQuote {...quoteProps} value={parsed.value} {event}>
-              {#snippet noteContent({event}: {event: TrustedEvent})}
-                <Content {quoteProps} {hideMedia} {event} depth={depth + 1} />
+              {#snippet noteContent({event, minimal}: {event: TrustedEvent; minimal: boolean})}
+                <Content {quoteProps} hideMedia={minimal || hideMedia} {event} depth={depth + 1} />
               {/snippet}
             </ContentQuote>
           {:else}

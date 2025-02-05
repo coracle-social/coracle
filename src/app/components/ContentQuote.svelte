@@ -96,7 +96,7 @@
 <Button class="my-2 block max-w-full text-left" {onclick}>
   {#if $quote}
     <NoteCard {minimal} event={$quote} class="bg-alt rounded-box p-4">
-      {@render noteContent({event: $quote})}
+      {@render noteContent({event: $quote, minimal})}
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onDestroy} from "svelte"
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import {between, throttle} from "@welshman/lib"
@@ -26,6 +27,10 @@
   })
 
   let popover: Instance | undefined = $state()
+
+  onDestroy(() => {
+    popover = undefined
+  })
 </script>
 
 <svelte:document onmousemove={onMouseMove} />
