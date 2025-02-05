@@ -1,10 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
-  import {
-    formatTimestamp,
-    formatTimestampAsDate,
-    formatTimestampAsTime,
-  } from "@welshman/app"
+  import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -24,8 +20,6 @@
   const isSingleDay = $derived(startDateDisplay === endDateDisplay)
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
-
-  $inspect(event)
 </script>
 
 <div class="card2 bg-alt col-2">

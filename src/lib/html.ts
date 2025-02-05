@@ -21,7 +21,6 @@ export type ScrollerOpts = {
   onScroll: () => any
   element: Element
   threshold?: number
-  reverse?: boolean
   delay?: number
 }
 
@@ -35,7 +34,6 @@ export const createScroller = ({
   element,
   delay = 1000,
   threshold = 2000,
-  reverse = false,
 }: ScrollerOpts) => {
   let done = false
 

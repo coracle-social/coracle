@@ -8,8 +8,6 @@
   let index = $state(0)
   let items: string[] = $state([])
 
-  $inspect(items)
-
   const populateItems = throttle(300, term => {
     items = search(term).slice(0, 5)
   })

@@ -1,6 +1,6 @@
 import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
 import * as nip19 from "nostr-tools/nip19"
-import {HOUR} from "@welshman/lib"
+import {HOUR, MONTH, DAY} from "@welshman/lib"
 
 export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") => {
   const stringItems = xs.map(String)
@@ -44,10 +44,7 @@ export const timeHash = (seconds: number, precision = 32) => {
   return hash
 }
 
-export const timeHashesBetween = (a: number, b: number) => {
-  const precisions = [10, 15, 20]
-  const start = Math.min(a, b) >>> 0
-  const end = Math.min(Math.max(a, b) >>> 0, 0xffffffff)
+export const timeHashesBetween = (start: number, end: number, precisions = [10, 15, 20]) => {
   const hashes = new Set<string>()
 
   for (let seconds = start; seconds <= end; seconds += HOUR) {
@@ -57,4 +54,13 @@ export const timeHashesBetween = (a: number, b: number) => {
   }
 
   return Array.from(hashes).sort()
+}
+
+export const timeHashesForFilter = (start: number, end: number) => {
+  const diff = end - start
+
+  if (diff < 3 * DAY) return timeHashesBetween(start, end, [20])
+  if (diff < 3 * MONTH) return timeHashesBetween(start, end, [15])
+
+  return timeHashesBetween(start, end, [10])
 }

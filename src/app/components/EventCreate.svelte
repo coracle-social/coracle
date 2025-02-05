@@ -1,8 +1,8 @@
 <script lang="ts">
   import {writable} from "svelte/store"
-  import {randomId} from "@welshman/lib"
+  import {randomId, HOUR} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
-  import {publishThunk, dateToSeconds} from "@welshman/app"
+  import {publishThunk} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import {timeHashesBetween} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
@@ -39,18 +39,15 @@
       })
     }
 
-    const startTs = dateToSeconds(start)
-    const endTs = dateToSeconds(end)
-
     const event = createEvent(EVENT_TIME, {
       content: editor.getText({blockSeparator: "\n"}).trim(),
       tags: [
         ["d", randomId()],
         ["title", title],
         ["location", location],
-        ["start", startTs.toString()],
-        ["end", endTs.toString()],
-        ...timeHashesBetween(startTs, endTs).map(T => ["T", T]),
+        ["start", start.toString()],
+        ["end", end.toString()],
+        ...timeHashesBetween(start, end).map(T => ["T", T]),
         ...editor.storage.nostr.getEditorTags(),
         PROTECTED,
       ],
@@ -64,8 +61,8 @@
 
   let title = $state("")
   let location = $state("")
-  let start: Date | undefined = $state()
-  let end: Date | undefined = $state()
+  let start: number | undefined = $state()
+  let end: number | undefined = $state()
 </script>
 
 <form class="column gap-4" onsubmit={preventDefault(submit)}>

@@ -1,10 +1,11 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, last, ago} from "@welshman/lib"
+  import {sortBy, now, int, MONTH, last} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {EVENT_DATE, EVENT_TIME} from "@welshman/util"
+  import {EVENT_DATE, EVENT_TIME, getTagValue} from "@welshman/util"
   import {subscribe, formatTimestampAsDate} from "@welshman/app"
+  import {timeHashesForFilter} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -24,10 +25,9 @@
 
   const createEvent = () => pushModal(EventCreate, {url})
 
-  const getEnd = (event: TrustedEvent) => parseInt(event.tags.find(t => t[0] === "end")?.[1] || "")
+  const getEnd = (event: TrustedEvent) => parseInt(getTagValue("end", event.tags) || "")
 
-  const getStart = (event: TrustedEvent) =>
-    parseInt(event.tags.find(t => t[0] === "start")?.[1] || "")
+  const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
 
   const limit = 5
   let loading = $state(true)
@@ -38,7 +38,7 @@
   }
 
   const items = $derived(
-    sortBy(e => -getStart(e), $events)
+    sortBy(e => getStart(e), $events)
       .reduce<Item[]>((r, event) => {
         const end = getEnd(event)
         const start = getStart(event)
@@ -56,9 +56,10 @@
   )
 
   onMount(() => {
-    const sub = subscribe({filters: [{kinds, since: ago(30)}]})
+    const sub = subscribe({filters: [{kinds, since: now()}]})
+    const hashes = timeHashesForFilter(now() - int(3, MONTH), now() + int(3, MONTH))
 
-    pullConservatively({filters: [{kinds}], relays: [url]})
+    pullConservatively({filters: [{kinds, "#T": hashes}], relays: [url]})
 
     return () => sub.close()
   })
