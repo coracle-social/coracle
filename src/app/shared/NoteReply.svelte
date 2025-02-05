@@ -16,12 +16,12 @@
   import {slide} from "src/util/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Compose from "src/app/shared/Compose.svelte"
+  import EditorContent from "src/app/editor/EditorContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
-  import {getEditor} from "src/app/editor"
+  import {makeEditor} from "src/app/editor"
 
   export let parent
   export let replyIsOpen: boolean
@@ -40,8 +40,6 @@
   let pow: ProofOfWork
   let showOptions = false
   let options = {warning: "", anonymous: false, pow_difficulty: $userSettings.pow_difficulty}
-  let element: HTMLElement
-  let editor: ReturnType<typeof getEditor>
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -62,9 +60,7 @@
   }
 
   const saveDraft = () => {
-    if ($editor) {
-      drafts.set(parent.id, $editor.getHTML())
-    }
+    drafts.set(parent.id, editor.getHTML())
   }
 
   const clearDraft = () => {
@@ -78,7 +74,7 @@
   const send = async ({skipNsecWarning = false} = {}) => {
     if ($editorLoading) return
 
-    const content = $editor.getText({blockSeparator: "\n"}).trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return
 
@@ -86,7 +82,7 @@
 
     const kind = parent.kind === NOTE ? NOTE : COMMENT
     const parentTags = kind === NOTE ? tagEventForReply(parent) : tagEventForComment(parent)
-    const editorTags = $editor.storage.nostr.getEditorTags()
+    const editorTags = editor.storage.nostr.getEditorTags()
     const tags = uniqTags([...editorTags, ...parentTags, ...getClientTags()])
 
     if (options.warning) {
@@ -117,35 +113,26 @@
     onReplyPublish(thunk)
   }
 
-  onDestroy(() => {
-    pow?.worker.terminate()
-  })
-
   const onBodyClick = e => {
     saveDraft()
     onReplyCancel()
   }
 
-  const createEditor = () => {
-    editor = getEditor({
-      element,
-      submit: send,
-      autofocus: true,
-      content: drafts.get(parent.id) || "",
-    })
-  }
-
-  $: {
-    if (element) {
-      createEditor()
-    }
-  }
+  const editor = makeEditor({
+    submit: send,
+    autofocus: true,
+    content: drafts.get(parent.id) || "",
+  })
 
   $: {
     if (replyIsOpen) {
       saveDraft()
     }
   }
+
+  onDestroy(() => {
+    pow?.worker.terminate()
+  })
 </script>
 
 <svelte:body on:click={onBodyClick} />
@@ -158,7 +145,7 @@
     <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
-          <Compose bind:element editor={$editor}>
+          <EditorContent {editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
                 disabled={$editorLoading}
@@ -172,7 +159,7 @@
                 {/if}
               </button>
             </div>
-          </Compose>
+          </EditorContent>
         </div>
         <div class="h-px" />
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
@@ -180,7 +167,7 @@
             <div class="flex cursor-pointer items-center gap-3">
               <i
                 class="fa fa-paperclip"
-                on:click|preventDefault={() => $editor.chain().selectFiles().run()} />
+                on:click|preventDefault={() => editor.chain().selectFiles().run()} />
               <i class="fa fa-cog" on:click|preventDefault={openOptions} />
             </div>
           </div>

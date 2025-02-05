@@ -27,12 +27,7 @@
   const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
   const deleted = deriveIsDeletedByAddress(repository, note)
 
-  const sendMessage = () => {
-    const naddr = address.toNaddr()
-    const initialMessage = `Hi, I'd like to make an offer on this listing:\n${naddr}`
-
-    router.at("channels").of([$pubkey, note.pubkey]).cx({initialMessage}).push()
-  }
+  const sendMessage = () => router.at("channels").of([$pubkey, note.pubkey]).push()
 </script>
 
 <FlexColumn>

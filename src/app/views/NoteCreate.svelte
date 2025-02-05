@@ -23,11 +23,11 @@
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {showInfo, showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
-  import Compose from "src/app/shared/Compose.svelte"
+  import EditorContent from "src/app/editor/EditorContent.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
-  import {getEditor} from "src/app/editor"
+  import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
@@ -38,22 +38,6 @@
   const uploading = writable(false)
   const wordCount = writable(0)
   const charCount = writable(0)
-
-  let showPreview = false
-  let showOptions = false
-  let publishing: "signing" | "pow"
-
-  let pow: ProofOfWork
-
-  let editor: ReturnType<typeof getEditor>
-  let element: HTMLElement
-  let options = {
-    warning: "",
-    anonymous: false,
-    publish_at: null,
-    pow_difficulty: $userSettings.pow_difficulty,
-  }
-
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
   const nsecWarning = writable(null)
 
@@ -79,13 +63,13 @@
     // prevent sending before media are uploaded
     if ($uploading || publishing) return
 
-    const content = $editor.getText({blockSeparator: "\n"}).trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
     if (!content) return showWarning("Please provide a description.")
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = [...$editor.storage.nostr.getEditorTags(), ...getClientTags()]
+    const tags = [...editor.storage.nostr.getEditorTags(), ...getClientTags()]
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])
@@ -105,7 +89,7 @@
       $session.pubkey,
     )
 
-    drafts.set("notecreate", $editor.getHTML())
+    drafts.set("notecreate", editor.getHTML())
 
     let hashedEvent = hash(ownedEvent)
 
@@ -221,19 +205,29 @@
     },
   }
 
-  onMount(() => {
-    editor = getEditor({
-      element,
-      uploading,
-      content: drafts.get("notecreate") || "",
-      submit: onSubmit,
-      autofocus: true,
-      charCount,
-      wordCount,
-    })
+  const editor = makeEditor({
+    uploading,
+    content: drafts.get("notecreate") || "",
+    submit: onSubmit,
+    autofocus: true,
+    charCount,
+    wordCount,
+  })
 
+  let showPreview = false
+  let showOptions = false
+  let publishing: "signing" | "pow"
+  let pow: ProofOfWork
+  let options = {
+    warning: "",
+    anonymous: false,
+    publish_at: null,
+    pow_difficulty: $userSettings.pow_difficulty,
+  }
+
+  onMount(() => {
     if (pubkey && pubkey !== $session.pubkey) {
-      $editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
+      editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
     }
 
     if (quote) {
@@ -244,7 +238,7 @@
         relays: ctx.app.router.Event(quote).limit(3).getUrls(),
       })
 
-      $editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
+      editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
     }
 
     return () => {
@@ -267,10 +261,10 @@
           class:bg-tinted-700={showPreview}>
           {#if showPreview}
             <NoteContent
-              note={{content: $editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
+              note={{content: editor.getText({blockSeparator: "\n"}).trim(), tags: []}} />
           {/if}
           <div class:hidden={showPreview}>
-            <Compose bind:element editor={$editor} class="min-h-24" />
+            <EditorContent {editor} class="min-h-24" />
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 text-neutral-200">
@@ -311,7 +305,7 @@
         </Anchor>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
-          on:click|preventDefault={() => $editor.chain().selectFiles().run()}>
+          on:click|preventDefault={() => editor.chain().selectFiles().run()}>
           <i class="fa fa-upload" />
         </button>
       </div>

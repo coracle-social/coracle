@@ -753,7 +753,7 @@ Maintenance release - bugfixes, style fixes, and refactoring. High points are AU
 - [x] Show relay status based on stats not current connection status
 - [x] Auto-mention person when creating a note from their profile page
 - [x] Make chat header overlap main header to save space
-- [x] Strip formatting when pasting into Compose
+- [x] Strip formatting when pasting into EditorContent
 - [x] Upgraded nostr-tools to 1.4.1
 - [x] Improve anonymous and new user experience by prompting for relays and follows
 - [x] Fixed kind0 merging to avoid dropping properties coracle doesn't support

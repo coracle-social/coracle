@@ -18,16 +18,13 @@
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {hasNip44, sendMessage, userSettings} from "src/engine"
-  import {getEditor} from "src/app/editor"
+  import {makeEditor} from "src/app/editor"
   import Message from "src/app/shared/Message.svelte"
-  import Compose from "src/app/shared/Compose.svelte"
+  import EditorContent from "src/app/editor/EditorContent.svelte"
 
   export let pubkeys
-  export let initialMessage = ""
   export let channelId: string
   export let messages: TrustedEvent[]
-
-  let editor: ReturnType<typeof getEditor>
 
   const loading = sleep(5_000)
 
@@ -50,40 +47,11 @@
     confirmIsOpen = false
   }
 
-  let textarea, element, scroller, sending
-  let limit = 10
-  let showNewMessages = false
-  let groupedMessages = []
-
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
     pubkeys.filter(
       pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
-
-  onMount(() => {
-    editor = getEditor({
-      autofocus: true,
-      aggressive: true,
-      element: textarea,
-      placeholder: "Say hello...",
-      submit: sendOrConfirm,
-    })
-
-    startScroller()
-
-    if (textarea) {
-      textarea.value = initialMessage
-    }
-
-    return () => {
-      scroller?.stop()
-    }
-  })
-
-  export const setMessage = message => {
-    textarea.value = message
-  }
 
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
 
@@ -112,9 +80,9 @@
   }
 
   const send = async () => {
-    const content = $editor.getText({blockSeparator: "\n"}).trim()
+    const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    $editor.commands.clearContent()
+    editor.commands.clearContent()
 
     if (content) {
       sending = true
@@ -125,6 +93,18 @@
       stickToBottom()
     }
   }
+
+  const editor = makeEditor({
+    autofocus: true,
+    aggressive: true,
+    placeholder: "Say hello...",
+    submit: sendOrConfirm,
+  })
+
+  let element, scroller, sending
+  let limit = 10
+  let showNewMessages = false
+  let groupedMessages = []
 
   $: userHasInbox = !$pubkeysWithoutInbox.includes($session?.pubkey)
 
@@ -144,6 +124,14 @@
 
     groupedMessages = result.slice(0, limit) as (TrustedEvent & {showProfile: boolean})[]
   }
+
+  onMount(() => {
+    startScroller()
+
+    return () => {
+      scroller?.stop()
+    }
+  })
 </script>
 
 <svelte:window
@@ -179,15 +167,14 @@
   </div>
   {#if $hasNip44}
     <div class="flex border-t border-solid border-tinted-700 bg-neutral-900 dark:bg-neutral-600">
-      <Compose
-        bind:element={textarea}
-        editor={$editor}
+      <EditorContent
+        {editor}
         class="w-full resize-none border-r border-solid border-tinted-700 bg-transparent p-2 text-neutral-100 outline-0 placeholder:text-neutral-100" />
       <div>
         <button
           class="flex cursor-pointer flex-col justify-center gap-2 p-3
                  py-6 text-neutral-100 transition-all hover:bg-accent hover:text-white"
-          on:click={() => $editor.chain().selectFiles().run()}>
+          on:click={() => editor.chain().selectFiles().run()}>
           <i class="fa-solid fa-paperclip fa-lg" />
         </button>
         <button

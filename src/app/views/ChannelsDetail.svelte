@@ -21,7 +21,6 @@
 
   export let pubkeys
   export let channelId
-  export let initialMessage = null
 
   const messages = derived(
     deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]}),
@@ -60,7 +59,7 @@
   document.title = `Direct Messages`
 </script>
 
-<Channel {pubkeys} {channelId} messages={$messages} {initialMessage}>
+<Channel {pubkeys} {channelId} messages={$messages}>
   <div slot="header" class="flex h-16 justify-between px-4">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-4 pt-1">

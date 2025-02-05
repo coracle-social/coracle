@@ -1,13 +1,15 @@
+import "@welshman/editor/index.css"
+
 import type {Writable} from "svelte/store"
-import {derived} from "svelte/store"
-import {createEditor, SvelteNodeViewRenderer} from "svelte-tiptap"
+import {get} from "svelte/store"
+import {Editor} from "@tiptap/core"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
 import {MentionSuggestion, WelshmanExtension} from "@welshman/editor"
+import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
-import EditMention from "./EditMention.svelte"
 
 export const getUploadType = () => getSetting("upload_type")
 
@@ -25,12 +27,11 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const getEditor = ({
+export const makeEditor = ({
   aggressive = false,
   autofocus = false,
   charCount,
   content = "",
-  element,
   placeholder = "",
   submit,
   uploading,
@@ -40,14 +41,12 @@ export const getEditor = ({
   autofocus?: boolean
   charCount?: Writable<number>
   content?: string
-  element: HTMLElement
   placeholder?: string
   submit: () => void
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
 }) =>
-  createEditor({
-    element,
+  new Editor({
     content,
     autofocus,
     extensions: [
@@ -79,14 +78,20 @@ export const getEditor = ({
           },
           nprofile: {
             extend: {
-              addNodeView: () => SvelteNodeViewRenderer(EditMention),
+              addNodeView: () => MentionNodeView,
               addProseMirrorPlugins() {
                 return [
                   MentionSuggestion({
                     editor: (this as any).editor,
-                    search: derived(profileSearch, s => s.searchValues),
+                    search: (term: string) => get(profileSearch).searchValues(term),
                     getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
-                    component: ProfileSuggestion,
+                    createSuggestion: (value: string) => {
+                      const target = document.createElement("div")
+
+                      new ProfileSuggestion({target, props: {value}})
+
+                      return target
+                    },
                   }),
                 ]
               },
