@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {derived} from "svelte/store"
+  import {writable} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
   import {profileSearch} from "@welshman/app"
@@ -19,15 +19,12 @@
 
   let {value = $bindable(), autofocus = false}: Props = $props()
 
-  let term = $state("")
-  let input: Element | undefined = $state()
-  let popover: Instance | undefined = $state()
-  let instance: any = $state()
+  const term = writable("")
 
-  const search = derived(profileSearch, $profileSearch => $profileSearch.searchValues)
+  const search = (term: string) => $profileSearch.searchValues(term)
 
   const selectPubkey = (pubkey: string) => {
-    term = ""
+    term.set("")
     popover?.hide()
     value = uniq(append(pubkey, value))
   }
@@ -42,8 +39,12 @@
     }
   }
 
+  let input: Element | undefined = $state()
+  let popover: Instance | undefined = $state()
+  let instance: any = $state()
+
   $effect(() => {
-    if (term) {
+    if ($term) {
       popover?.show()
     } else {
       popover?.hide()
@@ -73,7 +74,7 @@
       class="grow"
       type="text"
       placeholder="Search for profiles..."
-      bind:value={term}
+      bind:value={$term}
       onkeydown={onKeyDown} />
   </label>
   <Tippy

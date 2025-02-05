@@ -28,9 +28,7 @@
   </ModalHeader>
   <Field>
     {#snippet input()}
-      <div>
-        <ProfileMultiSelect autofocus bind:value={pubkeys} />
-      </div>
+      <ProfileMultiSelect autofocus bind:value={pubkeys} />
     {/snippet}
   </Field>
   <ModalFooter>

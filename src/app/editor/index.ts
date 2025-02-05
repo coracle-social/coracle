@@ -85,10 +85,10 @@ export const makeEditor = ({
                     editor: (this as any).editor,
                     search: (term: string) => get(profileSearch).searchValues(term),
                     getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
-                    createSuggestion: (pubkey: string) => {
+                    createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 
-                      mount(ProfileSuggestion, {target, props: {pubkey}})
+                      mount(ProfileSuggestion, {target, props: {value}})
 
                       return target
                     },

@@ -1,23 +1,17 @@
-<svelte:options accessors />
-
 <script lang="ts">
   import {fly} from "svelte/transition"
   import {throttle, clamp} from "@welshman/lib"
+  import {preventDefault, stopPropagation} from "@lib/html"
 
-  export let term
-  export let search
-  export let select
-  export let component
-  export let allowCreate = false
+  const {term, search, select, component: Component, allowCreate = false} = $props()
 
-  let index = 0
-  let element: Element
-  let items: string[] = []
+  let index = $state(0)
+  let items: string[] = $state([])
 
-  $: populateItems(term)
+  $inspect(items)
 
   const populateItems = throttle(300, term => {
-    items = $search(term).slice(0, 5)
+    items = search(term).slice(0, 5)
   })
 
   const setIndex = (newIndex: number, block: any) => {
@@ -31,14 +25,14 @@
       if (value) {
         select(value)
         return true
-      } else if (term && allowCreate) {
-        select(term)
+      } else if ($term && allowCreate) {
+        select($term)
         return true
       }
     }
 
-    if (e.code === "Space" && term && allowCreate) {
-      select(term)
+    if (e.code === "Space" && $term && allowCreate) {
+      select($term)
       return true
     }
 
@@ -54,31 +48,39 @@
       return true
     }
   }
+
+  const onmousedown = (e: Event) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  $effect(() => {
+    populateItems($term)
+  })
 </script>
 
-{#if term}
-  <div bind:this={element} transition:fly|local={{duration: 200}} class="tiptap-suggestions">
-    <div class="tiptap-suggestions__content">
-      {#if term && allowCreate && !items.includes(term)}
-        <button
-          class="tiptap-suggestions__create"
-          on:mousedown|preventDefault|stopPropagation
-          on:click|preventDefault|stopPropagation={() => select(term)}>
-          Use "<svelte:component this={component} value={term} />"
-        </button>
-      {/if}
-      {#each items as value, i (value)}
-        <button
-          class="tiptap-suggestions__item"
-          class:tiptap-suggestions__selected={index === i}
-          on:mousedown|preventDefault|stopPropagation
-          on:click|preventDefault|stopPropagation={() => select(value)}>
-          <svelte:component this={component} {value} />
-        </button>
-      {/each}
-    </div>
-    {#if items.length === 0}
-      <div class="tiptap-suggestions__empty">No results</div>
+<div transition:fly|local={{duration: 200}} class="tiptap-suggestions">
+  <div class="tiptap-suggestions__content">
+    {#if $term && allowCreate && !items.includes($term)}
+      <button
+        class="tiptap-suggestions__create"
+        {onmousedown}
+        onclick={stopPropagation(preventDefault(() => select($term)))}>
+        Use "<Component value={$term}></Component>"
+      </button>
     {/if}
+    {#each items as value, i (value)}
+      <button
+        aria-label={value}
+        class="tiptap-suggestions__item"
+        class:tiptap-suggestions__selected={index === i}
+        {onmousedown}
+        onclick={stopPropagation(preventDefault(() => select(value)))}>
+        <Component {value}></Component>
+      </button>
+    {/each}
   </div>
-{/if}
+  {#if items.length === 0}
+    <div class="tiptap-suggestions__empty">No results</div>
+  {/if}
+</div>
