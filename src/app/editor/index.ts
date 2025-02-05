@@ -1,15 +1,14 @@
-import {asClassComponent} from "svelte/legacy"
 import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
-import {Editor, SvelteNodeViewRenderer} from "svelte-tiptap"
+import {Editor} from "@tiptap/core"
 import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {MentionSuggestion, WelshmanExtension} from "@lib/editor"
 import {getSetting, userSettingValues} from "@app/state"
+import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
-import EditMention from "./EditMention.svelte"
 
 export const getUploadType = () => getSetting<"nip96" | "blossom">("upload_type")
 
@@ -78,7 +77,7 @@ export const makeEditor = ({
           },
           nprofile: {
             extend: {
-              addNodeView: () => SvelteNodeViewRenderer(asClassComponent(EditMention)),
+              addNodeView: () => MentionNodeView,
               addProseMirrorPlugins() {
                 return [
                   MentionSuggestion({

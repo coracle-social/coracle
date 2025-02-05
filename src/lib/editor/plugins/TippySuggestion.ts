@@ -127,6 +127,7 @@ export class DefaultSuggestionsWrapper implements ISuggestionsWrapper {
 
   setProps(props: SuggestionsWrapperProps) {
     this.props = props
+    this.search()
     this.render()
   }
 
