@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import type {Snippet} from "svelte"
   import {groupBy, uniq, uniqBy, batch} from "@welshman/lib"
   import {REACTION, getTag, REPORT, DELETE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -18,7 +19,7 @@
     url?: string
     reactionClass?: string
     noTooltip?: boolean
-    children?: import("svelte").Snippet
+    children?: Snippet
   }
 
   const {

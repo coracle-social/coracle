@@ -93,7 +93,7 @@
       {#if dateDisplay}
         <Divider>{dateDisplay}</Divider>
       {/if}
-      <EventItem {event} />
+      <EventItem {url} {event} />
     {/each}
     <p class="flex h-10 items-center justify-center py-20">
       <Spinner {loading}>

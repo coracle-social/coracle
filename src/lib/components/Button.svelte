@@ -8,7 +8,7 @@
     ...restProps
   }: {
     children: Snippet
-    onclick?: (...args: unknown[]) => any
+    onclick?: (event: Event) => any
     type?: "button" | "submit"
     class?: string
     style?: string
@@ -22,7 +22,7 @@
     e.preventDefault()
     e.stopPropagation()
 
-    onclick?.()
+    onclick?.(e)
   }
 </script>
 
