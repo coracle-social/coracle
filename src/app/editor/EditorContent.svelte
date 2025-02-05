@@ -6,16 +6,17 @@
   let element: HTMLElement
 
   onMount(() => {
-    if (element) {
-      element.append(...(Array.from(editor.options.element.childNodes) as any))
-      editor.setOptions({element})
-      editor.contentElement = element
+    if (editor.options.element) {
+      element?.append(editor.options.element)
+    }
+
+    if (editor.options.autofocus) {
+      ;(element?.querySelector("[contenteditable]") as HTMLElement)?.focus()
     }
   })
 
   onDestroy(() => {
-    editor.contentElement = null
-    editor.setOptions({element: null})
+    editor.destroy()
   })
 </script>
 

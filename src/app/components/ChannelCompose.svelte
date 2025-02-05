@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -39,10 +39,6 @@
 
   onMount(() => {
     editor.chain().setContent(content).run()
-  })
-
-  onDestroy(() => {
-    editor.destroy()
   })
 </script>
 

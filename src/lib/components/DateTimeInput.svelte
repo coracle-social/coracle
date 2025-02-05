@@ -4,12 +4,10 @@
   import Button from "@lib/components/Button.svelte"
 
   interface Props {
-    initialValue?: Date | undefined
     value?: Date | undefined
   }
 
-  let {initialValue = undefined, value = $bindable<Date | undefined>(initialValue)}: Props =
-    $props()
+  let {value = $bindable()}: Props = $props()
 
   const pad = (n: number) => ("00" + String(n)).slice(-2)
 
@@ -29,7 +27,7 @@
     return d
   }
 
-  const onChange = () => {
+  const onchange = () => {
     if (value) {
       value = syncTime(value)
     }
@@ -40,38 +38,32 @@
     time = ""
   }
 
-  let time = ""
+  let time = $state("")
   let element: HTMLElement
 
-  $: {
+  $effect(() => {
     if (value) {
       value = syncTime(value)
     }
-  }
+  })
 </script>
 
 <div class="relative grid grid-cols-2 gap-2" bind:this={element}>
   <div class="relative">
-    <DateInput format="yyyy-MM-dd" placeholder="" bind:value on:change={onChange} />
+    <DateInput format="yyyy-MM-dd" placeholder="" bind:value on:change={onchange} />
     <div class="absolute right-2 top-0 flex h-12 cursor-pointer items-center gap-2">
       {#if value}
-        <Button on:click={clear} class="h-5">
+        <Button onclick={clear} class="h-5">
           <Icon icon="close-circle" />
         </Button>
       {:else}
-        <Button on:click={focusDate} class="h-5">
+        <Button onclick={focusDate} class="h-5">
           <Icon icon="calendar-minimalistic" />
         </Button>
       {/if}
     </div>
   </div>
   <label class="input input-bordered flex items-center">
-    <input
-      list="time-options"
-      class="grow"
-      type="time"
-      step="300"
-      bind:value={time}
-      on:change={onChange} />
+    <input list="time-options" class="grow" type="time" step="300" bind:value={time} {onchange} />
   </label>
 </div>

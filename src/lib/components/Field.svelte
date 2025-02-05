@@ -1,24 +1,26 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
+
   interface Props {
-    label?: import("svelte").Snippet
-    input?: import("svelte").Snippet
-    info?: import("svelte").Snippet
+    label?: Snippet
+    input?: Snippet
+    info?: Snippet
     [key: string]: any
   }
 
-  const {...props}: Props = $props()
+  const {label, input, info, ...props}: Props = $props()
 </script>
 
 <div class="flex flex-col gap-2 {props.class}">
-  {#if props.label}
+  {#if label}
     <label class="flex items-center gap-2 font-bold">
-      {@render props.label?.()}
+      {@render label()}
     </label>
   {/if}
-  {@render props.input?.()}
-  {#if props.info}
+  {@render input?.()}
+  {#if info}
     <p class="text-sm">
-      {@render props.info?.()}
+      {@render info()}
     </p>
   {/if}
 </div>

@@ -4,6 +4,7 @@
   import {createEvent, EVENT_TIME} from "@welshman/util"
   import {publishThunk, dateToSeconds} from "@welshman/app"
   import {preventDefault} from "@lib/html"
+  import {timeHashesBetween} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -38,14 +39,18 @@
       })
     }
 
+    const startTs = dateToSeconds(start)
+    const endTs = dateToSeconds(end)
+
     const event = createEvent(EVENT_TIME, {
       content: editor.getText({blockSeparator: "\n"}).trim(),
       tags: [
         ["d", randomId()],
         ["title", title],
         ["location", location],
-        ["start", dateToSeconds(start).toString()],
-        ["end", dateToSeconds(end).toString()],
+        ["start", startTs.toString()],
+        ["end", endTs.toString()],
+        ...timeHashesBetween(startTs, endTs).map(T => ["T", T]),
         ...editor.storage.nostr.getEditorTags(),
         PROTECTED,
       ],
@@ -106,7 +111,7 @@
   </Field>
   <Field>
     {#snippet label()}
-      Start
+      Start*
     {/snippet}
     {#snippet input()}
       <DateTimeInput bind:value={start} />
@@ -114,7 +119,7 @@
   </Field>
   <Field>
     {#snippet label()}
-      End
+      End*
     {/snippet}
     {#snippet input()}
       <DateTimeInput bind:value={end} />

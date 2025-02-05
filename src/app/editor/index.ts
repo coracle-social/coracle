@@ -50,6 +50,7 @@ export const makeEditor = ({
   new Editor({
     content,
     autofocus,
+    element: document.createElement("div"),
     extensions: [
       WelshmanExtension.configure({
         submit,
