@@ -1,10 +1,10 @@
 <script lang="ts">
   import {writable} from "svelte/store"
-  import {randomId, HOUR} from "@welshman/lib"
+  import {randomId} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {preventDefault} from "@lib/html"
-  import {timeHashesBetween} from "@lib/util"
+  import {daysBetween} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -47,7 +47,7 @@
         ["location", location],
         ["start", start.toString()],
         ["end", end.toString()],
-        ...timeHashesBetween(start, end).map(T => ["T", T]),
+        ...daysBetween(start, end).map(D => ["D", D]),
         ...editor.storage.nostr.getEditorTags(),
         PROTECTED,
       ],

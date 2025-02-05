@@ -1,11 +1,11 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
-  import {sortBy, now, int, MONTH, last} from "@welshman/lib"
+  import {sortBy, now, MONTH, last} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {EVENT_DATE, EVENT_TIME, getTagValue} from "@welshman/util"
   import {subscribe, formatTimestampAsDate} from "@welshman/app"
-  import {timeHashesForFilter} from "@lib/util"
+  import {daysBetween} from "@lib/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -57,9 +57,9 @@
 
   onMount(() => {
     const sub = subscribe({filters: [{kinds, since: now()}]})
-    const hashes = timeHashesForFilter(now() - int(3, MONTH), now() + int(3, MONTH))
+    const hashes = daysBetween(now() - MONTH, now() + MONTH)
 
-    pullConservatively({filters: [{kinds, "#T": hashes}], relays: [url]})
+    pullConservatively({filters: [{kinds, "#D": hashes}], relays: [url]})
 
     return () => sub.close()
   })
