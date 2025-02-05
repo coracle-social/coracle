@@ -175,7 +175,8 @@
         <div class="card2 col-2 m-auto max-w-md items-center text-center">
           <p class="row-2 text-lg text-error">
             <Icon icon="danger" />
-            {missingInboxes.length} {missingInboxes.length > 1 ? 'inboxes are' : 'inbox is'} not configured.
+            {missingInboxes.length}
+            {missingInboxes.length > 1 ? "inboxes are" : "inbox is"} not configured.
           </p>
           <p>
             In order to deliver messages, {PLATFORM_NAME} needs to know where to send them. Please make

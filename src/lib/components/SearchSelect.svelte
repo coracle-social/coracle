@@ -4,7 +4,8 @@
   import {type Instance} from "tippy.js"
   import {identity} from "@welshman/lib"
   import {createSearch} from "@welshman/app"
-  import {Suggestions, SuggestionString} from "@welshman/editor"
+  import Suggestions from "@lib/components/Suggestions.svelte"
+  import SuggestionString from "@lib/components/SuggestionString.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
 

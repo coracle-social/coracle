@@ -3,7 +3,7 @@
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
   import {profileSearch} from "@welshman/app"
-  import {Suggestions} from "@welshman/editor"
+  import Suggestions from "@lib/components/Suggestions.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"

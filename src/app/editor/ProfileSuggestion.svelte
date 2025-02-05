@@ -10,9 +10,8 @@
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
 
-  const {value} = $props()
+  const {pubkey} = $props()
 
-  const pubkey = value
   const profileDisplay = deriveProfileDisplay(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
