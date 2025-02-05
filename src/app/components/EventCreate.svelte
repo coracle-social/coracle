@@ -10,7 +10,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
-  import EditorContent from "@lib/components/EditorContent.svelte"
+  import EditorContent from "@app/editor/EditorContent.svelte"
   import {PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"

@@ -8,7 +8,7 @@
   import Button from "@lib/components/Button.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import EditorContent from "@lib/components/EditorContent.svelte"
+  import EditorContent from "@app/editor/EditorContent.svelte"
   import {pushToast} from "@app/toast"
   import {GENERAL, tagRoom, PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"

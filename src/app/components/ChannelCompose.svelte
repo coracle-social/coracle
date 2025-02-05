@@ -4,7 +4,7 @@
   import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import EditorContent from "@lib/components/EditorContent.svelte"
+  import EditorContent from "@app/editor/EditorContent.svelte"
   import {makeEditor} from "@app/editor"
 
   interface Props {

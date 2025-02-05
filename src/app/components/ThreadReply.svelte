@@ -5,7 +5,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import EditorContent from "@lib/components/EditorContent.svelte"
+  import EditorContent from "@app/editor/EditorContent.svelte"
   import {publishComment} from "@app/commands"
   import {tagRoom, GENERAL, PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
