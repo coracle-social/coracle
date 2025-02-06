@@ -3,10 +3,11 @@
   import type {Readable} from "svelte/store"
   import {readable} from "svelte/store"
   import {page} from "$app/stores"
-  import {sortBy, now, last} from "@welshman/lib"
+  import {now, last} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {REACTION, DELETE, EVENT_TIME, getTagValue} from "@welshman/util"
   import {formatTimestampAsDate} from "@welshman/app"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -24,8 +25,6 @@
 
   const createEvent = () => pushModal(EventCreate, {url})
 
-  const getEnd = (event: TrustedEvent) => parseInt(getTagValue("end", event.tags) || "")
-
   const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
 
   let element: HTMLElement
@@ -36,23 +35,59 @@
   type Item = {
     event: TrustedEvent
     dateDisplay?: string
+    isFirstFutureEvent?: boolean
   }
 
-  const items = $derived(
-    sortBy(e => getStart(e), $events).reduce<Item[]>((r, event) => {
-      const end = getEnd(event)
-      const start = getStart(event)
+  const items = $derived.by(() => {
+    const todayDateDisplay = formatTimestampAsDate(now())
 
-      if (isNaN(start) || isNaN(end)) return r
+    let haveISeenTheFuture = false
+    let prevDateDisplay: string
 
-      const prevDateDisplay =
-        r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-      const newDateDisplay = formatTimestampAsDate(start)
+    return $events.map<Item>(event => {
+      const newDateDisplay = formatTimestampAsDate(getStart(event))
       const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+      const isFuture = todayDateDisplay === newDateDisplay || event.created_at > now()
+      const isFirstFutureEvent = !haveISeenTheFuture && isFuture
 
-      return [...r, {event, dateDisplay}]
-    }, []),
-  )
+      prevDateDisplay = newDateDisplay
+      haveISeenTheFuture = isFuture
+
+      return {event, dateDisplay, isFirstFutureEvent}
+    })
+  })
+
+  let previousScrollHeight = 0
+  let prevFirstEventId = ""
+  let initialScrollDone = false
+
+  $effect(() => {
+    if (initialScrollDone) {
+      // If new events are prepended, adjust the scroll position so that the viewport content remains anchored
+      if (prevFirstEventId && items[0].event.id !== prevFirstEventId) {
+        const newScrollHeight = element.scrollHeight
+        const delta = newScrollHeight - previousScrollHeight
+
+        if (delta > 0) {
+          element.scrollTop += delta
+        }
+      }
+    } else if (items.length > 0) {
+      const {event} = items.find(({event}) => getStart(event) >= now()) || last(items)
+      const {offsetTop, clientHeight} = document.querySelector(
+        ".calendar-event-" + event.id,
+      ) as HTMLElement
+
+      // On initial load, center the scroll container on today's date (or the next available event)
+      element.scrollTop = offsetTop - element.clientHeight / 2 + clientHeight / 2
+      initialScrollDone = true
+    }
+
+    if (items.length > 0) {
+      previousScrollHeight = element.scrollHeight
+      prevFirstEventId = items[0].event.id
+    }
+  })
 
   onMount(() => {
     const feedFilters = [{kinds: [EVENT_TIME], "#h": [GENERAL]}]
@@ -95,21 +130,30 @@
     {/snippet}
   </PageBar>
   <div class="scroll-container flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
-    {#each items as { event, dateDisplay }, i (event.id)}
-      {#if dateDisplay}
-        <Divider>{dateDisplay}</Divider>
-      {/if}
-      <EventItem {url} {event} />
-    {/each}
-    <p class="flex h-10 items-center justify-center py-20">
-      <Spinner {loading}>
-        {#if loading}
-          Looking for events...
-        {:else if items.length === 0}
-          No events found.
+    {#each items as { event, dateDisplay, isFirstFutureEvent }, i (event.id)}
+      <div class={"calendar-event-" + event.id}>
+        {#if isFirstFutureEvent}
+          <div class="flex items-center gap-2 p-2">
+            <div class="h-px flex-grow bg-primary"></div>
+            <p class="text-xs uppercase text-primary">Today</p>
+            <div class="h-px flex-grow bg-primary"></div>
+          </div>
         {/if}
-      </Spinner>
-    </p>
+        {#if dateDisplay}
+          <Divider>{dateDisplay}</Divider>
+        {/if}
+        <EventItem {url} {event} />
+      </div>
+    {/each}
+    {#if loading}
+      <p class="flex h-10 items-center justify-center py-20" transition:fly>
+        <Spinner {loading}>Looking for events...</Spinner>
+      </p>
+    {:else if items.length === 0}
+      <p class="flex h-10 items-center justify-center py-20" transition:fly>No events found.</p>
+    {:else}
+      <p class="flex h-10 items-center justify-center py-20" transition:fly>That's all!</p>
+    {/if}
   </div>
   <Button
     class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"

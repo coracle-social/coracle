@@ -8,6 +8,7 @@ import {
   COMMENT,
   matchFilters,
   getTagValues,
+  getTagValue,
 } from "@welshman/util"
 import type {TrustedEvent, Filter} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
@@ -155,16 +156,25 @@ export const makeCalendarFeed = ({
   onExhausted?: () => void
   initialEvents?: TrustedEvent[]
 }) => {
-  const events = writable(initialEvents)
-
+  let exhaustedScrollers = 0
   let backwardWindow = [now() - MONTH, now()]
   let forwardWindow = [now(), now() + MONTH]
 
+  const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
+
+  const getEnd = (event: TrustedEvent) => parseInt(getTagValue("end", event.tags) || "")
+
+  const events = writable(sortBy(getStart, initialEvents))
+
   const insertEvent = (event: TrustedEvent) => {
+    const start = getStart(event)
+
+    if (isNaN(start) || isNaN(getEnd(event))) return
+
     events.update($events => {
       for (let i = 0; i < $events.length; i++) {
         if ($events[i].id === event.id) return $events
-        if ($events[i].created_at < event.created_at) return insert(i, event, $events)
+        if (getStart($events[i]) > start) return insert(i, event, $events)
       }
 
       return [...$events, event]
@@ -201,13 +211,17 @@ export const makeCalendarFeed = ({
   const loadTimeframe = (since: number, until: number) => {
     const hashes = daysBetween(since, until).map(String)
 
-    console.log(since, until, hashes)
-
     load({
       relays,
       filters: [{kinds: [EVENT_TIME], "#D": hashes}],
       onEvent: insertEvent,
     })
+  }
+
+  const maybeExhausted = () => {
+    if (++exhaustedScrollers === 2) {
+      onExhausted?.()
+    }
   }
 
   const backwardScroller = createScroller({
@@ -222,6 +236,7 @@ export const makeCalendarFeed = ({
         loadTimeframe(since, until)
       } else {
         backwardScroller.stop()
+        maybeExhausted()
       }
     },
   })
@@ -237,6 +252,7 @@ export const makeCalendarFeed = ({
         loadTimeframe(since, until)
       } else {
         forwardScroller.stop()
+        maybeExhausted()
       }
     },
   })
