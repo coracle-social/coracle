@@ -1,12 +1,8 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {type Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
-  import {max} from "@welshman/lib"
-  import {deriveEvents} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
-  import {COMMENT} from "@welshman/util"
-  import {load, pubkey, repository, formatTimestampRelative} from "@welshman/app"
+  import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -14,20 +10,21 @@
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatusOrDeleted from "@app/components/ThunkStatusOrDeleted.svelte"
   import CalendarEventMenu from "@app/components/CalendarEventMenu.svelte"
+  import EventActivity from "@app/components/EventActivity.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
-  import {notifications} from "@app/notifications"
   import {makeCalendarPath} from "@app/routes"
 
-  interface Props {
-    url: any
-    event: any
+  const {
+    url,
+    event,
+    showActivity = false,
+  }: {
+    url: string
+    event: TrustedEvent
     showActivity?: boolean
-  }
+  } = $props()
 
-  const {url, event, showActivity = false}: Props = $props()
   const path = makeCalendarPath(url, event.id)
-  const filters = [{kinds: [COMMENT], "#E": [event.id]}]
-  const replies = deriveEvents(repository, {filters})
 
   const showPopover = () => popover?.show()
 
@@ -47,12 +44,6 @@
     publishReaction({event, content: emoji.unicode, relays: [url]})
 
   let popover: Instance | undefined = $state()
-
-  const lastActive = $derived(max([...$replies, event].map(e => e.created_at)))
-
-  onMount(() => {
-    load({relays: [url], filters})
-  })
 </script>
 
 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -60,16 +51,7 @@
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-left" />
     <ThunkStatusOrDeleted {event} />
     {#if showActivity}
-      <div class="flex-inline btn btn-neutral btn-xs gap-1 rounded-full">
-        <Icon icon="reply" />
-        <span>{$replies.length} {$replies.length === 1 ? "reply" : "replies"}</span>
-      </div>
-      <div class="btn btn-neutral btn-xs relative hidden rounded-full sm:flex">
-        {#if $notifications.has(path)}
-          <div class="h-2 w-2 rounded-full bg-primary"></div>
-        {/if}
-        Active {formatTimestampRelative(lastActive)}
-      </div>
+      <EventActivity {url} {path} {event} />
     {/if}
     <Button class="join rounded-full">
       <EmojiButton {onEmoji} class="btn join-item btn-neutral btn-xs">

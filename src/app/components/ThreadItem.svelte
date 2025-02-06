@@ -1,5 +1,6 @@
 <script lang="ts">
   import {nthEq} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
@@ -7,13 +8,15 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import {makeThreadPath} from "@app/routes"
 
-  interface Props {
-    url: any
-    event: any
+  const {
+    url,
+    event,
+    hideActions = false,
+  }: {
+    url: string
+    event: TrustedEvent
     hideActions?: boolean
-  }
-
-  const {url, event, hideActions = false}: Props = $props()
+  } = $props()
 
   const title = event.tags.find(nthEq(0, "title"))?.[1]
 </script>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -8,7 +9,15 @@
   import EventPostedBy from "@app/components/EventPostedBy.svelte"
   import {makeCalendarPath} from "@app/routes"
 
-  const {url, event} = $props()
+  const {
+    url,
+    event,
+    hideActions = false,
+  }: {
+    url: string
+    event: TrustedEvent
+    hideActions?: boolean
+  } = $props()
 
   const meta = $derived(fromPairs(event.tags) as Record<string, string>)
   const end = $derived(parseInt(meta.end))
@@ -31,6 +40,8 @@
   <Content {event} expandMode="inline" quoteProps={{relays: [url]}} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <EventPostedBy {event} />
-    <CalendarEventActions {url} {event} />
+    {#if !hideActions}
+      <CalendarEventActions showActivity {url} {event} />
+    {/if}
   </div>
 </Link>
