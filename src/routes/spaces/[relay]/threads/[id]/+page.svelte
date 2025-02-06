@@ -13,7 +13,7 @@
   import NoteCard from "@app/components/NoteCard.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
-  import ThreadReply from "@app/components/ThreadReply.svelte"
+  import EventReply from "@app/components/EventReply.svelte"
   import {deriveEvent, decodeRelay} from "@app/state"
   import {setChecked} from "@app/notifications"
 
@@ -110,5 +110,5 @@
   </PageBar>
 </div>
 {#if showReply}
-  <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
+  <EventReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
 {/if}

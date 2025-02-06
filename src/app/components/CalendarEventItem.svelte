@@ -12,11 +12,9 @@
   const {
     url,
     event,
-    hideActions = false,
   }: {
     url: string
     event: TrustedEvent
-    hideActions?: boolean
   } = $props()
 
   const meta = $derived(fromPairs(event.tags) as Record<string, string>)
@@ -40,8 +38,6 @@
   <Content {event} expandMode="inline" quoteProps={{relays: [url]}} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <EventPostedBy {event} />
-    {#if !hideActions}
-      <CalendarEventActions showActivity {url} {event} />
-    {/if}
+    <CalendarEventActions showActivity {url} {event} />
   </div>
 </Link>

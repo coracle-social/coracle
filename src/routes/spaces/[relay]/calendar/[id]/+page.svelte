@@ -12,8 +12,8 @@
   import Content from "@app/components/Content.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
-  import ThreadActions from "@app/components/ThreadActions.svelte"
-  import ThreadReply from "@app/components/ThreadReply.svelte"
+  import CalendarEventActions from "@app/components/CalendarEventActions.svelte"
+  import EventReply from "@app/components/EventReply.svelte"
   import {deriveEvent, decodeRelay} from "@app/state"
   import {setChecked} from "@app/notifications"
 
@@ -57,7 +57,7 @@
       <div class="flex justify-end px-2 pb-2">
         <Button class="btn btn-primary" onclick={openReply}>
           <Icon icon="reply" />
-          Reply to thread
+          Leave comment
         </Button>
       </div>
     {/if}
@@ -65,7 +65,7 @@
       <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
         <div class="col-3 ml-12">
           <Content showEntire event={reply} />
-          <ThreadActions event={reply} {url} />
+          <CalendarEventActions event={reply} {url} />
         </div>
       </NoteCard>
     {/each}
@@ -80,14 +80,14 @@
     <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
       <div class="col-3 ml-12">
         <Content showEntire event={$event} quoteProps={{relays: [url]}} />
-        <ThreadActions event={$event} {url} />
+        <CalendarEventActions event={$event} {url} />
       </div>
     </NoteCard>
   {:else}
     {#await sleep(5000)}
-      <Spinner loading>Loading thread...</Spinner>
+      <Spinner loading>Loading comments...</Spinner>
     {:then}
-      <p>Failed to load thread.</p>
+      <p>Failed to load comments.</p>
     {/await}
   {/if}
   <PageBar class="mx-0">
@@ -110,5 +110,5 @@
   </PageBar>
 </div>
 {#if showReply}
-  <ThreadReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
+  <EventReply {url} event={$event} onClose={closeReply} onSubmit={closeReply} />
 {/if}

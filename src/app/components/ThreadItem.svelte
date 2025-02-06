@@ -11,11 +11,9 @@
   const {
     url,
     event,
-    hideActions = false,
   }: {
     url: string
     event: TrustedEvent
-    hideActions?: boolean
   } = $props()
 
   const title = event.tags.find(nthEq(0, "title"))?.[1]
@@ -37,8 +35,6 @@
   <Content {event} expandMode="inline" quoteProps={{relays: [url]}} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <EventPostedBy {event} />
-    {#if !hideActions}
-      <ThreadActions showActivity {url} {event} />
-    {/if}
+    <ThreadActions showActivity {url} {event} />
   </div>
 </Link>
