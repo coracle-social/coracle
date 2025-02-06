@@ -185,8 +185,6 @@ export const makeCalendarFeed = ({
     events.update($events => $events.filter(e => !ids.includes(e.id)))
   }
 
-  const handleDelete = (e: TrustedEvent) => removeEvents(getTagValues(["e", "a"], e.tags))
-
   const onThunk = (thunk: Thunk) => {
     if (matchFilters(feedFilters, thunk.event)) {
       insertEvent(thunk.event)
@@ -194,8 +192,6 @@ export const makeCalendarFeed = ({
       thunk.controller.signal.addEventListener("abort", () => {
         removeEvents([thunk.event.id])
       })
-    } else if (thunk.event.kind === DELETE) {
-      handleDelete(thunk.event)
     }
   }
 
@@ -204,7 +200,6 @@ export const makeCalendarFeed = ({
     filters: subscriptionFilters,
     onEvent: (e: TrustedEvent) => {
       if (matchFilters(feedFilters, e)) insertEvent(e)
-      if (e.kind === DELETE) handleDelete(e)
     },
   })
 

@@ -62,6 +62,10 @@
   let initialScrollDone = false
 
   $effect(() => {
+    if (items.length === 0) {
+      return
+    }
+
     if (initialScrollDone) {
       // If new events are prepended, adjust the scroll position so that the viewport content remains anchored
       if (prevFirstEventId && items[0].event.id !== prevFirstEventId) {
@@ -72,7 +76,7 @@
           element.scrollTop += delta
         }
       }
-    } else if (items.length > 0) {
+    } else {
       const {event} = items.find(({event}) => getStart(event) >= now()) || last(items)
       const {offsetTop, clientHeight} = document.querySelector(
         ".calendar-event-" + event.id,
@@ -83,10 +87,8 @@
       initialScrollDone = true
     }
 
-    if (items.length > 0) {
-      previousScrollHeight = element.scrollHeight
-      prevFirstEventId = items[0].event.id
-    }
+    previousScrollHeight = element.scrollHeight
+    prevFirstEventId = items[0].event.id
   })
 
   onMount(() => {
