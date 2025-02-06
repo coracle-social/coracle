@@ -26,7 +26,7 @@
 
   const {url, event, showActivity = false}: Props = $props()
 
-  const thunk = $thunks[event.id]
+  const thunk = $derived($thunks[event.id])
   const deleted = deriveIsDeleted(repository, event)
   const path = makeSpacePath(url, "threads", event.id)
   const filters = [{kinds: [COMMENT], "#E": [event.id]}]

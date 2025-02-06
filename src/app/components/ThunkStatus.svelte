@@ -27,7 +27,7 @@
       : publishThunk((thunk as Thunk).request)
   }
 
-  const status = throttled(300, thunk.status)
+  const status = $derived(throttled(300, thunk.status))
   const ps = $derived(Object.values($status))
   const canCancel = $derived(ps.length === 0 && $userSettingValues.send_delay > 0)
   const isFailure = $derived(!canCancel && ps.every(s => [Failure, Timeout].includes(s.status)))
