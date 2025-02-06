@@ -115,8 +115,6 @@
   const hasEllipsis = $derived(shortContent.some(isEllipsis))
   const expandInline = $derived(hasEllipsis && expandMode === "inline")
   const expandBlock = $derived(hasEllipsis && expandMode === "block")
-
-  $inspect(fullContent)
 </script>
 
 <div class="relative">

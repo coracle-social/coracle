@@ -202,8 +202,12 @@
   })
 
   onDestroy(() => {
-    setChecked($page.url.pathname)
     cleanup()
+
+    // Sveltekit calls onDestroy at the beginning of the page load for some reason
+    setTimeout(() => {
+      setChecked($page.url.pathname)
+    }, 300)
   })
 </script>
 

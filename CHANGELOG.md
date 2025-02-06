@@ -8,7 +8,7 @@
 * Make reply indicator nicer
 * Make share indicator nicer
 * Improve feed loading
-* (pending) Show marker for last activity in chat
+* Show marker for last activity in chat
 
 # 0.2.6
 
