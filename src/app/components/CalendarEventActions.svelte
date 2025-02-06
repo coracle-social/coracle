@@ -3,7 +3,6 @@
   import {pubkey} from "@welshman/app"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatusOrDeleted from "@app/components/ThunkStatusOrDeleted.svelte"
-  import CalendarEventMenu from "@app/components/CalendarEventMenu.svelte"
   import EventActivity from "@app/components/EventActivity.svelte"
   import EventActions from "@app/components/EventActions.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
@@ -39,6 +38,6 @@
     {#if showActivity}
       <EventActivity {url} {path} {event} />
     {/if}
-    <EventActions {url} {event} component={CalendarEventMenu} />
+    <EventActions {url} {event} noun="Event" />
   </div>
 </div>

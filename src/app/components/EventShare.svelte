@@ -2,6 +2,7 @@
   import {nip19} from "nostr-tools"
   import {goto} from "$app/navigation"
   import {ctx} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {toNostrURI} from "@welshman/util"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -13,7 +14,7 @@
   import {makeRoomPath} from "@app/routes"
   import {setKey} from "@app/implicit"
 
-  const {url, event} = $props()
+  const {url, noun, event}: {url: string; noun: string; event: TrustedEvent} = $props()
 
   const relays = ctx.app.router.Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
@@ -35,7 +36,7 @@
 <form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
   <ModalHeader>
     {#snippet title()}
-      <div>Share Event</div>
+      <div>Share {noun}</div>
     {/snippet}
     {#snippet info()}
       <div>Which room would you like to share this event to?</div>
@@ -59,7 +60,7 @@
       Go back
     </Button>
     <Button type="submit" class="btn btn-primary" disabled={!selection}>
-      Share Event
+      Share {noun}
       <Icon icon="alt-arrow-right" />
     </Button>
   </ModalFooter>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {Component} from "svelte"
   import type {Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import type {TrustedEvent} from "@welshman/util"
@@ -7,16 +6,17 @@
   import Tippy from "@lib/components/Tippy.svelte"
   import Button from "@lib/components/Button.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
+  import EventMenu from "@app/components/EventMenu.svelte"
   import {publishReaction} from "@app/commands"
 
   const {
     url,
+    noun,
     event,
-    component,
   }: {
     url: string
+    noun: string
     event: TrustedEvent
-    component: Component<any>
   } = $props()
 
   const showPopover = () => popover?.show()
@@ -34,9 +34,9 @@
     <Icon icon="smile-circle" size={4} />
   </EmojiButton>
   <Tippy
-    {component}
     bind:popover
-    props={{url, event, onClick: hidePopover}}
+    component={EventMenu}
+    props={{url, noun, event, onClick: hidePopover}}
     params={{trigger: "manual", interactive: true}}>
     <Button class="btn join-item btn-neutral btn-xs" onclick={showPopover}>
       <Icon icon="menu-dots" size={4} />
