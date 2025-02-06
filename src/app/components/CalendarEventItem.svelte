@@ -3,11 +3,13 @@
   import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
+  import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
-  import ThreadActions from "@app/components/ThreadActions.svelte"
+  import CalendarEventActions from "@app/components/CalendarEventActions.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
+  import {makeCalendarPath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   const {url, event} = $props()
@@ -22,7 +24,7 @@
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 </script>
 
-<div class="card2 bg-alt col-2">
+<Link class="col-2 card2 bg-alt w-full cursor-pointer" href={makeCalendarPath(url, event.id)}>
   <div class="flex items-center justify-between gap-2">
     <span>{meta.title || meta.name}</span>
     <div class="flex items-center gap-2 text-sm">
@@ -40,6 +42,6 @@
         @<ProfileName pubkey={event.pubkey} />
       </Button>
     </span>
-    <ThreadActions {url} {event} />
+    <CalendarEventActions {url} {event} />
   </div>
-</div>
+</Link>

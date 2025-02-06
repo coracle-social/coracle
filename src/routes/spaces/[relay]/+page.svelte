@@ -25,7 +25,7 @@
     deriveOtherRooms,
     userRoomsByUrl,
   } from "@app/state"
-  import {makeChatPath, makeRoomPath, makeSpacePath} from "@app/routes"
+  import {makeChatPath, makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
   import {notifications} from "@app/notifications"
   import {pushModal} from "@app/modal"
 
@@ -33,7 +33,8 @@
   const relay = deriveRelay(url)
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
-  const threadsPath = makeSpacePath(url, "threads")
+  const threadsPath = makeThreadPath(url)
+  const calendarPath = makeCalendarPath(url)
 
   const joinSpace = () => pushModal(SpaceJoin, {url})
 
@@ -130,6 +131,18 @@
           <Icon icon="notes-minimalistic" />
           Threads
           {#if $notifications.has(threadsPath)}
+            <div
+              class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary-content"
+              transition:fade>
+            </div>
+          {/if}
+        </div>
+      </Link>
+      <Link href={calendarPath} class="btn btn-secondary">
+        <div class="relative flex items-center gap-2">
+          <Icon icon="notes-minimalistic" />
+          Calendar
+          {#if $notifications.has(calendarPath)}
             <div
               class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary-content"
               transition:fade>

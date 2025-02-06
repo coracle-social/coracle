@@ -3,8 +3,14 @@ import {synced, throttled} from "@welshman/store"
 import {pubkey} from "@welshman/app"
 import {prop, spec, identity, now, groupBy} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {MESSAGE, THREAD, COMMENT, getTagValue} from "@welshman/util"
-import {makeSpacePath, makeChatPath, makeThreadPath, makeRoomPath} from "@app/routes"
+import {EVENT_TIME, MESSAGE, THREAD, COMMENT, getTagValue} from "@welshman/util"
+import {
+  makeSpacePath,
+  makeChatPath,
+  makeThreadPath,
+  makeCalendarPath,
+  makeRoomPath,
+} from "@app/routes"
 import {chats, getUrlsForEvent, userRoomsByUrl, repositoryStore} from "@app/state"
 
 // Checked state
@@ -57,16 +63,29 @@ export const notifications = derived(
       {kinds: [THREAD]},
       {kinds: [COMMENT], "#K": [String(THREAD)]},
     ])
+
+    const allCalendarEvents = $repository.query([
+      {kinds: [EVENT_TIME]},
+      {kinds: [COMMENT], "#K": [String(EVENT_TIME)]},
+    ])
+
     const allMessageEvents = $repository.query([{kinds: [MESSAGE]}])
 
     for (const [url, rooms] of $userRoomsByUrl.entries()) {
       const spacePath = makeSpacePath(url)
       const threadPath = makeThreadPath(url)
+      const calendarPath = makeCalendarPath(url)
       const threadEvents = allThreadEvents.filter(e => $getUrlsForEvent(e.id).includes(url))
+      const calendarEvents = allCalendarEvents.filter(e => $getUrlsForEvent(e.id).includes(url))
 
       if (hasNotification(threadPath, threadEvents[0])) {
         paths.add(spacePath)
         paths.add(threadPath)
+      }
+
+      if (hasNotification(calendarPath, calendarEvents[0])) {
+        paths.add(spacePath)
+        paths.add(calendarPath)
       }
 
       const commentsByThreadId = groupBy(
@@ -79,6 +98,19 @@ export const notifications = derived(
 
         if (hasNotification(threadItemPath, comment)) {
           paths.add(threadItemPath)
+        }
+      }
+
+      const commentsByEventId = groupBy(
+        e => getTagValue("E", e.tags),
+        calendarEvents.filter(spec({kind: COMMENT})),
+      )
+
+      for (const [eventId, [comment]] of commentsByEventId.entries()) {
+        const calendarEventPath = makeCalendarPath(url, eventId)
+
+        if (hasNotification(calendarEventPath, comment)) {
+          paths.add(calendarEventPath)
         }
       }
 

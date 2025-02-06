@@ -1,11 +1,17 @@
 import type {Page} from "@sveltejs/kit"
+import {identity} from "@welshman/lib"
 import {makeChatId, decodeRelay, encodeRelay, userRoomsByUrl} from "@app/state"
 
-export const makeSpacePath = (url: string, ...extra: string[]) => {
+export const makeSpacePath = (url: string, ...extra: (string | undefined)[]) => {
   let path = `/spaces/${encodeRelay(url)}`
 
   if (extra.length > 0) {
-    path += "/" + extra.map(s => encodeURIComponent(s)).join("/")
+    path +=
+      "/" +
+      extra
+        .filter(identity)
+        .map(s => encodeURIComponent(s as string))
+        .join("/")
   }
 
   return path
@@ -15,15 +21,11 @@ export const makeChatPath = (pubkeys: string[]) => `/chat/${makeChatId(pubkeys)}
 
 export const makeRoomPath = (url: string, room: string) => `/spaces/${encodeRelay(url)}/${room}`
 
-export const makeThreadPath = (url: string, eventId?: string) => {
-  let path = `/spaces/${encodeRelay(url)}/threads`
+export const makeThreadPath = (url: string, eventId?: string) =>
+  makeSpacePath(url, "threads", eventId)
 
-  if (eventId) {
-    path += "/" + eventId
-  }
-
-  return path
-}
+export const makeCalendarPath = (url: string, eventId?: string) =>
+  makeSpacePath(url, "calendar", eventId)
 
 export const getPrimaryNavItem = ($page: Page) => $page.route?.id?.split("/")[1]
 

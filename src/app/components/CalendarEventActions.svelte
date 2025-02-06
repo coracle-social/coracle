@@ -13,10 +13,10 @@
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import ThunkStatus from "@app/components/ThunkStatus.svelte"
-  import ThreadMenu from "@app/components/ThreadMenu.svelte"
+  import CalendarEventMenu from "@app/components/CalendarEventMenu.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
   import {notifications} from "@app/notifications"
-  import {makeThreadPath} from "@app/routes"
+  import {makeCalendarPath} from "@app/routes"
 
   interface Props {
     url: any
@@ -28,7 +28,7 @@
 
   const thunk = $derived($thunks[event.id])
   const deleted = deriveIsDeleted(repository, event)
-  const path = makeThreadPath(url, event.id)
+  const path = makeCalendarPath(url, event.id)
   const filters = [{kinds: [COMMENT], "#E": [event.id]}]
   const replies = deriveEvents(repository, {filters})
 
@@ -84,7 +84,7 @@
       </EmojiButton>
       <Tippy
         bind:popover
-        component={ThreadMenu}
+        component={CalendarEventMenu}
         props={{url, event, onClick: hidePopover}}
         params={{trigger: "manual", interactive: true}}>
         <Button class="btn join-item btn-neutral btn-xs" onclick={showPopover}>

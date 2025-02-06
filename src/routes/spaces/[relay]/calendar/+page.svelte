@@ -14,8 +14,8 @@
   import PageBar from "@lib/components/PageBar.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
-  import EventItem from "@app/components/EventItem.svelte"
-  import EventCreate from "@app/components/EventCreate.svelte"
+  import CalendarEventItem from "@app/components/CalendarEventItem.svelte"
+  import CalendarEventCreate from "@app/components/CalendarEventCreate.svelte"
   import {pushModal} from "@app/modal"
   import {GENERAL, getEventsForUrl, decodeRelay} from "@app/state"
   import {makeCalendarFeed} from "@app/requests"
@@ -23,7 +23,7 @@
 
   const url = decodeRelay($page.params.relay)
 
-  const createEvent = () => pushModal(EventCreate, {url})
+  const createEvent = () => pushModal(CalendarEventCreate, {url})
 
   const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
 
@@ -144,7 +144,7 @@
         {#if dateDisplay}
           <Divider>{dateDisplay}</Divider>
         {/if}
-        <EventItem {url} {event} />
+        <CalendarEventItem {url} {event} />
       </div>
     {/each}
     {#if loading}
