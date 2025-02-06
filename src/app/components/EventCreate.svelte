@@ -1,6 +1,6 @@
 <script lang="ts">
   import {writable} from "svelte/store"
-  import {randomId} from "@welshman/lib"
+  import {randomId, HOUR} from "@welshman/lib"
   import {createEvent, EVENT_TIME} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {preventDefault} from "@lib/html"
@@ -12,7 +12,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import EditorContent from "@app/editor/EditorContent.svelte"
-  import {PROTECTED} from "@app/state"
+  import {PROTECTED, GENERAL, tagRoom} from "@app/state"
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
@@ -39,6 +39,13 @@
       })
     }
 
+    if (start >= end) {
+      return pushToast({
+        theme: "error",
+        message: "End time must be later than start time.",
+      })
+    }
+
     const event = createEvent(EVENT_TIME, {
       content: editor.getText({blockSeparator: "\n"}).trim(),
       tags: [
@@ -47,12 +54,14 @@
         ["location", location],
         ["start", start.toString()],
         ["end", end.toString()],
-        ...daysBetween(start, end).map(D => ["D", D]),
+        ...daysBetween(start, end).map(D => ["D", D.toString()]),
         ...editor.storage.nostr.getEditorTags(),
+        tagRoom(GENERAL, url),
         PROTECTED,
       ],
     })
 
+    pushToast({message: "Your event has been published!"})
     publishThunk({event, relays: [url]})
     history.back()
   }
@@ -63,6 +72,15 @@
   let location = $state("")
   let start: number | undefined = $state()
   let end: number | undefined = $state()
+  let endDirty = false
+
+  $effect(() => {
+    if (!endDirty && start) {
+      end = start + HOUR
+    } else if (end) {
+      endDirty = true
+    }
+  })
 </script>
 
 <form class="column gap-4" onsubmit={preventDefault(submit)}>

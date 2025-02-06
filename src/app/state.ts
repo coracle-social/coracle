@@ -40,14 +40,7 @@ import {
   asDecryptedEvent,
   normalizeRelayUrl,
 } from "@welshman/util"
-import type {
-  TrustedEvent,
-  Repository,
-  SignedEvent,
-  PublishedList,
-  List,
-  Filter,
-} from "@welshman/util"
+import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59} from "@welshman/signer"
 import {
   pubkey,
@@ -261,7 +254,7 @@ export const getUrlsForEvent = derived([trackerStore, thunks], ([$tracker, $thun
   }
 })
 
-export const getEventsForUrl = (repository: Repository, url: string, filters: Filter[]) => {
+export const getEventsForUrl = (url: string, filters: Filter[]) => {
   const $getUrlsForEvent = get(getUrlsForEvent)
   const $events = repository.query(filters)
 

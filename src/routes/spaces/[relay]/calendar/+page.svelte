@@ -1,11 +1,12 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onMount} from "svelte"
+  import type {Readable} from "svelte/store"
+  import {readable} from "svelte/store"
   import {page} from "$app/stores"
-  import {sortBy, now, MONTH, last} from "@welshman/lib"
+  import {sortBy, now, last} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {EVENT_DATE, EVENT_TIME, getTagValue} from "@welshman/util"
-  import {subscribe, formatTimestampAsDate} from "@welshman/app"
-  import {daysBetween} from "@lib/util"
+  import {REACTION, DELETE, EVENT_TIME, getTagValue} from "@welshman/util"
+  import {formatTimestampAsDate} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -15,13 +16,11 @@
   import EventItem from "@app/components/EventItem.svelte"
   import EventCreate from "@app/components/EventCreate.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveEventsForUrl, decodeRelay} from "@app/state"
-  import {pullConservatively} from "@app/requests"
+  import {GENERAL, getEventsForUrl, decodeRelay} from "@app/state"
+  import {makeCalendarFeed} from "@app/requests"
   import {setChecked} from "@app/notifications"
 
   const url = decodeRelay($page.params.relay)
-  const kinds = [EVENT_DATE, EVENT_TIME]
-  const events = deriveEventsForUrl(url, [{kinds}])
 
   const createEvent = () => pushModal(EventCreate, {url})
 
@@ -29,8 +28,10 @@
 
   const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
 
-  const limit = 5
+  let element: HTMLElement
   let loading = $state(true)
+  let cleanup: () => void
+  let events: Readable<TrustedEvent[]> = $state(readable([]))
 
   type Item = {
     event: TrustedEvent
@@ -38,39 +39,43 @@
   }
 
   const items = $derived(
-    sortBy(e => getStart(e), $events)
-      .reduce<Item[]>((r, event) => {
-        const end = getEnd(event)
-        const start = getStart(event)
+    sortBy(e => getStart(e), $events).reduce<Item[]>((r, event) => {
+      const end = getEnd(event)
+      const start = getStart(event)
 
-        if (isNaN(start) || isNaN(end)) return r
+      if (isNaN(start) || isNaN(end)) return r
 
-        const prevDateDisplay =
-          r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
-        const newDateDisplay = formatTimestampAsDate(start)
-        const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
+      const prevDateDisplay =
+        r.length > 0 ? formatTimestampAsDate(getStart(last(r).event)) : undefined
+      const newDateDisplay = formatTimestampAsDate(start)
+      const dateDisplay = prevDateDisplay === newDateDisplay ? undefined : newDateDisplay
 
-        return [...r, {event, dateDisplay}]
-      }, [])
-      .slice(0, limit),
+      return [...r, {event, dateDisplay}]
+    }, []),
   )
 
   onMount(() => {
-    const sub = subscribe({filters: [{kinds, since: now()}]})
-    const hashes = daysBetween(now() - MONTH, now() + MONTH)
+    const feedFilters = [{kinds: [EVENT_TIME], "#h": [GENERAL]}]
+    const subscriptionFilters = [
+      {kinds: [DELETE, REACTION, EVENT_TIME], "#h": [GENERAL], since: now()},
+    ]
 
-    pullConservatively({filters: [{kinds, "#D": hashes}], relays: [url]})
+    ;({events, cleanup} = makeCalendarFeed({
+      element,
+      relays: [url],
+      feedFilters,
+      subscriptionFilters,
+      initialEvents: getEventsForUrl(url, feedFilters),
+      onExhausted: () => {
+        loading = false
+      },
+    }))
 
-    return () => sub.close()
+    return () => {
+      setChecked($page.url.pathname)
+      cleanup()
+    }
   })
-
-  onDestroy(() => {
-    setChecked($page.url.pathname)
-  })
-
-  setTimeout(() => {
-    loading = false
-  }, 5000)
 </script>
 
 <div class="relative flex h-screen flex-col">
@@ -89,7 +94,7 @@
       </div>
     {/snippet}
   </PageBar>
-  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
+  <div class="scroll-container flex flex-grow flex-col gap-2 overflow-auto p-2" bind:this={element}>
     {#each items as { event, dateDisplay }, i (event.id)}
       {#if dateDisplay}
         <Divider>{dateDisplay}</Divider>

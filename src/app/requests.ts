@@ -1,6 +1,14 @@
 import {get, writable} from "svelte/store"
-import {partition, insert, sortBy, assoc, now} from "@welshman/lib"
-import {MESSAGE, DELETE, THREAD, COMMENT, matchFilters, getTagValues} from "@welshman/util"
+import {partition, int, YEAR, MONTH, insert, sortBy, assoc, now} from "@welshman/lib"
+import {
+  MESSAGE,
+  DELETE,
+  THREAD,
+  EVENT_TIME,
+  COMMENT,
+  matchFilters,
+  getTagValues,
+} from "@welshman/util"
 import type {TrustedEvent, Filter} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
 import type {Subscription} from "@welshman/net"
@@ -15,6 +23,7 @@ import {
   createFeedController,
 } from "@welshman/app"
 import {createScroller} from "@lib/html"
+import {daysBetween} from "@lib/util"
 import {userRoomsByUrl, getUrlsForEvent} from "@app/state"
 
 // Utils
@@ -127,6 +136,120 @@ export const makeFeed = ({
       sub.close()
       scroller.stop()
       thunkWorker.removeGlobalHandler(onThunk)
+    },
+  }
+}
+
+export const makeCalendarFeed = ({
+  relays,
+  feedFilters,
+  subscriptionFilters,
+  element,
+  onExhausted,
+  initialEvents = [],
+}: {
+  relays: string[]
+  feedFilters: Filter[]
+  subscriptionFilters: Filter[]
+  element: HTMLElement
+  onExhausted?: () => void
+  initialEvents?: TrustedEvent[]
+}) => {
+  const events = writable(initialEvents)
+
+  let backwardWindow = [now() - MONTH, now()]
+  let forwardWindow = [now(), now() + MONTH]
+
+  const insertEvent = (event: TrustedEvent) => {
+    events.update($events => {
+      for (let i = 0; i < $events.length; i++) {
+        if ($events[i].id === event.id) return $events
+        if ($events[i].created_at < event.created_at) return insert(i, event, $events)
+      }
+
+      return [...$events, event]
+    })
+  }
+
+  const removeEvents = (ids: string[]) => {
+    events.update($events => $events.filter(e => !ids.includes(e.id)))
+  }
+
+  const handleDelete = (e: TrustedEvent) => removeEvents(getTagValues(["e", "a"], e.tags))
+
+  const onThunk = (thunk: Thunk) => {
+    if (matchFilters(feedFilters, thunk.event)) {
+      insertEvent(thunk.event)
+
+      thunk.controller.signal.addEventListener("abort", () => {
+        removeEvents([thunk.event.id])
+      })
+    } else if (thunk.event.kind === DELETE) {
+      handleDelete(thunk.event)
+    }
+  }
+
+  const sub = subscribe({
+    relays,
+    filters: subscriptionFilters,
+    onEvent: (e: TrustedEvent) => {
+      if (matchFilters(feedFilters, e)) insertEvent(e)
+      if (e.kind === DELETE) handleDelete(e)
+    },
+  })
+
+  const loadTimeframe = (since: number, until: number) => {
+    const hashes = daysBetween(since, until).map(String)
+
+    console.log(since, until, hashes)
+
+    load({
+      relays,
+      filters: [{kinds: [EVENT_TIME], "#D": hashes}],
+      onEvent: insertEvent,
+    })
+  }
+
+  const backwardScroller = createScroller({
+    element,
+    reverse: true,
+    onScroll: () => {
+      const [since, until] = backwardWindow
+
+      backwardWindow = [since - MONTH, since]
+
+      if (until > now() - int(2, YEAR)) {
+        loadTimeframe(since, until)
+      } else {
+        backwardScroller.stop()
+      }
+    },
+  })
+
+  const forwardScroller = createScroller({
+    element,
+    onScroll: () => {
+      const [since, until] = forwardWindow
+
+      forwardWindow = [until, until + MONTH]
+
+      if (until < now() + int(2, YEAR)) {
+        loadTimeframe(since, until)
+      } else {
+        forwardScroller.stop()
+      }
+    },
+  })
+
+  thunkWorker.addGlobalHandler(onThunk)
+
+  return {
+    events,
+    cleanup: () => {
+      thunkWorker.removeGlobalHandler(onThunk)
+      backwardScroller.stop()
+      forwardScroller.stop()
+      sub.close()
     },
   }
 }

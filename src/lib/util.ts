@@ -26,6 +26,6 @@ export const nsecDecode = (nsec: string) => {
   return bytesToHex(data)
 }
 
-export const day = (seconds: number) => Math.floor(seconds / DAY).toString()
+export const day = (seconds: number) => Math.floor(seconds / DAY)
 
 export const daysBetween = (start: number, end: number) => [...range(start, end, DAY)].map(day)

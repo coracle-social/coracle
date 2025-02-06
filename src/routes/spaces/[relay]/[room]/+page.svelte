@@ -6,7 +6,7 @@
   import {now} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
-  import {formatTimestampAsDate, pubkey, publishThunk, deriveRelay, repository} from "@welshman/app"
+  import {formatTimestampAsDate, pubkey, publishThunk, deriveRelay} from "@welshman/app"
   import {slide, fade, fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -179,7 +179,7 @@
       relays: [url],
       feedFilters: [filter],
       subscriptionFilters: [{kinds: [DELETE, REACTION, MESSAGE], "#h": [room], since: now()}],
-      initialEvents: getEventsForUrl(repository, url, [{...filter, limit: 20}]),
+      initialEvents: getEventsForUrl(url, [{...filter, limit: 20}]),
       onExhausted: () => {
         loading = false
       },
