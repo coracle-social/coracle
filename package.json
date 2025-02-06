@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "./build.sh",
-    "sourcemaps": "./sourcemaps.sh",
-    "release:android": "cap build android --androidreleasetype APK --signing-type apksigner",
+    "sourcemaps": "./build.sh && ./sourcemaps.sh",
+    "release:android": "./build.sh && cap build android --androidreleasetype APK --signing-type apksigner",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check src && eslint src",
