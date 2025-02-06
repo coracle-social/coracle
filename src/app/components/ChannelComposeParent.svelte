@@ -6,18 +6,21 @@
   import Button from "@lib/components/Button.svelte"
   import Content from "@app/components/Content.svelte"
 
-  interface Props {
+  const {
+    verb,
+    event,
+    clear,
+  }: {
+    verb: string
     event: TrustedEvent
     clear: () => void
-  }
-
-  const {event, clear}: Props = $props()
+  } = $props()
 </script>
 
 <div
   class="relative border-l-2 border-solid border-primary bg-base-300 px-2 py-1 pr-8 text-xs"
   transition:slide>
-  <p class="text-primary">Replying to @{displayProfileByPubkey(event.pubkey)}</p>
+  <p class="text-primary">{verb} @{displayProfileByPubkey(event.pubkey)}</p>
   {#key event.id}
     <Content {event} hideMedia minLength={100} maxLength={300} expandMode="disabled" />
   {/key}

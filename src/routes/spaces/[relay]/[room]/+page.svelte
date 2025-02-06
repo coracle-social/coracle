@@ -42,7 +42,6 @@
 
   const {room = GENERAL} = $page.params
   const lastChecked = $checked[$page.url.pathname]
-  const content = popKey<string>("content") || ""
   const url = decodeRelay($page.params.relay)
   const filter = {kinds: [MESSAGE], "#h": [room]}
   const relay = deriveRelay(url)
@@ -78,17 +77,32 @@
     parent = undefined
   }
 
+  const clearShare = () => {
+    share = undefined
+  }
+
   const onSubmit = ({content, tags}: EventContent) => {
     tags.push(tagRoom(room, url))
     tags.push(PROTECTED)
 
+    let template = {content, tags}
+
+    if (share) {
+      template = prependParent(share, template)
+    }
+
+    if (parent) {
+      template = prependParent(parent, template)
+    }
+
     publishThunk({
       relays: [url],
-      event: createEvent(MESSAGE, prependParent(parent, {content, tags})),
+      event: createEvent(MESSAGE, template),
       delay: $userSettingValues.send_delay,
     })
 
     clearParent()
+    clearShare()
   }
 
   const onScroll = () => {
@@ -113,6 +127,7 @@
   const scrollToBottom = () => element?.scrollTo({top: 0, behavior: "smooth"})
 
   let loading = $state(true)
+  let share = $state(popKey<TrustedEvent | undefined>("share"))
   let parent: TrustedEvent | undefined = $state()
   let element: HTMLElement | undefined = $state()
   let newMessages: HTMLElement | undefined = $state()
@@ -264,9 +279,12 @@
   {/if}
   <div class="saib">
     {#if parent}
-      <ChannelComposeParent event={parent} clear={clearParent} />
+      <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
     {/if}
-    <ChannelCompose bind:this={compose} {content} {onSubmit} />
+    {#if share}
+      <ChannelComposeParent event={share} clear={clearShare} verb="Sharing" />
+    {/if}
+    <ChannelCompose bind:this={compose} {onSubmit} />
   </div>
 </div>
 

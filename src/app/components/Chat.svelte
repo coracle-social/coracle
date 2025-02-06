@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {onMount} from "svelte"
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
@@ -28,7 +29,13 @@
   import {pushModal} from "@app/modal"
   import {sendWrapped, prependParent} from "@app/commands"
 
-  const {id, info = undefined} = $props()
+  const {
+    id,
+    info,
+  }: {
+    id: string
+    info?: Snippet
+  } = $props()
 
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
@@ -205,7 +212,7 @@
     </p>
   </div>
   {#if parent}
-    <ChatComposeParent event={parent} clear={clearParent} />
+    <ChatComposeParent event={parent} clear={clearParent} verb="Replying to" />
   {/if}
   <ChatCompose bind:this={compose} {onSubmit} />
 </div>

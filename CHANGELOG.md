@@ -6,7 +6,7 @@
 * Migrate to svelte 5 (fixes some bugs, probably introduces others)
 * Migrate to new welshman editor
 * Make reply indicator nicer
-* (pending) Make share indicator nicer
+* Make share indicator nicer
 * Improve feed loading
 * (pending) Show marker for last activity in chat
 

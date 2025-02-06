@@ -3,12 +3,12 @@
   import {goto} from "$app/navigation"
   import {ctx, nthEq} from "@welshman/lib"
   import {tracker, repository} from "@welshman/app"
-  import {Address, DIRECT_MESSAGE, MESSAGE, THREAD} from "@welshman/util"
+  import {Address, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import {deriveEvent, entityLink, ROOM} from "@app/state"
-  import {makeThreadPath, makeRoomPath} from "@app/routes"
+  import {makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
 
   const {value, event, noteContent, relays = [], minimal = false} = $props()
 
@@ -70,6 +70,10 @@
           return goto(makeThreadPath(url, $quote.id))
         }
 
+        if ($quote.kind === EVENT_TIME) {
+          return goto(makeCalendarPath(url, $quote.id))
+        }
+
         if ($quote.kind === MESSAGE) {
           return scrollToEvent($quote.id) || openMessage(url, room, $quote.id)
         }
@@ -80,6 +84,10 @@
         if (id && kind) {
           if (parseInt(kind) === THREAD) {
             return goto(makeThreadPath(url, id))
+          }
+
+          if (parseInt(kind) === EVENT_TIME) {
+            return goto(makeCalendarPath(url, id))
           }
 
           if (parseInt(kind) === MESSAGE) {

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -9,10 +8,9 @@
 
   interface Props {
     onSubmit: any
-    content?: string
   }
 
-  const {onSubmit, content = ""}: Props = $props()
+  const {onSubmit}: Props = $props()
 
   const autofocus = !isMobile
 
@@ -36,10 +34,6 @@
   }
 
   const editor = makeEditor({autofocus, submit, uploading, aggressive: true})
-
-  onMount(() => {
-    editor.chain().setContent(content).run()
-  })
 </script>
 
 <form class="relative z-feature flex gap-2 p-2" onsubmit={preventDefault(submit)}>

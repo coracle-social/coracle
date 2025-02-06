@@ -115,6 +115,8 @@
   const hasEllipsis = $derived(shortContent.some(isEllipsis))
   const expandInline = $derived(hasEllipsis && expandMode === "inline")
   const expandBlock = $derived(hasEllipsis && expandMode === "block")
+
+  $inspect(fullContent)
 </script>
 
 <div class="relative">
@@ -131,8 +133,8 @@
       class="overflow-hidden text-ellipsis break-words"
       style={expandBlock ? "mask-image: linear-gradient(0deg, transparent 0px, black 100px)" : ""}>
       {#each shortContent as parsed, i}
-        {#if isNewline(parsed)}
-          <ContentNewline value={parsed.value.slice(isBlock(i - 1) ? 1 : 0)} />
+        {#if isNewline(parsed) && !isBlock(i - 1)}
+          <ContentNewline value={parsed.value} />
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
         {:else if isCode(parsed)}

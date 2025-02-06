@@ -1,9 +1,6 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
   import {goto} from "$app/navigation"
-  import {ctx} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {toNostrURI} from "@welshman/util"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -16,13 +13,10 @@
 
   const {url, noun, event}: {url: string; noun: string; event: TrustedEvent} = $props()
 
-  const relays = ctx.app.router.Event(event).getUrls()
-  const nevent = nip19.neventEncode({id: event.id, relays})
-
   const back = () => history.back()
 
   const onSubmit = () => {
-    setKey("content", toNostrURI(nevent))
+    setKey("share", event)
     goto(makeRoomPath(url, selection), {replaceState: true})
   }
 
