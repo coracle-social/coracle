@@ -4,9 +4,8 @@
   import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
-  import Content from "@app/components/Content.svelte"
   import CalendarEventActions from "@app/components/CalendarEventActions.svelte"
-  import EventPostedBy from "@app/components/EventPostedBy.svelte"
+  import ProfileLink from "@app/components/ProfileLink.svelte"
   import {makeCalendarPath} from "@app/routes"
 
   const {
@@ -25,9 +24,9 @@
   const isSingleDay = $derived(startDateDisplay === endDateDisplay)
 </script>
 
-<Link class="col-2 card2 bg-alt w-full cursor-pointer" href={makeCalendarPath(url, event.id)}>
+<Link class="col-3 card2 bg-alt w-full cursor-pointer" href={makeCalendarPath(url, event.id)}>
   <div class="flex items-center justify-between gap-2">
-    <span>{meta.title || meta.name}</span>
+    <p class="text-xl">{meta.title || meta.name}</p>
     <div class="flex items-center gap-2 text-sm">
       <Icon icon="clock-circle" size={4} />
       {formatTimestampAsTime(start)} — {isSingleDay
@@ -35,9 +34,10 @@
         : formatTimestamp(end)}
     </div>
   </div>
-  <Content {event} expandMode="inline" quoteProps={{relays: [url]}} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
-    <EventPostedBy {event} />
+    <span class="whitespace-nowrap py-1 text-sm opacity-75">
+      Posted by <ProfileLink pubkey={event.pubkey} />
+    </span>
     <CalendarEventActions showActivity {url} {event} />
   </div>
 </Link>

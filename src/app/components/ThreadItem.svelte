@@ -4,7 +4,7 @@
   import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
-  import EventPostedBy from "@app/components/EventPostedBy.svelte"
+  import ProfileLink from "@app/components/ProfileLink.svelte"
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import {makeThreadPath} from "@app/routes"
 
@@ -34,7 +34,9 @@
   {/if}
   <Content {event} expandMode="inline" quoteProps={{relays: [url]}} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
-    <EventPostedBy {event} />
+    <span class="whitespace-nowrap py-1 text-sm opacity-75">
+      Posted by <ProfileLink pubkey={event.pubkey} />
+    </span>
     <ThreadActions showActivity {url} {event} />
   </div>
 </Link>

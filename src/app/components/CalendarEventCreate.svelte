@@ -8,6 +8,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Spinner from "@lib/components/Spinner.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
@@ -156,6 +157,8 @@
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary">Create Event</Button>
+    <Button type="submit" class="btn btn-primary" disabled={$uploading}>
+      <Spinner loading={$uploading}>Create Event</Spinner>
+    </Button>
   </ModalFooter>
 </form>
