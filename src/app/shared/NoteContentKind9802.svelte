@@ -1,12 +1,15 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
-  export let note, showEntire, showMedia
+  export let note: TrustedEvent
+  export let showEntire: boolean
+  export let showMedia: boolean
 
-  const meta: Record<string, string> = fromPairs(note.tags)
+  const meta = fromPairs(note.tags)
 </script>
 
 <div class="flex flex-col gap-2">
@@ -21,7 +24,7 @@
   {#if meta.r}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-highlighter fa-xs mt-1" />
-      <NoteContentLink value={{url: meta.r, isMedia: urlIsMedia(meta.r)}} />
+      <NoteContentLink url={meta.r} />
     </div>
   {/if}
 </div>

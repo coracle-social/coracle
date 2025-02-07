@@ -35,7 +35,7 @@
         <p>{summary}</p>
       {/if}
       {#if showMedia && image && urlIsMedia(image)}
-        <NoteContentLink value={{url: image, isMedia: true}} showMedia />
+        <NoteContentLink url={image} showMedia />
       {/if}
       <NoteContentTopics {note} />
     </FlexColumn>

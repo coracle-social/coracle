@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {ParsedLinkGridValue} from "@welshman/content"
+  import type {ParsedLinkValue} from "@welshman/content"
   import {displayUrl} from "@welshman/lib"
   import cx from "classnames"
   import {router} from "src/app/util"
@@ -7,20 +7,16 @@
   import Image from "src/partials/Image.svelte"
   import ImageZoom from "./ImageZoom.svelte"
 
-  export let value: ParsedLinkGridValue
+  export let links: ParsedLinkValue[]
   export let showMedia = false
   export let onClick: (e: any) => void
 
+  const columns = Math.ceil(Math.sqrt(links.length))
+
+  const getSpan = (i: number) => columns - (i % columns)
+
   let zoomed: number
   let grid: HTMLElement
-  $: links = value?.links || []
-  $: columns = Math.ceil(Math.sqrt(links.length))
-
-  function getSpan(i: number) {
-    // how many slots are left in the row
-    const slots = columns - (i % columns)
-    return slots
-  }
 </script>
 
 {#if showMedia}
@@ -38,22 +34,23 @@
       <i class="fas fa-times"></i>
     </button>
     {#each links as link, i}
+      {@const zoom = () => (zoomed = i)}
       {#if i === 0}
         <Image
+          onClick={zoom}
           class={cx("col-span-" + getSpan(links.length - 1), "h-full max-h-96 w-full object-cover")}
-          onClick={() => (zoomed = i)}
-          src={link.toString()} />
+          src={link.url.toString()} />
       {:else}
         <Image
+          onClick={zoom}
           class="h-full max-h-96 w-full object-cover"
-          onClick={() => (zoomed = i)}
-          src={link.toString()} />
+          src={link.url.toString()} />
       {/if}
     {/each}
   </div>
 {:else}
   {#each links as link, i}
-    {@const url = link.toString()}
+    {@const url = link.url.toString()}
     <Anchor
       modal
       underline

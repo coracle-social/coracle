@@ -74,7 +74,7 @@
   {:else}
     <div class="flex flex-col">
       {#each images as url}
-        <NoteContentLink value={{url, isMedia: true}} />
+        <NoteContentLink {url} />
       {/each}
     </div>
   {/if}

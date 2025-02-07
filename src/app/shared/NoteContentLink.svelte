@@ -5,10 +5,8 @@
   import Media from "src/partials/Media.svelte"
   import {router} from "src/app/util/router"
 
-  export let value
+  export let url: string
   export let showMedia = false
-
-  const url = value.url.toString()
 
   const coracleRegexp = /^(https?:\/\/)?(app\.)?coracle.social/
 

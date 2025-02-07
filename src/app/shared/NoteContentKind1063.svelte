@@ -1,6 +1,5 @@
 <script lang="ts">
   import {getTagValue} from "@welshman/util"
-  import {urlIsMedia} from "@welshman/content"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
   export let note, showMedia
@@ -9,5 +8,5 @@
 </script>
 
 {#if url}
-  <NoteContentLink value={{url, isMedia: urlIsMedia(url)}} {showMedia} />
+  <NoteContentLink {url} {showMedia} />
 {/if}

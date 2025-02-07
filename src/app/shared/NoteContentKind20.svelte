@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {fromPairs} from '@welshman/lib'
   import {getTags, getTagValue, tagsFromIMeta, type TrustedEvent} from "@welshman/util"
   import Carousel from "src/app/shared/Carousel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
@@ -9,30 +10,26 @@
   export let showEntire = true
   export let showMedia = getSetting("show_media")
 
-  const title = getTagValue("title", note.tags)
+  const {title, alt} = fromPairs(note.tags)
 
-  let images = getTags("imeta", note.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
+  let imeta = getTags("imeta", note.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
 
-  const onError = item => {
-    images = images.filter(i => i !== item)
+  const onError = url => {
+    imeta = imeta.filter(i => i !== url)
   }
 </script>
 
 {#if title}
   <h1 class="staatliches text-2xl">{title}</h1>
 {/if}
-{#if images.length > 0}
+{#if imeta.length > 0}
   {#if showMedia}
-    <Carousel items={images} let:item>
-      <img
-        src={getTagValue("url", item)}
-        alt={getTagValue("alt", item)}
-        on:error={() => onError(item)}
-        class="min-w-full" />
+    <Carousel items={imeta} let:item>
+      <img src={item.toString()} {alt} class="min-w-full" on:error={() => onError(item)} />
     </Carousel>
   {:else}
-    {#each images as item}
-      <NoteContentLink value={{url: getTagValue("url", item)}} {showMedia} />
+    {#each imeta as tags}
+      <NoteContentLink url={getTagValue('url', tags)} {showMedia} />
     {/each}
   {/if}
 {/if}

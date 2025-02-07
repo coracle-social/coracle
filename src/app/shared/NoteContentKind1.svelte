@@ -30,7 +30,6 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
   import ImageGrid from "./ImageGrid.svelte"
-  import {onMount} from "svelte"
 
   export let note
   export let minLength = 500
@@ -69,22 +68,15 @@
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
 
-  let fullContent: Parsed[] = []
-
-  onMount(() => {
-    fullContent = reduceLinks(parse(note))
-  })
+  const fullContent = reduceLinks(parse(note))
 
   $: shortContent = showEntire
     ? fullContent
-    : truncate(
-        fullContent.filter(p => !skipMedia || (isLink(p) && p.value.isMedia)),
-        {
-          minLength,
-          maxLength,
-          mediaLength: showMedia ? 200 : 50,
-        },
-      )
+    : truncate(fullContent, {
+        minLength,
+        maxLength,
+        mediaLength: showMedia ? 200 : 50,
+      })
 
   $: ellipsize = expandable && shortContent.map(c => (Array.isArray(c) ? c[0] : c)).find(isEllipsis)
 </script>
@@ -95,7 +87,7 @@
     "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
     {#if isLinkGrid(parsed)}
-      <ImageGrid value={parsed.value} onClick={expand} {showMedia} />
+      <ImageGrid links={parsed.value.links} onClick={expand} {showMedia} />
     {:else if isNewline(parsed)}
       <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
@@ -111,7 +103,7 @@
         <QRCode code={parsed.value} />
       </div>
     {:else if isLink(parsed)}
-      <NoteContentLink value={parsed.value} showMedia={showMedia && isEnd(i)} />
+      <NoteContentLink url={parsed.value.url.toString()} showMedia={showMedia && isEnd(i)} />
     {:else if isProfile(parsed)}
       <PersonLink pubkey={parsed.value.pubkey} />
     {:else if isEvent(parsed) || isAddress(parsed)}

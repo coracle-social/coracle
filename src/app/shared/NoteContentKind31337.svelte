@@ -1,11 +1,13 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
+  import type {TrustedEvent} from "@welshman/util"
   import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"
   import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
 
-  export let note, showMedia
+  export let note: TrustedEvent
+  export let showMedia: boolean
 
   const imeta = getTag("imeta", note.tags)
   const categories = getTagValues("c", note.tags)
@@ -27,6 +29,6 @@
     <Media url={getTagValue("url", tags)} {tags} />
   {/if}
   {#if cover}
-    <NoteContentLink {showMedia} value={{url: cover, isMedia: true}} />
+    <NoteContentLink {showMedia} url={cover} />
   {/if}
 </div>

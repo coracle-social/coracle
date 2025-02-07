@@ -29,7 +29,7 @@
     </div>
     <NoteContentKind1 note={zap.request} {showEntire} />
     {#if url}
-      <NoteContentLink value={{url}} {showMedia} />
+      <NoteContentLink {url} {showMedia} />
     {/if}
   </div>
 {/if}

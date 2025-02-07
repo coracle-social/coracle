@@ -142,7 +142,7 @@
     class="relative transition-colors"
     class:opacity-50={loading}
     class:pointer-events-none={loading}>
-    <div transition:slide|local class="note-reply relative my-2 gap-1" on:click|stopPropagation>
+    <div transition:slide|local class="note-reply relative mt-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
           <EditorContent {editor}>

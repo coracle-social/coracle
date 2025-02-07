@@ -2,9 +2,9 @@
   .shimmer {
     background: linear-gradient(
       to right,
-      var(--tinted-500) 8%,
-      var(--tinted-600) 18%,
-      var(--tinted-500) 33%
+      var(--tinted-700) 8%,
+      var(--tinted-800) 18%,
+      var(--tinted-700) 33%
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
@@ -28,9 +28,14 @@
   export let src
   export let onClick = undefined
 
+  const urls = ensurePlural(src)
+
   let i = 0
   let loading = true
-  const urls = ensurePlural(src)
+
+  const onLoad = () => {
+    loading = false
+  }
 
   const onError = () => {
     if (i < urls.length - 1) {
@@ -39,13 +44,7 @@
   }
 </script>
 
-<img
-  {...$$props}
-  class:hidden={loading}
-  on:error={onError}
-  on:load={() => (loading = false)}
-  on:click={onClick}
-  src={imgproxy(urls[i])} />
+<img {...$$props} class:hidden={loading} on:error={onError} on:load={onLoad} on:click={onClick} src={imgproxy(urls[i])} />
 
 {#if loading}
   <slot name="placeholder">
