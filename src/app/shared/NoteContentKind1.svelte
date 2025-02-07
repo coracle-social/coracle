@@ -1,6 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
+  import {prop} from "@welshman/lib"
   import {fromNostrURI} from "@welshman/util"
+  import type {Parsed, ParsedLinkValue} from '@welshman/content'
   import {
     parse,
     truncate,
@@ -18,7 +20,6 @@
     isNewline,
     reduceLinks,
     isLinkGrid,
-    type Parsed,
   } from "@welshman/content"
   import QRCode from "src/partials/QRCode.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -26,17 +27,15 @@
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
   import NoteContentCode from "src/app/shared/NoteContentCode.svelte"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
-  import ImageGrid from "./ImageGrid.svelte"
 
   export let note
   export let minLength = 500
   export let maxLength = 700
   export let showEntire = false
   export let showMedia = false
-  export let skipMedia = false
   export let expandable = true
   export let depth = 0
 
@@ -68,7 +67,9 @@
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
 
-  const fullContent = reduceLinks(parse(note))
+  const fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
+
+  const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
 
   $: shortContent = showEntire
     ? fullContent
@@ -87,7 +88,7 @@
     "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
     {#if isLinkGrid(parsed)}
-      <ImageGrid links={parsed.value.links} onClick={expand} {showMedia} />
+      <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
     {:else if isNewline(parsed)}
       <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
@@ -103,7 +104,7 @@
         <QRCode code={parsed.value} />
       </div>
     {:else if isLink(parsed)}
-      <NoteContentLink url={parsed.value.url.toString()} showMedia={showMedia && isEnd(i)} />
+      <NoteContentLinks urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
     {:else if isProfile(parsed)}
       <PersonLink pubkey={parsed.value.pubkey} />
     {:else if isEvent(parsed) || isAddress(parsed)}

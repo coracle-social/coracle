@@ -4,13 +4,12 @@
   import {onMount} from "svelte"
   import {nip19} from "nostr-tools"
   import {fromPairs, switcher} from "@welshman/lib"
-  import {urlIsMedia} from "@welshman/content"
   import {fromNostrURI, getTopicTagValues} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import {router} from "src/app/util/router"
 
   export let note, showEntire
@@ -66,8 +65,8 @@
   {#if summary || alt}
     <p>{summary || alt}</p>
   {/if}
-  {#if showMedia && image && urlIsMedia(image)}
-    <NoteContentLink url={image} showMedia />
+  {#if showMedia && image}
+    <NoteContentLinks urls={[image]} showMedia />
   {/if}
   <div>
     {#each getTopicTagValues(note.tags) as topic}

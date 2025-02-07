@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {getTagValue} from "@welshman/util"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import {getTagValues} from "@welshman/util"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note, showMedia
 
-  const url = getTagValue("url", note.tags)
+  const urls = getTagValues("url", note.tags)
 </script>
 
-{#if url}
-  <NoteContentLink {url} {showMedia} />
+{#if urls.length > 0}
+  <NoteContentLinks {urls} {showMedia} />
 {/if}

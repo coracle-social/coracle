@@ -7,7 +7,7 @@
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
 
@@ -35,7 +35,7 @@
         <p>{summary}</p>
       {/if}
       {#if showMedia && image && urlIsMedia(image)}
-        <NoteContentLink url={image} showMedia />
+        <NoteContentLinks urls={[image]} showMedia />
       {/if}
       <NoteContentTopics {note} />
     </FlexColumn>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
 
-  export let items: any[] = []
+  export let urls: any[] = []
   export let onClose: () => void = undefined
   export let currentIndex = 0
   export let keyboardShortcut = false
@@ -21,7 +21,7 @@
   }
 
   function handleScroll(event: WheelEvent | TouchEvent) {
-    if (items.length > 1 && currentIndex !== items.length - 1) {
+    if (urls.length > 1 && currentIndex !== urls.length - 1) {
       event.stopPropagation()
     }
     if (carouselElement) {
@@ -35,7 +35,7 @@
     if (event.key === "ArrowLeft") {
       scrollToIndex(Math.max(currentIndex - 1, 0))
     } else if (event.key === "ArrowRight") {
-      scrollToIndex(Math.min(currentIndex + 1, items.length - 1))
+      scrollToIndex(Math.min(currentIndex + 1, urls.length - 1))
     } else if (event.key === "Escape") {
       onClose()
     }
@@ -61,19 +61,19 @@
     on:wheel={handleScroll}
     on:touchmove={handleScroll}
     on:touchend={handleScroll}>
-    {#each items as item, index}
+    {#each urls as url, index}
       <div
         class="h-full w-full shrink-0 snap-always overflow-hidden rounded-xl bg-opacity-50"
         class:snap-start={index === 0}
         class:snap-center={index !== 0}>
-        <slot {item}>Missing template</slot>
+        <slot {url}>Missing template</slot>
       </div>
     {/each}
   </div>
 
-  {#if items.length > 1}
+  {#if urls.length > 1}
     <div class="absolute bottom-4 flex w-full items-center justify-center gap-1">
-      {#each items as _, index (index)}
+      {#each urls as _, index (index)}
         <button
           class="border-primary h-2 w-2 rounded-full border"
           class:bg-white={index === currentIndex}
@@ -93,9 +93,9 @@
       class="absolute inset-y-0 right-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
       <button
         class="bg-primary rounded-full p-2 text-white"
-        class:opacity-0={currentIndex == items.length - 1}
+        class:opacity-0={currentIndex == urls.length - 1}
         on:click|stopPropagation={() =>
-          scrollToIndex(Math.min(currentIndex + 1, items.length - 1))}>
+          scrollToIndex(Math.min(currentIndex + 1, urls.length - 1))}>
         <i class="fas fa-chevron-right text-2xl"></i>
       </button>
     </div>

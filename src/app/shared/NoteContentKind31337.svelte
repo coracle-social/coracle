@@ -4,7 +4,7 @@
   import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import Media from "src/partials/Media.svelte"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note: TrustedEvent
   export let showMedia: boolean
@@ -29,6 +29,6 @@
     <Media url={getTagValue("url", tags)} {tags} />
   {/if}
   {#if cover}
-    <NoteContentLink {showMedia} url={cover} />
+    <NoteContentLinks {showMedia} urls={[cover]} />
   {/if}
 </div>

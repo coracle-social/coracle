@@ -9,7 +9,6 @@
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {router} from "src/app/util/router"
@@ -19,7 +18,6 @@
   export let showMedia = false
   export let showEntire = false
 
-  const images = getTagValues("image", note.tags)
   const {title, summary, location, status} = fromPairs(note.tags)
   const [price, code = "SAT"] = getTagValue("price", note.tags)?.slice(1) || []
   const address = Address.fromEvent(note, ctx.app.router.Event(note).getUrls())
@@ -67,17 +65,8 @@
       <p class="text-neutral-200">{summary}</p>
     {/if}
     <div class="h-px bg-neutral-600" />
-    <NoteContentKind1 skipMedia {note} {showEntire} />
+    <NoteContentKind1 {note} {showEntire} {showMedia} />
   </div>
-  {#if showMedia}
-    <Carousel urls={images} />
-  {:else}
-    <div class="flex flex-col">
-      {#each images as url}
-        <NoteContentLink {url} />
-      {/each}
-    </div>
-  {/if}
   <NoteContentTopics {note} />
   {#if !$deleted}
     <div class="flex justify-center">

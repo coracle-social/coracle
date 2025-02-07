@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import NoteContentLink from "src/app/shared/NoteContentLink.svelte"
+  import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note: TrustedEvent
   export let showMedia: boolean
@@ -16,6 +16,6 @@
     <p>{description}</p>
   {/if}
   {#if image}
-    <NoteContentLink {showMedia} url={image} />
+    <NoteContentLinks {showMedia} urls={[image]} />
   {/if}
 </div>
