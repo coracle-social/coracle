@@ -25,8 +25,7 @@
     </Chips>
   </div>
   {#if imeta}
-    {@const tags = tagsFromIMeta(imeta.slice(1))}
-    <Media url={getTagValue("url", tags)} {tags} />
+    <Media url={getTagValue("url", tagsFromIMeta(imeta.slice(1)))} />
   {/if}
   {#if cover}
     <NoteContentLinks {showMedia} urls={[cover]} />
