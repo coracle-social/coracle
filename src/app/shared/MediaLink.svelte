@@ -8,13 +8,17 @@
 
   const coracleRegexp = /^(https?:\/\/)?(app\.)?coracle.social/
 
-  const onClick = () => {
+  const onClick = (e: {detail: PointerEvent}) => {
+    if (e.detail.metaKey) {
+      return window.open(url, '_blank')
+    }
+
     if (url.match(coracleRegexp)) {
-      router.at(url.replace(coracleRegexp, "")).push({overlay: true})
+      router.at(url.replace(coracleRegexp, "")).open({overlay: true})
     } else if (isShareableRelayUrl(url)) {
-      router.at("relays").of(url).push({overlay: true})
+      router.at("relays").of(url).open({overlay: true})
     } else {
-      router.at("media").of(url).push({overlay: true})
+      router.at("media").of(url).open({overlay: true})
     }
   }
 </script>
@@ -23,7 +27,6 @@
   underline
   stopPropagation
   class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-  externalHref={url}
   on:click={onClick}>
   {displayUrl(url)}
 </Anchor>
