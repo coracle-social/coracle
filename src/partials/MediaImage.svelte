@@ -8,7 +8,7 @@
   export let fullSize = false
 
   const src = imgproxy(url)
-  const className = cx("object-contain object-center", {"max-h-96": !fullSize})
+  const className = cx("object-contain object-center", {"max-h-96": !fullSize, 'max-h-screen': fullSize})
 </script>
 
 <Image {src} {alt} class={className} />

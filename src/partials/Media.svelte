@@ -4,10 +4,11 @@
   import MediaTidal from "src/partials/MediaTidal.svelte"
   import MediaVideo from "src/partials/MediaVideo.svelte"
   import MediaImage from "src/partials/MediaImage.svelte"
-  import MediaLink from "src/partials/MediaLink.svelte"
+  import MediaLinkPreview from "src/partials/MediaLinkPreview.svelte"
 
   export let url: string
   export let fullSize = false
+  export let onClick: (event: any) => void = undefined
 </script>
 
 {#if url.match(/\.(wav|mp3|m3u8)$/)}
@@ -15,9 +16,8 @@
 {:else}
   <a
     href={url}
-    target="_blank"
-    style="background-color: rgba(15, 15, 14, 0.5)"
-    class="relative flex w-full flex-grow flex-col overflow-hidden rounded">
+    on:click|preventDefault={onClick}
+    class="relative flex flex-grow flex-col overflow-hidden rounded bg-neutral-800">
     {#if url.match(/open.spotify.com/)}
       <MediaSpotify {url} />
     {:else if url.match(/tidal.com/)}
@@ -27,7 +27,7 @@
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <MediaImage {url} {fullSize} />
     {:else}
-      <MediaLink {url} />
+      <MediaLinkPreview {url} />
     {/if}
   </a>
 {/if}

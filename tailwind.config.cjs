@@ -78,7 +78,6 @@ module.exports = {
       popover: 4,
       modal: 5,
       toast: 6,
-      zoom: 7,
     },
     screens: {
       xs: "400px",
