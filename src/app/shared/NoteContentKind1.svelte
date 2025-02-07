@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {fromNostrURI} from "@welshman/util"
-  import type {ParsedLinkValue} from '@welshman/content'
+  import type {ParsedLinkValue} from "@welshman/content"
   import {
     parse,
     truncate,
@@ -44,7 +44,7 @@
 
   const isBoundary = i => {
     const parsed = shortContent[i]
-    if (parsed instanceof Array) return false
+
     if (!parsed || isNewline(parsed)) return true
     if (isText(parsed)) return Boolean(parsed.value.match(/^\s+$/))
 
@@ -57,18 +57,17 @@
 
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
-    if (!parsed) return true
-    if (parsed instanceof Array) return showMedia
-    if (isLink(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
+
+    if (isLink(parsed) || isLinkGrid(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
 
     return isEvent(parsed) || isAddress(parsed)
   }
 
   const isNextToBlock = (i: number) => isBlock(i - 1) || isBlock(i + 1)
 
-  const fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
-
   const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
+
+  $: fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
 
   $: shortContent = showEntire
     ? fullContent
@@ -86,9 +85,7 @@
   style={ellipsize &&
     "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
   {#each shortContent as parsed, i}
-    {#if isLinkGrid(parsed)}
-      <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
-    {:else if isNewline(parsed)}
+    {#if isNewline(parsed)}
       <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
     {:else if isTopic(parsed)}
       <NoteContentTopic value={parsed.value} />
@@ -104,6 +101,8 @@
       </div>
     {:else if isLink(parsed)}
       <NoteContentLinks urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
+    {:else if isLinkGrid(parsed)}
+      <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
     {:else if isProfile(parsed)}
       <PersonLink pubkey={parsed.value.pubkey} />
     {:else if isEvent(parsed) || isAddress(parsed)}

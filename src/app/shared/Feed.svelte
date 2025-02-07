@@ -59,6 +59,7 @@
     const definition = hasKinds
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
+
     ctrl = createFeedController({
       feed: definition,
       forcePlatform,

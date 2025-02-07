@@ -18,8 +18,6 @@
   export let canClose = true
   export let canCloseAll = true
 
-  console.log(overlay)
-
   const {history} = router
 
   let root, content, closing, historyItem, isNested
@@ -111,6 +109,7 @@
     <div
       transition:fade
       class="fixed inset-0 z-modal"
+      class:z-overlay={overlay}
       class:pointer-events-none={closing}
       class:ml-72={innerWidth >= 1024 && !overlay}>
       <div

@@ -46,7 +46,6 @@
     "@welshman/signer": "~0.0.20",
     "@welshman/store": "~0.0.16",
     "@welshman/util": "~0.0.60",
-    "@welshman/util": "~0.0.60",
     "autoprefixer": "^10.4.20",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",

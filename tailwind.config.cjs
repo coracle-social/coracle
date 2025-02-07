@@ -77,7 +77,9 @@ module.exports = {
       chat: 3,
       popover: 4,
       modal: 5,
-      toast: 6,
+      sidebar: 6,
+      overlay: 7,
+      toast: 8,
     },
     screens: {
       xs: "400px",
