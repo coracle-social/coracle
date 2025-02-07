@@ -10,7 +10,8 @@
   const getSpan = (i: number) => columns - (i % columns)
 </script>
 
-<div class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded">
+<div
+  class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded bg-neutral-800 p-2">
   {#each urls as url, i}
     {@const className = i === 0 ? "col-span-" + getSpan(urls.length - 1) : ""}
     {@const clickHandler = event => onClick(url, event)}

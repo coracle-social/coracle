@@ -4,6 +4,7 @@
   import {ctx} from "@welshman/lib"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
+  import Redirect from "src/app/shared/Redirect.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
 
@@ -38,7 +39,5 @@
     {/if}
   {/await}
 {:else}
-  <Content size="lg" class="text-center">
-    <div>Sorry, we weren't able to find "{entity}".</div>
-  </Content>
+  <Redirect to="/" />
 {/if}
