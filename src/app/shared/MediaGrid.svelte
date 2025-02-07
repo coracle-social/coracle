@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {displayUrl} from "@welshman/lib"
   import cx from "classnames"
-  import {router} from "src/app/util"
-  import Anchor from "src/partials/Anchor.svelte"
   import Image from "src/partials/Image.svelte"
   import ImageZoom from "./ImageZoom.svelte"
 

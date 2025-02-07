@@ -1,8 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {prop} from "@welshman/lib"
   import {fromNostrURI} from "@welshman/util"
-  import type {Parsed, ParsedLinkValue} from '@welshman/content'
+  import type {ParsedLinkValue} from '@welshman/content'
   import {
     parse,
     truncate,

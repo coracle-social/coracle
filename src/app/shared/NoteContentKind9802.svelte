@@ -1,7 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {urlIsMedia} from "@welshman/content"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 

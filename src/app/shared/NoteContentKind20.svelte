@@ -1,7 +1,6 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
   import {getTags, getTagValue, tagsFromIMeta, type TrustedEvent} from "@welshman/util"
-  import Carousel from "src/app/shared/Carousel.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import {getSetting} from "src/engine"
@@ -24,4 +23,7 @@
 {#if note.content}
   <div class="h-2" />
   <NoteContentKind1 {note} {showEntire} />
+{:else if alt}
+  <div class="h-2" />
+  <p>{alt}</p>
 {/if}

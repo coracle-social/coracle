@@ -1,6 +1,4 @@
 <script lang="ts">
-  import {displayUrl} from "src/util/misc"
-  import Media from "src/partials/Media.svelte"
   import MediaGrid from "src/app/shared/MediaGrid.svelte"
   import MediaLink from "src/app/shared/MediaLink.svelte"
 

@@ -84,7 +84,7 @@
       class="absolute inset-y-0 left-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
       <button
         class="bg-primary rounded-full p-2 text-white"
-        class:opacity-0={currentIndex == 0}
+        class:opacity-0={currentIndex === 0}
         on:click|stopPropagation={() => scrollToIndex(Math.max(currentIndex - 1, 0))}>
         <i class="fas fa-chevron-left text-2xl"></i>
       </button>
@@ -93,7 +93,7 @@
       class="absolute inset-y-0 right-0 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
       <button
         class="bg-primary rounded-full p-2 text-white"
-        class:opacity-0={currentIndex == urls.length - 1}
+        class:opacity-0={currentIndex === urls.length - 1}
         on:click|stopPropagation={() =>
           scrollToIndex(Math.min(currentIndex + 1, urls.length - 1))}>
         <i class="fas fa-chevron-right text-2xl"></i>
