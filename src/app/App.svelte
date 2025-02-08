@@ -1,4 +1,5 @@
 <script lang="ts">
+
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
 
@@ -91,6 +92,10 @@
     asEntity,
   } from "src/app/util/router"
 
+  //Translation import mechanism
+  import "src/app/localization/i18n.js"
+  
+  
   const {session, pubkey} = app
 
   // Routes

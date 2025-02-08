@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n'
   import {seconds} from "hurdak"
   import {derived, get} from "svelte/store"
   import {now, omit} from "@welshman/lib"
@@ -24,6 +25,10 @@
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, hasNewMessages, hasNewNotifications} from "src/engine"
+
+
+//add florent : ajout du selcteur de langue ...
+  import LanguageSelector from './shared/LanguageSelector.svelte'
 
   const {page} = router
 
@@ -79,14 +84,23 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
-  {#if env.PLATFORM_RELAYS.length === 0}
+
+  <!--Florent test switch language-->
+  <MenuDesktopItem>
+    <LanguageSelector />
+</MenuDesktopItem>
+<br />
+<MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>
+    {$_('page.home.feeds', { default: 'Feeds' })}
+</MenuDesktopItem>
+
+{#if env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem
       path="/settings/relays"
       disabled={!$signer}
       isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
-        Relays
+        {$_('page.home.relays', { default: 'Relays' })}
         {#if $slowConnections.length > 0}
           <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
         {/if}
@@ -98,7 +112,7 @@
     disabled={!$signer}
     isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
-      Notifications
+      {$_('page.home.notifications', { default: 'Notifications' })}
       {#if $hasNewNotifications}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
@@ -109,44 +123,44 @@
     disabled={!$signer}
     isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
-      Messages
+      {$_('page.home.messages', { default: 'Messages' })} 
       {#if $hasNewMessages}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem modal path="/groups" disabled={!$signer}>Groups</MenuDesktopItem>
+  <MenuDesktopItem modal path="/groups" disabled={!$signer}>   {$_('page.home.group', { default: 'Group' })} </MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
-      on:click={() => setSubMenu("settings")}>Settings</Anchor>
+      on:click={() => setSubMenu("settings")}>{$_('page.home.settings.title', { default: 'Settings' })}</Anchor>
     <div class="staatliches flex h-8 gap-2 px-8 text-tinted-500">
-      <Anchor class="hover:text-tinted-100" href="/about">About</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/privacy.html">Privacy</Anchor>
+      <Anchor class="hover:text-tinted-100" href="/about">{$_('page.home.about', { default: 'About' })}</Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/terms.html">{$_('page.home.terms', { default: 'Terms' })}</Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/privacy.html">{$_('page.home.privacy', { default: 'Privacy' })}</Anchor>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
-          <i class="fa fa-palette" /> Toggle Theme
+          <i class="fa fa-palette" /> {$_('page.home.settings.theme', { default: 'Toggle Theme' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/data"
           disabled={!$signer}>
-          <i class="fa fa-database" /> Database
+          <i class="fa fa-database" /> {$_('page.home.settings.database', { default: 'Database' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
           disabled={!$signer}>
-          <i class="fa fa-cog" /> App Settings
+          <i class="fa fa-cog" /> {$_('page.home.settings.application_settings', { default: 'App Settings' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/content"
           disabled={!$signer}>
-          <i class="fa fa-volume-xmark" /> Content Settings
+          <i class="fa fa-volume-xmark" /> {$_('page.home.settings.content_settings', { default: 'Content Settings' })} 
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
