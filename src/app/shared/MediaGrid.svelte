@@ -11,11 +11,12 @@
 </script>
 
 <div
-  class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded bg-neutral-800 p-2">
+  class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded bg-neutral-800"
+  class:p-2={urls.length > 1}>
   {#each urls as url, i}
     {@const className = i === 0 ? "col-span-" + getSpan(urls.length - 1) : ""}
     {@const clickHandler = event => onClick(url, event)}
-    <div class="h-full max-h-96 w-full object-cover {className}">
+    <div class="h-full w-full object-cover {className}">
       <Media {url} onClick={clickHandler} />
     </div>
   {/each}
