@@ -50,7 +50,7 @@
       </Button>
     </div>
     {#key $profile?.about}
-      <Content event={{content: $profile?.about || "", tags: []}} hideMedia />
+      <Content event={{content: $profile?.about || "", tags: []}} hideMediaAtDepth={0} />
     {/key}
   </div>
   {#if $session?.email}

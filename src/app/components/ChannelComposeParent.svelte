@@ -4,7 +4,7 @@
   import {slide} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Content from "@app/components/Content.svelte"
+  import NoteContent from "@app/components/NoteContent.svelte"
 
   const {
     verb,
@@ -22,7 +22,12 @@
   transition:slide>
   <p class="text-primary">{verb} @{displayProfileByPubkey(event.pubkey)}</p>
   {#key event.id}
-    <Content {event} hideMedia minLength={100} maxLength={300} expandMode="disabled" />
+    <NoteContent
+      {event}
+      hideMediaAtDepth={0}
+      minLength={100}
+      maxLength={300}
+      expandMode="disabled" />
   {/key}
   <Button class="absolute right-2 top-2 cursor-pointer" onclick={clear}>
     <Icon icon="close-circle" />

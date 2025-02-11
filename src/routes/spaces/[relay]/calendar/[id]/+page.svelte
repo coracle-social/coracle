@@ -127,7 +127,7 @@
           <div class="flex py-2 opacity-50">
             <div class="h-px flex-grow bg-base-content opacity-25"></div>
           </div>
-          <Content showEntire event={$event} quoteProps={{relays: [url]}} />
+          <Content showEntire event={$event} relays={[url]} />
         </div>
       </div>
       <div class="flex w-full flex-col justify-end sm:flex-row">

@@ -4,7 +4,7 @@
   import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
-  import Content from "@app/components/Content.svelte"
+  import NoteContent from "@app/components/NoteContent.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
   import {publishDelete, publishReaction} from "@app/commands"
@@ -26,7 +26,7 @@
 </script>
 
 <NoteCard {event} class="card2 bg-alt">
-  <Content {event} expandMode="inline" />
+  <NoteContent {event} expandMode="inline" />
   <div class="flex w-full justify-between gap-2">
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right">
       <EmojiButton {onEmoji} class="btn btn-neutral btn-xs h-[26px] rounded-box">

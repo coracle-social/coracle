@@ -7,10 +7,11 @@
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
+  import NoteContent from "@app/components/NoteContent.svelte"
   import {deriveEvent, entityLink, ROOM} from "@app/state"
   import {makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
 
-  const {value, event, noteContent, relays = [], minimal = false} = $props()
+  const {value, event, depth, hideMediaAtDepth, relays = []} = $props()
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
@@ -103,8 +104,8 @@
 
 <Button class="my-2 block max-w-full text-left" {onclick}>
   {#if $quote}
-    <NoteCard {minimal} event={$quote} class="bg-alt rounded-box p-4">
-      {@render noteContent({event: $quote, minimal})}
+    <NoteCard event={$quote} class="bg-alt rounded-box p-4">
+      <NoteContent {hideMediaAtDepth} {relays} event={$quote} depth={depth + 1} />
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">
