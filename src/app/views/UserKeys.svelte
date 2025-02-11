@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {session} from "@welshman/app"
+  import type {Nip46Signer} from "@welshman/signer"
+  import {session, signer} from "@welshman/app"
   import {nip19} from "nostr-tools"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
@@ -8,6 +9,7 @@
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
+  const getBunkerUrl = () => ($signer as Nip46Signer).broker.getBunkerUrl()
 
   document.title = "Keys"
 </script>
@@ -31,7 +33,7 @@
         on nostr.
       </small>
     </div>
-    {#if $session?.secret}
+    {#if $session?.method === "nip01"}
       <div>
         <CopyValue
           isPassword
@@ -45,6 +47,16 @@
           Be careful about copying this into other apps - instead, consider using a <Anchor
             href={nip07}
             external>compatible browser extension</Anchor> to securely store your key.
+        </small>
+      </div>
+    {/if}
+    {#if $session?.method === "nip46"}
+      <div>
+        <CopyValue label="Bunker URL" value={getBunkerUrl()} />
+        <small class="text-neutral-100">
+          Your bunker url works like password, and can be used instead of your private key to log in
+          to other apps. This is safer than sharing your private key, but you should still be
+          careful to keep your bunker url private.
         </small>
       </div>
     {/if}

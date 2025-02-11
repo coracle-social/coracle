@@ -40,11 +40,20 @@ import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {getParentIdOrAddr} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
-import {hexToBytes} from "@noble/hashes/utils"
-import {nip05, nip19} from "nostr-tools"
+import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
+import * as nip19 from "nostr-tools/nip19"
+import * as nip05 from "nostr-tools/nip05"
 import {parseJson} from "src/util/misc"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
+
+export const nsecDecode = (nsec: string) => {
+  const {type, data} = nip19.decode(nsec)
+
+  if (type !== "nsec") throw new Error(`Invalid nsec: ${nsec}`)
+
+  return bytesToHex(data)
+}
 
 export const isKeyValid = (key: string) => {
   // Validate the key before setting it to state by encoding it using bech32.
