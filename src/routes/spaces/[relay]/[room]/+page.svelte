@@ -147,6 +147,12 @@
     let newMessagesSeen = false
 
     if (events) {
+      const lastUserEvent = $events.find(e => e.pubkey === $pubkey)
+
+      // Adjust last checked to account for messages that came from a different device
+      const adjustedLastChecked =
+        lastChecked && lastUserEvent ? Math.max(lastUserEvent.created_at, lastChecked) : lastChecked
+
       for (const event of $events.toReversed()) {
         if (seen.has(event.id)) {
           continue
@@ -156,9 +162,9 @@
 
         if (
           !newMessagesSeen &&
+          adjustedLastChecked &&
           event.pubkey !== $pubkey &&
-          lastChecked &&
-          event.created_at > lastChecked
+          event.created_at > adjustedLastChecked
         ) {
           elements.push({type: "new-messages", id: "new-messages"})
           newMessagesSeen = true
