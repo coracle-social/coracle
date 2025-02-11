@@ -22,7 +22,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
-  import {makeEditor, removeBlobs} from "src/app/editor"
+  import {makeEditor, removePendingUploads} from "src/app/editor"
 
   export let parent
   export let replyIsOpen: boolean
@@ -31,7 +31,6 @@
 
   const nsecWarning = writable(null)
   const uploading = writable(false)
-  const uploadError = writable("")
 
   $: mentions = without(
     [$session?.pubkey],
@@ -63,7 +62,7 @@
 
   const saveDraft = () => {
     $uploading = false
-    removeBlobs(editor)
+    removePendingUploads(editor)
     drafts.set(parent.id, editor.getHTML())
   }
 
@@ -123,22 +122,17 @@
   }
 
   const editor = makeEditor({
+    uploading,
     submit: send,
     autofocus: true,
-    uploading,
-    uploadError,
     content: drafts.get(parent.id) || "",
+    onUploadError: (url, file) =>
+      showWarning(`Failed to upload file to ${url}: ${file.uploadError}`),
   })
 
   $: {
     if (replyIsOpen) {
       saveDraft()
-    }
-  }
-
-  $: {
-    if ($uploadError) {
-      showWarning($uploadError)
     }
   }
 

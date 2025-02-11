@@ -22,6 +22,6 @@
 </script>
 
 <div class="relative flex w-full overflow-x-hidden">
-  <div {...$$props} bind:this={element} class="relative w-full min-w-0 {$$props.class}" />
+  <div {...$$props} bind:this={element} class="relative grid w-full min-w-0 {$$props.class}" />
   <slot name="addon" />
 </div>

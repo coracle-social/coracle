@@ -4,6 +4,7 @@ import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import {Editor} from "@tiptap/core"
 import {ctx} from "@welshman/lib"
+import type {UploadTask} from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
 import {signer, profileSearch} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
@@ -27,16 +28,24 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const removeBlobs = (editor: Editor, errorsOnly = false) => {
+export const removePendingUploads = (editor: Editor) => {
   editor.view.state.doc.descendants((node, pos) => {
-    if (!(node.type.name === "image" || node.type.name === "video")) {
-      return
-    }
-    if (node.attrs.src.startsWith("blob:")) {
-      if (errorsOnly && !node.attrs.uploadError) return
+    if (["image", "video"].includes(node.type.name) && node.attrs.uploading) {
       editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
     }
   })
+
+  return true
+}
+
+export const removeFailedUploads = (editor: Editor) => {
+  editor.view.state.doc.descendants((node, pos) => {
+    if (["image", "video"].includes(node.type.name) && node.attrs.uploadError) {
+      editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
+    }
+  })
+
+  return true
 }
 
 export const makeEditor = ({
@@ -47,7 +56,7 @@ export const makeEditor = ({
   placeholder = "",
   submit,
   uploading,
-  uploadError,
+  onUploadError,
   wordCount,
 }: {
   aggressive?: boolean
@@ -57,7 +66,7 @@ export const makeEditor = ({
   placeholder?: string
   submit: () => void
   uploading?: Writable<boolean>
-  uploadError?: Writable<string>
+  onUploadError?: (url: string, task: UploadTask) => void
   wordCount?: Writable<number>
 }) =>
   new Editor({
@@ -88,9 +97,9 @@ export const makeEditor = ({
               onComplete() {
                 uploading?.set(false)
               },
-              onUploadError(currentEditor, file) {
-                removeBlobs(currentEditor as Editor, true)
-                uploadError?.set(`Failed to upload file to ${getUploadUrl()}: ${file.uploadError}`)
+              onUploadError(currentEditor, task: UploadTask) {
+                onUploadError?.(getUploadUrl(), task)
+                removeFailedUploads(currentEditor)
                 uploading?.set(false)
               },
             },

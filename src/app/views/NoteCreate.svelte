@@ -36,7 +36,6 @@
   export let pubkey = null
 
   const uploading = writable(false)
-  const uploadError = writable("")
   const wordCount = writable(0)
   const charCount = writable(0)
   const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
@@ -208,7 +207,8 @@
 
   const editor = makeEditor({
     uploading,
-    uploadError,
+    onUploadError: (url, file) =>
+      showWarning(`Failed to upload file to ${url}: ${file.uploadError}`),
     content: drafts.get("notecreate") || "",
     submit: onSubmit,
     autofocus: true,
@@ -247,12 +247,6 @@
       pow?.worker.terminate()
     }
   })
-
-  $: {
-    if ($uploadError) {
-      showWarning($uploadError)
-    }
-  }
 </script>
 
 <form on:submit|preventDefault={() => onSubmit()}>
