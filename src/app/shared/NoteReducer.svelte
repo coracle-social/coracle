@@ -14,6 +14,9 @@
   import {isEventMuted} from "src/engine"
   import {getValidZap} from "src/app/util"
 
+  type GetContext = (event: TrustedEvent) => TrustedEvent[]
+  type ShouldAddEvent = (event: TrustedEvent, getContext: GetContext) => boolean
+
   export let events: TrustedEvent[]
   export let depth = 0
   export let showMuted = false
@@ -21,6 +24,7 @@
   export let showDeleted = false
   export let shouldSort = false
   export let shouldAwait = false
+  export let shouldAddEvent: ShouldAddEvent = undefined
   export let items: TrustedEvent[] = []
 
   const timestamps = new Map<string, number>()
@@ -87,6 +91,7 @@
 
     // If we've already seen it, or it's not displayable, skip it
     if (timestamps.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
+    if (shouldAddEvent && !shouldAddEvent(event, getContext)) return
 
     let inserted = false
 

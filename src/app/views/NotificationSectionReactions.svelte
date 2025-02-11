@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {groupBy, ago, int, DAY} from "@welshman/lib"
+  import {pubkey} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import NotificationItem from "src/app/shared/NotificationItem.svelte"
   import NoteReactions from "src/app/shared/NoteReactions.svelte"
@@ -10,9 +11,12 @@
 
   const interval = int(DAY)
 
-  $: notifications = Array.from(
-    groupBy(e => Math.round(ago(e.created_at) / interval), $reactionNotifications).entries(),
-  ).slice(0, limit)
+  const getBucket = e => Math.round(ago(e.created_at) / interval)
+
+  const shouldAddEvent = (event, getContext) => event.pubkey === $pubkey
+
+  $: notificationsGrouped = groupBy(getBucket, $reactionNotifications)
+  $: notifications = Array.from(notificationsGrouped.entries()).slice(0, limit)
 
   onMount(() => {
     setChecked("reactions/*")
@@ -25,7 +29,15 @@
 
 <FlexColumn>
   {#each notifications as [seconds, events], i (seconds)}
-    <NotificationItem depth={0} {notifications} {interval} {events} {i} let:event let:context>
+    <NotificationItem
+      depth={0}
+      {notifications}
+      {interval}
+      {shouldAddEvent}
+      {events}
+      {i}
+      let:event
+      let:context>
       <NoteReactions {context} {event} />
     </NotificationItem>
   {:else}
