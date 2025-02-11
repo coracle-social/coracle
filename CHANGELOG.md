@@ -1,9 +1,27 @@
 # Changelog
 
-# Current
+# 0.6.0
+
+Contributors: @hodlbod, @dtonon, @thibaut
 
 - [x] Add support for tor/local relays
 - [x] Use nstart for onboarding process
+- [x] Oranize media into grids and add full-screen overlay view for images
+- [x] Fix several note editor bugs
+- [x] Improve thread, profile page, and notification loading
+- [x] Show more details on reaction notifications
+- [x] Improve mutes, add setting to completely hide muted people
+- [x] Tweak long form article rendering
+- [x] Refactor zap dialog
+- [x] Add kind 20 rendering support
+- [x] Improve rendering for various note kinds
+- [x] Use more subtle placeholder avatar
+- [x] Fix handling of all-caps lnurls
+- [x] Fix rendering of notes in publish information dialog
+- [x] Add pinned note support
+- [x] Remove broadcasting of note parents
+- [x] Add note scheduling via DVM
+- [x] Clean up modal colors and design
 
 # 0.5.0
 
