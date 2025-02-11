@@ -33,24 +33,24 @@
       return setStage("profile")
     }
 
-    if (state.username.length < 3) {
+    if (state.profile.name.length < 3) {
       return showWarning("Username is too short.")
     }
 
-    if (!state.username.match(/^[a-z0-9]+$/)) {
+    if (!state.profile.name.match(/^[a-z0-9]+$/)) {
       return showWarning("Please use only numbers and lowercase letters.")
     }
 
     loading = true
 
     try {
-      const handle = await loadHandle(`${state.username}@${signerDomain}`)
+      const handle = await loadHandle(`${state.profile.name}@${signerDomain}`)
 
       if (handle?.pubkey) {
         return showWarning("Sorry, it looks like that username is already taken.")
       }
 
-      state.pubkey = await broker.createAccount(state.username, signerDomain, nip46Perms)
+      state.pubkey = await broker.createAccount(state.profile.name, signerDomain, nip46Perms)
 
       if (!state.pubkey) {
         return showWarning("Something went wrong, please try again!")
@@ -97,7 +97,7 @@
 </p>
 <Field label="Your User Name">
   <Input
-    bind:value={state.username}
+    bind:value={state.profile.name}
     disabled={loading || state.pubkey}
     placeholder="nostrnewb27"
     class="flex-grow">

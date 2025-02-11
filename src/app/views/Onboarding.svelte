@@ -26,7 +26,6 @@
 
   let state = {
     pubkey: "",
-    username: "",
     profile: {
       name: "",
       about: "",

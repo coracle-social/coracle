@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {isMobile} from "src/util/html"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import Media from "src/partials/Media.svelte"
@@ -7,6 +8,10 @@
   export let setStage
 
   let media
+
+  const ac = window.location.origin
+  const at = isMobile ? "android" : "web"
+  const njump = `https://start.njump.me/?an=Coracle&at=${at}&ac=${ac}`
 
   const next = () => setStage("keys")
 
@@ -55,6 +60,10 @@
   When you’re ready, click below and we’ll guide you through the process of creating an account.
 </p>
 <Anchor button accent class="text-center" on:click={next}>Let's go!</Anchor>
+<p class="text-center text-sm opacity-75">
+  You can also try nostr's dedicated onboarding experience over at
+  <Anchor underline external href={njump}>njump</Anchor>.
+</p>
 
 {#if media}
   <Modal onEscape={closeMedia}>

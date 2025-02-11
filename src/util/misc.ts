@@ -1,4 +1,4 @@
-import {derived, writable, type Readable} from "svelte/store"
+import {derived, type Readable} from "svelte/store"
 import {
   now,
   stripProtocol,
@@ -8,12 +8,9 @@ import {
   last,
   sum,
   identity,
-  throttle,
   pluck,
   tryCatch,
   ensurePlural,
-  getJson,
-  setJson,
   MINUTE,
   HOUR,
   DAY,
