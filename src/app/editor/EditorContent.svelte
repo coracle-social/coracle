@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {Editor} from "@tiptap/core"
-  import {onDestroy, onMount} from "svelte"
+  import {onMount} from "svelte"
 
   export let editor: Editor
 
@@ -14,10 +14,6 @@
     if (editor.options.autofocus) {
       ;(element?.querySelector("[contenteditable]") as HTMLElement)?.focus()
     }
-  })
-
-  onDestroy(() => {
-    editor.destroy()
   })
 </script>
 

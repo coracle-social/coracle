@@ -1,24 +1,26 @@
 <script lang="ts">
   import Media from "src/partials/Media.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
 
   export let urls: string[]
   export let onClose: (e: any) => void
   export let onClick: (url: string, event: PointerEvent) => void
 
-  const columns = Math.ceil(Math.sqrt(urls.length))
-
+  const useGrid = urls.length > 2
+  const className = useGrid ? "p-2" : ""
+  const columns = useGrid ? Math.ceil(Math.sqrt(urls.length)) : 1
   const getSpan = (i: number) => columns - (i % columns)
 </script>
 
-<div
-  class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded bg-neutral-800"
-  class:p-2={urls.length > 1}>
+<AltColor
+  background={useGrid}
+  class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded {className}">
   {#each urls as url, i}
     {@const className = i === 0 ? "col-span-" + getSpan(urls.length - 1) : ""}
     {@const clickHandler = event => onClick(url, event)}
-    <div class="h-full w-full object-cover {className}">
+    <AltColor background={!useGrid} class="h-full w-full object-cover {className}">
       <Media {url} onClick={clickHandler} />
-    </div>
+    </AltColor>
   {/each}
   {#if onClose}
     <div
@@ -28,4 +30,4 @@
       <i class="fa fa-times" />
     </div>
   {/if}
-</div>
+</AltColor>

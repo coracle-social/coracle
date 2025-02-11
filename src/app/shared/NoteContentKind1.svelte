@@ -58,6 +58,7 @@
   const isBlock = (i: number) => {
     const parsed = fullContent[i]
 
+    if (!parsed) return false
     if (isLink(parsed) || isLinkGrid(parsed)) return showMedia && !parsed.raw.match("^ws|coracle")
 
     return isEvent(parsed) || isAddress(parsed)
@@ -67,7 +68,7 @@
 
   const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
 
-  $: fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
+  $: fullContent = reduceLinks(parse(note))
 
   $: shortContent = showEntire
     ? fullContent

@@ -138,6 +138,7 @@
 
   onDestroy(() => {
     pow?.worker.terminate()
+    editor.destroy()
   })
 </script>
 
@@ -151,7 +152,7 @@
     <div transition:slide|local class="note-reply relative mt-2 gap-1" on:click|stopPropagation>
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
-          <EditorContent {editor}>
+          <EditorContent doNotDestroy {editor}>
             <div class="flex flex-col justify-start" slot="addon">
               <button
                 disabled={$uploading}

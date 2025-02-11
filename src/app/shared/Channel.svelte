@@ -130,6 +130,7 @@
 
     return () => {
       scroller?.stop()
+      editor.destroy()
     }
   })
 </script>

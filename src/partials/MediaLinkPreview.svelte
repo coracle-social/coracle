@@ -22,7 +22,7 @@
   let hideImage = false
 </script>
 
-<a href={url} target="_blank" on:click|stopPropagation>
+<div class="flex h-full w-full flex-col justify-center">
   {#await loadPreview()}
     <Spinner />
   {:then { title, description, image }}
@@ -31,7 +31,7 @@
         alt="Link preview"
         src={imgproxy(image)}
         on:error={onError}
-        class="m-auto max-h-96 object-contain object-center" />
+        class="h-full max-h-96 w-full object-cover" />
     {/if}
     {#if image && !hideImage && title}
       <div class="h-px bg-neutral-600" />
@@ -47,4 +47,4 @@
       Unable to load a preview for {url}
     </p>
   {/await}
-</a>
+</div>

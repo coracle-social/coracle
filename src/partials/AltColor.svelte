@@ -10,7 +10,7 @@
     let cur = element
     let count = 0
     while (cur.parentElement) {
-      if (cur.parentElement.classList.contains("bg-swap")) {
+      if (cur.parentElement.classList.contains("bg-swap-bg")) {
         count++
       }
 
@@ -25,6 +25,7 @@
   on:click
   bind:this={element}
   class={cx("bg-swap", $$props.class)}
+  class:bg-swap-bg={background}
   class:bg-tinted-700={background && isAlt}
   class:bg-neutral-800={background && !isAlt}>
   <slot {isAlt} />

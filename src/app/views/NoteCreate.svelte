@@ -245,6 +245,7 @@
 
     return () => {
       pow?.worker.terminate()
+      editor.destroy()
     }
   })
 </script>

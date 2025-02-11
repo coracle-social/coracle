@@ -1,7 +1,9 @@
 <script lang="ts">
+  import {onDestroy} from "svelte"
   import {ctx} from "@welshman/lib"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
+  import AltColor from "src/partials/AltColor.svelte"
   import Heading from "src/partials/Heading.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import Rating from "src/partials/Rating.svelte"
@@ -38,6 +40,10 @@
     placeholder: "Write a review...",
     submit: onSubmit,
   })
+
+  onDestroy(() => {
+    editor.destroy()
+  })
 </script>
 
 <form on:submit|preventDefault={onSubmit}>
@@ -50,10 +56,9 @@
           <Rating bind:value={rating} />
         </div>
       </div>
-      <EditorContent
-        {editor}
-        class="shadow-inset rounded bg-tinted-200 px-2 py-2 text-black"
-        style="min-height: 6rem" />
+      <AltColor background class="overflow-hidden rounded">
+        <EditorContent {editor} class="min-h-24 bg-white p-3 text-black" />
+      </AltColor>
       <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
     </div>
   </Content>

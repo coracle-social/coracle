@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onDestroy} from "svelte"
   import {ctx} from "@welshman/lib"
   import {NOTE} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
@@ -42,6 +43,10 @@
   })
 
   let loading = false
+
+  onDestroy(() => {
+    editor.destroy()
+  })
 </script>
 
 <div class="flex gap-3">
