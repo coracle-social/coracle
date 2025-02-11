@@ -141,7 +141,7 @@
       <p>Failed to load comments.</p>
     {/await}
   {/if}
-  <PageBar class="mx-0">
+  <PageBar class="!mx-0">
     {#snippet icon()}
       <div>
         <Button class="btn btn-neutral btn-sm" onclick={back}>
