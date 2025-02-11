@@ -24,15 +24,16 @@
   import {fade} from "@lib/transition"
   import {page} from "$app/stores"
 
-  const {children, href = "", notification = false, ...restProps} = $props()
+  const {children, href = "", notification = false, replaceState = false, ...restProps} = $props()
 
   const active = $derived($page.url.pathname === href)
 </script>
 
 {#if href}
   <a
-    {...restProps}
     {href}
+    {...restProps}
+    data-sveltekit-replacestate={replaceState}
     class="{restProps.class} relative flex items-center gap-3 text-left transition-all hover:bg-base-100 hover:text-base-content"
     class:text-base-content={active}
     class:bg-base-100={active}>

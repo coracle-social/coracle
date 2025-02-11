@@ -57,14 +57,14 @@
   const addRoom = () => pushModal(RoomCreate, {url}, {replaceState})
 
   let showMenu = $state(false)
-  let replaceState = false
+  let replaceState = $state(false)
   let element: Element | undefined = $state()
 
   const members = $derived(
     $memberships.filter(l => hasMembershipUrl(l, url)).map(l => l.event.pubkey),
   )
 
-  onMount(async () => {
+  onMount(() => {
     replaceState = Boolean(element?.closest(".drawer"))
     pullConservatively({relays: [url], filters: [{kinds: [GROUP_META]}]})
   })
@@ -112,19 +112,25 @@
       {/if}
     </div>
     <div class="flex min-h-0 flex-col gap-1 overflow-auto">
-      <SecondaryNavItem href={makeSpacePath(url)}>
+      <SecondaryNavItem {replaceState} href={makeSpacePath(url)}>
         <Icon icon="home-smile" /> Home
       </SecondaryNavItem>
-      <SecondaryNavItem href={threadsPath} notification={$notifications.has(threadsPath)}>
+      <SecondaryNavItem
+        {replaceState}
+        href={threadsPath}
+        notification={$notifications.has(threadsPath)}>
         <Icon icon="notes-minimalistic" /> Threads
       </SecondaryNavItem>
-      <SecondaryNavItem href={calendarPath} notification={$notifications.has(calendarPath)}>
+      <SecondaryNavItem
+        {replaceState}
+        href={calendarPath}
+        notification={$notifications.has(calendarPath)}>
         <Icon icon="calendar-minimalistic" /> Calendar
       </SecondaryNavItem>
       <div class="h-2"></div>
       <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
       {#each $userRooms as room, i (room)}
-        <MenuSpaceRoomItem notify {url} {room} />
+        <MenuSpaceRoomItem {replaceState} notify {url} {room} />
       {/each}
       {#if $otherRooms.length > 0}
         <div class="h-2"></div>
@@ -137,9 +143,9 @@
         </SecondaryNavHeader>
       {/if}
       {#each $otherRooms as room, i (room)}
-        <MenuSpaceRoomItem {url} {room} />
+        <MenuSpaceRoomItem {replaceState} {url} {room} />
       {/each}
-      <SecondaryNavItem onclick={addRoom}>
+      <SecondaryNavItem {replaceState} onclick={addRoom}>
         <Icon icon="add-circle" />
         Create room
       </SecondaryNavItem>
