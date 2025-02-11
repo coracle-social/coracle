@@ -28,26 +28,6 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const removePendingUploads = (editor: Editor) => {
-  editor.view.state.doc.descendants((node, pos) => {
-    if (["image", "video"].includes(node.type.name) && node.attrs.uploading) {
-      editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
-    }
-  })
-
-  return true
-}
-
-export const removeFailedUploads = (editor: Editor) => {
-  editor.view.state.doc.descendants((node, pos) => {
-    if (["image", "video"].includes(node.type.name) && node.attrs.uploadError) {
-      editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
-    }
-  })
-
-  return true
-}
-
 export const makeEditor = ({
   aggressive = false,
   autofocus = false,
@@ -98,8 +78,8 @@ export const makeEditor = ({
                 uploading?.set(false)
               },
               onUploadError(currentEditor, task: UploadTask) {
+                currentEditor.commands.removeFailedUploads()
                 onUploadError?.(getUploadUrl(), task)
-                removeFailedUploads(currentEditor)
                 uploading?.set(false)
               },
             },

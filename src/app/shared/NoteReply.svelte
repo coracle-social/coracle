@@ -22,7 +22,7 @@
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
   import {getClientTags, publish, sign, userSettings} from "src/engine"
-  import {makeEditor, removePendingUploads} from "src/app/editor"
+  import {makeEditor} from "src/app/editor"
 
   export let parent
   export let replyIsOpen: boolean
@@ -62,7 +62,7 @@
 
   const saveDraft = () => {
     $uploading = false
-    removePendingUploads(editor)
+    editor.commands.removePendingUploads()
     drafts.set(parent.id, editor.getHTML())
   }
 
