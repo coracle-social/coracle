@@ -34,7 +34,7 @@ if (window.location.hash?.startsWith("#nostr-login")) {
     }
 
     if (success) {
-      setTimeout(() => router.at("/signup/welcome").open(), 300)
+      setTimeout(() => router.at("/signup").open(), 300)
     }
   })()
 }

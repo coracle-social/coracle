@@ -6,7 +6,6 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
-  import OnboardingProfile from "src/app/views/OnboardingProfile.svelte"
   import OnboardingFollows from "src/app/views/OnboardingFollows.svelte"
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
@@ -21,9 +20,9 @@
   import {router} from "src/app/util/router"
   import {setChecked} from "src/engine"
 
-  export let stage = "intro"
   export let invite = null
 
+  let stage = $session ? "follows" : "intro"
   let state = {
     pubkey: "",
     profile: {
@@ -96,9 +95,7 @@
     {#if stage === "intro"}
       <OnboardingIntro {setStage} />
     {:else if stage === "keys"}
-      <OnboardingKeys {setStage} bind:state />
-    {:else if stage === "profile"}
-      <OnboardingProfile {setStage} bind:state />
+      <OnboardingKeys {setStage} />
     {:else if stage === "follows"}
       <OnboardingFollows {setStage} bind:state />
     {:else if stage === "note"}
@@ -106,7 +103,7 @@
     {/if}
   {/key}
   <div class="m-auto flex gap-2">
-    {#each ["intro", "keys", "profile", "follows", "note"] as s}
+    {#each ["intro", "keys", "follows", "note"] as s}
       <div
         class="h-2 w-2 rounded-full"
         class:bg-neutral-300={s === stage}

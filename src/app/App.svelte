@@ -57,7 +57,6 @@
   import NoteDetail from "src/app/views/NoteDetail.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import OnboardingWelcome from "src/app/views/OnboardingWelcome.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
   import PersonFollowers from "src/app/views/PersonFollowers.svelte"
   import PersonFollows from "src/app/views/PersonFollows.svelte"
@@ -221,8 +220,6 @@
   })
 
   router.register("/signup", Onboarding)
-
-  router.register("/signup/welcome", OnboardingWelcome)
 
   router.register("/people/list", PersonList, {
     serializers: {

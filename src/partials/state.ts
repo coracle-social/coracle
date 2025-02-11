@@ -36,7 +36,6 @@ const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 export const theme = synced("ui/theme", "dark")
 
 theme.subscribe(value => {
-  console.log(value)
   if (value === "dark") {
     document.documentElement.classList.add("dark")
   } else {

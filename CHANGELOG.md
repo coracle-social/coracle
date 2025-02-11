@@ -3,6 +3,7 @@
 # Current
 
 - [x] Add support for tor/local relays
+- [x] Use nstart for onboarding process
 
 # 0.5.0
 
