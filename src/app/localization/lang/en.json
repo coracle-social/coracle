@@ -1,0 +1,23 @@
+
+{
+"page": {
+  "home": {
+    "feeds": "Feeds",
+    "relays": "Relay",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "group" : "Group",
+        "settings":{
+          "title": "Settings",
+          "theme": "Theme",
+          "database": "Database",
+          "application_settings": "App Settings",
+          "content_settings": "Content Settings"
+
+        },
+        "about": "About",
+        "terms": "Terms of Use",
+        "privacy": "Privacy Policy"
+        }
+  }
+}

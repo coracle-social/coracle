@@ -1,0 +1,22 @@
+{
+  "page": {
+    "home": {
+      "feeds": "Flux",
+      "relays": "Relais",
+      "notifications": "Notifications",
+      "messages": "Messages",
+      "group" : "Groupe",
+          "settings":{
+            "title": "Paramètres",
+            "theme": "Thème couleur",
+            "database": "Base de données",
+            "application_settings": "Paramètres de l'application",
+            "content_settings": "Paramètres de contenu"
+
+          },
+          "about": "À propos",
+          "terms": "Conditions d'utilisation",
+          "privacy": "Politique de confidentialité"
+          }
+    }
+  }

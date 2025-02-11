@@ -92,6 +92,7 @@
     "sharp": "^0.33.5",
     "svelte": "^4.2.19",
     "svelte-check": "^4.0.5",
+    "svelte-i18n": "^4.0.1",
     "svelte-link-preview": "^0.3.3",
     "svelte-loading-spinners": "^0.3.6",
     "svelte-preprocess": "^6.0.3",
