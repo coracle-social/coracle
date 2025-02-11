@@ -3,6 +3,7 @@
   import {writable} from "svelte/store"
   import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {synced} from "@welshman/store"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
   import {
     isRelayFeed,
@@ -11,7 +12,7 @@
     isKindFeed,
     walkFeed,
   } from "@welshman/feeds"
-  import {createScroller, synced} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
   import Anchor from "src/partials/Anchor.svelte"

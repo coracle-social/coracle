@@ -1,8 +1,8 @@
 import Bowser from "bowser"
-import {fromPairs} from "@welshman/lib"
 import {derived, writable, get} from "svelte/store"
+import {fromPairs} from "@welshman/lib"
+import {synced} from "@welshman/store"
 import {parseHex} from "src/util/html"
-import {synced} from "src/util/misc"
 
 // Browser
 
@@ -36,6 +36,7 @@ const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 export const theme = synced("ui/theme", "dark")
 
 theme.subscribe(value => {
+  console.log(value)
   if (value === "dark") {
     document.documentElement.classList.add("dark")
   } else {

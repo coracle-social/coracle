@@ -344,14 +344,3 @@ export const displayList = <T>(xs: T[], conj = "and", n = 6, locale = "en-US") =
 
   return new Intl.ListFormat(locale, {style: "long", type: "conjunction"}).format(stringItems)
 }
-
-// Local storage
-
-export const synced = <T>(key: string, defaultValue: T, delay = 300) => {
-  const init = getJson(key)
-  const store = writable<T>(init === null ? defaultValue : init)
-
-  store.subscribe(throttle(delay, ($value: T) => setJson(key, $value)))
-
-  return store
-}
