@@ -14,19 +14,26 @@
 
     return json
   }
+
+  const onError = () => {
+    hideImage = true
+  }
+
+  let hideImage = false
 </script>
 
 <a href={url} target="_blank" on:click|stopPropagation>
   {#await loadPreview()}
     <Spinner />
   {:then { title, description, image }}
-    {#if image}
+    {#if image && !hideImage}
       <img
         alt="Link preview"
         src={imgproxy(image)}
+        on:error={onError}
         class="m-auto max-h-96 object-contain object-center" />
     {/if}
-    {#if image && title}
+    {#if image && !hideImage && title}
       <div class="h-px bg-neutral-600" />
     {/if}
     {#if title}
