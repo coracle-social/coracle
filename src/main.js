@@ -11,30 +11,32 @@ import {loginWithNip46} from "src/engine"
 
 // Nstart login - hash is replaced somewhere else, maybe router?
 if (window.location.hash?.startsWith("#nostr-login")) {
-  const params = new URLSearchParams(window.location.hash.slice(1))
-  const login = params.get("nostr-login")
+  ;(async () => {
+    const params = new URLSearchParams(window.location.hash.slice(1))
+    const login = params.get("nostr-login")
 
-  let success = false
+    let success = false
 
-  try {
-    if (login.startsWith("bunker://")) {
-      success = await loginWithNip46({
-        clientSecret: makeSecret(),
-        ...Nip46Broker.parseBunkerUrl(login),
-      })
-    } else {
-      const secret = nsecDecode(login)
+    try {
+      if (login.startsWith("bunker://")) {
+        success = await loginWithNip46({
+          clientSecret: makeSecret(),
+          ...Nip46Broker.parseBunkerUrl(login),
+        })
+      } else {
+        const secret = nsecDecode(login)
 
-      addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
-      success = true
+        addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+        success = true
+      }
+    } catch (e) {
+      console.error(e)
     }
-  } catch (e) {
-    console.error(e)
-  }
 
-  if (success) {
-    setTimeout(() => router.at("/signup/welcome").open(), 300)
-  }
+    if (success) {
+      setTimeout(() => router.at("/signup/welcome").open(), 300)
+    }
+  })()
 }
 
 if (import.meta.env.VITE_GLITCHTIP_API_KEY) {
