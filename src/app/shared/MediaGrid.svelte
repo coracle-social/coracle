@@ -4,7 +4,8 @@
 
   export let urls: string[]
   export let onClose: (e: any) => void
-  export let onClick: (url: string, event: PointerEvent) => void
+  export let onLinkClick: (url: string, event: PointerEvent) => void
+  export let onImageClick: (url: string, event: PointerEvent) => void
 
   const useGrid = urls.length > 2
   const className = useGrid ? "p-2" : ""
@@ -17,9 +18,8 @@
   class="grid-cols-{columns} relative my-2 grid cursor-pointer gap-2 overflow-hidden rounded {className}">
   {#each urls as url, i}
     {@const className = i === 0 ? "col-span-" + getSpan(urls.length - 1) : ""}
-    {@const clickHandler = event => onClick(url, event)}
     <AltColor background={!useGrid} class="h-full w-full object-cover {className}">
-      <Media {url} onClick={clickHandler} />
+      <Media {url} {onLinkClick} {onImageClick} />
     </AltColor>
   {/each}
   {#if onClose}

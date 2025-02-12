@@ -4,12 +4,12 @@
   export let url: string
   export let onClick: (url: string, event: any) => void
 
-  const _onClick = (e: {detail: any}) => onClick(url, e.detail)
+  const _onClick = (e: any) => onClick(url, e)
 </script>
 
 <a
   href={url}
-  class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-  on:click|preventDefault={_onClick}>
+  on:click|preventDefault={_onClick}
+  class="overflow-hidden text-ellipsis whitespace-nowrap underline">
   {displayUrl(url)}
 </a>

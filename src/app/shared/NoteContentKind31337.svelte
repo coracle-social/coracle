@@ -3,7 +3,6 @@
   import type {TrustedEvent} from "@welshman/util"
   import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
-  import Media from "src/partials/Media.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note: TrustedEvent
@@ -25,7 +24,7 @@
     </Chips>
   </div>
   {#if imeta}
-    <Media url={getTagValue("url", tagsFromIMeta(imeta.slice(1)))} />
+    <NoteContentLinks {showMedia} urls={[getTagValue("url", tagsFromIMeta(imeta.slice(1)))]} />
   {/if}
   {#if cover}
     <NoteContentLinks {showMedia} urls={[cover]} />

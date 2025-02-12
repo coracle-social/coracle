@@ -16,7 +16,7 @@
 <div class="flex h-screen w-full items-center justify-center">
   <Carousel {urls} {onClose} bind:currentIndex let:url noScroll>
     <div class="m-auto flex h-full w-full max-w-2xl items-center justify-center">
-      <Media fullSize {url} {onClick} />
+      <Media fullSize {url} onLinkClick={onClick} onImageClick={onClick} />
     </div>
   </Carousel>
 </div>

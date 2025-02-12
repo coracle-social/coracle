@@ -21,7 +21,7 @@
   let hideImage = false
 </script>
 
-<div class="flex h-full w-full flex-col justify-center">
+<div class="flex h-full w-full flex-col justify-center overflow-hidden rounded bg-neutral-800">
   {#await loadPreview()}
     <div class="shimmer h-64 w-full" />
   {:then { title, description, image }}

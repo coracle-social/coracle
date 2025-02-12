@@ -1,7 +1,7 @@
 <script lang="ts">
   import {appName} from "src/partials/state"
+  import MediaVideo from "src/partials/MediaVideo.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import Media from "src/partials/Media.svelte"
   import Modal from "src/partials/Modal.svelte"
 
   export let setStage
@@ -58,6 +58,6 @@
 
 {#if media}
   <Modal onEscape={closeMedia}>
-    <Media url={media || ""} />
+    <MediaVideo url={media || ""} />
   </Modal>
 {/if}
