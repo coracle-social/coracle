@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type {TrustedEvent} from "@welshman/util"
   import {fromNostrURI} from "@welshman/util"
   import {nthEq} from "@welshman/lib"
   import {
