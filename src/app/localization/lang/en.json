@@ -19,5 +19,14 @@
         "terms": "Terms of Use",
         "privacy": "Privacy Policy"
         }
+  },
+  "relaylist": {
+    "title": "Your Relays",
+    "addrelay": "Add Relay",
+    "description": "Relays are hubs for your content and connections. At least one is required to interact with the network, but you can join as many as you like.",
+    "norelay" : "No relays connected",
+    "other": "Other relays",
+    "otherdesc": "Below are relays used by people in your network. Adding these may improve your ability to load profiles and content.",
+    "modaldesc": "Enter a relay url below to add it to your relay selections."
   }
 }

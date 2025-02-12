@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n'
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
@@ -134,26 +135,26 @@
   })
 
   document.title = "Relays"
+
 </script>
 
 <FlexColumn bind:element>
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your relays</h2>
+      <h2 class="staatliches text-2xl">{$_('page.relaylist.title', { default: 'Your relays' })}</h2>
     </div>
     <Anchor button accent on:click={addCustomRelay}>
-      <i class="fa-solid fa-compass" /> Add Relay
+      <i class="fa-solid fa-compass" /> {$_('page.relaylist.addrelay', { default: 'Add Relay' })}
     </Anchor>
   </div>
   <p>
-    Relays are hubs for your content and connections. At least one is required to interact with the
-    network, but you can join as many as you like.
+    {$_('page.relaylist.description', { default: 'Relays are hubs for your content and connections. At least one is required to interact with the network, but you can join as many as you like.' })}
   </p>
   {#if currentRelayUrls.length === 0}
     <div class="mt-8 flex items-center justify-center gap-2 text-center">
       <i class="fa fa-triangle-exclamation" />
-      No relays connected
+      {$_('page.relaylist.norelay', { default: 'No relays connected' })}
     </div>
   {/if}
   <div class="grid grid-cols-1 gap-4">
@@ -166,8 +167,7 @@
     <h2 class="staatliches text-2xl">Other relays</h2>
   </div>
   <p>
-    Below are relays used by people in your network. Adding these may improve your ability to load
-    profiles and content.
+    {$_('page.relaylist.otherdesc', { default: 'Below are relays used by people in your network. Adding these may improve your ability to load profiles and content.' })}
   </p>
   <Tabs {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
@@ -192,11 +192,11 @@
 
 {#if modal}
   <Modal onEscape={closeModal}>
-    <Subheading>Add a relay</Subheading>
-    <p>Enter a relay url below to add it to your relay selections.</p>
+    <Subheading>{$_('page.relaylist.addrelay', { default: 'Add Relay' })}</Subheading>
+    <p>{$_('page.relaylist.modaldesc', { default: 'Enter a relay url below to add it to your relay selections.' })}</p>
     <Input autofocus bind:value={customRelay} placeholder="wss://...">
       <i slot="before" class="fa fa-server" />
     </Input>
-    <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>
+    <Anchor button accent on:click={confirmAddCustomRelay}>{$_('page.relaylist.addrelay', { default: 'Add Relay' })}</Anchor>
   </Modal>
 {/if}
