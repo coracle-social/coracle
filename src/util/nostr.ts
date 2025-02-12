@@ -130,6 +130,22 @@ export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating
 
 export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
 
+const BAD_DOMAINS = ["libfans.com", "matrix.org/_matrix/media/v3/download"]
+
+const getBadDomainsWarning = e => {
+  for (const domain of BAD_DOMAINS) {
+    if (e.content.includes(domain)) {
+      return "This note includes media from untrusted hosts."
+    }
+
+    for (const tag of e.tags) {
+      if (tag.some(t => t.includes(domain))) {
+        return "This note includes media from untrusted hosts."
+      }
+    }
+  }
+}
+
 const WARN_TAGS = new Set([
   "nsfw",
   "nude",
@@ -144,6 +160,7 @@ const WARN_TAGS = new Set([
 ])
 
 export const getContentWarning = e =>
+  getBadDomainsWarning(e) ||
   getTagValue("content-warning", e.tags) ||
   getTopicTagValues(e.tags).some(t => WARN_TAGS.has(t.toLowerCase()))
 

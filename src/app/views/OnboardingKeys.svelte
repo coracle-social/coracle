@@ -1,13 +1,20 @@
 <script lang="ts">
   import {isMobile} from "src/util/html"
   import {pubkey} from "@welshman/app"
+  import {themeColors, appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
 
   export let setStage
 
-  const ac = window.location.origin
-  const at = isMobile ? "android" : "web"
-  const njump = `https://start.njump.me/?an=Coracle&at=${at}&ac=${ac}&asf=yes`
+  const params = new URLSearchParams({
+    an: appName,
+    ac: window.location.origin,
+    at: isMobile ? "android" : "web",
+    aa: $themeColors.accent.slice(1),
+    asf: "yes",
+  })
+
+  const njump = `https://start.njump.me/?${params.toString()}`
 
   const prev = () => setStage("intro")
 
