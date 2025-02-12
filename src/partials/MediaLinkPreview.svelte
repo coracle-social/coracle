@@ -1,6 +1,5 @@
 <script lang="ts">
   import {ellipsize, postJson} from "@welshman/lib"
-  import Spinner from "src/partials/Spinner.svelte"
   import {dufflepud, imgproxy} from "src/engine"
 
   export let url: string
@@ -24,7 +23,7 @@
 
 <div class="flex h-full w-full flex-col justify-center">
   {#await loadPreview()}
-    <Spinner />
+    <div class="shimmer h-64 w-full" />
   {:then { title, description, image }}
     {#if image && !hideImage}
       <img

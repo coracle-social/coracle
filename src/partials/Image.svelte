@@ -1,6 +1,5 @@
 <script lang="ts">
   import {ensurePlural} from "@welshman/lib"
-  import Spinner from "src/partials/Spinner.svelte"
   import {imgproxy} from "src/engine"
 
   export let src
@@ -31,5 +30,5 @@
   src={imgproxy(urls[i])} />
 
 {#if loading}
-  <Spinner />
+  <div class="shimmer h-64 w-full" />
 {/if}
