@@ -1,3 +1,5 @@
 node_modules
-android
+.gradle
+.idea
 dist
+assets

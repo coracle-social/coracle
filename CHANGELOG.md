@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.6.1
+
+* Use wasted space on mobile notes
+* Fix images/link behavior on mobile
+* Show PoW difficulty in settings
+* Fix WoT filter not getting applied
+
 # 0.6.0
 
 Contributors: @hodlbod, @dtonon, @thibaut
@@ -22,6 +29,7 @@ Contributors: @hodlbod, @dtonon, @thibaut
 * Remove broadcasting of note parents
 * Add note scheduling via DVM
 * Clean up modal colors and design
+* Add PoW generation and filtering
 
 # 0.5.0
 
