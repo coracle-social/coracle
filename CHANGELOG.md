@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.2
+
+* Prevent notes from opening when links are clicked
+
 # 0.6.1
 
 * Use wasted space on mobile notes
