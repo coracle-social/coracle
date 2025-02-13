@@ -83,10 +83,10 @@
           }}>Show</Anchor>
       </p>
     {:else}
-      <div class:!pl-0={headerlessKinds.includes(event.kind)} class="mt-2 pl-14">
+      <div class:!pl-0={headerlessKinds.includes(event.kind)} class="mt-2 sm:pl-14">
         <NoteContent note={event} {depth} {showEntire} {showMedia} />
       </div>
-      <div class:!pl-10={headerlessKinds.includes(event.kind)} class="pl-14 pt-4">
+      <div class:!pl-10={headerlessKinds.includes(event.kind)} class="pt-4 sm:pl-14">
         {#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && thunk}
           <NotePending {event} {onReplyAbort} />
         {:else}

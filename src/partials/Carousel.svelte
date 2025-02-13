@@ -4,7 +4,6 @@
   export let urls: any[] = []
   export let onClose: () => void = undefined
   export let currentIndex = 0
-  export let noScroll = false
 
   let carouselElement: HTMLElement
   let container: HTMLElement
@@ -23,10 +22,10 @@
     if (urls.length > 1 && currentIndex !== urls.length - 1) {
       event.stopPropagation()
     }
+
     if (carouselElement) {
       currentIndex = Math.round(carouselElement.scrollLeft / carouselElement.offsetWidth)
     }
-    if (noScroll) event.preventDefault()
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -48,7 +47,7 @@
 </script>
 
 <div
-  class="group relative h-full w-full outline-none cursor-pointer"
+  class="group relative h-full w-full cursor-pointer outline-none"
   on:click={onClose}
   bind:this={container}
   on:keydown|stopPropagation|preventDefault={handleKeydown}
@@ -68,7 +67,6 @@
       </div>
     {/each}
   </div>
-
   {#if urls.length > 1}
     <div class="absolute bottom-4 flex w-full items-center justify-center gap-1">
       {#each urls as _, index (index)}
