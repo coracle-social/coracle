@@ -32,7 +32,7 @@
   const context = new Map<string, Set<TrustedEvent>>()
 
   const shouldSkip = (event: TrustedEvent) => {
-    if (!showMuted && $isEventMuted(event)) return true
+    if (!showMuted && $isEventMuted(event, true)) return true
     if (!showDeleted && repository.isDeleted(event)) return true
     if (hideReplies && getParentIdOrAddr(event)) return true
 
