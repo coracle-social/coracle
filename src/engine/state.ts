@@ -377,10 +377,12 @@ export const isEventMuted = withGetter(
         if (strict || $userFollows.has(e.pubkey)) return false
 
         const wotScore = getUserWotScore(e.pubkey)
+        const okWot = wotScore >= minWot
         const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
         const isValidPow = getPow(e.id) >= powDifficulty
+        const okPow = isValidPow && powDifficulty > minPow
 
-        return wotScore < minWot && (powDifficulty < minPow || !isValidPow)
+        return !okWot && !okPow
       }
     },
   ),

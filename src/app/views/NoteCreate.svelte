@@ -240,6 +240,7 @@
         relays: ctx.app.router.Event(quote).limit(3).getUrls(),
       })
 
+      editor.commands.insertContent("\n")
       editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
     }
 

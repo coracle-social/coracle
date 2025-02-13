@@ -138,7 +138,7 @@
 {/if}
 
 <FlexColumn bind:element>
-  {#key feed.identifier}
+  {#key abortController}
     <NoteReducer
       {shouldSort}
       {depth}

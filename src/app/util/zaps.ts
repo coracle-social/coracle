@@ -13,7 +13,7 @@ export const getLnUrlsForEvent = async (event: TrustedEvent) => {
 
   const profile = await loadProfile(event.pubkey)
 
-  return profile.lnurl ? [profile.lnurl] : []
+  return profile?.lnurl ? [profile.lnurl] : []
 }
 
 export const getZapperForZap = async (zap: TrustedEvent, parent: TrustedEvent) => {
