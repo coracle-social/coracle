@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.3
+
+* Go back to strict mute application in feeds
+
 # 0.6.2
 
 * Prevent notes from opening when links are clicked
