@@ -9,7 +9,7 @@
 
 <a
   href={url}
-  on:click|preventDefault={_onClick}
+  on:click|preventDefault|stopPropagation={_onClick}
   class="overflow-hidden text-ellipsis whitespace-nowrap underline">
   {displayUrl(url)}
 </a>
