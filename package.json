@@ -1,6 +1,6 @@
 {
   "name": "flotilla",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "scripts": {
     "dev": "vite dev",
@@ -56,7 +56,7 @@
     "@welshman/editor": "~0.0.15",
     "@welshman/feeds": "~0.0.30",
     "@welshman/lib": "~0.0.41",
-    "@welshman/net": "~0.0.46",
+    "@welshman/net": "~0.0.47",
     "@welshman/signer": "~0.0.20",
     "@welshman/store": "~0.0.16",
     "@welshman/util": "~0.0.61",

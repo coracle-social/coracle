@@ -1,5 +1,5 @@
 import {get, writable} from "svelte/store"
-import {partition, int, YEAR, MONTH, insert, sortBy, assoc, now} from "@welshman/lib"
+import {partition, shuffle, int, YEAR, MONTH, insert, sortBy, assoc, now} from "@welshman/lib"
 import {
   MESSAGE,
   DELETE,
@@ -285,13 +285,17 @@ export const makeCalendarFeed = ({
 export const listenForNotifications = () => {
   const subs: Subscription[] = []
 
-  for (const [url, rooms] of userRoomsByUrl.get()) {
+  for (const [url, allRooms] of userRoomsByUrl.get()) {
+    // Limit how many rooms we load at a time, since we have to send a separate filter
+    // for each one due to nip 29 breaking postel's law
+    const rooms = shuffle(Array.from(allRooms)).slice(0, 30)
+
     load({
       relays: [url],
       filters: [
         {kinds: [THREAD], limit: 1},
         {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
-        ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
+        ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
       ],
     })
 
@@ -301,7 +305,7 @@ export const listenForNotifications = () => {
         filters: [
           {kinds: [THREAD], since: now()},
           {kinds: [COMMENT], "#K": [String(THREAD)], since: now()},
-          ...Array.from(rooms).map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
+          ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
         ],
       }),
     )

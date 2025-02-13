@@ -8,6 +8,8 @@
 
   const {value} = $props()
 
+  let hideImage = $state(false)
+
   const url = value.url.toString()
 
   const loadPreview = async () => {
@@ -18,6 +20,10 @@
     }
 
     return json
+  }
+
+  const onError = () => {
+    hideImage = true
   }
 
   const expand = () => pushModal(ContentLinkDetail, {url}, {fullscreen: true})
@@ -40,9 +46,10 @@
         </div>
       {:then preview}
         <div class="bg-alt flex max-w-xl flex-col leading-normal">
-          {#if preview.image}
+          {#if preview.image && !hideImage}
             <img
               alt="Link preview"
+              onerror={onError}
               src={imgproxy(preview.image)}
               class="bg-alt max-h-72 object-contain object-center" />
           {/if}
