@@ -57,7 +57,6 @@
   <div
     class="scrollbar-hide flex h-full snap-x snap-mandatory items-center gap-4 overflow-x-scroll scroll-smooth"
     bind:this={carouselElement}
-    on:wheel={handleScroll}
     on:touchmove={handleScroll}
     on:touchend={handleScroll}>
     {#each urls as url, index}

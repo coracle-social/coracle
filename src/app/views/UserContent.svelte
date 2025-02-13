@@ -10,6 +10,7 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
+  import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -81,11 +82,16 @@
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Minimum Proof of Work</strong>
-        <div>{values.min_pow_difficulty}</div>
+        <div>
+          difficulty {values.min_pow_difficulty} (<WorkEstimate
+            difficulty={values.min_pow_difficulty} />)
+        </div>
       </div>
-      <Input type="range" bind:value={values.min_pow_difficulty} step="4" min={0} max={32} />
+      <Input type="range" bind:value={values.min_pow_difficulty} min={0} max={32} />
       <p slot="info">
-        Select a minimum proof-of-work difficulty for notes from people outside your network. If a note fails to meet both your minimum web of trust score and minimum proof-of-work difficulty, it will be hidden.
+        Select a minimum proof-of-work difficulty for notes from people outside your network. If a
+        note fails to meet both your minimum web of trust score and minimum proof-of-work
+        difficulty, it will be hidden.
       </p>
     </Field>
     <Field label="Muted accounts">
