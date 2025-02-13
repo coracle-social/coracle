@@ -126,7 +126,11 @@
       <strong>Calendar</strong>
     {/snippet}
     {#snippet action()}
-      <div class="md:hidden">
+      <div class="row-2">
+        <Button class="btn btn-primary btn-sm" onclick={createEvent}>
+          <Icon icon="calendar-add" />
+          Create an Event
+        </Button>
         <MenuSpaceButton {url} />
       </div>
     {/snippet}
@@ -157,12 +161,4 @@
       <p class="flex h-10 items-center justify-center py-20" transition:fly>That's all!</p>
     {/if}
   </div>
-  <Button
-    class="tooltip tooltip-left fixed bottom-16 right-2 z-feature p-1 md:bottom-4 md:right-4"
-    data-tip="Create an Event"
-    onclick={createEvent}>
-    <div class="btn btn-circle btn-primary flex h-12 w-12 items-center justify-center">
-      <Icon icon="calendar-add" />
-    </div>
-  </Button>
 </div>

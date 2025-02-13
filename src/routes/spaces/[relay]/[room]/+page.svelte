@@ -217,7 +217,7 @@
   })
 </script>
 
-<div class="saib relative flex h-full flex-col">
+<div class="relative flex h-full flex-col">
   <PageBar>
     {#snippet icon()}
       <div class="center">
@@ -287,7 +287,7 @@
       </div>
     </div>
   {/if}
-  <div class="saib">
+  <div>
     {#if parent}
       <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
     {/if}

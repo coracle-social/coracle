@@ -55,6 +55,7 @@ export const makeFeed = ({
   feedFilters,
   subscriptionFilters,
   element,
+  onEvent,
   onExhausted,
   initialEvents = [],
 }: {
@@ -62,11 +63,20 @@ export const makeFeed = ({
   feedFilters: Filter[]
   subscriptionFilters: Filter[]
   element: HTMLElement
+  onEvent?: (event: TrustedEvent) => void
   onExhausted?: () => void
   initialEvents?: TrustedEvent[]
 }) => {
+  const seen = new Set<string>()
   const buffer = writable<TrustedEvent[]>([])
   const events = writable(initialEvents)
+
+  for (const event of initialEvents) {
+    if (!seen.has(event.id)) {
+      seen.add(event.id)
+      onEvent?.(event)
+    }
+  }
 
   const insertEvent = (event: TrustedEvent) => {
     buffer.update($buffer => {
@@ -77,6 +87,11 @@ export const makeFeed = ({
 
       return [...$buffer, event]
     })
+
+    if (!seen.has(event.id)) {
+      seen.add(event.id)
+      onEvent?.(event)
+    }
   }
 
   const removeEvents = (ids: string[]) => {

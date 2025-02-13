@@ -93,9 +93,9 @@
   <PageBar class="!mx-0">
     {#snippet icon()}
       <div>
-        <Button class="btn btn-neutral btn-sm" onclick={back}>
+        <Button class="btn btn-neutral btn-sm flex-nowrap whitespace-nowrap" onclick={back}>
           <Icon icon="alt-arrow-left" />
-          Go back
+          <span class="hidden sm:inline">Go back</span>
         </Button>
       </div>
     {/snippet}

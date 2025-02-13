@@ -16,6 +16,11 @@
   import {loadUserData} from "@app/commands"
   import {setChecked} from "@app/notifications"
 
+  let signers: any[] = $state([])
+  let loading: string | undefined = $state()
+
+  const disabled = $derived(loading ? true : undefined)
+
   const signUp = () => pushModal(SignUp)
 
   const onSuccess = async (session: Session, relays: string[] = []) => {
@@ -70,9 +75,6 @@
 
   const loginWithBunker = () => pushModal(LogInBunker)
 
-  let signers: any[] = $state([])
-  let loading: string | undefined = $state()
-
   const hasSigner = $derived(getNip07() || signers.length > 0)
 
   onMount(async () => {
@@ -90,7 +92,7 @@
     you to own your social identity.
   </p>
   {#if getNip07()}
-    <Button disabled={Boolean(loading)} onclick={loginWithNip07} class="btn btn-primary">
+    <Button {disabled} onclick={loginWithNip07} class="btn btn-primary">
       {#if loading === "nip07"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -100,7 +102,7 @@
     </Button>
   {/if}
   {#each signers as app}
-    <Button disabled={Boolean(loading)} class="btn btn-primary" onclick={() => loginWithNip55(app)}>
+    <Button {disabled} class="btn btn-primary" onclick={() => loginWithNip55(app)}>
       {#if loading === "nip55"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -110,7 +112,7 @@
     </Button>
   {/each}
   {#if BURROW_URL && !hasSigner}
-    <Button disabled={Boolean(loading)} onclick={loginWithPassword} class="btn btn-primary">
+    <Button {disabled} onclick={loginWithPassword} class="btn btn-primary">
       {#if loading === "password"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -121,13 +123,13 @@
   {/if}
   <Button
     onclick={loginWithBunker}
-    disabled={Boolean(loading)}
+    {disabled}
     class="btn {hasSigner || BURROW_URL ? 'btn-neutral' : 'btn-primary'}">
     <Icon icon="cpu" />
     Log in with Remote Signer
   </Button>
   {#if BURROW_URL && hasSigner}
-    <Button disabled={Boolean(loading)} onclick={loginWithPassword} class="btn">
+    <Button {disabled} onclick={loginWithPassword} class="btn">
       {#if loading === "password"}
         <span class="loading loading-spinner mr-3"></span>
       {:else}
@@ -139,7 +141,7 @@
   {#if !hasSigner || !BURROW_URL}
     <Link
       external
-      disabled={Boolean(loading)}
+      {disabled}
       href="https://nostrapps.com#signers"
       class="btn {hasSigner || BURROW_URL ? '' : 'btn-neutral'}">
       <Icon icon="compass" />
