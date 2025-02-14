@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.9
+
+* Add NIP 01 signup flow on mobile
+
 # 0.2.8
 
 * Show spinner when joining a room
