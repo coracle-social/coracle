@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {Capacitor} from "@capacitor/core"
   import {postJson} from "@welshman/lib"
   import {isMobile, preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -8,6 +9,7 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import LogIn from "@app/components/LogIn.svelte"
   import InfoNostr from "@app/components/InfoNostr.svelte"
+  import SignUpKey from "@app/components/SignUpKey.svelte"
   import SignUpSuccess from "@app/components/SignUpSuccess.svelte"
   import {pushModal} from "@app/modal"
   import {BURROW_URL, PLATFORM_NAME} from "@app/state"
@@ -37,18 +39,20 @@
     }
   }
 
-  const signup = () => {
+  const usePassword = () => {
     if (BURROW_URL) {
       signupPassword()
     }
   }
+
+  const useKey = () => pushModal(SignUpKey)
 
   let email = $state("")
   let password = $state("")
   let loading = $state(false)
 </script>
 
-<form class="column gap-4" onsubmit={preventDefault(signup)}>
+<form class="column gap-4" onsubmit={preventDefault(usePassword)}>
   <h1 class="heading">Sign up with Nostr</h1>
   <p class="m-auto max-w-sm text-center">
     {PLATFORM_NAME} is built using the
@@ -89,10 +93,21 @@
     </p>
     <Divider>Or</Divider>
   {/if}
-  <a href={nstart} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
-    <Icon icon="square-share-line" />
-    Get going on nstart
-  </a>
+  {#if Capacitor.isNativePlatform()}
+    <Button onclick={useKey} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
+      <Icon icon="key" />
+      Generate a key
+    </Button>
+    <a href={nstart} class="btn">
+      <Icon icon="square-share-line" />
+      Create an account on Nstart
+    </a>
+  {:else}
+    <a href={nstart} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
+      <Icon icon="square-share-line" />
+      Create an account on Nstart
+    </a>
+  {/if}
   <div class="text-sm">
     Already have an account?
     <Button class="link" onclick={login}>Log in instead</Button>
