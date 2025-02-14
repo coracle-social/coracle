@@ -68,7 +68,7 @@
 
   const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
 
-  $: fullContent = reduceLinks(parse(note))
+  $: fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
 
   $: shortContent = showEntire
     ? fullContent

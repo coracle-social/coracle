@@ -361,7 +361,7 @@ export const isEventMuted = withGetter(
           ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
           : null
 
-      return (e: HashedEvent, strict = false) => {
+      return simpleCache(([e, strict = false]: [e: HashedEvent, strict?: boolean]) => {
         if (!$pubkey || !e.pubkey) return false
 
         const {roots, replies} = getReplyTagValues(e.tags)
@@ -383,7 +383,7 @@ export const isEventMuted = withGetter(
         const okPow = isValidPow && powDifficulty > minPow
 
         return !okWot && !okPow
-      }
+      })
     },
   ),
 )
