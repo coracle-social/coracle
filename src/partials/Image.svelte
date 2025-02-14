@@ -30,5 +30,5 @@
   src={imgproxy(urls[i])} />
 
 {#if loading}
-  <div class="shimmer h-64 w-full" />
+  <div class="shimmer h-64 w-96" />
 {/if}

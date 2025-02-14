@@ -35,7 +35,7 @@
       href={url}
       on:click|preventDefault={imageClickHandler}
       class="relative flex h-full flex-grow items-center justify-center">
-      <div class="flex flex-grow items-center justify-center overflow-hidden rounded">
+      <div class="flex max-w-[95vw] flex-grow items-center justify-center overflow-hidden rounded">
         <MediaImage {url} {fullSize} />
       </div>
     </a>

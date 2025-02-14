@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.4
+
+* Make event details json nicer
+* Fix shimmer placeholder
+
 # 0.6.3
 
 * Go back to strict mute application in feeds

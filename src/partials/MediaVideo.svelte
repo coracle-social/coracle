@@ -17,5 +17,5 @@
   class="max-h-96 object-contain object-center" />
 
 {#if !loaded}
-  <div class="shimmer h-64 w-full" />
+  <div class="shimmer h-64 w-96" />
 {/if}
