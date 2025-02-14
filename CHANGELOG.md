@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.2.8
+
+* Show spinner when joining a room
+* Reduce self-rate limiting of REQs
+* Fix disabled signers link
+* Prepare for iOS release
+* Improve threads and calendar pages
+* Improve quote rendering and new messages button
+
 # 0.2.7
 
 * Add calendar events
