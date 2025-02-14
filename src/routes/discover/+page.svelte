@@ -2,8 +2,9 @@
   import {onMount} from "svelte"
   import {addToMapKey, dec, gt} from "@welshman/lib"
   import type {Relay} from "@welshman/app"
-  import {relays, createSearch} from "@welshman/app"
+  import {relays, createSearch, loadRelay, loadRelaySelections} from "@welshman/app"
   import {createScroller} from "@lib/html"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -14,14 +15,25 @@
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
   import {
-    memberships,
     membershipByPubkey,
     getMembershipUrls,
+    loadMembership,
     userRoomsByUrl,
     getDefaultPubkeys,
   } from "@app/state"
-  import {discoverRelays} from "@app/requests"
   import {pushModal} from "@app/modal"
+
+  const discoverRelays = () =>
+    Promise.all(
+      getDefaultPubkeys().map(async pubkey => {
+        await loadRelaySelections(pubkey)
+
+        const membership = await loadMembership(pubkey)
+        const urls = getMembershipUrls(membership)
+
+        await Promise.all(urls.map(url => loadRelay(url)))
+      }),
+    )
 
   const wotGraph = $derived.by(() => {
     const scores = new Map<string, Set<string>>()
@@ -131,9 +143,9 @@
         {/if}
       </Button>
     {/each}
-    {#await discoverRelays($memberships)}
-      <div class="flex justify-center py-20">
-        <Spinner loading>Loading spaces...</Spinner>
+    {#await discoverRelays()}
+      <div class="flex justify-center py-20" out:fly>
+        <Spinner loading>Looking for spaces...</Spinner>
       </div>
     {/await}
   </div>

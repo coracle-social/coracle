@@ -345,7 +345,11 @@ export const hasMembershipUrl = (list: List | undefined, url: string) =>
 export const getMembershipUrls = (list?: List) => {
   const tags = getListTags(list)
 
-  return sort(uniq([...getRelayTagValues(tags), ...getGroupTags(tags).map(nth(2))]))
+  return sort(
+    uniq([...getRelayTagValues(tags), ...getGroupTags(tags).map(nth(2))]).map(url =>
+      normalizeRelayUrl(url),
+    ),
+  )
 }
 
 export const getMembershipRooms = (list?: List) =>

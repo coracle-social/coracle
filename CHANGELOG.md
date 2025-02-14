@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.2.10
+
+* Improve space discovery
+
 # 0.2.9
 
 * Add NIP 01 signup flow on mobile
