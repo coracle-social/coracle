@@ -1,6 +1,8 @@
 <script lang="ts">
-  import {derived} from "svelte/store"
   import {now, omit, MINUTE} from "@welshman/lib"
+  import { i18n } from './stores/i18nStore'
+  import {seconds} from "hurdak"
+  import {derived, get} from "svelte/store"
   import {LOCAL_RELAY_URL} from "@welshman/util"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -23,6 +25,8 @@
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
   import {env, hasNewMessages, hasNewNotifications} from "src/engine"
+  import LanguageSelector from './shared/LanguageSelector.svelte'
+  import OpenTranslationsButton from './i18n/OpenTranslationsButton.svelte'
 
   const {page} = router
 
@@ -85,74 +89,102 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
-  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
+
+  <MenuDesktopItem>
+    <LanguageSelector />
+  </MenuDesktopItem>
+
+  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>
+    {$i18n.t('page.home.feeds', { default: 'Feeds' })}
+  </MenuDesktopItem>
+
   {#if env.PLATFORM_RELAYS.length === 0}
     <MenuDesktopItem
       path="/settings/relays"
       disabled={!$signer}
       isActive={$page?.path.startsWith("/settings/relays")}>
       <div class="relative inline-block">
-        Relays
+        {$i18n.t('page.home.relays', { default: 'Relays' })}
         {#if $slowConnections.length > 0}
           <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
         {/if}
       </div>
     </MenuDesktopItem>
   {/if}
+
   <MenuDesktopItem
     path="/notifications"
     disabled={!$signer}
     isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
-      Notifications
+      {$i18n.t('page.home.notifications', { default: 'Notifications' })}
       {#if $hasNewNotifications}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
+
   <MenuDesktopItem
     path="/channels"
     disabled={!$signer}
     isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
-      Messages
+      {$i18n.t('page.home.messages', { default: 'Messages' })} 
       {#if $hasNewMessages}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem modal path="/groups" disabled={!$signer}>Groups</MenuDesktopItem>
+
+  <MenuDesktopItem modal path="/groups" disabled={!$signer}>
+    {$i18n.t('page.home.group', { default: 'Group' })}
+  </MenuDesktopItem>
+
   <FlexColumn small class="absolute bottom-0 w-72">
     <Anchor
       class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
-      on:click={() => setSubMenu("settings")}>Settings</Anchor>
+      on:click={() => setSubMenu("settings")}>
+      {$i18n.t('page.home.settings.title', { default: 'Settings' })}
+    </Anchor>
+
     <div class="staatliches flex h-8 gap-2 px-8 text-tinted-500">
-      <Anchor class="hover:text-tinted-100" href="/about">About</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/privacy.html">Privacy</Anchor>
+      <Anchor class="hover:text-tinted-100" href="/about">
+        {$i18n.t('page.home.about', { default: 'About' })}
+      </Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/terms.html">
+        {$i18n.t('page.home.terms', { default: 'Terms' })}
+      </Anchor> /
+      <Anchor external class="hover:text-tinted-100" href="/privacy.html">
+        {$i18n.t('page.home.privacy', { default: 'Privacy' })}
+      </Anchor>
     </div>
+
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
-          <i class="fa fa-palette" /> Toggle Theme
+          <i class="fa fa-palette" />
+          {$i18n.t('page.home.settings.toggle_theme', { default: 'Toggle Theme' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/data"
           disabled={!$signer}>
-          <i class="fa fa-database" /> Database
+          <i class="fa fa-database" />
+          {$i18n.t('page.home.settings.database', { default: 'Database' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
           disabled={!$signer}>
-          <i class="fa fa-cog" /> App Settings
+          <i class="fa fa-cog" />
+          {$i18n.t('page.home.settings.application_settings', { default: 'App Settings' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/content"
           disabled={!$signer}>
-          <i class="fa fa-volume-xmark" /> Content Settings
+          <i class="fa fa-volume-xmark" />
+          {$i18n.t('page.home.settings.content_settings', { default: 'Content Settings' })}
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
@@ -160,23 +192,28 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href={router.at("people").of($pubkey).toString()}>
-          <i class="fa fa-user-circle" /> Profile
+          <i class="fa fa-user-circle" />
+          {$i18n.t('page.home.settings.profile', { default: 'Profile' })}
         </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/keys">
-          <i class="fa fa-key" /> Keys
+          <i class="fa fa-key" />
+          {$i18n.t('page.home.settings.keys', { default: 'Keys' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}>
-          <i class="fa fa-paper-plane" /> Create Invite
+          <i class="fa fa-paper-plane" />
+          {$i18n.t('page.home.settings.invite', { default: 'Create Invite' })}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           on:click={() => setSubMenu("accounts")}>
-          <i class="fa fa-right-left" /> Switch Account
+          <i class="fa fa-right-left" />
+          {$i18n.t('page.home.settings.switchAccount', { default: 'Switch Account' })}
         </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/logout">
-          <i class="fa fa-right-to-bracket" /> Log Out
+          <i class="fa fa-right-to-bracket" />
+          {$i18n.t('page.home.settings.logOut', { default: 'Log Out' })}
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "accounts"}
@@ -196,10 +233,12 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4"
           on:click={() => router.at("login").open()}>
-          <i class="fa fa-plus" /> Add Account
+          <i class="fa fa-plus" />
+          {$i18n.t('page.home.settings.addAccount', { default: 'Add Account' })}
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
+
     <div>
       <Anchor
         modal
@@ -221,6 +260,7 @@
           {$hud.failure}
         </div>
       </Anchor>
+
       <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">
         {#if $pubkey}
           <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
@@ -231,7 +271,9 @@
             </div>
           </Anchor>
         {:else}
-          <Anchor modal button accent href="/login">Log In</Anchor>
+          <Anchor modal button accent href="/login">
+            {$i18n.t('page.home.login', { default: 'Log In' })}
+          </Anchor>
         {/if}
       </div>
     </div>

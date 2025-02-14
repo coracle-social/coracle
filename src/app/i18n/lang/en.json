@@ -1,0 +1,38 @@
+{
+"page": {
+  "home": {
+    "feeds": "Feeds",
+    "relays": "Relay",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "group" : "Group",
+        "settings":{
+          "title": "Settings",
+          "theme": "Theme",
+          "database": "Database",
+          "application_settings": "App Settings",
+          "content_settings": "Content Settings",
+          "keys": "Keys",
+          "invite": "Invite Friends",
+          "switchAccount":  "Switch Account",
+          "logOut":   "Log Out",
+          "addAccount":    "Add Account"
+        },
+        "login": "Log In",
+        "about": "About",
+        "terms": "Terms of Use",
+        "privacy": "Privacy Policy",
+        "search":"Search",
+        "logIn": "Log In"
+        }
+  },
+  "relaylist": {
+    "title": "Your Relays",
+    "addrelay": "Add Relay",
+    "description": "Relays are hubs for your content and connections. At least one is required to interact with the network, but you can join as many as you like.",
+    "norelay" : "No relays connected",
+    "other": "Other relays",
+    "otherdesc": "Below are relays used by people in your network. Adding these may improve your ability to load profiles and content.",
+    "modaldesc": "Enter a relay url below to add it to your relay selections."
+  }
+}

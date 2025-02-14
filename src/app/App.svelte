@@ -1,7 +1,8 @@
 <script lang="ts">
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
   import "@fortawesome/fontawesome-free/css/solid.css"
-
+  import { i18n } from './stores/i18nStore'
+   
   import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
   import {ctx, omit, ago, max, sleep, memoize, isNil} from "@welshman/lib"
@@ -76,6 +77,11 @@
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
   import Zap from "src/app/views/Zap.svelte"
+
+
+  import adminUILangTranslation from "src/app/i18n/AdminUILangTranslation.svelte"
+
+
   import {onMount} from "svelte"
   import {logUsage} from "src/app/state"
   import {
@@ -92,9 +98,14 @@
     asEntity,
   } from "src/app/util/router"
 
+
   const {session, pubkey} = app
 
   // Routes
+  router.register("/translations-manager", adminUILangTranslation, {
+  preventMultipleOpening: true,
+  modal: true
+});
 
   router.register("/about", About)
   router.register("/search", Search)

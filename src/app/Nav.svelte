@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { i18n } from './stores/i18nStore'
   import {pubkey, signer} from "@welshman/app"
   import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
@@ -9,6 +10,7 @@
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
   import {hasNewMessages, hasNewNotifications} from "src/engine"
+  import OpenTranslationsButton from "src/app/i18n/OpenTranslationsButton.svelte"
 
   let innerWidth = 0
   let searching = false
@@ -52,6 +54,7 @@
     class="fixed left-0 right-0 top-0 z-nav flex h-16 items-center justify-end gap-8 bg-neutral-900 pl-4 pr-8">
     <div class="relative">
       <div class="flex">
+        <OpenTranslationsButton />
         <Input
           dark
           class="border-tinted-700 !bg-neutral-800 py-px outline-none"
@@ -60,7 +63,8 @@
           bind:element={searchInput}
           bind:value={$searchTerm} />
         <Anchor button class="z-feature -ml-2 border-none !bg-tinted-700 !text-tinted-200"
-          >Search</Anchor>
+          > {$i18n.t('page.home.search', { default: 'Search' })} 
+        </Anchor>
       </div>
       {#if $searchTerm}
         <div
@@ -97,7 +101,7 @@
     {#if $signer}
       <Anchor button accent on:click={createNote}>Post +</Anchor>
     {:else if !$pubkey}
-      <Anchor modal button accent href="/login">Log In</Anchor>
+      <Anchor modal button accent href="/login">{$i18n.t('page.home.login', { default: 'S\'authentifier' })} </Anchor>
     {/if}
   </div>
 {/if}
