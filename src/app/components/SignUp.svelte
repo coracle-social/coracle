@@ -93,7 +93,7 @@
     </p>
     <Divider>Or</Divider>
   {/if}
-  {#if Capacitor.isNativePlatform()}
+  {#if Capacitor.getPlatform() === "ios"}
     <Button onclick={useKey} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
       <Icon icon="key" />
       Generate a key
