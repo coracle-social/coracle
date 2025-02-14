@@ -323,3 +323,9 @@ emoji-picker {
   --input-font-color: var(--base-content);
   --outline-color: var(--base-100);
 }
+
+/* progress */
+
+progress[value]::-webkit-progress-value {
+  transition: width 0.5s;
+}

@@ -9,6 +9,7 @@
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileEdit from "@app/components/ProfileEdit.svelte"
+  import ProfileDelete from "@app/components/ProfileDelete.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
   import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
@@ -25,6 +26,8 @@
   const startEdit = () => pushModal(ProfileEdit)
 
   const startEject = () => pushModal(InfoKeys)
+
+  const startDelete = () => pushModal(ProfileDelete)
 </script>
 
 <div class="content column gap-4">
@@ -116,5 +119,11 @@
         {/snippet}
       </FieldInline>
     {/if}
+  </div>
+  <div class="card2 bg-alt col-4 shadow-xl">
+    <Button class="btn btn-outline btn-error" onclick={startDelete}>
+      <Icon icon="trash-bin-2" />
+      Delete your profile
+    </Button>
   </div>
 </div>

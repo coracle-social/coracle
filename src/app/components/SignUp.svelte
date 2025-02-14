@@ -12,14 +12,19 @@
   import SignUpKey from "@app/components/SignUpKey.svelte"
   import SignUpSuccess from "@app/components/SignUpSuccess.svelte"
   import {pushModal} from "@app/modal"
-  import {BURROW_URL, PLATFORM_NAME} from "@app/state"
+  import {BURROW_URL, PLATFORM_NAME, PLATFORM_ACCENT} from "@app/state"
   import {pushToast} from "@app/toast"
 
-  const ac = window.location.origin
+  const params = new URLSearchParams({
+    an: PLATFORM_NAME,
+    ac: window.location.origin,
+    at: isMobile ? "android" : "web",
+    aa: PLATFORM_ACCENT.slice(1),
+    am: "dark",
+    asf: "yes",
+  })
 
-  const at = isMobile ? "android" : "web"
-
-  const nstart = `https://start.njump.me/?an=Flotilla&at=${at}&ac=${ac}`
+  const nstart = `https://start.njump.me/?${params.toString()}`
 
   const login = () => pushModal(LogIn)
 
