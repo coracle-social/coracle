@@ -37,8 +37,8 @@
       <div class="h-px bg-neutral-600" />
     {/if}
     {#if title}
-      <div class="flex flex-col bg-white px-4 py-2 text-black">
-        <strong class="overflow-hidden text-ellipsis whitespace-nowrap">{title}</strong>
+      <div class="flex flex-col bg-white px-4 py-2 text-black" style="overflow-wrap: anywhere">
+        <strong>{title}</strong>
         <small>{ellipsize(description, 140)}</small>
       </div>
     {/if}
