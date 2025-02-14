@@ -16,7 +16,8 @@
   import RelayItem from "@app/components/RelayItem.svelte"
   import RelayAdd from "@app/components/RelayAdd.svelte"
   import {pushModal} from "@app/modal"
-  import {setRelayPolicy, discoverRelays, setInboxRelayPolicy} from "@app/commands"
+  import {discoverRelays} from "@app/requests"
+  import {setRelayPolicy, setInboxRelayPolicy} from "@app/commands"
 
   const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
   const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)

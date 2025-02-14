@@ -13,7 +13,7 @@
   import {pushModal, clearModals} from "@app/modal"
   import {PLATFORM_NAME, BURROW_URL} from "@app/state"
   import {pushToast} from "@app/toast"
-  import {loadUserData} from "@app/commands"
+  import {loadUserData} from "@app/requests"
   import {setChecked} from "@app/notifications"
 
   let signers: any[] = $state([])

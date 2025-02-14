@@ -20,7 +20,7 @@
     userRoomsByUrl,
     getDefaultPubkeys,
   } from "@app/state"
-  import {discoverRelays} from "@app/commands"
+  import {discoverRelays} from "@app/requests"
   import {pushModal} from "@app/modal"
 
   const wotGraph = $derived.by(() => {
@@ -36,20 +36,23 @@
   })
 
   const relaySearch = $derived(
-    createSearch($relays, {
-      getValue: (relay: Relay) => relay.url,
-      sortFn: ({score, item}) => {
-        if (score && score > 0.1) return -score!
+    createSearch(
+      $relays.filter(r => wotGraph.has(r.url)),
+      {
+        getValue: (relay: Relay) => relay.url,
+        sortFn: ({score, item}) => {
+          if (score && score > 0.1) return -score!
 
-        const wotScore = wotGraph.get(item.url)?.size || 0
+          const wotScore = wotGraph.get(item.url)?.size || 0
 
-        return score ? dec(score) * wotScore : -wotScore
+          return score ? dec(score) * wotScore : -wotScore
+        },
+        fuseOptions: {
+          keys: ["url", "name", {name: "description", weight: 0.3}],
+          shouldSort: false,
+        },
       },
-      fuseOptions: {
-        keys: ["url", "name", {name: "description", weight: 0.3}],
-        shouldSort: false,
-      },
-    }),
+    ),
   )
 
   const openSpace = (url: string) => pushModal(SpaceCheck, {url})
@@ -129,8 +132,8 @@
       </Button>
     {/each}
     {#await discoverRelays($memberships)}
-      <div class="flex justify-center">
-        <Spinner loading>Loading more relays...</Spinner>
+      <div class="flex justify-center py-20">
+        <Spinner loading>Loading spaces...</Spinner>
       </div>
     {/await}
   </div>

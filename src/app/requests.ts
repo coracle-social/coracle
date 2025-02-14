@@ -1,5 +1,19 @@
 import {get, writable} from "svelte/store"
-import {partition, shuffle, int, YEAR, MONTH, insert, sortBy, assoc, now} from "@welshman/lib"
+import {
+  partition,
+  chunk,
+  sample,
+  sleep,
+  shuffle,
+  uniq,
+  int,
+  YEAR,
+  MONTH,
+  insert,
+  sortBy,
+  assoc,
+  now,
+} from "@welshman/lib"
 import {
   MESSAGE,
   DELETE,
@@ -9,10 +23,11 @@ import {
   matchFilters,
   getTagValues,
   getTagValue,
+  isShareableRelayUrl,
 } from "@welshman/util"
-import type {TrustedEvent, Filter} from "@welshman/util"
+import type {TrustedEvent, Filter, List} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
-import type {Subscription} from "@welshman/net"
+import type {Subscription, SubscribeRequestWithHandlers} from "@welshman/net"
 import type {AppSyncOpts, Thunk} from "@welshman/app"
 import {
   subscribe,
@@ -22,10 +37,23 @@ import {
   hasNegentropy,
   thunkWorker,
   createFeedController,
+  loadRelay,
+  loadMutes,
+  loadFollows,
+  loadProfile,
+  loadInboxRelaySelections,
+  getRelayUrls,
 } from "@welshman/app"
 import {createScroller} from "@lib/html"
 import {daysBetween} from "@lib/util"
-import {userRoomsByUrl, getUrlsForEvent} from "@app/state"
+import {
+  INDEXER_RELAYS,
+  getDefaultPubkeys,
+  userRoomsByUrl,
+  getUrlsForEvent,
+  loadMembership,
+  loadSettings,
+} from "@app/state"
 
 // Utils
 
@@ -317,3 +345,42 @@ export const listenForNotifications = () => {
     }
   }
 }
+
+export const loadUserData = (
+  pubkey: string,
+  request: Partial<SubscribeRequestWithHandlers> = {},
+) => {
+  const promise = Promise.race([
+    sleep(3000),
+    Promise.all([
+      loadInboxRelaySelections(pubkey, request),
+      loadMembership(pubkey, request),
+      loadSettings(pubkey, request),
+      loadProfile(pubkey, request),
+      loadFollows(pubkey, request),
+      loadMutes(pubkey, request),
+    ]),
+  ])
+
+  // Load followed profiles slowly in the background without clogging other stuff up. Only use a single
+  // indexer relay to avoid too many redundant validations, which slow things down and eat bandwidth
+  promise.then(async () => {
+    for (const pubkeys of chunk(50, getDefaultPubkeys())) {
+      const relays = sample(1, INDEXER_RELAYS)
+
+      await sleep(1000)
+
+      for (const pubkey of pubkeys) {
+        loadMembership(pubkey, {relays})
+        loadProfile(pubkey, {relays})
+        loadFollows(pubkey, {relays})
+        loadMutes(pubkey, {relays})
+      }
+    }
+  })
+
+  return promise
+}
+
+export const discoverRelays = (lists: List[]) =>
+  Promise.all(uniq(lists.flatMap(getRelayUrls)).filter(isShareableRelayUrl).map(loadRelay))

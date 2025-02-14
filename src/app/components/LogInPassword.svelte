@@ -12,7 +12,7 @@
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import PasswordResetRequest from "@app/components/PasswordResetRequest.svelte"
-  import {loadUserData} from "@app/commands"
+  import {loadUserData} from "@app/requests"
   import {clearModals, pushModal} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {pushToast} from "@app/toast"
