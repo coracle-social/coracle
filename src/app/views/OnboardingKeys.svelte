@@ -14,7 +14,7 @@
     asf: "yes",
   })
 
-  const njump = `https://start.njump.me/?${params.toString()}`
+  const nstart = `https://start.njump.me/?${params.toString()}`
 
   const prev = () => setStage("intro")
 
@@ -41,6 +41,6 @@
   {#if $pubkey}
     <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
   {:else}
-    <Anchor button accent class="flex-grow" externalHref={njump}>Continue</Anchor>
+    <Anchor button accent class="flex-grow" externalHref={nstart}>Continue</Anchor>
   {/if}
 </div>
