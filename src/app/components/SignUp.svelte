@@ -98,15 +98,11 @@
     </p>
     <Divider>Or</Divider>
   {/if}
-  {#if Capacitor.getPlatform() === "ios"}
+  {#if Capacitor.isNativePlatform()}
     <Button onclick={useKey} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
       <Icon icon="key" />
       Generate a key
     </Button>
-    <a href={nstart} class="btn">
-      <Icon icon="square-share-line" />
-      Create an account on Nstart
-    </a>
   {:else}
     <a href={nstart} class="btn {email || password ? 'btn-neutral' : 'btn-primary'}">
       <Icon icon="square-share-line" />
