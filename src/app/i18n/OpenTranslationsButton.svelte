@@ -1,3 +1,7 @@
+
+<script lang="ts">
+    import { router } from '../util/router';
+  </script>
 <button
     on:click={() => router.at('/translations-manager').open()}
     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center gap-2"

@@ -1,25 +1,23 @@
 <script lang="ts">
     import { i18n } from '../stores/i18nStore'
     import { onMount } from 'svelte'
-    
-    interface TranslationReducer {
-        [key: string]: {
-            [key: string]: string | object
-        }
-    }
-
-    const languages: string[] = ['fr', 'en', 'es', 'de']
+    import { isSidebarCollapsed } from '../stores/sidebarStore'
+    import type { TranslationReducer } from './types'
+    import { supportedLanguages, languageToCountry } from './types'
+    import { getFlagEmoji, getAllKeys, getNestedValue } from './utils'
+   
     let keys: string[] = []
     let newKey: string = ''
-    let visibleLanguages: string[] = [...languages]
+    let visibleLanguages: string[] = [...supportedLanguages]
     let translations: Record<string, any> = {}
     let searchKey: string = ''
     let editingKey: string | null = null
     let newKeyName: string = ''
 
-    // Pagination
-    let currentPage: number = 1
-    const itemsPerPage: number = 10
+    // Filtrage et pagination
+      // Pagination améliorée
+      let currentPage: number = 1
+    const itemsPerPage: number = 15
 
     // Filtrage et pagination
     $: filteredKeys = keys.filter(key => 
@@ -33,12 +31,11 @@
         currentPage * itemsPerPage
     )
 
-    // Réinitialisez la pagination quand les filtres changent
-    $: if (filteredKeys.length) {
-        currentPage = 1
+    // Réinitialisation de la page courante quand les résultats filtrés changent
+    $: if (filteredKeys.length && currentPage > totalPages) {
+        currentPage = totalPages
     }
 
-    // Fonctions de pagination
     function goToPage(page: number) {
         if (page >= 1 && page <= totalPages) {
             currentPage = page
@@ -46,35 +43,15 @@
     }
 
     function previousPage() {
-        if (currentPage > 1) {
-            currentPage--
-        }
+        currentPage = Math.max(1, currentPage - 1)
     }
 
     function nextPage() {
-        if (currentPage < totalPages) {
-            currentPage++
-        }
+        currentPage = Math.min(totalPages, currentPage + 1)
     }
 
-    // Fonctions existantes
     function exportTranslations() {
         $i18n.exportTranslations()
-    }
-
-    function getAllKeys(obj: any, prefix: string = ''): string[] {
-        return Object.entries(obj).reduce((acc, [key, value]) => {
-            const newKey = prefix ? `${prefix}.${key}` : key
-            if (typeof value === 'object') {
-                return [...acc, ...getAllKeys(value, newKey)]
-            }
-            return [...acc, newKey]
-        }, [])
-    }
-
-    function getNestedValue(obj: any, path: string): string {
-        return path.split('.').reduce((current, key) => 
-            current && current[key] !== undefined ? current[key] : '', obj)
     }
     
     function saveTranslation(key: string, lang: string, value: string): void {
@@ -91,7 +68,6 @@
         }
     }
 
-    // Fonctions CRUD
     function deleteTranslationKey(keyToDelete: string) {
         keys = keys.filter(key => key !== keyToDelete);
     }
@@ -106,7 +82,7 @@
             counter++;
         }
 
-        const newTranslations = languages.reduce((acc, lang) => {
+        const newTranslations = supportedLanguages.reduce((acc, lang) => {
             acc[lang] = getNestedValue(translations[lang], originalKey);
             return acc;
         }, {});
@@ -122,7 +98,7 @@
 
     function saveKeyEdit(oldKey: string) {
         if (newKeyName && newKeyName !== oldKey) {
-            const newTranslations = languages.reduce((acc, lang) => {
+            const newTranslations = supportedLanguages.reduce((acc, lang) => {
                 acc[lang] = getNestedValue(translations[lang], oldKey);
                 return acc;
             }, {});
@@ -137,7 +113,6 @@
         editingKey = null;
     }
 
-    // Import des traductions
     async function handleImport(event: Event) {
         const file = (event.target as HTMLInputElement).files?.[0]
         if (file) {
@@ -146,7 +121,7 @@
                 const staticTrans = $i18n.getStaticTranslations()
                 const dynamicTrans = $i18n.getDynamicTranslations()
                 
-                translations = languages.reduce((acc, lang) => {
+                translations = supportedLanguages.reduce((acc, lang) => {
                     acc[lang] = {
                         ...staticTrans[lang],
                         ...dynamicTrans[lang]
@@ -166,16 +141,9 @@
             }
         }
     }
-
-    onMount(() => {
-        const trans = $i18n.getStaticTranslations()
-        translations = trans
-        keys = getAllKeys(trans.fr)
-    })
-
     function addNewKey() {
         if (newKey && !keys.includes(newKey)) {
-            const values = languages.reduce((acc, lang) => {
+            const values = supportedLanguages.reduce((acc, lang) => {
                 acc[lang] = ''
                 return acc
             }, {})
@@ -186,10 +154,15 @@
     }
 
     function closeManager() {
-        window.history.back(); // ou router.pop() selon votre implémentation
+        window.history.back();
     }
-</script>
 
+    onMount(() => {
+        const trans = $i18n.getStaticTranslations()
+        translations = trans
+        keys = getAllKeys(trans.fr)
+    })
+</script>
 <button 
     on:click={closeManager}
     class="absolute top-4 right-4 px-3 py-1 bg-red-500 text-black rounded"
@@ -197,8 +170,20 @@
     Fermer
 </button>
 
-<div class="translations-page w-screen min-h-screen bg-white">
-    <!-- Section Import/Export -->
+<div 
+    class="translations-page z-50"
+    style="
+        position: fixed;
+        left: {$isSidebarCollapsed ? '0' : '288px'};
+        right: 0;
+        top: 0;
+        bottom: 0;
+        padding: 1rem;
+        transition: left 0.3s ease-in-out;
+        overflow-x: auto;
+        overflow-y: auto;
+        background: white;
+    ">
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
         <button
             on:click={exportTranslations}
@@ -213,29 +198,25 @@
                 type="file" 
                 accept=".json"
                 on:change={handleImport}
-                class="hipx-4 py-2 bg-green-500 text-black rounded border border-black hover:bg-green-600"
+                class="hidden"
             />
         </label>
     </div>
 
-    <br />
-
-    <!-- Section Langues visibles -->
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
         <span class="font-bold">Langues visibles :</span>
-        {#each languages as lang}
+        {#each supportedLanguages as lang}
             <label class="flex items-center gap-2 cursor-pointer">
                 <input
                     type="checkbox"
                     checked={visibleLanguages.includes(lang)}
                     on:change={() => toggleLanguage(lang)}
                 />
-                <span>{lang.toUpperCase()}</span>
+                <span>{getFlagEmoji(lang)} {lang.toUpperCase()}</span>
             </label>
         {/each}
     </div>
 
-    <!-- Barre de recherche et ajout de nouvelle clé -->
     <div class="mb-4 flex justify-center items-center gap-2">
         <input
             type="text"
@@ -258,73 +239,76 @@
         </button>
     </div>
 
-    <br />
-    
-    <!-- Tableau des traductions -->
-            <div class="w-full overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2 header-yellow">N° / #</th>
-                            <th class="px-4 py-2 header-yellow" 
-                                style="width: {visibleLanguages.length === 0 ? '100%' : '250px'}">
-                                Clé
-                            </th>
-                            {#each visibleLanguages as lang}
-                                <th class="px-4 py-2 border header-yellow min-w-[150px] text-left">
-                                    {lang.toUpperCase()}
-                                </th>
-                            {/each}
-                            <th class="px-4 py-2 border header-yellow text-left">Actions</th>
-                        </tr>
-                    </thead>
+
+    <div class="w-full overflow-x-auto border rounded-lg" style="min-width: 100%;">
+        <table class="w-full border-collapse text-sm">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-2 py-1 header-yellow w-12 sticky left-0 z-20">N°</th>
+                    <th class="px-2 py-1 header-yellow sticky left-12 z-20 bg-[#FFC107]" 
+                        style="width: {visibleLanguages.length === 0 ? '100%' : '200px'}">
+                        Clé
+                    </th>
+                    {#each visibleLanguages as lang}
+                        <th class="px-2 py-1 border header-yellow min-w-[120px] text-left">
+                            <span class="flag-and-text whitespace-nowrap">
+                                <span class="flag-emoji" title={`Langue : ${lang.toUpperCase()}`}>
+                                    {getFlagEmoji(lang)}
+                                </span>
+                                <span>{lang.toUpperCase()}</span>
+                            </span>
+                        </th>
+                    {/each}
+                    <th class="px-2 py-1 border header-yellow text-left sticky right-0 z-20 bg-[#FFC107]">Actions</th>
+                </tr>
+            </thead>
             
             <tbody>
                 {#each paginatedKeys as key, index}
                     <tr class="hover:bg-gray-50">
-                        <td class="p-4 border text-center">
+                        <td class="p-1 border text-center text-xs sticky left-0 z-10 bg-white">
                             {((currentPage - 1) * itemsPerPage) + index + 1}
                         </td>
-                        <td class="p-4 border font-mono sticky left-0 bg-white z-10"
-                            style="width: {visibleLanguages.length === 0 ? '100%' : '250px'}">
-                            {#if editingKey === key}
-                                <div class="flex items-center">
-                                    <input
-                                        type="text"
-                                        bind:value={newKeyName}
-                                        class="w-full p-2 border rounded mr-2"
-                                        on:keydown={(e) => {
-                                            if (e.key === 'Enter') saveKeyEdit(key);
-                                            if (e.key === 'Escape') cancelKeyEdit();
-                                        }}
-                                    />
-                                    <button 
-                                        on:click={() => saveKeyEdit(key)}
-                                        class="px-2 py-1 bg-green-500 text-white rounded mr-1"
-                                    >
-                                        ✓
-                                    </button>
-                                    <button 
-                                        on:click={cancelKeyEdit}
-                                        class="px-2 py-1 bg-red-500 text-white rounded"
-                                    >
-                                        ✗
-                                    </button>
-                                </div>
-                            {:else}
-                                <div class="flex items-center">
-                                    <span>{key}</span>
-                                    <button 
-                                        on:click={() => startKeyEdit(key)}
-                                        class="ml-2 text-blue-500 hover:text-blue-700"
-                                    >
-                                        ✎
-                                    </button>
-                                </div>
-                            {/if}
-                        </td>
+                        <td class="p-1 border font-mono sticky left-12 bg-white z-10 text-sm"
+                        style="width: {visibleLanguages.length === 0 ? '100%' : '200px'}">
+                        {#if editingKey === key}
+                            <div class="flex items-center gap-1">
+                                <input
+                                    type="text"
+                                    bind:value={newKeyName}
+                                    class="w-full p-1 border rounded text-xs"
+                                    on:keydown={(e) => {
+                                        if (e.key === 'Enter') saveKeyEdit(key);
+                                        if (e.key === 'Escape') cancelKeyEdit();
+                                    }}
+                                />
+                                <button 
+                                    on:click={() => saveKeyEdit(key)}
+                                    class="px-1 py-0.5 bg-green-500 text-white rounded text-xs"
+                                >
+                                    ✓
+                                </button>
+                                <button 
+                                    on:click={cancelKeyEdit}
+                                    class="px-1 py-0.5 bg-red-500 text-white rounded text-xs"
+                                >
+                                    ✗
+                                </button>
+                            </div>
+                        {:else}
+                            <div class="flex items-center justify-between">
+                                <span class="truncate" title={key}>{key}</span>
+                                <button 
+                                    on:click={() => startKeyEdit(key)}
+                                    class="ml-1 text-blue-500 hover:text-blue-700 text-xs"
+                                >
+                                    ✎
+                                </button>
+                            </div>
+                        {/if}
+                    </td>
                         {#each visibleLanguages as lang}
-                            <td class="p-4 border">
+                            <td class="p-1 border">
                                 <input
                                     type="text"
                                     value={getNestedValue(translations[lang], key)}
@@ -332,22 +316,22 @@
                                         const value = event.currentTarget.value;
                                         saveTranslation(key, lang, value);
                                     }}
-                                    class="w-full p-2 border rounded"
+                                    class="w-full p-1 border rounded text-sm"
                                 />
                             </td>
                         {/each}
-                        <td class="p-4 border">
-                            <div class="flex gap-2">
+                        <td class="p-1 border sticky right-0 z-10 bg-white">
+                            <div class="flex gap-1">
                                 <button 
                                     on:click={() => duplicateTranslationKey(key)}
-                                    class="px-2 py-1 bg-blue-500 text-white rounded"
+                                    class="px-1.5 py-0.5 bg-blue-500 text-white rounded text-xs"
                                     title="Dupliquer la clé"
                                 >
                                     📄
                                 </button>
                                 <button 
                                     on:click={() => deleteTranslationKey(key)}
-                                    class="px-2 py-1 bg-red-500 text-white rounded"
+                                    class="px-1.5 py-0.5 bg-red-500 text-white rounded text-xs"
                                     title="Supprimer la clé"
                                 >
                                     🗑️
@@ -357,64 +341,109 @@
                     </tr>
                 {/each}
             </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <div class="flex justify-center items-center mt-4 space-x-2">
-            <button 
-                on:click={previousPage} 
-                disabled={currentPage === 1}
-                class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-            >
-                Précédent
-            </button>
-        
-            <div class="flex space-x-1">
+            <div class="flex justify-center items-center space-x-2 mt-4">
+                <button 
+                    on:click={previousPage}
+                    disabled={currentPage === 1}
+                    class="px-4 py-2 bg-blue-500 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Précédent
+                </button>
+            
                 {#each Array(totalPages) as _, i}
                     <button 
                         on:click={() => goToPage(i + 1)}
-                        class="px-3 py-1 {currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-blue-200'} rounded"
+                        class="px-4 py-2 {currentPage === i + 1 
+                            ? 'bg-blue-700 text-black' 
+                            : 'bg-blue-400 text-black hover:bg-blue-500'} rounded"
                     >
                         {i + 1}
                     </button>
                 {/each}
+            
+                <button 
+                    on:click={nextPage}
+                    disabled={currentPage === totalPages}
+                    class="px-4 py-2 bg-blue-500 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Suivant
+                </button>
             </div>
-        
-            <button 
-                on:click={nextPage} 
-                disabled={currentPage === totalPages}
-                class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-            >
-                Suivant
-            </button>
-        </div>
+        </table>
     </div>
 </div>
 
 <style>
-    :global(.translations-page) {
+    .translations-page {
         position: absolute;
-        left: 0;
         right: 0;
         margin: 0;
-        padding: 0;
+        padding: 1rem;
         max-width: none !important;
         color: black;
+        overflow-x: hidden;
+        transition: margin-left 0.3s ease-in-out;
     }
 
-    :global(.translations-page > *) {
+    .translations-page table {
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        min-width: max-content; /* Assure que la table ne se réduit pas trop */
+    }
+
+    .translations-page > * {
         max-width: none !important;
         margin: 0 !important;
         padding: 0 !important;
         color: black;
     }
 
+    .translations-page td, 
+    .translations-page th {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .translations-page input {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .flag-and-text {
+        white-space: nowrap;
+    }
+
     input[type="checkbox"] {
         accent-color: #ffa600;
     }
+
     .header-yellow {
         background-color: #FFC107;
         color: white;
     }
 
+    input[type="text"] {
+        min-height: 28px;
+    }
+
+    .translations-page table td {
+        max-width: 0;
+        overflow: hidden;
+    }
+
+    .translations-page input[type="text"]:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: -1px;
+    }
+
+    .translations-page {
+        min-height: 100vh;
+        background: white;
+        overflow-x: auto;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Ajoutez cette règle pour assurer que la table prend toute la largeur disponible */
+    .translations-page > div {
+        width: 100%;
+        min-width: fit-content;
+    }
 </style>

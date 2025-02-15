@@ -27,8 +27,10 @@
   import {env, hasNewMessages, hasNewNotifications} from "src/engine"
   import LanguageSelector from './shared/LanguageSelector.svelte'
   import OpenTranslationsButton from './i18n/OpenTranslationsButton.svelte'
-
+import { writable } from 'svelte/store'
+import { isSidebarCollapsed } from './stores/sidebarStore'
   const {page} = router
+
 
   $: recent = (Object.values($thunks) as Thunk[]).filter(
     t => t.event.created_at > now() - 5 * MINUTE && t.event.pubkey === $pubkey,
@@ -76,9 +78,29 @@
   $: isFeedPage = Boolean($page?.path.match(/^\/(notes)?$/))
   $: isListPage = Boolean($page?.path.match(/^\/(lists)?$/))
   $: userDisplay = deriveProfileDisplay($pubkey)
+
+    // Fonction pour basculer l'état du menu
+    function toggleSidebar() {
+    $isSidebarCollapsed = !$isSidebarCollapsed
+  }
 </script>
 
-<div class="fixed bottom-0 left-0 top-0 z-sidebar w-72 bg-tinted-700 transition-colors">
+<!-- Bouton pour contrôler le menu -->
+<button 
+  on:click={toggleSidebar}
+  class="fixed left-[288px] top-4 z-[60] px-2 py-1 bg-tinted-700 text-white rounded-r-md hover:bg-tinted-600 transition-all duration-300 border-r border-t border-b border-tinted-600"
+  style="transform: translateX({$isSidebarCollapsed ? '-288px' : '0'})">
+  {$isSidebarCollapsed ? '▶' : '◀'}
+</button>
+
+<!-- Menu avec transition -->
+<div 
+  class="fixed bottom-0 left-0 top-0 z-sidebar bg-tinted-700 transition-all duration-300"
+  style="
+    width: 288px; 
+    transform: translateX({$isSidebarCollapsed ? '-288px' : '0'})
+  ">
+  <!-- Votre contenu de menu existant -->
   <Anchor
     external
     class="mb-4 mt-4 flex items-center gap-2 px-6"
@@ -89,6 +111,7 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
+
 
   <MenuDesktopItem>
     <LanguageSelector />
@@ -279,3 +302,20 @@
     </div>
   </FlexColumn>
 </div>
+
+<style>
+  /* Styles pour les transitions */
+  :global(body) {
+    transition: padding-left 0.3s ease-in-out;
+    padding-left: var(--sidebar-width, 288px); /* 72px * 4 pour tenir compte du scale Tailwind */
+  }
+
+  :global(body[data-sidebar-collapsed="true"]) {
+    padding-left: 0;
+  }
+
+  /* Ajustez les styles existants si nécessaire */
+  .transition-all {
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  }
+</style>
