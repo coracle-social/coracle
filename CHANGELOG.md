@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.2.11
+
+* Add in-app signup flow on ios
+* Add profile deletion
+
 # 0.2.10
 
 * Improve space discovery
