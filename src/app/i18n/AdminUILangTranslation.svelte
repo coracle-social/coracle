@@ -293,21 +293,20 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
     ">
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
         <button 
-        class="px-4 py-2 bg-green-500 text-black rounded"
+               class="px-4 py-2 bg-green-500 text-black rounded border border-black"
         on:click={exportTranslations}
     >
-        Exporter
+        Export JSON
     </button>
 
-        <label class="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600 cursor-pointer">
-            Importer les traductions
-            <input 
-                type="file" 
-                accept=".json"
-                on:change={handleImport}
-                class="hidden"
-            />
-        </label>
+
+    <button 
+           class="px-4 py-2 bg-green-500 text-black rounded border border-black"
+    on:change={handleImport}
+    >
+    Import JSON 
+    </button>
+
     </div>
 
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
