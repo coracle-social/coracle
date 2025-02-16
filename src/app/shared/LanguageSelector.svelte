@@ -170,6 +170,7 @@
                 </button>
             {/each}
         </div>
+       
     {/if}
  
     {#if tooltipVisible}
@@ -181,12 +182,14 @@
             {tooltipContent}
         </div>
     {/if}
+   
  </div>
 
  <style>
     .language-selector {
         user-select: none;
         isolation: isolate;
+        color: black;
     }
  
     .rotate-180 {

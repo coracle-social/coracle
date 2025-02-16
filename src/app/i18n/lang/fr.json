@@ -1,5 +1,6 @@
 {
   "FLORENT_LEFEVRE": "test",
+  "PROUT": "test",
   "page": {
     "home": {
       "about": "À propos",
@@ -34,6 +35,6 @@
     "norelay": "Aucun relai connecté",
     "other": "Autres relais",
     "otherdesc": "Ci-dessous se trouvent des relais utilisés par d'autres utilisateurs. Ajouter ceux où se trouvent vos amis pour capter leur profiles et contenus.",
-    "title": "Vos Relais"
+    "title": "Vos Relais coucou les kebabous"
   }
 }

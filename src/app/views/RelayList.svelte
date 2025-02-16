@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import { i18n } from '../stores/i18nStore'
   import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {
     pubkey,
@@ -142,7 +143,7 @@
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your relays</h2>
+      <h2 class="staatliches text-2xl">{$i18n.t('relaylist.title', { default: 'Your relays' })}</h2>
     </div>
     <Anchor button accent on:click={addCustomRelay}>
       <i class="fa-solid fa-compass" /> Add Relay

@@ -1,4 +1,4 @@
-<script lang="ts">
+ei<script lang="ts">
   import {now, omit, MINUTE} from "@welshman/lib"
   import { i18n } from './stores/i18nStore'
   import {seconds} from "hurdak"
@@ -116,7 +116,7 @@ import { isSidebarCollapsed } from './stores/sidebarStore'
   <MenuDesktopItem>
     <LanguageSelector />
   </MenuDesktopItem>
-
+<br>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>
     {$i18n.t('page.home.feeds', { default: 'Feeds' })}
   </MenuDesktopItem>
