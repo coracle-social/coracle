@@ -28,10 +28,13 @@ interface I18nStore {
    setLocale: (newLocale: string) => void;
    addTranslation: (key: string, values: {[locale: string]: string}) => void;
    getAvailableLocales: () => string[];
-   exportTranslations: () => void;
    importTranslations: (file: File) => Promise<void>;
    getStaticTranslations: () => typeof translations;
    getDynamicTranslations: () => TranslationStore;
+   deleteTranslation: (key: string) => void;
+   updateTranslation: (locale: string, key: string, value: string) => void;
+   renameTranslationKey: (oldKey: string, newKey: string) => void;
+   exportTranslations: (keys: string[], visibleLanguages: string[]) => void;
 }
 
 function createI18nStore() {
@@ -77,59 +80,166 @@ function createI18nStore() {
                }
            },
            addTranslation: (key: string, values: {[locale: string]: string}) => {
+               console.log('Ajout de la traduction :', { key, values });
+               
                dynamicTranslations.update(current => {
                    const updated = { ...current }
                    Object.entries(values).forEach(([locale, text]) => {
                        if (!updated[locale]) updated[locale] = {}
                        setNestedValue(updated[locale], key, text)
                    })
+                   
+                   console.log('Traductions dynamiques mises à jour :', updated);
+                   localStorage.setItem('dynamicTranslations', JSON.stringify(updated))
                    return updated
                })
-               localStorage.setItem('dynamicTranslations', JSON.stringify(get(dynamicTranslations)))
            },
            getAvailableLocales: () => Object.keys(translations),
-           exportTranslations: () => {
-            const allTranslations = {
-                static: translations,  // traductions statiques existantes
-                dynamic: get(dynamicTranslations)  // traductions dynamiques actuelles
-            }
-            const blob = new Blob([JSON.stringify(allTranslations, null, 2)], { type: 'application/json' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'translations.json'
-            a.click()
-            URL.revokeObjectURL(url)
-            },
-           importTranslations: async (file: File): Promise<void> => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onload = (e) => {
-                    try {
-                        const content = e.target?.result as string
-                        const parsed = JSON.parse(content)
-                        // Si le fichier importé contient les deux types de traductions
-                        if (parsed.static && parsed.dynamic) {
-                            // Mettre à jour les traductions dynamiques
-                            dynamicTranslations.set(parsed.dynamic)
-                            // Les traductions statiques restent inchangées car elles viennent des fichiers JSON
-                        } else {
-                            // Si c'est un ancien format, tout mettre dans dynamic
-                            dynamicTranslations.set(parsed)
-                        }
-                        localStorage.setItem('dynamicTranslations', JSON.stringify(get(dynamicTranslations)))
-                        resolve()
-                    } catch (error) {
-                        reject(error)
-                    }
-                }
-                reader.onerror = () => reject(reader.error)
-                reader.readAsText(file)
-            })
-        },
-           getStaticTranslations: () => translations,
-           getDynamicTranslations: () => get(dynamicTranslations)
            
+           exportTranslations: (keys: string[], visibleLanguages: string[]) => {
+               console.log('Clés à exporter :', keys);
+               console.log('Langues à exporter :', visibleLanguages);
+
+               const i18nStore = get(i18n);
+               
+               visibleLanguages.forEach(lang => {
+                   const staticTrans = i18nStore.getStaticTranslations()[lang] || {};
+                   const dynamicTrans = i18nStore.getDynamicTranslations()[lang] || {};
+                   
+                   console.log(`Traductions statiques pour ${lang} :`, staticTrans);
+                   console.log(`Traductions dynamiques pour ${lang} :`, dynamicTrans);
+
+                   const exportData: any = {};
+
+                   keys.forEach(key => {
+                       const dynamicValue = getNestedValue(dynamicTrans, key);
+                       const staticValue = getNestedValue(staticTrans, key);
+                       const inputValue = document.querySelector(`input[data-key="${key}"][data-lang="${lang}"]`)?.value;
+
+                       console.log(`Recherche de la clé ${key} en ${lang}:`, {
+                           dynamicValue, 
+                           staticValue, 
+                           inputValue
+                       });
+
+                       const value = inputValue || dynamicValue || staticValue;
+
+                       if (value !== null && value !== undefined) {
+                           const parts = key.split('.');
+                           let current = exportData;
+                           
+                           for (let i = 0; i < parts.length - 1; i++) {
+                               current[parts[i]] = current[parts[i]] || {};
+                               current = current[parts[i]];
+                           }
+                           
+                           current[parts[parts.length - 1]] = value;
+                       }
+                   });
+
+                   // Reste du code d'export (création de fichier) inchangé
+                   const now = new Date();
+                   const timestamp = 
+                     now.getFullYear().toString() +
+                     (now.getMonth() + 1).toString().padStart(2, '0') +
+                     now.getDate().toString().padStart(2, '0') + '_' +
+                     now.getHours().toString().padStart(2, '0') +
+                     now.getMinutes().toString().padStart(2, '0') +
+                     now.getSeconds().toString().padStart(2, '0');
+                   
+                   const jsonString = JSON.stringify(exportData, null, 2);
+                   const blob = new Blob([jsonString], { type: 'application/json' });
+                   const url = URL.createObjectURL(blob);
+                   const a = document.createElement('a');
+                   a.href = url;
+                   a.download = `translations_${lang}_${timestamp}.json`;
+                   
+                   document.body.appendChild(a);
+                   a.click();
+                   document.body.removeChild(a);
+                   URL.revokeObjectURL(url);
+
+                   console.log(`Données exportées pour ${lang} :`, exportData);
+               });
+           },
+           importTranslations: async (file: File): Promise<void> => {
+               return new Promise((resolve, reject) => {
+                   const reader = new FileReader()
+                   reader.onload = (e) => {
+                       try {
+                           const content = e.target?.result as string
+                           const parsed = JSON.parse(content)
+                           // Si le fichier importé contient les deux types de traductions
+                           if (parsed.static && parsed.dynamic) {
+                               // Mettre à jour les traductions dynamiques
+                               dynamicTranslations.set(parsed.dynamic)
+                               // Les traductions statiques restent inchangées car elles viennent des fichiers JSON
+                           } else {
+                               // Si c'est un ancien format, tout mettre dans dynamic
+                               dynamicTranslations.set(parsed)
+                           }
+                           localStorage.setItem('dynamicTranslations', JSON.stringify(get(dynamicTranslations)))
+                           resolve()
+                       } catch (error) {
+                           reject(error)
+                       }
+                   }
+                   reader.onerror = () => reject(reader.error)
+                   reader.readAsText(file)
+               })
+           },
+           getStaticTranslations: () => translations,
+           getDynamicTranslations: () => get(dynamicTranslations),
+           deleteTranslation: (key: string) => {
+               dynamicTranslations.update(current => {
+                   const updated = { ...current };
+                   Object.keys(updated).forEach(locale => {
+                       if (updated[locale]) {
+                           const keys = key.split('.');
+                           let obj = updated[locale];
+                           for (let i = 0; i < keys.length - 1; i++) {
+                               if (obj[keys[i]] === undefined) return updated;
+                               obj = obj[keys[i]];
+                           }
+                           delete obj[keys[keys.length - 1]];
+                       }
+                   });
+                   localStorage.setItem('dynamicTranslations', JSON.stringify(updated));
+                   return updated;
+               });
+           },
+           updateTranslation: (locale: string, key: string, value: string) => {
+               dynamicTranslations.update(current => {
+                   const updated = { ...current };
+                   if (!updated[locale]) updated[locale] = {};
+                   setNestedValue(updated[locale], key, value);
+                   localStorage.setItem('dynamicTranslations', JSON.stringify(updated));
+                   return updated;
+               });
+           },
+           renameTranslationKey: (oldKey: string, newKey: string) => {
+               dynamicTranslations.update(current => {
+                   const updated = { ...current };
+                   Object.keys(updated).forEach(locale => {
+                       if (updated[locale]) {
+                           const value = getNestedValue(updated[locale], oldKey);
+                           if (value !== null) {
+                               setNestedValue(updated[locale], newKey, value);
+                               // Supprime l'ancienne clé
+                               const keys = oldKey.split('.');
+                               let obj = updated[locale];
+                               for (let i = 0; i < keys.length - 1; i++) {
+                                   if (obj[keys[i]] === undefined) break;
+                                   obj = obj[keys[i]];
+                               }
+                               delete obj[keys[keys.length - 1]];
+                           }
+                       }
+                   });
+                   localStorage.setItem('dynamicTranslations', JSON.stringify(updated));
+                   return updated;
+               });
+           },
        })
    )
 
@@ -137,8 +247,3 @@ function createI18nStore() {
 }
 
 export const i18n = createI18nStore()
-
-
-
-
-

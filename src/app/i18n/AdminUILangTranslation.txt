@@ -1,13 +1,11 @@
 <script lang="ts">
     import { i18n } from '../stores/i18nStore'
-    import { get } from 'svelte/store'
     import { onMount } from 'svelte'
     import { isSidebarCollapsed } from '../stores/sidebarStore'
     import type { TranslationReducer } from './types'
     import { supportedLanguages, languageToCountry } from './types'
     import { getFlagEmoji, getAllKeys, getNestedValue } from './utils'
     import Modal from 'src/partials/Modal.svelte'
-
    
     let keys: string[] = []
     let newKey: string = ''
@@ -16,34 +14,13 @@
     let searchKey: string = ''
     let editingKey: string | null = null
     let newKeyName: string = ''
+
     let isExportModalOpen = false
     let selectedLanguage = supportedLanguages[0]
 
-
-
-    let selectedLanguages: string[] = [];
-
-function performExport() {
-    console.log("Exporting languages:", selectedLanguages);
-    $i18n.exportTranslations(keys, selectedLanguages);
-    isExportModalOpen = false;
-}
-
-// Ajout d'une fonction pour sélectionner/désélectionner toutes les langues
-function toggleAllLanguages() {
-    if (selectedLanguages.length === supportedLanguages.length) {
-        selectedLanguages = []; // Désélectionner tout
-    } else {
-        selectedLanguages = [...supportedLanguages]; // Sélectionner tout
-    }
-}
-
-    // Filtrage et pagination
-      // Pagination améliorée
-      let currentPage: number = 1
+    let currentPage: number = 1
     const itemsPerPage: number = 15
 
-    // Filtrage et pagination
     $: filteredKeys = keys.filter(key => 
         key.toLowerCase().includes(searchKey.toLowerCase())
     )
@@ -55,13 +32,14 @@ function toggleAllLanguages() {
         currentPage * itemsPerPage
     )
 
-    function exportTranslations() {
-    isExportModalOpen = true;
-}
-
-    // Réinitialisation de la page courante quand les résultats filtrés changent
     $: if (filteredKeys.length && currentPage > totalPages) {
         currentPage = totalPages
+    }
+
+    $: {
+        if (searchKey) {
+            currentPage = 1;
+        }
     }
 
     function goToPage(page: number) {
@@ -77,64 +55,18 @@ function toggleAllLanguages() {
     function nextPage() {
         currentPage = Math.min(totalPages, currentPage + 1)
     }
+
+    function exportTranslations() {
+        isExportModalOpen = true;
+    }
+
+    function performExport() {
+        $i18n.exportTranslations();
+        isExportModalOpen = false;
+    }
     
-    function saveTranslation(key: string, lang: string, value: string): void {
-        console.log('Saving:', key, lang, value)
-        const values = { [lang]: value }
-        $i18n.addTranslation(key, values)
-    }
-
-    function toggleLanguage(lang: string) : void {
-        if (visibleLanguages.includes(lang)) {
-            visibleLanguages = visibleLanguages.filter(l => l !== lang)
-        } else {
-            visibleLanguages = [...visibleLanguages, lang].sort()
-        }
-    }
-
-    function deleteTranslationKey(keyToDelete: string) {
-        keys = keys.filter(key => key !== keyToDelete);
-    }
-
-    function duplicateTranslationKey(originalKey: string) {
-        let newKeyBase = `${originalKey}_copy`;
-        let counter = 1;
-        let newKeyName = newKeyBase;
-
-        while (keys.includes(newKeyName)) {
-            newKeyName = `${newKeyBase}_${counter}`;
-            counter++;
-        }
-
-        const newTranslations = supportedLanguages.reduce((acc, lang) => {
-            acc[lang] = getNestedValue(translations[lang], originalKey);
-            return acc;
-        }, {});
-
-        $i18n.addTranslation(newKeyName, newTranslations);
-        keys = [newKeyName, ...keys];
-    }
-
-    function startKeyEdit(oldKey: string) {
-        editingKey = oldKey;
-        newKeyName = oldKey;
-    }
-
-    function saveKeyEdit(oldKey: string) {
-        if (newKeyName && newKeyName !== oldKey) {
-            const newTranslations = supportedLanguages.reduce((acc, lang) => {
-                acc[lang] = getNestedValue(translations[lang], oldKey);
-                return acc;
-            }, {});
-
-            $i18n.addTranslation(newKeyName, newTranslations);
-            keys = keys.map(key => key === oldKey ? newKeyName : key);
-            editingKey = null;
-        }
-    }
-
-    function cancelKeyEdit() {
-        editingKey = null;
+    function closeManager() {
+        window.history.back();
     }
 
     async function handleImport(event: Event) {
@@ -167,109 +99,76 @@ function toggleAllLanguages() {
     }
 
     function addNewKey() {
-    if (newKey && !keys.includes(newKey)) {
-        // Créer des valeurs vides pour TOUTES les langues
-        const values = supportedLanguages.reduce((acc, lang) => {
-            acc[lang] = ''; // Assurez-vous de mettre une chaîne vide
-            return acc;
-        }, {});
+        if (newKey && !keys.includes(newKey)) {
+            keys = [...keys, newKey].sort();
+            supportedLanguages.forEach(lang => {
+                if (!translations[lang]) translations[lang] = {};
+                translations[lang][newKey] = '';
+            });
+            newKey = '';
+        }
+    }
 
-        console.log('Ajout de nouvelle clé :', {
-            key: newKey, 
-            values: values
+    function toggleLanguage(lang: string) {
+        if (visibleLanguages.includes(lang)) {
+            visibleLanguages = visibleLanguages.filter(l => l !== lang);
+        } else {
+            visibleLanguages = [...visibleLanguages, lang].sort();
+        }
+    }
+
+    function saveTranslation(key: string, lang: string, value: string) {
+        if (!translations[lang]) translations[lang] = {};
+        translations[lang][key] = value;
+        $i18n.updateTranslation(lang, key, value);
+    }
+
+    function duplicateTranslationKey(key: string) {
+        const newKey = `${key}_copy`;
+        if (!keys.includes(newKey)) {
+            keys = [...keys, newKey].sort();
+            supportedLanguages.forEach(lang => {
+                if (!translations[lang]) translations[lang] = {};
+                translations[lang][newKey] = translations[lang][key] || '';
+            });
+        }
+    }
+
+    function deleteTranslationKey(key: string) {
+        keys = keys.filter(k => k !== key);
+        supportedLanguages.forEach(lang => {
+            if (translations[lang]) {
+                delete translations[lang][key];
+            }
         });
-
-        // Utilisez addTranslation du store i18n
-        $i18n.addTranslation(newKey, values);
-
-        // Mettez à jour immédiatement la liste des clés
-        keys = [...keys, newKey].sort();
-
-        // Mettez également à jour l'objet translations
-        translations = supportedLanguages.reduce((acc, lang) => {
-            if (!acc[lang]) acc[lang] = {};
-            setNestedValue(acc[lang], newKey, '');
-            return acc;
-        }, translations);
-
-        // Log pour vérification
-        console.log('Translations après ajout :', translations);
-        
-        // Réinitialiser le champ de nouvelle clé
-        newKey = '';
-    }
-}
-
-
-function setNestedValue(obj: any, path: string, value: any): void {
-    // Diviser le chemin en parties
-    const keys = path.split('.');
-    
-    // Commencer à partir de l'objet de base
-    let current = obj;
-    
-    // Parcourir toutes les clés sauf la dernière
-    for (let i = 0; i < keys.length - 1; i++) {
-        const key = keys[i];
-        
-        // Si la clé n'existe pas, créer un nouvel objet
-        if (current[key] === undefined || current[key] === null) {
-            current[key] = {};
-        }
-        
-        // Si l'élément n'est pas un objet, le convertir en objet
-        if (typeof current[key] !== 'object') {
-            current[key] = {};
-        }
-        
-        // Se déplacer au niveau suivant
-        current = current[key];
-    }
-    
-    // Définir la valeur à la dernière clé
-    current[keys[keys.length - 1]] = value;
-}
-
-
-    function closeManager() {
-        window.history.back();
+        $i18n.deleteTranslation(key);
     }
 
-  // Modification de onMount
-onMount(() => {
-    const staticTrans = $i18n.getStaticTranslations()
-    const dynamicTrans = $i18n.getDynamicTranslations()
-    
-    translations = mergeTranslations(staticTrans, dynamicTrans)
-    
-    keys = Array.from(new Set([
-        ...getAllKeys(staticTrans.fr || {}),
-        ...getAllKeys(dynamicTrans.fr || {})
-    ])).sort()
+    function startKeyEdit(key: string) {
+        editingKey = key;
+        newKeyName = key;
+    }
 
-    // Ajouter un écouteur pour mettre à jour les traductions
-    const unsubscribe = i18n.subscribe(() => {
-        const updatedStaticTrans = $i18n.getStaticTranslations()
-        const updatedDynamicTrans = $i18n.getDynamicTranslations()
-        
-        translations = mergeTranslations(updatedStaticTrans, updatedDynamicTrans)
-    })
-
-    // Nouvelle fonction utilitaire pour fusionner les traductions
-function mergeTranslations(staticTrans: any, dynamicTrans: any) {
-    return supportedLanguages.reduce((acc, lang) => {
-        acc[lang] = {
-            ...staticTrans[lang],
-            ...dynamicTrans[lang]
+    function saveKeyEdit(oldKey: string) {
+        if (newKeyName && newKeyName !== oldKey && !keys.includes(newKeyName)) {
+            keys = keys.map(k => k === oldKey ? newKeyName : k).sort();
+            supportedLanguages.forEach(lang => {
+                if (translations[lang]) {
+                    translations[lang][newKeyName] = translations[lang][oldKey];
+                    delete translations[lang][oldKey];
+                }
+            });
+            $i18n.renameTranslationKey(oldKey, newKeyName);
+            editingKey = null;
         }
-        return acc
-    }, {})
-}
+    }
 
-    // Retourner la fonction de désabonnement
-    return unsubscribe
-})
+    function cancelKeyEdit() {
+        editingKey = null;
+        newKeyName = '';
+    }
 </script>
+
 <button 
     on:click={closeManager}
     class="absolute top-4 right-4 px-3 py-1 bg-red-500 text-black rounded"
@@ -292,12 +191,12 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
         background: white;
     ">
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
-        <button 
-        class="px-4 py-2 bg-green-500 text-black rounded"
-        on:click={exportTranslations}
-    >
-        Exporter
-    </button>
+        <button
+            on:click={exportTranslations}
+            class="px-4 py-2 bg-green-500 text-black rounded border border-black hover:bg-green-600"
+        >
+            Exporter les traductions
+        </button>
 
         <label class="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600 cursor-pointer">
             Importer les traductions
@@ -345,7 +244,6 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
             ✓ Ajouter
         </button>
     </div>
-
 
     <div class="w-full overflow-x-auto border rounded-lg" style="min-width: 100%;">
         <table class="w-full border-collapse text-sm">
@@ -414,26 +312,19 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
                             </div>
                         {/if}
                     </td>
-                    {#each visibleLanguages as lang}
-                    <td class="p-1 border">
-                       <input
-    type="text"
-    value={
-        getNestedValue(translations[lang], key) || 
-        getNestedValue($i18n.getDynamicTranslations()[lang], key) || 
-        getNestedValue($i18n.getStaticTranslations()[lang], key) || 
-        ''
-    }
-    on:input={function(event) {
-        const value = event.currentTarget.value;
-        saveTranslation(key, lang, value);
-    }}
-    class="w-full p-1 border rounded text-sm"
-    data-key={key}
-    data-lang={lang}
-/>
-                    </td>
-                {/each}
+                        {#each visibleLanguages as lang}
+                            <td class="p-1 border">
+                                <input
+                                    type="text"
+                                    value={getNestedValue(translations[lang], key)}
+                                    on:input={function(event) {
+                                        const value = event.currentTarget.value;
+                                        saveTranslation(key, lang, value);
+                                    }}
+                                    class="w-full p-1 border rounded text-sm"
+                                />
+                            </td>
+                        {/each}
                         <td class="p-1 border sticky right-0 z-10 bg-white">
                             <div class="flex gap-1">
                                 <button 
@@ -485,62 +376,55 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
             </div>
         </table>
     </div>
-</div>
 
-{#if isExportModalOpen}
-<Modal drawer={false} mini={false} canClose={true} onEscape={() => isExportModalOpen = false}>
-    <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-4">
-        <h2 class="text-xl font-bold mb-4">Exporter les traductions</h2>
-        
-        <div class="mb-4">
-            <label class="block mb-2 flex items-center">
-                <input 
-                    type="checkbox" 
-                    checked={selectedLanguages.length === supportedLanguages.length}
-                    on:change={toggleAllLanguages}
-                    class="mr-2"
-                />
-                Toutes les langues
-            </label>
-
-            <div class="grid grid-cols-2 gap-2">
-                {#each supportedLanguages as lang}
-                    <label class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            bind:group={selectedLanguages} 
-                            value={lang} 
-                            class="mr-2"
-                        />
-                        <span class="flag-and-text whitespace-nowrap">
-                            <span class="flag-emoji" title={`Langue : ${lang.toUpperCase()}`}>
-                                {getFlagEmoji(lang)}
-                            </span>
-                            <span>{lang.toUpperCase()}</span>
-                        </span>
+    {#if isExportModalOpen}
+        <Modal
+            drawer={false}
+            mini={false}
+            canClose={true}
+            onEscape={() => isExportModalOpen = false}
+        >
+            <div class="modal-content-inner m-auto flex max-w-2xl flex-col gap-4 p-4">
+                <h2 class="text-xl font-bold mb-4">Exporter les traductions</h2>
+                
+                <div class="mb-4">
+                    <label 
+                        for="language-select" 
+                        class="block mb-2"
+                    >
+                        Langue
                     </label>
-                {/each}
-            </div>
-        </div>
+                    <select 
+                        id="language-select"
+                        bind:value={selectedLanguage}
+                        class="w-full p-2 border rounded"
+                    >
+                        {#each supportedLanguages as lang}
+                            <option value={lang}>
+                                {getFlagEmoji(lang)} {lang.toUpperCase()}
+                            </option>
+                        {/each}
+                    </select>
+                </div>
 
-        <div class="flex justify-end gap-4">
-            <button 
-                class="px-4 py-2 bg-gray-200 rounded"
-                on:click={() => isExportModalOpen = false}
-            >
-                Annuler
-            </button>
-            <button 
-                class="px-4 py-2 bg-green-500 text-white rounded"
-                on:click={performExport}
-                disabled={selectedLanguages.length === 0}
-            >
-                Exporter
-            </button>
-        </div>
-    </div>
-</Modal>
-{/if}
+                <div class="flex justify-end gap-4">
+                    <button 
+                        class="px-4 py-2 bg-gray-200 rounded"
+                        on:click={() => isExportModalOpen = false}
+                    >
+                        Annuler
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded"
+                        on:click={performExport}
+                    >
+                        Exporter
+                    </button>
+                </div>
+            </div>
+        </Modal>
+    {/if}
+</div>
 
 <style>
     .translations-page {

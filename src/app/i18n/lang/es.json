@@ -1,33 +1,32 @@
 {
-    "page": {
-      "home": {
-        "feeds": "Flux",
-        "relays": "Relais",
-        "notifications": "Notifications",
-        "messages": "Messages",
-        "group" : "Groupe",
-            "settings":{
-              "title": "Paramètres",
-              "theme": "Thème couleur",
-              "database": "Base de données",
-              "application_settings": "Paramètres de l'application",
-              "content_settings": "Paramètres de contenu"
-  
-            },
-            "about": "À propos",
-            "terms": "Conditions d'utilisation",
-            "privacy": "Politique de confidentialité",
-            "search":"Rechercher"
-            }
+  "FLORENT_LEFEVRE": "test",
+  "page": {
+    "home": {
+      "about": "À propos",
+      "feeds": "Flux",
+      "group": "Groupe",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "privacy": "Politique de confidentialité",
+      "relays": "Relais",
+      "search": "Rechercher",
+      "settings": {
+        "application_settings": "Paramètres de l'application",
+        "content_settings": "Paramètres de contenu",
+        "database": "Base de données",
+        "theme": "Thème couleur",
+        "title": "Paramètres"
       },
-      "relaylist": {
-        "title": "Vos Relais",
-        "addrelay": "Ajouter Relai",
-        "description": "Les relais sont des routeurs pour vos contenus et vos connexions. Il en faut au moisn un pour rejoindre le réseau NOSTR, mais vous pouvez en ajouter autant que vous voulez.",
-        "norelay" : "Aucun relai connecté",
-        "other": "Autres relais",
-        "otherdesc": "Ci-dessous se trouvent des relais utilisés par d'autres utilisateurs. Ajouter ceux où se trouvent vos amis pour capter leur profiles et contenus.",
-        "modaldesc": "Ajouter son URL wss:// pour ajouter votre relai à la selection."
-      }
+      "terms": "Conditions d'utilisation"
     }
-  
+  },
+  "relaylist": {
+    "addrelay": "Ajouter Relai",
+    "description": "Les relais sont des routeurs pour vos contenus et vos connexions. Il en faut au moisn un pour rejoindre le réseau NOSTR, mais vous pouvez en ajouter autant que vous voulez.",
+    "modaldesc": "Ajouter son URL wss:// pour ajouter votre relai à la selection.",
+    "norelay": "Aucun relai connecté",
+    "other": "Autres relais",
+    "otherdesc": "Ci-dessous se trouvent des relais utilisés par d'autres utilisateurs. Ajouter ceux où se trouvent vos amis pour capter leur profiles et contenus.",
+    "title": "Vos Relais"
+  }
+}
