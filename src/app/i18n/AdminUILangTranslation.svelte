@@ -291,21 +291,30 @@ function mergeTranslations(staticTrans: any, dynamicTrans: any) {
         overflow-y: auto;
         background: white;
     ">
+
     <div class="mb-4 flex gap-4 p-4 bg-gray-100 rounded-lg">
+
+
+
+
+        <button 
+        class="px-4 py-2 bg-green-500 text-black rounded border border-black"
+ on:change={handleImport}
+>
+Import JSON (not yet implemented)
+</button>
+
+
+
         <button 
                class="px-4 py-2 bg-green-500 text-black rounded border border-black"
         on:click={exportTranslations}
     >
-        Export JSON
+        Export JSON (works !)
     </button>
 
 
-    <button 
-           class="px-4 py-2 bg-green-500 text-black rounded border border-black"
-    on:change={handleImport}
-    >
-    Import JSON 
-    </button>
+
 
     </div>
 
