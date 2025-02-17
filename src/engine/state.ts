@@ -45,6 +45,7 @@ import {
   pushToMapKey,
   setContext,
   simpleCache,
+  cached,
   sort,
   take,
   uniq,
@@ -361,28 +362,32 @@ export const isEventMuted = withGetter(
           ? new RegExp(`\\b(${words.map(w => w.toLowerCase().trim()).join("|")})\\b`)
           : null
 
-      return simpleCache(([e, strict = false]: [e: HashedEvent, strict?: boolean]) => {
-        if (!$pubkey || !e.pubkey) return false
+      return cached({
+        maxSize: 5000,
+        getKey: ([e, strict = false]: [e: HashedEvent, strict?: boolean]) => `${e.id}:${strict}`,
+        getValue: ([e, strict = false]: [e: HashedEvent, strict?: boolean]) => {
+          if (!$pubkey || !e.pubkey) return false
 
-        const {roots, replies} = getReplyTagValues(e.tags)
+          const {roots, replies} = getReplyTagValues(e.tags)
 
-        if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x)))
-          return true
+          if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x)))
+            return true
 
-        if (regex) {
-          if (e.content?.toLowerCase().match(regex)) return true
-          if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) return true
-        }
+          if (regex) {
+            if (e.content?.toLowerCase().match(regex)) return true
+            if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) return true
+          }
 
-        if (strict || $userFollows.has(e.pubkey)) return false
+          if (strict || $userFollows.has(e.pubkey)) return false
 
-        const wotScore = getUserWotScore(e.pubkey)
-        const okWot = wotScore >= minWot
-        const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
-        const isValidPow = getPow(e.id) >= powDifficulty
-        const okPow = isValidPow && powDifficulty > minPow
+          const wotScore = getUserWotScore(e.pubkey)
+          const okWot = wotScore >= minWot
+          const powDifficulty = Number(getTag("nonce", e.tags)?.[2] || "0")
+          const isValidPow = getPow(e.id) >= powDifficulty
+          const okPow = isValidPow && powDifficulty > minPow
 
-        return !okWot && !okPow
+          return !okWot && !okPow
+        },
       })
     },
   ),
