@@ -176,7 +176,7 @@
           </div>
         </div>
       </div>
-      <div class="grid max-w-[80%] grid-cols-2 gap-3 sm:flex-row">
+      <div class="flex max-w-[80%] flex-col gap-3">
         {#if $handle}
           <div class="flex items-center gap-2">
             <i class="fa fa-at w-4 text-accent" />

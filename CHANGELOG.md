@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.6
+
+* Show complete website/lnurl
+
 # 0.6.5
 
 * Fix memory leak
