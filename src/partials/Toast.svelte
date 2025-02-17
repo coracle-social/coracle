@@ -25,9 +25,7 @@
 
   export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
 
-  export const showPublishInfo = (thunk: Thunk, opts = {}) => {
-    showToast({thunk, type: "publish", ...opts})
-  }
+  export const showPublishInfo = (thunk: Thunk, opts = {}) => showToast({thunk, type: "publish", ...opts})
 
   window.addEventListener("online", () => {
     if (get(toast)?.id === "offline") {

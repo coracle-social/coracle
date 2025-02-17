@@ -150,7 +150,6 @@
 
     if ($userSettings.send_delay > 0) {
       showToast({
-        id: "send-delay",
         type: "delay",
         timeout: $userSettings.send_delay / 1000,
         onCancel: () => {
