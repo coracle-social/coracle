@@ -152,3 +152,28 @@ router.extend("people", (pubkey, {relays = []} = {}) => {
 
   return nip19.nprofileEncode({pubkey, relays})
 })
+
+export type Serializer = {
+  encode: (v: any) => string
+  decode: (v: string) => any
+}
+
+export type ComponentSerializers = Record<string, Serializer>
+
+
+interface RegisterOpts {
+  required?: string[]
+  serializers?: ComponentSerializers
+  requireUser?: boolean
+  requireSigner?: boolean
+  preventMultipleOpening?: boolean
+  modal?: boolean;
+  hidden?: boolean;  
+}
+
+export type Route = RegisterOpts & {
+  path: string
+  component: any
+  modal?: boolean    // Ajout explicite
+  hidden?: boolean   // Ajout explicite
+}

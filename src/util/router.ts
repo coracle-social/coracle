@@ -127,6 +127,9 @@ export type RegisterOpts = {
   serializers?: ComponentSerializers
   requireUser?: boolean
   requireSigner?: boolean
+  preventMultipleOpening?: boolean
+  modal?: boolean      // Ajout de cette propriété
+  hidden?: boolean     // Ajout de cette propriété
 }
 
 export type Route = RegisterOpts & {
@@ -293,16 +296,34 @@ export class Router {
       }
     })
   }
-
+  
   register = (
     path: string,
     component: any,
-    {serializers, requireUser, requireSigner, required}: RegisterOpts = {},
-  ) => {
-    this.routes.push({path, component, required, serializers, requireUser, requireSigner})
-  }
+    {
+        serializers, 
+        requireUser, 
+        requireSigner, 
+        required,
+        preventMultipleOpening,
+        modal,            // Ajout de modal dans la déstructuration
+        hidden           // Ajout de hidden dans la déstructuration
+    }: RegisterOpts = {},
+) => {
+    this.routes.push({
+        path, 
+        component, 
+        required, 
+        serializers, 
+        requireUser, 
+        requireSigner,
+        preventMultipleOpening,
+        modal,           // Ajout de modal dans l'objet
+        hidden          // Ajout de hidden dans l'objet
+    })
+}
 
-  getMatch(path): {route: Route; params: Record<string, any>} {
+  getMatch(path: string): {route: Route; params: Record<string, any>} {
     const match = pickRoute(this.routes, path)
 
     if (!match) {
