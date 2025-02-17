@@ -91,13 +91,13 @@
 </script>
 
 {#if $toast}
-  {#key $toast.id}
-    <div
-      on:touchstart={onTouchStart}
-      on:touchmove={onTouchMove}
-      on:touchend={onTouchEnd}
-      class="pointer-events-none fixed left-0 right-0 top-0 z-toast flex justify-center"
-      transition:fly={{y: -50, duration: 300}}>
+  <div
+    on:touchstart={onTouchStart}
+    on:touchmove={onTouchMove}
+    on:touchend={onTouchEnd}
+    class="pointer-events-none fixed left-0 right-0 top-0 z-toast flex justify-center"
+    transition:fly={{y: -50, duration: 300}}>
+    {#key $toast.id}
       <div
         style={`transform: translate(${offset}px, 0)`}
         class={cx(
@@ -127,6 +127,6 @@
           <i class="fa fa-times" />
         </div>
       </div>
-    </div>
-  {/key}
+    {/key}
+  </div>
 {/if}
