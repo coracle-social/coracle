@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.6.5
+
+* Fix memory leak
+* Fix isEventMuted
+* Fix toast animation
+* Fix (and improve) drafts
+* Fix parser dropping sections of notes
+
 # 0.6.4
 
 * Make event details json nicer
