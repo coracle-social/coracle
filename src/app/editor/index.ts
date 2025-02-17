@@ -31,22 +31,24 @@ export const signWithAssert = async (template: StampedEvent) => {
 export const makeEditor = ({
   aggressive = false,
   autofocus = false,
-  charCount,
   content = "",
   placeholder = "",
   submit,
-  uploading,
+  onUpdate,
   onUploadError,
+  uploading,
+  charCount,
   wordCount,
 }: {
   aggressive?: boolean
   autofocus?: boolean
-  charCount?: Writable<number>
   content?: string
   placeholder?: string
   submit: () => void
-  uploading?: Writable<boolean>
+  onUpdate?: () => void
   onUploadError?: (url: string, task: UploadTask) => void
+  uploading?: Writable<boolean>
+  charCount?: Writable<number>
   wordCount?: Writable<number>
 }) =>
   new Editor({
@@ -109,6 +111,7 @@ export const makeEditor = ({
       }),
     ],
     onUpdate({editor}) {
+      onUpdate?.()
       wordCount?.set(editor.storage.wordCount.words)
       charCount?.set(editor.storage.wordCount.chars)
     },

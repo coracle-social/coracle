@@ -89,8 +89,6 @@
       $session.pubkey,
     )
 
-    drafts.set("notecreate", editor.getHTML())
-
     let hashedEvent = hash(ownedEvent)
 
     if (options.pow_difficulty) {
@@ -108,8 +106,8 @@
 
     let thunk: Thunk, emitter: Emitter
 
-    // if a delay is set, send the event through the DVM
     router.clearModals()
+    drafts.delete(DRAFT_KEY)
 
     if (options.publish_at) {
       const dvmContent = await $signer.nip04.encrypt(
@@ -148,7 +146,6 @@
     thunk.result.finally(() => {
       charCount.set(0)
       wordCount.set(0)
-      drafts.delete("notecreate")
     })
 
     if ($userSettings.send_delay > 0) {
@@ -159,6 +156,7 @@
         onCancel: () => {
           abortThunk(thunk)
           router.at("notes/create").open()
+          drafts.set(DRAFT_KEY, editor.getHTML())
         },
       })
     }
@@ -205,13 +203,29 @@
     },
   }
 
+  let DRAFT_KEY = "notecreate"
+
+  if (pubkey) {
+    DRAFT_KEY += `:${pubkey}`
+  }
+
+  if (quote) {
+    DRAFT_KEY += `:${quote.id}`
+  }
+
+  const draft = drafts.get(DRAFT_KEY) || ""
+
   const editor = makeEditor({
-    uploading,
-    onUploadError: (url, file) =>
-      showWarning(`Failed to upload file to ${url}: ${file.uploadError}`),
-    content: drafts.get("notecreate") || "",
-    submit: onSubmit,
     autofocus: true,
+    content: draft,
+    submit: onSubmit,
+    onUpdate: () => {
+      drafts.set(DRAFT_KEY, editor.getHTML())
+    },
+    onUploadError: (url, file) => {
+      showWarning(`Failed to upload file to ${url}: ${file.uploadError}`)
+    },
+    uploading,
     charCount,
     wordCount,
   })
@@ -228,10 +242,6 @@
   }
 
   onMount(() => {
-    if (pubkey && pubkey !== $session.pubkey) {
-      editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
-    }
-
     if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
@@ -242,6 +252,8 @@
 
       editor.commands.insertContent("\n")
       editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
+    } else if (pubkey && pubkey !== $session.pubkey) {
+      editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
     }
 
     return () => {
