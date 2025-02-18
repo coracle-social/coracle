@@ -1,5 +1,6 @@
 <script lang="ts">
   import type {NativeEmoji} from "emoji-picker-element/shared"
+  import type {TrustedEvent} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Icon from "@lib/components/Icon.svelte"
@@ -11,10 +12,10 @@
 
   const {url, event, reply} = $props()
 
-  const onEmoji = (emoji: NativeEmoji) => {
+  const onEmoji = ((event: TrustedEvent, url: string, emoji: NativeEmoji) => {
     history.back()
     publishReaction({event, relays: [url], content: emoji.unicode})
-  }
+  }).bind(undefined, $state.snapshot(event), url)
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
