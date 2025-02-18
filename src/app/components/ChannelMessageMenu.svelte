@@ -4,7 +4,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
   import EventReport from "@app/components/EventReport.svelte"
-  import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
+  import EventDeleteConfirm from "@app/components/EventDeleteConfirm.svelte"
   import {pushModal} from "@app/modal"
 
   const {url, event, onClick} = $props()
@@ -21,7 +21,7 @@
 
   const showDelete = () => {
     onClick()
-    pushModal(ConfirmDelete, {url, event})
+    pushModal(EventDeleteConfirm, {url, event})
   }
 </script>
 

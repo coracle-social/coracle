@@ -6,7 +6,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
+  import EventDeleteConfirm from "@app/components/EventDeleteConfirm.svelte"
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -26,7 +26,7 @@
 
   const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
 
-  const showDelete = () => pushModal(ConfirmDelete, {url, event})
+  const showDelete = () => pushModal(EventDeleteConfirm, {url, event})
 </script>
 
 <div class="col-2">

@@ -7,7 +7,7 @@
   import EventInfo from "@app/components/EventInfo.svelte"
   import EventReport from "@app/components/EventReport.svelte"
   import EventShare from "@app/components/EventShare.svelte"
-  import ConfirmDelete from "@app/components/ConfirmDelete.svelte"
+  import EventDeleteConfirm from "@app/components/EventDeleteConfirm.svelte"
   import {pushModal} from "@app/modal"
 
   const {
@@ -41,7 +41,7 @@
 
   const showDelete = () => {
     onClick()
-    pushModal(ConfirmDelete, {url, event})
+    pushModal(EventDeleteConfirm, {url, event})
   }
 </script>
 
