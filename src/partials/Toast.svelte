@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
   import {get, writable} from "svelte/store"
+  import {identity} from "@welshman/lib"
 
   export const toast = writable(null)
 
@@ -25,7 +26,8 @@
 
   export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
 
-  export const showPublishInfo = (thunk: Thunk, opts = {}) => showToast({thunk, type: "publish", ...opts})
+  export const showPublishInfo = (thunk: Thunk, opts = {}) =>
+    showToast({thunk, type: "publish", ...opts})
 
   window.addEventListener("online", () => {
     if (get(toast)?.id === "offline") {
@@ -88,43 +90,41 @@
   })
 </script>
 
-{#if $toast}
+{#each [$toast].filter(identity) as { id, type, theme, thunk, message, onCancel } (id)}
   <div
     on:touchstart={onTouchStart}
     on:touchmove={onTouchMove}
     on:touchend={onTouchEnd}
     class="pointer-events-none fixed left-0 right-0 top-0 z-toast flex justify-center"
     transition:fly={{y: -50, duration: 300}}>
-    {#key $toast.id}
-      <div
-        style={`transform: translate(${offset}px, 0)`}
-        class={cx(
-          "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
-          "relative max-w-xl flex-grow transition-all",
-          {
-            "border-neutral-600 bg-tinted-700 text-neutral-100": $toast.theme === "info",
-            "border-warning bg-tinted-700 text-neutral-100": $toast.theme === "warning",
-          },
-        )}>
-        {#if $toast.type === "text"}
-          {$toast.message}
-        {:else if $toast.type === "delay"}
-          Sending in {timeLeft} seconds...
-          <Anchor
-            class="ml-3 inline-flex"
-            link
-            underline
-            on:click={() => {
-              $toast.onCancel()
-              toast.set(null)
-            }}>Cancel</Anchor>
-        {:else if $toast.type === "publish"}
-          <ThunkStatus thunk={$toast.thunk} />
-        {/if}
-        <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
-          <i class="fa fa-times" />
-        </div>
+    <div
+      style={`transform: translate(${offset}px, 0)`}
+      class={cx(
+        "pointer-events-auto m-2 rounded border p-3 pr-8 text-center shadow-xl sm:ml-2",
+        "relative max-w-xl flex-grow transition-all",
+        {
+          "border-neutral-600 bg-tinted-700 text-neutral-100": theme === "info",
+          "border-warning bg-tinted-700 text-neutral-100": theme === "warning",
+        },
+      )}>
+      {#if type === "text"}
+        {message}
+      {:else if type === "delay"}
+        Sending in {timeLeft} seconds...
+        <Anchor
+          class="ml-3 inline-flex"
+          link
+          underline
+          on:click={() => {
+            onCancel()
+            toast.set(null)
+          }}>Cancel</Anchor>
+      {:else if type === "publish"}
+        <ThunkStatus {thunk} />
+      {/if}
+      <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
+        <i class="fa fa-times" />
       </div>
-    {/key}
+    </div>
   </div>
-{/if}
+{/each}
