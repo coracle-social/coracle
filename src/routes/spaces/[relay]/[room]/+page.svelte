@@ -46,8 +46,6 @@
   const filter = {kinds: [MESSAGE], "#h": [room]}
   const relay = deriveRelay(url)
 
-  const assertEvent = (e: any) => e as TrustedEvent
-
   const joinRoom = async () => {
     if (hasNip29($relay)) {
       joiningRoom = true
@@ -275,7 +273,12 @@
         <Divider>{value}</Divider>
       {:else}
         <div in:slide class:-mt-1={!showPubkey}>
-          <ChannelMessage {url} {room} {replyTo} event={assertEvent(value)} {showPubkey} />
+          <ChannelMessage
+            {url}
+            {room}
+            {replyTo}
+            event={$state.snapshot(value as TrustedEvent)}
+            {showPubkey} />
         </div>
       {/if}
     {/each}

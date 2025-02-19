@@ -42,8 +42,6 @@
     return sortBy(e => -max([scores.get(e.id), e.created_at]), threads)
   })
 
-  $inspect({threads, comments, events})
-
   onMount(() => {
     const {cleanup} = makeFeed({
       element: element!,
@@ -98,7 +96,7 @@
   <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
     {#each events as event (event.id)}
       <div in:fly>
-        <ThreadItem {url} {event} />
+        <ThreadItem {url} event={$state.snapshot(event)} />
       </div>
     {/each}
     <p class="flex h-10 items-center justify-center py-20">

@@ -1,14 +1,18 @@
 <script lang="ts">
+  import type {TrustedEvent} from "@welshman/util"
   import Confirm from "@lib/components/Confirm.svelte"
   import {publishDelete} from "@app/commands"
   import {clearModals} from "@app/modal"
 
-  const {url, event} = $props()
+  type Props = {
+    url: string
+    event: TrustedEvent
+  }
+
+  const {url, event}: Props = $props()
 
   const confirm = async () => {
-    const snapshot = $state.snapshot(event)
-
-    await publishDelete({event: snapshot, relays: [url]})
+    await publishDelete({event, relays: [url]})
 
     clearModals()
   }

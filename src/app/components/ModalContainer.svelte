@@ -10,7 +10,7 @@
     }
   }
 
-  let modal: any = $state()
+  let modal: any = $state.raw()
   const hash = $derived($page.url.hash.slice(1))
   const hashIsValid = $derived(Boolean($modals[hash]))
 

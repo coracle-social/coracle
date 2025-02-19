@@ -42,8 +42,6 @@
   const others = remove($pubkey!, pubkeys)
   const missingInboxes = $derived(pubkeys.filter(pk => !$inboxRelaySelectionsByPubkey.has(pk)))
 
-  const assertEvent = (e: any) => e as TrustedEvent
-
   const showMembers = () =>
     pushModal(ProfileList, {pubkeys: others, title: `People in this conversation`})
 
@@ -196,7 +194,11 @@
       {#if type === "date"}
         <Divider>{value}</Divider>
       {:else}
-        <ChatMessage event={assertEvent(value)} {pubkeys} {showPubkey} {replyTo} />
+        <ChatMessage
+          event={$state.snapshot(value as TrustedEvent)}
+          {pubkeys}
+          {showPubkey}
+          {replyTo} />
       {/if}
     {/each}
     <p

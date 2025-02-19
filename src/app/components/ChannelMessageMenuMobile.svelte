@@ -10,12 +10,18 @@
   import {publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
-  const {url, event, reply} = $props()
+  type Props = {
+    url: string
+    event: TrustedEvent
+    reply: () => void
+  }
+
+  const {url, event, reply}: Props = $props()
 
   const onEmoji = ((event: TrustedEvent, url: string, emoji: NativeEmoji) => {
     history.back()
     publishReaction({event, relays: [url], content: emoji.unicode})
-  }).bind(undefined, $state.snapshot(event), url)
+  }).bind(undefined, event, url)
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
