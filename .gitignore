@@ -56,6 +56,8 @@ out/
 .gradle/
 local.properties
 proguard/
+google-services.json
+GoogleService-Info.plist
 
 # IDEs and editors
 .idea/
