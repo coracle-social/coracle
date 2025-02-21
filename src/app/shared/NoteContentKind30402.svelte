@@ -1,16 +1,14 @@
 <script lang="ts">
   import cx from "classnames"
   import {deriveIsDeletedByAddress} from "@welshman/store"
-  import {ctx, fromPairs} from "@welshman/lib"
-  import {getTagValue, Address} from "@welshman/util"
-  import {repository, pubkey} from "@welshman/app"
+  import {fromPairs} from "@welshman/lib"
+  import {getTagValue} from "@welshman/util"
+  import {repository} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
-  import {router} from "src/app/util/router"
   import {commaFormat} from "src/util/misc"
 
   export let note
@@ -19,12 +17,7 @@
 
   const {title, summary, location, status} = fromPairs(note.tags)
   const [price, code = "SAT"] = getTagValue("price", note.tags)?.slice(1) || []
-  const address = Address.fromEvent(note, ctx.app.router.Event(note).getUrls())
-  const editLink = router.at("listings").of(address.toString()).at("edit").toString()
-  const deleteLink = router.at("listings").of(address.toString()).at("delete").toString()
   const deleted = deriveIsDeletedByAddress(repository, note)
-
-  const sendMessage = () => router.at("channels").of([$pubkey, note.pubkey]).push()
 </script>
 
 <FlexColumn>
@@ -34,14 +27,7 @@
         <strong class={cx({"line-through": $deleted})}>
           {title}
         </strong>
-        {#if note.pubkey === $pubkey && !$deleted}
-          <Anchor modal stopPropagation href={editLink} class="flex items-center">
-            <i class="fa fa-edit text-base text-neutral-200" />
-          </Anchor>
-          <Anchor modal stopPropagation href={deleteLink} class="flex items-center">
-            <i class="fa fa-trash text-base text-neutral-200" />
-          </Anchor>
-        {:else if $deleted}
+        {#if $deleted}
           <Chip danger small>Deleted</Chip>
         {:else if status === "sold"}
           <Chip danger small>Sold</Chip>
@@ -67,9 +53,4 @@
     <NoteContentKind1 {note} {showEntire} {showMedia} />
   </div>
   <NoteContentTopics {note} />
-  {#if !$deleted}
-    <div class="flex justify-center">
-      <Anchor button accent on:click={sendMessage}>Make an offer</Anchor>
-    </div>
-  {/if}
 </FlexColumn>
