@@ -12,6 +12,7 @@
     isCashu,
     isInvoice,
     isLink,
+    isImage,
     isProfile,
     isEvent,
     isEllipsis,
@@ -29,6 +30,7 @@
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentQuote from "src/app/shared/NoteContentQuote.svelte"
+  import NoteCheckImages from "src/app/shared/NoteCheckImages.svelte"
 
   export let note
   export let minLength = 500
@@ -68,8 +70,8 @@
 
   const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
 
-  $: fullContent = showMedia ? reduceLinks(parse(note)) : parse(note)
-
+  $: rawContent = parse(note)
+  $: fullContent = showMedia ? reduceLinks(rawContent) : rawContent
   $: shortContent = showEntire
     ? fullContent
     : truncate(fullContent, {
@@ -78,56 +80,58 @@
         mediaLength: showMedia ? 200 : 50,
       })
 
-  $: ellipsize = expandable && shortContent.map(c => (Array.isArray(c) ? c[0] : c)).find(isEllipsis)
+  $: mediaUrls = rawContent.filter(isImage).map(p => p.value.url.toString())
+  $: ellipsize = expandable && shortContent.find(isEllipsis)
 </script>
 
-<div
-  class={cx($$props.class, "note-content overflow-hidden text-ellipsis")}
-  style={ellipsize &&
-    "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
-  {#each shortContent as parsed, i}
-    {#if isNewline(parsed)}
-      <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
-    {:else if isTopic(parsed)}
-      <NoteContentTopic value={parsed.value} />
-    {:else if isCode(parsed)}
-      <NoteContentCode value={parsed.value} />
-    {:else if isCashu(parsed)}
-      <div on:click|stopPropagation>
-        <QRCode code={parsed.value} />
-      </div>
-    {:else if isInvoice(parsed)}
-      <div on:click|stopPropagation>
-        <QRCode code={parsed.value} />
-      </div>
-    {:else if isLink(parsed)}
-      <NoteContentLinks urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
-    {:else if isLinkGrid(parsed)}
-      <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
-    {:else if isProfile(parsed)}
-      <PersonLink pubkey={parsed.value.pubkey} />
-    {:else if isEvent(parsed) || isAddress(parsed)}
-      {#if isStartOrEnd(i) && depth < 2}
-        <NoteContentQuote {depth} {note} value={parsed.value}>
-          <div slot="note-content" let:quote>
-            <slot name="note-content" {quote} />
-          </div>
-        </NoteContentQuote>
+<NoteCheckImages author={note.pubkey} urls={mediaUrls}>
+  <div
+    class={cx($$props.class, "note-content overflow-hidden text-ellipsis")}
+    style={ellipsize &&
+      "mask-origin: border-box; mask-size: cover; mask-repeat: no-repeat; mask-image: linear-gradient(0deg, transparent 0px, black 100px)"}>
+    {#each shortContent as parsed, i}
+      {#if isNewline(parsed)}
+        <NoteContentNewline value={parsed.value.slice(isNextToBlock(i) ? 1 : 0)} />
+      {:else if isTopic(parsed)}
+        <NoteContentTopic value={parsed.value} />
+      {:else if isCode(parsed)}
+        <NoteContentCode value={parsed.value} />
+      {:else if isCashu(parsed)}
+        <div on:click|stopPropagation>
+          <QRCode code={parsed.value} />
+        </div>
+      {:else if isInvoice(parsed)}
+        <div on:click|stopPropagation>
+          <QRCode code={parsed.value} />
+        </div>
+      {:else if isLink(parsed)}
+        <NoteContentLinks urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
+      {:else if isLinkGrid(parsed)}
+        <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
+      {:else if isProfile(parsed)}
+        <PersonLink pubkey={parsed.value.pubkey} />
+      {:else if isEvent(parsed) || isAddress(parsed)}
+        {#if isStartOrEnd(i) && depth < 2}
+          <NoteContentQuote {depth} {note} value={parsed.value}>
+            <div slot="note-content" let:quote>
+              <slot name="note-content" {quote} />
+            </div>
+          </NoteContentQuote>
+        {:else}
+          <Anchor
+            modal
+            stopPropagation
+            class="overflow-hidden text-ellipsis whitespace-nowrap underline"
+            href={fromNostrURI(parsed.raw)}>
+            {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
+          </Anchor>
+        {/if}
       {:else}
-        <Anchor
-          modal
-          stopPropagation
-          class="overflow-hidden text-ellipsis whitespace-nowrap underline"
-          href={fromNostrURI(parsed.raw)}>
-          {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
-        </Anchor>
+        {@html renderAsHtml(parsed)}
       {/if}
-    {:else}
-      {@html renderAsHtml(parsed)}
-    {/if}
-  {/each}
-</div>
-
-{#if ellipsize}
-  <NoteContentEllipsis on:click={expand} />
-{/if}
+    {/each}
+  </div>
+  {#if ellipsize}
+    <NoteContentEllipsis on:click={expand} />
+  {/if}
+</NoteCheckImages>

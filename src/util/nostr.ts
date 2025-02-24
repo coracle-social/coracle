@@ -162,7 +162,7 @@ const WARN_TAGS = new Set([
 export const getContentWarning = e =>
   getBadDomainsWarning(e) ||
   getTagValue("content-warning", e.tags) ||
-  getTopicTagValues(e.tags).some(t => WARN_TAGS.has(t.toLowerCase()))
+  getTopicTagValues(e.tags).find(t => WARN_TAGS.has(t.toLowerCase()))
 
 export const parseAnything = async entity => {
   if (entity.includes("@")) {
