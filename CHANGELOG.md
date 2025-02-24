@@ -3,6 +3,8 @@
 # 0.6.6
 
 * Show complete website/lnurl
+* Scan images for sensitive content
+* Make muting on feeds more strict
 
 # 0.6.5
 

@@ -31,8 +31,8 @@
 
   const context = new Map<string, Set<TrustedEvent>>()
 
-  const shouldSkip = (event: TrustedEvent) => {
-    if (!showMuted && $isEventMuted(event, true)) return true
+  const shouldSkip = (event: TrustedEvent, strict: boolean) => {
+    if (!showMuted && $isEventMuted(event, strict)) return true
     if (!showDeleted && repository.isDeleted(event)) return true
     if (hideReplies && getParentIdOrAddr(event)) return true
 
@@ -73,7 +73,7 @@
       }
 
       // Hide replies to deleted/muted parents
-      if (shouldSkip(parent)) {
+      if (shouldSkip(parent, true)) {
         return
       }
 
@@ -114,7 +114,7 @@
 
   const addEvents = async (events: TrustedEvent[]) => {
     for (const event of events) {
-      if (!shouldSkip(event)) {
+      if (!shouldSkip(event, false)) {
         const promise = addEvent(event)
 
         if (shouldAwait) {
