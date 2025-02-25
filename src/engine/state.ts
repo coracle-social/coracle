@@ -6,6 +6,7 @@ import {
   ensurePlaintext,
   followsByPubkey,
   freshness,
+  profilesByPubkey,
   getDefaultAppContext,
   getDefaultNetContext,
   getNetwork,
@@ -352,8 +353,8 @@ export const userPins = derived(userPinList, l => new Set(getTagValues(["e"], ge
 
 export const isEventMuted = withGetter(
   derived(
-    [userMutes, userFollows, userSettings, pubkey],
-    ([$userMutes, $userFollows, $userSettings, $pubkey]) => {
+    [userMutes, userFollows, userSettings, profilesByPubkey, pubkey],
+    ([$userMutes, $userFollows, $userSettings, $profilesByPubkey, $pubkey]) => {
       const words = $userSettings.muted_words
       const minWot = $userSettings.min_wot_score
       const minPow = $userSettings.min_pow_difficulty
@@ -376,6 +377,7 @@ export const isEventMuted = withGetter(
           if (regex) {
             if (e.content?.toLowerCase().match(regex)) return true
             if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) return true
+            if ($profilesByPubkey.get(e.pubkey)?.nip05?.match(regex)) return true
           }
 
           if (strict || $userFollows.has(e.pubkey)) return false

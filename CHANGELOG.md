@@ -5,6 +5,7 @@
 * Show complete website/lnurl
 * Scan images for sensitive content
 * Make muting on feeds more strict
+* Apply muted words to nip05
 
 # 0.6.5
 
