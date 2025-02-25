@@ -39,7 +39,7 @@
       <div>{subtitle}</div>
     {/snippet}
   </ModalHeader>
-  <p>{message}</p>
+  <p class="text-center">{message}</p>
   <ModalFooter>
     <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />

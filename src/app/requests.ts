@@ -47,6 +47,9 @@ import {
 import {createScroller} from "@lib/html"
 import {daysBetween} from "@lib/util"
 import {
+  ALERT,
+  ALERT_STATUS,
+  NOTIFIER_RELAY,
   INDEXER_RELAYS,
   getDefaultPubkeys,
   userRoomsByUrl,
@@ -308,6 +311,20 @@ export const makeCalendarFeed = ({
   }
 }
 
+// Domain specific
+
+export const loadAlerts = (pubkey: string) =>
+  load({
+    relays: [NOTIFIER_RELAY],
+    filters: [{kinds: [ALERT], authors: [pubkey]}],
+  })
+
+export const loadAlertStatuses = (pubkey: string) =>
+  load({
+    relays: [NOTIFIER_RELAY],
+    filters: [{kinds: [ALERT_STATUS], "#p": [pubkey]}],
+  })
+
 // Application requests
 
 export const listenForNotifications = () => {
@@ -361,6 +378,8 @@ export const loadUserData = (
       loadProfile(pubkey, request),
       loadFollows(pubkey, request),
       loadMutes(pubkey, request),
+      loadAlertStatuses(pubkey),
+      loadAlerts(pubkey),
     ]),
   ])
 

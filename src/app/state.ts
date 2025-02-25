@@ -41,7 +41,7 @@ import {
   normalizeRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
-import {Nip59} from "@welshman/signer"
+import {Nip59, decrypt} from "@welshman/signer"
 import {
   pubkey,
   repository,
@@ -62,6 +62,7 @@ import {
   ensurePlaintext,
   thunks,
   walkThunks,
+  signer,
 } from "@welshman/app"
 import type {Thunk, Relay} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
@@ -72,6 +73,15 @@ export const ROOM = "h"
 export const GENERAL = "_"
 
 export const PROTECTED = ["-"]
+
+export const ALERT = 32830
+
+export const ALERT_STATUS = 32831
+
+export const NOTIFIER_PUBKEY = "27b7c2ed89ef78322114225ea3ebf5f72c7767c2528d4d0c1854d039c00085df"
+
+// export const NOTIFIER_RELAY = 'wss://notifier.flotilla.social/'
+export const NOTIFIER_RELAY = "ws://localhost:4738/"
 
 export const INDEXER_RELAYS = [
   "wss://purplepag.es/",
@@ -332,6 +342,40 @@ export const {
     load({...request, filters: [{kinds: [SETTINGS], authors: [pubkey]}]}),
 })
 
+// Alerts
+
+export type Alert = {
+  event: TrustedEvent
+  tags: string[][]
+}
+
+export const alerts = deriveEventsMapped<Alert>(repository, {
+  filters: [{kinds: [ALERT]}],
+  itemToEvent: item => item.event,
+  eventToItem: async event => {
+    const tags = parseJson(await decrypt(signer.get(), NOTIFIER_PUBKEY, event.content))
+
+    return {event, tags}
+  },
+})
+
+// Alert Statuses
+
+export type AlertStatus = {
+  event: TrustedEvent
+  tags: string[][]
+}
+
+export const alertStatuses = deriveEventsMapped<AlertStatus>(repository, {
+  filters: [{kinds: [ALERT_STATUS]}],
+  itemToEvent: item => item.event,
+  eventToItem: async event => {
+    const tags = parseJson(await decrypt(signer.get(), NOTIFIER_PUBKEY, event.content))
+
+    return {event, tags}
+  },
+})
+
 // Membership
 
 export const hasMembershipUrl = (list: List | undefined, url: string) =>
@@ -356,11 +400,7 @@ export const getMembershipRooms = (list?: List) =>
   getGroupTags(getListTags(list)).map(([_, room, url, name = ""]) => ({url, room, name}))
 
 export const getMembershipRoomsByUrl = (url: string, list?: List) =>
-  sort(
-    getGroupTags(getListTags(list))
-      .filter(t => t[2] === url)
-      .map(nth(1)),
-  )
+  sort(getGroupTags(getListTags(list)).filter(nthEq(2, url)).map(nth(1)))
 
 export const memberships = deriveEventsMapped<PublishedList>(repository, {
   filters: [{kinds: [GROUPS]}],

@@ -1,6 +1,6 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
-import {ctx, uniq, equals} from "@welshman/lib"
+import {ctx, randomId, uniq, equals} from "@welshman/lib"
 import {
   DELETE,
   REPORT,
@@ -28,8 +28,9 @@ import {
   getRelayTags,
   getRelayTagValues,
   toNostrURI,
+  unionFilters,
 } from "@welshman/util"
-import type {TrustedEvent, EventContent, EventTemplate} from "@welshman/util"
+import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
 import {PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
 import {
@@ -61,6 +62,9 @@ import {
   userMembership,
   INDEXER_RELAYS,
   NIP46_PERMS,
+  ALERT,
+  NOTIFIER_PUBKEY,
+  NOTIFIER_RELAY,
   userRoomsByUrl,
 } from "@app/state"
 import {loadUserData} from "@app/requests"
@@ -455,3 +459,35 @@ export const makeComment = ({event, content, tags = []}: CommentParams) =>
 
 export const publishComment = ({relays, ...params}: CommentParams & {relays: string[]}) =>
   publishThunk({event: makeComment(params), relays})
+
+export type AlertParams = {
+  cron: string
+  email: string
+  relay: string
+  handler: string
+  filters: Filter[]
+}
+
+export const makeAlert = async ({cron, email, handler, relay, filters}: AlertParams) =>
+  createEvent(ALERT, {
+    content: await signer
+      .get()
+      .nip44.encrypt(
+        NOTIFIER_PUBKEY,
+        JSON.stringify([
+          ["cron", cron],
+          ["email", email],
+          ["relay", relay],
+          ["handler", handler],
+          ["channel", "email"],
+          ...unionFilters(filters).map(filter => ["filter", JSON.stringify(filter)]),
+        ]),
+      ),
+    tags: [
+      ["d", randomId()],
+      ["p", NOTIFIER_PUBKEY],
+    ],
+  })
+
+export const publishAlert = async (params: AlertParams) =>
+  publishThunk({event: await makeAlert(params), relays: [NOTIFIER_RELAY]})

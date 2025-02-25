@@ -11,6 +11,7 @@
   import ProfileEdit from "@app/components/ProfileEdit.svelte"
   import ProfileDelete from "@app/components/ProfileDelete.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
+  import Alerts from "@app/components/Alerts.svelte"
   import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
@@ -120,6 +121,7 @@
       </FieldInline>
     {/if}
   </div>
+  <Alerts />
   <div class="card2 bg-alt col-4 shadow-xl">
     <Button class="btn btn-outline btn-error" onclick={startDelete}>
       <Icon icon="trash-bin-2" />
