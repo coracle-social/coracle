@@ -90,27 +90,17 @@ export const readUserList = (event: TrustedEvent) => {
   } as PublishedUserList
 }
 
-export const createUserList = ({kind, title, description, identifier, tags}: UserList) => ({
-  kind,
-  tags: Object.entries({
-    ...fromPairs(tags),
-    title,
-    alt: title,
-    d: identifier,
-    description: description,
-  }),
-})
+export const createUserList = ({kind, title, description, identifier, tags}: UserList) => {
+  const data = {title, alt: title, d: identifier, description}
 
-export const editUserList = ({kind, title, description, identifier, tags}: UserList) => ({
-  kind: kind,
-  tags: Object.entries({
-    ...fromPairs(tags),
-    title,
-    alt: title,
-    d: identifier,
-    description: description,
-  }),
-})
+  return {kind, tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
+}
+
+export const editUserList = ({kind, title, description, identifier, tags}: UserList) => {
+  const data = {title, alt: title, d: identifier, description}
+
+  return {kind, tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
+}
 
 export const displayUserList = (list?: UserList) => {
   if (list) {

@@ -6,6 +6,7 @@
 * Scan images for sensitive content
 * Make muting on feeds more strict
 * Apply muted words to nip05
+* Fix list editing
 
 # 0.6.5
 
