@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Capacitor} from "@capacitor/core"
   import {preventDefault} from "@lib/html"
+  import {randomInt} from "@welshman/lib"
   import {displayRelayUrl, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import {pubkey} from "@welshman/app"
@@ -24,9 +25,10 @@
     .match(/GMT[^\s]+/)![0]
     .slice(3)
   const timezoneOffset = parseInt(timezone) / 100
+  const minute = randomInt(0, 59)
   const hour = (17 - timezoneOffset) % 24
-  const WEEKLY = `0 03 ${hour} * * 1`
-  const DAILY = `0 03 ${hour} * * *`
+  const WEEKLY = `0 ${minute} ${hour} * * 1`
+  const DAILY = `0 ${minute} ${hour} * * *`
 
   let loading = false
   let cron = WEEKLY
