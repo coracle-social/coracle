@@ -1,25 +1,29 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {postJson} from '@welshman/lib'
-  import {pubkey} from '@welshman/app'
-  import Anchor from 'src/partials/Anchor.svelte'
-  import {dufflepud, getSetting} from 'src/engine'
+  import {onMount} from "svelte"
+  import {postJson} from "@welshman/lib"
+  import {pubkey} from "@welshman/app"
+  import Anchor from "src/partials/Anchor.svelte"
+  import {dufflepud, getSetting, userFollows} from "src/engine"
 
   export let urls: string[]
   export let author: string
 
+  const shouldSkip = author === $pubkey || $userFollows.has(author) || !getSetting("hide_sensitive")
+
   let maxScore = 0
-  let threshold = author !== $pubkey && getSetting('hide_sensitive') ? 0.5 : 1
+  let threshold = shouldSkip ? 1 : 0.5
 
   const ignoreWarning = () => {
     threshold = 1
   }
 
   onMount(() => {
-    for (const url of urls) {
-      postJson(dufflepud('media/alert'), {url}).then(({score = 0}) => {
-        maxScore = Math.max(score, maxScore)
-      })
+    if (threshold < 1) {
+      for (const url of urls) {
+        postJson(dufflepud("media/alert"), {url}).then(({score = 0}) => {
+          maxScore = Math.max(score, maxScore)
+        })
+      }
     }
   })
 </script>
