@@ -2,16 +2,20 @@
   import cx from "classnames"
   import {abortThunk, session, thunks, type Thunk} from "@welshman/app"
   import {fly} from "svelte/transition"
-  import NoteContent from "src/app/shared/NoteContent.svelte"
-  import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
   import {formatTimestamp, timestamp1} from "src/util/misc"
+  import Modal from "src/partials/Modal.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import NoteContent from "src/app/shared/NoteContent.svelte"
+  import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
+  import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {ensureMessagePlaintext, userSettings} from "src/engine"
 
   export let message
 
   const getContent = e => (e.kind === 4 ? ensureMessagePlaintext(e) : e.content) || ""
+
+  let showDetails = false
 
   $: thunk = $thunks[message.wrap?.id || message.id] as Thunk
 </script>
@@ -54,33 +58,46 @@
       {:else}
         {formatTimestamp(message.created_at)}
       {/if}
-      {#if message.kind === 4}
-        <Popover triggerType="mouseenter">
-          <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
-          <p slot="tooltip">
-            This message was sent using nostr's legacy DMs, which have a number of shortcomings.
-            Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
-          </p>
-        </Popover>
-      {:else}
-        <Popover triggerType="mouseenter">
-          <i slot="trigger" class="fa fa-lock cursor-pointer text-neutral-400" />
-          <div slot="tooltip" class="flex flex-col gap-2">
-            <p>
-              This message was sent using nostr's new group chat specification, which solves several
-              problems with legacy DMs. Read more <Anchor underline modal href="/help/nip-44-dms"
-                >here</Anchor
-              >.
+      <div class="flex items-center gap-3">
+        <i
+          class="fa fa-info-circle cursor-pointer text-neutral-400"
+          on:click={() => (showDetails = true)} />
+        {#if message.kind === 4}
+          <Popover triggerType="mouseenter">
+            <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
+            <p slot="tooltip">
+              This message was sent using nostr's legacy DMs, which have a number of shortcomings.
+              Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
             </p>
-            {#if message.pubkey === $session.pubkey}
+          </Popover>
+        {:else}
+          <Popover triggerType="mouseenter">
+            <i slot="trigger" class="fa fa-lock cursor-pointer text-neutral-400" />
+            <div slot="tooltip" class="flex flex-col gap-2">
               <p>
-                Note that these messages are not yet universally supported. Make sure the person
-                you're chatting with is using a compatible nostr client.
+                This message was sent using nostr's new group chat specification, which solves
+                several problems with legacy DMs. Read more <Anchor
+                  underline
+                  modal
+                  href="/help/nip-44-dms">here</Anchor
+                >.
               </p>
-            {/if}
-          </div>
-        </Popover>
-      {/if}
+              {#if message.pubkey === $session.pubkey}
+                <p>
+                  Note that these messages are not yet universally supported. Make sure the person
+                  you're chatting with is using a compatible nostr client.
+                </p>
+              {/if}
+            </div>
+          </Popover>
+        {/if}
+      </div>
     </small>
   </div>
 </div>
+
+{#if showDetails}
+  <Modal onEscape={() => (showDetails = false)}>
+    <NoteInfo event={message} />
+  </Modal>
+{/if}

@@ -34,11 +34,9 @@
   import {deriveEvents} from "@welshman/store"
   import {
     LOCAL_RELAY_URL,
-    toNostrURI,
     asSignedEvent,
     isSignedEvent,
     createEvent,
-    getPubkeyTagValues,
     getLnUrl,
     NOTE,
     REACTION,
@@ -47,26 +45,19 @@
     isChildOf,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
-  import {copyToClipboard} from "src/util/html"
   import {isLike, noteKinds} from "src/util/nostr"
-  import {formatSats, pluralize, quantify} from "src/util/misc"
+  import {formatSats, pluralize} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Icon from "src/partials/Icon.svelte"
-  import Field from "src/partials/Field.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import Popover from "src/partials/Popover.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
-  import FlexColumn from "src/partials/FlexColumn.svelte"
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
-  import CopyValue from "src/partials/CopyValue.svelte"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import HandlerCard from "src/app/shared/HandlerCard.svelte"
-  import RelayCard from "src/app/shared/RelayCard.svelte"
+  import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {router, deriveValidZaps} from "src/app/util"
   import {
     env,
@@ -83,7 +74,6 @@
     load,
     userPins,
   } from "src/engine"
-  import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let event: TrustedEvent
   export let onReplyStart: () => void
@@ -97,27 +87,16 @@
   })
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const mentions = getPubkeyTagValues(event.tags)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const kindHandlers = deriveHandlersForKind(event.kind)
-  const handlerId = String(event.tags.find(nthEq(0, "client"))?.[2] || "")
-  const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
   const noteActions = getSetting("note_actions")
   const seenOn = derived(trackerStore, $t =>
     remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
   )
   const setView = v => {
     view = v
-  }
-
-  const showHandlers = () => {
-    handlersShown = true
-  }
-
-  const hideHandlers = () => {
-    handlersShown = false
   }
 
   const os = browser.os?.name?.toLowerCase()
@@ -127,11 +106,6 @@
   const quote = () => router.at("notes/create").cx({quote: event}).open()
 
   const report = () => router.at("notes").of(event.id).at("report").open()
-
-  const copyJson = () => {
-    copyToClipboard(json)
-    showInfo(`Event JSON copied to clipboard!`)
-  }
 
   const deleteNote = () =>
     router.at("notes").of(event.id).at("delete").qp({kind: event.kind}).open()
@@ -193,9 +167,7 @@
 
   let view
   let actions = []
-  let handlersShown = false
 
-  $: json = JSON.stringify(event, null, 2)
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
@@ -402,88 +374,6 @@
 
 {#if view}
   <Modal onEscape={() => setView(null)}>
-    {#if view === "info"}
-      {#if $zaps.length > 0}
-        <h1 class="staatliches text-2xl">Zapped By</h1>
-        <div class="grid grid-cols-2 gap-2">
-          {#each $zaps as zap}
-            <div class="flex flex-col gap-1">
-              <PersonBadge pubkey={zap.request.pubkey} />
-              <span class="ml-16 text-sm text-neutral-600"
-                >{formatSats(zap.invoiceAmount / 1000)} sats</span>
-            </div>
-          {/each}
-        </div>
-      {/if}
-      {#if likes.length > 0}
-        <h1 class="staatliches text-2xl">Liked By</h1>
-        <div class="grid grid-cols-2 gap-2">
-          {#each likes as like}
-            <PersonBadge pubkey={like.pubkey} />
-          {/each}
-        </div>
-      {/if}
-      {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
-        <h1 class="staatliches text-2xl">Relays</h1>
-        <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
-        <div class="flex flex-col gap-2">
-          {#each $seenOn as url}
-            <RelayCard {url} />
-          {/each}
-        </div>
-      {/if}
-      {#if mentions.length > 0}
-        <h1 class="staatliches text-2xl">In this conversation</h1>
-        <p>{quantify(mentions.length, "person is", "people are")} tagged in this note.</p>
-        <div class="grid grid-cols-2 gap-2">
-          {#each mentions as pubkey}
-            <PersonBadge {pubkey} />
-          {/each}
-        </div>
-      {/if}
-      {#if handlers.length > 0 || handlerEvent}
-        <h1 class="staatliches text-2xl">Apps</h1>
-        {#if handlerEvent}
-          {@const [handler] = readHandlers(handlerEvent)}
-          {#if handler}
-            <p>This note was published using {displayHandler(handler)}.</p>
-            <HandlerCard {handler} />
-          {/if}
-        {/if}
-        {#if handlers.length > 0}
-          <div class="flex justify-between">
-            <p>
-              This note can also be viewed using {quantify(handlers.length, "other nostr app")}.
-            </p>
-            {#if handlersShown}
-              <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
-            {:else}
-              <Anchor underline on:click={showHandlers}>Show apps</Anchor>
-            {/if}
-          </div>
-          {#if handlersShown}
-            <div in:fly={{y: 20}}>
-              <FlexColumn>
-                {#each handlers as handler (getHandlerKey(handler))}
-                  <HandlerCard {handler} />
-                {/each}
-              </FlexColumn>
-            </div>
-          {/if}
-        {/if}
-      {/if}
-      <h1 class="staatliches text-2xl">Details</h1>
-      <CopyValue label="Link" value={toNostrURI(nevent)} />
-      <CopyValue label="Event ID" encode={nip19.noteEncode} value={event.id} />
-      <Field>
-        <p slot="label">Event JSON</p>
-        <div class="relative rounded bg-tinted-700 p-1">
-          <pre class="overflow-auto text-xs"><code>{json}</code></pre>
-          <Anchor circle class="absolute right-1 top-1 bg-neutral-800" on:click={copyJson}>
-            <i class="fa fa-copy m-2" />
-          </Anchor>
-        </div>
-      </Field>
-    {/if}
+    <NoteInfo {event} {handlers} {children} />
   </Modal>
 {/if}

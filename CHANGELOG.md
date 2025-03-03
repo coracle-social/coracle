@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.7
+
+* Add note info to DMs
+
 # 0.6.6
 
 * Show complete website/lnurl
