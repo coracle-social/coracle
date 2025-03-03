@@ -13,7 +13,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
-  import LongPress from "@lib/components/LongPress.svelte"
+  import TapTarget from "@lib/components/TapTarget.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Content from "@app/components/Content.svelte"
   import ReactionSummary from "@app/components/ReactionSummary.svelte"
@@ -95,9 +95,9 @@
     </button>
   </Tippy>
   <div class="flex min-w-0 flex-col" class:items-end={isOwn}>
-    <LongPress
+    <TapTarget
       class="bg-alt chat-bubble mx-1 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
-      onLongPress={showMobileMenu}>
+      onTap={showMobileMenu}>
       {#if showPubkey}
         <div class="flex items-center gap-2">
           {#if !isOwn}
@@ -120,7 +120,7 @@
       <div class="text-sm">
         <Content showEntire {event} />
       </div>
-    </LongPress>
+    </TapTarget>
     <div class="row-2 z-feature -mt-1 ml-4">
       <ReactionSummary {event} {onReactionClick} noTooltip />
     </div>

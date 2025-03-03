@@ -11,7 +11,7 @@
     formatTimestampAsTime,
   } from "@welshman/app"
   import {isMobile} from "@lib/html"
-  import LongPress from "@lib/components/LongPress.svelte"
+  import TapTarget from "@lib/components/TapTarget.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -45,7 +45,7 @@
 
   const reply = () => replyTo(event)
 
-  const onLongPress = () => pushModal(ChannelMessageMenuMobile, {url, event, reply})
+  const onTap = () => pushModal(ChannelMessageMenuMobile, {url, event, reply})
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 
@@ -60,9 +60,9 @@
   }
 </script>
 
-<LongPress
+<TapTarget
   data-event={event.id}
-  onLongPress={inert ? null : onLongPress}
+  onTap={inert ? null : onTap}
   class="group relative flex w-full cursor-default flex-col p-2 pb-3 text-left">
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
@@ -110,4 +110,4 @@
     {/if}
     <ChannelMessageMenuButton {url} {event} />
   </button>
-</LongPress>
+</TapTarget>
