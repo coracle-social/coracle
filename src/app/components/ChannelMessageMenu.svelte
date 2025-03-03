@@ -16,7 +16,7 @@
 
   const showInfo = () => {
     onClick()
-    pushModal(EventInfo, {event})
+    pushModal(EventInfo, {url, event})
   }
 
   const showDelete = () => {

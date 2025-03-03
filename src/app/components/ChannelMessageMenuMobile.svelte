@@ -30,7 +30,7 @@
     reply()
   }
 
-  const showInfo = () => pushModal(EventInfo, {event}, {replaceState: true})
+  const showInfo = () => pushModal(EventInfo, {url, event}, {replaceState: true})
 
   const showDelete = () => pushModal(EventDeleteConfirm, {url, event})
 </script>
