@@ -331,6 +331,7 @@ export const checkRelayConnection = async (url: string) => {
   const connection = ctx.net.pool.get(url)
 
   await connection.socket.open()
+  await connection.socket.wait(3000)
 
   if (connection.socket.status !== SocketStatus.Open) {
     return `Failed to connect`
