@@ -39,7 +39,7 @@
 
 <form class="content column gap-4" {onsubmit}>
   <div class="card2 bg-alt col-4 shadow-xl">
-    <p class="text-lg">Content Settings</p>
+    <strong class="text-lg">Content Settings</strong>
     <FieldInline>
       {#snippet label()}
         <p>Hide sensitive content?</p>
@@ -77,7 +77,37 @@
         </div>
       {/snippet}
     </Field>
-    <p class="text-lg">Editor Settings</p>
+    <strong class="text-lg">Privacy Settings</strong>
+    <FieldInline>
+      {#snippet label()}
+        <p>Report errors?</p>
+      {/snippet}
+      {#snippet input()}
+        <input
+          type="checkbox"
+          class="toggle toggle-primary"
+          bind:checked={settings.report_errors} />
+      {/snippet}
+      {#snippet info()}
+        <p>
+          Allow {PLATFORM_NAME} to send error reports to help improve the app.
+        </p>
+      {/snippet}
+    </FieldInline>
+    <FieldInline>
+      {#snippet label()}
+        <p>Report usage?</p>
+      {/snippet}
+      {#snippet input()}
+        <input type="checkbox" class="toggle toggle-primary" bind:checked={settings.report_usage} />
+      {/snippet}
+      {#snippet info()}
+        <p>
+          Allow {PLATFORM_NAME} to collect anonymous usage data.
+        </p>
+      {/snippet}
+    </FieldInline>
+    <strong class="text-lg">Editor Settings</strong>
     <FieldInline>
       {#snippet label()}
         <p>Send Delay</p>
@@ -119,7 +149,7 @@
         </div>
       {/snippet}
       {#snippet info()}
-        <p>Choose a media server type and url for files you upload to flotilla.</p>
+        <p>Choose a media server type and url for files you upload to {PLATFORM_NAME}.</p>
       {/snippet}
     </Field>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">

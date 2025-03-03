@@ -1,6 +1,7 @@
 /* eslint prefer-rest-params: 0 */
 
 import {page} from "$app/stores"
+import {getSetting} from "@app/state"
 
 const w = window as any
 
@@ -12,7 +13,7 @@ w.plausible =
 
 export const setupAnalytics = () => {
   page.subscribe($page => {
-    if ($page.route) {
+    if ($page.route && getSetting("report_usage")) {
       w.plausible("pageview", {u: $page.route.id})
     }
   })

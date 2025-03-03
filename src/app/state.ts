@@ -305,6 +305,8 @@ export type Settings = {
   values: {
     show_media: boolean
     hide_sensitive: boolean
+    report_usage: boolean
+    report_errors: boolean
     send_delay: number
     upload_type: "nip96" | "blossom"
     nip96_urls: string[]
@@ -315,6 +317,8 @@ export type Settings = {
 export const defaultSettings = {
   show_media: true,
   hide_sensitive: true,
+  report_usage: true,
+  report_errors: false,
   send_delay: 3000,
   upload_type: "nip96",
   nip96_urls: ["https://nostr.build"],

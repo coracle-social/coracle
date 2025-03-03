@@ -3,6 +3,7 @@
   import {hexToBytes} from "@noble/hashes/utils"
   import {displayPubkey, displayProfile} from "@welshman/util"
   import {pubkey, session, displayNip05, deriveProfile} from "@welshman/app"
+  import {slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -29,6 +30,8 @@
   const startEject = () => pushModal(InfoKeys)
 
   const startDelete = () => pushModal(ProfileDelete)
+
+  let showAdvanced = false
 </script>
 
 <div class="content column gap-4">
@@ -122,10 +125,24 @@
     {/if}
   </div>
   <Alerts />
-  <div class="card2 bg-alt col-4 shadow-xl">
-    <Button class="btn btn-outline btn-error" onclick={startDelete}>
-      <Icon icon="trash-bin-2" />
-      Delete your profile
-    </Button>
+  <div class="card2 bg-alt shadow-xl">
+    <div class="flex items-center justify-between">
+      <strong>Advanced</strong>
+      <Button onclick={() => (showAdvanced = !showAdvanced)}>
+        {#if showAdvanced}
+          <Icon icon="alt-arrow-down" />
+        {:else}
+          <Icon icon="alt-arrow-up" />
+        {/if}
+      </Button>
+    </div>
+    {#if showAdvanced}
+      <div transition:slideAndFade class="pt-4">
+        <Button class="btn btn-outline btn-error" onclick={startDelete}>
+          <Icon icon="trash-bin-2" />
+          Delete your profile
+        </Button>
+      </div>
+    {/if}
   </div>
 </div>
