@@ -99,15 +99,17 @@
   <div class="row-2 ml-10 mt-1">
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right" />
   </div>
-  <button
-    class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
-    class:group-hover:opacity-100={!isMobile}>
-    <ChannelMessageEmojiButton {url} {room} {event} />
-    {#if replyTo}
-      <Button class="btn join-item btn-xs" onclick={reply}>
-        <Icon icon="reply" size={4} />
-      </Button>
-    {/if}
-    <ChannelMessageMenuButton {url} {event} />
-  </button>
+  {#if !isMobile}
+    <button
+      class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
+      class:group-hover:opacity-100={!isMobile}>
+      <ChannelMessageEmojiButton {url} {room} {event} />
+      {#if replyTo}
+        <Button class="btn join-item btn-xs" onclick={reply}>
+          <Icon icon="reply" size={4} />
+        </Button>
+      {/if}
+      <ChannelMessageMenuButton {url} {event} />
+    </button>
+  {/if}
 </TapTarget>

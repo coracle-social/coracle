@@ -27,18 +27,20 @@
 
   interface Props {
     event: TrustedEvent
-    replyTo?: any
+    replyTo: (event: TrustedEvent) => void
     pubkeys: string[]
     showPubkey?: boolean
   }
 
-  const {event, replyTo = undefined, pubkeys, showPubkey = false}: Props = $props()
+  const {event, replyTo, pubkeys, showPubkey = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const isOwn = event.pubkey === $pubkey
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+
+  const reply = () => replyTo(event)
 
   const onReactionClick = async (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -49,7 +51,7 @@
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 
-  const showMobileMenu = () => pushModal(ChatMessageMenuMobile, {event, pubkeys})
+  const showMobileMenu = () => pushModal(ChatMessageMenuMobile, {event, pubkeys, reply})
 
   const togglePopover = () => {
     if (popoverIsVisible) {
@@ -72,31 +74,33 @@
   class:chat-start={!isOwn}
   class:flex-row-reverse={!isOwn}
   class:chat-end={isOwn}>
-  <Tippy
-    bind:popover
-    component={ChatMessageMenu}
-    props={{event, pubkeys, popover, replyTo}}
-    params={{
-      interactive: true,
-      trigger: "manual",
-      onShow() {
-        popoverIsVisible = true
-      },
-      onHidden() {
-        popoverIsVisible = false
-      },
-    }}>
-    <button
-      type="button"
-      class="opacity-0 transition-all"
-      class:group-hover:opacity-100={!isMobile}
-      onclick={togglePopover}>
-      <Icon icon="menu-dots" size={4} />
-    </button>
-  </Tippy>
+  {#if !isMobile}
+    <Tippy
+      bind:popover
+      component={ChatMessageMenu}
+      props={{event, pubkeys, popover, replyTo}}
+      params={{
+        interactive: true,
+        trigger: "manual",
+        onShow() {
+          popoverIsVisible = true
+        },
+        onHidden() {
+          popoverIsVisible = false
+        },
+      }}>
+      <button
+        type="button"
+        class="opacity-0 transition-all"
+        class:group-hover:opacity-100={!isMobile}
+        onclick={togglePopover}>
+        <Icon icon="menu-dots" size={4} />
+      </button>
+    </Tippy>
+  {/if}
   <div class="flex min-w-0 flex-col" class:items-end={isOwn}>
     <TapTarget
-      class="bg-alt chat-bubble mx-1 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
+      class="bg-alt chat-bubble mx-1 mb-2 flex cursor-auto flex-col gap-1 text-left lg:max-w-2xl"
       onTap={showMobileMenu}>
       {#if showPubkey}
         <div class="flex items-center gap-2">

@@ -10,6 +10,7 @@
 * Fix nevent hints for url-specific stuff
 * Add alerts via Anchor
 * Fix confirm and reactions on mobile
+* Add reply to chat on mobile
 
 # 0.2.11
 

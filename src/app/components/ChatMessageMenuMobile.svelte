@@ -9,7 +9,13 @@
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 
-  const {event, pubkeys} = $props()
+  type Props = {
+    pubkeys: string[]
+    event: TrustedEvent
+    reply: () => void
+  }
+
+  const {event, pubkeys, reply}: Props = $props()
 
   const onEmoji = ((event: TrustedEvent, emoji: NativeEmoji) => {
     history.back()
@@ -17,6 +23,11 @@
   }).bind(undefined, event)
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
+
+  const sendReply = () => {
+    history.back()
+    reply()
+  }
 
   const copyText = () => {
     history.back()
@@ -30,6 +41,10 @@
   <Button class="btn btn-primary w-full" onclick={showEmojiPicker}>
     <Icon size={4} icon="smile-circle" />
     Send Reaction
+  </Button>
+  <Button class="btn btn-neutral w-full" onclick={sendReply}>
+    <Icon size={4} icon="reply" />
+    Send Reply
   </Button>
   <Button class="btn btn-neutral w-full" onclick={copyText}>
     <Icon size={4} icon="copy" />
