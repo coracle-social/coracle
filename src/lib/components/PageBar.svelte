@@ -9,7 +9,7 @@
   const {...props}: Props = $props()
 </script>
 
-<div class="relative z-feature mx-2 rounded-xl pt-2 {props.class}">
+<div class="relative z-feature rounded-xl px-2 pt-2 {props.class}">
   <div
     class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
     <div class="flex items-center gap-4">

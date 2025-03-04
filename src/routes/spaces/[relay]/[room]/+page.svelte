@@ -134,6 +134,8 @@
   let parent: TrustedEvent | undefined = $state()
   let element: HTMLElement | undefined = $state()
   let newMessages: HTMLElement | undefined = $state()
+  let parentPreview: HTMLElement | undefined = $state()
+  let dynamicPadding: HTMLElement | undefined = $state()
   let newMessagesSeen = false
   let showFixedNewMessages = $state(false)
   let showScrollButton = $state(false)
@@ -208,6 +210,16 @@
         loadingEvents = false
       },
     }))
+
+    const observer = new ResizeObserver(() => {
+      dynamicPadding!.style.minHeight = `${parentPreview!.offsetHeight}px`
+    })
+
+    observer.observe(parentPreview!)
+
+    return () => {
+      observer.unobserve(parentPreview!)
+    }
   })
 
   onDestroy(() => {
@@ -220,100 +232,101 @@
   })
 </script>
 
-<div class="relative flex h-full flex-col">
-  <PageBar>
-    {#snippet icon()}
-      <div class="center">
-        <Icon icon="hashtag" />
-      </div>
-    {/snippet}
-    {#snippet title()}
-      <strong>
-        <ChannelName {url} {room} />
-      </strong>
-    {/snippet}
-    {#snippet action()}
-      <div class="row-2">
-        {#if room !== GENERAL}
-          {#if $userRoomsByUrl.get(url)?.has(room)}
-            <Button class="btn btn-neutral btn-sm" onclick={leaveRoom}>
-              <Icon icon="arrows-a-logout-2" />
-              Leave Room
-            </Button>
-          {:else}
-            <Button class="btn btn-neutral btn-sm" disabled={joiningRoom} onclick={joinRoom}>
-              {#if joiningRoom}
-                <span class="loading loading-spinner loading-sm"></span>
-              {:else}
-                <Icon icon="login-2" />
-              {/if}
-              Join Room
-            </Button>
-          {/if}
-        {/if}
-        <MenuSpaceButton {url} />
-      </div>
-    {/snippet}
-  </PageBar>
-  <div
-    class="scroll-container -mt-2 flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden py-2"
-    onscroll={onScroll}
-    bind:this={element}>
-    {#each elements as { type, id, value, showPubkey } (id)}
-      {#if type === "new-messages"}
-        <div
-          bind:this={newMessages}
-          class="flex items-center py-2 text-xs transition-colors"
-          class:opacity-0={showFixedNewMessages}>
-          <div class="h-px flex-grow bg-primary"></div>
-          <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
-          <div class="h-px flex-grow bg-primary"></div>
-        </div>
-      {:else if type === "date"}
-        <Divider>{value}</Divider>
-      {:else}
-        <div in:slide class:-mt-1={!showPubkey}>
-          <ChannelMessage
-            {url}
-            {room}
-            {replyTo}
-            event={$state.snapshot(value as TrustedEvent)}
-            {showPubkey} />
-        </div>
-      {/if}
-    {/each}
-    <p class="flex h-10 items-center justify-center py-20">
-      {#if loadingEvents}
-        <Spinner loading={loadingEvents}>Looking for messages...</Spinner>
-      {:else}
-        <Spinner>End of message history</Spinner>
-      {/if}
-    </p>
-  </div>
-  {#if showFixedNewMessages}
-    <div class="relative z-feature flex justify-center">
-      <div transition:fly={{duration: 200}} class="fixed top-12">
-        <Button class="btn btn-primary btn-xs rounded-full" onclick={scrollToNewMessages}>
-          New Messages
-        </Button>
-      </div>
+<PageBar class="chat__page-bar">
+  {#snippet icon()}
+    <div class="center">
+      <Icon icon="hashtag" />
     </div>
-  {/if}
-  <div>
+  {/snippet}
+  {#snippet title()}
+    <strong>
+      <ChannelName {url} {room} />
+    </strong>
+  {/snippet}
+  {#snippet action()}
+    <div class="row-2">
+      {#if room !== GENERAL}
+        {#if $userRoomsByUrl.get(url)?.has(room)}
+          <Button class="btn btn-neutral btn-sm" onclick={leaveRoom}>
+            <Icon icon="arrows-a-logout-2" />
+            Leave Room
+          </Button>
+        {:else}
+          <Button class="btn btn-neutral btn-sm" disabled={joiningRoom} onclick={joinRoom}>
+            {#if joiningRoom}
+              <span class="loading loading-spinner loading-sm"></span>
+            {:else}
+              <Icon icon="login-2" />
+            {/if}
+            Join Room
+          </Button>
+        {/if}
+      {/if}
+      <MenuSpaceButton {url} />
+    </div>
+  {/snippet}
+</PageBar>
+
+<div class="chat__messages scroll-container" onscroll={onScroll} bind:this={element}>
+  <div bind:this={dynamicPadding}></div>
+  {#each elements as { type, id, value, showPubkey } (id)}
+    {#if type === "new-messages"}
+      <div
+        bind:this={newMessages}
+        class="flex items-center py-2 text-xs transition-colors"
+        class:opacity-0={showFixedNewMessages}>
+        <div class="h-px flex-grow bg-primary"></div>
+        <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
+        <div class="h-px flex-grow bg-primary"></div>
+      </div>
+    {:else if type === "date"}
+      <Divider>{value}</Divider>
+    {:else}
+      <div in:slide class:-mt-1={!showPubkey}>
+        <ChannelMessage
+          {url}
+          {room}
+          {replyTo}
+          event={$state.snapshot(value as TrustedEvent)}
+          {showPubkey} />
+      </div>
+    {/if}
+  {/each}
+  <p class="flex h-10 items-center justify-center py-20">
+    {#if loadingEvents}
+      <Spinner loading={loadingEvents}>Looking for messages...</Spinner>
+    {:else}
+      <Spinner>End of message history</Spinner>
+    {/if}
+  </p>
+</div>
+
+<div class="chat__compose bg-base-200">
+  <div bind:this={parentPreview}>
     {#if parent}
       <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
     {/if}
     {#if share}
       <ChannelComposeParent event={share} clear={clearShare} verb="Sharing" />
     {/if}
-    <ChannelCompose bind:this={compose} {onSubmit} />
   </div>
+  <ChannelCompose bind:this={compose} {onSubmit} />
 </div>
 
 {#if showScrollButton}
-  <div in:fade class="fixed bottom-14 right-4">
+  <div in:fade class="chat__scroll-down">
     <Button class="btn btn-circle btn-neutral" onclick={scrollToBottom}>
       <Icon icon="alt-arrow-down" />
     </Button>
+  </div>
+{/if}
+
+{#if showFixedNewMessages}
+  <div class="relative z-feature flex justify-center">
+    <div transition:fly={{duration: 200}} class="fixed top-12">
+      <Button class="btn btn-primary btn-xs rounded-full" onclick={scrollToNewMessages}>
+        New Messages
+      </Button>
+    </div>
   </div>
 {/if}

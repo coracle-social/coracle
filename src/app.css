@@ -329,3 +329,27 @@ emoji-picker {
 progress[value]::-webkit-progress-value {
   transition: width 0.5s;
 }
+
+/* content width for fixed elements */
+
+.cw {
+  @apply w-full md:w-[calc(100%-18.5rem)];
+}
+
+/* chat view */
+
+.chat__page-bar {
+  @apply cw !fixed top-0;
+}
+
+.chat__messages {
+  @apply cw fixed top-12 flex h-[calc(100%-10rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-6rem)];
+}
+
+.chat__compose {
+  @apply cw fixed bottom-14 md:bottom-0;
+}
+
+.chat__scroll-down {
+  @apply fixed bottom-28 right-4 md:bottom-16;
+}

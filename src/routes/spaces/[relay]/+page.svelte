@@ -125,6 +125,7 @@
         </div>
       {/if}
     </div>
+    <Divider>Your Rooms</Divider>
     <div class="grid grid-cols-3 gap-2">
       <Link href={threadsPath} class="btn btn-primary">
         <div class="relative flex items-center gap-2">
@@ -167,6 +168,9 @@
           {/if}
         </Link>
       {/each}
+    </div>
+    <Divider>Other Rooms</Divider>
+    <div class="grid grid-cols-3 gap-2">
       {#each $otherRooms as room (room)}
         <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
           <div class="relative flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
