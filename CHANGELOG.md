@@ -3,6 +3,7 @@
 # 0.6.7
 
 * Add note info to DMs
+* Make lnurl parsing more robust
 
 # 0.6.6
 
