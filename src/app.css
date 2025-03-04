@@ -341,17 +341,17 @@ progress[value]::-webkit-progress-value {
 /* chat view */
 
 .chat__page-bar {
-  @apply cw !fixed top-0;
+  @apply sait cw !fixed top-0;
 }
 
 .chat__messages {
-  @apply cw fixed top-12 flex h-[calc(100%-10rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-6rem)];
+  @apply saib cw fixed top-12 flex h-[calc(100%-10rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-6rem)];
 }
 
 .chat__compose {
-  @apply cw fixed bottom-14 md:bottom-0;
+  @apply saib cw fixed bottom-14 md:bottom-0;
 }
 
 .chat__scroll-down {
-  @apply fixed bottom-28 right-4 md:bottom-16;
+  @apply saib fixed bottom-28 right-4 md:bottom-16;
 }
