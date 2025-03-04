@@ -134,7 +134,7 @@
   let parent: TrustedEvent | undefined = $state()
   let element: HTMLElement | undefined = $state()
   let newMessages: HTMLElement | undefined = $state()
-  let parentPreview: HTMLElement | undefined = $state()
+  let chatCompose: HTMLElement | undefined = $state()
   let dynamicPadding: HTMLElement | undefined = $state()
   let newMessagesSeen = false
   let showFixedNewMessages = $state(false)
@@ -212,13 +212,13 @@
     }))
 
     const observer = new ResizeObserver(() => {
-      dynamicPadding!.style.minHeight = `${parentPreview!.offsetHeight}px`
+      dynamicPadding!.style.minHeight = `${chatCompose!.offsetHeight}px`
     })
 
-    observer.observe(parentPreview!)
+    observer.observe(chatCompose!)
 
     return () => {
-      observer.unobserve(parentPreview!)
+      observer.unobserve(chatCompose!)
     }
   })
 
@@ -301,8 +301,8 @@
   </p>
 </div>
 
-<div class="chat__compose bg-base-200">
-  <div bind:this={parentPreview}>
+<div class="chat__compose bg-base-200" bind:this={chatCompose}>
+  <div>
     {#if parent}
       <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
     {/if}

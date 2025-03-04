@@ -70,7 +70,7 @@
   let loading = $state(true)
   let compose: ChatCompose | undefined = $state()
   let parent: TrustedEvent | undefined = $state()
-  let parentPreview: HTMLElement | undefined = $state()
+  let chatCompose: HTMLElement | undefined = $state()
   let dynamicPadding: HTMLElement | undefined = $state()
 
   const elements = $derived.by(() => {
@@ -108,13 +108,13 @@
     load({filters: [{kinds: [INBOX_RELAYS], authors: others}]})
 
     const observer = new ResizeObserver(() => {
-      dynamicPadding!.style.minHeight = `${parentPreview!.offsetHeight}px`
+      dynamicPadding!.style.minHeight = `${chatCompose!.offsetHeight}px`
     })
 
-    observer.observe(parentPreview!)
+    observer.observe(chatCompose!)
 
     return () => {
-      observer.unobserve(parentPreview!)
+      observer.unobserve(chatCompose!)
     }
   })
 
@@ -225,8 +225,8 @@
   </p>
 </div>
 
-<div class="chat__compose bg-base-200">
-  <div bind:this={parentPreview}>
+<div class="chat__compose bg-base-200" bind:this={chatCompose}>
+  <div>
     {#if parent}
       <ChatComposeParent event={parent} clear={clearParent} verb="Replying to" />
     {/if}
