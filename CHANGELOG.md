@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.0.0
+
+* Add alerts via Anchor
+
 # 0.2.12
 
 * Fix keyboard covering chat input
@@ -8,7 +12,6 @@
 * Replace long press with tap target
 * Fix time input
 * Fix nevent hints for url-specific stuff
-* Add alerts via Anchor
 * Fix confirm and reactions on mobile
 * Add reply to chat on mobile
 * Fix profile suggestions
