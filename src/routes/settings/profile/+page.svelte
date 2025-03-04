@@ -12,7 +12,6 @@
   import ProfileEdit from "@app/components/ProfileEdit.svelte"
   import ProfileDelete from "@app/components/ProfileDelete.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
-  import Alerts from "@app/components/Alerts.svelte"
   import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
@@ -84,7 +83,10 @@
   <div class="card2 bg-alt col-4 shadow-xl">
     <FieldInline>
       {#snippet label()}
-        <p>Public Key</p>
+        <p class="flex items-center gap-3">
+          <Icon icon="key" />
+          Public Key
+        </p>
       {/snippet}
       {#snippet input()}
         <label class="input input-bordered flex w-full items-center justify-between gap-2">
@@ -107,7 +109,10 @@
     {#if $session?.method === "nip01"}
       <FieldInline>
         {#snippet label()}
-          <p>Private Key</p>
+          <p class="flex items-center gap-3">
+            <Icon icon="key" />
+            Private Key
+          </p>
         {/snippet}
         {#snippet input()}
           <label class="input input-bordered flex w-full items-center gap-2">
@@ -124,10 +129,12 @@
       </FieldInline>
     {/if}
   </div>
-  <Alerts />
   <div class="card2 bg-alt shadow-xl">
     <div class="flex items-center justify-between">
-      <strong>Advanced</strong>
+      <strong class="flex items-center gap-3">
+        <Icon icon="settings" />
+        Advanced
+      </strong>
       <Button onclick={() => (showAdvanced = !showAdvanced)}>
         {#if showAdvanced}
           <Icon icon="alt-arrow-down" />
@@ -137,7 +144,7 @@
       </Button>
     </div>
     {#if showAdvanced}
-      <div transition:slideAndFade class="pt-4">
+      <div transition:slideAndFade class="flex flex-col gap-2 pt-4">
         <Button class="btn btn-outline btn-error" onclick={startDelete}>
           <Icon icon="trash-bin-2" />
           Delete your profile

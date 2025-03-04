@@ -11,7 +11,10 @@
 
 <div class="card2 bg-alt flex flex-col gap-6 shadow-xl">
   <div class="flex items-center justify-between">
-    <strong>Alerts</strong>
+    <strong class="flex items-center gap-3">
+      <Icon icon="inbox" />
+      Alerts
+    </strong>
     <Button class="btn btn-primary btn-sm" onclick={startAlert}>
       <Icon icon="add-circle" />
       Add Alert
