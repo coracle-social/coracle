@@ -5,7 +5,14 @@
   import {ctx, sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
   import {repository} from "@welshman/app"
   import type {TrustedEvent, Handler} from "@welshman/util"
-  import {LOCAL_RELAY_URL, toNostrURI, getPubkeyTagValues, ZAP_RESPONSE} from "@welshman/util"
+  import {
+    LOCAL_RELAY_URL,
+    isReplaceable,
+    Address,
+    toNostrURI,
+    getPubkeyTagValues,
+    ZAP_RESPONSE,
+  } from "@welshman/util"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
   import {isLike, noteKinds} from "src/util/nostr"
@@ -26,13 +33,9 @@
   export let children: TrustedEvent[] = []
   export let handlers: Handler[] = []
 
-  const nevent = nip19.neventEncode({
-    id: event.id,
-    kind: event.kind,
-    author: event.pubkey,
-    relays: ctx.app.router.Event(event).limit(3).getUrls(),
-  })
-
+  const relays = ctx.app.router.Event(event).limit(3).getUrls()
+  const nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
+  const naddr = Address.fromEvent(event, relays).toNaddr()
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = getPubkeyTagValues(event.tags)
   const likesCount = tweened(0, {interpolate})
@@ -138,7 +141,11 @@
   {/if}
 {/if}
 <h1 class="staatliches text-2xl">Details</h1>
-<CopyValue label="Link" value={toNostrURI(nevent)} />
+{#if isReplaceable(event)}
+  <CopyValue label="Link" value={toNostrURI(naddr)} />
+{:else}
+  <CopyValue label="Link" value={toNostrURI(nevent)} />
+{/if}
 <CopyValue label="Event ID" encode={nip19.noteEncode} value={event.id} />
 <Field>
   <p slot="label">Event JSON</p>
