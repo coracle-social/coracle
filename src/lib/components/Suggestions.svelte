@@ -58,7 +58,7 @@
 </script>
 
 <div transition:fly|local={{duration: 200}} class="tiptap-suggestions">
-  <div class="tiptap-suggestions__content">
+  <div class="tiptap-suggestions__content max-h-[40vh]">
     {#if $term && allowCreate && !items.includes($term)}
       <button
         class="tiptap-suggestions__create"

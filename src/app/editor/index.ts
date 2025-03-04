@@ -1,5 +1,3 @@
-import "@welshman/editor/index.css"
-
 import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"

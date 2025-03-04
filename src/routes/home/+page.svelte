@@ -23,7 +23,7 @@
 </script>
 
 {#if !PLATFORM_RELAY}
-  <div class="hero min-h-screen">
+  <div class="hero min-h-screen overflow-auto pb-8">
     <div class="hero-content">
       <div class="column content gap-4">
         <h1 class="text-center text-5xl">Welcome to</h1>

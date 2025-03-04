@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       androidSplashResourceName: "splash"
-    }
+    },
   },
   // Use this for live reload https://capacitorjs.com/docs/guides/live-reload
   // server: {

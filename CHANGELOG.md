@@ -11,6 +11,7 @@
 * Add alerts via Anchor
 * Fix confirm and reactions on mobile
 * Add reply to chat on mobile
+* Fix profile suggestions
 
 # 0.2.11
 
