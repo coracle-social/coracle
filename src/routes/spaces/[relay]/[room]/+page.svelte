@@ -239,7 +239,7 @@
     </div>
   {/snippet}
   {#snippet title()}
-    <strong>
+    <strong class="ellipsize">
       <ChannelName {url} {room} />
     </strong>
   {/snippet}

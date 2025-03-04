@@ -1,5 +1,16 @@
 # Changelog
 
+# 0.2.12
+
+* Fix keyboard covering chat input
+* Fix thread replies
+* Make error reporting and analytics optional
+* Replace long press with tap target
+* Fix time input
+* Fix nevent hints for url-specific stuff
+* Add alerts via Anchor
+* Fix confirm and reactions on mobile
+
 # 0.2.11
 
 * Add in-app signup flow on ios

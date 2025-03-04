@@ -12,7 +12,7 @@
 <div class="relative z-feature rounded-xl px-2 pt-2 {props.class}">
   <div
     class="flex min-h-12 items-center justify-between gap-4 rounded-xl bg-base-100 px-4 shadow-xl">
-    <div class="flex items-center gap-4">
+    <div class="ellipsize flex items-center gap-4 whitespace-nowrap">
       {@render props.icon?.()}
       {@render props.title?.()}
     </div>
