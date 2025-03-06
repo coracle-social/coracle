@@ -1,8 +1,15 @@
 <script lang="ts">
-  import {getContext} from "svelte"
-  import {ctx} from "@welshman/lib"
+  import {onMount, getContext} from "svelte"
+  import {ctx, nth, nthEq} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getIdOrAddress} from "@welshman/util"
+  import {
+    getIdOrAddress,
+    getReplyFilters,
+    NOTE,
+    COMMENT,
+    REACTION,
+    ZAP_RESPONSE,
+  } from "@welshman/util"
   import {thunks, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
@@ -14,7 +21,7 @@
   import {timestamp1} from "src/util/misc"
   import {headerlessKinds} from "src/util/nostr"
   import NotePending from "src/app/shared/NotePending.svelte"
-  import {getSetting, isEventMuted} from "src/engine"
+  import {getSetting, env, isEventMuted, loadPubkeys, load} from "src/engine"
   import {router} from "src/app/util"
 
   export let event: TrustedEvent
@@ -63,6 +70,33 @@
 
   $: thunk = $thunks[event.id]
   $: hidden = $isEventMuted(event, true)
+
+  onMount(() => {
+    loadPubkeys(event.tags.filter(nthEq(0, "zap")).map(nth(1)))
+
+    const actions = getSetting("note_actions")
+    const kinds = []
+
+    if (actions.includes("replies")) {
+      kinds.push(NOTE)
+      kinds.push(COMMENT)
+    }
+
+    if (actions.includes("reactions")) {
+      kinds.push(REACTION)
+    }
+
+    if (env.ENABLE_ZAPS && actions.includes("zaps")) {
+      kinds.push(ZAP_RESPONSE)
+    }
+
+    console.log(ctx.app.router.Replies(event).getUrls())
+
+    load({
+      relays: ctx.app.router.Replies(event).getUrls(),
+      filters: getReplyFilters([event], {kinds}),
+    })
+  })
 </script>
 
 <div class="group relative">

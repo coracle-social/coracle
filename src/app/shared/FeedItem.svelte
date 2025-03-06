@@ -7,7 +7,7 @@
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
-  import {noteKinds} from "src/util/nostr"
+  import {replyKinds} from "src/util/nostr"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {
@@ -57,8 +57,9 @@
     pendingReplies = remove(thunk, pendingReplies)
   }
 
-  const replies = derived(deriveEvents(repository, {filters: getReplyFilters([event])}), events =>
-    sortEventsDesc(events.filter(e => noteKinds.includes(e.kind) && isChildOf(e, event))),
+  const replies = derived(
+    deriveEvents(repository, {filters: getReplyFilters([event], {kinds: replyKinds})}),
+    events => sortEventsDesc(events.filter(e => isChildOf(e, event))),
   )
 
   let mutedReplies, hiddenReplies, visibleReplies

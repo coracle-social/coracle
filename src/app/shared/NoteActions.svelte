@@ -1,22 +1,9 @@
 <script lang="ts">
   import cx from "classnames"
   import {nip19} from "nostr-tools"
-  import {onMount} from "svelte"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {
-    ctx,
-    sum,
-    pluck,
-    spec,
-    nth,
-    nthEq,
-    remove,
-    last,
-    sortBy,
-    uniqBy,
-    prop,
-  } from "@welshman/lib"
+  import {ctx, sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
   import {
     deriveZapper,
     deriveZapperForPubkey,
@@ -38,14 +25,12 @@
     isSignedEvent,
     createEvent,
     getLnUrl,
-    NOTE,
-    REACTION,
     ZAP_RESPONSE,
     getReplyFilters,
     isChildOf,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
-  import {isLike, noteKinds} from "src/util/nostr"
+  import {isLike, replyKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -66,12 +51,10 @@
     signAndPublish,
     deleteEvent,
     getSetting,
-    loadPubkeys,
     getClientTags,
     trackerStore,
     userMutes,
     sortEventsDesc,
-    load,
     userPins,
   } from "src/engine"
 
@@ -174,7 +157,7 @@
   $: pinned = $userPins.has(event.id)
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
-  $: replies = sortEventsDesc(children.filter(e => noteKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length
@@ -252,30 +235,6 @@
       onClick: () => setView("info"),
     })
   }
-
-  onMount(() => {
-    loadPubkeys(event.tags.filter(nthEq(0, "zap")).map(nth(1)))
-
-    const actions = getSetting("note_actions")
-    const kinds = []
-
-    if (actions.includes("replies")) {
-      kinds.push(NOTE)
-    }
-
-    if (actions.includes("reactions")) {
-      kinds.push(REACTION)
-    }
-
-    if (env.ENABLE_ZAPS && actions.includes("zaps")) {
-      kinds.push(ZAP_RESPONSE)
-    }
-
-    load({
-      relays: ctx.app.router.Replies(event).getUrls(),
-      filters: getReplyFilters([event], {kinds}),
-    })
-  })
 </script>
 
 <button

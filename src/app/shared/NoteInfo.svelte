@@ -15,7 +15,7 @@
   } from "@welshman/util"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
-  import {isLike, noteKinds} from "src/util/nostr"
+  import {isLike, replyKinds} from "src/util/nostr"
   import {formatSats, quantify} from "src/util/misc"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -65,7 +65,7 @@
   $: json = JSON.stringify(event, null, 2)
   $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
-  $: replies = sortEventsDesc(children.filter(e => noteKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: $likesCount = likes.length
   $: $zapsTotal = sum(pluck("invoiceAmount", $zaps)) / 1000
   $: $repliesCount = replies.length

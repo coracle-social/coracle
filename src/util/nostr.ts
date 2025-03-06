@@ -38,7 +38,6 @@ import {
 } from "@welshman/util"
 import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {getParentIdOrAddr} from "@welshman/util"
 import {getPubkey} from "@welshman/signer"
 import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
 import * as nip19 from "nostr-tools/nip19"
@@ -67,7 +66,8 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-export const noteKinds = [NOTE, PICTURE_NOTE, LONG_FORM, HIGHLIGHT]
+export const replyKinds = [NOTE, COMMENT]
+export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
@@ -99,9 +99,6 @@ export const appDataKeys = {
 export const isLike = (e: TrustedEvent) =>
   e.kind === REACTION &&
   ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
-
-export const isReply = (e: TrustedEvent) =>
-  Boolean([NOTE, COMMENT].includes(e.kind) && getParentIdOrAddr(e))
 
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {

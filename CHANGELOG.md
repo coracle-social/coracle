@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.8
+
+* Correctly fetch and render NIP 22 comments
+
 # 0.6.7
 
 * Add note info to DMs
