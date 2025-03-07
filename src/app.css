@@ -341,7 +341,7 @@ progress[value]::-webkit-progress-value {
 /* chat view */
 
 .chat__page-bar {
-  @apply sait cw !fixed top-0;
+  @apply sait cw !fixed top-2;
 }
 
 .chat__messages {
