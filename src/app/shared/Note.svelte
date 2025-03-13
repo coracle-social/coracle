@@ -90,8 +90,6 @@
       kinds.push(ZAP_RESPONSE)
     }
 
-    console.log(ctx.app.router.Replies(event).getUrls())
-
     load({
       relays: ctx.app.router.Replies(event).getUrls(),
       filters: getReplyFilters([event], {kinds}),
