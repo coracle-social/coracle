@@ -34,7 +34,7 @@
 
   export let note
   export let minLength = 500
-  export let maxLength = 700
+  export let maxLength = 1000
   export let showEntire = false
   export let showMedia = false
   export let expandable = true
