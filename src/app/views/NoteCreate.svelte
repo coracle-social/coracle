@@ -2,11 +2,13 @@
   import {onMount} from "svelte"
   import {ctx, last, type Emitter} from "@welshman/lib"
   import {now, own, hash} from "@welshman/signer"
+  import type {TrustedEvent} from "@welshman/util"
   import {
     createEvent,
     toNostrURI,
     DVM_REQUEST_PUBLISH_SCHEDULE,
-    type TrustedEvent,
+    Address,
+    isReplaceable,
   } from "@welshman/util"
   import type {Thunk, ThunkStatus, ThunkStatusByUrl} from "@welshman/app"
   import {session, tagPubkey, signer, abortThunk} from "@welshman/app"
@@ -241,7 +243,13 @@
   }
 
   onMount(() => {
-    if (quote) {
+    if (quote && isReplaceable(quote)) {
+      const relays = ctx.app.router.Event(quote).limit(3).getUrls()
+      const naddr = Address.fromEvent(quote, relays).toNaddr()
+
+      editor.commands.insertContent("\n")
+      editor.commands.insertNAddr({bech32: toNostrURI(naddr)})
+    } else if (quote) {
       const nevent = nip19.neventEncode({
         id: quote.id,
         kind: quote.kind,
