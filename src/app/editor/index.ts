@@ -73,8 +73,16 @@ export const makeEditor = ({
           },
           fileUpload: {
             config: {
-              onDrop() {
+              onDrop(currentEditor, file: File) {
                 uploading?.set(true)
+                setTimeout(() => {
+                  const files = currentEditor.storage.fileUpload.getFiles()
+
+                  // Hack to fix bug with immediateUpload
+                  if (files.some(f => f.src.startsWith("blob:") && !f.uploading)) {
+                    currentEditor.commands.uploadFiles()
+                  }
+                })
               },
               onComplete() {
                 uploading?.set(false)

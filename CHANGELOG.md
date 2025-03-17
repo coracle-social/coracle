@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.9
+
+* Fix collection loading
+* Fix image paste uploading
+
 # 0.6.8
 
 * Correctly fetch and render NIP 22 comments
