@@ -12,9 +12,7 @@
   <div class="flex items-start gap-4">
     <CalendarEventDate event={props.event} />
     <div class="flex flex-grow flex-col">
-      <div class="flex flex-grow flex-wrap justify-between gap-2">
-        <CalendarEventHeader event={props.event} />
-      </div>
+      <CalendarEventHeader event={props.event} />
       <div class="flex py-2 opacity-50">
         <div class="h-px flex-grow bg-base-content opacity-25"></div>
       </div>

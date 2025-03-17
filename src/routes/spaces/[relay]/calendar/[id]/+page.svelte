@@ -83,13 +83,9 @@
     <div class="card2 bg-alt col-3 z-feature">
       <div class="flex items-start gap-4">
         <CalendarEventDate event={$event} />
-        <div class="flex flex-grow flex-col">
-          <div class="flex flex-grow justify-between gap-2">
-            <CalendarEventHeader event={$event} />
-          </div>
-          <div class="flex items-center gap-2 text-sm opacity-75">
-            <CalendarEventMeta event={$event} />
-          </div>
+        <div class="flex min-w-0 flex-grow flex-col gap-1">
+          <CalendarEventHeader event={$event} />
+          <CalendarEventMeta event={$event} />
           <div class="flex py-2 opacity-50">
             <div class="h-px flex-grow bg-base-content opacity-25"></div>
           </div>

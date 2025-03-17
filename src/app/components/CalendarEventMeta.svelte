@@ -12,13 +12,15 @@
   const meta = $derived(fromPairs(event.tags) as Record<string, string>)
 </script>
 
-<span>
-  Posted by <ProfileLink pubkey={event.pubkey} />
-</span>
-{#if meta.location}
-  <span>•</span>
+<div class="flex min-w-0 flex-col gap-1 text-sm opacity-75">
   <span class="flex items-center gap-1">
-    <Icon icon="map-point" size={4} />
-    {meta.location}
+    <Icon icon="user-circle" size={4} />
+    Posted by <ProfileLink pubkey={event.pubkey} />
   </span>
-{/if}
+  {#if meta.location}
+    <span class="ellipsize flex items-center gap-1 whitespace-nowrap">
+      <Icon icon="map-point" size={4} />
+      {meta.location}
+    </span>
+  {/if}
+</div>
