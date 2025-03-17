@@ -11,7 +11,6 @@ import {
   always,
   chunk,
   max,
-  first,
   int,
   HOUR,
   WEEK,
@@ -108,16 +107,6 @@ export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) =
   return {promise, loading, stop: onExhausted}
 }
 
-export const loadEvent = async (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) =>
-  first(
-    await load({
-      ...request,
-      skipCache: true,
-      forcePlatform: false,
-      filters: getIdFilters([idOrAddress]),
-    }),
-  )
-
 export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) => {
   let attempted = false
 
@@ -131,8 +120,15 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeReq
           const {pubkey, relays} = Address.from(idOrAddress)
           request.relays = uniq([...relays, ...ctx.app.router.ForPubkey(pubkey).getUrls()])
         }
-        loadEvent(idOrAddress, request)
+
         attempted = true
+
+        load({
+          ...request,
+          skipCache: true,
+          forcePlatform: false,
+          filters: getIdFilters([idOrAddress]),
+        })
       }
 
       return events[0]

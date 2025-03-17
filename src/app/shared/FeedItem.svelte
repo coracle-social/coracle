@@ -1,7 +1,7 @@
 <script lang="ts">
   import {ctx, remove, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
-  import {getIdOrAddress, getReplyFilters, isChildOf} from "@welshman/util"
+  import {getIdOrAddress, getIdFilters, getReplyFilters, isChildOf} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
@@ -14,9 +14,9 @@
     ensureUnwrapped,
     getSetting,
     isEventMuted,
-    loadEvent,
     sortEventsDesc,
     userSettings,
+    load,
   } from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -105,8 +105,18 @@
 
   onMount(async () => {
     if (!event.pubkey) {
-      event = await loadEvent(event.id, {
-        relays: ctx.app.router.FromRelays(relays).getUrls(),
+      event = await new Promise(resolve => {
+        load({
+          forcePlatform: false,
+          relays: ctx.app.router.FromRelays(relays).getUrls(),
+          filters: getIdFilters([event.id]),
+          onEose: () => {
+            resolve(event)
+          },
+          onEvent: (e: TrustedEvent) => {
+            resolve(e)
+          },
+        })
       })
     }
 
