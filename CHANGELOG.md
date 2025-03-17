@@ -6,6 +6,7 @@
 * Fix image paste uploading
 * Quote addressable events by address rather than nevent
 * Bump nostr-tools to fix nostrcheck uploads
+* Show error when DM fails to send
 
 # 0.6.8
 

@@ -49,7 +49,7 @@
   })
 </script>
 
-<div class="flex items-center gap-2" on:click|stopPropagation>
+<div class="flex items-center gap-2 p-4" on:click|stopPropagation>
   <div
     class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-accent"
     on:click={controller.toggle}>

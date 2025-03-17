@@ -12,6 +12,7 @@
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
   import {createScroller, displayList, pluralize} from "src/util/misc"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -87,7 +88,11 @@
     if (content) {
       sending = true
 
-      await sendMessage(channelId, content, $userSettings.send_delay)
+      try {
+        await sendMessage(channelId, content, $userSettings.send_delay)
+      } catch (e: any) {
+        showWarning(`Failed to send message: ${e.error || "unknown error"}`)
+      }
 
       sending = false
       stickToBottom()
