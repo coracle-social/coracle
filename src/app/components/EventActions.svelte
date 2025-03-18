@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import type {Instance} from "tippy.js"
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import type {TrustedEvent} from "@welshman/util"
@@ -9,15 +10,14 @@
   import EventMenu from "@app/components/EventMenu.svelte"
   import {publishReaction} from "@app/commands"
 
-  const {
-    url,
-    noun,
-    event,
-  }: {
+  type Props = {
     url: string
     noun: string
     event: TrustedEvent
-  } = $props()
+    customActions?: Snippet
+  }
+
+  const {url, noun, event, customActions}: Props = $props()
 
   const showPopover = () => popover?.show()
 
@@ -36,7 +36,7 @@
   <Tippy
     bind:popover
     component={EventMenu}
-    props={{url, noun, event, onClick: hidePopover}}
+    props={{url, noun, event, customActions, onClick: hidePopover}}
     params={{trigger: "manual", interactive: true}}>
     <Button class="btn join-item btn-neutral btn-xs" onclick={showPopover}>
       <Icon icon="menu-dots" size={4} />

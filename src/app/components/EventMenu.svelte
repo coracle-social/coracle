@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {onMount} from "svelte"
+  import type {Snippet} from "svelte"
   import type {TrustedEvent} from "@welshman/util"
   import {COMMENT} from "@welshman/util"
   import {pubkey} from "@welshman/app"
@@ -10,42 +12,34 @@
   import EventDeleteConfirm from "@app/components/EventDeleteConfirm.svelte"
   import {pushModal} from "@app/modal"
 
-  const {
-    url,
-    noun,
-    event,
-    onClick,
-  }: {
+  type Props = {
     url: string
     noun: string
     event: TrustedEvent
     onClick: () => void
-  } = $props()
+    customActions?: Snippet
+  }
+
+  const {url, noun, event, onClick, customActions}: Props = $props()
 
   const isRoot = event.kind !== COMMENT
 
-  const report = () => {
-    onClick()
-    pushModal(EventReport, {url, event})
-  }
+  const report = () => pushModal(EventReport, {url, event})
 
-  const showInfo = () => {
-    onClick()
-    pushModal(EventInfo, {url, event})
-  }
+  const showInfo = () => pushModal(EventInfo, {url, event})
 
-  const share = () => {
-    onClick()
-    pushModal(EventShare, {url, event})
-  }
+  const share = () => pushModal(EventShare, {url, event})
 
-  const showDelete = () => {
-    onClick()
-    pushModal(EventDeleteConfirm, {url, event})
-  }
+  const showDelete = () => pushModal(EventDeleteConfirm, {url, event})
+
+  let ul: Element
+
+  onMount(() => {
+    ul.addEventListener("click", onClick)
+  })
 </script>
 
-<ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl">
+<ul class="menu whitespace-nowrap rounded-box bg-base-100 p-2 shadow-xl" bind:this={ul}>
   {#if isRoot}
     <li>
       <Button onclick={share}>
@@ -60,6 +54,7 @@
       {noun} Details
     </Button>
   </li>
+  {@render customActions?.()}
   {#if event.pubkey === $pubkey}
     <li>
       <Button onclick={showDelete} class="text-error">

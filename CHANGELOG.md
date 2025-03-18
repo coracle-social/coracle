@@ -4,6 +4,14 @@
 
 * Add alerts via Anchor
 
+# 0.2.14
+
+* Add calendar event editing
+
+# 0.2.13
+
+* Fix android keyboard issue
+
 # 0.2.12
 
 * Fix keyboard covering chat input

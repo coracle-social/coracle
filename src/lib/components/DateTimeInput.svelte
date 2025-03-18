@@ -12,7 +12,7 @@
 
   const pad = (n: number) => ("00" + String(n)).slice(-2)
 
-  const getTime = (d: Date) => `${pad(d.getHours())}:${minutes}`
+  const getTime = (d: Date, m: string) => `${pad(d.getHours())}:${m}`
 
   const setTime = (d: Date, time: string) => {
     const [hours, minutes] = time.split(":").map(x => parseInt(x))
@@ -37,15 +37,19 @@
     time = undefined
   }
 
-  let date: Date | undefined = $state()
-  let time: string | undefined = $state()
-  let minutes: string = $state("00")
+  const initialDate = value ? secondsToDate(value) : undefined
+  const initialTime = initialDate ? getTime(initialDate, pad(initialDate.getMinutes())) : undefined
+  const initialMinutes = initialTime ? initialTime.slice(-2) : "00"
+
+  let date: Date | undefined = $state(initialDate)
+  let time: string | undefined = $state(initialTime)
+  let minutes: string = $state(initialMinutes)
   let element: HTMLElement
 
   // Sync date to time and value
   $effect(() => {
     if (date) {
-      time = getTime(date)
+      time = getTime(date, minutes)
       value = dateToSeconds(date)
     } else {
       value = undefined
@@ -55,7 +59,7 @@
   // Sync updates to value to date/time
   $effect(() => {
     const derivedDate = value ? secondsToDate(value) : undefined
-    const derivedTime = derivedDate ? getTime(derivedDate) : undefined
+    const derivedTime = derivedDate ? getTime(derivedDate, minutes) : undefined
 
     date = derivedDate
     time = derivedTime

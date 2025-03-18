@@ -18,9 +18,9 @@
     Posted by <ProfileLink pubkey={event.pubkey} />
   </span>
   {#if meta.location}
-    <span class="ellipsize flex items-center gap-1 whitespace-nowrap">
-      <Icon icon="map-point" size={4} />
-      {meta.location}
+    <span class="flex items-start gap-1">
+      <Icon icon="map-point" class="mt-[2px]" size={4} />
+      <span class="break-words">{meta.location}</span>
     </span>
   {/if}
 </div>

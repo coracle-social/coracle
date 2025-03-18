@@ -23,6 +23,7 @@ import {
   matchFilters,
   getTagValues,
   getTagValue,
+  getAddress,
   isShareableRelayUrl,
 } from "@welshman/util"
 import type {TrustedEvent, Filter, List} from "@welshman/util"
@@ -214,6 +215,7 @@ export const makeCalendarFeed = ({
 
   const insertEvent = (event: TrustedEvent) => {
     const start = getStart(event)
+    const address = getAddress(event)
 
     if (isNaN(start) || isNaN(getEnd(event))) return
 
@@ -223,7 +225,7 @@ export const makeCalendarFeed = ({
         if (getStart($events[i]) > start) return insert(i, event, $events)
       }
 
-      return [...$events, event]
+      return [...$events.filter(e => getAddress(e) !== address), event]
     })
   }
 
