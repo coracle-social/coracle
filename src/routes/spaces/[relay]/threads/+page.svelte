@@ -9,6 +9,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
+  import PageContent from "@lib/components/PageContent.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ThreadItem from "@app/components/ThreadItem.svelte"
@@ -73,42 +74,41 @@
   })
 </script>
 
-<div class="relative flex h-screen flex-col" bind:this={element}>
-  <PageBar>
-    {#snippet icon()}
-      <div class="center">
+<PageBar>
+  {#snippet icon()}
+    <div class="center">
+      <Icon icon="notes-minimalistic" />
+    </div>
+  {/snippet}
+  {#snippet title()}
+    <strong>Threads</strong>
+  {/snippet}
+  {#snippet action()}
+    <div class="row-2">
+      <Button class="btn btn-primary btn-sm" onclick={createThread}>
         <Icon icon="notes-minimalistic" />
-      </div>
-    {/snippet}
-    {#snippet title()}
-      <strong>Threads</strong>
-    {/snippet}
-    {#snippet action()}
-      <div class="row-2">
-        <Button class="btn btn-primary btn-sm" onclick={createThread}>
-          <Icon icon="notes-minimalistic" />
-          Create a Thread
-        </Button>
-        <MenuSpaceButton {url} />
-      </div>
-    {/snippet}
-  </PageBar>
-  <div class="flex flex-grow flex-col gap-2 overflow-auto p-2">
-    {#each events as event (event.id)}
-      <div in:fly>
-        <ThreadItem {url} event={$state.snapshot(event)} />
-      </div>
-    {/each}
-    <p class="flex h-10 items-center justify-center py-20">
-      <Spinner {loading}>
-        {#if loading}
-          Looking for threads...
-        {:else if events.length === 0}
-          No threads found.
-        {:else}
-          That's all!
-        {/if}
-      </Spinner>
-    </p>
-  </div>
-</div>
+        Create a Thread
+      </Button>
+      <MenuSpaceButton {url} />
+    </div>
+  {/snippet}
+</PageBar>
+
+<PageContent bind:element class="flex flex-col gap-2 p-2 pt-4">
+  {#each events as event (event.id)}
+    <div in:fly>
+      <ThreadItem {url} event={$state.snapshot(event)} />
+    </div>
+  {/each}
+  <p class="flex h-10 items-center justify-center py-20">
+    <Spinner {loading}>
+      {#if loading}
+        Looking for threads...
+      {:else if events.length === 0}
+        No threads found.
+      {:else}
+        That's all!
+      {/if}
+    </Spinner>
+  </p>
+</PageContent>

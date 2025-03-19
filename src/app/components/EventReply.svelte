@@ -1,7 +1,8 @@
 <script lang="ts">
+  import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {isMobile, preventDefault} from "@lib/html"
-  import {fly, slideAndFade} from "@lib/transition"
+  import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
@@ -32,30 +33,52 @@
   }
 
   const editor = makeEditor({submit, uploading, autofocus: !isMobile})
+
+  let form: HTMLElement
+  let spacer: HTMLElement
+
+  onMount(() => {
+    setTimeout(() => {
+      spacer.scrollIntoView({block: "end", behavior: "smooth"})
+    })
+
+    const observer = new ResizeObserver(() => {
+      spacer!.style.minHeight = `${form!.offsetHeight}px`
+    })
+
+    observer.observe(form!)
+
+    return () => {
+      observer.unobserve(form!)
+    }
+  })
 </script>
 
+<div bind:this={spacer}></div>
 <form
   in:fly
-  out:slideAndFade
+  bind:this={form}
   onsubmit={preventDefault(submit)}
-  class="card2 sticky bottom-2 z-feature mx-2 mt-4 bg-neutral">
-  <div class="relative">
-    <div class="note-editor flex-grow overflow-hidden">
-      <EditorContent {editor} />
+  class="cb cw fixed z-feature -mx-2 pt-3">
+  <div class="card2 mx-2 my-2 bg-neutral">
+    <div class="relative">
+      <div class="note-editor flex-grow overflow-hidden">
+        <EditorContent {editor} />
+      </div>
+      <Button
+        data-tip="Add an image"
+        class="tooltip tooltip-left absolute bottom-1 right-2"
+        onclick={editor.commands.selectFiles}>
+        {#if $uploading}
+          <span class="loading loading-spinner loading-xs"></span>
+        {:else}
+          <Icon icon="paperclip" size={3} />
+        {/if}
+      </Button>
     </div>
-    <Button
-      data-tip="Add an image"
-      class="tooltip tooltip-left absolute bottom-1 right-2"
-      onclick={editor.commands.selectFiles}>
-      {#if $uploading}
-        <span class="loading loading-spinner loading-xs"></span>
-      {:else}
-        <Icon icon="paperclip" size={3} />
-      {/if}
-    </Button>
+    <ModalFooter>
+      <Button class="btn btn-link" onclick={onClose}>Cancel</Button>
+      <Button type="submit" class="btn btn-primary">Post Reply</Button>
+    </ModalFooter>
   </div>
-  <ModalFooter>
-    <Button class="btn btn-link" onclick={onClose}>Cancel</Button>
-    <Button type="submit" class="btn btn-primary">Post Reply</Button>
-  </ModalFooter>
 </form>

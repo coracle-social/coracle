@@ -83,8 +83,8 @@
   const content = initialValues?.content || ""
   const editor = makeEditor({submit, uploading, content})
 
-  let title = $state(initialValues?.title)
-  let location = $state(initialValues?.location)
+  let title = $state(initialValues?.title || "")
+  let location = $state(initialValues?.location || "")
   let start: number | undefined = $state(initialValues?.start)
   let end: number | undefined = $state(initialValues?.end)
   let endDirty = Boolean(initialValues?.end)

@@ -15,6 +15,7 @@
   import Link from "@lib/components/Link.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
+  import PageContent from "@lib/components/PageContent.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import Button from "@lib/components/Button.svelte"
   import ProfileName from "@app/components/ProfileName.svelte"
@@ -124,7 +125,7 @@
 </script>
 
 {#if others.length > 0}
-  <PageBar class="chat__page-bar">
+  <PageBar>
     {#snippet title()}
       <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
         {#if others.length === 1}
@@ -172,7 +173,7 @@
   </PageBar>
 {/if}
 
-<div class="chat__messages scroll-container">
+<PageContent class="flex flex-col-reverse pt-4">
   <div bind:this={dynamicPadding}></div>
   {#if missingInboxes.includes($pubkey!)}
     <div class="py-12">
@@ -223,7 +224,7 @@
     </Spinner>
     {@render info?.()}
   </p>
-</div>
+</PageContent>
 
 <div class="chat__compose bg-base-200" bind:this={chatCompose}>
   <div>

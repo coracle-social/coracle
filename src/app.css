@@ -338,18 +338,14 @@ progress[value]::-webkit-progress-value {
   @apply w-full md:w-[calc(100%-18.5rem)];
 }
 
+.cb {
+  @apply saib bottom-14 md:bottom-0;
+}
+
 /* chat view */
 
-.chat__page-bar {
-  @apply sait cw !fixed top-2;
-}
-
-.chat__messages {
-  @apply saib cw fixed top-12 flex h-[calc(100%-6.5rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-3rem)];
-}
-
 .chat__compose {
-  @apply saib cw fixed bottom-14 md:bottom-0;
+  @apply cb cw fixed;
 }
 
 .chat__scroll-down {

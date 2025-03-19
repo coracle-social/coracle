@@ -12,6 +12,7 @@
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
+  import PageContent from "@lib/components/PageContent.svelte"
   import Divider from "@lib/components/Divider.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
@@ -232,7 +233,7 @@
   })
 </script>
 
-<PageBar class="chat__page-bar">
+<PageBar>
   {#snippet icon()}
     <div class="center">
       <Icon icon="hashtag" />
@@ -267,7 +268,7 @@
   {/snippet}
 </PageBar>
 
-<div class="chat__messages scroll-container" onscroll={onScroll} bind:this={element}>
+<PageContent bind:element onscroll={onScroll} class="flex flex-col-reverse pt-4">
   <div bind:this={dynamicPadding}></div>
   {#each elements as { type, id, value, showPubkey } (id)}
     {#if type === "new-messages"}
@@ -299,7 +300,7 @@
       <Spinner>End of message history</Spinner>
     {/if}
   </p>
-</div>
+</PageContent>
 
 <div class="chat__compose bg-base-200" bind:this={chatCompose}>
   <div>
