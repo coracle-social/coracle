@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.10
+
+* Fix spotify url parsing bug
+
 # 0.6.9
 
 * Fix collection loading

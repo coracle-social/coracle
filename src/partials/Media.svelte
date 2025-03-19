@@ -25,7 +25,7 @@
   {#if isAudio}
     <MediaAudio {url} />
   {:else if isSpotify}
-    <MediaSpotify {url} />
+    <MediaSpotify {url} {linkClickHandler} />
   {:else if isTidal}
     <MediaTidal {url} />
   {:else if isVideo}
