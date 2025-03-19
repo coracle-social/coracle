@@ -345,7 +345,7 @@ progress[value]::-webkit-progress-value {
 }
 
 .chat__messages {
-  @apply saib cw fixed top-12 flex h-[calc(100%-6rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-3rem)];
+  @apply saib cw fixed top-12 flex h-[calc(100%-6.5rem)] flex-col-reverse overflow-y-auto overflow-x-hidden md:h-[calc(100%-3rem)];
 }
 
 .chat__compose {
