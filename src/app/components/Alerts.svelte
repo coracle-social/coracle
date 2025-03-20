@@ -1,12 +1,20 @@
 <script lang="ts">
+  import {onMount} from "svelte"
+  import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import AlertAdd from "@app/components/AlertAdd.svelte"
   import AlertItem from "@app/components/AlertItem.svelte"
+  import {loadAlertStatuses, loadAlerts} from "@app/requests"
   import {pushModal} from "@app/modal"
   import {alerts} from "@app/state"
 
   const startAlert = () => pushModal(AlertAdd)
+
+  onMount(() => {
+    loadAlertStatuses($pubkey!)
+    loadAlerts($pubkey!)
+  })
 </script>
 
 <div class="card2 bg-alt flex flex-col gap-6 shadow-xl">

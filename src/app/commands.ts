@@ -466,27 +466,34 @@ export type AlertParams = {
   email: string
   relay: string
   filters: Filter[]
+  bunker: string
+  secret: string
 }
 
-export const makeAlert = async ({cron, email, relay, filters}: AlertParams) => {
-  const handler =
-    "31990:97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322:1737058597050"
-  const handlerRelay = "wss://relay.nostr.band/"
+export const makeAlert = async ({cron, email, relay, filters, bunker, secret}: AlertParams) => {
+  const tags = [
+    ["cron", cron],
+    ["email", email],
+    ["relay", relay],
+    ["channel", "email"],
+    [
+      "handler",
+      "31990:97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322:1737058597050",
+      "wss://relay.nostr.band/",
+      "web",
+    ],
+  ]
+
+  for (const filter of unionFilters(filters)) {
+    tags.push(["filter", JSON.stringify(filter)])
+  }
+
+  if (bunker) {
+    tags.push(["nip46", secret, bunker])
+  }
 
   return createEvent(ALERT, {
-    content: await signer
-      .get()
-      .nip44.encrypt(
-        NOTIFIER_PUBKEY,
-        JSON.stringify([
-          ["cron", cron],
-          ["email", email],
-          ["relay", relay],
-          ["channel", "email"],
-          ["handler", handler, handlerRelay, "web"],
-          ...unionFilters(filters).map(filter => ["filter", JSON.stringify(filter)]),
-        ]),
-      ),
+    content: await signer.get().nip44.encrypt(NOTIFIER_PUBKEY, JSON.stringify(tags)),
     tags: [
       ["d", randomId()],
       ["p", NOTIFIER_PUBKEY],
