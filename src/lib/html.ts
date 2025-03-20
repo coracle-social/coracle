@@ -1,4 +1,4 @@
-import {sleep} from "@welshman/lib"
+import {sleep, last} from "@welshman/lib"
 export {preventDefault, stopPropagation} from "svelte/legacy"
 
 export const copyToClipboard = (text: string) => {
@@ -88,4 +88,41 @@ export const downloadText = (filename: string, text: string) => {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+export const isIntersecting = async (element: Element) =>
+  new Promise(resolve => {
+    const observer = new IntersectionObserver(xs => {
+      resolve(xs.some(x => x.isIntersecting))
+      observer.unobserve(element)
+    })
+
+    observer.observe(element)
+  })
+
+export const scrollToEvent = async (id: string) => {
+  const element = document.querySelector(`[data-event="${id}"]`) as any
+
+  if (element) {
+    element.scrollIntoView({behavior: "smooth", block: "center"})
+    element.style = "filter: brightness(1.5); transition-property: all; transition-duration: 400ms;"
+
+    setTimeout(() => {
+      element.style = "transition-property: all; transition-duration: 300ms;"
+    }, 800)
+
+    setTimeout(() => {
+      element.style = ""
+    }, 800 + 400)
+  } else {
+    const lastElement = last(Array.from(document.querySelectorAll("[data-event]")))
+
+    if (lastElement && !isIntersecting(lastElement)) {
+      lastElement.scrollIntoView({behavior: "smooth", block: "center"})
+    }
+
+    await sleep(300)
+
+    scrollToEvent(id)
+  }
 }

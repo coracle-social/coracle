@@ -12,6 +12,7 @@
   import ProfileEdit from "@app/components/ProfileEdit.svelte"
   import ProfileDelete from "@app/components/ProfileDelete.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
+  import Alerts from "@app/components/Alerts.svelte"
   import {PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
@@ -129,6 +130,7 @@
       </FieldInline>
     {/if}
   </div>
+  <Alerts />
   <div class="card2 bg-alt shadow-xl">
     <div class="flex items-center justify-between">
       <strong class="flex items-center gap-3">

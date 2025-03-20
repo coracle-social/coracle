@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {Capacitor} from "@capacitor/core"
   import {preventDefault} from "@lib/html"
   import {randomInt} from "@welshman/lib"
   import {displayRelayUrl, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
@@ -11,14 +10,10 @@
   import Spinner from "@lib/components/Spinner.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {getMembershipUrls, getMembershipRoomsByUrl, userMembership} from "@app/state"
+  import {GENERAL, getMembershipUrls, getMembershipRoomsByUrl, userMembership} from "@app/state"
   import {loadAlertStatuses} from "@app/requests"
   import {publishAlert} from "@app/commands"
   import {pushToast} from "@app/toast"
-
-  const handler = Capacitor.isNativePlatform()
-    ? "https://app.flotilla.social"
-    : window.location.origin
 
   const timezone = new Date()
     .toString()
@@ -75,13 +70,18 @@
     }
 
     if (notifyChat) {
-      filters.push({kinds: [MESSAGE], "#h": getMembershipRoomsByUrl(relay, $userMembership)})
+      filters.push({
+        kinds: [MESSAGE],
+        "#h": [GENERAL, ...getMembershipRoomsByUrl(relay, $userMembership)],
+      })
     }
 
     loading = true
 
     try {
-      await publishAlert({cron, email, relay, handler, filters})
+      const thunk = await publishAlert({cron, email, relay, filters})
+
+      await thunk.result
       await loadAlertStatuses($pubkey!)
 
       pushToast({message: "Your alert has been successfully created!"})

@@ -4,6 +4,7 @@
   import {ctx, nthEq} from "@welshman/lib"
   import {tracker, repository} from "@welshman/app"
   import {Address, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
+  import {scrollToEvent} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
@@ -24,34 +25,12 @@
     ? nip19.neventEncode({id, relays: mergedRelays})
     : new Address(kind, pubkey, identifier, mergedRelays).toNaddr()
 
-  const scrollToEvent = (id: string) => {
-    const element = document.querySelector(`[data-event="${id}"]`) as any
-
-    if (element) {
-      element.scrollIntoView({behavior: "smooth"})
-      element.style =
-        "filter: brightness(1.5); transition-property: all; transition-duration: 400ms;"
-
-      setTimeout(() => {
-        element.style = "transition-property: all; transition-duration: 300ms;"
-      }, 800)
-
-      setTimeout(() => {
-        element.style = ""
-      }, 800 + 400)
-    }
-
-    return Boolean(element)
-  }
-
   const openMessage = (url: string, room: string, id: string) => {
     const event = repository.getEvent(id)
 
     if (event) {
       goto(makeRoomPath(url, room))
-
-      // TODO: if the event doesn't immediately load, this won't work. Scroll up until it's found
-      setTimeout(() => scrollToEvent(id), 300)
+      scrollToEvent(id)
     }
 
     return Boolean(event)

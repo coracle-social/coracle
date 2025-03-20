@@ -465,12 +465,15 @@ export type AlertParams = {
   cron: string
   email: string
   relay: string
-  handler: string
   filters: Filter[]
 }
 
-export const makeAlert = async ({cron, email, handler, relay, filters}: AlertParams) =>
-  createEvent(ALERT, {
+export const makeAlert = async ({cron, email, relay, filters}: AlertParams) => {
+  const handler =
+    "31990:97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322:1737058597050"
+  const handlerRelay = "wss://relay.nostr.band/"
+
+  return createEvent(ALERT, {
     content: await signer
       .get()
       .nip44.encrypt(
@@ -479,8 +482,8 @@ export const makeAlert = async ({cron, email, handler, relay, filters}: AlertPar
           ["cron", cron],
           ["email", email],
           ["relay", relay],
-          ["handler", handler],
           ["channel", "email"],
+          ["handler", handler, handlerRelay, "web"],
           ...unionFilters(filters).map(filter => ["filter", JSON.stringify(filter)]),
         ]),
       ),
@@ -489,6 +492,7 @@ export const makeAlert = async ({cron, email, handler, relay, filters}: AlertPar
       ["p", NOTIFIER_PUBKEY],
     ],
   })
+}
 
 export const publishAlert = async (params: AlertParams) =>
   publishThunk({event: await makeAlert(params), relays: [NOTIFIER_RELAY]})
