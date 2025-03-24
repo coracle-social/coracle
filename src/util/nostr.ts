@@ -129,7 +129,7 @@ export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
 
 const BAD_DOMAINS = ["libfans.com", "matrix.org/_matrix/media/v3/download"]
 
-const getBadDomainsWarning = e => {
+const getBadDomainsWarning = (e: TrustedEvent) => {
   for (const domain of BAD_DOMAINS) {
     if (e.content.includes(domain)) {
       return "This note includes media from untrusted hosts."
@@ -156,7 +156,7 @@ const WARN_TAGS = new Set([
   "fuck",
 ])
 
-export const getContentWarning = e =>
+export const getContentWarning = (e: TrustedEvent) =>
   getBadDomainsWarning(e) ||
   getTagValue("content-warning", e.tags) ||
   getTopicTagValues(e.tags).find(t => WARN_TAGS.has(t.toLowerCase()))

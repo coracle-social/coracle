@@ -3,6 +3,7 @@
 # 0.6.10
 
 * Fix spotify url parsing bug
+* Fix nip46 signer connect
 
 # 0.6.9
 
