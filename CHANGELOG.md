@@ -3,6 +3,7 @@
 # 1.0.0
 
 * Add alerts via Anchor
+* Fix nip46 signer connect
 
 # 0.2.14
 
