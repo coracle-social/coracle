@@ -1,10 +1,10 @@
 <script lang="ts">
   import {isMobile} from "src/util/html"
-  import {pubkey} from "@welshman/app"
   import {themeColors, appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
 
   export let setStage
+  export let nstartCompleted
 
   const params = new URLSearchParams({
     an: appName,
@@ -38,7 +38,7 @@
 </p>
 <div class="flex gap-2">
   <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  {#if $pubkey}
+  {#if nstartCompleted}
     <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
   {:else}
     <Anchor button accent class="flex-grow" externalHref={nstart}>Continue</Anchor>

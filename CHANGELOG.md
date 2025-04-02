@@ -4,6 +4,9 @@
 
 * Fix spotify url parsing bug
 * Fix nip46 signer connect
+* Use new version of network library
+* Fix reply drafts bug
+* Fix creating a new account while logged in
 
 # 0.6.9
 

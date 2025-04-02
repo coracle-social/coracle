@@ -68,6 +68,7 @@
   }
 
   const clearDraft = () => {
+    editor.commands.setContent("")
     drafts.delete(parent.id)
   }
 
@@ -118,8 +119,10 @@
   }
 
   const onBodyClick = e => {
-    saveDraft()
-    onReplyCancel()
+    if (replyIsOpen) {
+      saveDraft()
+      onReplyCancel()
+    }
   }
 
   const editor = makeEditor({
@@ -130,12 +133,6 @@
     onUploadError: (url, file) =>
       showWarning(`Failed to upload file to ${url}: ${file.uploadError}`),
   })
-
-  $: {
-    if (replyIsOpen) {
-      saveDraft()
-    }
-  }
 
   onDestroy(() => {
     pow?.worker.terminate()

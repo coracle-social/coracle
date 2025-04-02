@@ -34,7 +34,10 @@ if (window.location.hash?.startsWith("#nostr-login")) {
     }
 
     if (success) {
-      setTimeout(() => router.at("/signup").open(), 300)
+      setTimeout(
+        () => router.at("/signup").cx({stage: "follows", nstartCompleted: true}).open(),
+        300,
+      )
     }
   })()
 }

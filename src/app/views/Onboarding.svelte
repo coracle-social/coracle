@@ -22,8 +22,9 @@
   import {setChecked} from "src/engine"
 
   export let invite = null
+  export let stage = "intro"
+  export let nstartCompleted = false
 
-  let stage = $session ? "follows" : "intro"
   let state = {
     pubkey: "",
     profile: {
@@ -99,7 +100,7 @@
     {#if stage === "intro"}
       <OnboardingIntro {setStage} />
     {:else if stage === "keys"}
-      <OnboardingKeys {setStage} />
+      <OnboardingKeys {setStage} {nstartCompleted} />
     {:else if stage === "follows"}
       <OnboardingFollows {setStage} bind:state />
     {:else if stage === "note"}
