@@ -10,9 +10,8 @@
     Address,
     isReplaceable,
   } from "@welshman/util"
-  import type {Thunk, ThunkStatus, ThunkStatusByUrl} from "@welshman/app"
+  import type {Thunk} from "@welshman/app"
   import {session, Router, tagPubkey, signer, abortThunk} from "@welshman/app"
-  import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
@@ -150,11 +149,14 @@
       wordCount.set(0)
     })
 
+    let aborted = false
+
     if ($userSettings.send_delay > 0) {
-      showToast({
+      await showToast({
         type: "delay",
         timeout: $userSettings.send_delay / 1000,
         onCancel: () => {
+          aborted = true
           abortThunk(thunk)
           router.at("notes/create").open()
           drafts.set(DRAFT_KEY, editor.getHTML())
@@ -162,14 +164,9 @@
       })
     }
 
-    thunk.status.subscribe((status: ThunkStatusByUrl) => {
-      if (
-        Object.values(status).length === thunk.request.relays.length &&
-        Object.values(status).every((s: ThunkStatus) => s.status === PublishStatus.Pending)
-      ) {
-        showPublishInfo(thunk)
-      }
-    })
+    if (!aborted) {
+      showPublishInfo(thunk)
+    }
 
     if (emitter) {
       emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {

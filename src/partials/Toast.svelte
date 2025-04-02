@@ -10,17 +10,22 @@
     theme = "info",
     timeout = 5,
     ...opts
-  }) => {
-    toast.set({id, type, theme, timeout, ...opts})
+  }) =>
+    new Promise<void>(resolve => {
+      toast.set({id, type, theme, timeout, ...opts})
 
-    if (timeout) {
-      setTimeout(() => {
-        if (get(toast)?.id === id) {
-          toast.set(null)
-        }
-      }, timeout * 1000)
-    }
-  }
+      if (timeout) {
+        setTimeout(() => {
+          if (get(toast)?.id === id) {
+            toast.set(null)
+          }
+
+          resolve()
+        }, timeout * 1000)
+      } else {
+        resolve()
+      }
+    })
 
   export const showInfo = (message, opts = {}) => showToast({message, ...opts})
 
