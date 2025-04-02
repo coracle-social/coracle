@@ -1,6 +1,13 @@
 import {writable, get} from "svelte/store"
 import {uniq} from "@welshman/lib"
-import {FEEDS, APP_DATA, getAddressTagValues, getIdFilters, getListTags} from "@welshman/util"
+import {
+  FEEDS,
+  Address,
+  APP_DATA,
+  getAddressTagValues,
+  getIdFilters,
+  getListTags,
+} from "@welshman/util"
 import {
   pubkey,
   loadZapper,
@@ -12,12 +19,13 @@ import {
   loadMutes,
   getFollows,
   loadInboxRelaySelections,
+  Router,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
   env,
-  load,
+  myLoad,
   loadPubkeys,
   loadDeletes,
   loadHandlers,
@@ -68,7 +76,7 @@ export const loadUserData = async (hints: string[] = []) => {
   loadHandle($pubkey)
 
   // Load user feed selections, app data, and feeds that were favorited by the user
-  load({
+  myLoad({
     relays,
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
@@ -80,8 +88,12 @@ export const loadUserData = async (hints: string[] = []) => {
     ],
   }).then(() => {
     const addrs = getAddressTagValues(getListTags(get(userFeedFavorites)))
+    const pubkeys = uniq(addrs.map(a => Address.from(a).pubkey))
 
-    load({filters: getIdFilters(addrs)})
+    myLoad({
+      relays: Router.get().FromPubkeys(pubkeys).getUrls(),
+      filters: getIdFilters(addrs),
+    })
   })
 
   // Load enough to figure out web of trust

@@ -1,7 +1,6 @@
 <script lang="ts">
   import {formatTimestamp, thunks, createSearch, type Thunk} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
-  import {type Connection} from "@welshman/net"
+  import {Pool} from "@welshman/net"
   import {get} from "svelte/store"
   import {fly} from "svelte/transition"
   import AltColor from "src/partials/AltColor.svelte"
@@ -17,9 +16,9 @@
 
   $: subNotices = Array.from($subscriptionNotices.values()).flatMap(n => n)
 
-  function getPubNotices(connections: Connection[]) {
+  function getPubNotices(urls: string[]) {
     return Object.values($thunks).filter(
-      t => connections.some(cxn => get(t.status)[cxn.url]?.status) && "event" in t,
+      t => urls.some(url => get(t.status)[url]?.status) && "event" in t,
     ) as Thunk[]
   }
 
@@ -35,7 +34,7 @@
     }
   }
 
-  $: pubNotices = getPubNotices(Array.from(ctx.net.pool.data.values())).flatMap(p =>
+  $: pubNotices = getPubNotices(Array.from(Pool.getSingleton()._data.keys())).flatMap(p =>
     Object.keys(get(p.status))
       .filter(k => k.includes(search) || get(p.status)[k].message.includes(search))
       .map(k => ({

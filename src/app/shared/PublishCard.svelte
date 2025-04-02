@@ -3,7 +3,7 @@
   import {first, nthEq, remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
   import {ensureUnwrapped, publish} from "src/engine"

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {now, omit, MINUTE} from "@welshman/lib"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {PublishStatus} from "@welshman/net"
   import {
     signer,

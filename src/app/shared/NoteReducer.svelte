@@ -1,15 +1,16 @@
 <script lang="ts">
-  import {ctx, insert, addToMapKey, parseJson} from "@welshman/lib"
+  import {insert, addToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
     getIdFilters,
     getParentIdsAndAddrs,
     getParentIdOrAddr,
-    hasValidSignature,
+    verifyEvent,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {load, repository} from "@welshman/app"
+  import {request, RequestEvent} from "@welshman/net"
+  import {Router, repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {isEventMuted} from "src/engine"
   import {getValidZap} from "src/app/util"
@@ -43,7 +44,7 @@
     if (repostKinds.includes(event.kind)) {
       const parent = parseJson(event.content)
 
-      if (parent && hasValidSignature(parent)) {
+      if (parent && verifyEvent(parent)) {
         return parent
       }
     }
@@ -52,11 +53,13 @@
 
     if (parentIds.length > 0) {
       return new Promise(resolve => {
-        load({
+        const req = request({
+          autoClose: true,
           filters: getIdFilters(parentIds),
-          relays: ctx.app.router.EventParents(event).getUrls(),
-          onEvent: resolve,
+          relays: Router.get().EventParents(event).getUrls(),
         })
+
+        req.on(RequestEvent.Event, resolve)
       })
     }
   }

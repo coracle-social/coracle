@@ -1,14 +1,13 @@
 <script lang="ts">
+  import {nip19} from "nostr-tools"
   import {derived} from "svelte/store"
-  import {session, signer, tagPubkey, mute, unmute} from "@welshman/app"
+  import {toNostrURI} from "@welshman/util"
+  import {Router, session, signer, tagPubkey, mute, unmute} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {loginWithPublicKey, userMutes} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {toNostrURI} from "@welshman/util"
-  import {nip19} from "nostr-tools"
-  import {ctx} from "@welshman/lib"
 
   export let pubkey
 
@@ -32,7 +31,7 @@
       .at("qrcode")
       .of(
         toNostrURI(
-          nip19.nprofileEncode({pubkey, relays: ctx.app.router.FromPubkeys([pubkey]).getUrls()}),
+          nip19.nprofileEncode({pubkey, relays: Router.get().FromPubkeys([pubkey]).getUrls()}),
         ),
       )
       .open()

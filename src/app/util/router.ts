@@ -1,5 +1,6 @@
 import {fromNostrURI, Address} from "@welshman/util"
-import {ctx, last, identity, tryCatch} from "@welshman/lib"
+import {last, identity, tryCatch} from "@welshman/lib"
+import {Router as RelayRouter} from "@welshman/app"
 import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
@@ -76,6 +77,7 @@ export const asNote = {
 export const asPerson = {
   encode: nip19.npubEncode,
   decode: entity => {
+    const router = RelayRouter.get()
     const parsed = parseAnythingSync(entity)
 
     if (parsed?.type === "npub") {
@@ -83,7 +85,7 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+        relays: router.FromPubkeys([pubkey]).getUrls(),
       }
     }
 
@@ -92,9 +94,7 @@ export const asPerson = {
 
       return {
         pubkey,
-        relays: ctx.app.router
-          .merge([ctx.app.router.FromRelays(relays), ctx.app.router.FromPubkeys([pubkey])])
-          .getUrls(),
+        relays: router.merge([router.FromRelays(relays), router.FromPubkeys([pubkey])]).getUrls(),
       }
     }
 
@@ -143,7 +143,7 @@ router.extend("notes", (id, {relays = []} = {}) => {
 router.extend("people", (pubkey, {relays = []} = {}) => {
   if (relays.length < 3) {
     relays = relays.concat(
-      ctx.app.router
+      RelayRouter.get()
         .FromPubkeys([pubkey])
         .limit(3 - relays.length)
         .getUrls(),

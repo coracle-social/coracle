@@ -1,7 +1,6 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {loadHandle} from "@welshman/app"
-  import {ctx} from "@welshman/lib"
+  import {loadHandle, Router} from "@welshman/app"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Redirect from "src/app/shared/Redirect.svelte"
@@ -19,7 +18,7 @@
   {@const address = new Address(data.kind, data.pubkey, data.identifier).toString()}
   {@const relays = [
     ...(data.relays || []),
-    ...Array.from(ctx.app.router.FromPubkey(data.pubkey).getUrls()),
+    ...Array.from(Router.get().FromPubkey(data.pubkey).getUrls()),
   ]}
   <NoteDetail {address} {relays} />
 {:else if type === "nprofile"}

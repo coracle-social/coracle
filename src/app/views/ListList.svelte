@@ -1,6 +1,6 @@
 <script lang="ts">
   import {getAddress} from "@welshman/util"
-  import {pubkey} from "@welshman/app"
+  import {pubkey, Router} from "@welshman/app"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -10,7 +10,7 @@
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util/router"
   import {EDITABLE_LIST_KINDS} from "src/domain"
-  import {userLists, userFollows, listSearch, load, addSinceToFilter} from "src/engine"
+  import {userLists, userFollows, listSearch, myLoad, addSinceToFilter} from "src/engine"
 
   const createList = () => router.at("lists/create").open()
 
@@ -22,10 +22,13 @@
   let limit = 20
   let element
 
-  load({
+  const authors = Array.from($userFollows)
+
+  myLoad({
     skipCache: true,
     forcePlatform: false,
-    filters: [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors: Array.from($userFollows)})],
+    relays: Router.get().FromPubkeys(authors).getUrls(),
+    filters: [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors})],
   })
 
   onMount(() => {

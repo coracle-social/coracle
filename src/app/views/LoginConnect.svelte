@@ -1,14 +1,8 @@
 <script lang="ts">
-  import {
-    RELAYS,
-    FOLLOWS,
-    PROFILE,
-    LOCAL_RELAY_URL,
-    normalizeRelayUrl,
-    isRelayUrl,
-  } from "@welshman/util"
+  import {RELAYS, FOLLOWS, PROFILE, normalizeRelayUrl, isRelayUrl} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {session, repository} from "@welshman/app"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -18,7 +12,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import {router} from "src/app/util/router"
-  import {env, load} from "src/engine"
+  import {env, myLoad} from "src/engine"
   import {loadUserData} from "src/app/state"
   import {sleep} from "@welshman/lib"
 
@@ -33,7 +27,7 @@
   const searchRelays = async relays => {
     failed = false
 
-    await load({filters, relays, timeout: 8000})
+    await myLoad({filters, relays, timeout: 8000})
 
     if (!found) {
       failed = true

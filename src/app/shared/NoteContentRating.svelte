@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {ctx, switcher} from "@welshman/lib"
+  import {switcher} from "@welshman/lib"
   import {getTag, displayRelayUrl} from "@welshman/util"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {displayProfileByPubkey, Router} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
@@ -15,7 +15,7 @@
 
   if (tag) {
     const [type, value] = tag
-    const relays = ctx.app.router.Event(note).getUrls()
+    const relays = Router.get().Event(note).getUrls()
 
     href = switcher(type, {
       r: router.at("relays").of(value).toString(),

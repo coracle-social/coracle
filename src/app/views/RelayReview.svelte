@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {ctx} from "@welshman/lib"
+  import {Router} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -19,7 +19,7 @@
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
     createAndPublish({
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: Router.get().FromUser().getUrls(),
       kind: 1986,
       content,
       tags: [

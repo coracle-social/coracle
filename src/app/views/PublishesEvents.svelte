@@ -2,7 +2,7 @@
   import {thunks, type Thunk} from "@welshman/app"
   import {assoc, DAY, MINUTE, now, omit, remove, sortBy} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {derived} from "svelte/store"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"

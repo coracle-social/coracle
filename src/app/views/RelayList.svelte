@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {RequestEvent} from "@welshman/net"
   import {
     pubkey,
     relays,
@@ -14,6 +15,7 @@
     deriveInboxRelaySelections,
     getWriteRelayUrls,
     relaySelectionsByPubkey,
+    Router,
   } from "@welshman/app"
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller, displayList} from "src/util/misc"
@@ -26,7 +28,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
-  import {load, userFollows, sortEventsDesc, joinRelay} from "src/engine"
+  import {myRequest, userFollows, sortEventsDesc, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]
 
@@ -120,13 +122,15 @@
     }
   }, reviews)
 
-  load({
+  const req = myRequest({
+    relays: Router.get().Index().getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
-    onEvent: event => {
-      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
-        reviews = sortEventsDesc(reviews.concat(event))
-      }
-    },
+  })
+
+  req.on(RequestEvent.Event, event => {
+    if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
+      reviews = sortEventsDesc(reviews.concat(event))
+    }
   })
 
   onMount(() => {

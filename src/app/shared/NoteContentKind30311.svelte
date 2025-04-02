@@ -2,7 +2,7 @@
   import {fromPairs} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
-  import {ctx} from "@welshman/lib"
+  import {Router} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -14,7 +14,7 @@
   export let note
   export let showMedia = false
 
-  const address = Address.fromEvent(note, ctx.app.router.Event(note).getUrls())
+  const address = Address.fromEvent(note, Router.get().Event(note).getUrls())
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

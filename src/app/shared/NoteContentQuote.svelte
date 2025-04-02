@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
   import {Address} from "@welshman/util"
-  import {deriveProfileDisplay} from "@welshman/app"
+  import {deriveProfileDisplay, Router} from "@welshman/app"
   import {headerlessKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -18,7 +17,7 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const relays = ctx.app.router.Quote(note, idOrAddress, relayHints).getUrls()
+  const relays = Router.get().Quote(note, idOrAddress, relayHints).getUrls()
   const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
 
   const openQuote = e => {

@@ -1,9 +1,10 @@
 <script lang="ts">
-  import {ctx, remove, spec} from "@welshman/lib"
+  import {remove, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getIdFilters, getReplyFilters, isChildOf} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {RequestEvent} from "@welshman/net"
+  import {repository, Router} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
@@ -16,7 +17,7 @@
     isEventMuted,
     sortEventsDesc,
     userSettings,
-    load,
+    myRequest,
   } from "src/engine"
   import AltColor from "src/partials/AltColor.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -106,17 +107,15 @@
   onMount(async () => {
     if (!event.pubkey) {
       event = await new Promise(resolve => {
-        load({
+        const req = myRequest({
+          autoClose: true,
           forcePlatform: false,
-          relays: ctx.app.router.FromRelays(relays).getUrls(),
+          relays: Router.get().FromRelays(relays).getUrls(),
           filters: getIdFilters([event.id]),
-          onEose: () => {
-            resolve(event)
-          },
-          onEvent: (e: TrustedEvent) => {
-            resolve(e)
-          },
         })
+
+        req.on(RequestEvent.Eose, () => resolve(event))
+        req.on(RequestEvent.Event, (e: TrustedEvent) => resolve(e))
       })
     }
 

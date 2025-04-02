@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
-  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
+  import {pubkey, Router, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -69,7 +68,7 @@
   }
 
   const saveFeed = async () => {
-    const relays = ctx.app.router.FromUser().getUrls()
+    const relays = Router.get().FromUser().getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
     const pub = await createAndPublish({...template, relays})
 

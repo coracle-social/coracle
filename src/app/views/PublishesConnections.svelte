@@ -1,11 +1,12 @@
 <script lang="ts">
   import {relaysByUrl} from "@welshman/app"
-  import {addToMapKey, ctx} from "@welshman/lib"
+  import {addToMapKey} from "@welshman/lib"
+  import {Pool} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
   import {onMount} from "svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
-  import {ConnectionType, displayConnectionType, getConnectionStatus} from "src/domain/connection"
+  import {ConnectionType, displayConnectionType, getSocketStatus} from "src/domain/connection"
   import {quantify} from "src/util/misc"
 
   export let selected: string
@@ -24,14 +25,14 @@
     ConnectionType.UnstableConnection,
   ]
 
-  $: connections = Array.from(ctx.net.pool.data.keys()).filter(url =>
+  $: connections = Array.from(Pool.getSingleton()._data.keys()).filter(url =>
     selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
   )
 
   function fetchConnectionStatus() {
     const newConnectionStatus: Map<ConnectionType, Set<string>> = new Map()
-    for (const [url, cxn] of ctx.net.pool.data.entries()) {
-      addToMapKey(newConnectionStatus, getConnectionStatus(cxn), url)
+    for (const [url, {socket}] of Pool.getSingleton()._data.entries()) {
+      addToMapKey(newConnectionStatus, getSocketStatus(socket), url)
     }
     connectionsStatus = newConnectionStatus
   }

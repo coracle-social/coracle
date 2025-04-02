@@ -3,10 +3,9 @@ import "@welshman/editor/index.css"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import {Editor} from "@tiptap/core"
-import {ctx} from "@welshman/lib"
 import type {UploadTask} from "nostr-editor"
 import type {StampedEvent} from "@welshman/util"
-import {signer, profileSearch} from "@welshman/app"
+import {signer, Router, profileSearch} from "@welshman/app"
 import {getSetting, userSettings} from "src/engine/state"
 import {MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {MentionNodeView} from "./MentionNodeView"
@@ -102,7 +101,7 @@ export const makeEditor = ({
                   MentionSuggestion({
                     editor: (this as any).editor,
                     search: (term: string) => get(profileSearch).searchValues(term),
-                    getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+                    getRelays: (pubkey: string) => Router.get().FromPubkeys([pubkey]).getUrls(),
                     createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 

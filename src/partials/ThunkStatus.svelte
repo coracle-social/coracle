@@ -2,7 +2,7 @@
   import {ne, omit} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
-  import {LOCAL_RELAY_URL} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import Anchor from "src/partials/Anchor.svelte"
 
   export let thunk: Thunk

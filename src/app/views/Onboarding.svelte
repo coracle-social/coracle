@@ -2,7 +2,8 @@
   import {onMount} from "svelte"
   import {uniq, nth} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, Address, getIdFilters} from "@welshman/util"
-  import {session, userRelaySelections, getWriteRelayUrls} from "@welshman/app"
+  import {session, userRelaySelections, Router, getWriteRelayUrls} from "@welshman/app"
+  import {RequestEvent} from "@welshman/net"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -10,7 +11,7 @@
   import OnboardingNote from "src/app/views/OnboardingNote.svelte"
   import {
     env,
-    load,
+    myRequest,
     anonymous,
     loadPubkeys,
     requestRelayAccess,
@@ -77,15 +78,18 @@
     loadPubkeys([...env.DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
-    load({
+    const req = myRequest({
+      autoClose: true,
       filters: getIdFilters(env.ONBOARDING_LISTS),
-      onEvent: e => {
-        if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
-          state.onboardingLists = state.onboardingLists.concat(e)
-        }
+      relays: Router.get().FromPubkeys(listOwners).getUrls(),
+    })
 
-        loadPubkeys(getPubkeyTagValues(e.tags))
-      },
+    req.on(RequestEvent.Event, e => {
+      if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
+        state.onboardingLists = state.onboardingLists.concat(e)
+      }
+
+      loadPubkeys(getPubkeyTagValues(e.tags))
     })
   })
 </script>

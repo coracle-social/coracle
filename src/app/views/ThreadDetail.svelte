@@ -1,9 +1,10 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
-  import {identity, sortBy, uniqBy, ctx} from "@welshman/lib"
+  import {identity, sortBy, uniqBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
-  import {load} from "@welshman/app"
+  import {request, RequestEvent} from "@welshman/net"
+  import {Router} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
@@ -26,13 +27,15 @@
     const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
-      load({
-        relays: ctx.app.router.EventParents(event).getUrls(),
+      const req = request({
+        autoClose: true,
+        relays: Router.get().EventParents(event).getUrls(),
         filters: getIdFilters(filteredIds),
-        onEvent: (event: TrustedEvent) => {
-          addToThread(event)
-          loadParents(event)
-        },
+      })
+
+      req.on(RequestEvent.Event, (event: TrustedEvent) => {
+        addToThread(event)
+        loadParents(event)
       })
     }
   }

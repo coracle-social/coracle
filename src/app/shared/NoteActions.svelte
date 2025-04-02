@@ -3,7 +3,8 @@
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {ctx, sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
+  import {sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {
     deriveZapper,
     deriveZapperForPubkey,
@@ -16,11 +17,11 @@
     unmute,
     pin,
     unpin,
+    Router,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {
-    LOCAL_RELAY_URL,
     asSignedEvent,
     isSignedEvent,
     createEvent,
@@ -66,7 +67,7 @@
     id: event.id,
     kind: event.kind,
     author: event.pubkey,
-    relays: ctx.app.router.Event(event).limit(3).getUrls(),
+    relays: Router.get().Event(event).limit(3).getUrls(),
   })
 
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -121,7 +122,7 @@
   const broadcast = () => {
     publish({
       event: asSignedEvent(event as SignedEvent),
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: Router.get().FromUser().getUrls(),
     })
 
     showInfo("Note has been re-published!")

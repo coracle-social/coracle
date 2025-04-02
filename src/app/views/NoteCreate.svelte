@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx, last, type Emitter} from "@welshman/lib"
+  import {last, type Emitter} from "@welshman/lib"
   import {now, own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -11,7 +11,7 @@
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk, ThunkStatus, ThunkStatusByUrl} from "@welshman/app"
-  import {session, tagPubkey, signer, abortThunk} from "@welshman/app"
+  import {session, Router, tagPubkey, signer, abortThunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
@@ -116,7 +116,7 @@
         SHIPYARD_PUBKEY,
         JSON.stringify([
           ["i", JSON.stringify(signedEvent), "text"],
-          ["param", "relays", ...ctx.app.router.FromUser().getUrls()],
+          ["param", "relays", ...Router.get().FromUser().getUrls()],
         ]),
       )
       const dvmEvent = await sign(
@@ -140,7 +140,7 @@
 
       thunk = publish({
         event: signedEvent,
-        relays: ctx.app.router.PublishEvent(signedEvent).getUrls(),
+        relays: Router.get().PublishEvent(signedEvent).getUrls(),
         delay: $userSettings.send_delay,
       })
     }
@@ -193,7 +193,7 @@
 
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = ctx.app.router.FromPubkeys([pubkey]).limit(3).getUrls()
+      const relays = Router.get().FromPubkeys([pubkey]).limit(3).getUrls()
       const nprofile = nip19.nprofileEncode({pubkey, relays})
 
       return toNostrURI(nprofile)
@@ -244,7 +244,7 @@
 
   onMount(() => {
     if (quote && isReplaceable(quote)) {
-      const relays = ctx.app.router.Event(quote).limit(3).getUrls()
+      const relays = Router.get().Event(quote).limit(3).getUrls()
       const naddr = Address.fromEvent(quote, relays).toNaddr()
 
       editor.commands.insertContent("\n")
@@ -254,7 +254,7 @@
         id: quote.id,
         kind: quote.kind,
         author: quote.pubkey,
-        relays: ctx.app.router.Event(quote).limit(3).getUrls(),
+        relays: Router.get().Event(quote).limit(3).getUrls(),
       })
 
       editor.commands.insertContent("\n")

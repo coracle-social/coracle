@@ -2,11 +2,11 @@
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {ctx, sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
-  import {repository} from "@welshman/app"
+  import {sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
+  import {repository, Router} from "@welshman/app"
   import type {TrustedEvent, Handler} from "@welshman/util"
+  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {
-    LOCAL_RELAY_URL,
     isReplaceable,
     Address,
     toNostrURI,
@@ -33,7 +33,7 @@
   export let children: TrustedEvent[] = []
   export let handlers: Handler[] = []
 
-  const relays = ctx.app.router.Event(event).limit(3).getUrls()
+  const relays = Router.get().Event(event).limit(3).getUrls()
   const nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
   const naddr = Address.fromEvent(event, relays).toNaddr()
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)

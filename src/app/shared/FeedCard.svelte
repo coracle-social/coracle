@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {ctx, remove} from "@welshman/lib"
-  import {repository, pubkey} from "@welshman/app"
+  import {remove} from "@welshman/lib"
+  import {repository, Router, pubkey} from "@welshman/app"
   import {
     NAMED_BOOKMARKS,
     toNostrURI,
@@ -32,7 +32,7 @@
   const expandDefinition = boolCtrl()
   const event = repository.getEvent(address)
   const deleted = repository.isDeleted(event)
-  const naddr = Address.from(address, ctx.app.router.Event(event).getUrls()).toNaddr()
+  const naddr = Address.from(address, Router.get().Event(event).getUrls()).toNaddr()
   const feed = address.startsWith(NAMED_BOOKMARKS)
     ? mapListToFeed(readUserList(event))
     : readFeed(event)

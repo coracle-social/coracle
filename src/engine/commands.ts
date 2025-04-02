@@ -10,17 +10,16 @@ import {
   session,
   sessions,
   signer,
-  subscribe,
   tagPubkey,
   userInboxRelaySelections,
   userRelaySelections,
+  Router,
 } from "@welshman/app"
 import {DVMEvent, type DVMRequestOptions} from "@welshman/dvm"
 import {
   identity,
   append,
   cached,
-  ctx,
   groupBy,
   now,
   remove,
@@ -35,7 +34,7 @@ import {
   sleep,
   tryCatch,
 } from "@welshman/lib"
-import {SubscriptionEvent} from "@welshman/net"
+import {request, RequestEvent} from "@welshman/net"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
 import type {Filter, Profile, TrustedEvent} from "@welshman/util"
 import {
@@ -120,28 +119,28 @@ export const nip98Fetch = async (url, method, body = null) => {
   return fetchJson(url, {body, method, headers})
 }
 
-export const makeDvmRequest = (request: DVMRequestOptions & {delay?: number}) => {
+export const makeDvmRequest = (options: DVMRequestOptions & {delay?: number}) => {
   const emitter = new Emitter()
-  const {event, relays, timeout = 30_000, autoClose = true, reportProgress = true} = request
+  const {event, relays, delay, timeout = 30_000, autoClose = true, reportProgress = true} = options
   const kind = event.kind + 1000
   const kinds = reportProgress ? [kind, 7000] : [kind]
   const filters: Filter[] = [{kinds, since: now() - 60, "#e": [event.id]}]
 
-  const sub = subscribe({relays, timeout, filters})
-  const thunk = publish({event, relays, timeout, delay: request.delay})
+  const req = request({relays, timeout, filters})
+  const thunk = publish({event, relays, timeout, delay})
 
-  sub.on(SubscriptionEvent.Event, (url: string, event: TrustedEvent) => {
+  req.on(RequestEvent.Event, (url: string, event: TrustedEvent) => {
     if (event.kind === 7000) {
       emitter.emit(DVMEvent.Progress, url, event)
     } else {
       emitter.emit(DVMEvent.Result, url, event)
 
       if (autoClose) {
-        sub.close()
+        req.close()
       }
     }
   })
-  return {request, emitter, sub, thunk}
+  return {options, emitter, req, thunk}
 }
 
 export const getMediaProviderURL = cached({
@@ -224,7 +223,7 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
 
 export const signAndPublish = async (template, {anonymous = false} = {}) => {
   const event = await sign(template, {anonymous})
-  const relays = ctx.app.router.PublishEvent(event).getUrls()
+  const relays = Router.get().PublishEvent(event).getUrls()
 
   return await publish({event, relays})
 }
@@ -245,7 +244,7 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
   return createAndPublish({
     tags,
     kind: 5,
-    relays: ctx.app.router.FromUser().getUrls(),
+    relays: Router.get().FromUser().getUrls(),
     forcePlatform: false,
   })
 }
@@ -259,7 +258,7 @@ export const deleteEventByAddress = (address: string) =>
 // Profile
 
 export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) => {
-  const relays = withIndexers(ctx.app.router.FromUser().getUrls())
+  const relays = withIndexers(Router.get().FromUser().getUrls())
   const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
 
   return createAndPublish({...addClientTags(template), relays, forcePlatform})
@@ -283,14 +282,14 @@ export const removeFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
   const template = await removeFromList(list, address).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({...template, relays: ctx.app.router.FromUser().getUrls()})
+  return createAndPublish({...template, relays: Router.get().FromUser().getUrls()})
 }
 
 export const addFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
   const template = await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({...template, relays: ctx.app.router.FromUser().getUrls()})
+  return createAndPublish({...template, relays: Router.get().FromUser().getUrls()})
 }
 
 // Relays
@@ -311,7 +310,7 @@ export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string
       kind: list.kind,
       content: list.event?.content || "",
       tags: modifyTags(list.publicTags),
-      relays: withIndexers(ctx.app.router.FromUser().getUrls()),
+      relays: withIndexers(Router.get().FromUser().getUrls()),
     })
   } else {
     anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
@@ -325,7 +324,7 @@ export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[
     kind: list.kind,
     content: list.event?.content || "",
     tags: modifyTags(list.publicTags),
-    relays: withIndexers(ctx.app.router.FromUser().getUrls()),
+    relays: withIndexers(Router.get().FromUser().getUrls()),
   })
 }
 
@@ -406,7 +405,7 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     // Publish via thunk
     publish({
       event: rumor.wrap,
-      relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
+      relays: Router.get().PubkeyInbox(recipient).getUrls(),
       forcePlatform: false,
       delay,
     })
@@ -476,7 +475,7 @@ export const setAppData = async (d: string, data: any) => {
       kind: 30078,
       tags: [["d", d]],
       content: await signer.get().nip04.encrypt(pubkey, JSON.stringify(data)),
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: Router.get().FromUser().getUrls(),
       forcePlatform: false,
     })
   }

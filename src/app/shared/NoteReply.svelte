@@ -1,9 +1,10 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {ctx, without, uniq, now} from "@welshman/lib"
+  import {without, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
   import {
     session,
+    Router,
     displayProfileByPubkey,
     tagEventForReply,
     tagEventForComment,
@@ -108,7 +109,7 @@
 
     const thunk = publish({
       event: await sign(hashedEvent, options),
-      relays: ctx.app.router.PublishEvent(hashedEvent).getUrls(),
+      relays: Router.get().PublishEvent(hashedEvent).getUrls(),
       delay: $userSettings.send_delay,
     })
 

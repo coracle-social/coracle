@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx} from "@welshman/lib"
+  import {Pool} from "@welshman/net"
   import Popover from "src/partials/Popover.svelte"
-  import {ConnectionType, displayConnectionType, getConnectionStatus} from "src/domain/connection"
+  import {ConnectionType, displayConnectionType, getSocketStatus} from "src/domain/connection"
 
   export let url
 
@@ -10,9 +10,7 @@
 
   onMount(() => {
     const interval = setInterval(() => {
-      const cxn = ctx.net.pool.get(url)
-
-      status = getConnectionStatus(cxn)
+      status = getSocketStatus(Pool.getSingleton().get(url))
     }, 800)
 
     return () => {

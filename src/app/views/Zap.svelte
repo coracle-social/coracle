@@ -1,9 +1,9 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
-  import {ctx, sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
+  import {sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent, ZAP_REQUEST} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
+  import {signer, displayProfileByPubkey, Router, loadZapper, loadProfile} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -11,7 +11,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util/router"
-  import {env, load, getSetting} from "src/engine"
+  import {env, myLoad, getSetting} from "src/engine"
 
   export let splits
   export let id = null
@@ -20,7 +20,7 @@
 
   let message = ""
 
-  const platformRelay = ctx.app.router.FromPubkeys([env.PLATFORM_PUBKEY]).getUrl()
+  const platformRelay = Router.get().FromPubkeys([env.PLATFORM_PUBKEY]).getUrl()
 
   const requestZap = async ({pubkey, relay, msats, zapper, relays}) => {
     const tags = [
@@ -65,7 +65,7 @@
       })
     })
 
-    load({
+    myLoad({
       relays,
       filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since: now() - 30}],
     })
@@ -90,8 +90,8 @@
 
       if (!zapper?.allowsNostr) continue
 
-      const relays = ctx.app.router
-        .merge([ctx.app.router.ForPubkey(pubkey), ctx.app.router.FromRelays([relay])])
+      const relays = Router.get()
+        .merge([Router.get().ForPubkey(pubkey), Router.get().FromRelays([relay])])
         .getUrls()
 
       const zap = {pubkey, relay, msats, zapper, relays}

@@ -3,7 +3,6 @@ import {get, writable, derived} from "svelte/store"
 import type {RequestOpts, Feed} from "@welshman/feeds"
 import {FeedController} from "@welshman/feeds"
 import {
-  ctx,
   uniq,
   without,
   partition,
@@ -33,7 +32,7 @@ import {
   FEEDS,
   Address,
 } from "@welshman/util"
-import {Tracker} from "@welshman/net"
+import {Tracker, RequestEvent} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
 import {
   pubkey,
@@ -48,12 +47,13 @@ import {
   requestDVM,
   getPubkeysForScope,
   getPubkeysForWOTRange,
+  Router,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {race} from "src/util/misc"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, subscribe, load, type MySubscribeRequest} from "src/engine/state"
+import {env, myRequest, myLoad, type MyRequestOptions} from "src/engine/state"
 
 // Utils
 
@@ -107,7 +107,7 @@ export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) =
   return {promise, loading, stop: onExhausted}
 }
 
-export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeRequest> = {}) => {
+export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptions> = {}) => {
   let attempted = false
 
   const filters = getIdFilters([idOrAddress])
@@ -116,17 +116,23 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MySubscribeReq
     deriveEvents(repository, {filters, includeDeleted: true}),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
-        if (Address.isAddress(idOrAddress) && !request.relays) {
-          const {pubkey, relays} = Address.from(idOrAddress)
-          request.relays = uniq([...relays, ...ctx.app.router.ForPubkey(pubkey).getUrls()])
+        let relays = Router.get().Search().getUrls()
+
+        if (request.relays) {
+          relays = request.relays
+        } else if (Address.isAddress(idOrAddress)) {
+          const a = Address.from(idOrAddress)
+
+          relays = uniq([...a.relays, ...Router.get().ForPubkey(a.pubkey).getUrls()])
         }
 
         attempted = true
 
-        load({
+        myLoad({
           ...request,
           skipCache: true,
           forcePlatform: false,
+          relays,
           filters: getIdFilters([idOrAddress]),
         })
       }
@@ -157,16 +163,20 @@ export const createPeopleLoader = ({
 
         loading.set(true)
 
-        load({
-          onEvent,
+        const req = myRequest({
+          autoClose: true,
           skipCache: true,
           forcePlatform: false,
+          relays: Router.get().Search().getUrls(),
           filters: [{kinds: [0], search: term, limit: 100}],
-          onComplete: async () => {
-            await sleep(Math.min(1000, Date.now() - now))
+        })
 
-            loading.set(false)
-          },
+        req.on(RequestEvent.Event, onEvent)
+
+        req.on(RequestEvent.Close, async () => {
+          await sleep(Math.min(1000, Date.now() - now))
+
+          loading.set(false)
         })
       }
     }),
@@ -197,19 +207,33 @@ export const makeFeedRequestHandler =
     const loadOptions = {
       onEvent,
       tracker,
+      signal,
       forcePlatform,
       skipCache: true,
+      autoClose: true,
       delay: 0,
     }
+
     if (relays?.length > 0) {
-      await load({...loadOptions, filters, relays, signal, authTimeout: 3000})
+      await new Promise(resolve => {
+        const req = myRequest({...loadOptions, relays, filters})
+
+        req.on(RequestEvent.Event, onEvent)
+        req.on(RequestEvent.Close, resolve)
+      })
     } else {
       // Break out selections by relay so we can complete early after a certain number
       // of requests complete for faster load times
       await race(
         filters.every(f => f.search) ? 0.1 : 0.8,
-        getFilterSelections(filters).flatMap(({relays, filters}) =>
-          relays.map(relay => load({...loadOptions, relays: [relay], signal, filters})),
+        getFilterSelections(filters).flatMap(
+          ({relays, filters}) =>
+            new Promise(resolve => {
+              const req = myRequest({...loadOptions, relays, filters})
+
+              req.on(RequestEvent.Event, onEvent)
+              req.on(RequestEvent.Close, resolve)
+            }),
         ),
       )
 
@@ -251,7 +275,7 @@ export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   return pullConservatively({
-    relays: ctx.app.router.ForUser().getUrls(),
+    relays: Router.get().ForUser().getUrls(),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
@@ -259,9 +283,9 @@ export const loadNotifications = () => {
 export const listenForNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
-  subscribe({
+  myRequest({
     skipCache: true,
-    relays: ctx.app.router.ForUser().getUrls(),
+    relays: Router.get().ForUser().getUrls(),
     filters: [addSinceToFilter(filter)],
   })
 }
@@ -269,23 +293,26 @@ export const listenForNotifications = () => {
 // Other user data
 
 export const loadLabels = (authors: string[]) =>
-  load({
+  myLoad({
     skipCache: true,
     forcePlatform: false,
+    relays: Router.get().FromPubkeys(authors).getUrls(),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
 export const loadDeletes = () =>
-  load({
+  myLoad({
     skipCache: true,
     forcePlatform: false,
+    relays: Router.get().FromUser().getUrls(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
 
 export const loadFeedsAndLists = () =>
-  load({
+  myLoad({
     skipCache: true,
     forcePlatform: false,
+    relays: Router.get().FromUser().getUrls(),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...CUSTOM_LIST_KINDS],
@@ -297,8 +324,8 @@ export const loadFeedsAndLists = () =>
 export const loadMessages = () =>
   pullConservatively({
     // TODO, stop using non-inbox relays
-    relays: ctx.app.router
-      .merge([ctx.app.router.ForUser(), ctx.app.router.FromUser(), ctx.app.router.UserInbox()])
+    relays: Router.get()
+      .merge([Router.get().ForUser(), Router.get().FromUser(), Router.get().UserInbox()])
       .getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
@@ -309,17 +336,10 @@ export const loadMessages = () =>
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
 
-  return subscribe({
+  return myRequest({
     skipCache: true,
     forcePlatform: false,
-    // TODO, stop using non-inbox relays
-    relays: ctx.app.router
-      .merge([
-        ctx.app.router.ForPubkeys(pubkeys),
-        ctx.app.router.FromPubkeys(pubkeys),
-        ctx.app.router.PubkeyInboxes(pubkeys),
-      ])
-      .getUrls(),
+    relays: Router.get().UserInbox().getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [WRAP], "#p": [pubkey.get()]},
@@ -328,10 +348,10 @@ export const listenForMessages = (pubkeys: string[]) => {
 }
 
 export const loadHandlers = () =>
-  load({
+  myLoad({
     skipCache: true,
     forcePlatform: false,
-    relays: ctx.app.router.ForUser().getUrls().concat("wss://relay.nostr.band/"),
+    relays: Router.get().ForUser().getUrls().concat("wss://relay.nostr.band/"),
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],

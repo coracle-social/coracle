@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {sortBy, flatten, batch, uniqBy} from "@welshman/lib"
+  import {sortBy, uniq, flatten, batch, uniqBy} from "@welshman/lib"
   import {
     FEED,
     FEEDS,
@@ -7,9 +7,10 @@
     getAddress,
     getAddressTagValues,
     getIdFilters,
+    Address,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {repository, Router} from "@welshman/app"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -20,7 +21,7 @@
   import {router} from "src/app/util/router"
   import {displayFeed} from "src/domain"
   import {
-    load,
+    myLoad,
     userFeeds,
     feedSearch,
     userListFeeds,
@@ -29,15 +30,22 @@
     addSinceToFilter,
   } from "src/engine"
 
+  const authors = Array.from($userFollows)
+
   const createFeed = () => router.at("feeds/create").open()
 
   const editFeed = address => router.at("feeds").of(address).open()
 
   const loadFeeds = batch(300, (addresseses: string[][]) => {
     const addresses = flatten(addresseses).filter(a => !repository.getEvent(a))
+    const pubkeys = uniq(addresses.map(a => Address.from(a).pubkey))
 
     if (addresses.length > 0) {
-      load({skipCache: true, filters: getIdFilters(addresses)})
+      myLoad({
+        skipCache: true,
+        filters: getIdFilters(addresses),
+        relays: Router.get().FromPubkeys(pubkeys).getUrls(),
+      })
     }
   })
 
@@ -58,12 +66,11 @@
     sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
   )
 
-  load({
+  myLoad({
     skipCache: true,
     forcePlatform: false,
-    filters: [
-      addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors: Array.from($userFollows)}),
-    ],
+    relays: Router.get().FromPubkeys(authors).getUrls(),
+    filters: [addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors})],
   })
 
   onMount(() => {

@@ -31,6 +31,7 @@
     tagPubkey,
     repository,
     pinsByPubkey,
+    Router,
   } from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {ensureProto, toTitle} from "src/util/misc"
@@ -52,7 +53,7 @@
   import PersonFollowers from "src/app/views/PersonFollowers.svelte"
   import PersonFollows from "src/app/views/PersonFollows.svelte"
   import {makeFeed} from "src/domain"
-  import {load, userMutes, imgproxy, userFollows, follow, unfollow} from "src/engine"
+  import {myLoad, userMutes, imgproxy, userFollows, follow, unfollow} from "src/engine"
   import {router} from "src/app/util"
   import {nip19} from "nostr-tools"
   import {tweened} from "svelte/motion"
@@ -99,11 +100,17 @@
     .toString()
 
   $: {
-    load({filters: getIdFilters(pinnedIds)})
+    myLoad({
+      relays: Router.get().FromPubkey(pubkey).getUrls(),
+      filters: getIdFilters(pinnedIds),
+    })
   }
 
   // Force load profile when the user visits the detail page
-  load({filters: [{kinds: [PINS, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}]})
+  myLoad({
+    relays: Router.get().FromPubkey(pubkey).getUrls(),
+    filters: [{kinds: [PINS, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}],
+  })
 
   document.title = displayProfileByPubkey(pubkey)
 </script>

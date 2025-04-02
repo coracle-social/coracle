@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
   import {getReplyTagValues, getIdOrAddress, type TrustedEvent} from "@welshman/util"
+  import {Router} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import {formatTimestamp} from "src/util/misc"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -23,19 +23,19 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: ctx.app.router.Event(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: Router.get().Event(event).getUrls()})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply, {relays: ctx.app.router.EventParents(event).getUrls()})
+      .of(reply, {relays: Router.get().EventParents(event).getUrls()})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: ctx.app.router.EventRoots(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: Router.get().EventRoots(event).getUrls()})
       .at("thread")
       .open()
 </script>

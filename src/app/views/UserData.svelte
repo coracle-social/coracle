@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx} from "@welshman/lib"
-  import {repository} from "@welshman/app"
+  import {repository, Router} from "@welshman/app"
   import {commaFormat, createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -74,7 +73,7 @@
           <Anchor
             href={router
               .at("notes")
-              .of(event.id, {relays: ctx.app.router.Event(event).getUrls()})
+              .of(event.id, {relays: Router.get().Event(event).getUrls()})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Anchor>

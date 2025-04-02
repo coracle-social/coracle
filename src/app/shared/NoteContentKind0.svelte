@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
+  import {Router} from "@welshman/app"
   import {parseJson} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"
@@ -20,7 +20,7 @@
     router
       .at("people")
       .of(pubkey)
-      .cx({relays: ctx.app.router.Event(note).getUrls()})
+      .cx({relays: Router.get().Event(note).getUrls()})
       .open()
 </script>
 

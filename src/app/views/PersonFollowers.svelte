@@ -1,35 +1,27 @@
 <script lang="ts">
-  import type {TrustedEvent} from "@welshman/util"
-  import {batch, pluck, uniq} from "@welshman/lib"
-  import PersonList from "src/app/shared/PersonList.svelte"
-  import {subscribe} from "src/engine"
-  import Spinner from "src/partials/Spinner.svelte"
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
+  import {uniq} from "@welshman/lib"
+  import {Router} from "@welshman/app"
+  import Spinner from "src/partials/Spinner.svelte"
+  import PersonList from "src/app/shared/PersonList.svelte"
+  import {myLoad} from "src/engine"
 
   export let pubkey
 
-  let pubkeys = []
-  let loaded = false
+  let events = []
 
-  onMount(() => {
-    const sub = subscribe({
-      onComplete: () => {
-        loaded = true
-      },
+  $: pubkeys = uniq(events.map(event => event.pubkey))
+
+  onMount(async () => {
+    events = await myLoad({
+      relays: Router.get().ForPubkey(pubkey).getUrls(),
       filters: [{kinds: [3], "#p": [pubkey]}],
-      onEvent: batch(500, (events: TrustedEvent[]) => {
-        pubkeys = uniq(pubkeys.concat(pluck("pubkey", events)))
-      }),
     })
-
-    return () => {
-      sub.close()
-    }
   })
 </script>
 
-{#if !pubkeys.length && !loaded}
+{#if pubkeys.length > 0}
   <div class="flex h-64 items-center justify-center">
     <Spinner />
   </div>

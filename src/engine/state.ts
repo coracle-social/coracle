@@ -1,14 +1,11 @@
-import type {PartialSubscribeRequest} from "@welshman/app"
+import type {ThunkRequest} from "@welshman/app"
 import {
-  subscribe as baseSubscribe,
   db,
   displayProfileByPubkey,
   ensurePlaintext,
   followsByPubkey,
   freshness,
   profilesByPubkey,
-  getDefaultAppContext,
-  getDefaultNetContext,
   getNetwork,
   getPlaintext,
   getSession,
@@ -17,7 +14,6 @@ import {
   handles,
   initStorage,
   loadRelay,
-  makeRouter,
   makeTrackerStore,
   maxWot,
   mutesByPubkey,
@@ -35,37 +31,29 @@ import {
   storageAdapters,
   tracker,
   zappers,
+  appContext,
+  routerContext,
 } from "@welshman/app"
 import {
-  Worker,
-  ctx,
+  TaskQueue,
   groupBy,
   identity,
   now,
   ago,
   pushToMapKey,
-  setContext,
   simpleCache,
   cached,
   sort,
   take,
   uniq,
-  partition,
   prop,
   sortBy,
   max,
   HOUR,
+  always,
 } from "@welshman/lib"
-import type {Connection, PublishRequest, Target} from "@welshman/net"
-import {
-  Executor,
-  AuthMode,
-  Local,
-  Multi,
-  Relays,
-  SubscriptionEvent,
-  ConnectionEvent,
-} from "@welshman/net"
+import type {Socket, MultiRequestOptions} from "@welshman/net"
+import {SocketEvent, Pool, load, request, makeSocketPolicyAuth, defaultSocketPolicies} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
 import type {
@@ -74,7 +62,9 @@ import type {
   SignedEvent,
   TrustedEvent,
   HashedEvent,
+  StampedEvent,
 } from "@welshman/util"
+import {LOCAL_RELAY_URL} from "@welshman/relay"
 import {
   APP_DATA,
   DIRECT_MESSAGE,
@@ -84,7 +74,6 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
-  LOCAL_RELAY_URL,
   MUTES,
   NAMED_BOOKMARKS,
   WRAP,
@@ -226,14 +215,15 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
 // Unwrap/decrypt stuff as it comes in
 
-const unwrapper = new Worker<TrustedEvent>({chunkSize: 10})
-
-unwrapper.addGlobalHandler(async (event: TrustedEvent) => {
-  if (event.kind === WRAP) {
-    await ensureUnwrapped(event)
-  } else {
-    await ensurePlaintext(event)
-  }
+const unwrapper = new TaskQueue<TrustedEvent>({
+  batchSize: 10,
+  processItem: async (event: TrustedEvent) => {
+    if (event.kind === WRAP) {
+      await ensureUnwrapped(event)
+    } else {
+      await ensurePlaintext(event)
+    }
+  },
 })
 
 const decryptKinds = [APP_DATA, FOLLOWS, MUTES]
@@ -638,51 +628,40 @@ export const collectionSearch = derived(
 
 // Network
 
-export const getExecutor = (urls: string[]) => {
-  const [localUrls, remoteUrls] = partition(url => LOCAL_RELAY_URL === url, urls)
-
-  let target: Target = new Relays(remoteUrls.map(url => ctx.net.pool.get(url)))
-
-  if (localUrls.length > 0) {
-    target = new Multi([target, new Local(relay)])
-  }
-
-  return new Executor(target)
-}
-
-export type MySubscribeRequest = PartialSubscribeRequest & {
+export type MyRequestOptions = MultiRequestOptions & {
   skipCache?: boolean
   forcePlatform?: boolean
 }
 
-export const subscribe = ({forcePlatform, skipCache, ...request}: MySubscribeRequest) => {
-  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform !== false) {
-    request.relays = env.PLATFORM_RELAYS
+export const myRequest = ({forcePlatform = true, skipCache, ...options}: MyRequestOptions) => {
+  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform) {
+    options.relays = env.PLATFORM_RELAYS
   }
 
-  // Only add our local relay if we have relay selections to avoid bypassing auto relay selection
-  if (!skipCache && request.relays?.length > 0) {
-    request.relays = [...request.relays, LOCAL_RELAY_URL]
+  if (!skipCache) {
+    options.relays = [...options.relays, LOCAL_RELAY_URL]
   }
 
-  return baseSubscribe(request)
+  return request(options)
 }
 
-export const load = (request: MySubscribeRequest) =>
-  new Promise<TrustedEvent[]>(resolve => {
-    const events: TrustedEvent[] = []
-    const sub = subscribe({...request, closeOnEose: true})
+export const myLoad = ({forcePlatform = true, skipCache, ...options}: MyRequestOptions) => {
+  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform) {
+    options.relays = env.PLATFORM_RELAYS
+  }
 
-    sub.on(SubscriptionEvent.Event, (url: string, e: TrustedEvent) => events.push(e))
-    sub.on(SubscriptionEvent.Complete, (url: string) => resolve(events))
-  })
+  if (!skipCache) {
+    options.relays = [...options.relays, LOCAL_RELAY_URL]
+  }
 
-export type MyPublishRequest = PublishRequest & {
+  return load(options)
+}
+
+export type MyPublishOptions = ThunkRequest & {
   forcePlatform?: boolean
-  delay?: number
 }
 
-export const publish = ({forcePlatform = true, ...request}: MyPublishRequest) => {
+export const publish = ({forcePlatform = true, ...request}: MyPublishOptions) => {
   request.relays = forcePlatform
     ? forcePlatformRelays(request.relays)
     : withPlatformRelays(request.relays)
@@ -720,7 +699,6 @@ export type CreateAndPublishOpts = {
   anonymous?: boolean
   sk?: string
   timeout?: number
-  verb?: "EVENT" | "AUTH"
   forcePlatform?: boolean
 }
 
@@ -733,13 +711,12 @@ export const createAndPublish = async ({
   anonymous,
   sk,
   timeout,
-  verb,
   forcePlatform = true,
 }: CreateAndPublishOpts) => {
   const template = createEvent(kind, {content, tags, created_at})
   const event = await sign(template, {anonymous, sk})
 
-  return publish({event, relays, verb, timeout, forcePlatform})
+  return publish({event, relays, timeout, forcePlatform})
 }
 
 export const getClientTags = () => {
@@ -844,36 +821,41 @@ if (!db) {
     ...env.SEARCH_RELAYS,
   ]
 
-  setContext({
-    net: getDefaultNetContext({getExecutor}),
-    app: getDefaultAppContext({
-      dufflepudUrl: env.DUFFLEPUD_URL,
-      indexerRelays: env.INDEXER_RELAYS,
-      requestTimeout: 10000,
-      router: makeRouter({
-        getLimit: () => getSetting("relay_limit"),
-      }),
+  let autoAuthenticate = env.PLATFORM_RELAYS.length > 0
+
+  defaultSocketPolicies.push(
+    makeSocketPolicyAuth({
+      sign: (event: StampedEvent) => signer.get()?.sign(event),
+      shouldAuth: (socket: Socket) => autoAuthenticate,
     }),
-  })
+  )
 
+  // Configure app
+  appContext.dufflepudUrl = env.DUFFLEPUD_URL
+
+  // Configure router
+  routerContext.getIndexerRelays = always(env.INDEXER_RELAYS)
+  routerContext.getLimit = () => getSetting("relay_limit")
+
+  // Sync user settings
   userSettings.subscribe($settings => {
-    const autoAuthenticate = $settings.auto_authenticate || env.PLATFORM_RELAYS.length > 0
+    if (env.PLATFORM_RELAYS.length === 0) {
+      autoAuthenticate = $settings.auto_authenticate
+    }
 
-    ctx.net.authMode = autoAuthenticate ? AuthMode.Implicit : AuthMode.Explicit
-    ctx.app.dufflepudUrl = getSetting("dufflepud_url")
+    appContext.dufflepudUrl = getSetting("dufflepud_url")
   })
 
-  ctx.net.pool.on("init", (connection: Connection) => {
-    connection.on(ConnectionEvent.Receive, function (cxn, [verb, ...args]) {
-      if (!noticeVerbs.includes(verb)) return
-      subscriptionNotices.update($notices => {
-        pushToMapKey($notices, connection.url, {
-          created_at: now(),
-          url: cxn.url,
-          notice: [verb, ...args],
+  // Monitor notices
+  Pool.getSingleton().subscribe((socket: Socket) => {
+    socket.on(SocketEvent.Receive, (message, url) => {
+      if (noticeVerbs.includes(message[0])) {
+        subscriptionNotices.update($notices => {
+          pushToMapKey($notices, url, {url, created_at: now(), notice: message})
+
+          return $notices
         })
-        return $notices
-      })
+      }
     })
   })
 

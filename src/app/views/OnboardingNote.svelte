@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {ctx} from "@welshman/lib"
+  import {Router} from "@welshman/app"
   import {NOTE} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import {createAndPublish} from "src/engine"
@@ -26,7 +26,7 @@
           kind: NOTE,
           content,
           tags: editor.storage.nostr.getEditorTags(),
-          relays: ctx.app.router.FromUser().getUrls(),
+          relays: Router.get().FromUser().getUrls(),
         })
       }
 

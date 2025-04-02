@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, getContext} from "svelte"
-  import {ctx, nth, nthEq} from "@welshman/lib"
+  import {nth, nthEq} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -10,7 +10,7 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {thunks, pubkey} from "@welshman/app"
+  import {thunks, Router, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
@@ -21,7 +21,7 @@
   import {timestamp1} from "src/util/misc"
   import {headerlessKinds} from "src/util/nostr"
   import NotePending from "src/app/shared/NotePending.svelte"
-  import {getSetting, env, isEventMuted, loadPubkeys, load} from "src/engine"
+  import {getSetting, env, isEventMuted, loadPubkeys, myLoad} from "src/engine"
   import {router} from "src/app/util"
 
   export let event: TrustedEvent
@@ -45,7 +45,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       router
         .at("notes")
-        .of(getIdOrAddress(event), {relays: ctx.app.router.Event(event).getUrls()})
+        .of(getIdOrAddress(event), {relays: Router.get().Event(event).getUrls()})
         .open()
     }
   }
@@ -90,8 +90,8 @@
       kinds.push(ZAP_RESPONSE)
     }
 
-    load({
-      relays: ctx.app.router.Replies(event).getUrls(),
+    myLoad({
+      relays: Router.get().Replies(event).getUrls(),
       filters: getReplyFilters([event], {kinds}),
     })
   })

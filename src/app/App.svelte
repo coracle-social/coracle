@@ -4,11 +4,10 @@
 
   import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
-  import {ctx, omit, ago, max, sleep, memoize, isNil} from "@welshman/lib"
+  import {omit, sleep, memoize, isNil} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as content from "@welshman/content"
-  import {getRelayQuality, getPubkeyRelays, trackRelayStats, loadRelay} from "@welshman/app"
   import * as signer from "@welshman/signer"
   import * as net from "@welshman/net"
   import * as app from "@welshman/app"
@@ -18,7 +17,7 @@
   import {ready} from "src/engine"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
-  import {slowConnections, loadUserData} from "src/app/state"
+  import {loadUserData} from "src/app/state"
   import {themeVariables, appName} from "src/partials/state"
   import Toast from "src/partials/Toast.svelte"
   import ChatEnable from "src/app/views/ChatEnable.svelte"
@@ -409,11 +408,6 @@
     // pass
   }
 
-  ctx.net.pool.on("init", connection => {
-    loadRelay(connection.url)
-    trackRelayStats(connection)
-  })
-
   // App data boostrap and relay meta fetching
 
   ready.then(async () => {
@@ -423,28 +417,6 @@
 
     if ($session) {
       loadUserData()
-    }
-
-    const interval1 = setInterval(() => {
-      slowConnections.set(getPubkeyRelays($pubkey).filter(url => getRelayQuality(url) < 0.5))
-
-      // Prune connections we haven't used in a while
-      for (const connection of ctx.net.pool.data.values()) {
-        const lastActivity = max([
-          connection.stats.lastOpen,
-          connection.stats.lastPublish,
-          connection.stats.lastRequest,
-          connection.stats.lastEvent,
-        ])
-
-        if (lastActivity && lastActivity < ago(30)) {
-          ctx.net.pool.get(connection.url).socket.close()
-        }
-      }
-    }, 5_000)
-
-    return () => {
-      clearInterval(interval1)
     }
   })
 </script>
