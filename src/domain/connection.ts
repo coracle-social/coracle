@@ -1,5 +1,5 @@
 import {getRelayQuality, type ThunkStatus} from "@welshman/app"
-import {Pool, AuthStatus, Socket, PublishStatus, SocketStatus} from "@welshman/net"
+import {AuthStatus, Socket, PublishStatus, SocketStatus} from "@welshman/net"
 import {derived, writable} from "svelte/store"
 
 export type PublishNotice = {
@@ -38,11 +38,9 @@ export enum ConnectionType {
 }
 
 export const getSocketStatus = (socket: Socket): ConnectionType => {
-  const auth = Pool.getSingleton().getAuth(socket.url)
-
-  if (pendingStatuses.includes(auth.status)) {
+  if (pendingStatuses.includes(socket.auth.status)) {
     return ConnectionType.Logging
-  } else if (failureStatuses.includes(auth.status)) {
+  } else if (failureStatuses.includes(socket.auth.status)) {
     return ConnectionType.LoginFailed
   } else if (socket.status === SocketStatus.Error) {
     return ConnectionType.ConnectFailed

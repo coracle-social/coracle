@@ -128,13 +128,7 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptio
 
         attempted = true
 
-        myLoad({
-          ...request,
-          skipCache: true,
-          forcePlatform: false,
-          relays,
-          filters: getIdFilters([idOrAddress]),
-        })
+        myLoad({...request, skipCache: true, forcePlatform: false, relays, filters})
       }
 
       return events[0]

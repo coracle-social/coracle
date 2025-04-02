@@ -9,10 +9,9 @@
     verifyEvent,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {request, RequestEvent} from "@welshman/net"
   import {Router, repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
-  import {isEventMuted} from "src/engine"
+  import {isEventMuted, myLoad} from "src/engine"
   import {getValidZap} from "src/app/util"
 
   type GetContext = (event: TrustedEvent) => TrustedEvent[]
@@ -52,15 +51,15 @@
     const parentIds = getParentIdsAndAddrs(event)
 
     if (parentIds.length > 0) {
-      return new Promise(resolve => {
-        const req = request({
-          autoClose: true,
-          filters: getIdFilters(parentIds),
-          relays: Router.get().EventParents(event).getUrls(),
-        })
+      const filters = getIdFilters(parentIds)
+      const [cached] = repository.query(filters)
 
-        req.on(RequestEvent.Event, resolve)
-      })
+      if (cached) return cached
+
+      const relays = Router.get().EventParents(event).getUrls()
+      const [parent] = await myLoad({filters, relays})
+
+      return parent
     }
   }
 
