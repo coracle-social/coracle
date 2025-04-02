@@ -1,4 +1,4 @@
-import type {NodeViewProps} from "@tiptap/core"
+import type {NodeViewProps} from "@welshman/editor"
 import {deriveProfileDisplay} from "@welshman/app"
 
 export const MentionNodeView = ({node}: NodeViewProps) => {

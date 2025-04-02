@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {Editor} from "@tiptap/core"
+  import type {Editor} from "@welshman/editor"
   import {onMount} from "svelte"
 
   export let editor: Editor
