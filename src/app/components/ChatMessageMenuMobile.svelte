@@ -17,10 +17,10 @@
 
   const {event, pubkeys, reply}: Props = $props()
 
-  const onEmoji = ((event: TrustedEvent, emoji: NativeEmoji) => {
+  const onEmoji = ((event: TrustedEvent, pubkeys: string[], emoji: NativeEmoji) => {
     history.back()
     sendWrapped({template: makeReaction({event, content: emoji.unicode}), pubkeys})
-  }).bind(undefined, event)
+  }).bind(undefined, event, pubkeys)
 
   const showEmojiPicker = () => pushModal(EmojiPicker, {onClick: onEmoji}, {replaceState: true})
 
