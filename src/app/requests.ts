@@ -8,7 +8,7 @@ import {
   uniq,
   int,
   YEAR,
-  MONTH,
+  DAY,
   insert,
   sortBy,
   assoc,
@@ -203,9 +203,11 @@ export const makeCalendarFeed = ({
   onExhausted?: () => void
   initialEvents?: TrustedEvent[]
 }) => {
+  const interval = int(5, DAY)
+
   let exhaustedScrollers = 0
-  let backwardWindow = [now() - MONTH, now()]
-  let forwardWindow = [now(), now() + MONTH]
+  let backwardWindow = [now() - interval, now()]
+  let forwardWindow = [now(), now() + interval]
 
   const getStart = (event: TrustedEvent) => parseInt(getTagValue("start", event.tags) || "")
 
@@ -273,7 +275,7 @@ export const makeCalendarFeed = ({
     onScroll: () => {
       const [since, until] = backwardWindow
 
-      backwardWindow = [since - MONTH, since]
+      backwardWindow = [since - interval, since]
 
       if (until > now() - int(2, YEAR)) {
         loadTimeframe(since, until)
@@ -289,7 +291,7 @@ export const makeCalendarFeed = ({
     onScroll: () => {
       const [since, until] = forwardWindow
 
-      forwardWindow = [until, until + MONTH]
+      forwardWindow = [until, until + interval]
 
       if (until < now() + int(2, YEAR)) {
         loadTimeframe(since, until)

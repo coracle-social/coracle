@@ -65,7 +65,7 @@
       tags: [
         ["d", initialValues?.d || randomId()],
         ["title", title],
-        ["location", location],
+        ["location", location || ""],
         ["start", start.toString()],
         ["end", end.toString()],
         ...daysBetween(start, end).map(D => ["D", D.toString()]),
