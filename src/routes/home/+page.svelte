@@ -6,14 +6,11 @@
   import Button from "@lib/components/Button.svelte"
   import CardButton from "@lib/components/CardButton.svelte"
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
-  import ChatStart from "@app/components/ChatStart.svelte"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
   import {PLATFORM_NAME, PLATFORM_RELAY} from "@app/state"
 
   const addSpace = () => pushModal(SpaceAdd)
-
-  const startChat = () => pushModal(ChatStart)
 
   onMount(() => {
     if (PLATFORM_RELAY) {
@@ -42,7 +39,7 @@
               {/snippet}
             </CardButton>
           </Button>
-          <Link href="/people">
+          <Link href="/discover">
             <CardButton>
               {#snippet icon()}
                 <div><Icon icon="compass" size={7} /></div>
@@ -51,11 +48,11 @@
                 <div>Browse the network</div>
               {/snippet}
               {#snippet info()}
-                <div>Find your people on the nostr network.</div>
+                <div>Find communities on the nostr network.</div>
               {/snippet}
             </CardButton>
           </Link>
-          <Button onclick={startChat}>
+          <Link href="/people">
             <CardButton>
               {#snippet icon()}
                 <div><Icon icon="chat-round" size={7} /></div>
@@ -67,7 +64,7 @@
                 <div>Use nostr's encrypted group chats to stay in touch.</div>
               {/snippet}
             </CardButton>
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
   fromPairs,
   memoize,
   addToMapKey,
+  identity,
 } from "@welshman/lib"
 import {
   getIdFilters,
@@ -68,6 +69,8 @@ import type {Thunk, Relay} from "@welshman/app"
 import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
+export const fromCsv = (s: string) => (s || "").split(",").filter(identity)
+
 export const ROOM = "h"
 
 export const GENERAL = "_"
@@ -83,13 +86,9 @@ export const NOTIFIER_PUBKEY = "27b7c2ed89ef78322114225ea3ebf5f72c7767c2528d4d0c
 // export const NOTIFIER_RELAY = 'wss://notifier.flotilla.social/'
 export const NOTIFIER_RELAY = "ws://localhost:4738/"
 
-export const INDEXER_RELAYS = [
-  "wss://purplepag.es/",
-  "wss://relay.damus.io/",
-  "wss://relay.nostr.band/",
-]
+export const INDEXER_RELAYS = fromCsv(import.meta.env.VITE_INDEXER_RELAYS)
 
-export const SIGNER_RELAYS = ["wss://relay.nsec.app/", "wss://bucket.coracle.social/"]
+export const SIGNER_RELAYS = fromCsv(import.meta.env.VITE_SIGNER_RELAYS)
 
 export const PLATFORM_URL = window.location.origin
 
