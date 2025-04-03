@@ -4,7 +4,6 @@ import {
   displayProfileByPubkey,
   ensurePlaintext,
   followsByPubkey,
-  freshness,
   profilesByPubkey,
   getNetwork,
   getPlaintext,
@@ -28,32 +27,43 @@ import {
   sessions,
   setPlaintext,
   signer,
-  storageAdapters,
   tracker,
   zappers,
   appContext,
   routerContext,
+  getAll,
+  bulkPut,
+  bulkDelete,
+  onRelay,
+  onHandle,
+  onZapper,
 } from "@welshman/app"
 import {
   TaskQueue,
   groupBy,
   identity,
   now,
-  ago,
   pushToMapKey,
   simpleCache,
   cached,
   sort,
-  take,
   uniq,
   prop,
   sortBy,
   max,
-  HOUR,
   always,
+  fromPairs,
+  batch,
 } from "@welshman/lib"
 import type {Socket, MultiRequestOptions} from "@welshman/net"
-import {SocketEvent, Pool, load, request, makeSocketPolicyAuth, defaultSocketPolicies} from "@welshman/net"
+import {
+  SocketEvent,
+  Pool,
+  load,
+  request,
+  makeSocketPolicyAuth,
+  defaultSocketPolicies,
+} from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
 import type {
@@ -112,7 +122,7 @@ import {
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import logger from "src/util/logger"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
-import {appDataKeys, metaKinds, noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {appDataKeys, metaKinds} from "src/util/nostr"
 import {derived, get, writable} from "svelte/store"
 
 export const env = {
@@ -387,7 +397,7 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const checked = writable<Record<string, number>>({})
+export const checked = synced<Record<string, number>>("checked", {})
 
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
@@ -743,73 +753,6 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
 
 let ready: Promise<any> = Promise.resolve()
 
-const migrateFreshness = (data: {key: string; value: number}[]) => {
-  const cutoff = now() - HOUR
-
-  return data.filter(({value}) => value > cutoff)
-}
-
-const getScoreEvent = () => {
-  const ALWAYS_KEEP = Infinity
-  const NEVER_KEEP = 0
-
-  const $sessionKeys = new Set(Object.keys(sessions.get()))
-  const $userFollows = get(userFollows)
-  const $maxWot = get(maxWot)
-
-  return e => {
-    const isFollowing = $userFollows.has(e.pubkey)
-
-    // No need to keep a record of everyone who follows the current user
-    if (e.kind === FOLLOWS && !isFollowing) return NEVER_KEEP
-
-    // Always keep stuff by or tagging a signed in user
-    if ($sessionKeys.has(e.pubkey)) return ALWAYS_KEEP
-    if (e.tags.some(t => $sessionKeys.has(t[1]))) return ALWAYS_KEEP
-
-    // Get rid of irrelevant messages, reactions, and likes
-    if (e.wrap || e.kind === 4 || e.kind === WRAP) return NEVER_KEEP
-    if (repostKinds.includes(e.kind)) return NEVER_KEEP
-    if (reactionKinds.includes(e.kind)) return NEVER_KEEP
-
-    // If the user follows this person, use max wot score
-    let score = isFollowing ? $maxWot : getUserWotScore(e.pubkey)
-
-    // Demote non-metadata type events, and introduce recency bias
-    if (noteKinds.includes(e.kind)) {
-      score = (e.created_at / now()) * score
-    }
-
-    // Inflate the score for profiles/relays/follows to avoid redundant fetches
-    if (metaKinds.includes(e.kind)) {
-      score *= 2
-    }
-
-    return score
-  }
-}
-
-let lastMigrate = 0
-
-const migrateEvents = (events: TrustedEvent[]) => {
-  if (events.length < 50_000 || ago(lastMigrate) < 60) {
-    return events
-  }
-
-  // filter out all event posted to encrypted group
-  events = events.filter(e => !e.wrap?.tags.some(t => t[1].startsWith("35834:")))
-
-  // Keep track of the last time we migrated the events, since it's expensive
-  lastMigrate = now()
-
-  const scoreEvent = getScoreEvent()
-
-  return take(
-    30_000,
-    sortBy(e => -scoreEvent(e), events),
-  )
-}
-
 // Avoid initializing multiple times on hot reload
 if (!db) {
   const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
@@ -859,17 +802,71 @@ if (!db) {
     })
   })
 
-  ready = initStorage("coracle", 3, {
-    relays: storageAdapters.fromCollectionStore("url", relays, {throttle: 3000}),
-    handles: storageAdapters.fromCollectionStore("nip05", handles, {throttle: 3000}),
-    zappers: storageAdapters.fromCollectionStore("lnurl", zappers, {throttle: 3000}),
-    checked: storageAdapters.fromObjectStore(checked, {throttle: 3000}),
-    freshness: storageAdapters.fromObjectStore(freshness, {
-      throttle: 3000,
-      migrate: migrateFreshness,
-    }),
-    plaintext: storageAdapters.fromObjectStore(plaintext, {throttle: 3000}),
-    repository: storageAdapters.fromRepository(repository, {throttle: 300, migrate: migrateEvents}),
+  ready = initStorage("coracle", 4, {
+    relays: {
+      keyPath: "url",
+      init: async () => relays.set(await getAll("relays")),
+      sync: () => onRelay(batch(300, $relays => bulkPut("relays", $relays))),
+    },
+    handles: {
+      keyPath: "nip05",
+      init: async () => handles.set(await getAll("handles")),
+      sync: () => onHandle(batch(300, $handles => bulkPut("handles", $handles))),
+    },
+    zappers: {
+      keyPath: "lnurl",
+      init: async () => zappers.set(await getAll("zappers")),
+      sync: () => onZapper(batch(300, $zappers => bulkPut("zappers", $zappers))),
+    },
+    plaintext: {
+      keyPath: "key",
+      init: async () => {
+        const items = await getAll("plaintext")
+
+        plaintext.set(fromPairs(items.map(item => [item.key, item.value])))
+      },
+      sync: () => {
+        const interval = setInterval(() => {
+          bulkPut(
+            "plaintext",
+            Object.entries(plaintext.get()).map(([key, value]) => ({key, value})),
+          )
+        }, 10_000)
+
+        return () => clearInterval(interval)
+      },
+    },
+    events: {
+      keyPath: "id",
+      init: async () => repository.load(await getAll("events")),
+      sync: () => {
+        const onUpdate = async ({added, removed}) => {
+          const $sessionKeys = new Set(Object.keys(sessions.get()))
+          const $userFollows = get(userFollows)
+
+          if (removed.size > 0) {
+            await bulkDelete("events", Array.from(removed))
+          }
+
+          if (added.length > 0) {
+            await bulkPut(
+              "events",
+              added.filter(e => {
+                if ($sessionKeys.has(e.pubkey)) return true
+                if (e.tags.some(t => $sessionKeys.has(t[1]))) return true
+                if (metaKinds.includes(e.kind) && $userFollows.has(e.pubkey)) return true
+
+                return false
+              }),
+            )
+          }
+        }
+
+        repository.on("update", onUpdate)
+
+        return () => repository.off("update", onUpdate)
+      },
+    },
   }).then(() => Promise.all(initialRelays.map(loadRelay)))
 }
 

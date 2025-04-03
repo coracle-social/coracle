@@ -7,6 +7,7 @@
 * Use new version of network library
 * Fix reply drafts bug
 * Fix creating a new account while logged in
+* Re-work storage adapter to minimize storage and improve performance
 
 # 0.6.9
 
