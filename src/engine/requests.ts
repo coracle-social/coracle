@@ -32,6 +32,7 @@ import {
   FEEDS,
   Address,
 } from "@welshman/util"
+import type {MultiRequest} from "@welshman/net"
 import {Tracker, RequestEvent} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
 import {
@@ -48,6 +49,7 @@ import {
   getPubkeysForScope,
   getPubkeysForWOTRange,
   Router,
+  addNoFallbacks,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
@@ -216,15 +218,34 @@ export const makeFeedRequestHandler =
         req.on(RequestEvent.Close, resolve)
       })
     } else {
+      const requests: MultiRequest[] = []
+      const [withSearch, withoutSearch] = partition(f => Boolean(f.search), filters)
+
+      if (withSearch.length > 0) {
+        requests.push(
+          myRequest({
+            ...loadOptions,
+            filters: withSearch,
+            relays: Router.get().Search().policy(addNoFallbacks).getUrls(),
+          }),
+        )
+      }
+
+      if (withoutSearch.length > 0) {
+        requests.push(
+          ...getFilterSelections(filters).flatMap(options =>
+            myRequest({...loadOptions, ...options}),
+          ),
+        )
+      }
+
       // Break out selections by relay so we can complete early after a certain number
       // of requests complete for faster load times
       await race(
-        filters.every(f => f.search) ? 0.1 : 0.8,
-        getFilterSelections(filters).flatMap(
-          ({relays, filters}) =>
+        withSearch.length > 0 ? 0.1 : 0.8,
+        requests.map(
+          req =>
             new Promise(resolve => {
-              const req = myRequest({...loadOptions, relays, filters})
-
               req.on(RequestEvent.Event, onEvent)
               req.on(RequestEvent.Close, resolve)
             }),

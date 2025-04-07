@@ -778,6 +778,7 @@ if (!db) {
 
   // Configure router
   routerContext.getIndexerRelays = always(env.INDEXER_RELAYS)
+  routerContext.getSearchRelays = always(env.SEARCH_RELAYS)
   routerContext.getLimit = () => getSetting("relay_limit")
 
   // Sync user settings
