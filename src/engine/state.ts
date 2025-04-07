@@ -867,7 +867,7 @@ if (!db) {
         return () => repository.off("update", onUpdate)
       },
     },
-  }).then(() => Promise.all(initialRelays.map(loadRelay)))
+  }).then(() => Promise.all(initialRelays.map(url => loadRelay(url))))
 }
 
 export {ready}

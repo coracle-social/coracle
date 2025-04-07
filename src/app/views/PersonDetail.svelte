@@ -66,9 +66,9 @@
   export let relays = []
 
   const handle = deriveHandleForPubkey(pubkey)
-  const profile = deriveProfile(pubkey, {relays})
-  const zapper = deriveZapperForPubkey(pubkey, {relays})
-  const relaySelections = deriveRelaySelections(pubkey, {relays})
+  const profile = deriveProfile(pubkey, relays)
+  const zapper = deriveZapperForPubkey(pubkey, relays)
+  const relaySelections = deriveRelaySelections(pubkey, relays)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)

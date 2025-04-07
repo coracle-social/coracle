@@ -23,9 +23,9 @@
 
   export let pubkey
 
-  const handle = deriveHandleForPubkey(pubkey)
+  const profile = deriveProfile(pubkey)
   const wotScore = getUserWotScore(pubkey)
-  const profile = deriveProfile(pubkey, {relays: []})
+  const handle = deriveHandleForPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const showPerson = () => router.at("people").of(pubkey).open()
 

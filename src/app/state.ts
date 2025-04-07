@@ -13,7 +13,6 @@ import {
   loadZapper,
   loadHandle,
   loadRelaySelections,
-  getRelayUrls,
   loadProfile,
   loadFollows,
   loadMutes,
@@ -60,15 +59,14 @@ export const slowConnections = writable([])
 export const loadUserData = async (hints: string[] = []) => {
   // Load relays, then load everything else so we have a better chance of finding it
   const $pubkey = pubkey.get()
-  const relaySelections = await loadRelaySelections($pubkey, {relays: hints})
-  const relays = uniq([...hints, ...getRelayUrls(relaySelections)])
 
   // Load crucial user data
   await Promise.all([
-    loadInboxRelaySelections($pubkey, {relays}),
-    loadProfile($pubkey, {relays}),
-    loadFollows($pubkey, {relays}),
-    loadMutes($pubkey, {relays}),
+    loadInboxRelaySelections($pubkey, hints),
+    loadRelaySelections($pubkey, hints),
+    loadProfile($pubkey, hints),
+    loadFollows($pubkey, hints),
+    loadMutes($pubkey, hints),
   ])
 
   // Load less important user data
@@ -77,7 +75,7 @@ export const loadUserData = async (hints: string[] = []) => {
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({
-    relays,
+    relays: Router.get().FromUser().getUrls(),
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
       {
