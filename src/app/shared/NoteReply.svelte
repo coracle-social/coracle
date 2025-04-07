@@ -151,7 +151,7 @@
       <AltColor background class="overflow-hidden rounded">
         <div class="p-3 text-neutral-100" class:rounded-b={mentions.length === 0}>
           <EditorContent doNotDestroy {editor}>
-            <div class="flex flex-col justify-start" slot="addon">
+            <div class="z-feature flex flex-col justify-start" slot="addon">
               <button
                 disabled={$uploading}
                 class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full transition-all"
@@ -167,7 +167,6 @@
           </EditorContent>
         </div>
         <div class="h-px" />
-
         <div class="flex gap-2 rounded-b p-2 text-sm text-neutral-100">
           <div class="flex border-r border-solid border-neutral-600 py-2 pl-1 pr-3">
             <div class="flex cursor-pointer items-center gap-3">
