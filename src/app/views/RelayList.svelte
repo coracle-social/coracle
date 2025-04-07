@@ -136,7 +136,10 @@
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
-    return () => scroller.stop()
+    return () => {
+      req.close()
+      scroller.stop()
+    }
   })
 
   document.title = "Relays"
