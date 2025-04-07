@@ -18,11 +18,12 @@
   export let anonymous = false
   export let amount = getSetting<number>("default_zap")
 
+  let zapping = false
   let message = ""
 
   const platformRelay = Router.get().FromPubkeys([env.PLATFORM_PUBKEY]).getUrl()
 
-  const requestZap = async ({pubkey, relay, msats, zapper, relays}) => {
+  const requestZap = async ({pubkey, msats, zapper, relays}) => {
     const tags = [
       ["relays", ...relays],
       ["amount", msats.toString()],
@@ -76,6 +77,8 @@
     const percent = getSetting("platform_zap_split") as number
     const platformSplit = ["zap", env.PLATFORM_PUBKEY, platformRelay, percent * totalWeight]
 
+    zapping = true
+
     for (const [_, pubkey, relay, weightString] of [...splits, platformSplit]) {
       const weight = parseFloat(weightString)
       const msats = 1000 * amount * (weight / totalWeight)
@@ -90,11 +93,11 @@
 
       if (!zapper?.allowsNostr) continue
 
-      const relays = Router.get()
-        .merge([Router.get().ForPubkey(pubkey), Router.get().FromRelays([relay])])
-        .getUrls()
+      const router = Router.get()
+      const scenarios = [router.ForPubkey(pubkey), router.FromRelays([relay])]
+      const relays = router.merge(scenarios).getUrls()
 
-      const zap = {pubkey, relay, msats, zapper, relays}
+      const zap = {pubkey, msats, zapper, relays}
 
       await sendZap(zap, await requestZap(zap))
     }
@@ -129,4 +132,4 @@
     </Anchor>
   </div>
 {/if}
-<Anchor button accent on:click={startZapping}>Zap!</Anchor>
+<Anchor button accent on:click={startZapping} loading={zapping}>Zap!</Anchor>
