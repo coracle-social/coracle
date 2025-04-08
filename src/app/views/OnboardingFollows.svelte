@@ -1,7 +1,7 @@
 <script lang="ts">
   import {fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
-  import {relaySearch, profileSearch, Router, tagPubkey} from "@welshman/app"
+  import {relaySearch, profileSearch, Router, tagPubkey, addMaximalFallbacks} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -39,7 +39,7 @@
       await createAndPublish({
         kind: FOLLOWS,
         tags: state.follows.map(tagPubkey),
-        relays: Router.get().FromUser().getUrls(),
+        relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       })
     } finally {
       loading = false

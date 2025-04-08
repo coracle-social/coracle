@@ -11,7 +11,7 @@
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
-  import {session, Router, tagPubkey, signer, abortThunk} from "@welshman/app"
+  import {session, Router, tagPubkey, signer, abortThunk, addMaximalFallbacks} from "@welshman/app"
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import {nip19} from "nostr-tools"
@@ -104,6 +104,7 @@
     publishing = "signing"
 
     const signedEvent = await sign(hashedEvent, options)
+    const relays = Router.get().PublishEvent(signedEvent).policy(addMaximalFallbacks).getUrls()
 
     let thunk: Thunk, emitter: Emitter
 
@@ -115,9 +116,10 @@
         SHIPYARD_PUBKEY,
         JSON.stringify([
           ["i", JSON.stringify(signedEvent), "text"],
-          ["param", "relays", ...Router.get().FromUser().getUrls()],
+          ["param", "relays", ...relays],
         ]),
       )
+
       const dvmEvent = await sign(
         createEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
           content: dvmContent,
@@ -137,11 +139,7 @@
     } else {
       router.clearModals()
 
-      thunk = publish({
-        event: signedEvent,
-        relays: Router.get().PublishEvent(signedEvent).getUrls(),
-        delay: $userSettings.send_delay,
-      })
+      thunk = publish({relays, event: signedEvent, delay: $userSettings.send_delay})
     }
 
     thunk.result.finally(() => {

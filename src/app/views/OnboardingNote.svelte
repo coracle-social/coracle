@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Router} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/app"
   import {NOTE} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import {createAndPublish} from "src/engine"
@@ -26,7 +26,7 @@
           kind: NOTE,
           content,
           tags: editor.storage.nostr.getEditorTags(),
-          relays: Router.get().FromUser().getUrls(),
+          relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
         })
       }
 

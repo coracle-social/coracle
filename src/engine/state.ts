@@ -776,7 +776,7 @@ if (!db) {
   appContext.dufflepudUrl = env.DUFFLEPUD_URL
 
   // Configure router
-  routerContext.getFallbackRelays = always(env.DEFAULT_RELAYS)
+  routerContext.getDefaultRelays = always(env.DEFAULT_RELAYS)
   routerContext.getIndexerRelays = always(env.INDEXER_RELAYS)
   routerContext.getSearchRelays = always(env.SEARCH_RELAYS)
   routerContext.getLimit = () => getSetting("relay_limit")

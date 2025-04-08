@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity, equals} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
-  import {topicSearch, Router, tagPubkey} from "@welshman/app"
+  import {topicSearch, Router, tagPubkey, addMaximalFallbacks} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -30,7 +30,7 @@
       createAndPublish({
         kind: MUTES,
         tags: mutedPubkeys.map(pk => tagPubkey(pk)),
-        relays: Router.get().FromUser().getUrls(),
+        relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       })
     }
 

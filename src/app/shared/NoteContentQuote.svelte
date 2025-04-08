@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {deriveProfileDisplay, addMinimalFallbacks, Router} from "@welshman/app"
+  import {deriveProfileDisplay, addMaximalFallbacks, Router} from "@welshman/app"
   import {headerlessKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -19,7 +19,7 @@
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
   const relays = Router.get()
     .Quote(note, idOrAddress, relayHints)
-    .policy(addMinimalFallbacks)
+    .policy(addMaximalFallbacks)
     .getUrls()
   const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
 

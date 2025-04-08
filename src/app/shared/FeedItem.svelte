@@ -4,7 +4,7 @@
   import {getIdOrAddress, getIdFilters, getReplyFilters, isChildOf} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {RequestEvent} from "@welshman/net"
-  import {repository, Router} from "@welshman/app"
+  import {repository, Router, addMaximalFallbacks} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
@@ -110,7 +110,7 @@
         const req = myRequest({
           autoClose: true,
           forcePlatform: false,
-          relays: Router.get().FromRelays(relays).getUrls(),
+          relays: Router.get().FromRelays(relays).policy(addMaximalFallbacks).getUrls(),
           filters: getIdFilters([event.id]),
         })
 

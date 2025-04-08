@@ -8,7 +8,7 @@
 
   const profile = deriveProfile(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
-  const relays = Router.get().FromPubkeys([pubkey]).getUrls()
+  const relays = Router.get().FromPubkey(pubkey).getUrls()
 
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>

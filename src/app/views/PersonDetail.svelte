@@ -32,6 +32,7 @@
     repository,
     pinsByPubkey,
     Router,
+    addMaximalFallbacks,
   } from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {ensureProto, toTitle} from "src/util/misc"
@@ -101,15 +102,18 @@
 
   $: {
     myLoad({
-      relays: Router.get().FromPubkey(pubkey).getUrls(),
+      relays: Router.get().FromPubkey(pubkey).policy(addMaximalFallbacks).getUrls(),
       filters: getIdFilters(pinnedIds),
     })
   }
 
   // Force load profile when the user visits the detail page
   myLoad({
-    relays: Router.get().FromPubkey(pubkey).getUrls(),
     filters: [{kinds: [PINS, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}],
+    relays: Router.get()
+      .merge([Router.get().Index(), Router.get().FromPubkey(pubkey)])
+      .policy(addMaximalFallbacks)
+      .getUrls(),
   })
 
   document.title = displayProfileByPubkey(pubkey)

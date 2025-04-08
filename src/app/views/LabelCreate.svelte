@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
-  import {pubkey, Router, topicSearch} from "@welshman/app"
+  import {pubkey, Router, topicSearch, addMaximalFallbacks} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -40,7 +40,7 @@
 
     createAndPublish({
       kind: 1985,
-      relays: Router.get().FromUser().getUrls(),
+      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       tags: [["e", id], ["L", "#t"], ...names.map(name => ["l", name, "#t"]), ...getClientTags()],
     })
 

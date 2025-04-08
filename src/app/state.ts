@@ -19,6 +19,7 @@ import {
   getFollows,
   loadInboxRelaySelections,
   Router,
+  addMaximalFallbacks,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -75,7 +76,7 @@ export const loadUserData = async (hints: string[] = []) => {
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({
-    relays: Router.get().FromUser().getUrls(),
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
       {
@@ -89,7 +90,7 @@ export const loadUserData = async (hints: string[] = []) => {
     const pubkeys = uniq(addrs.map(a => Address.from(a).pubkey))
 
     myLoad({
-      relays: Router.get().FromPubkeys(pubkeys).getUrls(),
+      relays: Router.get().FromPubkeys(pubkeys).policy(addMaximalFallbacks).getUrls(),
       filters: getIdFilters(addrs),
     })
   })

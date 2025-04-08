@@ -49,7 +49,7 @@ import {
   getPubkeysForScope,
   getPubkeysForWOTRange,
   Router,
-  addNoFallbacks,
+  addMaximalFallbacks,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
@@ -112,21 +112,20 @@ export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) =
 export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptions> = {}) => {
   let attempted = false
 
+  const router = Router.get()
   const filters = getIdFilters([idOrAddress])
 
   return derived(
     deriveEvents(repository, {filters, includeDeleted: true}),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
-        let relays = Router.get().Search().getUrls()
+        const scenarios = [router.FromRelays(request.relays || [])]
 
-        if (request.relays) {
-          relays = request.relays
-        } else if (Address.isAddress(idOrAddress)) {
-          const a = Address.from(idOrAddress)
-
-          relays = uniq([...a.relays, ...Router.get().ForPubkey(a.pubkey).getUrls()])
+        if (Address.isAddress(idOrAddress)) {
+          scenarios.push(router.ForPubkey(Address.from(idOrAddress).pubkey))
         }
+
+        const relays = router.merge(scenarios).policy(addMaximalFallbacks).getUrls()
 
         attempted = true
 
@@ -226,7 +225,7 @@ export const makeFeedRequestHandler =
           myRequest({
             ...loadOptions,
             filters: withSearch,
-            relays: Router.get().Search().policy(addNoFallbacks).getUrls(),
+            relays: Router.get().Search().getUrls(),
           }),
         )
       }
@@ -290,7 +289,7 @@ export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
 
   return pullConservatively({
-    relays: Router.get().ForUser().getUrls(),
+    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
@@ -300,7 +299,7 @@ export const listenForNotifications = () => {
 
   myRequest({
     skipCache: true,
-    relays: Router.get().ForUser().getUrls(),
+    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter(filter)],
   })
 }
@@ -311,7 +310,7 @@ export const loadLabels = (authors: string[]) =>
   myLoad({
     skipCache: true,
     forcePlatform: false,
-    relays: Router.get().FromPubkeys(authors).getUrls(),
+    relays: Router.get().FromPubkeys(authors).policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
@@ -319,7 +318,7 @@ export const loadDeletes = () =>
   myLoad({
     skipCache: true,
     forcePlatform: false,
-    relays: Router.get().FromUser().getUrls(),
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
 
@@ -327,7 +326,7 @@ export const loadFeedsAndLists = () =>
   myLoad({
     skipCache: true,
     forcePlatform: false,
-    relays: Router.get().FromUser().getUrls(),
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...CUSTOM_LIST_KINDS],
@@ -336,17 +335,18 @@ export const loadFeedsAndLists = () =>
     ],
   })
 
-export const loadMessages = () =>
+export const loadMessages = () => {
+  const router = Router.get()
+  const scenario = router.merge([router.ForUser(), router.FromUser(), router.UserInbox()])
+
   pullConservatively({
-    // TODO, stop using non-inbox relays
-    relays: Router.get()
-      .merge([Router.get().ForUser(), Router.get().FromUser(), Router.get().UserInbox()])
-      .getUrls(),
+    relays: scenario.getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
       {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
     ],
   })
+}
 
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
@@ -366,7 +366,7 @@ export const loadHandlers = () =>
   myLoad({
     skipCache: true,
     forcePlatform: false,
-    relays: Router.get().ForUser().getUrls().concat("wss://relay.nostr.band/"),
+    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       addSinceToFilter({
         kinds: [HANDLER_RECOMMENDATION],

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Router} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -19,7 +19,7 @@
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
     createAndPublish({
-      relays: Router.get().FromUser().getUrls(),
+      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       kind: 1986,
       content,
       tags: [

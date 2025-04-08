@@ -16,6 +16,7 @@
     getWriteRelayUrls,
     relaySelectionsByPubkey,
     Router,
+    addMaximalFallbacks,
   } from "@welshman/app"
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller, displayList} from "src/util/misc"
@@ -123,7 +124,7 @@
   }, reviews)
 
   const req = myRequest({
-    relays: Router.get().Index().getUrls(),
+    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
   })
 

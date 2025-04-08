@@ -3,7 +3,15 @@
   import {sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent, ZAP_REQUEST} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, displayProfileByPubkey, Router, loadZapper, loadProfile} from "@welshman/app"
+  import {
+    signer,
+    displayProfileByPubkey,
+    Router,
+    loadZapper,
+    loadProfile,
+    addMinimalFallbacks,
+    addMaximalFallbacks,
+  } from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
@@ -21,7 +29,10 @@
   let zapping = false
   let message = ""
 
-  const platformRelay = Router.get().FromPubkeys([env.PLATFORM_PUBKEY]).getUrl()
+  const platformRelay = Router.get()
+    .FromPubkeys([env.PLATFORM_PUBKEY])
+    .policy(addMinimalFallbacks)
+    .getUrl()
 
   const requestZap = async ({pubkey, msats, zapper, relays}) => {
     const tags = [
@@ -95,7 +106,7 @@
 
       const router = Router.get()
       const scenarios = [router.ForPubkey(pubkey), router.FromRelays([relay])]
-      const relays = router.merge(scenarios).getUrls()
+      const relays = router.merge(scenarios).policy(addMaximalFallbacks).getUrls()
 
       const zap = {pubkey, msats, zapper, relays}
 

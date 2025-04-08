@@ -100,7 +100,7 @@ export const makeEditor = ({
                   MentionSuggestion({
                     editor: (this as any).editor,
                     search: (term: string) => get(profileSearch).searchValues(term),
-                    getRelays: (pubkey: string) => Router.get().FromPubkeys([pubkey]).getUrls(),
+                    getRelays: (pubkey: string) => Router.get().FromPubkey(pubkey).getUrls(),
                     createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 

@@ -4,7 +4,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
   import {RequestEvent} from "@welshman/net"
-  import {Router} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
@@ -29,7 +29,7 @@
     if (filteredIds.length > 0) {
       const req = myRequest({
         autoClose: true,
-        relays: Router.get().EventParents(event).getUrls(),
+        relays: Router.get().EventParents(event).policy(addMaximalFallbacks).getUrls(),
         filters: getIdFilters(filteredIds),
       })
 

@@ -9,7 +9,7 @@
     verifyEvent,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {Router, repository} from "@welshman/app"
+  import {Router, repository, addMaximalFallbacks} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {isEventMuted, myLoad} from "src/engine"
   import {getValidZap} from "src/app/util"
@@ -56,7 +56,7 @@
 
       if (cached) return cached
 
-      const relays = Router.get().EventParents(event).getUrls()
+      const relays = Router.get().EventParents(event).policy(addMaximalFallbacks).getUrls()
       const [parent] = await myLoad({filters, relays})
 
       return parent

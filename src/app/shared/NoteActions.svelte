@@ -18,6 +18,7 @@
     pin,
     unpin,
     Router,
+    addMaximalFallbacks,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
@@ -122,7 +123,7 @@
   const broadcast = () => {
     publish({
       event: asSignedEvent(event as SignedEvent),
-      relays: Router.get().FromUser().getUrls(),
+      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     })
 
     showInfo("Note has been re-published!")

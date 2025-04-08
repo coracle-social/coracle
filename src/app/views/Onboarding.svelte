@@ -2,7 +2,13 @@
   import {onMount} from "svelte"
   import {uniq, nth} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, Address, getIdFilters} from "@welshman/util"
-  import {session, userRelaySelections, Router, getWriteRelayUrls} from "@welshman/app"
+  import {
+    session,
+    userRelaySelections,
+    Router,
+    getWriteRelayUrls,
+    addMaximalFallbacks,
+  } from "@welshman/app"
   import {RequestEvent} from "@welshman/net"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -82,7 +88,7 @@
     const req = myRequest({
       autoClose: true,
       filters: getIdFilters(env.ONBOARDING_LISTS),
-      relays: Router.get().FromPubkeys(listOwners).getUrls(),
+      relays: Router.get().FromPubkeys(listOwners).policy(addMaximalFallbacks).getUrls(),
     })
 
     req.on(RequestEvent.Event, e => {

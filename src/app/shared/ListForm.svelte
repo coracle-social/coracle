@@ -10,7 +10,7 @@
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {topicSearch, Router, tagPubkey, relaySearch} from "@welshman/app"
+  import {topicSearch, Router, tagPubkey, relaySearch, addMaximalFallbacks} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -42,7 +42,7 @@
   }
 
   const submit = async () => {
-    const relays = Router.get().FromUser().getUrls()
+    const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
     const template = list.event ? editUserList(list) : createUserList(list)
     const pub = await createAndPublish({...template, relays})
 

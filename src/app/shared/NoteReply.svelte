@@ -8,6 +8,7 @@
     displayProfileByPubkey,
     tagEventForReply,
     tagEventForComment,
+    addMaximalFallbacks,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {own, hash} from "@welshman/signer"
@@ -110,7 +111,7 @@
 
     const thunk = publish({
       event: await sign(hashedEvent, options),
-      relays: Router.get().PublishEvent(hashedEvent).getUrls(),
+      relays: Router.get().PublishEvent(hashedEvent).policy(addMaximalFallbacks).getUrls(),
       delay: $userSettings.send_delay,
     })
 

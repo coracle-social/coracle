@@ -14,6 +14,8 @@ import {
   userInboxRelaySelections,
   userRelaySelections,
   Router,
+  addMaximalFallbacks,
+  addMinimalFallbacks,
 } from "@welshman/app"
 import {DVMEvent, type DVMRequestOptions} from "@welshman/dvm"
 import {
@@ -223,7 +225,7 @@ export const uploadFiles = async (urls, files, compressorOpts = {}) => {
 
 export const signAndPublish = async (template, {anonymous = false} = {}) => {
   const event = await sign(template, {anonymous})
-  const relays = Router.get().PublishEvent(event).getUrls()
+  const relays = Router.get().PublishEvent(event).policy(addMaximalFallbacks).getUrls()
 
   return await publish({event, relays})
 }
@@ -244,7 +246,7 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
   return createAndPublish({
     tags,
     kind: 5,
-    relays: Router.get().FromUser().getUrls(),
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     forcePlatform: false,
   })
 }
@@ -282,14 +284,20 @@ export const removeFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
   const template = await removeFromList(list, address).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({...template, relays: Router.get().FromUser().getUrls()})
+  return createAndPublish({
+    ...template,
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+  })
 }
 
 export const addFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
   const template = await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({...template, relays: Router.get().FromUser().getUrls()})
+  return createAndPublish({
+    ...template,
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+  })
 }
 
 // Relays
@@ -310,7 +318,7 @@ export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string
       kind: list.kind,
       content: list.event?.content || "",
       tags: modifyTags(list.publicTags),
-      relays: withIndexers(Router.get().FromUser().getUrls()),
+      relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
     })
   } else {
     anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
@@ -324,7 +332,7 @@ export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[
     kind: list.kind,
     content: list.event?.content || "",
     tags: modifyTags(list.publicTags),
-    relays: withIndexers(Router.get().FromUser().getUrls()),
+    relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
   })
 }
 
@@ -405,7 +413,7 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     // Publish via thunk
     publish({
       event: rumor.wrap,
-      relays: Router.get().PubkeyInbox(recipient).getUrls(),
+      relays: Router.get().PubkeyInbox(recipient).policy(addMinimalFallbacks).getUrls(),
       forcePlatform: false,
       delay,
     })
@@ -475,7 +483,7 @@ export const setAppData = async (d: string, data: any) => {
       kind: 30078,
       tags: [["d", d]],
       content: await signer.get().nip04.encrypt(pubkey, JSON.stringify(data)),
-      relays: Router.get().FromUser().getUrls(),
+      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       forcePlatform: false,
     })
   }
