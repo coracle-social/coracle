@@ -1,6 +1,6 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {deriveProfileDisplay, Router} from "@welshman/app"
+  import {deriveProfileDisplay, addMinimalFallbacks, Router} from "@welshman/app"
   import {headerlessKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
@@ -17,7 +17,10 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const relays = Router.get().Quote(note, idOrAddress, relayHints).getUrls()
+  const relays = Router.get()
+    .Quote(note, idOrAddress, relayHints)
+    .policy(addMinimalFallbacks)
+    .getUrls()
   const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
 
   const openQuote = e => {

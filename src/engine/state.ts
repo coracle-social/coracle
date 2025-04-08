@@ -34,7 +34,6 @@ import {
   getAll,
   bulkPut,
   bulkDelete,
-  onRelay,
   onHandle,
   onZapper,
 } from "@welshman/app"
@@ -65,7 +64,7 @@ import {
   defaultSocketPolicies,
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
+import {deriveEvents, throttled, deriveEventsMapped, synced, withGetter} from "@welshman/store"
 import type {
   EventTemplate,
   PublishedList,
@@ -777,6 +776,7 @@ if (!db) {
   appContext.dufflepudUrl = env.DUFFLEPUD_URL
 
   // Configure router
+  routerContext.getFallbackRelays = always(env.DEFAULT_RELAYS)
   routerContext.getIndexerRelays = always(env.INDEXER_RELAYS)
   routerContext.getSearchRelays = always(env.SEARCH_RELAYS)
   routerContext.getLimit = () => getSetting("relay_limit")
@@ -807,7 +807,7 @@ if (!db) {
     relays: {
       keyPath: "url",
       init: async () => relays.set(await getAll("relays")),
-      sync: () => onRelay(batch(300, $relays => bulkPut("relays", $relays))),
+      sync: () => throttled(3000, relays).subscribe($relays => bulkPut("relays", $relays)),
     },
     handles: {
       keyPath: "nip05",
