@@ -4,7 +4,7 @@
 
   import {nip19} from "nostr-tools"
   import {get} from "svelte/store"
-  import {omit, sleep, memoize, isNil} from "@welshman/lib"
+  import {omit, sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as content from "@welshman/content"
@@ -357,9 +357,9 @@
     } else if (document.body.style.position === "fixed") {
       document.body.setAttribute("style", "")
 
-      if (!isNil(scrollY)) {
+      if (scrollY !== undefined) {
         window.scrollTo(0, scrollY)
-        scrollY = null
+        scrollY = undefined
       }
     }
   })

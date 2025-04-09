@@ -10,7 +10,6 @@ import {
   getSession,
   getSigner,
   getUserWotScore,
-  handles,
   initStorage,
   loadRelay,
   makeTrackerStore,
@@ -21,21 +20,14 @@ import {
   pubkey,
   publishThunk,
   relay,
-  relays,
   repository,
   session,
-  sessions,
   setPlaintext,
   signer,
   tracker,
-  zappers,
   appContext,
   routerContext,
-  getAll,
-  bulkPut,
-  bulkDelete,
-  onHandle,
-  onZapper,
+  defaultStorageAdapters,
 } from "@welshman/app"
 import {
   TaskQueue,
@@ -51,8 +43,6 @@ import {
   sortBy,
   max,
   always,
-  fromPairs,
-  batch,
 } from "@welshman/lib"
 import type {Socket, MultiRequestOptions} from "@welshman/net"
 import {
@@ -64,7 +54,7 @@ import {
   defaultSocketPolicies,
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import {deriveEvents, throttled, deriveEventsMapped, synced, withGetter} from "@welshman/store"
+import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
 import type {
   EventTemplate,
   PublishedList,
@@ -121,8 +111,8 @@ import {
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import logger from "src/util/logger"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
-import {appDataKeys, metaKinds} from "src/util/nostr"
-import {derived, get, writable} from "svelte/store"
+import {appDataKeys} from "src/util/nostr"
+import {derived, writable} from "svelte/store"
 
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
@@ -803,72 +793,8 @@ if (!db) {
     })
   })
 
-  ready = initStorage("coracle", 4, {
-    relays: {
-      keyPath: "url",
-      init: async () => relays.set(await getAll("relays")),
-      sync: () => throttled(3000, relays).subscribe($relays => bulkPut("relays", $relays)),
-    },
-    handles: {
-      keyPath: "nip05",
-      init: async () => handles.set(await getAll("handles")),
-      sync: () => onHandle(batch(300, $handles => bulkPut("handles", $handles))),
-    },
-    zappers: {
-      keyPath: "lnurl",
-      init: async () => zappers.set(await getAll("zappers")),
-      sync: () => onZapper(batch(300, $zappers => bulkPut("zappers", $zappers))),
-    },
-    plaintext: {
-      keyPath: "key",
-      init: async () => {
-        const items = await getAll("plaintext")
-
-        plaintext.set(fromPairs(items.map(item => [item.key, item.value])))
-      },
-      sync: () => {
-        const interval = setInterval(() => {
-          bulkPut(
-            "plaintext",
-            Object.entries(plaintext.get()).map(([key, value]) => ({key, value})),
-          )
-        }, 10_000)
-
-        return () => clearInterval(interval)
-      },
-    },
-    events: {
-      keyPath: "id",
-      init: async () => repository.load(await getAll("events")),
-      sync: () => {
-        const onUpdate = async ({added, removed}) => {
-          const $sessionKeys = new Set(Object.keys(sessions.get()))
-          const $userFollows = get(userFollows)
-
-          if (removed.size > 0) {
-            await bulkDelete("events", Array.from(removed))
-          }
-
-          if (added.length > 0) {
-            await bulkPut(
-              "events",
-              added.filter(e => {
-                if ($sessionKeys.has(e.pubkey)) return true
-                if (e.tags.some(t => $sessionKeys.has(t[1]))) return true
-                if (metaKinds.includes(e.kind) && $userFollows.has(e.pubkey)) return true
-
-                return false
-              }),
-            )
-          }
-        }
-
-        repository.on("update", onUpdate)
-
-        return () => repository.off("update", onUpdate)
-      },
-    },
-  }).then(() => Promise.all(initialRelays.map(url => loadRelay(url))))
+  ready = initStorage("coracle", 5, defaultStorageAdapters)
+  ready.then(() => Promise.all(initialRelays.map(url => loadRelay(url))))
 }
 
 export {ready}
