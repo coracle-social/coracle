@@ -81,7 +81,6 @@
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "rollup": "^4.24.0",
-    "sharp": "^0.33.5",
     "svelte": "^4.2.19",
     "svelte-check": "^4.0.5",
     "svelte-link-preview": "^0.3.3",
