@@ -1,7 +1,7 @@
+import * as nip19 from "nostr-tools/nip19"
 import {fromNostrURI, Address} from "@welshman/util"
 import {last, identity, tryCatch} from "@welshman/lib"
 import {Router as RelayRouter} from "@welshman/app"
-import {nip19} from "nostr-tools"
 import {Router} from "src/util/router"
 import {parseJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"

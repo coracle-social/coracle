@@ -56,7 +56,7 @@
   import {makeFeed} from "src/domain"
   import {myLoad, userMutes, imgproxy, userFollows, follow, unfollow} from "src/engine"
   import {router} from "src/app/util"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import WotScore from "src/partials/WotScore.svelte"

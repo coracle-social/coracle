@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
   import {toNostrURI} from "@welshman/util"
   import {Router, session, signer, tagPubkey, mute, unmute} from "@welshman/app"

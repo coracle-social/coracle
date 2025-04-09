@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {deriveProfile, Router, deriveHandleForPubkey, displayHandle} from "@welshman/app"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"

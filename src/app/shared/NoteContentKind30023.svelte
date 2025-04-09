@@ -2,7 +2,7 @@
   import insane from "insane"
   import {marked} from "marked"
   import {onMount} from "svelte"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {fromPairs, switcher} from "@welshman/lib"
   import {fromNostrURI, getTopicTagValues} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"

@@ -201,26 +201,6 @@ export const pluralize = (n: number, label: string, pluralLabel?: string) =>
 export const quantify = (n: number, label: string, pluralLabel?: string) =>
   `${commaFormat(n)} ${pluralize(n, label, pluralLabel)}`
 
-export const race = (threshold, promises) => {
-  let count = 0
-
-  if (threshold === 0) {
-    return Promise.resolve()
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    promises.forEach(p => {
-      p.then(() => {
-        count++
-
-        if (count >= threshold * promises.length) {
-          resolve()
-        }
-      }).catch(reject)
-    })
-  })
-}
-
 export const displayUrl = url => {
   return stripProtocol(url)
     .replace(/^(www\.)?/i, "")

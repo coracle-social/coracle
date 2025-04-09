@@ -14,7 +14,7 @@
 
 <script lang="ts">
   import cx from "classnames"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {displayPubkey} from "@welshman/util"
   import {session, deriveProfileDisplay} from "@welshman/app"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"

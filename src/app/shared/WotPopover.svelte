@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as nip19 from "nostr-tools/nip19"
   import {
     deriveProfile,
     getUserWotScore,
@@ -19,7 +20,6 @@
   import {ensureProto, formatTimestampRelative} from "src/util/misc"
   import {stripProtocol} from "@welshman/lib"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
-  import {nip19} from "nostr-tools"
 
   export let pubkey
 

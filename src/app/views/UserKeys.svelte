@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {Nip46Signer} from "@welshman/signer"
   import {session, signer} from "@welshman/app"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

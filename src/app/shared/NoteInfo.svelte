@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"

@@ -14,7 +14,7 @@
   import {session, Router, tagPubkey, signer, abortThunk, addMaximalFallbacks} from "@welshman/app"
   import {DVMEvent} from "@welshman/dvm"
   import {writable} from "svelte/store"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {makePow} from "src/util/pow"
   import type {ProofOfWork} from "src/util/pow"
   import {warn} from "src/util/logger"

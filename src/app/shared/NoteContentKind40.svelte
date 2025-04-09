@@ -1,6 +1,6 @@
 <script lang="ts">
   import {getTagValue} from "@welshman/util"
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {parseJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

@@ -1,6 +1,6 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import type {RequestOpts, Feed} from "@welshman/feeds"
+import type {Feed} from "@welshman/feeds"
 import {FeedController} from "@welshman/feeds"
 import {
   uniq,
@@ -32,8 +32,7 @@ import {
   FEEDS,
   Address,
 } from "@welshman/util"
-import type {MultiRequest} from "@welshman/net"
-import {Tracker, RequestEvent} from "@welshman/net"
+import {RequestEvent} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
 import {
   pubkey,
@@ -41,7 +40,6 @@ import {
   loadProfile,
   loadFollows,
   loadMutes,
-  getFilterSelections,
   getFollows,
   pull,
   hasNegentropy,
@@ -50,10 +48,10 @@ import {
   getPubkeysForWOTRange,
   Router,
   addMaximalFallbacks,
+  makeFeedRequestHandler,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
-import {race} from "src/util/misc"
 import {CUSTOM_LIST_KINDS} from "src/domain"
 import {env, myRequest, myLoad, type MyRequestOptions} from "src/engine/state"
 
@@ -195,71 +193,6 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 
 export type FeedRequestHandlerOptions = {forcePlatform: boolean; signal: AbortSignal}
 
-export const makeFeedRequestHandler =
-  ({forcePlatform, signal}: FeedRequestHandlerOptions) =>
-  async ({relays, filters, onEvent}: RequestOpts) => {
-    const tracker = new Tracker()
-    const loadOptions = {
-      onEvent,
-      tracker,
-      signal,
-      forcePlatform,
-      skipCache: true,
-      autoClose: true,
-      delay: 0,
-    }
-
-    if (relays?.length > 0) {
-      await new Promise(resolve => {
-        const req = myRequest({...loadOptions, relays, filters})
-
-        req.on(RequestEvent.Event, onEvent)
-        req.on(RequestEvent.Close, resolve)
-      })
-    } else {
-      const requests: MultiRequest[] = []
-      const [withSearch, withoutSearch] = partition(f => Boolean(f.search), filters)
-
-      if (withSearch.length > 0) {
-        requests.push(
-          myRequest({
-            ...loadOptions,
-            filters: withSearch,
-            relays: Router.get().Search().getUrls(),
-          }),
-        )
-      }
-
-      if (withoutSearch.length > 0) {
-        requests.push(
-          ...getFilterSelections(filters).flatMap(options =>
-            myRequest({...loadOptions, ...options}),
-          ),
-        )
-      }
-
-      // Break out selections by relay so we can complete early after a certain number
-      // of requests complete for faster load times
-      await race(
-        withSearch.length > 0 ? 0.1 : 0.8,
-        requests.map(
-          req =>
-            new Promise(resolve => {
-              req.on(RequestEvent.Event, onEvent)
-              req.on(RequestEvent.Close, resolve)
-            }),
-        ),
-      )
-
-      // Wait until after we've queried the network to access our local cache. This results in less
-      // snappy response times, but is necessary to prevent stale stuff that the user has already seen
-      // from showing up at the top of the feed
-      for (const event of repository.query(filters)) {
-        onEvent(event)
-      }
-    }
-  }
-
 export type FeedControllerOptions = {
   feed: Feed
   onEvent: (event: TrustedEvent) => void
@@ -269,8 +202,9 @@ export type FeedControllerOptions = {
   signal?: AbortSignal
 }
 
-export const createFeedController = ({forcePlatform = true, ...options}: FeedControllerOptions) => {
-  const request = makeFeedRequestHandler({forcePlatform, signal: options.signal})
+export const createFeedController = (options: FeedControllerOptions) => {
+  const request = makeFeedRequestHandler({signal: options.signal})
+
   return new FeedController({
     request,
     requestDVM,
