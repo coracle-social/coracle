@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {hexToBytes} from "@noble/hashes/utils"
   import {displayPubkey, displayProfile} from "@welshman/util"
   import {pubkey, session, displayNip05, deriveProfile} from "@welshman/app"

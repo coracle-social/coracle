@@ -1,6 +1,6 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
-import {ctx, randomId, uniq, equals} from "@welshman/lib"
+import {randomId, poll, uniq, equals} from "@welshman/lib"
 import {
   DELETE,
   REPORT,
@@ -31,7 +31,7 @@ import {
   unionFilters,
 } from "@welshman/util"
 import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
-import {PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
+import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
 import {
   pubkey,
@@ -54,6 +54,7 @@ import {
   dropSession,
   tagEventForComment,
   tagEventForQuote,
+  Router,
 } from "@welshman/app"
 import type {Thunk} from "@welshman/app"
 import {
@@ -101,7 +102,7 @@ export const prependParent = (parent: TrustedEvent | undefined, {content, tags}:
       id: parent.id,
       kind: parent.kind,
       author: parent.pubkey,
-      relays: ctx.app.router.Event(parent).limit(3).getUrls(),
+      relays: Router.get().Event(parent).limit(3).getUrls(),
     })
 
     tags = [...tags, tagEventForQuote(parent)]
@@ -203,7 +204,7 @@ export const nip29 = {
 export const addSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: GROUPS})
   const event = await addToListPublicly(list, ["r", url]).reconcile(nip44EncryptToSelf)
-  const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
+  const relays = uniq([...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
   return publishThunk({event, relays})
 }
@@ -212,11 +213,7 @@ export const removeSpaceMembership = async (url: string) => {
   const list = get(userMembership) || makeList({kind: GROUPS})
   const pred = (t: string[]) => t[t[0] === "r" ? 1 : 2] === url
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
-  const relays = uniq([
-    url,
-    ...ctx.app.router.FromUser().getUrls(),
-    ...getRelayTagValues(event.tags),
-  ])
+  const relays = uniq([url, ...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
   return publishThunk({event, relays})
 }
@@ -228,7 +225,7 @@ export const addRoomMembership = async (url: string, room: string, name: string)
     ["group", room, url, name],
   ]
   const event = await addToListPublicly(list, ...newTags).reconcile(nip44EncryptToSelf)
-  const relays = uniq([...ctx.app.router.FromUser().getUrls(), ...getRelayTagValues(event.tags)])
+  const relays = uniq([...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
   return publishThunk({event, relays})
 }
@@ -237,11 +234,7 @@ export const removeRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: GROUPS})
   const pred = (t: string[]) => equals(["group", room, url], t.slice(0, 3))
   const event = await removeFromListByPredicate(list, pred).reconcile(nip44EncryptToSelf)
-  const relays = uniq([
-    url,
-    ...ctx.app.router.FromUser().getUrls(),
-    ...getRelayTagValues(event.tags),
-  ])
+  const relays = uniq([url, ...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 
   return publishThunk({event, relays})
 }
@@ -263,7 +256,7 @@ export const setRelayPolicy = (url: string, read: boolean, write: boolean) => {
     relays: [
       url,
       ...INDEXER_RELAYS,
-      ...ctx.app.router.FromUser().getUrls(),
+      ...Router.get().FromUser().getUrls(),
       ...userRoomsByUrl.get().keys(),
     ],
   })
@@ -284,7 +277,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
       event: createEvent(list.kind, {tags}),
       relays: [
         ...INDEXER_RELAYS,
-        ...ctx.app.router.FromUser().getUrls(),
+        ...Router.get().FromUser().getUrls(),
         ...userRoomsByUrl.get().keys(),
       ],
     })
@@ -294,9 +287,9 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 // Relay access
 
 export const checkRelayAccess = async (url: string, claim = "") => {
-  const connection = ctx.net.pool.get(url)
+  const socket = Pool.getSingleton().get(url)
 
-  await connection.auth.attempt(5000)
+  await socket.auth.attemptAuth(signer.get().sign)
 
   const thunk = publishThunk({
     event: createEvent(AUTH_JOIN, {tags: [["claim", claim]]}),
@@ -307,7 +300,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
 
   if (result[url].status === PublishStatus.Failure) {
     const message =
-      connection.auth.message?.replace(/^.*: /, "") ||
+      socket.auth.details?.replace(/^.*: /, "") ||
       result[url].message?.replace(/^.*: /, "") ||
       "join request rejected"
 
@@ -328,26 +321,30 @@ export const checkRelayProfile = async (url: string) => {
 }
 
 export const checkRelayConnection = async (url: string) => {
-  const connection = ctx.net.pool.get(url)
+  const socket = Pool.getSingleton().get(url)
 
-  await connection.socket.open()
-  await connection.socket.wait(3000)
+  socket.attemptToOpen()
 
-  if (connection.socket.status !== SocketStatus.Open) {
+  await poll({
+    signal: AbortSignal.timeout(3000),
+    condition: () => socket.status === SocketStatus.Open,
+  })
+
+  if (socket.status !== SocketStatus.Open) {
     return `Failed to connect`
   }
 }
 
 export const checkRelayAuth = async (url: string, timeout = 3000) => {
-  const connection = ctx.net.pool.get(url)
+  const socket = Pool.getSingleton().get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
-  await connection.auth.attempt(timeout)
+  await socket.auth.attemptAuth(signer.get().sign)
 
   // Only raise an error if it's not a timeout.
   // If it is, odds are the problem is with our signer, not the relay
-  if (!okStatuses.includes(connection.auth.status) && connection.auth.message) {
-    return `Failed to authenticate (${connection.auth.message})`
+  if (!okStatuses.includes(socket.auth.status) && socket.auth.details) {
+    return `Failed to authenticate (${socket.auth.details})`
   }
 }
 
@@ -384,7 +381,7 @@ export const sendWrapped = async ({
     await Promise.all(
       uniq(pubkeys).map(async recipient => ({
         event: await nip59.wrap(recipient, stamp(template)),
-        relays: ctx.app.router.PubkeyInbox(recipient).getUrls(),
+        relays: Router.get().PubkeyInbox(recipient).getUrls(),
         delay,
       })),
     ),

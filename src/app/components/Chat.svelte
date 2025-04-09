@@ -2,14 +2,15 @@
   import type {Snippet} from "svelte"
   import {onMount} from "svelte"
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
+  import {load} from "@welshman/net"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
     pubkey,
+    Router,
     tagPubkey,
     formatTimestampAsDate,
     inboxRelaySelectionsByPubkey,
-    load,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -106,7 +107,10 @@
 
   onMount(() => {
     // Don't use loadInboxRelaySelection because we want to force reload
-    load({filters: [{kinds: [INBOX_RELAYS], authors: others}]})
+    load({
+      relays: Router.get().FromPubkeys(others).getUrls(),
+      filters: [{kinds: [INBOX_RELAYS], authors: others}],
+    })
 
     const observer = new ResizeObserver(() => {
       dynamicPadding!.style.minHeight = `${chatCompose!.offsetHeight}px`

@@ -28,15 +28,14 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, Filter, List} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
-import type {Subscription, SubscribeRequestWithHandlers} from "@welshman/net"
+import {load, request, RequestEvent} from "@welshman/net"
+import type {MultiRequest} from "@welshman/net"
 import type {AppSyncOpts, Thunk} from "@welshman/app"
 import {
-  subscribe,
-  load,
   repository,
   pull,
   hasNegentropy,
-  thunkWorker,
+  thunkQueue,
   createFeedController,
   loadRelay,
   loadMutes,
@@ -152,13 +151,11 @@ export const makeFeed = ({
     onExhausted,
   })
 
-  const sub = subscribe({
-    relays,
-    filters: subscriptionFilters,
-    onEvent: (e: TrustedEvent) => {
-      if (matchFilters(feedFilters, e)) insertEvent(e)
-      if (e.kind === DELETE) handleDelete(e)
-    },
+  const req = request({relays, filters: subscriptionFilters})
+
+  req.on(RequestEvent.Event, (e: TrustedEvent) => {
+    if (matchFilters(feedFilters, e)) insertEvent(e)
+    if (e.kind === DELETE) handleDelete(e)
   })
 
   const scroller = createScroller({
@@ -176,14 +173,14 @@ export const makeFeed = ({
     },
   })
 
-  thunkWorker.addGlobalHandler(onThunk)
+  const unsubscribe = thunkQueue.subscribe(onThunk)
 
   return {
     events,
     cleanup: () => {
-      sub.close()
+      req.close()
+      unsubscribe()
       scroller.stop()
-      thunkWorker.removeGlobalHandler(onThunk)
     },
   }
 }
@@ -245,22 +242,22 @@ export const makeCalendarFeed = ({
     }
   }
 
-  const sub = subscribe({
-    relays,
-    filters: subscriptionFilters,
-    onEvent: (e: TrustedEvent) => {
-      if (matchFilters(feedFilters, e)) insertEvent(e)
-    },
+  const req = request({relays, filters: subscriptionFilters})
+
+  req.on(RequestEvent.Event, (e: TrustedEvent) => {
+    if (matchFilters(feedFilters, e)) insertEvent(e)
   })
 
   const loadTimeframe = (since: number, until: number) => {
     const hashes = daysBetween(since, until).map(String)
 
-    load({
+    const req = request({
       relays,
+      autoClose: true,
       filters: [{kinds: [EVENT_TIME], "#D": hashes}],
-      onEvent: insertEvent,
     })
+
+    req.on(RequestEvent.Event, insertEvent)
   }
 
   const maybeExhausted = () => {
@@ -302,15 +299,15 @@ export const makeCalendarFeed = ({
     },
   })
 
-  thunkWorker.addGlobalHandler(onThunk)
+  const unsubscribe = thunkQueue.subscribe(onThunk)
 
   return {
     events,
     cleanup: () => {
-      thunkWorker.removeGlobalHandler(onThunk)
       backwardScroller.stop()
       forwardScroller.stop()
-      sub.close()
+      unsubscribe()
+      req.close()
     },
   }
 }
@@ -332,7 +329,7 @@ export const loadAlertStatuses = (pubkey: string) =>
 // Application requests
 
 export const listenForNotifications = () => {
-  const subs: Subscription[] = []
+  const reqs: MultiRequest[] = []
 
   for (const [url, allRooms] of userRoomsByUrl.get()) {
     // Limit how many rooms we load at a time, since we have to send a separate filter
@@ -350,8 +347,8 @@ export const listenForNotifications = () => {
       ],
     })
 
-    subs.push(
-      subscribe({
+    reqs.push(
+      request({
         relays: [url],
         filters: [
           {kinds: [THREAD, EVENT_TIME], since: now()},
@@ -363,25 +360,22 @@ export const listenForNotifications = () => {
   }
 
   return () => {
-    for (const sub of subs) {
-      sub.close()
+    for (const req of reqs) {
+      req.close()
     }
   }
 }
 
-export const loadUserData = (
-  pubkey: string,
-  request: Partial<SubscribeRequestWithHandlers> = {},
-) => {
+export const loadUserData = (pubkey: string, relays: string[] = []) => {
   const promise = Promise.race([
     sleep(3000),
     Promise.all([
-      loadInboxRelaySelections(pubkey, request),
-      loadMembership(pubkey, request),
-      loadSettings(pubkey, request),
-      loadProfile(pubkey, request),
-      loadFollows(pubkey, request),
-      loadMutes(pubkey, request),
+      loadInboxRelaySelections(pubkey, relays),
+      loadMembership(pubkey, relays),
+      loadSettings(pubkey, relays),
+      loadProfile(pubkey, relays),
+      loadFollows(pubkey, relays),
+      loadMutes(pubkey, relays),
       loadAlertStatuses(pubkey),
       loadAlerts(pubkey),
     ]),
@@ -396,10 +390,10 @@ export const loadUserData = (
       await sleep(1000)
 
       for (const pubkey of pubkeys) {
-        loadMembership(pubkey, {relays})
-        loadProfile(pubkey, {relays})
-        loadFollows(pubkey, {relays})
-        loadMutes(pubkey, {relays})
+        loadMembership(pubkey, relays)
+        loadProfile(pubkey, relays)
+        loadFollows(pubkey, relays)
+        loadMutes(pubkey, relays)
       }
     }
   })
@@ -408,4 +402,8 @@ export const loadUserData = (
 }
 
 export const discoverRelays = (lists: List[]) =>
-  Promise.all(uniq(lists.flatMap(getRelayUrls)).filter(isShareableRelayUrl).map(loadRelay))
+  Promise.all(
+    uniq(lists.flatMap(getRelayUrls))
+      .filter(isShareableRelayUrl)
+      .map(url => loadRelay(url)),
+  )

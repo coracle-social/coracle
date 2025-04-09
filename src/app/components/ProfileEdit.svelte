@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
   import type {Profile} from "@welshman/util"
   import {
     createEvent,
@@ -8,7 +7,7 @@
     createProfile,
     isPublishedProfile,
   } from "@welshman/util"
-  import {pubkey, profilesByPubkey, publishThunk} from "@welshman/app"
+  import {Router, pubkey, profilesByPubkey, publishThunk} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import ProfileEditForm from "@app/components/ProfileEditForm.svelte"
   import {clearModals} from "@app/modal"
@@ -19,7 +18,7 @@
   const back = () => history.back()
 
   const onsubmit = (profile: Profile) => {
-    const relays = ctx.app.router.FromUser().getUrls()
+    const relays = Router.get().FromUser().getUrls()
     const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
     const event = createEvent(template.kind, template)
 

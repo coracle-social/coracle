@@ -1,6 +1,7 @@
 <script lang="ts">
-  import {ctx, tryCatch} from "@welshman/lib"
+  import {tryCatch} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
+  import {Pool, AuthStatus} from "@welshman/net"
   import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -25,9 +26,9 @@
       return pushToast({theme: "error", message: error})
     }
 
-    const connection = ctx.net.pool.get(url)
+    const socket = Pool.getSingleton().get(url)
 
-    if (connection.stats.lastAuth === 0) {
+    if (socket.auth.status === AuthStatus.None) {
       pushModal(SpaceJoinConfirm, {url}, {replaceState: true})
     } else {
       await confirmSpaceJoin(url)

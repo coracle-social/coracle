@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
+  import * as nip19 from "nostr-tools/nip19"
   import {goto} from "$app/navigation"
-  import {ctx, nthEq} from "@welshman/lib"
-  import {tracker, repository} from "@welshman/app"
+  import {nthEq} from "@welshman/lib"
+  import {Router, tracker, repository} from "@welshman/app"
   import {Address, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
   import {scrollToEvent} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
@@ -16,10 +16,7 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const mergedRelays = [
-    ...relays,
-    ...ctx.app.router.Quote(event, idOrAddress, relayHints).getUrls(),
-  ]
+  const mergedRelays = [...relays, ...Router.get().Quote(event, idOrAddress, relayHints).getUrls()]
   const quote = deriveEvent(idOrAddress, mergedRelays)
   const entity = id
     ? nip19.neventEncode({id, relays: mergedRelays})

@@ -3,7 +3,7 @@
   import {page} from "$app/stores"
   import {ago, MONTH} from "@welshman/lib"
   import {GROUPS, THREAD, COMMENT, MESSAGE, DELETE} from "@welshman/util"
-  import {subscribe, load} from "@welshman/app"
+  import {request, load} from "@welshman/net"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -56,7 +56,7 @@
 
     // Load all groups for this space to populate navigation. It would be nice to sync, but relay29
     // is too picky about how requests are built.
-    load({relays, filters: [{kinds: [GROUPS]}], delay: 0})
+    load({relays, filters: [{kinds: [GROUPS]}]})
 
     // Load threads, comments, and recent messages for user rooms to help with a quick page transition
     pullConservatively({
@@ -69,10 +69,10 @@
     })
 
     // Listen for deletes that would apply to messages we already have, and new groups
-    const sub = subscribe({relays, filters: [{kinds: [DELETE, GROUPS], since}]})
+    const req = request({relays, filters: [{kinds: [DELETE, GROUPS], since}]})
 
     return () => {
-      sub.close()
+      req.close()
     }
   })
 </script>

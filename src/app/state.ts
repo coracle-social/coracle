@@ -1,9 +1,7 @@
 import twColors from "tailwindcss/colors"
 import {get, derived} from "svelte/store"
-import {nip19} from "nostr-tools"
+import * as nip19 from "nostr-tools/nip19"
 import {
-  ctx,
-  setContext,
   remove,
   sortBy,
   sort,
@@ -17,7 +15,9 @@ import {
   memoize,
   addToMapKey,
   identity,
+  always,
 } from "@welshman/lib"
+import {load} from "@welshman/net"
 import {
   getIdFilters,
   WRAP,
@@ -46,12 +46,8 @@ import {Nip59, decrypt} from "@welshman/signer"
 import {
   pubkey,
   repository,
-  load,
   collection,
   profilesByPubkey,
-  getDefaultAppContext,
-  getDefaultNetContext,
-  makeRouter,
   tracker,
   makeTrackerStore,
   makeRepositoryStore,
@@ -64,9 +60,12 @@ import {
   thunks,
   walkThunks,
   signer,
+  Router,
+  loadWithAsapMetaRelayUrls,
+  routerContext,
+  appContext,
 } from "@welshman/app"
 import type {Thunk, Relay} from "@welshman/app"
-import type {SubscribeRequestWithHandlers} from "@welshman/net"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
 
 export const fromCsv = (s: string) => (s || "").split(",").filter(identity)
@@ -162,10 +161,8 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
 
 export const entityLink = (entity: string) => `https://coracle.social/${entity}`
 
-export const pubkeyLink = (
-  pubkey: string,
-  relays = ctx.app.router.FromPubkeys([pubkey]).getUrls(),
-) => entityLink(nip19.nprofileEncode({pubkey, relays}))
+export const pubkeyLink = (pubkey: string, relays = Router.get().FromPubkeys([pubkey]).getUrls()) =>
+  entityLink(nip19.nprofileEncode({pubkey, relays}))
 
 export const tagRoom = (room: string, url: string) => [ROOM, room]
 
@@ -283,15 +280,9 @@ export const deriveEventsForUrl = (url: string, filters: Filter[]) =>
 
 // Context
 
-setContext({
-  net: getDefaultNetContext(),
-  app: getDefaultAppContext({
-    dufflepudUrl: DUFFLEPUD_URL,
-    indexerRelays: INDEXER_RELAYS,
-    requestTimeout: 5000,
-    router: makeRouter(),
-  }),
-})
+appContext.dufflepudUrl = DUFFLEPUD_URL
+
+routerContext.getIndexerRelays = always(INDEXER_RELAYS)
 
 // Settings
 
@@ -341,8 +332,8 @@ export const {
   name: "settings",
   store: settings,
   getKey: settings => settings.event.pubkey,
-  load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
-    load({...request, filters: [{kinds: [SETTINGS], authors: [pubkey]}]}),
+  load: (pubkey: string, relays: string[]) =>
+    loadWithAsapMetaRelayUrls(pubkey, relays, [{kinds: [SETTINGS], authors: [pubkey]}]),
 })
 
 // Alerts
@@ -419,8 +410,8 @@ export const {
   name: "memberships",
   store: memberships,
   getKey: list => list.event.pubkey,
-  load: (pubkey: string, request: Partial<SubscribeRequestWithHandlers> = {}) =>
-    load({...request, filters: [{kinds: [GROUPS], authors: [pubkey]}]}),
+  load: (pubkey: string, relays: string[]) =>
+    loadWithAsapMetaRelayUrls(pubkey, relays, [{kinds: [GROUPS], authors: [pubkey]}]),
 })
 
 // Chats

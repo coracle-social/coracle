@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {sleep, identity, nthEq} from "@welshman/lib"
-  import {load} from "@welshman/app"
+  import {load} from "@welshman/net"
   import {displayRelayUrl, AUTH_INVITE} from "@welshman/util"
   import {slide} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"

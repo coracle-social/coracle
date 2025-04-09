@@ -1,11 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
   import type {Snippet} from "svelte"
-  import {nip19} from "nostr-tools"
-  import {ctx} from "@welshman/lib"
+  import * as nip19 from "nostr-tools/nip19"
   import {getListTags, getPubkeyTagValues} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestamp, userMutes} from "@welshman/app"
+  import {formatTimestamp, Router, userMutes} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -27,7 +26,7 @@
     class?: string
   } = $props()
 
-  const relays = ctx.app.router.Event(event).getUrls()
+  const relays = Router.get().Event(event).getUrls()
   const nevent = nip19.neventEncode({id: event.id, relays})
 
   const ignoreMute = () => {

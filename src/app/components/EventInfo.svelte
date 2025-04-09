@@ -1,6 +1,6 @@
 <script lang="ts">
-  import {nip19} from "nostr-tools"
-  import {ctx} from "@welshman/lib"
+  import * as nip19 from "nostr-tools/nip19"
+  import {Router} from "@welshman/app"
   import type {TrustedEvent} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
@@ -15,7 +15,7 @@
 
   const {url, event}: Props = $props()
 
-  const relays = url ? [url] : ctx.app.router.Event(event).getUrls()
+  const relays = url ? [url] : Router.get().Event(event).getUrls()
   const nevent1 = nip19.neventEncode({...event, relays})
   const npub1 = nip19.npubEncode(event.pubkey)
   const json = JSON.stringify(event, null, 2)

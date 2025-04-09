@@ -1,11 +1,9 @@
 import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
-import {Editor} from "@tiptap/core"
-import {ctx} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
-import {signer, profileSearch} from "@welshman/app"
-import {MentionSuggestion, WelshmanExtension} from "@welshman/editor"
+import {Router, signer, profileSearch} from "@welshman/app"
+import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {getSetting, userSettingValues} from "@app/state"
 import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
@@ -84,7 +82,7 @@ export const makeEditor = ({
                   MentionSuggestion({
                     editor: (this as any).editor,
                     search: (term: string) => get(profileSearch).searchValues(term),
-                    getRelays: (pubkey: string) => ctx.app.router.FromPubkeys([pubkey]).getUrls(),
+                    getRelays: (pubkey: string) => Router.get().FromPubkeys([pubkey]).getUrls(),
                     createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 

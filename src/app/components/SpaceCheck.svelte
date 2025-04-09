@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {ctx, sleep} from "@welshman/lib"
+  import {sleep} from "@welshman/lib"
+  import {Pool, AuthStatus} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -17,7 +18,7 @@
   const back = () => history.back()
 
   const next = () => {
-    if (!error && ctx.net.pool.get(url).stats.lastAuth === 0) {
+    if (!error && Pool.getSingleton().get(url).auth.status === AuthStatus.None) {
       pushModal(SpaceVisitConfirm, {url}, {replaceState: true})
     } else {
       confirmSpaceVisit(url)

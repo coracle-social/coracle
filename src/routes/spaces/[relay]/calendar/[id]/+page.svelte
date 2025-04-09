@@ -3,7 +3,8 @@
   import {page} from "$app/stores"
   import {sortBy, sleep} from "@welshman/lib"
   import {COMMENT, getTagValue} from "@welshman/util"
-  import {repository, subscribe} from "@welshman/app"
+  import {request} from "@welshman/net"
+  import {repository} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import Icon from "@lib/components/Icon.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
@@ -45,10 +46,10 @@
   let showReply = $state(false)
 
   onMount(() => {
-    const sub = subscribe({relays: [url], filters})
+    const req = request({relays: [url], filters})
 
     return () => {
-      sub.close()
+      req.close()
       setChecked($page.url.pathname)
     }
   })

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {ctx} from "@welshman/lib"
   import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
-  import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
+  import {pubkey, Router, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
@@ -22,12 +21,12 @@
 
     publishThunk({
       event: createEvent(SETTINGS, {content}),
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: Router.get().FromUser().getUrls(),
     })
 
     publishThunk({
       event: createEvent(MUTES, {tags: mutedPubkeys.map(tagPubkey)}),
-      relays: ctx.app.router.FromUser().getUrls(),
+      relays: Router.get().FromUser().getUrls(),
     })
 
     pushToast({message: "Your settings have been saved!"})
