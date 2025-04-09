@@ -5,17 +5,17 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@welshman/lib': link:../welshman2/packages/lib
-  '@welshman/util': link:../welshman2/packages/util
-  '@welshman/app': link:../welshman2/packages/app
-  '@welshman/content': link:../welshman2/packages/content
-  '@welshman/dvm': link:../welshman2/packages/dvm
-  '@welshman/feeds': link:../welshman2/packages/feeds
-  '@welshman/net': link:../welshman2/packages/net
-  '@welshman/relay': link:../welshman2/packages/relay
-  '@welshman/signer': link:../welshman2/packages/signer
-  '@welshman/store': link:../welshman2/packages/store
-  '@welshman/editor': link:../welshman2/packages/editor
+  '@welshman/lib': link:../welshman/packages/lib
+  '@welshman/util': link:../welshman/packages/util
+  '@welshman/app': link:../welshman/packages/app
+  '@welshman/content': link:../welshman/packages/content
+  '@welshman/dvm': link:../welshman/packages/dvm
+  '@welshman/feeds': link:../welshman/packages/feeds
+  '@welshman/net': link:../welshman/packages/net
+  '@welshman/relay': link:../welshman/packages/relay
+  '@welshman/signer': link:../welshman/packages/signer
+  '@welshman/store': link:../welshman/packages/store
+  '@welshman/editor': link:../welshman/packages/editor
 
 importers:
 
@@ -76,38 +76,38 @@ importers:
         specifier: ^0.2.6
         version: 0.2.6
       '@welshman/app':
-        specifier: link:../welshman2/packages/app
-        version: link:../welshman2/packages/app
+        specifier: link:../welshman/packages/app
+        version: link:../welshman/packages/app
       '@welshman/content':
-        specifier: link:../welshman2/packages/content
-        version: link:../welshman2/packages/content
+        specifier: link:../welshman/packages/content
+        version: link:../welshman/packages/content
       '@welshman/dvm':
-        specifier: link:../welshman2/packages/dvm
-        version: link:../welshman2/packages/dvm
+        specifier: link:../welshman/packages/dvm
+        version: link:../welshman/packages/dvm
       '@welshman/editor':
-        specifier: link:../welshman2/packages/editor
-        version: link:../welshman2/packages/editor
+        specifier: link:../welshman/packages/editor
+        version: link:../welshman/packages/editor
       '@welshman/feeds':
-        specifier: link:../welshman2/packages/feeds
-        version: link:../welshman2/packages/feeds
+        specifier: link:../welshman/packages/feeds
+        version: link:../welshman/packages/feeds
       '@welshman/lib':
-        specifier: link:../welshman2/packages/lib
-        version: link:../welshman2/packages/lib
+        specifier: link:../welshman/packages/lib
+        version: link:../welshman/packages/lib
       '@welshman/net':
-        specifier: link:../welshman2/packages/net
-        version: link:../welshman2/packages/net
+        specifier: link:../welshman/packages/net
+        version: link:../welshman/packages/net
       '@welshman/relay':
-        specifier: link:../welshman2/packages/relay
-        version: link:../welshman2/packages/relay
+        specifier: link:../welshman/packages/relay
+        version: link:../welshman/packages/relay
       '@welshman/signer':
-        specifier: link:../welshman2/packages/signer
-        version: link:../welshman2/packages/signer
+        specifier: link:../welshman/packages/signer
+        version: link:../welshman/packages/signer
       '@welshman/store':
-        specifier: link:../welshman2/packages/store
-        version: link:../welshman2/packages/store
+        specifier: link:../welshman/packages/store
+        version: link:../welshman/packages/store
       '@welshman/util':
-        specifier: link:../welshman2/packages/util
-        version: link:../welshman2/packages/util
+        specifier: link:../welshman/packages/util
+        version: link:../welshman/packages/util
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.3)

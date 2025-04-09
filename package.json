@@ -103,17 +103,17 @@
   },
   "pnpm": {
     "overrides": {
-      "@welshman/lib": "link:../welshman2/packages/lib",
-      "@welshman/util": "link:../welshman2/packages/util",
-      "@welshman/app": "link:../welshman2/packages/app",
-      "@welshman/content": "link:../welshman2/packages/content",
-      "@welshman/dvm": "link:../welshman2/packages/dvm",
-      "@welshman/feeds": "link:../welshman2/packages/feeds",
-      "@welshman/net": "link:../welshman2/packages/net",
-      "@welshman/relay": "link:../welshman2/packages/relay",
-      "@welshman/signer": "link:../welshman2/packages/signer",
-      "@welshman/store": "link:../welshman2/packages/store",
-      "@welshman/editor": "link:../welshman2/packages/editor"
+      "@welshman/lib": "link:../welshman/packages/lib",
+      "@welshman/util": "link:../welshman/packages/util",
+      "@welshman/app": "link:../welshman/packages/app",
+      "@welshman/content": "link:../welshman/packages/content",
+      "@welshman/dvm": "link:../welshman/packages/dvm",
+      "@welshman/feeds": "link:../welshman/packages/feeds",
+      "@welshman/net": "link:../welshman/packages/net",
+      "@welshman/relay": "link:../welshman/packages/relay",
+      "@welshman/signer": "link:../welshman/packages/signer",
+      "@welshman/store": "link:../welshman/packages/store",
+      "@welshman/editor": "link:../welshman/packages/editor"
     }
   }
 }
