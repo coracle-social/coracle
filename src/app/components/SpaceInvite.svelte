@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {sleep, identity, nthEq} from "@welshman/lib"
-  import {load} from "@welshman/net"
+  import {request} from "@welshman/net"
   import {displayRelayUrl, AUTH_INVITE} from "@welshman/util"
   import {slide} from "@lib/transition"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -29,7 +29,11 @@
 
   onMount(async () => {
     const [[event]] = await Promise.all([
-      load({filters: [{kinds: [AUTH_INVITE]}], relays: [url]}),
+      request({
+        relays: [url],
+        autoClose: true,
+        filters: [{kinds: [AUTH_INVITE]}],
+      }),
       sleep(2000),
     ])
 

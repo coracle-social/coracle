@@ -3,7 +3,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import type {TrustedEvent} from "@welshman/util"
   import {Address, getIdFilters, getTagValue} from "@welshman/util"
-  import {request} from "@welshman/net"
+  import {load} from "@welshman/net"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {scrollToEvent} from "@lib/html"
@@ -21,10 +21,9 @@
 
     let found = false
 
-    request({
-      autoClose: true,
-      filters: getIdFilters([type === "nevent" ? data.id : Address.fromNaddr(bech32).toString()]),
+    load({
       relays: data.relays,
+      filters: getIdFilters([type === "nevent" ? data.id : Address.fromNaddr(bech32).toString()]),
       onEvent: (event: TrustedEvent) => {
         found = true
 

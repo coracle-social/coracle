@@ -348,9 +348,7 @@ export const listenForNotifications = () => {
       relays: [url],
       filters: [
         {kinds: [THREAD], limit: 1},
-        {kinds: [EVENT_TIME], limit: 1},
         {kinds: [COMMENT], "#K": [String(THREAD)], limit: 1},
-        {kinds: [COMMENT], "#K": [String(EVENT_TIME)], limit: 1},
         ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], limit: 1})),
       ],
     })
@@ -359,8 +357,8 @@ export const listenForNotifications = () => {
       signal: controller.signal,
       relays: [url],
       filters: [
-        {kinds: [THREAD, EVENT_TIME], since: now()},
-        {kinds: [COMMENT], "#K": [String(THREAD), String(EVENT_TIME)], since: now()},
+        {kinds: [THREAD], since: now()},
+        {kinds: [COMMENT], "#K": [String(THREAD)], since: now()},
         ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
       ],
     })

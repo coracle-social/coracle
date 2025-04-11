@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import type {Snippet} from "svelte"
   import {groupBy, uniq, uniqBy, batch} from "@welshman/lib"
-  import {REACTION, getTag, REPORT, DELETE} from "@welshman/util"
+  import {REACTION, getReplyFilters, getTag, REPORT, DELETE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {load} from "@welshman/net"
@@ -58,11 +58,11 @@
       load({
         relays: [url],
         signal: controller.signal,
-        filters: [{kinds: [REACTION, REPORT, DELETE], "#e": [event.id]}],
+        filters: getReplyFilters([event], {kinds: [REACTION, REPORT, DELETE]}),
         onEvent: batch(300, (events: TrustedEvent[]) => {
           load({
             relays: [url],
-            filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
+            filters: getReplyFilters(events, {kinds: [DELETE]}),
           })
         }),
       })

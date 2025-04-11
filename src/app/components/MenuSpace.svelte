@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {displayRelayUrl, GROUP_META} from "@welshman/util"
+  import {displayRelayUrl} from "@welshman/util"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -22,7 +22,6 @@
     deriveOtherRooms,
   } from "@app/state"
   import {notifications} from "@app/notifications"
-  import {pullConservatively} from "@app/requests"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
 
@@ -66,7 +65,6 @@
 
   onMount(() => {
     replaceState = Boolean(element?.closest(".drawer"))
-    pullConservatively({relays: [url], filters: [{kinds: [GROUP_META]}]})
   })
 </script>
 

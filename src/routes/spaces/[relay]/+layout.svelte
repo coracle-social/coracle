@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ago, MONTH} from "@welshman/lib"
-  import {GROUPS, THREAD, COMMENT, MESSAGE} from "@welshman/util"
+  import {ago, WEEK} from "@welshman/lib"
+  import {GROUP_META, EVENT_TIME, GROUPS, THREAD, COMMENT, MESSAGE} from "@welshman/util"
   import {request} from "@welshman/net"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
@@ -52,21 +52,22 @@
     checkConnection()
 
     const relays = [url]
-    const since = ago(MONTH)
+    const since = ago(WEEK)
+    const controller = new AbortController()
 
-    // Load groups, threads, comments, and recent messages for user rooms to help with a quick page transition
+    // Load group meta, threads, calendar events, comments, and recent messages
+    // for user rooms to help with a quick page transition
     pullConservatively({
       relays,
       filters: [
-        {kinds: [THREAD], since},
-        {kinds: [COMMENT], "#K": [String(THREAD)], since},
-        ...rooms.map(r => ({kinds: [MESSAGE], "#h": [r], since})),
+        {kinds: [GROUP_META]},
+        {kinds: [THREAD, EVENT_TIME], since},
+        {kinds: [COMMENT], "#K": [String(THREAD), String(EVENT_TIME)], since},
+        ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since})),
       ],
     })
 
     // Completely refresh our groups list and listen for new ones
-    const controller = new AbortController()
-
     request({relays, filters: [{kinds: [GROUPS]}], signal: controller.signal})
 
     return () => {
