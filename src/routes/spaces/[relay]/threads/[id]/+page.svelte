@@ -43,10 +43,12 @@
   let showReply = $state(false)
 
   onMount(() => {
-    const req = request({relays: [url], filters})
+    const controller = new AbortController()
+
+    request({relays: [url], filters, signal: controller.signal})
 
     return () => {
-      req.close()
+      controller.abort()
       setChecked($page.url.pathname)
     }
   })

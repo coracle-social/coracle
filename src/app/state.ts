@@ -332,7 +332,7 @@ export const {
   name: "settings",
   store: settings,
   getKey: settings => settings.event.pubkey,
-  load: makeOutboxLoader([SETTINGS]),
+  load: makeOutboxLoader(SETTINGS),
 })
 
 // Alerts
@@ -409,7 +409,7 @@ export const {
   name: "memberships",
   store: memberships,
   getKey: list => list.event.pubkey,
-  load: makeOutboxLoader([GROUPS]),
+  load: makeOutboxLoader(GROUPS),
 })
 
 // Chats

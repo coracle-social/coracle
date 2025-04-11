@@ -5,8 +5,7 @@
   import {REACTION, getTag, REPORT, DELETE} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
-  import type {MultiRequest} from "@welshman/net"
-  import {load, request, RequestEvent} from "@welshman/net"
+  import {load} from "@welshman/net"
   import {pubkey, repository, displayProfileByPubkey} from "@welshman/app"
   import {displayList} from "@lib/util"
   import {isMobile, preventDefault, stopPropagation} from "@lib/html"
@@ -53,27 +52,24 @@
   )
 
   onMount(() => {
-    let req: MultiRequest
+    const controller = new AbortController()
 
     if (url) {
-      req = request({
+      load({
         relays: [url],
+        signal: controller.signal,
         filters: [{kinds: [REACTION, REPORT, DELETE], "#e": [event.id]}],
-      })
-
-      req.on(
-        RequestEvent.Event,
-        batch(300, (events: TrustedEvent[]) => {
+        onEvent: batch(300, (events: TrustedEvent[]) => {
           load({
             relays: [url],
             filters: [{kinds: [DELETE], "#e": events.map(e => e.id)}],
           })
         }),
-      )
+      })
     }
 
     return () => {
-      req?.close()
+      controller.abort()
     }
   })
 </script>

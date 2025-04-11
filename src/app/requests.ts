@@ -28,8 +28,7 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, Filter, List} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
-import {load, request, RequestEvent} from "@welshman/net"
-import type {MultiRequest} from "@welshman/net"
+import {load, request} from "@welshman/net"
 import type {AppSyncOpts, Thunk} from "@welshman/app"
 import {
   repository,
@@ -101,6 +100,7 @@ export const makeFeed = ({
   const seen = new Set<string>()
   const buffer = writable<TrustedEvent[]>([])
   const events = writable(initialEvents)
+  const controller = new AbortController()
 
   for (const event of initialEvents) {
     if (!seen.has(event.id)) {
@@ -151,11 +151,14 @@ export const makeFeed = ({
     onExhausted,
   })
 
-  const req = request({relays, filters: subscriptionFilters})
-
-  req.on(RequestEvent.Event, (e: TrustedEvent) => {
-    if (matchFilters(feedFilters, e)) insertEvent(e)
-    if (e.kind === DELETE) handleDelete(e)
+  request({
+    relays,
+    signal: controller.signal,
+    filters: subscriptionFilters,
+    onEvent: (e: TrustedEvent) => {
+      if (matchFilters(feedFilters, e)) insertEvent(e)
+      if (e.kind === DELETE) handleDelete(e)
+    },
   })
 
   const scroller = createScroller({
@@ -178,9 +181,9 @@ export const makeFeed = ({
   return {
     events,
     cleanup: () => {
-      req.close()
       unsubscribe()
       scroller.stop()
+      controller.abort()
     },
   }
 }
@@ -201,6 +204,7 @@ export const makeCalendarFeed = ({
   initialEvents?: TrustedEvent[]
 }) => {
   const interval = int(5, DAY)
+  const controller = new AbortController()
 
   let exhaustedScrollers = 0
   let backwardWindow = [now() - interval, now()]
@@ -242,22 +246,25 @@ export const makeCalendarFeed = ({
     }
   }
 
-  const req = request({relays, filters: subscriptionFilters})
-
-  req.on(RequestEvent.Event, (e: TrustedEvent) => {
-    if (matchFilters(feedFilters, e)) insertEvent(e)
+  request({
+    relays,
+    signal: controller.signal,
+    filters: subscriptionFilters,
+    onEvent: (e: TrustedEvent) => {
+      if (matchFilters(feedFilters, e)) insertEvent(e)
+    },
   })
 
   const loadTimeframe = (since: number, until: number) => {
     const hashes = daysBetween(since, until).map(String)
 
-    const req = request({
+    request({
       relays,
+      signal: controller.signal,
       autoClose: true,
       filters: [{kinds: [EVENT_TIME], "#D": hashes}],
+      onEvent: insertEvent,
     })
-
-    req.on(RequestEvent.Event, insertEvent)
   }
 
   const maybeExhausted = () => {
@@ -306,8 +313,8 @@ export const makeCalendarFeed = ({
     cleanup: () => {
       backwardScroller.stop()
       forwardScroller.stop()
+      controller.abort()
       unsubscribe()
-      req.close()
     },
   }
 }
@@ -329,7 +336,7 @@ export const loadAlertStatuses = (pubkey: string) =>
 // Application requests
 
 export const listenForNotifications = () => {
-  const reqs: MultiRequest[] = []
+  const controller = new AbortController()
 
   for (const [url, allRooms] of userRoomsByUrl.get()) {
     // Limit how many rooms we load at a time, since we have to send a separate filter
@@ -337,6 +344,7 @@ export const listenForNotifications = () => {
     const rooms = shuffle(Array.from(allRooms)).slice(0, 30)
 
     load({
+      signal: controller.signal,
       relays: [url],
       filters: [
         {kinds: [THREAD], limit: 1},
@@ -347,23 +355,18 @@ export const listenForNotifications = () => {
       ],
     })
 
-    reqs.push(
-      request({
-        relays: [url],
-        filters: [
-          {kinds: [THREAD, EVENT_TIME], since: now()},
-          {kinds: [COMMENT], "#K": [String(THREAD), String(EVENT_TIME)], since: now()},
-          ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
-        ],
-      }),
-    )
+    request({
+      signal: controller.signal,
+      relays: [url],
+      filters: [
+        {kinds: [THREAD, EVENT_TIME], since: now()},
+        {kinds: [COMMENT], "#K": [String(THREAD), String(EVENT_TIME)], since: now()},
+        ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since: now()})),
+      ],
+    })
   }
 
-  return () => {
-    for (const req of reqs) {
-      req.close()
-    }
-  }
+  return () => controller.abort()
 }
 
 export const loadUserData = (pubkey: string, relays: string[] = []) => {

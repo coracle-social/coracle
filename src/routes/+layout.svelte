@@ -160,14 +160,16 @@
       )
 
       // Listen for chats, populate chat-based notifications
-      let chatsReq: any
+      let controller: AbortController
 
       derived([pubkey, canDecrypt, userInboxRelaySelections], identity).subscribe(
         ([$pubkey, $canDecrypt, $userInboxRelaySelections]) => {
-          chatsReq?.close()
+          controller?.abort()
+          controller = new AbortController()
 
           if ($pubkey && $canDecrypt) {
-            chatsReq = request({
+            request({
+              signal: controller.signal,
               filters: [
                 {kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)},
                 {kinds: [WRAP], "#p": [$pubkey], limit: 100},

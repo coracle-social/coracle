@@ -113,7 +113,9 @@
     })
 
     const observer = new ResizeObserver(() => {
-      dynamicPadding!.style.minHeight = `${chatCompose!.offsetHeight}px`
+      if (dynamicPadding && chatCompose) {
+        dynamicPadding.style.minHeight = `${chatCompose.offsetHeight}px`
+      }
     })
 
     observer.observe(chatCompose!)

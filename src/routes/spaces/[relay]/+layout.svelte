@@ -65,10 +65,12 @@
     })
 
     // Completely refresh our groups list and listen for new ones
-    const req = request({relays, filters: [{kinds: [GROUPS]}]})
+    const controller = new AbortController()
+
+    request({relays, filters: [{kinds: [GROUPS]}], signal: controller.signal})
 
     return () => {
-      req.close()
+      controller.abort()
     }
   })
 </script>

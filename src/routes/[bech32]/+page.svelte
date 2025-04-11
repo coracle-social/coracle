@@ -3,7 +3,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import type {TrustedEvent} from "@welshman/util"
   import {Address, getIdFilters, getTagValue} from "@welshman/util"
-  import {request, RequestEvent} from "@welshman/net"
+  import {request} from "@welshman/net"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {scrollToEvent} from "@lib/html"
@@ -21,29 +21,27 @@
 
     let found = false
 
-    const req = request({
+    request({
       autoClose: true,
       filters: getIdFilters([type === "nevent" ? data.id : Address.fromNaddr(bech32).toString()]),
       relays: data.relays,
-    })
+      onEvent: (event: TrustedEvent) => {
+        found = true
 
-    req.on(RequestEvent.Event, (event: TrustedEvent) => {
-      found = true
-
-      if (event.kind === 9) {
-        goto(makeRoomPath(data.relays[0], getTagValue("h", event.tags)!), {replaceState: true})
-        scrollToEvent(event.id)
-      } else if (event.kind === 11) {
-        goto(makeThreadPath(data.relays[0], event.id), {replaceState: true})
-      } else {
-        goto("/", {replaceState: true})
-      }
-    })
-
-    req.on(RequestEvent.Close, () => {
-      if (!found) {
-        goto("/", {replaceState: true})
-      }
+        if (event.kind === 9) {
+          goto(makeRoomPath(data.relays[0], getTagValue("h", event.tags)!), {replaceState: true})
+          scrollToEvent(event.id)
+        } else if (event.kind === 11) {
+          goto(makeThreadPath(data.relays[0], event.id), {replaceState: true})
+        } else {
+          goto("/", {replaceState: true})
+        }
+      },
+      onClose: () => {
+        if (!found) {
+          goto("/", {replaceState: true})
+        }
+      },
     })
   }
 
