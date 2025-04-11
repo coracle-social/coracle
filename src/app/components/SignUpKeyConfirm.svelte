@@ -11,11 +11,10 @@
 
   type Props = {
     secret: string
-    pubkey: string
     ncryptsec: string
   }
 
-  const {secret, pubkey, ncryptsec}: Props = $props()
+  const {secret, ncryptsec}: Props = $props()
 
   const back = () => history.back()
 
@@ -25,7 +24,7 @@
   }
 
   const next = () => {
-    pushModal(SignUpProfile, {secret, pubkey})
+    pushModal(SignUpProfile, {secret})
   }
 </script>
 

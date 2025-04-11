@@ -32,7 +32,7 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
 import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
-import {Nip59, makeSecret, stamp, Nip46Broker} from "@welshman/signer"
+import {Nip59, stamp} from "@welshman/signer"
 import {
   pubkey,
   signer,
@@ -49,7 +49,6 @@ import {
   userInboxRelaySelections,
   nip44EncryptToSelf,
   loadRelay,
-  addSession,
   clearStorage,
   dropSession,
   tagEventForComment,
@@ -62,13 +61,11 @@ import {
   PROTECTED,
   userMembership,
   INDEXER_RELAYS,
-  NIP46_PERMS,
   ALERT,
   NOTIFIER_PUBKEY,
   NOTIFIER_RELAY,
   userRoomsByUrl,
 } from "@app/state"
-import {loadUserData} from "@app/requests"
 
 // Utils
 
@@ -110,38 +107,6 @@ export const prependParent = (parent: TrustedEvent | undefined, {content, tags}:
   }
 
   return {content, tags}
-}
-
-// Log in
-
-export const loginWithNip46 = async ({
-  relays,
-  signerPubkey,
-  clientSecret = makeSecret(),
-  connectSecret = "",
-}: {
-  relays: string[]
-  signerPubkey: string
-  clientSecret?: string
-  connectSecret?: string
-}) => {
-  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
-  const result = await broker.connect(connectSecret, NIP46_PERMS)
-
-  // TODO: remove ack result
-  if (!["ack", connectSecret].includes(result)) return false
-
-  const pubkey = await broker.getPublicKey()
-
-  if (!pubkey) return false
-
-  await loadUserData(pubkey)
-
-  const handler = {relays, pubkey: signerPubkey}
-
-  addSession({method: "nip46", pubkey, secret: clientSecret, handler})
-
-  return true
 }
 
 // Log out

@@ -1,22 +1,21 @@
 <script lang="ts">
   import type {Profile} from "@welshman/util"
   import {PROFILE, createProfile, createEvent} from "@welshman/util"
-  import {addSession, publishThunk} from "@welshman/app"
+  import {loginWithNip01, publishThunk} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import ProfileEditForm from "@app/components/ProfileEditForm.svelte"
   import {INDEXER_RELAYS} from "@app/state"
 
   type Props = {
     secret: string
-    pubkey: string
   }
 
-  const {secret, pubkey}: Props = $props()
+  const {secret}: Props = $props()
 
   const onsubmit = (profile: Profile) => {
     const event = createEvent(PROFILE, createProfile(profile))
 
-    addSession({method: "nip01", secret, pubkey})
+    loginWithNip01(secret)
     publishThunk({event, relays: INDEXER_RELAYS})
   }
 </script>

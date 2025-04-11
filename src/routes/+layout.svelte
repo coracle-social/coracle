@@ -10,7 +10,7 @@
   import {identity, memoize, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
   import type {TrustedEvent, StampedEvent} from "@welshman/util"
   import {WRAP} from "@welshman/util"
-  import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
+  import {Nip46Broker, makeSecret} from "@welshman/signer"
   import type {Socket} from "@welshman/net"
   import {request, defaultSocketPolicies, makeSocketPolicyAuth} from "@welshman/net"
   import {
@@ -25,7 +25,8 @@
     dropSession,
     getRelayUrls,
     userInboxRelaySelections,
-    addSession,
+    loginWithNip01,
+    loginWithNip46,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -40,7 +41,6 @@
   import {theme} from "@app/theme"
   import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
   import {loadUserData, listenForNotifications} from "@app/requests"
-  import {loginWithNip46} from "@app/commands"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
   import * as notifications from "@app/notifications"
@@ -81,14 +81,21 @@
 
       try {
         if (login?.startsWith("bunker://")) {
-          success = await loginWithNip46({
-            clientSecret: makeSecret(),
-            ...Nip46Broker.parseBunkerUrl(login),
-          })
-        } else if (login) {
-          const secret = nsecDecode(login)
+          const clientSecret = makeSecret()
+          const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
+          const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+          const result = await broker.connect(connectSecret, appState.NIP46_PERMS)
+          const pubkey = await broker.getPublicKey()
 
-          addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+          // TODO: remove ack result
+          if (pubkey && ["ack", connectSecret].includes(result)) {
+            await loadUserData(pubkey)
+
+            loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+            success = true
+          }
+        } else if (login) {
+          loginWithNip01(nsecDecode(login))
           success = true
         }
       } catch (e) {

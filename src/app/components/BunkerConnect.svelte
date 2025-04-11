@@ -26,7 +26,7 @@
 
       let response
       try {
-        response = await this.broker.waitForNostrconnect(this.url, this.abortController)
+        response = await this.broker.waitForNostrconnect(this.url, this.abortController.signal)
       } catch (errorResponse: any) {
         if (errorResponse?.error) {
           pushToast({

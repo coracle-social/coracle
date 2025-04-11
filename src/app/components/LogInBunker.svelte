@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {Nip46ResponseWithResult} from "@welshman/signer"
-  import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
-  import {addSession} from "@welshman/app"
+  import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {loginWithNip01, loginWithNip46} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -10,31 +10,21 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import BunkerConnect, {BunkerConnectController} from "@app/components/BunkerConnect.svelte"
   import BunkerUrl from "@app/components/BunkerUrl.svelte"
-  import {loginWithNip46} from "@app/commands"
   import {loadUserData} from "@app/requests"
   import {clearModals} from "@app/modal"
   import {setChecked} from "@app/notifications"
   import {pushToast} from "@app/toast"
-  import {SIGNER_RELAYS} from "@app/state"
+  import {SIGNER_RELAYS, NIP46_PERMS} from "@app/state"
 
   const back = () => history.back()
 
   const controller = new BunkerConnectController({
     onNostrConnect: async (response: Nip46ResponseWithResult) => {
-      const userPubkey = await controller.broker.getPublicKey()
+      const pubkey = await controller.broker.getPublicKey()
 
-      await loadUserData(userPubkey)
+      await loadUserData(pubkey)
 
-      addSession({
-        method: "nip46",
-        pubkey: userPubkey,
-        secret: controller.clientSecret,
-        handler: {
-          pubkey: response.event.pubkey,
-          relays: SIGNER_RELAYS,
-        },
-      })
-
+      loginWithNip46(pubkey, controller.clientSecret, response.event.pubkey, SIGNER_RELAYS)
       setChecked("*")
       clearModals()
     },
@@ -56,10 +46,17 @@
 
     try {
       const {clientSecret} = controller
-      const success = await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})
+      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+      const result = await broker.connect(connectSecret, NIP46_PERMS)
+      const pubkey = await broker.getPublicKey()
 
-      if (success) {
+      // TODO: remove ack result
+      if (pubkey && ["ack", connectSecret].includes(result)) {
         controller.stop()
+
+        await loadUserData(pubkey)
+
+        loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
       } else {
         return pushToast({
           theme: "error",
@@ -76,9 +73,7 @@
   $effect(() => {
     // For testing and for play store reviewers
     if (controller.bunker === "reviewkey") {
-      const secret = makeSecret()
-
-      addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+      loginWithNip01(makeSecret())
     }
   })
 </script>

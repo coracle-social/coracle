@@ -3,7 +3,7 @@
   import {postJson, stripProtocol} from "@welshman/lib"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import {normalizeRelayUrl} from "@welshman/util"
-  import {addSession} from "@welshman/app"
+  import {addSession, makeNip46Session} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -68,7 +68,7 @@
 
     let response
     try {
-      response = await broker.waitForNostrconnect(url, abortController)
+      response = await broker.waitForNostrconnect(url, abortController.signal)
     } catch (errorResponse: any) {
       if (errorResponse?.error) {
         pushToast({
@@ -83,17 +83,12 @@
     if (response) {
       loading = true
 
-      const userPubkey = await broker.getPublicKey()
+      const pubkey = await broker.getPublicKey()
+      const session = makeNip46Session(pubkey, clientSecret, response.event.pubkey, relays)
 
-      await loadUserData(userPubkey)
+      await loadUserData(pubkey)
 
-      addSession({
-        email,
-        method: "nip46",
-        pubkey: userPubkey,
-        secret: clientSecret,
-        handler: {pubkey: response.event.pubkey, relays},
-      })
+      addSession({...session, email})
 
       setChecked("*")
       clearModals()

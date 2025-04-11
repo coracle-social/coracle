@@ -1,7 +1,7 @@
 <script lang="ts">
   import {encrypt} from "nostr-tools/nip49"
   import {hexToBytes} from "@noble/hashes/utils"
-  import {makeSecret, getPubkey} from "@welshman/signer"
+  import {makeSecret} from "@welshman/signer"
   import {preventDefault, downloadText} from "@lib/html"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
@@ -14,8 +14,6 @@
   import {pushModal} from "@app/modal"
 
   const secret = makeSecret()
-
-  const pubkey = getPubkey(secret)
 
   const back = () => history.back()
 
@@ -31,7 +29,7 @@
 
     downloadText("Nostr Secret Key.txt", ncryptsec)
 
-    pushModal(SignUpKeyConfirm, {secret, pubkey, ncryptsec})
+    pushModal(SignUpKeyConfirm, {secret, ncryptsec})
   }
 
   let password = ""

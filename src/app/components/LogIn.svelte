@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {Capacitor} from "@capacitor/core"
   import {getNip07, getNip55, Nip55Signer} from "@welshman/signer"
-  import {addSession, type Session} from "@welshman/app"
+  import {addSession, type Session, makeNip07Session, makeNip55Session} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -39,7 +39,7 @@
       const pubkey = await getNip07()?.getPublicKey()
 
       if (pubkey) {
-        await onSuccess({method: "nip07", pubkey})
+        await onSuccess(makeNip07Session(pubkey))
       } else {
         pushToast({
           theme: "error",
@@ -59,7 +59,7 @@
       const pubkey = await signer.getPubkey()
 
       if (pubkey) {
-        await onSuccess({method: "nip55", pubkey, signer: app.packageName})
+        await onSuccess(makeNip55Session(pubkey, app.packageName))
       } else {
         pushToast({
           theme: "error",
