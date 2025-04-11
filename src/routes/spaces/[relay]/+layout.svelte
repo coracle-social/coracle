@@ -2,8 +2,8 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, MONTH} from "@welshman/lib"
-  import {GROUPS, THREAD, COMMENT, MESSAGE, DELETE} from "@welshman/util"
-  import {request, load} from "@welshman/net"
+  import {GROUPS, THREAD, COMMENT, MESSAGE} from "@welshman/util"
+  import {request} from "@welshman/net"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -54,11 +54,7 @@
     const relays = [url]
     const since = ago(MONTH)
 
-    // Load all groups for this space to populate navigation. It would be nice to sync, but relay29
-    // is too picky about how requests are built.
-    load({relays, filters: [{kinds: [GROUPS]}]})
-
-    // Load threads, comments, and recent messages for user rooms to help with a quick page transition
+    // Load groups, threads, comments, and recent messages for user rooms to help with a quick page transition
     pullConservatively({
       relays,
       filters: [
@@ -68,8 +64,8 @@
       ],
     })
 
-    // Listen for deletes that would apply to messages we already have, and new groups
-    const req = request({relays, filters: [{kinds: [DELETE, GROUPS], since}]})
+    // Completely refresh our groups list and listen for new ones
+    const req = request({relays, filters: [{kinds: [GROUPS]}]})
 
     return () => {
       req.close()

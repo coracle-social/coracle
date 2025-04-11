@@ -7,7 +7,7 @@
   import {dev} from "$app/environment"
   import {goto} from "$app/navigation"
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
-  import {identity, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
+  import {identity, memoize, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
   import type {TrustedEvent, StampedEvent} from "@welshman/util"
   import {WRAP} from "@welshman/util"
   import {Nip46Broker, getPubkey, makeSecret} from "@welshman/signer"
@@ -152,10 +152,12 @@
       // Listen for space data, populate space-based notifications
       let unsubSpaces: any
 
-      userMembership.subscribe($membership => {
-        unsubSpaces?.()
-        unsubSpaces = listenForNotifications()
-      })
+      userMembership.subscribe(
+        memoize($membership => {
+          unsubSpaces?.()
+          unsubSpaces = listenForNotifications()
+        }),
+      )
 
       // Listen for chats, populate chat-based notifications
       let chatsReq: any

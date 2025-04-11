@@ -61,7 +61,7 @@ import {
   walkThunks,
   signer,
   Router,
-  loadWithAsapMetaRelayUrls,
+  makeOutboxLoader,
   routerContext,
   appContext,
 } from "@welshman/app"
@@ -332,8 +332,7 @@ export const {
   name: "settings",
   store: settings,
   getKey: settings => settings.event.pubkey,
-  load: (pubkey: string, relays: string[]) =>
-    loadWithAsapMetaRelayUrls(pubkey, relays, [{kinds: [SETTINGS], authors: [pubkey]}]),
+  load: makeOutboxLoader([SETTINGS]),
 })
 
 // Alerts
@@ -410,8 +409,7 @@ export const {
   name: "memberships",
   store: memberships,
   getKey: list => list.event.pubkey,
-  load: (pubkey: string, relays: string[]) =>
-    loadWithAsapMetaRelayUrls(pubkey, relays, [{kinds: [GROUPS], authors: [pubkey]}]),
+  load: makeOutboxLoader([GROUPS]),
 })
 
 // Chats
