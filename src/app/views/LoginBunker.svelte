@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
-  import {addSession, nip46Perms} from "@welshman/app"
+  import {nip46Perms, loginWithNip46} from "@welshman/app"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -9,7 +9,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {env, loginWithNip46} from "src/engine"
+  import {env} from "src/engine"
   import {boot} from "src/app/state"
 
   let url = ""
@@ -19,8 +19,6 @@
   const clientSecret = makeSecret()
 
   const abortController = new AbortController()
-
-  const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS})
 
   const back = () => history.back()
 
@@ -38,9 +36,15 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      if (await loginWithNip46({connectSecret, clientSecret, signerPubkey, relays})) {
-        boot()
+      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+      const result = await broker.connect(connectSecret, nip46Perms)
+      const pubkey = await broker.getPublicKey()
+
+      // TODO: remove ack result
+      if (pubkey && ["ack", connectSecret].includes(result)) {
+        loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
         abortController.abort()
+        boot()
       }
     } finally {
       loading = false
@@ -48,6 +52,8 @@
   }
 
   onMount(async () => {
+    const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS})
+
     url = await broker.makeNostrconnectUrl({
       url: env.APP_URL,
       name: env.APP_NAME,
@@ -57,7 +63,7 @@
 
     let response
     try {
-      response = await broker.waitForNostrconnect(url, abortController)
+      response = await broker.waitForNostrconnect(url, abortController.signal)
     } catch (errorResponse: any) {
       if (errorResponse?.error) {
         showWarning(`Received error from signer: ${errorResponse.error}`)
@@ -67,18 +73,9 @@
     }
 
     if (response) {
-      const userPubkey = await broker.getPublicKey()
+      const pubkey = await broker.getPublicKey()
 
-      addSession({
-        method: "nip46",
-        pubkey: userPubkey,
-        secret: clientSecret,
-        handler: {
-          pubkey: response.event.pubkey,
-          relays: env.SIGNER_RELAYS,
-        },
-      })
-
+      loginWithNip46(pubkey, clientSecret, response.event.pubkey, env.SIGNER_RELAYS)
       boot()
     }
   })

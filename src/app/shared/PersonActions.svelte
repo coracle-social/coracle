@@ -2,10 +2,10 @@
   import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
   import {toNostrURI} from "@welshman/util"
-  import {Router, session, signer, tagPubkey, mute, unmute} from "@welshman/app"
+  import {Router, session, signer, tagPubkey, mute, unmute, loginWithPubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {loginWithPublicKey, userMutes} from "src/engine"
+  import {userMutes} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
 
@@ -16,7 +16,7 @@
 
   const loginAsUser = () => {
     router.clearModals()
-    loginWithPublicKey(pubkey)
+    loginWithPubkey(pubkey)
     boot()
   }
 

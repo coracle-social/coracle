@@ -1,14 +1,11 @@
-import type {Session} from "@welshman/app"
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
   getRelayUrls,
   inboxRelaySelectionsByPubkey,
-  nip46Perms,
   pubkey,
   repository,
   session,
-  sessions,
   signer,
   tagPubkey,
   userInboxRelaySelections,
@@ -28,13 +25,11 @@ import {
   flatten,
   nthNe,
   uniq,
-  assoc,
-  omit,
   fetchJson,
   sleep,
   tryCatch,
 } from "@welshman/lib"
-import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
+import {Nip01Signer, Nip59} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
 import {
   Address,
@@ -393,60 +388,7 @@ export const sendMessage = async (channelId: string, content: string, delay: num
   }
 }
 
-// Session/login
-
-const addSession = (s: Session) => {
-  sessions.update(assoc(s.pubkey, s))
-  pubkey.set(s.pubkey)
-}
-
-export const loginWithPublicKey = pubkey => addSession({method: "pubkey", pubkey})
-
-export const loginWithNip07 = pubkey => addSession({method: "nip07", pubkey})
-
-export const loginWithNip55 = (pubkey, pkg) =>
-  addSession({method: "nip55", pubkey: pubkey, signer: pkg})
-
-export const loginWithNip46 = async ({
-  relays,
-  signerPubkey,
-  clientSecret = makeSecret(),
-  connectSecret = "",
-}: {
-  relays: string[]
-  signerPubkey: string
-  clientSecret?: string
-  connectSecret?: string
-}) => {
-  const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
-  const result = await broker.connect(connectSecret, nip46Perms)
-
-  // TODO: remove ack result
-  if (!["ack", connectSecret].includes(result)) return false
-
-  const pubkey = await broker.getPublicKey()
-
-  if (!pubkey) return false
-
-  const handler = {relays, pubkey: signerPubkey}
-
-  addSession({method: "nip46", pubkey, secret: clientSecret, handler})
-
-  return true
-}
-
-export const logoutPubkey = pubkey => {
-  if (session.get().pubkey === pubkey) {
-    throw new Error("Can't destroy the current session, use logout instead")
-  }
-
-  sessions.update(s => omit([pubkey], s))
-}
-
-export const logout = () => {
-  pubkey.set(null)
-  sessions.set({})
-}
+// Settings
 
 export const setAppData = async (d: string, data: any) => {
   if (signer.get()) {

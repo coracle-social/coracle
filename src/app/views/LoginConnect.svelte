@@ -1,8 +1,9 @@
 <script lang="ts">
+  import {onMount} from "svelte"
+  import {sleep} from "@welshman/lib"
   import {RELAYS, FOLLOWS, PROFILE, normalizeRelayUrl, isRelayUrl} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {session, repository} from "@welshman/app"
-  import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -14,7 +15,6 @@
   import {router} from "src/app/util/router"
   import {env, myLoad} from "src/engine"
   import {loadUserData} from "src/app/state"
-  import {sleep} from "@welshman/lib"
 
   const t = Date.now()
 
@@ -24,15 +24,7 @@
 
   const skip = () => router.at("notes").push()
 
-  const searchRelays = async relays => {
-    failed = false
-
-    await myLoad({filters, relays, signal: AbortSignal.timeout(8000)})
-
-    if (!found) {
-      failed = true
-    }
-  }
+  const searchRelays = relays => myLoad({filters, relays})
 
   const confirmCustomRelay = () => {
     const url = normalizeRelayUrl(customRelay)
@@ -48,12 +40,7 @@
 
   const tryDefaultRelays = () => {
     // Pull out all the stops to try to find the user's profile
-    searchRelays([
-      LOCAL_RELAY_URL,
-      ...env.DEFAULT_RELAYS,
-      ...env.PLATFORM_RELAYS,
-      ...env.INDEXER_RELAYS,
-    ])
+    searchRelays([...env.DEFAULT_RELAYS, ...env.PLATFORM_RELAYS, ...env.INDEXER_RELAYS])
   }
 
   const openModal = m => {
@@ -87,12 +74,18 @@
       })
     }
   }
+
+  onMount(() => {
+    sleep(8000).then(() => {
+      failed = true
+    })
+  })
 </script>
 
 <Content size="lg">
   {#if showFound}
     <p class="text-center text-2xl">Success! Logging you in...</p>
-  {:else if failed}
+  {:else if failed && !found}
     <p class="text-2xl">We're having a hard time finding your profile.</p>
   {:else}
     <p class="text-2xl">We're searching for your profile on the network.</p>
@@ -109,7 +102,7 @@
       profile and relays may not get properly synchronized.
     </p>
   {/if}
-  {#if failed}
+  {#if failed && !found}
     <div class="flex justify-between gap-2">
       <Anchor button on:click={tryDefaultRelays}>Try again</Anchor>
       <Anchor button accent on:click={() => openModal("custom_relay")}

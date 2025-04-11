@@ -2,11 +2,11 @@
   import {onMount} from "svelte"
   import {Capacitor} from "@capacitor/core"
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
+  import {loginWithNip55, loginWithNip07} from "@welshman/app"
   import {appName} from "src/partials/state"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {loginWithNip07, loginWithNip55} from "src/engine"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
 

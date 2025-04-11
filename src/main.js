@@ -1,13 +1,12 @@
 import "src/app.css"
 import * as Sentry from "@sentry/browser"
-import {addSession} from "@welshman/app"
-import {getPubkey, makeSecret, Nip46Broker} from "@welshman/signer"
+import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"
+import {makeSecret, Nip46Broker} from "@welshman/signer"
 import {App as CapacitorApp} from "@capacitor/app"
 import {nsecDecode} from "src/util/nostr"
 import {router} from "src/app/util"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
-import {loginWithNip46} from "src/engine"
 
 // Nstart login - hash is replaced somewhere else, maybe router?
 if (window.location.hash?.startsWith("#nostr-login")) {
@@ -19,14 +18,21 @@ if (window.location.hash?.startsWith("#nostr-login")) {
 
     try {
       if (login.startsWith("bunker://")) {
-        success = await loginWithNip46({
-          clientSecret: makeSecret(),
-          ...Nip46Broker.parseBunkerUrl(login),
-        })
+        const clientSecret = makeSecret()
+        const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
+        const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+        const result = await broker.connect(connectSecret, nip46Perms)
+        const pubkey = await broker.getPublicKey()
+
+        // TODO: remove ack result
+        if (pubkey && ["ack", connectSecret].includes(result)) {
+          loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+          success = true
+        }
       } else {
         const secret = nsecDecode(login)
 
-        addSession({method: "nip01", secret, pubkey: getPubkey(secret)})
+        loginWithNip01(secret)
         success = true
       }
     } catch (e) {
