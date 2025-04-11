@@ -27,7 +27,7 @@
   const searchRelays = async relays => {
     failed = false
 
-    await myLoad({filters, relays, timeout: 8000})
+    await myLoad({filters, relays, signal: AbortSignal.timeout(8000)})
 
     if (!found) {
       failed = true

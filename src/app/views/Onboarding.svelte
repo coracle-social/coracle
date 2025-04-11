@@ -9,7 +9,6 @@
     getWriteRelayUrls,
     addMaximalFallbacks,
   } from "@welshman/app"
-  import {RequestEvent} from "@welshman/net"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -85,18 +84,17 @@
     loadPubkeys([...env.DEFAULT_FOLLOWS, ...listOwners])
 
     // Load our onboarding lists
-    const req = myRequest({
+    myRequest({
       autoClose: true,
       filters: getIdFilters(env.ONBOARDING_LISTS),
       relays: Router.get().FromPubkeys(listOwners).policy(addMaximalFallbacks).getUrls(),
-    })
+      onEvent: e => {
+        if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
+          state.onboardingLists = state.onboardingLists.concat(e)
+        }
 
-    req.on(RequestEvent.Event, e => {
-      if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
-        state.onboardingLists = state.onboardingLists.concat(e)
-      }
-
-      loadPubkeys(getPubkeyTagValues(e.tags))
+        loadPubkeys(getPubkeyTagValues(e.tags))
+      },
     })
   })
 </script>

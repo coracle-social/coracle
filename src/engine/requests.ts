@@ -32,7 +32,6 @@ import {
   FEEDS,
   Address,
 } from "@welshman/util"
-import {RequestEvent} from "@welshman/net"
 import {deriveEvents} from "@welshman/store"
 import {
   pubkey,
@@ -156,20 +155,18 @@ export const createPeopleLoader = ({
 
         loading.set(true)
 
-        const req = myRequest({
+        myRequest({
           autoClose: true,
           skipCache: true,
           forcePlatform: false,
           relays: Router.get().Search().getUrls(),
           filters: [{kinds: [0], search: term, limit: 100}],
-        })
+          onEvent,
+          onClose: async () => {
+            await sleep(Math.min(1000, Date.now() - now))
 
-        req.on(RequestEvent.Event, onEvent)
-
-        req.on(RequestEvent.Close, async () => {
-          await sleep(Math.min(1000, Date.now() - now))
-
-          loading.set(false)
+            loading.set(false)
+          },
         })
       }
     }),
@@ -284,16 +281,20 @@ export const loadMessages = () => {
 
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
+  const controller = new AbortController()
 
-  return myRequest({
+  myRequest({
     skipCache: true,
     forcePlatform: false,
+    signal: controller.signal,
     relays: Router.get().UserInbox().getUrls(),
     filters: [
       {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
       {kinds: [WRAP], "#p": [pubkey.get()]},
     ],
   })
+
+  return () => controller.abort()
 }
 
 export const loadHandlers = () =>

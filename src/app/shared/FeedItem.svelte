@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {remove, spec} from "@welshman/lib"
+  import {remove, first, spec} from "@welshman/lib"
   import {deriveEvents} from "@welshman/store"
   import {getIdOrAddress, getIdFilters, getReplyFilters, isChildOf} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {RequestEvent} from "@welshman/net"
   import {repository, Router, addMaximalFallbacks} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
@@ -106,17 +105,14 @@
 
   onMount(async () => {
     if (!event.pubkey) {
-      event = await new Promise(resolve => {
-        const req = myRequest({
+      event = first(
+        await myRequest({
           autoClose: true,
           forcePlatform: false,
           relays: Router.get().FromRelays(relays).policy(addMaximalFallbacks).getUrls(),
           filters: getIdFilters([event.id]),
-        })
-
-        req.on(RequestEvent.Eose, () => resolve(event))
-        req.on(RequestEvent.Event, (e: TrustedEvent) => resolve(e))
-      })
+        }),
+      )
     }
 
     event = await ensureUnwrapped(event)

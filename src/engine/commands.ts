@@ -17,7 +17,6 @@ import {
   addMaximalFallbacks,
   addMinimalFallbacks,
 } from "@welshman/app"
-import {DVMEvent, type DVMRequestOptions} from "@welshman/dvm"
 import {
   identity,
   append,
@@ -25,7 +24,6 @@ import {
   groupBy,
   now,
   remove,
-  Emitter,
   prop,
   flatten,
   nthNe,
@@ -36,9 +34,8 @@ import {
   sleep,
   tryCatch,
 } from "@welshman/lib"
-import {request, RequestEvent} from "@welshman/net"
 import {Nip01Signer, Nip46Broker, Nip59, makeSecret} from "@welshman/signer"
-import type {Filter, Profile, TrustedEvent} from "@welshman/util"
+import type {Profile, TrustedEvent} from "@welshman/util"
 import {
   Address,
   FEEDS,
@@ -119,30 +116,6 @@ export const nip98Fetch = async (url, method, body = null) => {
   const headers = {Authorization: `Nostr ${auth}`}
 
   return fetchJson(url, {body, method, headers})
-}
-
-export const makeDvmRequest = (options: DVMRequestOptions & {delay?: number}) => {
-  const emitter = new Emitter()
-  const {event, relays, delay, timeout = 30_000, autoClose = true, reportProgress = true} = options
-  const kind = event.kind + 1000
-  const kinds = reportProgress ? [kind, 7000] : [kind]
-  const filters: Filter[] = [{kinds, since: now() - 60, "#e": [event.id]}]
-
-  const req = request({relays, timeout, filters})
-  const thunk = publish({event, relays, timeout, delay})
-
-  req.on(RequestEvent.Event, (url: string, event: TrustedEvent) => {
-    if (event.kind === 7000) {
-      emitter.emit(DVMEvent.Progress, url, event)
-    } else {
-      emitter.emit(DVMEvent.Result, url, event)
-
-      if (autoClose) {
-        req.close()
-      }
-    }
-  })
-  return {options, emitter, req, thunk}
 }
 
 export const getMediaProviderURL = cached({

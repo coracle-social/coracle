@@ -38,7 +38,7 @@
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   onMount(() => {
-    const sub = listenForMessages(pubkeys)
+    const unsubscriber = listenForMessages(pubkeys)
 
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
     setChecked("channels/" + channelId)
@@ -48,7 +48,7 @@
     }
 
     return () => {
-      sub.close()
+      unsubscriber()
     }
   })
 

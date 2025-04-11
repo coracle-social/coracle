@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, type Emitter} from "@welshman/lib"
+  import {last} from "@welshman/lib"
   import {now, own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
   import {
@@ -12,7 +12,7 @@
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
   import {session, Router, tagPubkey, signer, abortThunk, addMaximalFallbacks} from "@welshman/app"
-  import {DVMEvent} from "@welshman/dvm"
+  import {requestDvmResponse} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"
   import {makePow} from "src/util/pow"
@@ -31,7 +31,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, getClientTags, makeDvmRequest, publish, sign, userSettings} from "src/engine"
+  import {env, getClientTags, publish, sign, userSettings} from "src/engine"
 
   export let quote = null
   export let pubkey = null
@@ -106,7 +106,7 @@
     const signedEvent = await sign(hashedEvent, options)
     const relays = Router.get().PublishEvent(signedEvent).policy(addMaximalFallbacks).getUrls()
 
-    let thunk: Thunk, emitter: Emitter
+    let thunk: Thunk
 
     router.clearModals()
     drafts.delete(DRAFT_KEY)
@@ -127,15 +127,26 @@
         }),
       )
 
-      const dvmRequest = makeDvmRequest({
+      thunk = publish({
         event: dvmEvent,
         relays: env.DVM_RELAYS,
-        reportProgress: true,
         delay: $userSettings.send_delay,
       })
 
-      thunk = dvmRequest.thunk
-      emitter = dvmRequest.emitter
+      requestDvmResponse({
+        event: dvmEvent,
+        relays: env.DVM_RELAYS,
+        onProgress: (event: TrustedEvent, url: string) => {
+          $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+            try {
+              data = JSON.parse(data)[0]
+              showInfo(data[2] || "Your note is " + data[1] + "!")
+            } catch (e) {
+              warn(e)
+            }
+          })
+        },
+      })
     } else {
       router.clearModals()
 
@@ -164,19 +175,6 @@
 
     if (!aborted) {
       showPublishInfo(thunk)
-    }
-
-    if (emitter) {
-      emitter.on(DVMEvent.Progress, (url: string, event: TrustedEvent) => {
-        $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
-          try {
-            data = JSON.parse(data)[0]
-            showInfo(data[2] || "Your note is " + data[1] + "!")
-          } catch (e) {
-            warn(e)
-          }
-        })
-      })
     }
 
     publishing = null

@@ -44,7 +44,7 @@ import {
   max,
   always,
 } from "@welshman/lib"
-import type {Socket, MultiRequestOptions} from "@welshman/net"
+import type {Socket, RequestOptions} from "@welshman/net"
 import {
   SocketEvent,
   Pool,
@@ -627,7 +627,7 @@ export const collectionSearch = derived(
 
 // Network
 
-export type MyRequestOptions = MultiRequestOptions & {
+export type MyRequestOptions = RequestOptions & {
   skipCache?: boolean
   forcePlatform?: boolean
 }

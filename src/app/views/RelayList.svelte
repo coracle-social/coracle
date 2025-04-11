@@ -2,7 +2,6 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
-  import {RequestEvent} from "@welshman/net"
   import {
     pubkey,
     relays,
@@ -123,22 +122,24 @@
     }
   }, reviews)
 
-  const req = myRequest({
+  const controller = new AbortController()
+
+  myRequest({
+    signal: controller.signal,
     relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
-  })
-
-  req.on(RequestEvent.Event, event => {
-    if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
-      reviews = sortEventsDesc(reviews.concat(event))
-    }
+    onEvent: event => {
+      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
+        reviews = sortEventsDesc(reviews.concat(event))
+      }
+    },
   })
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
     return () => {
-      req.close()
+      controller.abort()
       scroller.stop()
     }
   })

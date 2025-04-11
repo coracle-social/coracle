@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {Thunk, ThunkStatusByUrl} from "@welshman/app"
+  import type {Thunk, ThunkStatusByRelay} from "@welshman/app"
   import {first, nthEq, remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
@@ -24,7 +24,7 @@
   const retry = (url: string, event: TrustedEvent) =>
     publish({relays: [url], event: thunk.event as SignedEvent})
 
-  const getUrls = (m: ThunkStatusByUrl, status: PublishStatus) =>
+  const getUrls = (m: ThunkStatusByRelay, status: PublishStatus) =>
     remove(
       LOCAL_RELAY_URL,
       Object.entries(m || {})

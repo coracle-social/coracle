@@ -3,7 +3,6 @@
   import {identity, sortBy, uniqBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
-  import {RequestEvent} from "@welshman/net"
   import {Router, addMaximalFallbacks} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -27,15 +26,14 @@
     const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
-      const req = myRequest({
+      myRequest({
         autoClose: true,
         relays: Router.get().EventParents(event).policy(addMaximalFallbacks).getUrls(),
         filters: getIdFilters(filteredIds),
-      })
-
-      req.on(RequestEvent.Event, (event: TrustedEvent) => {
-        addToThread(event)
-        loadParents(event)
+        onEvent: (event: TrustedEvent) => {
+          addToThread(event)
+          loadParents(event)
+        },
       })
     }
   }
