@@ -8,6 +8,7 @@
     Router,
     getWriteRelayUrls,
     addMaximalFallbacks,
+    thunkIsComplete,
   } from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
@@ -63,9 +64,15 @@
     // Immediately request access to any relays with a claim
     for (const {url, claim} of invite?.parsedRelays || []) {
       if (claim) {
-        const pub = await requestRelayAccess(url, claim)
+        const thunk = await requestRelayAccess(url, claim)
 
-        await pub.result
+        await new Promise<void>(resolve => {
+          thunk.subscribe(t => {
+            if (thunkIsComplete(t)) {
+              resolve()
+            }
+          })
+        })
       }
     }
 

@@ -70,14 +70,14 @@
   const saveFeed = async () => {
     const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
     const template = draft.event ? editFeed(draft) : createFeed(draft)
-    const pub = await createAndPublish({...template, relays})
+    const thunk = await createAndPublish({...template, relays})
 
     showInfo("Your feed has been saved!")
 
     if (draft.list) {
       openListDelete()
     } else {
-      exit(pub.request.event)
+      exit(thunk.options.event)
     }
   }
 

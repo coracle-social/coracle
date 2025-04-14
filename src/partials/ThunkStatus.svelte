@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {ne, omit} from "@welshman/lib"
+  import {remove, nthNe, nthEq} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
@@ -7,14 +7,13 @@
 
   export let thunk: Thunk
 
-  $: status = thunk.status
-  $: relays = thunk.request.relays.filter(ne(LOCAL_RELAY_URL))
-  $: statuses = Object.values(omit([LOCAL_RELAY_URL], $status || {}))
-  $: total = relays.length
-  $: pending = statuses.filter(s => s.status === PublishStatus.Pending).length
+  $: relays = remove(LOCAL_RELAY_URL, thunk.options.relays)
+  $: pending = Object.entries($thunk.status)
+    .filter(nthNe(0, LOCAL_RELAY_URL))
+    .filter(nthEq(1, PublishStatus.Pending))
 </script>
 
 <div>
-  Published to {total - pending}/{total} relays.
+  Published to {relays.length - pending.length}/{relays.length} relays.
   <Anchor modal underline href="/publishes">View details</Anchor>
 </div>

@@ -11,7 +11,15 @@
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
-  import {session, Router, tagPubkey, signer, abortThunk, addMaximalFallbacks} from "@welshman/app"
+  import {
+    session,
+    thunkIsComplete,
+    Router,
+    tagPubkey,
+    signer,
+    abortThunk,
+    addMaximalFallbacks,
+  } from "@welshman/app"
   import {requestDvmResponse} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"
@@ -153,7 +161,13 @@
       thunk = publish({relays, event: signedEvent, delay: $userSettings.send_delay})
     }
 
-    thunk.result.finally(() => {
+    new Promise<void>(resolve => {
+      thunk.subscribe(t => {
+        if (thunkIsComplete(t)) {
+          resolve()
+        }
+      })
+    }).then(() => {
       charCount.set(0)
       wordCount.set(0)
     })

@@ -44,10 +44,10 @@
   const submit = async () => {
     const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
     const template = list.event ? editUserList(list) : createUserList(list)
-    const pub = await createAndPublish({...template, relays})
+    const thunk = await createAndPublish({...template, relays})
 
     showInfo("Your list has been saved!")
-    exit(pub.request.event)
+    exit(thunk.options.event)
   }
 
   const kindsHelper = new KindSearch([

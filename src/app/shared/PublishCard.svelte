@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type {Thunk, ThunkStatusByRelay} from "@welshman/app"
-  import {first, nthEq, remove} from "@welshman/lib"
+  import type {Thunk} from "@welshman/app"
+  import {thunkUrlsWithStatus} from "@welshman/app"
+  import {remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
@@ -17,21 +18,10 @@
 
   export let thunk: Thunk
 
-  $: status = thunk.status
-
   const promise = ensureUnwrapped(thunk.event)
 
   const retry = (url: string, event: TrustedEvent) =>
     publish({relays: [url], event: thunk.event as SignedEvent})
-
-  const getUrls = (m: ThunkStatusByRelay, status: PublishStatus) =>
-    remove(
-      LOCAL_RELAY_URL,
-      Object.entries(m || {})
-        .map(e => [e[0], e[1].status])
-        .filter(nthEq(1, status))
-        .map(first),
-    )
 
   const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 
@@ -45,10 +35,10 @@
 
   let expanded = false
 
-  $: pending = getUrls($status, PublishStatus.Pending)
-  $: success = getUrls($status, PublishStatus.Success)
-  $: failure = getUrls($status, PublishStatus.Failure)
-  $: timeout = getUrls($status, PublishStatus.Timeout)
+  $: pending = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Success))
+  $: failure = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Failure))
+  $: timeout = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Timeout))
 </script>
 
 {#await promise}

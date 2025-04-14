@@ -1,11 +1,36 @@
 <script lang="ts">
   import cx from "classnames"
+  import {PublishStatus} from "@welshman/net"
   import {formatTimestamp} from "@welshman/app"
-  import {messageAndColorFromStatus, type PublishNotice} from "src/domain/connection"
+  import type {PublishNotice} from "src/domain/connection"
 
   export let notice: PublishNotice
 
-  const {color} = messageAndColorFromStatus(notice.status)
+  let color = "text-success"
+
+  if (notice.status === PublishStatus.Sending) {
+    color = "text-warning"
+  }
+
+  if (notice.status === PublishStatus.Pending) {
+    color = "text-warning"
+  }
+
+  if (notice.status === PublishStatus.Failure) {
+    color = "text-danger"
+  }
+
+  if (notice.status === PublishStatus.Timeout) {
+    color = "text-accent"
+  }
+
+  if (notice.status === PublishStatus.Aborted) {
+    color = "text-accent"
+  }
+
+  if (notice.status === PublishStatus.Pending) {
+    color = "text-warning"
+  }
 </script>
 
 <div class="flex flex-wrap gap-2 p-2">

@@ -67,7 +67,6 @@
         If enabled, content flagged by the author as potentially sensitive will be hidden.
       </p>
     </FieldInline>
-
     <Field>
       <div slot="label" class="flex justify-between">
         <strong>Minimum WoT score</strong>

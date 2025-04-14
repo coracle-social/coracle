@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {now, omit, MINUTE} from "@welshman/lib"
+  import {now, nthNe, nthEq, MINUTE} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -10,7 +10,8 @@
     deriveProfileDisplay,
     displayProfileByPubkey,
     thunks,
-    type Thunk,
+    isThunk,
+    thunkIsComplete,
   } from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -26,33 +27,7 @@
 
   const {page} = router
 
-  $: recent = (Object.values($thunks) as Thunk[]).filter(
-    t => t.event.created_at > now() - 5 * MINUTE && t.event.pubkey === $pubkey,
-  )
-
-  $: hud = derived(
-    recent.map(t => t.status),
-    $statuses => {
-      let pending = 0
-      let success = 0
-      let failure = 0
-
-      for (const status of $statuses) {
-        const statuses = Object.values(omit([LOCAL_RELAY_URL], status))
-        const pubStatus = statuses.map(s => s.status)
-
-        if (statuses.length === 0 || pubStatus.includes(PublishStatus.Pending)) {
-          pending += 1
-        } else if (pubStatus.includes(PublishStatus.Success)) {
-          success += 1
-        } else {
-          failure += 1
-        }
-      }
-
-      return {pending, success, failure}
-    },
-  )
+  const isRecent = t => t.event.created_at > now() - 5 * MINUTE && t.event.pubkey === $pubkey
 
   const closeSubMenu = () => {
     subMenu = null
@@ -68,6 +43,28 @@
   }
 
   let subMenu
+
+  $: recentThunks = Object.values($thunks).filter(isThunk).filter(isRecent)
+
+  $: hud = derived(recentThunks, $recentThunks => {
+    let pending = 0
+    let success = 0
+    let failure = 0
+
+    for (const thunk of $recentThunks) {
+      const statuses = Object.entries(thunk.status).filter(nthNe(0, LOCAL_RELAY_URL))
+
+      if (!thunkIsComplete(thunk)) {
+        pending += 1
+      } else if (statuses.find(nthEq(1, PublishStatus.Success))) {
+        success += 1
+      } else {
+        failure += 1
+      }
+    }
+
+    return {pending, success, failure}
+  })
 
   $: isFeedPage = Boolean($page?.path.match(/^\/(notes)?$/))
   $: isListPage = Boolean($page?.path.match(/^\/(lists)?$/))

@@ -68,7 +68,7 @@
     replyIsOpen = true
   }
 
-  $: thunk = $thunks[event.id]
+  $: thunk = $thunks[event.id] as Thunk
   $: hidden = $isEventMuted(event, true)
 
   onMount(() => {
@@ -120,7 +120,7 @@
       </div>
       <div class:!pl-10={headerlessKinds.includes(event.kind)} class="pt-4 sm:pl-14">
         {#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && thunk}
-          <NotePending {event} {onReplyAbort} />
+          <NotePending {thunk} {onReplyAbort} />
         {:else}
           <NoteActions {event} {onReplyStart} />
         {/if}

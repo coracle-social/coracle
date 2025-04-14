@@ -15,11 +15,11 @@
 </style>
 
 <script lang="ts">
-  import {thunks, abortThunk} from "@welshman/app"
+  import {remove} from "@welshman/lib"
+  import {abortThunk, thunkCompleteUrls, thunkUrlsWithStatus} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
-  import {type TrustedEvent} from "@welshman/util"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
@@ -28,63 +28,49 @@
 
   const rendered = now()
 
-  export let event: TrustedEvent
+  export let thunk: Thunk
   export let onReplyAbort: (thunk: Thunk) => void
 
-  const completed = tweened(0)
+  const completedDisplay = tweened(0)
 
   const abort = () => {
     abortThunk(thunk)
     onReplyAbort(thunk)
   }
 
-  $: thunk = $thunks[event.id] as Thunk
-  $: status = thunk?.status
-  $: relays = thunk?.request?.relays.filter(r => r !== LOCAL_RELAY_URL)
-  $: statuses = Object.entries($status || {})
-    .filter(([k, v]) => k !== LOCAL_RELAY_URL)
-    .map(([k, v]) => v)
-  $: pending = statuses.filter(s => s.status === PublishStatus.Pending).length
-  $: failed = statuses.filter(
-    s => s.status === PublishStatus.Failure || s.status === PublishStatus.Aborted,
-  ).length
-  $: timeout = statuses.filter(s => s.status === PublishStatus.Timeout).length
-  $: success = statuses.filter(s => s.status === PublishStatus.Success).length
-  $: total = relays?.length || 0
-  $: isPending = pending > 0
-  $: isCompleted = total === success + failed + timeout
+  $: relays = remove(LOCAL_RELAY_URL, $thunk?.options?.relays)
+  $: completed = remove(LOCAL_RELAY_URL, thunkCompleteUrls($thunk))
+  $: pending = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Success))
+  $: showProgress = pending.length > 0 || completed.length > 0
 
-  $: {
-    if (thunk && statuses.length > 0) {
-      $completed = ((total - pending) / total) * 80
-    }
-  }
+  $: completedDisplay.set((completed.length / relays.length) * 80)
 </script>
 
-{#if thunk}
+{#if $thunk}
   <div
     class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
-    class:bg-neutral-500={thunk && (isPending || isCompleted)}
-    class:border={!(isPending || isCompleted)}
-    class:px-4={thunk && isPending}
+    class:bg-neutral-500={showProgress}
+    class:border={!showProgress}
+    class:px-4={pending.length > 0}
     on:click|stopPropagation>
-    {#if isPending || isCompleted}
+    {#if showProgress}
       <div
         class="loading-bar absolute left-0 top-0 h-full bg-accent"
-        style="width: {20 + $completed}%" />
-      {#if isPending}
+        style="width: {20 + $completedDisplay}%" />
+      {#if pending.length > 0}
         <span class="sm:hidden">
-          {success}/{total} relays
+          {success.length}/{relays.length} relays
         </span>
         <span class="hidden sm:inline">
-          Publishing... {total - pending} of {total} relays
+          Publishing... {relays.length - pending.length} of {relays.length} relays
         </span>
       {:else}
         <span class="sm:hidden">
-          {success}/{total} relays
+          {success.length}/{relays.length} relays
         </span>
         <span class="hidden sm:inline">
-          Published to {success}/{total} relays
+          Published to {success.length}/{relays.length} relays
         </span>
         <Anchor
           class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"

@@ -1,6 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {abortThunk, session, thunks, type Thunk} from "@welshman/app"
+  import {PublishStatus} from "@welshman/net"
+  import {abortThunk, session, thunkHasStatus, thunks, type Thunk} from "@welshman/app"
   import {fly} from "svelte/transition"
   import {formatTimestamp, timestamp1} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
@@ -41,8 +42,8 @@
       class="mt-1 flex items-center justify-between gap-2 text-xs"
       class:text-tinted-700={message.pubkey === $session.pubkey}
       class:text-neutral-100={message.pubkey !== $session.pubkey}>
-      {#if thunk}
-        {#await thunk.result}
+      {#if $thunk}
+        {#if thunkHasStatus($thunk, PublishStatus.Pending)}
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...
@@ -52,9 +53,9 @@
                 on:click={() => abortThunk(thunk)}>Cancel</button>
             {/if}
           </div>
-        {:then}
+        {:else}
           {formatTimestamp(message.created_at)}
-        {/await}
+        {/if}
       {:else}
         {formatTimestamp(message.created_at)}
       {/if}

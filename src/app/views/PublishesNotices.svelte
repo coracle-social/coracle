@@ -1,26 +1,14 @@
 <script lang="ts">
-  import {formatTimestamp, thunks, createSearch, type Thunk} from "@welshman/app"
-  import {Pool} from "@welshman/net"
-  import {get} from "svelte/store"
+  import {formatTimestamp, thunks, createSearch, isThunk} from "@welshman/app"
   import {fly} from "svelte/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Input from "src/partials/Input.svelte"
   import ThunkNotice from "src/partials/ThunkNotice.svelte"
-  import {
-    messageAndColorFromStatus,
-    subscriptionNotices,
-    type PublishNotice,
-  } from "src/domain/connection"
+  import {subscriptionNotices} from "src/domain/connection"
 
   export let search: string = ""
 
   $: subNotices = Array.from($subscriptionNotices.values()).flatMap(n => n)
-
-  function getPubNotices(urls: string[]) {
-    return Object.values($thunks).filter(
-      t => urls.some(url => get(t.status)[url]?.status) && "event" in t,
-    ) as Thunk[]
-  }
 
   // for subscription notices
   function colorFromVerb(verb: string) {
@@ -34,18 +22,18 @@
     }
   }
 
-  $: pubNotices = getPubNotices(Array.from(Pool.getSingleton()._data.keys())).flatMap(p =>
-    Object.keys(get(p.status))
-      .filter(k => k.includes(search) || get(p.status)[k].message.includes(search))
-      .map(k => ({
-        eventId: p.event.id,
-        created_at: p.event.created_at,
-        eventKind: "Kind" + p.event.kind,
-        url: k,
-        message: messageAndColorFromStatus(get(p.status)[k]).message,
-        status: get(p.status)[k],
-      })),
-  ) as PublishNotice[]
+  $: pubNotices = Object.values($thunks).flatMap(thunk => {
+    if (!isThunk(thunk)) return []
+
+    return Object.entries(thunk.status).map(([url, status]) => ({
+      url,
+      status,
+      message: thunk.details[url],
+      eventId: thunk.event.id,
+      created_at: thunk.event.created_at,
+      eventKind: "Kind" + thunk.event.kind,
+    }))
+  })
 
   $: noticesSearch = createSearch([...pubNotices, ...subNotices], {
     getValue: notice => notice.url,

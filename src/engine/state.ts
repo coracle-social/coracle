@@ -1,4 +1,4 @@
-import type {ThunkRequest} from "@welshman/app"
+import type {ThunkOptions} from "@welshman/app"
 import {
   db,
   displayProfileByPubkey,
@@ -656,7 +656,7 @@ export const myLoad = ({forcePlatform = true, skipCache, ...options}: MyRequestO
   return load(options)
 }
 
-export type MyPublishOptions = ThunkRequest & {
+export type MyPublishOptions = ThunkOptions & {
   forcePlatform?: boolean
 }
 
