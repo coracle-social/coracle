@@ -1,6 +1,6 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
-import {randomId, poll, uniq, equals} from "@welshman/lib"
+import {randomId, ifLet, poll, uniq, equals} from "@welshman/lib"
 import {
   DELETE,
   REPORT,
@@ -38,7 +38,7 @@ import {
   signer,
   repository,
   publishThunk,
-  publishThunks,
+  MergedThunk,
   profilesByPubkey,
   relaySelectionsByPubkey,
   getWriteRelayUrls,
@@ -54,6 +54,7 @@ import {
   tagEventForComment,
   tagEventForQuote,
   Router,
+  thunkIsComplete,
 } from "@welshman/app"
 import type {Thunk} from "@welshman/app"
 import {
@@ -84,14 +85,20 @@ export const getPubkeyPetname = (pubkey: string) => {
   return display
 }
 
-export const getThunkError = async (thunk: Thunk) => {
-  const result = await thunk.result
-  const [{status, message}] = Object.values(result) as any
+export const getThunkError = (thunk: Thunk) =>
+  new Promise<string>(resolve => {
+    thunk.subscribe($thunk => {
+      for (const [relay, status] of Object.entries($thunk.status)) {
+        if (status === PublishStatus.Failure) {
+          resolve($thunk.details[relay])
+        }
+      }
 
-  if (status !== PublishStatus.Success) {
-    return message
-  }
-}
+      if (thunkIsComplete($thunk)) {
+        resolve("")
+      }
+    })
+  })
 
 export const prependParent = (parent: TrustedEvent | undefined, {content, tags}: EventContent) => {
   if (parent) {
@@ -261,12 +268,10 @@ export const checkRelayAccess = async (url: string, claim = "") => {
     relays: [url],
   })
 
-  const result = await thunk.result
-
-  if (result[url].status === PublishStatus.Failure) {
+  ifLet(await getThunkError(thunk), error => {
     const message =
       socket.auth.details?.replace(/^.*: /, "") ||
-      result[url].message?.replace(/^.*: /, "") ||
+      error?.replace(/^.*: /, "") ||
       "join request rejected"
 
     // If it's a strict NIP 29 relay don't worry about requesting access
@@ -274,7 +279,7 @@ export const checkRelayAccess = async (url: string, claim = "") => {
     if (message !== "missing group (`h`) tag") {
       return `Failed to join relay (${message})`
     }
-  }
+  })
 }
 
 export const checkRelayProfile = async (url: string) => {
@@ -342,13 +347,15 @@ export const sendWrapped = async ({
 }) => {
   const nip59 = Nip59.fromSigner(signer.get()!)
 
-  return publishThunks(
+  return new MergedThunk(
     await Promise.all(
-      uniq(pubkeys).map(async recipient => ({
-        event: await nip59.wrap(recipient, stamp(template)),
-        relays: Router.get().PubkeyInbox(recipient).getUrls(),
-        delay,
-      })),
+      uniq(pubkeys).map(async recipient =>
+        publishThunk({
+          event: await nip59.wrap(recipient, stamp(template)),
+          relays: Router.get().PubkeyInbox(recipient).getUrls(),
+          delay,
+        }),
+      ),
     ),
   )
 }

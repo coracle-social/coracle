@@ -251,7 +251,7 @@ export const getUrlsForEvent = derived([trackerStore, thunks], ([$tracker, $thun
     const urls = Array.from($tracker.getRelays(id))
 
     for (const thunk of getThunksByEventId().get(id) || []) {
-      for (const url of thunk.request.relays) {
+      for (const url of thunk.options.relays) {
         urls.push(url)
       }
     }
@@ -661,7 +661,12 @@ export const deriveOtherRooms = (url: string) =>
 
 // Other utils
 
-export const encodeRelay = (url: string) => encodeURIComponent(normalizeRelayUrl(url))
+export const encodeRelay = (url: string) =>
+  encodeURIComponent(
+    normalizeRelayUrl(url)
+      .replace(/^wss:\/\//, "")
+      .replace(/\/$/, ""),
+  )
 
 export const decodeRelay = (url: string) => normalizeRelayUrl(decodeURIComponent(url))
 

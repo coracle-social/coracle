@@ -1,6 +1,5 @@
 <script lang="ts">
-  import {hash} from "@welshman/lib"
-  import {now} from "@welshman/lib"
+  import {hash, now} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     thunks,
@@ -9,6 +8,7 @@
     deriveProfileDisplay,
     formatTimestampAsDate,
     formatTimestampAsTime,
+    thunkIsComplete,
   } from "@welshman/app"
   import {isMobile} from "@lib/html"
   import TapTarget from "@lib/components/TapTarget.svelte"
@@ -42,6 +42,7 @@
   const profile = deriveProfile(event.pubkey)
   const profileDisplay = deriveProfileDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
+  const hideMenuButton = $derived($thunk && !thunkIsComplete($thunk))
 
   const reply = () => replyTo(event)
 
@@ -99,7 +100,7 @@
   <div class="row-2 ml-10 mt-1">
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right" />
   </div>
-  {#if !isMobile}
+  {#if !isMobile && !hideMenuButton}
     <button
       class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
       class:group-hover:opacity-100={!isMobile}>
