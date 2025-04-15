@@ -68,6 +68,7 @@
   import Server from "@assets/icons/Server.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
   import SettingsMinimalistic from "@assets/icons/Settings Minimalistic.svg?dataurl"
+  import Station from "@assets/icons/Station.svg?dataurl"
   import TagHorizontal from "@assets/icons/Tag Horizontal.svg?dataurl"
   import ShareCircle from "@assets/icons/Share Circle.svg?dataurl"
   import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
@@ -160,6 +161,7 @@
     server: Server,
     settings: Settings,
     "settings-minimalistic": SettingsMinimalistic,
+    station: Station,
     "tag-horizontal": TagHorizontal,
     "trash-bin-2": TrashBin2,
     "ufo-3": UFO3,

@@ -1,23 +1,28 @@
 <script lang="ts">
   import type {Snippet} from "svelte"
   import type {Profile} from "@welshman/util"
-  import {makeProfile} from "@welshman/util"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Field from "@lib/components/Field.svelte"
+  import FieldInline from "@lib/components/FieldInline.svelte"
   import Button from "@lib/components/Button.svelte"
   import InputProfilePicture from "@lib/components/InputProfilePicture.svelte"
   import InfoHandle from "@app/components/InfoHandle.svelte"
   import {pushModal} from "@app/modal"
 
+  type Values = {
+    profile: Profile
+    shouldBroadcast: boolean
+  }
+
   type Props = {
-    initialValues?: Profile
-    onsubmit: (profile: Profile) => void
+    initialValues: Values
+    onsubmit: (values: Values) => void
     hideAddress?: boolean
     footer: Snippet
   }
 
-  const {initialValues = makeProfile(), hideAddress, onsubmit, footer}: Props = $props()
+  const {initialValues, hideAddress, onsubmit, footer}: Props = $props()
 
   const values = $state(initialValues)
 
@@ -28,7 +33,7 @@
 
 <form class="col-4" onsubmit={preventDefault(submit)}>
   <div class="flex justify-center py-2">
-    <InputProfilePicture bind:file bind:url={values.picture} />
+    <InputProfilePicture bind:file bind:url={values.profile.picture} />
   </div>
   <Field>
     {#snippet label()}
@@ -37,7 +42,7 @@
     {#snippet input()}
       <label class="input input-bordered flex w-full items-center gap-2">
         <Icon icon="user-circle" />
-        <input bind:value={values.name} class="grow" type="text" />
+        <input bind:value={values.profile.name} class="grow" type="text" />
       </label>
     {/snippet}
     {#snippet info()}
@@ -49,8 +54,10 @@
       <p>About You</p>
     {/snippet}
     {#snippet input()}
-      <textarea class="textarea textarea-bordered leading-4" rows="3" bind:value={values.about}
-      ></textarea>
+      <textarea
+        class="textarea textarea-bordered leading-4"
+        rows="5"
+        bind:value={values.profile.about}></textarea>
     {/snippet}
     {#snippet info()}
       Give a brief introduction to why you're here.
@@ -64,7 +71,7 @@
       {#snippet input()}
         <label class="input input-bordered flex w-full items-center gap-2">
           <Icon icon="map-point" />
-          <input bind:value={values.nip05} class="grow" type="text" />
+          <input bind:value={values.profile.nip05} class="grow" type="text" />
         </label>
       {/snippet}
       {#snippet info()}
@@ -75,5 +82,19 @@
       {/snippet}
     </Field>
   {/if}
+  <FieldInline>
+    {#snippet label()}
+      <p>Broadcast Profile</p>
+    {/snippet}
+    {#snippet input()}
+      <input type="checkbox" class="toggle toggle-primary" bind:checked={values.shouldBroadcast} />
+    {/snippet}
+    {#snippet info()}
+      <p>
+        If enabled, your profile will be published to the broader nostr network, as well as to
+        spaces you are a member of.
+      </p>
+    {/snippet}
+  </FieldInline>
   {@render footer()}
 </form>

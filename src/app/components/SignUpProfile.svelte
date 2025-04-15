@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {Profile} from "@welshman/util"
-  import {PROFILE, createProfile, createEvent} from "@welshman/util"
+  import {PROFILE, createProfile, makeProfile, createEvent} from "@welshman/util"
   import {loginWithNip01, publishThunk} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import ProfileEditForm from "@app/components/ProfileEditForm.svelte"
@@ -12,15 +12,21 @@
 
   const {secret}: Props = $props()
 
-  const onsubmit = (profile: Profile) => {
+  const initialValues = {
+    profile: makeProfile(),
+    shouldBroadcast: true,
+  }
+
+  const onsubmit = ({profile, shouldBroadcast}: {profile: Profile; shouldBroadcast: boolean}) => {
     const event = createEvent(PROFILE, createProfile(profile))
+    const relays = shouldBroadcast ? INDEXER_RELAYS : []
 
     loginWithNip01(secret)
-    publishThunk({event, relays: INDEXER_RELAYS})
+    publishThunk({event, relays})
   }
 </script>
 
-<ProfileEditForm hideAddress {onsubmit}>
+<ProfileEditForm hideAddress {initialValues} {onsubmit}>
   {#snippet footer()}
     <Button type="submit" class="btn btn-primary">Create Account</Button>
   {/snippet}
