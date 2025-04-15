@@ -9,6 +9,7 @@
     pubkey,
     Router,
     tagPubkey,
+    loadUsingOutbox,
     formatTimestampAsDate,
     inboxRelaySelectionsByPubkey,
   } from "@welshman/app"
@@ -27,17 +28,16 @@
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
   import ChatComposeParent from "@app/components/ChannelComposeParent.svelte"
-  import {userSettingValues, deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
+  import {INDEXER_RELAYS, userSettingValues, deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped, prependParent} from "@app/commands"
 
-  const {
-    id,
-    info,
-  }: {
+  type Props = {
     id: string
     info?: Snippet
-  } = $props()
+  }
+
+  const {id, info}: Props = $props()
 
   const chat = deriveChat(id)
   const pubkeys = splitChatId(id)
@@ -107,10 +107,13 @@
 
   onMount(() => {
     // Don't use loadInboxRelaySelection because we want to force reload
-    load({
-      relays: Router.get().FromPubkeys(others).getUrls(),
-      filters: [{kinds: [INBOX_RELAYS], authors: others}],
-    })
+    for (const pubkey of others) {
+      loadUsingOutbox({
+        pubkey,
+        kind: INBOX_RELAYS,
+        relays: INDEXER_RELAYS,
+      })
+    }
 
     const observer = new ResizeObserver(() => {
       if (dynamicPadding && chatCompose) {

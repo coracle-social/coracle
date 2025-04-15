@@ -40,7 +40,7 @@
       <div class="flex items-center justify-between gap-2">
         <div class="flex min-w-0 items-center gap-2">
           {#if others.length === 0}
-            <ProfileCircle pubkey={$pubkey} size={5} />
+            <ProfileCircle pubkey={$pubkey!} size={5} />
             Note to self
           {:else if others.length === 1}
             <ProfileCircle pubkey={others[0]} size={5} />

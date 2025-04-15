@@ -3,6 +3,7 @@
   import {goto} from "$app/navigation"
   import {nthEq} from "@welshman/lib"
   import {Router, tracker, repository} from "@welshman/app"
+  import type {TrustedEvent} from "@welshman/util"
   import {Address, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
   import {scrollToEvent} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
@@ -12,11 +13,24 @@
   import {deriveEvent, entityLink, ROOM} from "@app/state"
   import {makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
 
-  const {value, event, depth, hideMediaAtDepth, relays = []} = $props()
+  type Props = {
+    value: any
+    hideMediaAtDepth: number
+    event: TrustedEvent
+    depth: number
+    url?: string
+  }
 
-  const {id, identifier, kind, pubkey, relays: relayHints = []} = value
+  const {value, event, depth, hideMediaAtDepth, url}: Props = $props()
+
+  const {id, identifier, kind, pubkey, relays = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const mergedRelays = [...relays, ...Router.get().Quote(event, idOrAddress, relayHints).getUrls()]
+  const mergedRelays = Router.get().Quote(event, idOrAddress, relays).getUrls()
+
+  if (url) {
+    mergedRelays.push(url)
+  }
+
   const quote = deriveEvent(idOrAddress, mergedRelays)
   const entity = id
     ? nip19.neventEncode({id, relays: mergedRelays})
@@ -80,8 +94,8 @@
 
 <Button class="my-2 block max-w-full text-left" {onclick}>
   {#if $quote}
-    <NoteCard event={$quote} class="bg-alt rounded-box p-4">
-      <NoteContent {hideMediaAtDepth} {relays} event={$quote} depth={depth + 1} />
+    <NoteCard event={$quote} {url} class="bg-alt rounded-box p-4">
+      <NoteContent {hideMediaAtDepth} {url} event={$quote} depth={depth + 1} />
     </NoteCard>
   {:else}
     <div class="rounded-box p-4">

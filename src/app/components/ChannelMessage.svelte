@@ -4,8 +4,6 @@
   import {
     thunks,
     pubkey,
-    deriveProfile,
-    deriveProfileDisplay,
     formatTimestampAsDate,
     formatTimestampAsTime,
     thunkIsComplete,
@@ -22,15 +20,15 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors} from "@app/state"
+  import {colors, deriveAlias, deriveAliasDisplay} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
   interface Props {
-    url: any
-    room: any
+    url: string
+    room: string
     event: TrustedEvent
-    replyTo?: any
+    replyTo?: (event: TrustedEvent) => void
     showPubkey?: boolean
     inert?: boolean
   }
@@ -39,16 +37,16 @@
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
-  const profile = deriveProfile(event.pubkey)
-  const profileDisplay = deriveProfileDisplay(event.pubkey)
+  const alias = deriveAlias(event.pubkey, url)
+  const aliasDisplay = deriveAliasDisplay(event.pubkey, url)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const hideMenuButton = $derived($thunk && !thunkIsComplete($thunk))
 
-  const reply = () => replyTo(event)
+  const reply = () => replyTo!(event)
 
   const onTap = () => pushModal(ChannelMessageMenuMobile, {url, event, reply})
 
-  const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
+  const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey, url})
 
   const onReactionClick = (content: string, events: TrustedEvent[]) => {
     const reaction = events.find(e => e.pubkey === $pubkey)
@@ -68,7 +66,10 @@
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Button onclick={openProfile} class="flex items-start">
-        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
+        <Avatar
+          src={$alias?.profile?.picture}
+          class="border border-solid border-base-content"
+          size={8} />
       </Button>
     {:else}
       <div class="w-8 min-w-8 max-w-8"></div>
@@ -77,7 +78,7 @@
       {#if showPubkey}
         <div class="flex items-center gap-2">
           <Button onclick={openProfile} class="text-sm font-bold" style="color: {colorValue}">
-            {$profileDisplay}
+            {$aliasDisplay}
           </Button>
           <span class="text-xs opacity-50">
             {#if formatTimestampAsDate(event.created_at) === today}
@@ -90,7 +91,7 @@
         </div>
       {/if}
       <div class="text-sm">
-        <Content {event} relays={[url]} />
+        <Content {event} {url} />
         {#if thunk}
           <ThunkStatus {thunk} class="mt-2" />
         {/if}

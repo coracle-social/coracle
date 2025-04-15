@@ -53,7 +53,7 @@
     history.back()
   }
 
-  const editor = makeEditor({submit, uploading, placeholder: "What's on your mind?"})
+  const editor = makeEditor({url, submit, uploading, placeholder: "What's on your mind?"})
 
   let title: string = $state("")
 </script>

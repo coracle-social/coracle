@@ -4,25 +4,29 @@
     session,
     userFollows,
     deriveUserWotScore,
-    deriveProfile,
     deriveHandleForPubkey,
     displayHandle,
-    deriveProfileDisplay,
   } from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
+  import {deriveAlias, deriveAliasDisplay} from "@app/state"
 
-  const {pubkey} = $props()
+  type Props = {
+    pubkey: string
+    url?: string
+  }
 
-  const profile = deriveProfile(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const {pubkey, url}: Props = $props()
+
+  const alias = deriveAlias(pubkey, url)
+  const aliasDisplay = deriveAliasDisplay(pubkey, url)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
-  const openProfile = () => pushModal(ProfileDetail, {pubkey})
+  const openProfile = () => pushModal(ProfileDetail, {pubkey, url})
 
   const following = $derived(
     pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey),
@@ -31,12 +35,12 @@
 
 <div class="flex max-w-full gap-3">
   <Button onclick={openProfile} class="py-1">
-    <Avatar src={$profile?.picture} size={10} />
+    <Avatar src={$alias?.profile?.picture} size={10} />
   </Button>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
       <Button onclick={openProfile} class="text-bold overflow-hidden text-ellipsis">
-        {$profileDisplay}
+        {$aliasDisplay}
       </Button>
       <WotScore score={$score} active={following} />
     </div>

@@ -23,12 +23,12 @@
   const back = () => history.back()
 
   const onsubmit = ({profile, shouldBroadcast}: {profile: Profile; shouldBroadcast: boolean}) => {
-    const relays = shouldBroadcast
-      ? Router.get().FromUser().getUrls()
-      : getMembershipUrls($userMembership)
     const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
+    const relays = [...getMembershipUrls($userMembership)]
 
-    if (!shouldBroadcast) {
+    if (shouldBroadcast) {
+      relays.push(...Router.get().FromUser().getUrls())
+    } else {
       template.tags = uniqTags([...template.tags, PROTECTED])
     }
 

@@ -81,11 +81,11 @@
         <CalendarEventDate event={$event} />
         <div class="flex min-w-0 flex-grow flex-col gap-1">
           <CalendarEventHeader event={$event} />
-          <CalendarEventMeta event={$event} />
+          <CalendarEventMeta event={$event} {url} />
           <div class="flex py-2 opacity-50">
             <div class="h-px flex-grow bg-base-content opacity-25"></div>
           </div>
-          <Content showEntire event={$event} relays={[url]} />
+          <Content showEntire event={$event} {url} />
         </div>
       </div>
       <div class="flex w-full flex-col justify-end sm:flex-row">
@@ -101,9 +101,9 @@
       </div>
     {/if}
     {#each sortBy(e => e.created_at, $replies).slice(0, showAll ? undefined : 4) as reply (reply.id)}
-      <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
+      <NoteCard event={reply} {url} class="card2 bg-alt z-feature w-full">
         <div class="col-3 ml-12">
-          <Content showEntire event={reply} />
+          <Content showEntire event={reply} {url} />
           <CalendarEventActions event={reply} {url} />
         </div>
       </NoteCard>

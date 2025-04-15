@@ -42,7 +42,7 @@
     <div class="column gap-2">
       <div class="flex justify-between">
         <div>
-          <Profile pubkey={report.pubkey} />
+          <Profile pubkey={report.pubkey} {url} />
           <span>Reported this event as "{reason}"</span>
         </div>
         {#if report.pubkey === $pubkey}

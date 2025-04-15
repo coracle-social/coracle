@@ -18,7 +18,7 @@
   <CalendarEventHeader {event} />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <span class="whitespace-nowrap py-1 text-sm opacity-75">
-      Posted by <ProfileLink pubkey={event.pubkey} />
+      Posted by <ProfileLink pubkey={event.pubkey} {url} />
     </span>
     <CalendarEventActions showActivity {url} {event} />
   </div>

@@ -32,7 +32,7 @@
     onSubmit(publishComment({event, content, tags, relays: [url]}))
   }
 
-  const editor = makeEditor({submit, uploading, autofocus: !isMobile})
+  const editor = makeEditor({url, submit, uploading, autofocus: !isMobile})
 
   let form: HTMLElement
   let spacer: HTMLElement

@@ -5,10 +5,8 @@
     session,
     userFollows,
     deriveUserWotScore,
-    deriveProfile,
     deriveHandleForPubkey,
     displayHandle,
-    deriveProfileDisplay,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -18,14 +16,19 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import ChatEnable from "@app/components/ChatEnable.svelte"
-  import {canDecrypt, pubkeyLink} from "@app/state"
+  import {canDecrypt, pubkeyLink, deriveAlias, deriveAliasDisplay} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeChatPath} from "@app/routes"
 
-  const {pubkey} = $props()
+  export type Props = {
+    pubkey: string
+    url?: string
+  }
 
-  const profile = deriveProfile(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const {pubkey, url}: Props = $props()
+
+  const alias = deriveAlias(pubkey, url)
+  const aliasDisplay = deriveAliasDisplay(pubkey, url)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
@@ -43,12 +46,12 @@
 <div class="column gap-4">
   <div class="flex max-w-full gap-3">
     <span class="py-1">
-      <Avatar src={$profile?.picture} size={10} />
+      <Avatar src={$alias?.profile?.picture} size={10} />
     </span>
     <div class="flex min-w-0 flex-col">
       <div class="flex items-center gap-2">
         <span class="text-bold overflow-hidden text-ellipsis">
-          {$profileDisplay}
+          {$aliasDisplay}
         </span>
         <WotScore score={$score} active={following} />
       </div>
@@ -57,7 +60,7 @@
       </div>
     </div>
   </div>
-  <ProfileInfo {pubkey} />
+  <ProfileInfo {pubkey} {url} />
   <ModalFooter>
     <Button onclick={back} class="btn btn-link">
       <Icon icon="alt-arrow-left" />

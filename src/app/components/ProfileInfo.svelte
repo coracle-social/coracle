@@ -1,12 +1,17 @@
 <script lang="ts">
-  import {deriveProfile} from "@welshman/app"
   import Content from "@app/components/Content.svelte"
+  import {deriveAlias} from "@app/state"
 
-  const {pubkey} = $props()
+  export type Props = {
+    pubkey: string
+    url?: string
+  }
 
-  const profile = deriveProfile(pubkey)
+  const {pubkey, url}: Props = $props()
+
+  const alias = deriveAlias(pubkey, url)
 </script>
 
-{#if $profile}
-  <Content event={{content: $profile.about, tags: []}} />
+{#if $alias?.profile}
+  <Content event={{content: $alias.profile.about, tags: []}} hideMediaAtDepth={0} />
 {/if}

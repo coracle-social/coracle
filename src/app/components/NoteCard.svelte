@@ -17,12 +17,14 @@
     children,
     minimal = false,
     hideProfile = false,
+    url,
     ...restProps
   }: {
     event: TrustedEvent
     children: Snippet
     minimal?: boolean
     hideProfile?: boolean
+    url?: string
     class?: string
   } = $props()
 
@@ -49,9 +51,9 @@
     <div class="flex justify-between gap-2">
       {#if !hideProfile}
         {#if minimal}
-          @<ProfileName pubkey={event.pubkey} />
+          @<ProfileName pubkey={event.pubkey} {url} />
         {:else}
-          <Profile pubkey={event.pubkey} />
+          <Profile pubkey={event.pubkey} {url} />
         {/if}
       {/if}
       <Link

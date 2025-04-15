@@ -91,7 +91,7 @@
     {/snippet}
     {#snippet info()}
       <p>
-        If enabled, your profile will be published to the broader nostr network, as well as to
+        If enabled, changes will be published to the broader nostr network in addition to
         spaces you are a member of.
       </p>
     {/snippet}

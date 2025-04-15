@@ -5,15 +5,20 @@
     deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
-    deriveProfileDisplay,
   } from "@welshman/app"
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
+  import {deriveAliasDisplay} from "@app/state"
 
-  const {value} = $props()
+  type Props = {
+    value: string
+    url?: string
+  }
+
+  const {value, url}: Props = $props()
 
   const pubkey = value
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const profileDisplay = deriveAliasDisplay(pubkey)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
@@ -22,7 +27,7 @@
 
 <div class="flex max-w-full gap-3">
   <div class="py-1">
-    <ProfileCircle {pubkey} />
+    <ProfileCircle {pubkey} {url} />
   </div>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">

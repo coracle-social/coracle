@@ -5,11 +5,16 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
 
-  const {pubkey}: {pubkey: string} = $props()
+  type Props = {
+    pubkey: string
+    url?: string
+  }
 
-  const openProfile = () => pushModal(ProfileDetail, {pubkey})
+  const {pubkey, url}: Props = $props()
+
+  const openProfile = () => pushModal(ProfileDetail, {pubkey, url})
 </script>
 
 <Button onclick={preventDefault(openProfile)} class="link-content">
-  @<ProfileName {pubkey} />
+  @<ProfileName {pubkey} {url} />
 </Button>

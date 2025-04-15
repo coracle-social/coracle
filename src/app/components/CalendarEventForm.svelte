@@ -81,7 +81,7 @@
   }
 
   const content = initialValues?.content || ""
-  const editor = makeEditor({submit, uploading, content})
+  const editor = makeEditor({url, submit, uploading, content})
 
   let title = $state(initialValues?.title || "")
   let location = $state(initialValues?.location || "")

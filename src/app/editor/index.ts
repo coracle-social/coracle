@@ -5,7 +5,7 @@ import type {StampedEvent} from "@welshman/util"
 import {Router, signer, profileSearch} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {getSetting, userSettingValues} from "@app/state"
-import {MentionNodeView} from "./MentionNodeView"
+import {makeMentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
 export const getUploadType = () => getSetting<"nip96" | "blossom">("upload_type")
@@ -30,6 +30,7 @@ export const makeEditor = ({
   charCount,
   content = "",
   placeholder = "",
+  url,
   submit,
   uploading,
   wordCount,
@@ -39,6 +40,7 @@ export const makeEditor = ({
   charCount?: Writable<number>
   content?: string
   placeholder?: string
+  url?: string
   submit: () => void
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
@@ -76,7 +78,7 @@ export const makeEditor = ({
           },
           nprofile: {
             extend: {
-              addNodeView: () => MentionNodeView,
+              addNodeView: () => makeMentionNodeView(url),
               addProseMirrorPlugins() {
                 return [
                   MentionSuggestion({
@@ -86,7 +88,7 @@ export const makeEditor = ({
                     createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 
-                      mount(ProfileSuggestion, {target, props: {value}})
+                      mount(ProfileSuggestion, {target, props: {value, url}})
 
                       return target
                     },

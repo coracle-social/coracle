@@ -2,7 +2,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import {hexToBytes} from "@noble/hashes/utils"
   import {displayPubkey, displayProfile} from "@welshman/util"
-  import {pubkey, session, displayNip05, deriveProfile} from "@welshman/app"
+  import {pubkey, session, displayNip05} from "@welshman/app"
   import {slideAndFade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
@@ -13,11 +13,11 @@
   import ProfileDelete from "@app/components/ProfileDelete.svelte"
   import InfoKeys from "@app/components/InfoKeys.svelte"
   import Alerts from "@app/components/Alerts.svelte"
-  import {PLATFORM_NAME} from "@app/state"
+  import {PLATFORM_NAME, deriveAlias} from "@app/state"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 
-  const profile = deriveProfile($pubkey!)
+  const alias = deriveAlias($pubkey!)
 
   const pubkeyDisplay = displayPubkey($pubkey!)
 
@@ -39,16 +39,16 @@
     <div class="flex justify-between gap-2">
       <div class="flex max-w-full gap-3">
         <div class="py-1">
-          <Avatar src={$profile?.picture} size={10} />
+          <Avatar src={$alias?.profile?.picture} size={10} />
         </div>
         <div class="flex min-w-0 flex-col">
           <div class="flex items-center gap-2">
             <div class="text-bold overflow-hidden text-ellipsis">
-              {displayProfile($profile, pubkeyDisplay)}
+              {displayProfile($alias?.profile, pubkeyDisplay)}
             </div>
           </div>
           <div class="overflow-hidden text-ellipsis text-sm opacity-75">
-            {$profile?.nip05 ? displayNip05($profile.nip05) : pubkeyDisplay}
+            {$alias?.profile?.nip05 ? displayNip05($alias?.profile.nip05) : pubkeyDisplay}
           </div>
         </div>
       </div>
@@ -56,8 +56,8 @@
         <Icon icon="pen-new-square" />
       </Button>
     </div>
-    {#key $profile?.about}
-      <Content event={{content: $profile?.about || "", tags: []}} hideMediaAtDepth={0} />
+    {#key $alias?.profile?.about}
+      <Content event={{content: $alias?.profile?.about || "", tags: []}} hideMediaAtDepth={0} />
     {/key}
   </div>
   {#if $session?.email}

@@ -8,13 +8,12 @@
   import ThreadActions from "@app/components/ThreadActions.svelte"
   import {makeThreadPath} from "@app/routes"
 
-  const {
-    url,
-    event,
-  }: {
+  type Props = {
     url: string
     event: TrustedEvent
-  } = $props()
+  }
+
+  const {url, event}: Props = $props()
 
   const title = event.tags.find(nthEq(0, "title"))?.[1]
 </script>
@@ -32,10 +31,10 @@
       {formatTimestamp(event.created_at)}
     </p>
   {/if}
-  <Content {event} expandMode="inline" relays={[url]} />
+  <Content {event} {url} expandMode="inline" />
   <div class="flex w-full flex-col items-end justify-between gap-2 sm:flex-row">
     <span class="whitespace-nowrap py-1 text-sm opacity-75">
-      Posted by <ProfileLink pubkey={event.pubkey} />
+      Posted by <ProfileLink pubkey={event.pubkey} {url} />
     </span>
     <ThreadActions showActivity {url} {event} />
   </div>

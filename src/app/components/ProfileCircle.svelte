@@ -1,10 +1,15 @@
 <script lang="ts">
-  import {deriveProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
+  import {deriveAlias} from "@app/state"
 
-  const {...props} = $props()
+  type Props = {
+    pubkey: string
+    url?: string
+  } & Record<string, any>
 
-  const profile = deriveProfile(props.pubkey)
+  const {pubkey, url, ...props}: Props = $props()
+
+  const alias = deriveAlias(pubkey, url)
 </script>
 
-<Avatar src={$profile?.picture} icon="user-circle" {...props} />
+<Avatar src={$alias?.profile?.picture} icon="user-circle" {...props} />

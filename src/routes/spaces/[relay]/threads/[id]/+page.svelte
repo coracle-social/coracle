@@ -76,9 +76,9 @@
 <PageContent class="flex flex-col p-2 pt-4">
   {#if $event}
     <div class="flex flex-col gap-3">
-      <NoteCard event={$event} class="card2 bg-alt z-feature w-full">
+      <NoteCard event={$event} {url} class="card2 bg-alt z-feature w-full">
         <div class="col-3 ml-12">
-          <Content showEntire event={$event} relays={[url]} />
+          <Content showEntire event={$event} {url} />
           <ThreadActions event={$event} {url} />
         </div>
       </NoteCard>
@@ -91,9 +91,9 @@
         </div>
       {/if}
       {#each sortBy(e => -e.created_at, $replies).slice(0, showAll ? undefined : 4) as reply (reply.id)}
-        <NoteCard event={reply} class="card2 bg-alt z-feature w-full">
+        <NoteCard event={reply} {url} class="card2 bg-alt z-feature w-full">
           <div class="col-3 ml-12">
-            <Content showEntire event={reply} />
+            <Content showEntire event={reply} {url} />
             <ThreadActions event={reply} {url} />
           </div>
         </NoteCard>

@@ -2,13 +2,7 @@
   import {type Instance} from "tippy.js"
   import {hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    thunks,
-    deriveProfile,
-    deriveProfileDisplay,
-    formatTimestampAsTime,
-    pubkey,
-  } from "@welshman/app"
+  import {thunks, formatTimestampAsTime, pubkey} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -21,7 +15,7 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
   import ChatMessageMenuMobile from "@app/components/ChatMessageMenuMobile.svelte"
-  import {colors} from "@app/state"
+  import {colors, deriveAlias, deriveAliasDisplay} from "@app/state"
   import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -36,8 +30,8 @@
 
   const thunk = $thunks[event.id]
   const isOwn = event.pubkey === $pubkey
-  const profile = deriveProfile(event.pubkey)
-  const profileDisplay = deriveProfileDisplay(event.pubkey)
+  const alias = deriveAlias(event.pubkey)
+  const aliasDisplay = deriveAliasDisplay(event.pubkey)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
 
   const reply = () => replyTo(event)
@@ -107,12 +101,12 @@
           {#if !isOwn}
             <Button onclick={openProfile} class="flex items-center gap-1">
               <Avatar
-                src={$profile?.picture}
+                src={$alias?.profile?.picture}
                 class="border border-solid border-base-content"
                 size={4} />
               <div class="flex items-center gap-2">
                 <Button onclick={openProfile} class="text-sm font-bold" style="color: {colorValue}">
-                  {$profileDisplay}
+                  {$aliasDisplay}
                 </Button>
               </div>
             </Button>

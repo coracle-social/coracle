@@ -43,7 +43,7 @@
   const showMembers = () =>
     pushModal(
       ProfileList,
-      {pubkeys: members, title: `Members of`, subtitle: displayRelayUrl(url)},
+      {url, pubkeys: members, title: `Members of`, subtitle: displayRelayUrl(url)},
       {replaceState},
     )
 

@@ -1,5 +1,5 @@
 import twColors from "tailwindcss/colors"
-import {get, derived} from "svelte/store"
+import {get, derived, writable} from "svelte/store"
 import * as nip19 from "nostr-tools/nip19"
 import {
   remove,
@@ -31,6 +31,7 @@ import {
   GROUPS,
   THREAD,
   COMMENT,
+  PROFILE,
   getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
@@ -38,10 +39,13 @@ import {
   displayProfile,
   readList,
   getListTags,
+  readProfile,
   asDecryptedEvent,
   normalizeRelayUrl,
+  displayPubkey,
 } from "@welshman/util"
-import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
+import {LOCAL_RELAY_URL} from "@welshman/relay"
+import type {TrustedEvent, Profile, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59, decrypt} from "@welshman/signer"
 import {
   pubkey,
@@ -64,6 +68,8 @@ import {
   makeOutboxLoader,
   routerContext,
   appContext,
+  deriveProfile,
+  makeCachedLoader,
 } from "@welshman/app"
 import type {Thunk, Relay} from "@welshman/app"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
@@ -369,6 +375,93 @@ export const alertStatuses = deriveEventsMapped<AlertStatus>(repository, {
   },
 })
 
+// Aliases
+
+export type Alias = {
+  url: string
+  pubkey: string
+  profile: Profile
+}
+
+export const encodeAliasKey = (pubkey: string, url: string) => `${pubkey}:${url}`
+
+export const decodeAliasKey = (key: string) => {
+  const [pubkey, url] = key.split(/:(.*)/s)
+
+  return {pubkey, url}
+}
+
+export const aliasesByKey = withGetter(writable(new Map<string, Alias>()))
+
+export const loadAliasByKey = makeCachedLoader({
+  name: "aliases",
+  indexStore: aliasesByKey,
+  load: (key: string) => {
+    const {pubkey, url} = decodeAliasKey(key)
+
+    return load({
+      relays: [url],
+      filters: [{kinds: [PROFILE], authors: [pubkey]}],
+      onEvent: (event: TrustedEvent) => {
+        const profile = readProfile(event)
+
+        aliasesByKey.update($aliasesByKey => {
+          $aliasesByKey.set(key, {url, pubkey, profile})
+
+          return $aliasesByKey
+        })
+      },
+    })
+  },
+})
+
+export const deriveAlias = (pubkey: string, url?: string) => {
+  const membershipUrls = getMembershipUrls(userMembership.get())
+
+  // Attempt to load all relevant aliases
+  for (const $url of [url, ...membershipUrls]) {
+    if ($url) {
+      const key = encodeAliasKey(pubkey, $url)
+
+      loadAliasByKey(key)
+    }
+  }
+
+  return derived([aliasesByKey, deriveProfile(pubkey)], ([$aliasesByKey, $profile]) => {
+    // Try to find an alias for the url we were asked about
+    if (url) {
+      const alias = $aliasesByKey.get(encodeAliasKey(pubkey, url))
+
+      if (alias) {
+        return alias
+      }
+    }
+
+    // Fall back to global profiles
+    if ($profile) {
+      return {
+        pubkey,
+        url: LOCAL_RELAY_URL,
+        profile: $profile,
+      }
+    }
+
+    // Fall back to other aliases we know about
+    for (const $url of membershipUrls) {
+      const alias = $aliasesByKey.get(encodeAliasKey(pubkey, $url))
+
+      if (alias) {
+        return alias
+      }
+    }
+  })
+}
+
+export const deriveAliasDisplay = (pubkey: string, url?: string) =>
+  derived(deriveAlias(pubkey, url), $alias =>
+    displayProfile($alias?.profile, displayPubkey(pubkey)),
+  )
+
 // Membership
 
 export const hasMembershipUrl = (list: List | undefined, url: string) =>
@@ -470,6 +563,7 @@ export const {
   name: "chats",
   store: chats,
   getKey: chat => chat.id,
+  load: always(Promise.resolve()),
 })
 
 export const chatSearch = derived(chats, $chats =>

@@ -10,7 +10,12 @@
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import {makeChatPath} from "@app/routes"
 
-  const {pubkey} = $props()
+  type Props = {
+    pubkey: string
+    url?: string
+  }
+
+  const {pubkey, url}: Props = $props()
 
   const filters: Filter[] = [{authors: [pubkey], limit: 1}]
   const events = deriveEvents(repository, {filters})
@@ -29,13 +34,13 @@
 
 <div class="card2 bg-alt col-2 shadow-xl">
   <div class="flex justify-between">
-    <Profile {pubkey} />
+    <Profile {pubkey} {url} />
     <Link class="btn btn-primary hidden sm:flex" href={makeChatPath([pubkey])}>
       <Icon icon="letter" />
       Start a Chat
     </Link>
   </div>
-  <ProfileInfo {pubkey} />
+  <ProfileInfo {pubkey} {url} />
   {#if $events.length > 0}
     <div class="bg-alt badge badge-neutral border-none">
       Last active {formatTimestampRelative($events[0].created_at)}

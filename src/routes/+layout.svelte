@@ -9,7 +9,7 @@
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, memoize, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
   import type {TrustedEvent, StampedEvent} from "@welshman/util"
-  import {WRAP} from "@welshman/util"
+  import {WRAP, PROFILE, getTag} from "@welshman/util"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import type {Socket} from "@welshman/net"
   import {request, defaultSocketPolicies, makeSocketPolicyAuth} from "@welshman/net"

@@ -1,9 +1,14 @@
 <script lang="ts">
-  import {deriveProfileDisplay} from "@welshman/app"
+  import {deriveAliasDisplay} from "@app/state"
 
-  const {pubkey} = $props()
+  type Props = {
+    pubkey: string
+    url?: string
+  }
 
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const {pubkey, url}: Props = $props()
+
+  const aliasDisplay = deriveAliasDisplay(pubkey, url)
 </script>
 
-{$profileDisplay}
+{$aliasDisplay}

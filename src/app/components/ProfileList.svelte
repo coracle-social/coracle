@@ -5,11 +5,12 @@
 
   interface Props {
     title: any
-    subtitle?: string
     pubkeys: any
+    subtitle?: string
+    url?: string
   }
 
-  const {subtitle = "", pubkeys, ...restProps}: Props = $props()
+  const {subtitle = "", pubkeys, url, ...restProps}: Props = $props()
 </script>
 
 <div class="column gap-4">
@@ -23,7 +24,7 @@
   </ModalHeader>
   {#each pubkeys as pubkey (pubkey)}
     <div class="card2 bg-alt">
-      <Profile {pubkey} />
+      <Profile {pubkey} {url} />
     </div>
   {/each}
   <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>

@@ -25,7 +25,7 @@
     publishReaction({event, content: emoji.unicode, relays: [url]})
 </script>
 
-<NoteCard {event} class="card2 bg-alt">
+<NoteCard {event} {url} class="card2 bg-alt">
   <NoteContent {event} expandMode="inline" />
   <div class="flex w-full justify-between gap-2">
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right">
