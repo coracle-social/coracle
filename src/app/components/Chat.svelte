@@ -2,12 +2,10 @@
   import type {Snippet} from "svelte"
   import {onMount} from "svelte"
   import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
-  import {load} from "@welshman/net"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
     pubkey,
-    Router,
     tagPubkey,
     loadUsingOutbox,
     formatTimestampAsDate,
@@ -28,7 +26,13 @@
   import ChatMessage from "@app/components/ChatMessage.svelte"
   import ChatCompose from "@app/components/ChannelCompose.svelte"
   import ChatComposeParent from "@app/components/ChannelComposeParent.svelte"
-  import {INDEXER_RELAYS, userSettingValues, deriveChat, splitChatId, PLATFORM_NAME} from "@app/state"
+  import {
+    INDEXER_RELAYS,
+    userSettingValues,
+    deriveChat,
+    splitChatId,
+    PLATFORM_NAME,
+  } from "@app/state"
   import {pushModal} from "@app/modal"
   import {sendWrapped, prependParent} from "@app/commands"
 

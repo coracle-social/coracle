@@ -12,7 +12,7 @@
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveAlias, deriveAliasDisplay} from "@app/state"
+  import {deriveAliasedProfile, deriveAliasDisplay} from "@app/state"
 
   type Props = {
     pubkey: string
@@ -21,7 +21,7 @@
 
   const {pubkey, url}: Props = $props()
 
-  const alias = deriveAlias(pubkey, url)
+  const profile = deriveAliasedProfile(pubkey, url)
   const aliasDisplay = deriveAliasDisplay(pubkey, url)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
@@ -35,7 +35,7 @@
 
 <div class="flex max-w-full gap-3">
   <Button onclick={openProfile} class="py-1">
-    <Avatar src={$alias?.profile?.picture} size={10} />
+    <Avatar src={$profile?.picture} size={10} />
   </Button>
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">

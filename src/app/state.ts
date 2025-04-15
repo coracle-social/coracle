@@ -1,5 +1,5 @@
 import twColors from "tailwindcss/colors"
-import {get, derived, writable} from "svelte/store"
+import {get, derived, readable, writable} from "svelte/store"
 import * as nip19 from "nostr-tools/nip19"
 import {
   remove,
@@ -16,6 +16,7 @@ import {
   addToMapKey,
   identity,
   always,
+  omit,
 } from "@welshman/lib"
 import {load} from "@welshman/net"
 import {
@@ -31,7 +32,6 @@ import {
   GROUPS,
   THREAD,
   COMMENT,
-  PROFILE,
   getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
@@ -44,7 +44,6 @@ import {
   normalizeRelayUrl,
   displayPubkey,
 } from "@welshman/util"
-import {LOCAL_RELAY_URL} from "@welshman/relay"
 import type {TrustedEvent, Profile, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59, decrypt} from "@welshman/signer"
 import {
@@ -81,6 +80,8 @@ export const ROOM = "h"
 export const GENERAL = "_"
 
 export const PROTECTED = ["-"]
+
+export const ALIAS = 11000
 
 export const ALERT = 32830
 
@@ -401,7 +402,7 @@ export const loadAliasByKey = makeCachedLoader({
 
     return load({
       relays: [url],
-      filters: [{kinds: [PROFILE], authors: [pubkey]}],
+      filters: [{kinds: [ALIAS], authors: [pubkey]}],
       onEvent: (event: TrustedEvent) => {
         const profile = readProfile(event)
 
@@ -416,50 +417,23 @@ export const loadAliasByKey = makeCachedLoader({
 })
 
 export const deriveAlias = (pubkey: string, url?: string) => {
-  const membershipUrls = getMembershipUrls(userMembership.get())
+  if (!url) return readable(undefined)
 
-  // Attempt to load all relevant aliases
-  for (const $url of [url, ...membershipUrls]) {
-    if ($url) {
-      const key = encodeAliasKey(pubkey, $url)
+  const key = encodeAliasKey(pubkey, url)
 
-      loadAliasByKey(key)
-    }
-  }
+  loadAliasByKey(key)
 
-  return derived([aliasesByKey, deriveProfile(pubkey)], ([$aliasesByKey, $profile]) => {
-    // Try to find an alias for the url we were asked about
-    if (url) {
-      const alias = $aliasesByKey.get(encodeAliasKey(pubkey, url))
-
-      if (alias) {
-        return alias
-      }
-    }
-
-    // Fall back to global profiles
-    if ($profile) {
-      return {
-        pubkey,
-        url: LOCAL_RELAY_URL,
-        profile: $profile,
-      }
-    }
-
-    // Fall back to other aliases we know about
-    for (const $url of membershipUrls) {
-      const alias = $aliasesByKey.get(encodeAliasKey(pubkey, $url))
-
-      if (alias) {
-        return alias
-      }
-    }
-  })
+  return derived(aliasesByKey, $aliasesByKey => $aliasesByKey.get(key))
 }
 
+export const deriveAliasedProfile = (pubkey: string, url?: string) =>
+  derived([deriveProfile(pubkey), deriveAlias(pubkey, url)], ([$profile, $alias]) =>
+    omit(["event"], {...$profile, ...$alias}),
+  )
+
 export const deriveAliasDisplay = (pubkey: string, url?: string) =>
-  derived(deriveAlias(pubkey, url), $alias =>
-    displayProfile($alias?.profile, displayPubkey(pubkey)),
+  derived(deriveAliasedProfile(pubkey, url), $profile =>
+    displayProfile($profile, displayPubkey(pubkey)),
   )
 
 // Membership

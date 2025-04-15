@@ -91,8 +91,8 @@
     {/snippet}
     {#snippet info()}
       <p>
-        If enabled, changes will be published to the broader nostr network in addition to
-        spaces you are a member of.
+        If enabled, changes will be published to the broader nostr network in addition to spaces you
+        are a member of.
       </p>
     {/snippet}
   </FieldInline>

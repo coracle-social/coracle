@@ -1,6 +1,6 @@
 <script lang="ts">
   import Avatar from "@lib/components/Avatar.svelte"
-  import {deriveAlias} from "@app/state"
+  import {deriveAliasedProfile} from "@app/state"
 
   type Props = {
     pubkey: string
@@ -9,7 +9,7 @@
 
   const {pubkey, url, ...props}: Props = $props()
 
-  const alias = deriveAlias(pubkey, url)
+  const profile = deriveAliasedProfile(pubkey, url)
 </script>
 
-<Avatar src={$alias?.profile?.picture} icon="user-circle" {...props} />
+<Avatar src={$profile?.picture} icon="user-circle" {...props} />

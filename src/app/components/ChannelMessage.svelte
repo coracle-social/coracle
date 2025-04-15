@@ -20,7 +20,7 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, deriveAlias, deriveAliasDisplay} from "@app/state"
+  import {colors, deriveAliasedProfile, deriveAliasDisplay} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -37,7 +37,7 @@
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
-  const alias = deriveAlias(event.pubkey, url)
+  const profile = deriveAliasedProfile(event.pubkey, url)
   const aliasDisplay = deriveAliasDisplay(event.pubkey, url)
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const hideMenuButton = $derived($thunk && !thunkIsComplete($thunk))
@@ -66,10 +66,7 @@
   <div class="flex w-full gap-3 overflow-auto">
     {#if showPubkey}
       <Button onclick={openProfile} class="flex items-start">
-        <Avatar
-          src={$alias?.profile?.picture}
-          class="border border-solid border-base-content"
-          size={8} />
+        <Avatar src={$profile?.picture} class="border border-solid border-base-content" size={8} />
       </Button>
     {:else}
       <div class="w-8 min-w-8 max-w-8"></div>
