@@ -1,5 +1,6 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
+  import {removeNil} from "@welshman/lib"
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
     session,
@@ -7,6 +8,8 @@
     deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
+    deriveProfile,
+    deriveProfileDisplay,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
@@ -16,7 +19,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
   import ChatEnable from "@app/components/ChatEnable.svelte"
-  import {canDecrypt, pubkeyLink, deriveAliasedProfile, deriveAliasDisplay} from "@app/state"
+  import {canDecrypt, pubkeyLink} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeChatPath} from "@app/routes"
 
@@ -27,8 +30,9 @@
 
   const {pubkey, url}: Props = $props()
 
-  const profile = deriveAliasedProfile(pubkey, url)
-  const display = deriveAliasDisplay(pubkey, url)
+  const relays = removeNil([url])
+  const profile = deriveProfile(pubkey, relays)
+  const display = deriveProfileDisplay(pubkey, relays)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 

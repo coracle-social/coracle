@@ -1,6 +1,7 @@
 <script lang="ts">
+  import {removeNil} from "@welshman/lib"
+  import {deriveProfile} from "@welshman/app"
   import Content from "@app/components/Content.svelte"
-  import {deriveAliasedProfile} from "@app/state"
 
   export type Props = {
     pubkey: string
@@ -9,7 +10,7 @@
 
   const {pubkey, url}: Props = $props()
 
-  const profile = deriveAliasedProfile(pubkey, url)
+  const profile = deriveProfile(pubkey, removeNil([url]))
 </script>
 
 {#if $profile}

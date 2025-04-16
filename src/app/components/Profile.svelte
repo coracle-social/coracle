@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {removeNil} from "@welshman/lib"
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
     session,
@@ -6,13 +7,14 @@
     deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
+    deriveProfile,
+    deriveProfileDisplay,
   } from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
-  import {deriveAliasedProfile, deriveAliasDisplay} from "@app/state"
 
   type Props = {
     pubkey: string
@@ -21,8 +23,9 @@
 
   const {pubkey, url}: Props = $props()
 
-  const profile = deriveAliasedProfile(pubkey, url)
-  const aliasDisplay = deriveAliasDisplay(pubkey, url)
+  const relays = removeNil([url])
+  const profile = deriveProfile(pubkey, relays)
+  const profileDisplay = deriveProfileDisplay(pubkey, relays)
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
@@ -40,7 +43,7 @@
   <div class="flex min-w-0 flex-col">
     <div class="flex items-center gap-2">
       <Button onclick={openProfile} class="text-bold overflow-hidden text-ellipsis">
-        {$aliasDisplay}
+        {$profileDisplay}
       </Button>
       <WotScore score={$score} active={following} />
     </div>

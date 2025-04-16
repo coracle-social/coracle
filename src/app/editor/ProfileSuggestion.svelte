@@ -1,14 +1,15 @@
 <script lang="ts">
+  import {removeNil} from "@welshman/lib"
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
     userFollows,
     deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
+    deriveProfileDisplay,
   } from "@welshman/app"
   import WotScore from "@lib/components/WotScore.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
-  import {deriveAliasDisplay} from "@app/state"
 
   type Props = {
     value: string
@@ -18,7 +19,7 @@
   const {value, url}: Props = $props()
 
   const pubkey = value
-  const profileDisplay = deriveAliasDisplay(pubkey)
+  const profileDisplay = deriveProfileDisplay(pubkey, removeNil([url]))
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 

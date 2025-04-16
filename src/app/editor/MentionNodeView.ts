@@ -1,11 +1,12 @@
 import type {NodeViewProps} from "@tiptap/core"
-import {deriveAliasDisplay} from "@app/state"
+import {removeNil} from "@welshman/lib"
+import {deriveProfileDisplay} from "@welshman/app"
 
 export const makeMentionNodeView =
   (url?: string) =>
   ({node}: NodeViewProps) => {
     const dom = document.createElement("span")
-    const display = deriveAliasDisplay(node.attrs.pubkey, url)
+    const display = deriveProfileDisplay(node.attrs.pubkey, removeNil([url]))
 
     dom.classList.add("tiptap-object")
 

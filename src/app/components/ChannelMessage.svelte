@@ -7,6 +7,8 @@
     formatTimestampAsDate,
     formatTimestampAsTime,
     thunkIsComplete,
+    deriveProfile,
+    deriveProfileDisplay,
   } from "@welshman/app"
   import {isMobile} from "@lib/html"
   import TapTarget from "@lib/components/TapTarget.svelte"
@@ -20,7 +22,7 @@
   import ChannelMessageEmojiButton from "@app/components/ChannelMessageEmojiButton.svelte"
   import ChannelMessageMenuButton from "@app/components/ChannelMessageMenuButton.svelte"
   import ChannelMessageMenuMobile from "@app/components/ChannelMessageMenuMobile.svelte"
-  import {colors, deriveAliasedProfile, deriveAliasDisplay} from "@app/state"
+  import {colors} from "@app/state"
   import {publishDelete, publishReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
@@ -37,8 +39,8 @@
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
-  const profile = deriveAliasedProfile(event.pubkey, url)
-  const aliasDisplay = deriveAliasDisplay(event.pubkey, url)
+  const profile = deriveProfile(event.pubkey, [url])
+  const profileDisplay = deriveProfileDisplay(event.pubkey, [url])
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
   const hideMenuButton = $derived($thunk && !thunkIsComplete($thunk))
 
@@ -75,7 +77,7 @@
       {#if showPubkey}
         <div class="flex items-center gap-2">
           <Button onclick={openProfile} class="text-sm font-bold" style="color: {colorValue}">
-            {$aliasDisplay}
+            {$profileDisplay}
           </Button>
           <span class="text-xs opacity-50">
             {#if formatTimestampAsDate(event.created_at) === today}

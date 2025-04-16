@@ -1,5 +1,5 @@
 import twColors from "tailwindcss/colors"
-import {get, derived, readable, writable} from "svelte/store"
+import {get, derived} from "svelte/store"
 import * as nip19 from "nostr-tools/nip19"
 import {
   remove,
@@ -16,7 +16,6 @@ import {
   addToMapKey,
   identity,
   always,
-  omit,
 } from "@welshman/lib"
 import {load} from "@welshman/net"
 import {
@@ -39,12 +38,10 @@ import {
   displayProfile,
   readList,
   getListTags,
-  readProfile,
   asDecryptedEvent,
   normalizeRelayUrl,
-  displayPubkey,
 } from "@welshman/util"
-import type {TrustedEvent, Profile, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
+import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59, decrypt} from "@welshman/signer"
 import {
   pubkey,
@@ -67,8 +64,6 @@ import {
   makeOutboxLoader,
   routerContext,
   appContext,
-  deriveProfile,
-  makeCachedLoader,
 } from "@welshman/app"
 import type {Thunk, Relay} from "@welshman/app"
 import {deriveEvents, deriveEventsMapped, withGetter, synced} from "@welshman/store"
@@ -80,8 +75,6 @@ export const ROOM = "h"
 export const GENERAL = "_"
 
 export const PROTECTED = ["-"]
-
-export const ALIAS = 11000
 
 export const ALERT = 32830
 
@@ -375,66 +368,6 @@ export const alertStatuses = deriveEventsMapped<AlertStatus>(repository, {
     return {event, tags}
   },
 })
-
-// Aliases
-
-export type Alias = {
-  url: string
-  pubkey: string
-  profile: Profile
-}
-
-export const encodeAliasKey = (pubkey: string, url: string) => `${pubkey}:${url}`
-
-export const decodeAliasKey = (key: string) => {
-  const [pubkey, url] = key.split(/:(.*)/s)
-
-  return {pubkey, url}
-}
-
-export const aliasesByKey = withGetter(writable(new Map<string, Alias>()))
-
-export const loadAliasByKey = makeCachedLoader({
-  name: "aliases",
-  indexStore: aliasesByKey,
-  load: (key: string) => {
-    const {pubkey, url} = decodeAliasKey(key)
-
-    return load({
-      relays: [url],
-      filters: [{kinds: [ALIAS], authors: [pubkey]}],
-      onEvent: (event: TrustedEvent) => {
-        const profile = readProfile(event)
-
-        aliasesByKey.update($aliasesByKey => {
-          $aliasesByKey.set(key, {url, pubkey, profile})
-
-          return $aliasesByKey
-        })
-      },
-    })
-  },
-})
-
-export const deriveAlias = (pubkey: string, url?: string) => {
-  if (!url) return readable(undefined)
-
-  const key = encodeAliasKey(pubkey, url)
-
-  loadAliasByKey(key)
-
-  return derived(aliasesByKey, $aliasesByKey => $aliasesByKey.get(key))
-}
-
-export const deriveAliasedProfile = (pubkey: string, url?: string) =>
-  derived([deriveProfile(pubkey), deriveAlias(pubkey, url)], ([$profile, $alias]) =>
-    omit(["event"], {...$profile, ...$alias}),
-  )
-
-export const deriveAliasDisplay = (pubkey: string, url?: string) =>
-  derived(deriveAliasedProfile(pubkey, url), $profile =>
-    displayProfile($profile, displayPubkey(pubkey)),
-  )
 
 // Membership
 
