@@ -9,7 +9,17 @@
   import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, memoize, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
   import type {TrustedEvent, StampedEvent} from "@welshman/util"
-  import {WRAP} from "@welshman/util"
+  import {
+    WRAP,
+    EVENT_TIME,
+    THREAD,
+    MESSAGE,
+    INBOX_RELAYS,
+    MUTES,
+    FOLLOWS,
+    PROFILE,
+    RELAYS,
+  } from "@welshman/util"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import type {Socket} from "@welshman/net"
   import {request, defaultSocketPolicies, makeSocketPolicyAuth} from "@welshman/net"
@@ -27,6 +37,7 @@
     userInboxRelaySelections,
     loginWithNip01,
     loginWithNip46,
+    EventsStorageAdapter,
   } from "@welshman/app"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -39,7 +50,14 @@
   import {setupAnalytics} from "@app/analytics"
   import {nsecDecode} from "@lib/util"
   import {theme} from "@app/theme"
-  import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
+  import {
+    INDEXER_RELAYS,
+    ALERT,
+    ALERT_STATUS,
+    userMembership,
+    ensureUnwrapped,
+    canDecrypt,
+  } from "@app/state"
   import {loadUserData, listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
@@ -119,7 +137,21 @@
         }
       })
 
-      initStorage("flotilla", 6, defaultStorageAdapters).then(async () => {
+      initStorage("flotilla", 8, {
+        ...defaultStorageAdapters,
+        events: new EventsStorageAdapter({
+          name: "events",
+          limit: 10_000,
+          repository,
+          rankEvent: (e: TrustedEvent) => {
+            if ([PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS].includes(e.kind)) return 1
+            if ([EVENT_TIME, THREAD, MESSAGE, WRAP, ALERT, ALERT_STATUS].includes(e.kind))
+              return 0.9
+
+            return 0
+          },
+        }),
+      }).then(async () => {
         await sleep(300)
         ready.resolve()
       })
