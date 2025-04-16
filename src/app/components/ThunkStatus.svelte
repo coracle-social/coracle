@@ -9,7 +9,6 @@
     thunkHasStatus,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Tippy from "@lib/components/Tippy.svelte"
   import ThunkStatusDetail from "@app/components/ThunkStatusDetail.svelte"
@@ -36,7 +35,7 @@
   const failedUrls = $derived(
     statuses
       .filter(([_, status]) => [PublishStatus.Failure, PublishStatus.Timeout].includes(status))
-      .map(nth(1)),
+      .map(nth(0)),
   )
 
   const showFailure = $derived(thunkIsComplete($thunk) && failedUrls.length > 0)
@@ -57,43 +56,37 @@
   })
 </script>
 
-{#if showFailure || showPending}
-  <div class="relative" out:fade>
-    <div class="absolute right-0 top-2">
-      {#if showFailure}
-        {@const url = failedUrls[0]}
-        {@const status = $thunk.status[url]}
-        {@const message = $thunk.details[url]}
-        <div class="flex justify-end px-1 text-xs {restProps.class}">
-          <Tippy
-            class="flex items-center {restProps.class}"
-            component={ThunkStatusDetail}
-            props={{url, message, status, retry}}
-            params={{interactive: true}}>
-            {#snippet children()}
-              <span class="flex cursor-pointer items-center gap-1 text-error">
-                <Icon icon="danger" size={3} />
-                <span>Failed to send!</span>
-              </span>
-            {/snippet}
-          </Tippy>
-        </div>
-      {:else if canCancel || isPending}
-        <div class="flex justify-end px-1 text-xs {restProps.class}">
-          <span class="flex items-center gap-1 {restProps.class}">
-            <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px"></span>
-            <span class="opacity-50">Sending...</span>
-            <button
-              type="button"
-              class="underline transition-all"
-              class:link={canCancel}
-              class:opacity-25={!canCancel}
-              onclick={abort}>
-              Cancel
-            </button>
-          </span>
-        </div>
-      {/if}
-    </div>
+{#if showFailure}
+  {@const url = failedUrls[0]}
+  {@const status = $thunk.status[url]}
+  {@const message = $thunk.details[url]}
+  <div class="flex justify-end px-1 text-xs {restProps.class}">
+    <Tippy
+      class="flex items-center {restProps.class}"
+      component={ThunkStatusDetail}
+      props={{url, message, status, retry}}
+      params={{interactive: true}}>
+      {#snippet children()}
+        <span class="flex cursor-pointer items-center gap-1 text-error">
+          <Icon icon="danger" size={3} />
+          <span>Failed to send!</span>
+        </span>
+      {/snippet}
+    </Tippy>
+  </div>
+{:else if showPending}
+  <div class="flex justify-end px-1 text-xs {restProps.class}">
+    <span class="flex items-center gap-1 {restProps.class}">
+      <span class="loading loading-spinner mx-1 h-3 w-3 translate-y-px"></span>
+      <span class="opacity-50">Sending...</span>
+      <button
+        type="button"
+        class="underline transition-all"
+        class:link={canCancel}
+        class:opacity-25={!canCancel}
+        onclick={abort}>
+        Cancel
+      </button>
+    </span>
   </div>
 {/if}

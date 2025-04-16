@@ -6,7 +6,6 @@
     pubkey,
     formatTimestampAsDate,
     formatTimestampAsTime,
-    thunkIsComplete,
     deriveProfile,
     deriveProfileDisplay,
   } from "@welshman/app"
@@ -42,7 +41,6 @@
   const profile = deriveProfile(event.pubkey, [url])
   const profileDisplay = deriveProfileDisplay(event.pubkey, [url])
   const [_, colorValue] = colors[parseInt(hash(event.pubkey)) % colors.length]
-  const hideMenuButton = $derived($thunk && !thunkIsComplete($thunk))
 
   const reply = () => replyTo!(event)
 
@@ -100,7 +98,7 @@
   <div class="row-2 ml-10 mt-1">
     <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right" />
   </div>
-  {#if !isMobile && !hideMenuButton}
+  {#if !isMobile}
     <button
       class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
       class:group-hover:opacity-100={!isMobile}>
