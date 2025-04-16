@@ -43,6 +43,7 @@ import {
   sortBy,
   max,
   always,
+  tryCatch,
 } from "@welshman/lib"
 import type {Socket, RequestOptions} from "@welshman/net"
 import {
@@ -366,7 +367,7 @@ export const isEventMuted = withGetter(
           if (regex) {
             if (e.content?.toLowerCase().match(regex)) return true
             if (displayProfileByPubkey(e.pubkey).toLowerCase().match(regex)) return true
-            if ($profilesByPubkey.get(e.pubkey)?.nip05?.match(regex)) return true
+            if (tryCatch(() => $profilesByPubkey.get(e.pubkey)?.nip05?.match(regex))) return true
           }
 
           if (strict || $userFollows.has(e.pubkey)) return false
@@ -793,7 +794,7 @@ if (!db) {
     })
   })
 
-  ready = initStorage("coracle", 5, defaultStorageAdapters)
+  ready = initStorage("coracle", 6, defaultStorageAdapters)
   ready.then(() => Promise.all(initialRelays.map(url => loadRelay(url))))
 }
 
