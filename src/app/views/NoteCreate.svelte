@@ -3,6 +3,7 @@
   import {last} from "@welshman/lib"
   import {now, own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     createEvent,
     toNostrURI,
@@ -11,15 +12,7 @@
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
-  import {
-    session,
-    thunkIsComplete,
-    Router,
-    tagPubkey,
-    signer,
-    abortThunk,
-    addMaximalFallbacks,
-  } from "@welshman/app"
+  import {session, thunkIsComplete, tagPubkey, signer, abortThunk} from "@welshman/app"
   import {requestDvmResponse} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"

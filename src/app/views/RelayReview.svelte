@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Router, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"

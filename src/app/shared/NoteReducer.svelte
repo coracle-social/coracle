@@ -1,6 +1,7 @@
 <script lang="ts">
-  import {insert, addToMapKey, parseJson} from "@welshman/lib"
+  import {insertAt, addToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     getIdOrAddress,
     getIdFilters,
@@ -9,7 +10,7 @@
     verifyEvent,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {Router, repository, addMaximalFallbacks} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {isEventMuted, myLoad} from "src/engine"
   import {getValidZap} from "src/app/util"
@@ -100,7 +101,7 @@
     if (shouldSort) {
       for (let i = 0; i < items.length; i++) {
         if (timestamps.get(getIdOrAddress(items[i])) < original.created_at) {
-          items = insert(i, event, items)
+          items = insertAt(i, event, items)
           inserted = true
           break
         }

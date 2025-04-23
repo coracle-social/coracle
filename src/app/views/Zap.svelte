@@ -2,16 +2,9 @@
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
   import {sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
   import {createEvent, ZAP_REQUEST} from "@welshman/util"
+  import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
   import {Nip01Signer} from "@welshman/signer"
-  import {
-    signer,
-    displayProfileByPubkey,
-    Router,
-    loadZapper,
-    loadProfile,
-    addMinimalFallbacks,
-    addMaximalFallbacks,
-  } from "@welshman/app"
+  import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"

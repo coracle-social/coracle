@@ -26,7 +26,6 @@ import {
   signer,
   tracker,
   appContext,
-  routerContext,
   defaultStorageAdapters,
 } from "@welshman/app"
 import {
@@ -45,6 +44,7 @@ import {
   always,
   tryCatch,
 } from "@welshman/lib"
+import {routerContext} from "@welshman/router"
 import type {Socket, RequestOptions} from "@welshman/net"
 import {
   SocketEvent,
@@ -782,7 +782,7 @@ if (!db) {
   })
 
   // Monitor notices
-  Pool.getSingleton().subscribe((socket: Socket) => {
+  Pool.get().subscribe((socket: Socket) => {
     socket.on(SocketEvent.Receive, (message, url) => {
       if (noticeVerbs.includes(message[0])) {
         subscriptionNotices.update($notices => {

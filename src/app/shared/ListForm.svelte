@@ -10,7 +10,8 @@
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {topicSearch, Router, tagPubkey, relaySearch, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {topicSearch, tagPubkey, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"

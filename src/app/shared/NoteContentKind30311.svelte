@@ -2,7 +2,7 @@
   import {fromPairs} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
-  import {Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Anchor from "src/partials/Anchor.svelte"

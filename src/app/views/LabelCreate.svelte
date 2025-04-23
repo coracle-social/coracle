@@ -1,6 +1,7 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
-  import {pubkey, Router, topicSearch, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {pubkey, topicSearch} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

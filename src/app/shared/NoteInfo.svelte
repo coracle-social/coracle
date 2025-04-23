@@ -3,7 +3,7 @@
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
-  import {repository, Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import type {TrustedEvent, Handler} from "@welshman/util"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {
@@ -13,6 +13,7 @@
     getPubkeyTagValues,
     ZAP_RESPONSE,
   } from "@welshman/util"
+  import {repository} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
   import {isLike, replyKinds} from "src/util/nostr"

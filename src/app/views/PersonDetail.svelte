@@ -14,6 +14,7 @@
     getTagValues,
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     deriveProfile,
     deriveHandleForPubkey,
@@ -31,8 +32,6 @@
     tagPubkey,
     repository,
     pinsByPubkey,
-    Router,
-    addMaximalFallbacks,
   } from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {ensureProto, toTitle} from "src/util/misc"

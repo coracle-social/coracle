@@ -25,13 +25,13 @@
     ConnectionType.UnstableConnection,
   ]
 
-  $: connections = Array.from(Pool.getSingleton()._data.keys()).filter(url =>
+  $: connections = Array.from(Pool.get()._data.keys()).filter(url =>
     selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
   )
 
   function fetchConnectionStatus() {
     const newConnectionStatus: Map<ConnectionType, Set<string>> = new Map()
-    for (const [url, socket] of Pool.getSingleton()._data.entries()) {
+    for (const [url, socket] of Pool.get()._data.entries()) {
       addToMapKey(newConnectionStatus, getSocketStatus(socket), url)
     }
     connectionsStatus = newConnectionStatus

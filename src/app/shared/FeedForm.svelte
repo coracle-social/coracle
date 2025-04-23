@@ -1,6 +1,7 @@
 <script lang="ts">
   import {getAddress} from "@welshman/util"
-  import {pubkey, Router, signer, displayProfileByPubkey, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"

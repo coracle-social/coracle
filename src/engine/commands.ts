@@ -10,9 +10,6 @@ import {
   tagPubkey,
   userInboxRelaySelections,
   userRelaySelections,
-  Router,
-  addMaximalFallbacks,
-  addMinimalFallbacks,
 } from "@welshman/app"
 import {
   identity,
@@ -31,6 +28,7 @@ import {
 } from "@welshman/lib"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
+import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
   Address,
   FEEDS,

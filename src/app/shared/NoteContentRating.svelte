@@ -1,7 +1,8 @@
 <script lang="ts">
   import {switcher} from "@welshman/lib"
   import {getTag, displayRelayUrl} from "@welshman/util"
-  import {displayProfileByPubkey, Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {displayProfileByPubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"

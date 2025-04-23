@@ -1,7 +1,8 @@
 <script lang="ts">
   import {identity, equals} from "@welshman/lib"
   import {MUTES} from "@welshman/util"
-  import {topicSearch, Router, tagPubkey, addMaximalFallbacks} from "@welshman/app"
+  import {addMaximalFallbacks, Router} from "@welshman/router"
+  import {topicSearch, tagPubkey} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"

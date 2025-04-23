@@ -5,6 +5,7 @@
   import {derived} from "svelte/store"
   import {sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     deriveZapper,
     deriveZapperForPubkey,
@@ -17,8 +18,6 @@
     unmute,
     pin,
     unpin,
-    Router,
-    addMaximalFallbacks,
   } from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"

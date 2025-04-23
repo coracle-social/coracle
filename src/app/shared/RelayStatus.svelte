@@ -10,7 +10,7 @@
 
   onMount(() => {
     const interval = setInterval(() => {
-      status = getSocketStatus(Pool.getSingleton().get(url))
+      status = getSocketStatus(Pool.get().get(url))
     }, 800)
 
     return () => {

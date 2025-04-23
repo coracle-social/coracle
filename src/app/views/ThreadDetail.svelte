@@ -3,7 +3,7 @@
   import {identity, sortBy, uniqBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"

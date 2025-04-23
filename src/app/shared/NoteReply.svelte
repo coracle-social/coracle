@@ -2,13 +2,12 @@
   import {onDestroy} from "svelte"
   import {without, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     session,
-    Router,
     displayProfileByPubkey,
     tagEventForReply,
     tagEventForComment,
-    addMaximalFallbacks,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {own, hash} from "@welshman/signer"

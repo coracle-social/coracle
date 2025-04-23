@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import {parseJson} from "src/util/misc"
   import {themeBackgroundGradient} from "src/partials/state"
   import Card from "src/partials/Card.svelte"

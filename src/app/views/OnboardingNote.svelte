@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Router, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {NOTE} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import {createAndPublish} from "src/engine"

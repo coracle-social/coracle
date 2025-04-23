@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     pubkey,
     relays,
@@ -14,8 +15,6 @@
     deriveInboxRelaySelections,
     getWriteRelayUrls,
     relaySelectionsByPubkey,
-    Router,
-    addMaximalFallbacks,
   } from "@welshman/app"
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
   import {createScroller, displayList} from "src/util/misc"

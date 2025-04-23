@@ -8,6 +8,7 @@ import {
   getIdFilters,
   getListTags,
 } from "@welshman/util"
+import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   pubkey,
   loadZapper,
@@ -18,8 +19,6 @@ import {
   loadMutes,
   getFollows,
   loadInboxRelaySelections,
-  Router,
-  addMaximalFallbacks,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"

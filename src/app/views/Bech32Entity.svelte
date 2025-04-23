@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {loadHandle, Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {loadHandle} from "@welshman/app"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Redirect from "src/app/shared/Redirect.svelte"

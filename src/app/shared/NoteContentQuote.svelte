@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Address} from "@welshman/util"
-  import {deriveProfileDisplay, addMaximalFallbacks, Router} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {deriveProfileDisplay} from "@welshman/app"
   import {headerlessKinds} from "src/util/nostr"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"

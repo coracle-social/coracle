@@ -1,6 +1,6 @@
 <script lang="ts">
   import {getReplyTagValues, getIdOrAddress, type TrustedEvent} from "@welshman/util"
-  import {Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import {formatTimestamp} from "src/util/misc"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"

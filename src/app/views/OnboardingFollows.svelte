@@ -1,7 +1,8 @@
 <script lang="ts">
   import {fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
-  import {relaySearch, profileSearch, Router, tagPubkey, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {relaySearch, profileSearch, tagPubkey} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"

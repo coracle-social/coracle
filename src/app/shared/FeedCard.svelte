@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
   import {remove} from "@welshman/lib"
-  import {repository, Router, pubkey} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {repository, pubkey} from "@welshman/app"
   import {
     NAMED_BOOKMARKS,
     toNostrURI,

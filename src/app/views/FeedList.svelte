@@ -1,5 +1,6 @@
 <script lang="ts">
   import {sortBy, uniq, flatten, batch, uniqBy} from "@welshman/lib"
+  import {Router} from "@welshman/router"
   import {
     FEED,
     FEEDS,
@@ -10,7 +11,7 @@
     Address,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {repository, Router} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"

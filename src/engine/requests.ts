@@ -2,6 +2,7 @@ import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
 import type {Feed} from "@welshman/feeds"
 import {FeedController} from "@welshman/feeds"
+import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   uniq,
   without,
@@ -45,8 +46,6 @@ import {
   requestDVM,
   getPubkeysForScope,
   getPubkeysForWOTRange,
-  Router,
-  addMaximalFallbacks,
   makeFeedRequestHandler,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {repository, Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {repository} from "@welshman/app"
   import {commaFormat, createScroller, formatTimestamp} from "src/util/misc"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"

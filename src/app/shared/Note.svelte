@@ -10,7 +10,8 @@
     REACTION,
     ZAP_RESPONSE,
   } from "@welshman/util"
-  import {thunks, Router, pubkey, addMaximalFallbacks} from "@welshman/app"
+  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {thunks, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
