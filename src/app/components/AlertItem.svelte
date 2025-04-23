@@ -45,15 +45,17 @@
 </script>
 
 <div class="flex items-start justify-between gap-4">
-  <Button class="py-1" onclick={startDelete}>
-    <Icon icon="trash-bin-2" />
-  </Button>
-  <div class="flex-inline gap-1">
-    {cron?.endsWith("1") ? "Weekly" : "Daily"} alert for
-    {displayList(types)} on
-    <Link class="link" href={makeSpacePath(relay)}>
-      {displayRelayUrl(relay)}
-    </Link>, sent via {channel}.
+  <div class="flex items-start gap-4">
+    <Button class="py-1" onclick={startDelete}>
+      <Icon icon="trash-bin-2" />
+    </Button>
+    <div class="flex-inline gap-1">
+      {cron?.endsWith("1") ? "Weekly" : "Daily"} alert for
+      {displayList(types)} on
+      <Link class="link" href={makeSpacePath(relay)}>
+        {displayRelayUrl(relay)}
+      </Link>, sent via {channel}.
+    </div>
   </div>
   {#if status}
     {@const statusText = getTagValue("status", status.tags) || "error"}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {preventDefault} from "@lib/html"
-  import {randomInt} from "@welshman/lib"
+  import {randomInt, TIMEZONE} from "@welshman/lib"
   import {displayRelayUrl, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import type {Nip46ResponseWithResult} from "@welshman/signer"
@@ -18,11 +18,8 @@
   import {publishAlert} from "@app/commands"
   import {pushToast} from "@app/toast"
   import {pushModal} from "@app/modal"
-  const timezone = new Date()
-    .toString()
-    .match(/GMT[^\s]+/)![0]
-    .slice(3)
-  const timezoneOffset = parseInt(timezone) / 100
+
+  const timezoneOffset = parseInt(TIMEZONE.slice(3)) / 100
   const minute = randomInt(0, 59)
   const hour = (17 - timezoneOffset) % 24
   const WEEKLY = `0 ${minute} ${hour} * * 1`

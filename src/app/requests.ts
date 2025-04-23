@@ -9,7 +9,7 @@ import {
   int,
   YEAR,
   DAY,
-  insert,
+  insertAt,
   sortBy,
   assoc,
   now,
@@ -113,7 +113,7 @@ export const makeFeed = ({
     buffer.update($buffer => {
       for (let i = 0; i < $buffer.length; i++) {
         if ($buffer[i].id === event.id) return $buffer
-        if ($buffer[i].created_at < event.created_at) return insert(i, event, $buffer)
+        if ($buffer[i].created_at < event.created_at) return insertAt(i, event, $buffer)
       }
 
       return [...$buffer, event]
@@ -225,7 +225,7 @@ export const makeCalendarFeed = ({
     events.update($events => {
       for (let i = 0; i < $events.length; i++) {
         if ($events[i].id === event.id) return $events
-        if (getStart($events[i]) > start) return insert(i, event, $events)
+        if (getStart($events[i]) > start) return insertAt(i, event, $events)
       }
 
       return [...$events.filter(e => getAddress(e) !== address), event]

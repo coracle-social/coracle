@@ -50,14 +50,7 @@
   import {setupAnalytics} from "@app/analytics"
   import {nsecDecode} from "@lib/util"
   import {theme} from "@app/theme"
-  import {
-    INDEXER_RELAYS,
-    ALERT,
-    ALERT_STATUS,
-    userMembership,
-    ensureUnwrapped,
-    canDecrypt,
-  } from "@app/state"
+  import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
   import {loadUserData, listenForNotifications} from "@app/requests"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
@@ -137,7 +130,7 @@
         }
       })
 
-      initStorage("flotilla", 8, {
+      await initStorage("flotilla", 8, {
         ...defaultStorageAdapters,
         events: new EventsStorageAdapter({
           name: "events",
@@ -145,16 +138,14 @@
           repository,
           rankEvent: (e: TrustedEvent) => {
             if ([PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS].includes(e.kind)) return 1
-            if ([EVENT_TIME, THREAD, MESSAGE, WRAP, ALERT, ALERT_STATUS].includes(e.kind))
-              return 0.9
+            if ([EVENT_TIME, THREAD, MESSAGE, WRAP].includes(e.kind)) return 0.9
 
             return 0
           },
         }),
-      }).then(async () => {
-        await sleep(300)
-        ready.resolve()
       })
+
+      sleep(300).then(() => ready.resolve())
 
       defaultSocketPolicies.push(
         makeSocketPolicyAuth({
