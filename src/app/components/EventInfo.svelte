@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
-  import {Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import type {TrustedEvent} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"

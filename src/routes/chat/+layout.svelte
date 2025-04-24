@@ -1,7 +1,8 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {WRAP} from "@welshman/util"
-  import {pubkey, Router} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
   import Button from "@lib/components/Button.svelte"

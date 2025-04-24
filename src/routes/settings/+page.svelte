@@ -1,6 +1,7 @@
 <script lang="ts">
   import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
-  import {pubkey, Router, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"

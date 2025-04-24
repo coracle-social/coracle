@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {parseJson, nthEq} from "@welshman/lib"
+  import {parseJson, displayList, nthEq} from "@welshman/lib"
   import {
     getAddress,
     getTagValue,
@@ -9,7 +9,6 @@
     MESSAGE,
     THREAD,
   } from "@welshman/util"
-  import {displayList} from "@lib/util"
   import Link from "@lib/components/Link.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"

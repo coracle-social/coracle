@@ -26,7 +26,7 @@
       return pushToast({theme: "error", message: error})
     }
 
-    const socket = Pool.getSingleton().get(url)
+    const socket = Pool.get().get(url)
 
     if (socket.auth.status === AuthStatus.None) {
       pushModal(SpaceJoinConfirm, {url}, {replaceState: true})

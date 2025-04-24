@@ -9,7 +9,8 @@
     isPublishedProfile,
     uniqTags,
   } from "@welshman/util"
-  import {Router, pubkey, profilesByPubkey, publishThunk} from "@welshman/app"
+  import {Router} from "@welshman/router"
+  import {pubkey, profilesByPubkey, publishThunk} from "@welshman/app"
   import Button from "@lib/components/Button.svelte"
   import ProfileEditForm from "@app/components/ProfileEditForm.svelte"
   import {clearModals} from "@app/modal"

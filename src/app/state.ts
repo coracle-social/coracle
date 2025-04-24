@@ -43,6 +43,7 @@ import {
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59, decrypt} from "@welshman/signer"
+import {routerContext, Router} from "@welshman/router"
 import {
   pubkey,
   repository,
@@ -60,9 +61,7 @@ import {
   thunks,
   walkThunks,
   signer,
-  Router,
   makeOutboxLoader,
-  routerContext,
   appContext,
 } from "@welshman/app"
 import type {Thunk, Relay} from "@welshman/app"

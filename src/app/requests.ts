@@ -35,7 +35,7 @@ import {
   pull,
   hasNegentropy,
   thunkQueue,
-  createFeedController,
+  makeFeedController,
   loadRelay,
   loadMutes,
   loadFollows,
@@ -102,7 +102,7 @@ export const makeFeed = ({
   const events = writable(initialEvents)
   const controller = new AbortController()
 
-  for (const event of initialEvents) {
+  const markEvent = (event: TrustedEvent) => {
     if (!seen.has(event.id)) {
       seen.add(event.id)
       onEvent?.(event)
@@ -110,19 +110,32 @@ export const makeFeed = ({
   }
 
   const insertEvent = (event: TrustedEvent) => {
-    buffer.update($buffer => {
-      for (let i = 0; i < $buffer.length; i++) {
-        if ($buffer[i].id === event.id) return $buffer
-        if ($buffer[i].created_at < event.created_at) return insertAt(i, event, $buffer)
+    let handled = false
+
+    events.update($events => {
+      for (let i = 0; i < $events.length; i++) {
+        if ($events[i].id === event.id) return $events
+        if ($events[i].created_at < event.created_at) {
+          handled = true
+          return insertAt(i, event, $events)
+        }
       }
 
-      return [...$buffer, event]
+      return $events
     })
 
-    if (!seen.has(event.id)) {
-      seen.add(event.id)
-      onEvent?.(event)
+    if (!handled) {
+      buffer.update($buffer => {
+        for (let i = 0; i < $buffer.length; i++) {
+          if ($buffer[i].id === event.id) return $buffer
+          if ($buffer[i].created_at < event.created_at) return insertAt(i, event, $buffer)
+        }
+
+        return [...$buffer, event]
+      })
     }
+
+    markEvent(event)
   }
 
   const removeEvents = (ids: string[]) => {
@@ -144,12 +157,16 @@ export const makeFeed = ({
     }
   }
 
-  const ctrl = createFeedController({
+  const ctrl = makeFeedController({
     useWindowing: true,
     feed: makeIntersectionFeed(makeRelayFeed(...relays), feedFromFilters(feedFilters)),
     onEvent: insertEvent,
     onExhausted,
   })
+
+  for (const event of initialEvents) {
+    markEvent(event)
+  }
 
   request({
     relays,

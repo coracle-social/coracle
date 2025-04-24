@@ -13,6 +13,7 @@ overrides:
   '@welshman/feeds': link:../welshman/packages/feeds
   '@welshman/net': link:../welshman/packages/net
   '@welshman/relay': link:../welshman/packages/relay
+  '@welshman/router': link:../welshman/packages/router
   '@welshman/signer': link:../welshman/packages/signer
   '@welshman/store': link:../welshman/packages/store
   '@welshman/editor': link:../welshman/packages/editor
@@ -87,6 +88,9 @@ importers:
       '@welshman/relay':
         specifier: link:../welshman/packages/relay
         version: link:../welshman/packages/relay
+      '@welshman/router':
+        specifier: link:../welshman/packages/router
+        version: link:../welshman/packages/router
       '@welshman/signer':
         specifier: link:../welshman/packages/signer
         version: link:../welshman/packages/signer

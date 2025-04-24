@@ -33,6 +33,7 @@ import {
 import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
 import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, stamp} from "@welshman/signer"
+import {Router} from "@welshman/router"
 import {
   pubkey,
   signer,
@@ -53,7 +54,6 @@ import {
   dropSession,
   tagEventForComment,
   tagEventForQuote,
-  Router,
   thunkIsComplete,
 } from "@welshman/app"
 import type {Thunk} from "@welshman/app"
@@ -259,7 +259,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
 // Relay access
 
 export const checkRelayAccess = async (url: string, claim = "") => {
-  const socket = Pool.getSingleton().get(url)
+  const socket = Pool.get().get(url)
 
   await socket.auth.attemptAuth(signer.get().sign)
 
@@ -291,7 +291,7 @@ export const checkRelayProfile = async (url: string) => {
 }
 
 export const checkRelayConnection = async (url: string) => {
-  const socket = Pool.getSingleton().get(url)
+  const socket = Pool.get().get(url)
 
   socket.attemptToOpen()
 
@@ -306,7 +306,7 @@ export const checkRelayConnection = async (url: string) => {
 }
 
 export const checkRelayAuth = async (url: string, timeout = 3000) => {
-  const socket = Pool.getSingleton().get(url)
+  const socket = Pool.get().get(url)
   const okStatuses = [AuthStatus.None, AuthStatus.Ok]
 
   await socket.auth.attemptAuth(signer.get().sign)

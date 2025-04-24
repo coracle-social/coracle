@@ -18,7 +18,7 @@
   const back = () => history.back()
 
   const next = () => {
-    if (!error && Pool.getSingleton().get(url).auth.status === AuthStatus.None) {
+    if (!error && Pool.get().get(url).auth.status === AuthStatus.None) {
       pushModal(SpaceVisitConfirm, {url}, {replaceState: true})
     } else {
       confirmSpaceVisit(url)
