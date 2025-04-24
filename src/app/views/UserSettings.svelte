@@ -85,14 +85,12 @@
         faster, but will require more bandwidth and processing power.
       </p>
     </Field>
-    {#if env.PLATFORM_RELAYS.length === 0}
-      <FieldInline label="Authenticate with relays">
-        <Toggle bind:value={values.auto_authenticate} />
-        <p slot="info">
-          Allows {appName} to authenticate with relays that have access controls automatically.
-        </p>
-      </FieldInline>
-    {/if}
+    <FieldInline label="Authenticate with relays">
+      <Toggle bind:value={values.auto_authenticate} />
+      <p slot="info">
+        Allows {appName} to authenticate with relays that have access controls automatically.
+      </p>
+    </FieldInline>
     <Field label="Upload Type">
       <p slot="info">
         Choose an upload type for your files, default is nip-96 but blossom is also supported.

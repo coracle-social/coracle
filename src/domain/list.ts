@@ -93,13 +93,13 @@ export const readUserList = (event: TrustedEvent) => {
 export const createUserList = ({kind, title, description, identifier, tags}: UserList) => {
   const data = {title, alt: title, d: identifier, description}
 
-  return {kind, tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
+  return {kind, content: "", tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
 }
 
 export const editUserList = ({kind, title, description, identifier, tags}: UserList) => {
   const data = {title, alt: title, d: identifier, description}
 
-  return {kind, tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
+  return {kind, content: "", tags: tags.filter(t => !data[t[0]]).concat(Object.entries(data))}
 }
 
 export const displayUserList = (list?: UserList) => {

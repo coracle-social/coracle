@@ -120,7 +120,7 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptio
 
         attempted = true
 
-        myLoad({...request, skipCache: true, forcePlatform: false, relays, filters})
+        myLoad({...request, skipCache: true, relays, filters})
       }
 
       return events[0]
@@ -152,7 +152,6 @@ export const createPeopleLoader = ({
         myRequest({
           autoClose: true,
           skipCache: true,
-          forcePlatform: false,
           relays: Router.get().Search().getUrls(),
           filters: [{kinds: [0], search: term, limit: 100}],
           onEvent,
@@ -209,7 +208,6 @@ export const listenForNotifications = () => {
 export const loadLabels = (authors: string[]) =>
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().FromPubkeys(authors).policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
@@ -217,7 +215,6 @@ export const loadLabels = (authors: string[]) =>
 export const loadDeletes = () =>
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
   })
@@ -225,7 +222,6 @@ export const loadDeletes = () =>
 export const loadFeedsAndLists = () =>
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       addSinceToFilter({
@@ -254,7 +250,6 @@ export const listenForMessages = (pubkeys: string[]) => {
 
   myRequest({
     skipCache: true,
-    forcePlatform: false,
     signal: controller.signal,
     relays: Router.get().UserInbox().getUrls(),
     filters: [
@@ -269,7 +264,6 @@ export const listenForMessages = (pubkeys: string[]) => {
 export const loadHandlers = () =>
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       addSinceToFilter({

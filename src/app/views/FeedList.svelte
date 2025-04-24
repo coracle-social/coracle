@@ -69,7 +69,6 @@
 
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().FromPubkeys(authors).getUrls(),
     filters: [addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors})],
   })

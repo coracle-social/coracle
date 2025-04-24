@@ -40,7 +40,7 @@
 
   const tryDefaultRelays = () => {
     // Pull out all the stops to try to find the user's profile
-    searchRelays([...env.DEFAULT_RELAYS, ...env.PLATFORM_RELAYS, ...env.INDEXER_RELAYS])
+    searchRelays([...env.DEFAULT_RELAYS, ...env.INDEXER_RELAYS])
   }
 
   const openModal = m => {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {getAddress} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {pubkey, signer, displayProfileByPubkey} from "@welshman/app"
+  import {pubkey, signer, displayProfileByPubkey, publishThunk} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -13,7 +13,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
-  import {deleteEvent, createAndPublish, removeFeedFavorite} from "src/engine"
+  import {deleteEvent, removeFeedFavorite} from "src/engine"
 
   export let feed
   export let exit
@@ -70,8 +70,8 @@
 
   const saveFeed = async () => {
     const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
-    const template = draft.event ? editFeed(draft) : createFeed(draft)
-    const thunk = await createAndPublish({...template, relays})
+    const event = draft.event ? editFeed(draft) : createFeed(draft)
+    const thunk = await publishThunk({event, relays})
 
     showInfo("Your feed has been saved!")
 

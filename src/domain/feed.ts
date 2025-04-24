@@ -61,6 +61,7 @@ export const readFeed = (event: TrustedEvent) => {
 
 export const createFeed = ({identifier, definition, title, description}: Feed) => ({
   kind: FEED,
+  content: "",
   tags: [
     ["d", identifier],
     ["alt", title],
@@ -72,6 +73,7 @@ export const createFeed = ({identifier, definition, title, description}: Feed) =
 
 export const editFeed = (feed: PublishedFeed) => ({
   kind: FEED,
+  content: feed.event.content,
   tags: Object.entries({
     ...fromPairs(feed.event.tags),
     title: feed.title,

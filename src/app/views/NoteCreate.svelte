@@ -12,7 +12,14 @@
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
-  import {session, thunkIsComplete, tagPubkey, signer, abortThunk} from "@welshman/app"
+  import {
+    session,
+    publishThunk,
+    thunkIsComplete,
+    tagPubkey,
+    signer,
+    abortThunk,
+  } from "@welshman/app"
   import {requestDvmResponse} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"
@@ -32,7 +39,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, getClientTags, publish, sign, userSettings} from "src/engine"
+  import {env, getClientTags, sign, userSettings} from "src/engine"
 
   export let quote = null
   export let pubkey = null
@@ -128,7 +135,7 @@
         }),
       )
 
-      thunk = publish({
+      thunk = publishThunk({
         event: dvmEvent,
         relays: env.DVM_RELAYS,
         delay: $userSettings.send_delay,
@@ -151,7 +158,7 @@
     } else {
       router.clearModals()
 
-      thunk = publish({relays, event: signedEvent, delay: $userSettings.send_delay})
+      thunk = publishThunk({relays, event: signedEvent, delay: $userSettings.send_delay})
     }
 
     new Promise<void>(resolve => {

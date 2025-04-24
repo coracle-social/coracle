@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {NOTE} from "@welshman/util"
+  import {NOTE, makeEvent} from "@welshman/util"
+  import {publishThunk} from "@welshman/app"
   import EditorContent from "src/app/editor/EditorContent.svelte"
-  import {createAndPublish} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import {makeEditor} from "src/app/editor"
 
@@ -22,10 +22,8 @@
 
       // Publish our welcome note
       if (content) {
-        await createAndPublish({
-          kind: NOTE,
-          content,
-          tags: editor.storage.nostr.getEditorTags(),
+        await publishThunk({
+          event: makeEvent(NOTE, {content, tags: editor.storage.nostr.getEditorTags()}),
           relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
         })
       }

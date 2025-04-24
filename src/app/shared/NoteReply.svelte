@@ -8,6 +8,7 @@
     displayProfileByPubkey,
     tagEventForReply,
     tagEventForComment,
+    publishThunk,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {own, hash} from "@welshman/signer"
@@ -22,7 +23,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {getClientTags, publish, sign, userSettings} from "src/engine"
+  import {getClientTags, sign, userSettings} from "src/engine"
   import {makeEditor} from "src/app/editor"
 
   export let parent
@@ -108,7 +109,7 @@
       hashedEvent = await pow.result
     }
 
-    const thunk = publish({
+    const thunk = publishThunk({
       event: await sign(hashedEvent, options),
       relays: Router.get().PublishEvent(hashedEvent).policy(addMaximalFallbacks).getUrls(),
       delay: $userSettings.send_delay,

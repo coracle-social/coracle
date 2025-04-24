@@ -11,7 +11,7 @@
     displayRelayUrl,
   } from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {topicSearch, tagPubkey, relaySearch} from "@welshman/app"
+  import {topicSearch, publishThunk, tagPubkey, relaySearch} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -21,7 +21,7 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {createAndPublish, deleteEvent} from "src/engine"
+  import {deleteEvent} from "src/engine"
   import {KindSearch, createUserList, displayUserList, editUserList} from "src/domain"
 
   export let list
@@ -44,8 +44,8 @@
 
   const submit = async () => {
     const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
-    const template = list.event ? editUserList(list) : createUserList(list)
-    const thunk = await createAndPublish({...template, relays})
+    const event = list.event ? editUserList(list) : createUserList(list)
+    const thunk = await publishThunk({event, relays})
 
     showInfo("Your list has been saved!")
     exit(thunk.options.event)

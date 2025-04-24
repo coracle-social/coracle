@@ -27,7 +27,7 @@
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {deriveValidZaps} from "src/app/util"
-  import {env, trackerStore, sortEventsDesc} from "src/engine"
+  import {trackerStore, sortEventsDesc} from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let event: TrustedEvent
@@ -92,7 +92,7 @@
     {/each}
   </div>
 {/if}
-{#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
+{#if $seenOn?.length > 0}
   <h1 class="staatliches text-2xl">Relays</h1>
   <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
   <div class="flex flex-col gap-2">

@@ -30,6 +30,7 @@
     getReplyFilters,
     isChildOf,
   } from "@welshman/util"
+  import {publishThunk} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {isLike, replyKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
@@ -47,7 +48,6 @@
   import {router, deriveValidZaps} from "src/app/util"
   import {
     env,
-    publish,
     deriveHandlersForKind,
     signAndPublish,
     deleteEvent,
@@ -120,7 +120,7 @@
   }
 
   const broadcast = () => {
-    publish({
+    publishThunk({
       event: asSignedEvent(event as SignedEvent),
       relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     })
@@ -200,7 +200,7 @@
       actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
     }
 
-    if (env.PLATFORM_RELAYS.length === 0 && isSignedEvent(event)) {
+    if (isSignedEvent(event)) {
       actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
     }
 
@@ -320,7 +320,7 @@
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
-    {#if $seenOn?.length > 0 && (env.PLATFORM_RELAYS.length === 0 || env.PLATFORM_RELAYS.length > 1)}
+    {#if $seenOn?.length > 0}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>

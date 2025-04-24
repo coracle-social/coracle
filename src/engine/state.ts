@@ -1,4 +1,3 @@
-import type {ThunkOptions} from "@welshman/app"
 import {
   db,
   displayProfileByPubkey,
@@ -18,7 +17,6 @@ import {
   plaintext,
   pinsByPubkey,
   pubkey,
-  publishThunk,
   relay,
   repository,
   session,
@@ -78,7 +76,6 @@ import {
   NAMED_BOOKMARKS,
   WRAP,
   asDecryptedEvent,
-  createEvent,
   getAddress,
   getAddressTagValues,
   getIdentifier,
@@ -110,7 +107,6 @@ import {
   subscriptionNotices,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
-import logger from "src/util/logger"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {derived, writable} from "svelte/store"
@@ -131,7 +127,6 @@ export const env = {
   BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
-  PLATFORM_RELAYS: fromCsv(import.meta.env.VITE_PLATFORM_RELAYS).map(normalizeRelayUrl) as string[],
   PLATFORM_ZAP_SPLIT: parseFloat(import.meta.env.VITE_PLATFORM_ZAP_SPLIT) as number,
   SEARCH_RELAYS: fromCsv(import.meta.env.VITE_SEARCH_RELAYS).map(normalizeRelayUrl) as string[],
   SIGNER_RELAYS: fromCsv(import.meta.env.VITE_SIGNER_RELAYS).map(normalizeRelayUrl) as string[],
@@ -455,10 +450,6 @@ export const forceRelays = (relays: string[], forceRelays: string[]) =>
 export const withRelays = (relays: string[], otherRelays: string[]) =>
   uniq([...relays, ...otherRelays])
 
-export const forcePlatformRelays = (relays: string[]) => forceRelays(relays, env.PLATFORM_RELAYS)
-
-export const withPlatformRelays = (relays: string[]) => withRelays(relays, env.PLATFORM_RELAYS)
-
 export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER_RELAYS)
 
 // Lists
@@ -630,14 +621,9 @@ export const collectionSearch = derived(
 
 export type MyRequestOptions = RequestOptions & {
   skipCache?: boolean
-  forcePlatform?: boolean
 }
 
-export const myRequest = ({forcePlatform = true, skipCache, ...options}: MyRequestOptions) => {
-  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform) {
-    options.relays = env.PLATFORM_RELAYS
-  }
-
+export const myRequest = ({skipCache, ...options}: MyRequestOptions) => {
   if (!skipCache) {
     options.relays = [...options.relays, LOCAL_RELAY_URL]
   }
@@ -645,34 +631,12 @@ export const myRequest = ({forcePlatform = true, skipCache, ...options}: MyReque
   return request(options)
 }
 
-export const myLoad = ({forcePlatform = true, skipCache, ...options}: MyRequestOptions) => {
-  if (env.PLATFORM_RELAYS.length > 0 && forcePlatform) {
-    options.relays = env.PLATFORM_RELAYS
-  }
-
+export const myLoad = ({skipCache, ...options}: MyRequestOptions) => {
   if (!skipCache) {
     options.relays = [...options.relays, LOCAL_RELAY_URL]
   }
 
   return load(options)
-}
-
-export type MyPublishOptions = ThunkOptions & {
-  forcePlatform?: boolean
-}
-
-export const publish = ({forcePlatform = true, ...request}: MyPublishOptions) => {
-  request.relays = forcePlatform
-    ? forcePlatformRelays(request.relays)
-    : withPlatformRelays(request.relays)
-
-  // Make sure it gets published to our repository as well. We do it via our local
-  // relay rather than directly so that listening subscriptions get notified.
-  request.relays = uniq(request.relays.concat(LOCAL_RELAY_URL))
-
-  logger.info(`Publishing event`, request)
-
-  return publishThunk(request)
 }
 
 export const sign = (
@@ -688,35 +652,6 @@ export const sign = (
   }
 
   return signer.get().sign(template)
-}
-
-export type CreateAndPublishOpts = {
-  kind: number
-  relays: string[]
-  tags?: string[][]
-  content?: string
-  created_at?: number
-  anonymous?: boolean
-  sk?: string
-  timeout?: number
-  forcePlatform?: boolean
-}
-
-export const createAndPublish = async ({
-  kind,
-  relays,
-  tags = [],
-  content = "",
-  created_at = now(),
-  anonymous,
-  sk,
-  timeout,
-  forcePlatform = true,
-}: CreateAndPublishOpts) => {
-  const template = createEvent(kind, {content, tags, created_at})
-  const event = await sign(template, {anonymous, sk})
-
-  return publish({event, relays, timeout, forcePlatform})
 }
 
 export const getClientTags = () => {
@@ -750,11 +685,10 @@ if (!db) {
     ...env.DEFAULT_RELAYS,
     ...env.DVM_RELAYS,
     ...env.INDEXER_RELAYS,
-    ...env.PLATFORM_RELAYS,
     ...env.SEARCH_RELAYS,
   ]
 
-  let autoAuthenticate = env.PLATFORM_RELAYS.length > 0
+  let autoAuthenticate = false
 
   defaultSocketPolicies.push(
     makeSocketPolicyAuth({
@@ -774,10 +708,7 @@ if (!db) {
 
   // Sync user settings
   userSettings.subscribe($settings => {
-    if (env.PLATFORM_RELAYS.length === 0) {
-      autoAuthenticate = $settings.auto_authenticate
-    }
-
+    autoAuthenticate = $settings.auto_authenticate
     appContext.dufflepudUrl = getSetting("dufflepud_url")
   })
 

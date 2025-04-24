@@ -22,7 +22,7 @@
     .Quote(note, idOrAddress, relayHints)
     .policy(addMaximalFallbacks)
     .getUrls()
-  const quote = deriveEvent(idOrAddress, {relays, forcePlatform: false})
+  const quote = deriveEvent(idOrAddress, {relays})
 
   const openQuote = e => {
     const noteId = value.id || $quote?.id

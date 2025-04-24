@@ -109,7 +109,6 @@
       event = first(
         await myRequest({
           autoClose: true,
-          forcePlatform: false,
           relays: Router.get().FromRelays(relays).policy(addMaximalFallbacks).getUrls(),
           filters: getIdFilters([event.id]),
         }),

@@ -27,7 +27,6 @@
 
   myLoad({
     skipCache: true,
-    forcePlatform: false,
     relays: Router.get().FromPubkeys(authors).getUrls(),
     filters: [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors})],
   })

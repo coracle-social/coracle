@@ -23,7 +23,7 @@
   import MenuDesktopSecondary from "src/app/MenuDesktopSecondary.svelte"
   import {slowConnections} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
+  import {hasNewMessages, hasNewNotifications} from "src/engine"
 
   const {page} = router
 
@@ -83,19 +83,17 @@
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Anchor>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
-  {#if env.PLATFORM_RELAYS.length === 0}
-    <MenuDesktopItem
-      path="/settings/relays"
-      disabled={!$signer}
-      isActive={$page?.path.startsWith("/settings/relays")}>
-      <div class="relative inline-block">
-        Relays
-        {#if $slowConnections.length > 0}
-          <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
-        {/if}
-      </div>
-    </MenuDesktopItem>
-  {/if}
+  <MenuDesktopItem
+    path="/settings/relays"
+    disabled={!$signer}
+    isActive={$page?.path.startsWith("/settings/relays")}>
+    <div class="relative inline-block">
+      Relays
+      {#if $slowConnections.length > 0}
+        <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
+      {/if}
+    </div>
+  </MenuDesktopItem>
   <MenuDesktopItem
     path="/notifications"
     disabled={!$signer}

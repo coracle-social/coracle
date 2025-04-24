@@ -1,8 +1,8 @@
 <script lang="ts">
   import {identity, equals} from "@welshman/lib"
-  import {MUTES} from "@welshman/util"
+  import {MUTES, makeEvent} from "@welshman/util"
   import {addMaximalFallbacks, Router} from "@welshman/router"
-  import {topicSearch, tagPubkey} from "@welshman/app"
+  import {topicSearch, publishThunk, tagPubkey} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -16,7 +16,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {userSettings, publishSettings, userMutes, createAndPublish} from "src/engine"
+  import {userSettings, publishSettings, userMutes} from "src/engine"
 
   const values = {...$userSettings}
 
@@ -28,9 +28,8 @@
     }
 
     if (!equals(mutedPubkeys, Array.from($userMutes))) {
-      createAndPublish({
-        kind: MUTES,
-        tags: mutedPubkeys.map(pk => tagPubkey(pk)),
+      publishThunk({
+        event: makeEvent(MUTES, {tags: mutedPubkeys.map(pk => tagPubkey(pk))}),
         relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       })
     }

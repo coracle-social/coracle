@@ -1,13 +1,13 @@
 <script lang="ts">
   import type {Thunk} from "@welshman/app"
-  import {thunkUrlsWithStatus} from "@welshman/app"
+  import {thunkUrlsWithStatus, publishThunk} from "@welshman/app"
   import {remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
-  import {ensureUnwrapped, publish} from "src/engine"
+  import {ensureUnwrapped} from "src/engine"
   import Anchor from "src/partials/Anchor.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -21,7 +21,7 @@
   const promise = ensureUnwrapped(thunk.event)
 
   const retry = (url: string, event: TrustedEvent) =>
-    publish({relays: [url], event: thunk.event as SignedEvent})
+    publishThunk({relays: [url], event: thunk.event as SignedEvent})
 
   const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 

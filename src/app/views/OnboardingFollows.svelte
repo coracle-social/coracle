@@ -1,8 +1,8 @@
 <script lang="ts">
   import {fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
-  import {getPubkeyTagValues, getAddress, FOLLOWS} from "@welshman/util"
+  import {getPubkeyTagValues, getAddress, makeEvent, FOLLOWS} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {relaySearch, profileSearch, tagPubkey} from "@welshman/app"
+  import {relaySearch, publishThunk, profileSearch, tagPubkey} from "@welshman/app"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -11,7 +11,7 @@
   import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {createPeopleLoader, createAndPublish, setOutboxPolicies} from "src/engine"
+  import {createPeopleLoader, setOutboxPolicies} from "src/engine"
   import {quantify} from "src/util/misc"
 
   export let state
@@ -37,9 +37,8 @@
       await setOutboxPolicies(() => state.relays)
 
       // Publish follows
-      await createAndPublish({
-        kind: FOLLOWS,
-        tags: state.follows.map(tagPubkey),
+      await publishThunk({
+        event: makeEvent(FOLLOWS, {tags: state.follows.map(tagPubkey)}),
         relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
       })
     } finally {

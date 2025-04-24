@@ -9,7 +9,7 @@
   import MenuMobileItem from "src/app/MenuMobileItem.svelte"
   import {slowConnections, menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, hasNewMessages, hasNewNotifications} from "src/engine"
+  import {hasNewMessages, hasNewNotifications} from "src/engine"
 
   const closeSubMenu = () => {
     subMenu = null
@@ -64,18 +64,16 @@
       <MenuMobileItem stopPropagation on:click={openSettings}>
         <i class="fa fa-cog" /> Settings
       </MenuMobileItem>
-      {#if env.PLATFORM_RELAYS.length === 0}
-        <MenuMobileItem href="/settings/relays" disabled={!$signer} on:click={closeMenu}>
-          <i class="fa fa-server" />
-          <div class="relative inline-block">
-            Relays
-            {#if $slowConnections.length > 0}
-              <div
-                class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
-            {/if}
-          </div>
-        </MenuMobileItem>
-      {/if}
+      <MenuMobileItem href="/settings/relays" disabled={!$signer} on:click={closeMenu}>
+        <i class="fa fa-server" />
+        <div class="relative inline-block">
+          Relays
+          {#if $slowConnections.length > 0}
+            <div
+              class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
+          {/if}
+        </div>
+      </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/notifications" on:click={closeMenu}>
         <i class="fa fa-bell" />
         <div class="relative inline-block">

@@ -10,6 +10,7 @@ import {
   tagPubkey,
   userInboxRelaySelections,
   userRelaySelections,
+  publishThunk,
 } from "@welshman/app"
 import {
   identity,
@@ -31,13 +32,14 @@ import type {Profile, TrustedEvent} from "@welshman/util"
 import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
   Address,
+  DELETE,
   FEEDS,
   FOLLOWS,
   INBOX_RELAYS,
   PROFILE,
   RELAYS,
   addToListPublicly,
-  createEvent,
+  makeEvent,
   createProfile,
   editProfile,
   getAddress,
@@ -53,9 +55,7 @@ import crypto from "crypto"
 import {
   addClientTags,
   anonymous,
-  createAndPublish,
   getClientTags,
-  publish,
   sign,
   userFeedFavorites,
   withIndexers,
@@ -104,7 +104,7 @@ export const nip98Fetch = async (url, method, body = null) => {
   }
 
   const $signer = signer.get() || Nip01Signer.ephemeral()
-  const event = await $signer.sign(createEvent(27235, {tags}))
+  const event = await $signer.sign(makeEvent(27235, {tags}))
   const auth = btoa(JSON.stringify(event))
   const headers = {Authorization: `Nostr ${auth}`}
 
@@ -193,7 +193,7 @@ export const signAndPublish = async (template, {anonymous = false} = {}) => {
   const event = await sign(template, {anonymous})
   const relays = Router.get().PublishEvent(event).policy(addMaximalFallbacks).getUrls()
 
-  return await publish({event, relays})
+  return await publishThunk({event, relays})
 }
 
 // Deletes
@@ -209,11 +209,9 @@ export const publishDeletion = ({kind, address = null, id = null}) => {
     tags.push(["e", id])
   }
 
-  return createAndPublish({
-    tags,
-    kind: 5,
+  return publishThunk({
+    event: makeEvent(DELETE, {tags}),
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-    forcePlatform: false,
   })
 }
 
@@ -225,11 +223,11 @@ export const deleteEventByAddress = (address: string) =>
 
 // Profile
 
-export const publishProfile = (profile: Profile, {forcePlatform = false} = {}) => {
+export const publishProfile = (profile: Profile) => {
   const relays = withIndexers(Router.get().FromUser().getUrls())
   const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
 
-  return createAndPublish({...addClientTags(template), relays, forcePlatform})
+  return publishThunk({event: addClientTags(template), relays})
 }
 
 // Follows
@@ -248,20 +246,18 @@ export const follow = async (tag: string[]) =>
 
 export const removeFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
-  const template = await removeFromList(list, address).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({
-    ...template,
+  return publishThunk({
+    event: await removeFromList(list, address).reconcile(nip44EncryptToSelf),
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
   })
 }
 
 export const addFeedFavorite = async (address: string) => {
   const list = get(userFeedFavorites) || makeList({kind: FEEDS})
-  const template = await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf)
 
-  return createAndPublish({
-    ...template,
+  return publishThunk({
+    event: await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf),
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
   })
 }
@@ -269,21 +265,17 @@ export const addFeedFavorite = async (address: string) => {
 // Relays
 
 export const requestRelayAccess = async (url: string, claim: string) =>
-  createAndPublish({
-    kind: 28934,
-    forcePlatform: false,
-    tags: [["claim", claim]],
-    relays: [url],
-  })
+  publishThunk({event: makeEvent(28934, {tags: [["claim", claim]]}), relays: [url]})
 
 export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
   if (signer.get()) {
     const list = get(userRelaySelections) || makeList({kind: RELAYS})
 
-    createAndPublish({
-      kind: list.kind,
-      content: list.event?.content || "",
-      tags: modifyTags(list.publicTags),
+    publishThunk({
+      event: makeEvent(list.kind, {
+        content: list.event?.content || "",
+        tags: modifyTags(list.publicTags),
+      }),
       relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
     })
   } else {
@@ -294,10 +286,11 @@ export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string
 export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
   const list = get(userInboxRelaySelections) || makeList({kind: INBOX_RELAYS})
 
-  createAndPublish({
-    kind: list.kind,
-    content: list.event?.content || "",
-    tags: modifyTags(list.publicTags),
+  publishThunk({
+    event: makeEvent(list.kind, {
+      content: list.event?.content || "",
+      tags: modifyTags(list.publicTags),
+    }),
     relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
   })
 }
@@ -373,14 +366,9 @@ export const sendMessage = async (channelId: string, content: string, delay: num
     const helper = Nip59.fromSigner(signer.get())
     const rumor = await helper.wrap(recipient, template)
 
-    // Publish immediately to the repository so messages show up right away
-    repository.publish(rumor)
-
-    // Publish via thunk
-    publish({
+    publishThunk({
       event: rumor.wrap,
       relays: Router.get().PubkeyInbox(recipient).policy(addMinimalFallbacks).getUrls(),
-      forcePlatform: false,
       delay,
     })
   }
@@ -391,13 +379,11 @@ export const sendMessage = async (channelId: string, content: string, delay: num
 export const setAppData = async (d: string, data: any) => {
   if (signer.get()) {
     const {pubkey} = session.get()
+    const content = await signer.get().nip04.encrypt(pubkey, JSON.stringify(data))
 
-    return createAndPublish({
-      kind: 30078,
-      tags: [["d", d]],
-      content: await signer.get().nip04.encrypt(pubkey, JSON.stringify(data)),
+    return publishThunk({
+      event: makeEvent(30078, {tags: [["d", d]], content}),
       relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-      forcePlatform: false,
     })
   }
 }
@@ -412,7 +398,7 @@ export const broadcastUserData = async (relays: string[]) => {
 
   for (const event of events) {
     if (isSignedEvent(event)) {
-      await publish({event, relays, forcePlatform: false})
+      await publishThunk({event, relays})
     }
   }
 }

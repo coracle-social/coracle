@@ -10,6 +10,8 @@
 * Re-work storage adapter to minimize storage and improve performance
 * Improve initial page load times
 * Fix followers page
+* Upgrade welshman
+* Remove platform relay
 
 # 0.6.9
 
