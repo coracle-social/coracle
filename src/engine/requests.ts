@@ -1,7 +1,5 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import type {Feed} from "@welshman/feeds"
-import {FeedController} from "@welshman/feeds"
 import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   uniq,
@@ -43,10 +41,7 @@ import {
   getFollows,
   pull,
   hasNegentropy,
-  requestDVM,
-  getPubkeysForScope,
-  getPubkeysForWOTRange,
-  makeFeedRequestHandler,
+  makeFeedController,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
@@ -93,7 +88,7 @@ export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) =
   const onExhausted = () => loading.set(false)
 
   const promise = new Promise<void>(async resolve => {
-    const ctrl = createFeedController({feed, onEvent, onExhausted})
+    const ctrl = makeFeedController({feed, onEvent, onExhausted})
 
     while (get(loading)) {
       await ctrl.load(100)
@@ -183,31 +178,6 @@ export const loadPubkeys = async (pubkeys: string[]) => {
       loadMutes(pubkey)
     }
   }
-}
-
-// Feeds
-
-export type FeedRequestHandlerOptions = {forcePlatform: boolean; signal: AbortSignal}
-
-export type FeedControllerOptions = {
-  feed: Feed
-  onEvent: (event: TrustedEvent) => void
-  onExhausted: () => void
-  forcePlatform?: boolean
-  useWindowing?: boolean
-  signal?: AbortSignal
-}
-
-export const createFeedController = (options: FeedControllerOptions) => {
-  const request = makeFeedRequestHandler({signal: options.signal})
-
-  return new FeedController({
-    request,
-    requestDVM,
-    getPubkeysForScope,
-    getPubkeysForWOTRange,
-    ...options,
-  })
 }
 
 // Notifications

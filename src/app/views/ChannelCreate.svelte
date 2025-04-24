@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {uniq} from "@welshman/lib"
+  import {displayList, uniq} from "@welshman/lib"
   import {isShareableRelayUrl} from "@welshman/util"
   import {
     pubkey,
@@ -14,7 +14,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {hasNip44} from "src/engine"
-  import {displayList, pluralize} from "src/util/misc"
+  import {pluralize} from "src/util/misc"
 
   let value = []
 

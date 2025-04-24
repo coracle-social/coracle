@@ -241,9 +241,9 @@
       <FeedItem note={event} pinned />
     </div>
   {/each}
-  <Feed shouldSort maxDepth={1} forcePlatform={false} feed={notesFeed} />
+  <Feed shouldSort maxDepth={1} feed={notesFeed} />
 {:else if activeTab === "likes"}
-  <Feed forcePlatform={false} feed={likesFeed} />
+  <Feed feed={likesFeed} />
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}

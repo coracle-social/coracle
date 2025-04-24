@@ -12,6 +12,7 @@
     isKindFeed,
     walkFeed,
   } from "@welshman/feeds"
+  import {makeFeedController} from "@welshman/app"
   import {createScroller} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
@@ -23,13 +24,12 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {router} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {env, createFeedController, sortEventsDesc} from "src/engine"
+  import {env, sortEventsDesc} from "src/engine"
   import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
   export let anchor = null
   export let showControls = false
-  export let forcePlatform = true
   export let hideSpinner = false
   export let shouldSort = false
   export let maxDepth = 2
@@ -61,9 +61,8 @@
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
 
-    ctrl = createFeedController({
+    ctrl = makeFeedController({
       feed: definition,
-      forcePlatform,
       useWindowing,
       signal: abortController.signal,
       onEvent: e => {

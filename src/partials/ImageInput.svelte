@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {displayList} from "@welshman/lib"
   import {getTagValue} from "@welshman/util"
   import {createEventDispatcher} from "svelte"
   import Input from "src/partials/Input.svelte"
@@ -7,7 +8,6 @@
   import Anchor from "src/partials/Anchor.svelte"
   import {listenForFile} from "src/util/html"
   import {uploadFiles, getSetting} from "src/engine"
-  import {displayList} from "src/util/misc"
 
   export let icon = null
   export let value = null

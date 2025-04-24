@@ -1,12 +1,11 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {pubkey, profiles, displayProfileByPubkey} from "@welshman/app"
-  import {without} from "@welshman/lib"
+  import {without, displayList} from "@welshman/lib"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
   import {channelHasNewMessages} from "src/engine"
-  import {displayList} from "src/util/misc"
 
   export let channel
 

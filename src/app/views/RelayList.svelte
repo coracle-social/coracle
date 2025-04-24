@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {nthEq, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {nthEq, displayList, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     pubkey,
@@ -17,7 +17,7 @@
     relaySelectionsByPubkey,
   } from "@welshman/app"
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
-  import {createScroller, displayList} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"

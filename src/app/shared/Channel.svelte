@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {sleep, prop, sortBy, max, last, pluck} from "@welshman/lib"
+  import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {isShareableRelayUrl} from "@welshman/util"
   import {
@@ -11,7 +11,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
-  import {createScroller, displayList, pluralize} from "src/util/misc"
+  import {createScroller, pluralize} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
