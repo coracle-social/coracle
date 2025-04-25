@@ -31,6 +31,7 @@
     isChildOf,
   } from "@welshman/util"
   import {publishThunk} from "@welshman/app"
+  import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
   import {isLike, replyKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
@@ -70,6 +71,7 @@
     relays: Router.get().Event(event).limit(3).getUrls(),
   })
 
+  const pow = getPow(event)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
@@ -313,6 +315,17 @@
     {/if}
   </div>
   <div class="flex scale-90 items-center gap-2">
+    {#if pow > 15}
+      <Popover triggerType="mouseenter">
+        <div
+          slot="trigger"
+          class="flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-xs text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
+          <i class="fa fa-hammer text-accent" />
+          <span>{pow}</span>
+        </div>
+        <div slot="tooltip" class="px-1">This event cost {pow} bits of work</div>
+      </Popover>
+    {/if}
     {#if event.wrap}
       <div
         class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">

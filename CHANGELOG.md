@@ -12,6 +12,7 @@
 * Fix followers page
 * Upgrade welshman
 * Remove platform relay
+* Show PoW
 
 # 0.6.9
 

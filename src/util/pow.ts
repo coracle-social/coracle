@@ -1,5 +1,5 @@
 import type {OwnedEvent, HashedEvent} from "@welshman/util"
-import {createEvent} from "@welshman/util"
+import {createEvent, getTag} from "@welshman/util"
 import {makeSecret, own, getPubkey} from "@welshman/signer"
 import {synced, withGetter} from "@welshman/store"
 import PowWorker from "src/workers/pow?worker"
@@ -35,6 +35,27 @@ export const makePow = (event: OwnedEvent, difficulty: number): ProofOfWork => {
   })
 
   return {worker, result}
+}
+
+export const getPow = (event: HashedEvent): number => {
+  const difficulty = parseInt(getTag("nonce", event.tags)?.[2])
+
+  if (isNaN(difficulty)) return 0
+
+  let count = 0
+
+  // Convert hex string to array of bytes
+  for (let i = 0; i < event.id.length; i += 2) {
+    const byte = parseInt(event.id.slice(i, i + 2), 16)
+    if (byte === 0) {
+      count += 8
+    } else {
+      count += Math.clz32(byte) - 24
+      break
+    }
+  }
+
+  return count >= difficulty ? difficulty : 0
 }
 
 // Generate a simple pow to estimate the device capacities
