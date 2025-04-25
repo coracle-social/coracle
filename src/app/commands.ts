@@ -29,6 +29,8 @@ import {
   getRelayTagValues,
   toNostrURI,
   unionFilters,
+  getRelaysFromList,
+  RelayMode,
 } from "@welshman/util"
 import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
 import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
@@ -42,10 +44,8 @@ import {
   MergedThunk,
   profilesByPubkey,
   relaySelectionsByPubkey,
-  getWriteRelayUrls,
   tagEvent,
   tagEventForReaction,
-  getRelayUrls,
   userRelaySelections,
   userInboxRelaySelections,
   nip44EncryptToSelf,
@@ -72,7 +72,7 @@ import {
 
 export const getPubkeyHints = (pubkey: string) => {
   const selections = relaySelectionsByPubkey.get().get(pubkey)
-  const relays = selections ? getWriteRelayUrls(selections) : []
+  const relays = selections ? getRelaysFromList(selections, RelayMode.Write) : []
   const hints = relays.length ? relays : INDEXER_RELAYS
 
   return hints
@@ -238,7 +238,7 @@ export const setInboxRelayPolicy = (url: string, enabled: boolean) => {
   const list = get(userInboxRelaySelections) || makeList({kind: INBOX_RELAYS})
 
   // Only update inbox policies if they already exist or we're adding them
-  if (enabled || getRelayUrls(list).includes(url)) {
+  if (enabled || getRelaysFromList(list).includes(url)) {
     const tags = getRelayTags(getListTags(list)).filter(t => normalizeRelayUrl(t[1]) !== url)
 
     if (enabled) {

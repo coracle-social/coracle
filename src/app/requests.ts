@@ -25,6 +25,7 @@ import {
   getTagValue,
   getAddress,
   isShareableRelayUrl,
+  getRelaysFromList,
 } from "@welshman/util"
 import type {TrustedEvent, Filter, List} from "@welshman/util"
 import {feedFromFilters, makeRelayFeed, makeIntersectionFeed} from "@welshman/feeds"
@@ -41,7 +42,6 @@ import {
   loadFollows,
   loadProfile,
   loadInboxRelaySelections,
-  getRelayUrls,
 } from "@welshman/app"
 import {createScroller} from "@lib/html"
 import {daysBetween} from "@lib/util"
@@ -421,7 +421,7 @@ export const loadUserData = (pubkey: string, relays: string[] = []) => {
 
 export const discoverRelays = (lists: List[]) =>
   Promise.all(
-    uniq(lists.flatMap(getRelayUrls))
+    uniq(lists.flatMap($l => getRelaysFromList($l)))
       .filter(isShareableRelayUrl)
       .map(url => loadRelay(url)),
   )

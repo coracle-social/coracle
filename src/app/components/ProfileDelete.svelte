@@ -7,8 +7,9 @@
     DELETE,
     isReplaceable,
     getAddress,
+    getRelaysFromList,
   } from "@welshman/util"
-  import {pubkey, userRelaySelections, publishThunk, getRelayUrls, repository} from "@welshman/app"
+  import {pubkey, userRelaySelections, publishThunk, repository} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -40,7 +41,7 @@
     const denominator = chunks.length + 2
     const relays = uniq([
       ...INDEXER_RELAYS,
-      ...getRelayUrls($userRelaySelections),
+      ...getRelaysFromList($userRelaySelections),
       ...getMembershipUrls($userMembership),
     ])
 

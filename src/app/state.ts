@@ -18,6 +18,7 @@ import {
   always,
 } from "@welshman/lib"
 import {load} from "@welshman/net"
+import {collection} from "@welshman/store"
 import {
   getIdFilters,
   WRAP,
@@ -47,7 +48,6 @@ import {routerContext, Router} from "@welshman/router"
 import {
   pubkey,
   repository,
-  collection,
   profilesByPubkey,
   tracker,
   makeTrackerStore,

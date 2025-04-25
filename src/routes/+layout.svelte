@@ -19,6 +19,7 @@
     FOLLOWS,
     PROFILE,
     RELAYS,
+    getRelaysFromList,
   } from "@welshman/util"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import type {Socket} from "@welshman/net"
@@ -33,7 +34,6 @@
     session,
     signer,
     dropSession,
-    getRelayUrls,
     userInboxRelaySelections,
     loginWithNip01,
     loginWithNip46,
@@ -204,7 +204,7 @@
                 {kinds: [WRAP], "#p": [$pubkey], since: ago(WEEK, 2)},
                 {kinds: [WRAP], "#p": [$pubkey], limit: 100},
               ],
-              relays: getRelayUrls($userInboxRelaySelections),
+              relays: getRelaysFromList($userInboxRelaySelections),
             })
           }
         },
