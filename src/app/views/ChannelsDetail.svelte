@@ -2,14 +2,13 @@
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {deriveEvents} from "@welshman/store"
-  import {DIRECT_MESSAGE, isShareableRelayUrl} from "@welshman/util"
+  import {DIRECT_MESSAGE, isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
   import {
     inboxRelaySelectionsByPubkey,
     session,
     repository,
     displayProfileByPubkey,
     loadInboxRelaySelections,
-    getRelayUrls,
   } from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Channel from "src/app/shared/Channel.svelte"
@@ -29,7 +28,8 @@
 
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
     pubkeys.filter(
-      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+      pubkey =>
+        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
 

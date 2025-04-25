@@ -10,13 +10,18 @@
     type Relay,
     displayProfileByPubkey,
     profilesByPubkey,
-    getRelayUrls,
     deriveRelaySelections,
     deriveInboxRelaySelections,
-    getWriteRelayUrls,
     relaySelectionsByPubkey,
   } from "@welshman/app"
-  import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, profileHasName} from "@welshman/util"
+  import {
+    isShareableRelayUrl,
+    isRelayUrl,
+    normalizeRelayUrl,
+    profileHasName,
+    getRelaysFromList,
+    RelayMode,
+  } from "@welshman/util"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -43,7 +48,7 @@
         continue
       }
 
-      for (const url of getWriteRelayUrls($relaySelectionsByPubkey.get(pk))) {
+      for (const url of getRelaysFromList($relaySelectionsByPubkey.get(pk), RelayMode.Write)) {
         if (isShareableRelayUrl(url)) {
           pushToMapKey(m, url, pk)
         }
@@ -109,8 +114,8 @@
 
   $: currentRelayUrls = uniq([
     ...currentRelayUrls,
-    ...getRelayUrls($userRelaySelections),
-    ...getRelayUrls($userInboxRelaySelections),
+    ...getRelaysFromList($userRelaySelections),
+    ...getRelaysFromList($userInboxRelaySelections),
   ]).sort()
 
   $: ratings = groupBy(e => {

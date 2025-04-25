@@ -1,9 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {uniq, nth} from "@welshman/lib"
-  import {getPubkeyTagValues, getAddress, Address, getIdFilters} from "@welshman/util"
+  import {
+    getPubkeyTagValues,
+    RelayMode,
+    getAddress,
+    Address,
+    getIdFilters,
+    getRelaysFromList,
+  } from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {session, userRelaySelections, getWriteRelayUrls, thunkIsComplete} from "@welshman/app"
+  import {session, userRelaySelections, thunkIsComplete} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -71,7 +78,7 @@
     }
 
     // Make sure our profile gets to the right relays
-    broadcastUserData(getWriteRelayUrls($userRelaySelections))
+    broadcastUserData(getRelaysFromList($userRelaySelections, RelayMode.Write))
 
     // Start our notifications listener
     listenForNotifications()

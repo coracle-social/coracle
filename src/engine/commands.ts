@@ -1,7 +1,6 @@
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
-  getRelayUrls,
   inboxRelaySelectionsByPubkey,
   pubkey,
   repository,
@@ -50,6 +49,7 @@ import {
   removeFromList,
   getTagValue,
   uniqTags,
+  getRelaysFromList,
 } from "@welshman/util"
 import crypto from "crypto"
 import {
@@ -296,7 +296,7 @@ export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[
 }
 
 export const setInboxPolicy = (url: string, enabled: boolean) => {
-  const urls = getRelayUrls(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))
+  const urls = getRelaysFromList(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))
 
   // Only update inbox policies if they already exist or we're adding them
   if (enabled || urls.includes(url)) {

@@ -1,16 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
-  import {displayRelayUrl} from "@welshman/util"
-  import {
-    signer,
-    deriveRelay,
-    getRelayUrls,
-    getWriteRelayUrls,
-    getReadRelayUrls,
-    userRelaySelections,
-    userInboxRelaySelections,
-  } from "@welshman/app"
-  import {derived} from "svelte/store"
+  import {displayRelayUrl, RelayMode} from "@welshman/util"
+  import {pubkey, signer, deriveRelay, derivePubkeyRelays} from "@welshman/app"
   import {displayUrl, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
@@ -35,9 +26,9 @@
   let innerWidth = 0
 
   const relay = deriveRelay(url)
-  const readRelayUrls = derived(userRelaySelections, getReadRelayUrls)
-  const writeRelayUrls = derived(userRelaySelections, getWriteRelayUrls)
-  const inboxRelayUrls = derived(userInboxRelaySelections, getRelayUrls)
+  const readRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Read)
+  const writeRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Write)
+  const inboxRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Inbox)
 
   const policySetter = (mode: string) => () => {
     const read = $readRelayUrls.includes(url)

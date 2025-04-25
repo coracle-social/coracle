@@ -12,6 +12,7 @@
     getListTags,
     getIdFilters,
     getTagValues,
+    getRelaysFromList,
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {Router, addMaximalFallbacks} from "@welshman/router"
@@ -20,7 +21,6 @@
     deriveHandleForPubkey,
     deriveZapperForPubkey,
     displayProfileByPubkey,
-    getRelayUrls,
     deriveRelaySelections,
     tagZapSplit,
     deriveProfileDisplay,
@@ -248,7 +248,7 @@
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
   {#if $relaySelections}
-    <PersonRelays urls={getRelayUrls($relaySelections).filter(isShareableRelayUrl)} />
+    <PersonRelays urls={getRelaysFromList($relaySelections).filter(isShareableRelayUrl)} />
   {:else}
     <Spinner />
   {/if}

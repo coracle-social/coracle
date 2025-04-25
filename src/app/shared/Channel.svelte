@@ -1,13 +1,8 @@
 <script lang="ts">
   import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {isShareableRelayUrl} from "@welshman/util"
-  import {
-    session,
-    getRelayUrls,
-    displayProfileByPubkey,
-    inboxRelaySelectionsByPubkey,
-  } from "@welshman/app"
+  import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
+  import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
@@ -50,7 +45,8 @@
 
   const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
     pubkeys.filter(
-      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+      pubkey =>
+        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
 

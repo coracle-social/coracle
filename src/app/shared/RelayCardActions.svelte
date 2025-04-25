@@ -1,10 +1,6 @@
 <script lang="ts">
-  import {
-    pubkey,
-    getRelayUrls,
-    deriveRelaySelections,
-    deriveInboxRelaySelections,
-  } from "@welshman/app"
+  import {pubkey, deriveRelaySelections, deriveInboxRelaySelections} from "@welshman/app"
+  import {getRelaysFromList} from "@welshman/util"
   import {leaveRelay, joinRelay} from "src/engine"
   import {router} from "../util"
   import Popover from "src/partials/Popover.svelte"
@@ -23,8 +19,8 @@
   const leave = () => leaveRelay(url)
 
   $: userRelayUrls = [
-    ...getRelayUrls($userRelaySelections),
-    ...getRelayUrls($userInboxRelaySelections),
+    ...getRelaysFromList($userRelaySelections),
+    ...getRelaysFromList($userInboxRelaySelections),
   ]
 </script>
 

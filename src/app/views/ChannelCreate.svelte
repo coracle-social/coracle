@@ -1,13 +1,8 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {displayList, uniq} from "@welshman/lib"
-  import {isShareableRelayUrl} from "@welshman/util"
-  import {
-    pubkey,
-    getRelayUrls,
-    displayProfileByPubkey,
-    inboxRelaySelectionsByPubkey,
-  } from "@welshman/app"
+  import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
+  import {pubkey, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Anchor from "src/partials/Anchor.svelte"
@@ -23,7 +18,8 @@
   $: pubkeys = uniq(value.concat($pubkey))
   $: pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
     pubkeys.filter(
-      pubkey => !getRelayUrls($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+      pubkey =>
+        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
   $: nip44Disabled = pubkeys.length > 2 && !$hasNip44

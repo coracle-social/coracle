@@ -1,9 +1,9 @@
 <script lang="ts">
   import {last} from "@welshman/lib"
+  import {getRelaysFromList} from "@welshman/util"
   import {
     pubkey,
     signer,
-    getRelayUrls,
     deriveRelaySelections,
     deriveInboxRelaySelections,
     deriveRelay,
@@ -26,8 +26,8 @@
     actions = []
 
     const userRelayUrls = [
-      ...getRelayUrls($userRelaySelections),
-      ...getRelayUrls($userInboxRelaySelections),
+      ...getRelaysFromList($userRelaySelections),
+      ...getRelaysFromList($userInboxRelaySelections),
     ]
 
     if (!userRelayUrls.includes(url)) {
