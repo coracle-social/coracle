@@ -7,7 +7,6 @@ import {favicons} from "favicons"
 import htmlPlugin from "vite-plugin-html-config"
 import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
-import {nodePolyfills} from "vite-plugin-node-polyfills"
 
 dotenv.config({path: ".env.local"})
 dotenv.config({path: ".env"})
@@ -36,9 +35,6 @@ export default defineConfig(async () => {
       },
     },
     plugins: [
-      nodePolyfills({
-        protocolImports: true,
-      }),
       htmlPlugin({
         title: process.env.VITE_APP_NAME,
         metas: [
