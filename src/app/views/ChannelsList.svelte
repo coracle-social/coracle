@@ -35,6 +35,7 @@
     if (!$canDecrypt) {
       router.at("channels/enable").open({mini: true, noEscape: true})
     }
+
     const scroller = createScroller(loadMore, {element, delay: 300})
 
     return () => {

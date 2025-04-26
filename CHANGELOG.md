@@ -13,6 +13,7 @@
 * Upgrade welshman
 * Remove platform relay
 * Show PoW
+* Don't fetch messages until decryption is enabled
 
 # 0.6.9
 

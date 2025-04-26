@@ -1,19 +1,22 @@
 <script lang="ts">
   import {WRAP} from "@welshman/util"
   import {repository} from "@welshman/app"
-  import {canDecrypt, ensureUnwrapped, env} from "src/engine"
-  import {router} from "src/app/util"
   import Anchor from "src/partials/Anchor.svelte"
+  import {canDecrypt, loadMessages, ensureUnwrapped, env} from "src/engine"
+  import {router} from "src/app/util"
 
   let loading = false
 
   const enableChat = async () => {
+    canDecrypt.set(true)
+
     for (const event of repository.query([{kinds: [WRAP]}])) {
       ensureUnwrapped(event)
     }
 
-    canDecrypt.set(true)
+    loadMessages()
   }
+
   const submit = () => {
     loading = true
 

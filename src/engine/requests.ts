@@ -46,7 +46,7 @@ import {
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, myRequest, myLoad, type MyRequestOptions} from "src/engine/state"
+import {env, myRequest, canDecrypt, myLoad, type MyRequestOptions} from "src/engine/state"
 
 // Utils
 
@@ -235,28 +235,32 @@ export const loadMessages = () => {
   const router = Router.get()
   const scenario = router.merge([router.ForUser(), router.FromUser(), router.UserInbox()])
 
-  pullConservatively({
-    relays: scenario.getUrls(),
-    filters: [
-      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
-      {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
-    ],
-  })
+  if (canDecrypt.get()) {
+    pullConservatively({
+      relays: scenario.getUrls(),
+      filters: [
+        {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
+        {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
+      ],
+    })
+  }
 }
 
 export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
   const controller = new AbortController()
 
-  myRequest({
-    skipCache: true,
-    signal: controller.signal,
-    relays: Router.get().UserInbox().getUrls(),
-    filters: [
-      {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
-      {kinds: [WRAP], "#p": [pubkey.get()]},
-    ],
-  })
+  if (canDecrypt.get()) {
+    myRequest({
+      skipCache: true,
+      signal: controller.signal,
+      relays: Router.get().UserInbox().getUrls(),
+      filters: [
+        {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
+        {kinds: [WRAP], "#p": [pubkey.get()]},
+      ],
+    })
+  }
 
   return () => controller.abort()
 }
