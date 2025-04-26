@@ -115,6 +115,15 @@
       "@welshman/signer": "link:../welshman/packages/signer",
       "@welshman/store": "link:../welshman/packages/store",
       "@welshman/editor": "link:../welshman/packages/editor"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@sentry/cli",
+      "cypress",
+      "esbuild",
+      "svelte-preprocess"
+    ],
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
   }
 }
