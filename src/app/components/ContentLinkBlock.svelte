@@ -4,9 +4,10 @@
   import {preventDefault, stopPropagation} from "@lib/html"
   import Link from "@lib/components/Link.svelte"
   import ContentLinkDetail from "@app/components/ContentLinkDetail.svelte"
+  import ContentLinkBlockImage from "@app/components/ContentLinkBlockImage.svelte"
   import {pushModal} from "@app/modal"
 
-  const {value} = $props()
+  const {value, event} = $props()
 
   let hideImage = $state(false)
 
@@ -37,7 +38,7 @@
       </video>
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <button type="button" onclick={stopPropagation(preventDefault(expand))}>
-        <img alt="Link preview" src={imgproxy(url)} class="m-auto max-h-96 rounded-box" />
+        <ContentLinkBlockImage {event} {value} />
       </button>
     {:else}
       {#await loadPreview()}

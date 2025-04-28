@@ -41,6 +41,7 @@ import {
   loadMutes,
   loadFollows,
   loadProfile,
+  loadRelaySelections,
   loadInboxRelaySelections,
 } from "@welshman/app"
 import {createScroller} from "@lib/html"
@@ -384,7 +385,9 @@ export const listenForNotifications = () => {
   return () => controller.abort()
 }
 
-export const loadUserData = (pubkey: string, relays: string[] = []) => {
+export const loadUserData = async (pubkey: string, relays: string[] = []) => {
+  await Promise.race([sleep(3000), loadRelaySelections(pubkey, relays)])
+
   const promise = Promise.race([
     sleep(3000),
     Promise.all([

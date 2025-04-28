@@ -18,16 +18,17 @@
 
   const onsubmit = preventDefault(async () => {
     const json = JSON.stringify($state.snapshot(settings))
-    const content = await $signer!.nip04.encrypt($pubkey!, json)
+    const content = await $signer!.nip44.encrypt($pubkey!, json)
+    const relays = Router.get().FromUser().getUrls()
 
     publishThunk({
       event: createEvent(SETTINGS, {content}),
-      relays: Router.get().FromUser().getUrls(),
+      relays,
     })
 
     publishThunk({
       event: createEvent(MUTES, {tags: mutedPubkeys.map(tagPubkey)}),
-      relays: Router.get().FromUser().getUrls(),
+      relays,
     })
 
     pushToast({message: "Your settings have been saved!"})

@@ -141,7 +141,7 @@
           <ContentToken value={parsed.value} />
         {:else if isLink(parsed)}
           {#if isBlock(i)}
-            <ContentLinkBlock value={parsed.value} />
+            <ContentLinkBlock value={parsed.value} {event} />
           {:else}
             <ContentLinkInline value={parsed.value} />
           {/if}
