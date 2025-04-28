@@ -1,9 +1,10 @@
 <script lang="ts">
   import {preventDefault} from "@lib/html"
-  import {randomInt, TIMEZONE} from "@welshman/lib"
+  import {randomInt, displayList, TIMEZONE} from "@welshman/lib"
   import {displayRelayUrl, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import type {Nip46ResponseWithResult} from "@welshman/signer"
+  import {makeIntersectionFeed, makeRelayFeed, feedFromFilters} from "@welshman/feeds"
   import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -82,18 +83,22 @@
     }
 
     const filters: Filter[] = []
+    const display: string[] = []
 
     if (notifyThreads) {
+      display.push("threads")
       filters.push({kinds: [THREAD]})
       filters.push({kinds: [COMMENT], "#k": [String(THREAD)]})
     }
 
     if (notifyCalendar) {
+      display.push("calendar events")
       filters.push({kinds: [EVENT_TIME]})
       filters.push({kinds: [COMMENT], "#k": [String(EVENT_TIME)]})
     }
 
     if (notifyChat) {
+      display.push("chat")
       filters.push({
         kinds: [MESSAGE],
         "#h": [GENERAL, ...getMembershipRoomsByUrl(relay, $userMembership)],
@@ -103,7 +108,10 @@
     loading = true
 
     try {
-      const thunk = await publishAlert({cron, email, relay, filters, bunker, secret})
+      const cadence = cron?.endsWith("1") ? "Weekly" : "Daily"
+      const description = `${cadence} alert for ${displayList(display)} on ${displayRelayUrl(relay)}, sent via email.`
+      const feed = makeIntersectionFeed(feedFromFilters(filters), makeRelayFeed(relay))
+      const thunk = await publishAlert({cron, email, feed, bunker, secret, description})
 
       await thunk.result
       await loadAlertStatuses($pubkey!)

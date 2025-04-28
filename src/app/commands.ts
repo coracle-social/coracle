@@ -1,6 +1,8 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
 import {randomId, ifLet, poll, uniq, equals} from "@welshman/lib"
+import type {Feed} from "@welshman/feeds"
+import type {TrustedEvent, EventContent, EventTemplate} from "@welshman/util"
 import {
   DELETE,
   REPORT,
@@ -28,11 +30,9 @@ import {
   getRelayTags,
   getRelayTagValues,
   toNostrURI,
-  unionFilters,
   getRelaysFromList,
   RelayMode,
 } from "@welshman/util"
-import type {TrustedEvent, Filter, EventContent, EventTemplate} from "@welshman/util"
 import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
 import {Nip59, stamp} from "@welshman/signer"
 import {Router} from "@welshman/router"
@@ -431,19 +431,20 @@ export const publishComment = ({relays, ...params}: CommentParams & {relays: str
   publishThunk({event: makeComment(params), relays})
 
 export type AlertParams = {
+  feed: Feed
   cron: string
   email: string
-  relay: string
-  filters: Filter[]
   bunker: string
   secret: string
+  description: string
 }
 
-export const makeAlert = async ({cron, email, relay, filters, bunker, secret}: AlertParams) => {
+export const makeAlert = async ({cron, email, feed, bunker, secret, description}: AlertParams) => {
   const tags = [
+    ["feed", JSON.stringify(feed)],
     ["cron", cron],
     ["email", email],
-    ["relay", relay],
+    ["description", description],
     ["channel", "email"],
     [
       "handler",
@@ -452,10 +453,6 @@ export const makeAlert = async ({cron, email, relay, filters, bunker, secret}: A
       "web",
     ],
   ]
-
-  for (const filter of unionFilters(filters)) {
-    tags.push(["filter", JSON.stringify(filter)])
-  }
 
   if (bunker) {
     tags.push(["nip46", secret, bunker])

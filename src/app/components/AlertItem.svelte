@@ -1,21 +1,12 @@
 <script lang="ts">
-  import {parseJson, displayList, nthEq} from "@welshman/lib"
-  import {
-    getAddress,
-    getTagValue,
-    getTagValues,
-    displayRelayUrl,
-    EVENT_TIME,
-    MESSAGE,
-    THREAD,
-  } from "@welshman/util"
-  import Link from "@lib/components/Link.svelte"
+  import {parseJson, nthEq} from "@welshman/lib"
+  import {displayFeeds} from "@welshman/feeds"
+  import {getAddress, getTagValue, getTagValues} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import AlertDelete from "@app/components/AlertDelete.svelte"
   import type {Alert} from "@app/state"
   import {alertStatuses} from "@app/state"
-  import {makeSpacePath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   type Props = {
@@ -28,17 +19,15 @@
   const status = $derived($alertStatuses.find(s => s.event.tags.some(nthEq(1, address))))
   const cron = $derived(getTagValue("cron", alert.tags))
   const channel = $derived(getTagValue("channel", alert.tags))
-  const relay = $derived(getTagValue("relay", alert.tags)!)
-  const filters = $derived(getTagValues("filter", alert.tags).map(parseJson))
-  const types = $derived.by(() => {
-    const t: string[] = []
-
-    if (filters.some(f => f.kinds?.includes(THREAD))) t.push("threads")
-    if (filters.some(f => f.kinds?.includes(EVENT_TIME))) t.push("calendar events")
-    if (filters.some(f => f.kinds?.includes(MESSAGE))) t.push("chat")
-
-    return t
-  })
+  const feeds = $derived(getTagValues("feed", alert.tags))
+  const description = $derived(
+    getTagValue("description", alert.tags) ||
+      [
+        `${cron?.endsWith("1") ? "Weekly" : "Daily"} alert for events`,
+        displayFeeds(feeds.map(parseJson)),
+        `sent via ${channel}.`,
+      ].join(" "),
+  )
 
   const startDelete = () => pushModal(AlertDelete, {alert})
 </script>
@@ -48,13 +37,7 @@
     <Button class="py-1" onclick={startDelete}>
       <Icon icon="trash-bin-2" />
     </Button>
-    <div class="flex-inline gap-1">
-      {cron?.endsWith("1") ? "Weekly" : "Daily"} alert for
-      {displayList(types)} on
-      <Link class="link" href={makeSpacePath(relay)}>
-        {displayRelayUrl(relay)}
-      </Link>, sent via {channel}.
-    </div>
+    <div class="flex-inline gap-1">{description}</div>
   </div>
   {#if status}
     {@const statusText = getTagValue("status", status.tags) || "error"}
