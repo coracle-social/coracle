@@ -87,7 +87,7 @@ import {
   makeList,
   normalizeRelayUrl,
   readList,
-  getReplyTagValues,
+  getAncestors,
   getTag,
 } from "@welshman/util"
 import Fuse from "fuse.js"
@@ -354,7 +354,7 @@ export const isEventMuted = withGetter(
         getValue: ([e, strict = false]: [e: HashedEvent, strict?: boolean]) => {
           if (!$pubkey || !e.pubkey) return false
 
-          const {roots, replies} = getReplyTagValues(e.tags)
+          const {roots, replies} = getAncestors(e)
 
           if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x)))
             return true

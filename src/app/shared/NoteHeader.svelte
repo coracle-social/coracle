@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getReplyTagValues, getIdOrAddress, type TrustedEvent} from "@welshman/util"
+  import {getAncestors, getIdOrAddress, type TrustedEvent} from "@welshman/util"
   import {Router} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import {formatTimestamp} from "src/util/misc"
@@ -11,7 +11,7 @@
   export let showParent = true
   export let anchor = null
 
-  $: ancestors = getReplyTagValues(event.tags || [])
+  $: ancestors = getAncestors(event)
   $: reply = ancestors.replies[0]
   $: root = ancestors.roots[0]
 

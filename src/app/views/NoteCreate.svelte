@@ -182,7 +182,7 @@
           aborted = true
           abortThunk(thunk)
           router.at("notes/create").open()
-          drafts.set(DRAFT_KEY, editor.getHTML())
+          drafts.set(DRAFT_KEY, editor.getJSON())
         },
       })
     }
@@ -228,7 +228,7 @@
     content: draft,
     submit: onSubmit,
     onUpdate: () => {
-      drafts.set(DRAFT_KEY, editor.getHTML())
+      drafts.set(DRAFT_KEY, editor.getJSON())
     },
     onUploadError: (url, file) => {
       showWarning(`Failed to upload file to ${url}: ${file.uploadError}`)

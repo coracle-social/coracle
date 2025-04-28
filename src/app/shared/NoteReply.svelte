@@ -65,7 +65,7 @@
   const saveDraft = () => {
     $uploading = false
     editor.commands.removePendingUploads()
-    drafts.set(parent.id, editor.getHTML())
+    drafts.set(parent.id, editor.getJSON())
   }
 
   const clearDraft = () => {

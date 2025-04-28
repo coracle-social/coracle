@@ -4,10 +4,11 @@
 
   import * as nip19 from "nostr-tools/nip19"
   import {get} from "svelte/store"
-  import {omit, sleep, memoize} from "@welshman/lib"
+  import {sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as content from "@welshman/content"
+  import * as welshmanRouter from "@welshman/router"
   import * as signer from "@welshman/signer"
   import * as net from "@welshman/net"
   import * as app from "@welshman/app"
@@ -322,10 +323,11 @@
     logger,
     router,
     content,
+    ...welshmanRouter,
     ...nostr,
     ...misc,
     ...signer,
-    ...omit(["Worker"], lib),
+    ...lib,
     ...util,
     ...net,
     ...app,

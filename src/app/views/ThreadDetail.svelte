@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {onMount, onDestroy} from "svelte"
+  import {onDestroy} from "svelte"
   import {identity, sortBy, uniqBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getIdAndAddress, getIdFilters, getReplyTagValues} from "@welshman/util"
+  import {getIdAndAddress, getIdFilters, getAncestors} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -21,7 +21,7 @@
       return
     }
 
-    const {roots, replies} = getReplyTagValues(event.tags)
+    const {roots, replies} = getAncestors(event)
     const seen = new Set(getThread().flatMap(getIdAndAddress))
     const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
@@ -44,7 +44,7 @@
 
   const addToThread = (newEvent: TrustedEvent) => {
     const ids = getIdAndAddress(newEvent)
-    const {roots, replies} = getReplyTagValues($event.tags)
+    const {roots, replies} = getAncestors($event)
 
     if (replies.some(id => ids.includes(id))) {
       parent = newEvent
@@ -63,9 +63,11 @@
   let parent, root
   let ancestors = []
 
-  onMount(() => {
-    loadParents($event)
-  })
+  $: {
+    if ($event) {
+      loadParents($event)
+    }
+  }
 
   onDestroy(() => {
     stopped = true
