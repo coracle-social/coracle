@@ -1,7 +1,7 @@
 <script lang="ts">
   import {preventDefault} from "@lib/html"
-  import {randomInt, displayList, TIMEZONE} from "@welshman/lib"
-  import {displayRelayUrl, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
+  import {randomInt, displayList, TIMEZONE, identity} from "@welshman/lib"
+  import {displayRelayUrl, getTagValue, THREAD, MESSAGE, EVENT_TIME, COMMENT} from "@welshman/util"
   import type {Filter} from "@welshman/util"
   import type {Nip46ResponseWithResult} from "@welshman/signer"
   import {makeIntersectionFeed, makeRelayFeed, feedFromFilters} from "@welshman/feeds"
@@ -14,7 +14,13 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoBunker from "@app/components/InfoBunker.svelte"
   import BunkerConnect, {BunkerConnectController} from "@app/components/BunkerConnect.svelte"
-  import {GENERAL, getMembershipUrls, getMembershipRoomsByUrl, userMembership} from "@app/state"
+  import {
+    GENERAL,
+    alerts,
+    getMembershipUrls,
+    getMembershipRoomsByUrl,
+    userMembership,
+  } from "@app/state"
   import {loadAlertStatuses} from "@app/requests"
   import {publishAlert} from "@app/commands"
   import {pushToast} from "@app/toast"
@@ -28,7 +34,7 @@
 
   let loading = false
   let cron = WEEKLY
-  let email = ""
+  let email = $alerts.map(a => getTagValue("email", a.tags)).filter(identity)[0] || ""
   let relay = ""
   let bunker = ""
   let secret = ""
