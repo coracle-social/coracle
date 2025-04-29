@@ -50,7 +50,7 @@
     "@welshman/router": "^0.2.0",
     "@welshman/signer": "^0.2.0",
     "@welshman/store": "^0.2.0",
-    "@welshman/util": "^0.2.0",
+    "@welshman/util": "^0.2.1",
     "autoprefixer": "^10.4.21",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",

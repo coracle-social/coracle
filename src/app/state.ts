@@ -37,7 +37,7 @@ import {
   setChecked,
 } from "src/engine"
 
-export const drafts = new Map<string, string>()
+export const drafts = new Map<string, any>()
 
 export const menuIsOpen = writable(false)
 
