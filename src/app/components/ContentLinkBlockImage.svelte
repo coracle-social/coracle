@@ -5,7 +5,7 @@
   import {signer} from "@welshman/app"
   import {imgproxy} from "@app/state"
 
-  const {value, event} = $props()
+  const {value, event, ...props} = $props()
 
   const url = value.url.toString()
 
@@ -46,4 +46,4 @@
   })
 </script>
 
-<img alt="" {src} {onerror} class="m-auto max-h-96 rounded-box" />
+<img alt="" {src} {onerror} {...props} />

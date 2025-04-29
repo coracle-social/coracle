@@ -27,7 +27,7 @@
     hideImage = true
   }
 
-  const expand = () => pushModal(ContentLinkDetail, {url}, {fullscreen: true})
+  const expand = () => pushModal(ContentLinkDetail, {value, event}, {fullscreen: true})
 </script>
 
 <Link external href={url} class="my-2 block">
@@ -38,7 +38,7 @@
       </video>
     {:else if url.match(/\.(jpe?g|png|gif|webp)$/)}
       <button type="button" onclick={stopPropagation(preventDefault(expand))}>
-        <ContentLinkBlockImage {event} {value} />
+        <ContentLinkBlockImage {value} {event} class="m-auto max-h-96 rounded-box" />
       </button>
     {:else}
       {#await loadPreview()}
