@@ -297,9 +297,6 @@ export type Settings = {
     report_usage: boolean
     report_errors: boolean
     send_delay: number
-    upload_type: "nip96" | "blossom"
-    nip96_urls: string[]
-    blossom_urls: string[]
   }
 }
 
@@ -309,9 +306,6 @@ export const defaultSettings = {
   report_usage: true,
   report_errors: false,
   send_delay: 3000,
-  upload_type: "nip96",
-  nip96_urls: ["https://nostr.build"],
-  blossom_urls: ["https://cdn.satellite.earth"],
 }
 
 export const settings = deriveEventsMapped<Settings>(repository, {

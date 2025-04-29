@@ -1,19 +1,35 @@
 <script lang="ts">
-  import {getListTags, createEvent, getPubkeyTagValues, MUTES} from "@welshman/util"
+  import {
+    getListTags,
+    tagger,
+    createEvent,
+    getPubkeyTagValues,
+    getTagValues,
+    MUTES,
+    BLOSSOM_SERVERS,
+  } from "@welshman/util"
   import {Router} from "@welshman/router"
-  import {pubkey, signer, userMutes, tagPubkey, publishThunk} from "@welshman/app"
+  import {
+    pubkey,
+    signer,
+    userMutes,
+    tagPubkey,
+    publishThunk,
+    userBlossomServers,
+  } from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
   import FieldInline from "@lib/components/FieldInline.svelte"
-  import Icon from "@lib/components/Icon.svelte"
+  import InputList from "@lib/components/InputList.svelte"
   import Button from "@lib/components/Button.svelte"
   import ProfileMultiSelect from "@app/components/ProfileMultiSelect.svelte"
   import {pushToast} from "@app/toast"
   import {SETTINGS, PLATFORM_NAME, userSettingValues} from "@app/state"
 
   const reset = () => {
-    mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
     settings = {...$userSettingValues}
+    mutedPubkeys = getPubkeyTagValues(getListTags($userMutes))
+    blossomServers = getTagValues("server", getListTags($userBlossomServers))
   }
 
   const onsubmit = preventDefault(async () => {
@@ -31,11 +47,19 @@
       relays,
     })
 
+    publishThunk({
+      event: createEvent(BLOSSOM_SERVERS, {tags: blossomServers.map(tagger("server"))}),
+      relays,
+    })
+
     pushToast({message: "Your settings have been saved!"})
   })
 
   let settings = $state({...$userSettingValues})
   let mutedPubkeys = $state(getPubkeyTagValues(getListTags($userMutes)))
+  let blossomServers = $state(getTagValues("server", getListTags($userBlossomServers)))
+
+  $inspect(blossomServers)
 </script>
 
 <form class="content column gap-4" {onsubmit}>
@@ -134,20 +158,11 @@
         <p>Media Server</p>
       {/snippet}
       {#snippet input()}
-        <div class="flex flex-col gap-2 lg:flex-row">
-          <select bind:value={settings.upload_type} class="select select-bordered">
-            <option value="nip96">NIP 96 (default)</option>
-            <option value="blossom">Blossom</option>
-          </select>
-          <label class="input input-bordered flex flex-grow items-center gap-2">
-            <Icon icon="link-round" />
-            {#if settings.upload_type === "nip96"}
-              <input class="grow" bind:value={settings.nip96_urls[0]} />
-            {:else}
-              <input class="grow" bind:value={settings.blossom_urls[0]} />
-            {/if}
-          </label>
-        </div>
+        <InputList bind:value={blossomServers}>
+          {#snippet addLabel()}
+            Add Server
+          {/snippet}
+        </InputList>
       {/snippet}
       {#snippet info()}
         <p>Choose a media server type and url for files you upload to {PLATFORM_NAME}.</p>

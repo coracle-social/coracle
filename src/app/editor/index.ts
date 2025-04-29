@@ -2,22 +2,15 @@ import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {StampedEvent} from "@welshman/util"
+import {getTagValue, getListTags} from "@welshman/util"
 import {Router} from "@welshman/router"
-import {signer, profileSearch} from "@welshman/app"
+import {signer, profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
-import {getSetting, userSettingValues} from "@app/state"
 import {makeMentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
-export const getUploadType = () => getSetting<"nip96" | "blossom">("upload_type")
-
-export const getUploadUrl = () => {
-  const {upload_type, nip96_urls, blossom_urls} = userSettingValues.get()
-
-  return upload_type === "nip96"
-    ? nip96_urls[0] || "https://nostr.build"
-    : blossom_urls[0] || "https://cdn.satellite.earth"
-}
+export const getUploadUrl = () =>
+  getTagValue("server", getListTags(userBlossomServers.get())) || "https://cdn.satellite.earth"
 
 export const signWithAssert = async (template: StampedEvent) => {
   const event = await signer.get().sign(template)
@@ -33,6 +26,7 @@ export const makeEditor = ({
   placeholder = "",
   url,
   submit,
+  uploadUrl = getUploadUrl(),
   uploading,
   wordCount,
 }: {
@@ -43,6 +37,7 @@ export const makeEditor = ({
   placeholder?: string
   url?: string
   submit: () => void
+  uploadUrl?: string
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
 }) =>
@@ -54,8 +49,8 @@ export const makeEditor = ({
       WelshmanExtension.configure({
         submit,
         sign: signWithAssert,
-        defaultUploadType: getUploadType(),
-        defaultUploadUrl: getUploadUrl(),
+        defaultUploadType: "blossom",
+        defaultUploadUrl: uploadUrl,
         extensions: {
           placeholder: {
             config: {

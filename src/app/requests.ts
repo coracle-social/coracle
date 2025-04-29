@@ -41,6 +41,7 @@ import {
   loadMutes,
   loadFollows,
   loadProfile,
+  loadBlossomServers,
   loadRelaySelections,
   loadInboxRelaySelections,
 } from "@welshman/app"
@@ -392,6 +393,7 @@ export const loadUserData = async (pubkey: string, relays: string[] = []) => {
     sleep(3000),
     Promise.all([
       loadInboxRelaySelections(pubkey, relays),
+      loadBlossomServers(pubkey, relays),
       loadMembership(pubkey, relays),
       loadSettings(pubkey, relays),
       loadProfile(pubkey, relays),

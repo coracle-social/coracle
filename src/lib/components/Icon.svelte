@@ -41,6 +41,7 @@
   import GallerySend from "@assets/icons/Gallery Send.svg?dataurl"
   import Ghost from "@assets/icons/Ghost.svg?dataurl"
   import Hashtag from "@assets/icons/Hashtag.svg?dataurl"
+  import HamburgerMenu from "@assets/icons/Hamburger Menu.svg?dataurl"
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import Inbox from "@assets/icons/Inbox.svg?dataurl"
@@ -131,6 +132,7 @@
     "gallery-send": GallerySend,
     ghost: Ghost,
     hashtag: Hashtag,
+    "hamburger-menu": HamburgerMenu,
     "hand-pills": HandPills,
     "home-smile": HomeSmile,
     inbox: Inbox,
