@@ -3,7 +3,7 @@ import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {StampedEvent} from "@welshman/util"
 import {makeEvent, getTagValues, getListTags, BLOSSOM_AUTH} from "@welshman/util"
-import {simpleCache, removeNil, now} from "@welshman/lib"
+import {simpleCache, normalizeUrl, removeNil, now} from "@welshman/lib"
 import {Router} from "@welshman/router"
 import {signer, profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
@@ -22,7 +22,7 @@ export const hasBlossomSupport = simpleCache(async ([url]: [string]) => {
       }),
     )
 
-    const res = await fetch(url + "/upload", {
+    const res = await fetch(normalizeUrl(url) + "/upload", {
       method: "head",
       headers: {
         Authorization: `Nostr ${btoa(JSON.stringify(event))}`,
@@ -45,7 +45,7 @@ export const getUploadUrl = async (spaceUrl?: string) => {
   const allUrls = removeNil([spaceUrl, ...userUrls])
 
   for (let url of allUrls) {
-    url = url.replace(/wss?:\/\//, "https://")
+    url = url.replace(/^ws/, "http")
 
     if (await hasBlossomSupport(url)) {
       return url

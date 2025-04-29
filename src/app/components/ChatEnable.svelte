@@ -13,6 +13,8 @@
 
   const {next} = $props()
 
+  const nextUrl = $state.snapshot(next)
+
   let loading = $state(false)
 
   const enableChat = async () => {
@@ -23,7 +25,7 @@
     }
 
     clearModals()
-    goto(next)
+    goto(nextUrl)
   }
 
   const submit = async () => {
