@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.11
+
+* Fix draft restoration bugs
+* Improve NIP 22 comment support
+
 # 0.6.10
 
 * Fix spotify url parsing bug
