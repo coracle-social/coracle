@@ -36,7 +36,9 @@
 
   const back = () => history.back()
 
-  const submit = () => {
+  const selectFiles = () => editor.then(ed => ed.chain().selectFiles().run())
+
+  const submit = async () => {
     if ($uploading) return
 
     if (!title) {
@@ -60,8 +62,9 @@
       })
     }
 
+    const ed = await editor
     const event = createEvent(EVENT_TIME, {
-      content: editor.getText({blockSeparator: "\n"}).trim(),
+      content: ed.getText({blockSeparator: "\n"}).trim(),
       tags: [
         ["d", initialValues?.d || randomId()],
         ["title", title],
@@ -69,7 +72,7 @@
         ["start", start.toString()],
         ["end", end.toString()],
         ...daysBetween(start, end).map(D => ["D", D.toString()]),
-        ...editor.storage.nostr.getEditorTags(),
+        ...ed.storage.nostr.getEditorTags(),
         tagRoom(GENERAL, url),
         PROTECTED,
       ],
@@ -119,10 +122,7 @@
         <div class="input-editor flex-grow overflow-hidden">
           <EditorContent {editor} />
         </div>
-        <Button
-          data-tip="Add an image"
-          class="center btn tooltip"
-          onclick={() => editor.chain().selectFiles().run()}>
+        <Button data-tip="Add an image" class="center btn tooltip" onclick={selectFiles}>
           {#if $uploading}
             <span class="loading loading-spinner loading-xs"></span>
           {:else}

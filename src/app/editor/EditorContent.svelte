@@ -1,22 +1,29 @@
 <script lang="ts">
+  import {Editor} from "@welshman/editor"
   import {onDestroy, onMount} from "svelte"
 
-  const {editor} = $props()
+  type Props = {
+    editor: Promise<Editor>
+  }
+
+  const {editor}: Props = $props()
 
   let element: HTMLElement
 
   onMount(() => {
-    if (editor.options.element) {
-      element?.append(editor.options.element)
-    }
+    editor.then(({options}) => {
+      if (options.element) {
+        element?.append(options.element)
+      }
 
-    if (editor.options.autofocus) {
-      ;(element?.querySelector("[contenteditable]") as HTMLElement)?.focus()
-    }
+      if (options.autofocus) {
+        ;(element?.querySelector("[contenteditable]") as HTMLElement)?.focus()
+      }
+    })
   })
 
   onDestroy(() => {
-    editor.destroy()
+    editor.then($editor => $editor.destroy())
   })
 </script>
 

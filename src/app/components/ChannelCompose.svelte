@@ -18,21 +18,22 @@
 
   const uploading = writable(false)
 
-  export const focus = () => editor.chain().focus().run()
+  export const focus = () => editor.then(ed => ed.chain().focus().run())
 
-  const uploadFiles = () => editor.chain().selectFiles().run()
+  const uploadFiles = () => editor.then(ed => ed.chain().selectFiles().run())
 
-  const submit = () => {
+  const submit = async () => {
     if ($uploading) return
 
-    const content = editor.getText({blockSeparator: "\n"}).trim()
-    const tags = editor.storage.nostr.getEditorTags()
+    const ed = await editor
+    const content = ed.getText({blockSeparator: "\n"}).trim()
+    const tags = ed.storage.nostr.getEditorTags()
 
     if (!content) return
 
     onSubmit({content, tags})
 
-    editor.chain().clearContent().run()
+    ed.chain().clearContent().run()
   }
 
   const editor = makeEditor({url, autofocus, submit, uploading, aggressive: true})

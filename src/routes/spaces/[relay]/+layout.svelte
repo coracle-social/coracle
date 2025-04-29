@@ -10,6 +10,7 @@
   import SpaceAuthError from "@app/components/SpaceAuthError.svelte"
   import {pushToast} from "@app/toast"
   import {pushModal} from "@app/modal"
+  import {getUploadUrl} from "@app/editor"
   import {setChecked} from "@app/notifications"
   import {checkRelayConnection, checkRelayAuth, checkRelayAccess} from "@app/commands"
   import {decodeRelay, userRoomsByUrl} from "@app/state"
@@ -50,6 +51,9 @@
 
   onMount(() => {
     checkConnection()
+
+    // Prime our cache so inputs show up quickly
+    getUploadUrl(url)
 
     const relays = [url]
     const since = ago(WEEK)

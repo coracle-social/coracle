@@ -19,7 +19,9 @@
 
   const back = () => history.back()
 
-  const submit = () => {
+  const selectFiles = () => editor.then(ed => ed.commands.selectFiles())
+
+  const submit = async () => {
     if ($uploading) return
 
     if (!title) {
@@ -29,7 +31,8 @@
       })
     }
 
-    const content = editor.getText({blockSeparator: "\n"}).trim()
+    const ed = await editor
+    const content = ed.getText({blockSeparator: "\n"}).trim()
 
     if (!content.trim()) {
       return pushToast({
@@ -39,7 +42,7 @@
     }
 
     const tags = [
-      ...editor.storage.nostr.getEditorTags(),
+      ...ed.storage.nostr.getEditorTags(),
       tagRoom(GENERAL, url),
       ["title", title],
       PROTECTED,
@@ -97,7 +100,7 @@
     <Button
       data-tip="Add an image"
       class="tooltip tooltip-left absolute bottom-1 right-2"
-      onclick={editor.commands.selectFiles}>
+      onclick={selectFiles}>
       {#if $uploading}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}

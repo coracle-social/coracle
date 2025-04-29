@@ -2,15 +2,58 @@ import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {StampedEvent} from "@welshman/util"
-import {getTagValue, getListTags} from "@welshman/util"
+import {makeEvent, getTagValues, getListTags, BLOSSOM_AUTH} from "@welshman/util"
+import {simpleCache, removeNil, now} from "@welshman/lib"
 import {Router} from "@welshman/router"
 import {signer, profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {makeMentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
-export const getUploadUrl = () =>
-  getTagValue("server", getListTags(userBlossomServers.get())) || "https://cdn.satellite.earth"
+export const hasBlossomSupport = simpleCache(async ([url]: [string]) => {
+  try {
+    const event = await signer.get()!.sign(
+      makeEvent(BLOSSOM_AUTH, {
+        tags: [
+          ["t", "upload"],
+          ["server", url],
+          ["expiration", String(now() + 30)],
+        ],
+      }),
+    )
+
+    const res = await fetch(url + "/upload", {
+      method: "head",
+      headers: {
+        Authorization: `Nostr ${btoa(JSON.stringify(event))}`,
+        "X-Content-Type": "text/plain",
+        "X-Content-Length": "1",
+        "X-SHA-256": "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac",
+      },
+    })
+
+    return res.status === 200
+  } catch (e) {
+    if (!String(e).includes("Failed to fetch")) {
+      console.error(e)
+    }
+  }
+})
+
+export const getUploadUrl = async (spaceUrl?: string) => {
+  const userUrls = getTagValues("server", getListTags(userBlossomServers.get()))
+  const allUrls = removeNil([spaceUrl, ...userUrls])
+
+  for (let url of allUrls) {
+    url = url.replace(/wss?:\/\//, "https://")
+
+    if (await hasBlossomSupport(url)) {
+      return url
+    }
+  }
+
+  return "https://cdn.satellite.earth"
+}
 
 export const signWithAssert = async (template: StampedEvent) => {
   const event = await signer.get().sign(template)
@@ -18,7 +61,7 @@ export const signWithAssert = async (template: StampedEvent) => {
   return event!
 }
 
-export const makeEditor = ({
+export const makeEditor = async ({
   aggressive = false,
   autofocus = false,
   charCount,
@@ -26,7 +69,6 @@ export const makeEditor = ({
   placeholder = "",
   url,
   submit,
-  uploadUrl = getUploadUrl(),
   uploading,
   wordCount,
 }: {
@@ -37,11 +79,10 @@ export const makeEditor = ({
   placeholder?: string
   url?: string
   submit: () => void
-  uploadUrl?: string
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
-}) =>
-  new Editor({
+}) => {
+  return new Editor({
     content,
     autofocus,
     element: document.createElement("div"),
@@ -50,7 +91,7 @@ export const makeEditor = ({
         submit,
         sign: signWithAssert,
         defaultUploadType: "blossom",
-        defaultUploadUrl: uploadUrl,
+        defaultUploadUrl: await getUploadUrl(url),
         extensions: {
           placeholder: {
             config: {
@@ -101,3 +142,4 @@ export const makeEditor = ({
       charCount?.set(editor.storage.wordCount.chars)
     },
   })
+}

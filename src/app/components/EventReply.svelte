@@ -16,11 +16,14 @@
 
   const uploading = writable(false)
 
-  const submit = () => {
+  const selectFiles = () => editor.then(ed => ed.commands.selectFiles())
+
+  const submit = async () => {
     if ($uploading) return
 
-    const content = editor.getText({blockSeparator: "\n"}).trim()
-    const tags = [...editor.storage.nostr.getEditorTags(), tagRoom(GENERAL, url), PROTECTED]
+    const ed = await editor
+    const content = ed.getText({blockSeparator: "\n"}).trim()
+    const tags = [...ed.storage.nostr.getEditorTags(), tagRoom(GENERAL, url), PROTECTED]
 
     if (!content) {
       return pushToast({
@@ -68,7 +71,7 @@
       <Button
         data-tip="Add an image"
         class="tooltip tooltip-left absolute bottom-1 right-2"
-        onclick={editor.commands.selectFiles}>
+        onclick={selectFiles}>
         {#if $uploading}
           <span class="loading loading-spinner loading-xs"></span>
         {:else}
