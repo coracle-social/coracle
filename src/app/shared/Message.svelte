@@ -1,9 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
+  import {formatTimestamp} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import {abortThunk, session, thunkHasStatus, thunks, type Thunk} from "@welshman/app"
   import {fly} from "svelte/transition"
-  import {formatTimestamp, timestamp1} from "src/util/misc"
+  import {timestamp1} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"

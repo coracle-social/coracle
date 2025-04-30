@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {formatTimestamp} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
   import {thunkUrlsWithStatus, publishThunk} from "@welshman/app"
   import {remove} from "@welshman/lib"
@@ -13,7 +14,6 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
-  import {formatTimestamp} from "src/util/misc"
   import {fly, slide} from "src/util/transition"
 
   export let thunk: Thunk

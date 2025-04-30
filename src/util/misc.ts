@@ -1,6 +1,5 @@
 import {derived, type Readable} from "svelte/store"
 import {
-  now,
   stripProtocol,
   first,
   sleep,
@@ -11,11 +10,7 @@ import {
   pluck,
   tryCatch,
   ensurePlural,
-  MINUTE,
-  HOUR,
-  DAY,
   round,
-  int,
 } from "@welshman/lib"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
@@ -26,59 +21,6 @@ export const timestamp1: Readable<number> = derived([], (_, set) => {
   }, 1000)
   return () => clearInterval(interval)
 })
-
-export const secondsToDate = ts => new Date(parseInt(ts) * 1000)
-
-export const dateToSeconds = date => Math.round(date.valueOf() / 1000)
-
-export const getTimeZone = () => new Date().toString().match(/GMT[^\s]+/)
-
-export const createLocalDate = (dateString: any) => new Date(`${dateString} ${getTimeZone()}`)
-
-export const getLocale = () => new Intl.DateTimeFormat().resolvedOptions().locale
-
-export const formatTimestamp = (ts: number) => {
-  const formatter = new Intl.DateTimeFormat(getLocale(), {
-    dateStyle: "short",
-    timeStyle: "short",
-  })
-
-  return formatter.format(new Date(ts * 1000))
-}
-
-export const formatTimestampAsDate = (ts: number) => {
-  const formatter = new Intl.DateTimeFormat(getLocale(), {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-
-  return formatter.format(new Date(ts * 1000))
-}
-
-export const formatTimestampRelative = (ts: number) => {
-  let unit
-  let delta = now() - ts
-  if (delta < MINUTE) {
-    unit = "second"
-  } else if (delta < HOUR) {
-    unit = "minute"
-    delta = Math.round(delta / MINUTE)
-  } else if (delta < int(2, DAY)) {
-    unit = "hour"
-    delta = Math.round(delta / HOUR)
-  } else {
-    unit = "day"
-    delta = Math.round(delta / DAY)
-  }
-
-  const locale = new Intl.RelativeTimeFormat().resolvedOptions().locale
-  const formatter = new Intl.RelativeTimeFormat(locale, {
-    numeric: "auto",
-  })
-
-  return formatter.format(-delta, unit as Intl.RelativeTimeFormatUnit)
-}
 
 export const formatDateAsLocalISODate = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60000

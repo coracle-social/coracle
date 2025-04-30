@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {formatTimestamp, thunks, createSearch, isThunk} from "@welshman/app"
+  import {formatTimestamp} from "@welshman/lib"
+  import {thunks, createSearch, isThunk} from "@welshman/app"
   import {fly} from "svelte/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Input from "src/partials/Input.svelte"

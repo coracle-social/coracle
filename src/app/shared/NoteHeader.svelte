@@ -1,8 +1,8 @@
 <script lang="ts">
+  import {formatTimestamp} from "@welshman/lib"
   import {getAncestors, getIdOrAddress, type TrustedEvent} from "@welshman/util"
   import {Router} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
-  import {formatTimestamp} from "src/util/misc"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import {router} from "src/app/util"

@@ -1,26 +1,33 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
-  import {omit} from "@welshman/lib"
-  import {createLocalDate, dateToSeconds, formatTimestampAsDate} from "src/util/misc"
+  import {omit, createLocalDate, dateToSeconds, formatTimestampAsDate} from "@welshman/lib"
   import DateInput from "src/partials/DateInput.svelte"
 
   export let feed
   export let onChange
 
   const changeSince = since => {
-    const value = since
-      ? {...feed[1], since: dateToSeconds(createLocalDate(since).setHours(0, 0, 0, 0))}
-      : omit(["since"], feed[1])
+    if (since) {
+      const date = createLocalDate(since)
 
-    onChange([FeedType.CreatedAt, value])
+      date.setHours(0, 0, 0, 0)
+
+      onChange([FeedType.CreatedAt, {...feed[1], since: dateToSeconds(date)}])
+    } else {
+      onChange([FeedType.CreatedAt, omit(["since"], feed[1])])
+    }
   }
 
   const changeUntil = until => {
-    const value = until
-      ? {...feed[1], until: dateToSeconds(createLocalDate(until).setHours(23, 59, 59, 0))}
-      : omit(["until"], feed[1])
+    if (until) {
+      const date = createLocalDate(until)
 
-    onChange([FeedType.CreatedAt, value])
+      date.setHours(23, 59, 59, 0)
+
+      onChange([FeedType.CreatedAt, {...feed[1], until: dateToSeconds(date)}])
+    } else {
+      onChange([FeedType.CreatedAt, omit(["until"], feed[1])])
+    }
   }
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {displayList} from "@welshman/lib"
+  import {now, displayList, formatTimestampAsDate, formatTimestampRelative} from "@welshman/lib"
   import {
     isScopeFeed,
     isRelayFeed,
@@ -18,7 +18,7 @@
   } from "@welshman/feeds"
   import {displayRelayUrl} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
-  import {formatTimestampAsDate, pluralize, quantify} from "src/util/misc"
+  import {pluralize, quantify} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
 
   export let feed
@@ -71,13 +71,22 @@
           {pluralize(values.length, "other tag")}
         {/if}
       {:else if isCreatedAtFeed(feed)}
-        {#each getFeedArgs(feed) as { since, until, relative }}
+        {#each getFeedArgs(feed) as { since, until, relative = [] }}
           {#if since && until}
-            Between {formatTimestampAsDate(since)} and {formatTimestampAsDate(until)}
+            Between {relative.includes("since")
+              ? formatTimestampRelative(now() - since)
+              : formatTimestampAsDate(since)} and {relative.includes("until")
+              ? formatTimestampRelative(now() - until)
+              : formatTimestampAsDate(until)}
           {:else if since}
-            From {formatTimestampAsDate(since)}
+            From {relative.includes("since")
+              ? formatTimestampRelative(now() - since)
+              : formatTimestampAsDate(since)}
           {:else if until}
-            Through {formatTimestampAsDate(until)}
+            {relative.includes("until") ? "Until" : "Through"}
+            {relative.includes("until")
+              ? formatTimestampRelative(now() - until)
+              : formatTimestampAsDate(until)}
           {/if}
         {/each}
       {:else if isSearchFeed(feed)}

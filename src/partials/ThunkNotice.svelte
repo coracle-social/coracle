@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {PublishStatus} from "@welshman/net"
-  import {formatTimestamp} from "@welshman/app"
+  import {formatTimestamp} from "@welshman/lib"
   import type {PublishNotice} from "src/domain/connection"
 
   export let notice: PublishNotice

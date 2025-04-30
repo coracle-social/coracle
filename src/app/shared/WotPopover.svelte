@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
+  import {formatTimestampRelative} from "@welshman/lib"
   import {
     deriveProfile,
     getUserWotScore,
@@ -17,7 +18,7 @@
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util"
-  import {ensureProto, formatTimestampRelative} from "src/util/misc"
+  import {ensureProto} from "src/util/misc"
   import {stripProtocol} from "@welshman/lib"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 

@@ -1,8 +1,7 @@
 <script lang="ts">
   import {pubkey} from "@welshman/app"
-  import {max, pluck, uniq} from "@welshman/lib"
+  import {max, pluck, uniq, formatTimestamp} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestamp} from "src/util/misc"
   import PeopleAction from "./PeopleAction.svelte"
 
   export let context: TrustedEvent[]

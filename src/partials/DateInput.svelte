@@ -2,7 +2,8 @@
   import cx from "classnames"
   import logger from "src/util/logger"
   import {DateInput} from "date-picker-svelte"
-  import {createLocalDate, formatDateAsLocalISODate} from "src/util/misc"
+  import {createLocalDate} from "@welshman/lib"
+  import {formatDateAsLocalISODate} from "src/util/misc"
 
   export let onChange = null
   export let initialValue = null

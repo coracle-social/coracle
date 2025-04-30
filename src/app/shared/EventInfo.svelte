@@ -2,8 +2,13 @@
   import {getTagValue} from "@welshman/util"
   import {deriveIsDeletedByAddress} from "@welshman/store"
   import {repository} from "@welshman/app"
-  import {fromPairs} from "@welshman/lib"
-  import {secondsToDate, formatTimestamp, formatTimestampAsDate, getLocale} from "src/util/misc"
+  import {
+    fromPairs,
+    formatTimestamp,
+    formatTimestampAsDate,
+    LOCALE,
+    secondsToDate,
+  } from "@welshman/lib"
   import Chip from "src/partials/Chip.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
@@ -12,8 +17,8 @@
   export let event
   export let showDate = false
 
-  const timeFmt = new Intl.DateTimeFormat(getLocale(), {timeStyle: "short"})
-  const datetimeFmt = new Intl.DateTimeFormat(getLocale(), {dateStyle: "short", timeStyle: "short"})
+  const timeFmt = new Intl.DateTimeFormat(LOCALE, {timeStyle: "short"})
+  const datetimeFmt = new Intl.DateTimeFormat(LOCALE, {dateStyle: "short", timeStyle: "short"})
   const deleted = deriveIsDeletedByAddress(repository, event)
 
   $: ({name, title, location} = fromPairs(event.tags))

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {ago} from "@welshman/lib"
+  import {ago, formatTimestampAsDate} from "@welshman/lib"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
-  import {formatTimestampAsDate} from "src/util/misc"
 
   export let i
   export let depth
