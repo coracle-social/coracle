@@ -3,7 +3,7 @@
   import {marked} from "marked"
   import {onMount} from "svelte"
   import * as nip19 from "nostr-tools/nip19"
-  import {fromPairs, switcher} from "@welshman/lib"
+  import {fromPairs} from "@welshman/lib"
   import {fromNostrURI, getTopicTagValues} from "@welshman/util"
   import {displayProfileByPubkey} from "@welshman/app"
   import {warn} from "src/util/logger"
@@ -31,11 +31,12 @@
         warn(e)
       }
 
-      const display = switcher(type, {
-        npub: "@" + displayProfileByPubkey(data),
-        nprofile: "@" + displayProfileByPubkey(data.pubkey),
-        default: entity.slice(0, 16) + "...",
-      })
+      let display = entity.slice(0, 16) + "..."
+      if (type === "npub") {
+        display = "@" + displayProfileByPubkey(data)
+      } else if (type === "nprofile") {
+        display = "@" + displayProfileByPubkey(data.pubkey)
+      }
 
       markdown = markdown.replace(uri, `[${display}](${entity})`)
     }
