@@ -15,6 +15,7 @@
     THREAD,
     MESSAGE,
     INBOX_RELAYS,
+    DIRECT_MESSAGE,
     MUTES,
     FOLLOWS,
     PROFILE,
@@ -131,31 +132,6 @@
         }
       })
 
-      await initStorage("flotilla", 8, {
-        ...defaultStorageAdapters,
-        events: new EventsStorageAdapter({
-          name: "events",
-          limit: 10_000,
-          repository,
-          rankEvent: (e: TrustedEvent) => {
-            if ([PROFILE, FOLLOWS, MUTES, RELAYS, BLOSSOM_SERVERS, INBOX_RELAYS].includes(e.kind))
-              return 1
-            if ([EVENT_TIME, THREAD, MESSAGE, WRAP].includes(e.kind)) return 0.9
-
-            return 0
-          },
-        }),
-      })
-
-      sleep(300).then(() => ready.resolve())
-
-      defaultSocketPolicies.push(
-        makeSocketPolicyAuth({
-          sign: (event: StampedEvent) => signer.get()?.sign(event),
-          shouldAuth: (socket: Socket) => true,
-        }),
-      )
-
       // Unwrap gift wraps as they come in, but throttled
       const unwrapper = new TaskQueue<TrustedEvent>({batchSize: 10, processItem: ensureUnwrapped})
 
@@ -170,6 +146,35 @@
           }
         }
       })
+
+      await initStorage("flotilla", 8, {
+        ...defaultStorageAdapters,
+        events: new EventsStorageAdapter({
+          name: "events",
+          limit: 10_000,
+          repository,
+          rankEvent: (e: TrustedEvent) => {
+            if ([PROFILE, FOLLOWS, MUTES, RELAYS, BLOSSOM_SERVERS, INBOX_RELAYS].includes(e.kind)) {
+              return 1
+            }
+
+            if ([EVENT_TIME, THREAD, MESSAGE, DIRECT_MESSAGE].includes(e.kind)) {
+              return 0.9
+            }
+
+            return 0
+          },
+        }),
+      })
+
+      sleep(300).then(() => ready.resolve())
+
+      defaultSocketPolicies.push(
+        makeSocketPolicyAuth({
+          sign: (event: StampedEvent) => signer.get()?.sign(event),
+          shouldAuth: (socket: Socket) => true,
+        }),
+      )
 
       // Load relay info
       for (const url of INDEXER_RELAYS) {

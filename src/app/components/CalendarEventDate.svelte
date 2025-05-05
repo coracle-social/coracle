@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {fromPairs} from "@welshman/lib"
+  import {fromPairs, LOCALE, secondsToDate} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {LOCALE, secondsToDate} from "@welshman/app"
 
   type Props = {
     event: TrustedEvent

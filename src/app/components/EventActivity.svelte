@@ -1,11 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {max} from "@welshman/lib"
+  import {max, formatTimestampRelative} from "@welshman/lib"
   import {COMMENT} from "@welshman/util"
   import {load} from "@welshman/net"
   import {deriveEvents} from "@welshman/store"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestampRelative, repository} from "@welshman/app"
+  import {repository} from "@welshman/app"
   import {notifications} from "@app/notifications"
   import Icon from "@lib/components/Icon.svelte"
 

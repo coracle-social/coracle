@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {nthEq} from "@welshman/lib"
+  import {nthEq, formatTimestamp} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {formatTimestamp} from "@welshman/app"
   import Link from "@lib/components/Link.svelte"
   import Content from "@app/components/Content.svelte"
   import ProfileLink from "@app/components/ProfileLink.svelte"

@@ -2,7 +2,7 @@
 
 A discord-like nostr client based on the idea of "relays as groups".
 
-If you would like to be interoperable with Flotilla, please check out this draft NIP: https://github.com/coracle-social/nips/blob/relay-chat/xx.md
+If you would like to be interoperable with Flotilla, please check out this guide: https://habla.news/u/hodlbod@coracle.social/1741286140797
 
 # Deploy
 

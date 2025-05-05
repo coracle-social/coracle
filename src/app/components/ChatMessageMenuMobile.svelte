@@ -1,11 +1,12 @@
 <script lang="ts">
   import type {NativeEmoji} from "emoji-picker-element/shared"
   import type {TrustedEvent} from "@welshman/util"
+  import {sendWrapped} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import EmojiPicker from "@lib/components/EmojiPicker.svelte"
   import EventInfo from "@app/components/EventInfo.svelte"
-  import {makeReaction, sendWrapped} from "@app/commands"
+  import {makeReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
 

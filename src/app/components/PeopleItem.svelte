@@ -1,10 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {formatTimestampRelative} from "@welshman/lib"
   import type {Filter} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {load} from "@welshman/net"
   import {Router} from "@welshman/router"
-  import {repository, loadRelaySelections, formatTimestampRelative} from "@welshman/app"
+  import {repository, loadRelaySelections} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Profile from "@app/components/Profile.svelte"

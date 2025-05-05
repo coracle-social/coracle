@@ -1,14 +1,14 @@
 <script lang="ts">
   import type {Snippet} from "svelte"
   import {onMount} from "svelte"
-  import {int, nthNe, MINUTE, sortBy, remove} from "@welshman/lib"
+  import {int, nthNe, MINUTE, sortBy, remove, formatTimestampAsDate} from "@welshman/lib"
   import type {TrustedEvent, EventContent} from "@welshman/util"
   import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
   import {
     pubkey,
     tagPubkey,
+    sendWrapped,
     loadUsingOutbox,
-    formatTimestampAsDate,
     inboxRelaySelectionsByPubkey,
   } from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
@@ -24,8 +24,8 @@
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import ProfileList from "@app/components/ProfileList.svelte"
   import ChatMessage from "@app/components/ChatMessage.svelte"
-  import ChatCompose from "@app/components/ChannelCompose.svelte"
-  import ChatComposeParent from "@app/components/ChannelComposeParent.svelte"
+  import ChatCompose from "@app/components/ChatCompose.svelte"
+  import ChatComposeParent from "@app/components/ChatComposeParent.svelte"
   import {
     INDEXER_RELAYS,
     userSettingValues,
@@ -34,7 +34,7 @@
     PLATFORM_NAME,
   } from "@app/state"
   import {pushModal} from "@app/modal"
-  import {sendWrapped, prependParent} from "@app/commands"
+  import {prependParent} from "@app/commands"
 
   type Props = {
     id: string
@@ -137,54 +137,57 @@
   }, 5000)
 </script>
 
-{#if others.length > 0}
-  <PageBar>
-    {#snippet title()}
-      <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
-        {#if others.length === 1}
-          {@const pubkey = others[0]}
-          {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
-          <Button onclick={onClick} class="row-2">
-            <ProfileCircle {pubkey} size={5} />
-            <ProfileName {pubkey} />
-          </Button>
-        {:else}
-          <div class="flex items-center gap-2">
-            <ProfileCircles pubkeys={others} size={5} />
-            <p class="overflow-hidden text-ellipsis whitespace-nowrap">
-              <ProfileName pubkey={others[0]} />
-              and
-              {#if others.length === 2}
-                <ProfileName pubkey={others[1]} />
-              {:else}
-                {others.length - 1}
-                {others.length > 2 ? "others" : "other"}
-              {/if}
-            </p>
-          </div>
-          {#if others.length > 2}
-            <Button onclick={showMembers} class="btn btn-link hidden sm:block"
-              >Show all members</Button>
-          {/if}
+<PageBar>
+  {#snippet title()}
+    <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
+      {#if others.length === 0}
+        <div class="row-2">
+          <ProfileCircle pubkey={$pubkey!} size={5} />
+          <ProfileName pubkey={$pubkey!} />
+        </div>
+      {:else if others.length === 1}
+        {@const pubkey = others[0]}
+        {@const onClick = () => pushModal(ProfileDetail, {pubkey})}
+        <Button onclick={onClick} class="row-2">
+          <ProfileCircle {pubkey} size={5} />
+          <ProfileName {pubkey} />
+        </Button>
+      {:else}
+        <div class="flex items-center gap-2">
+          <ProfileCircles pubkeys={others} size={5} />
+          <p class="overflow-hidden text-ellipsis whitespace-nowrap">
+            <ProfileName pubkey={others[0]} />
+            and
+            {#if others.length === 2}
+              <ProfileName pubkey={others[1]} />
+            {:else}
+              {others.length - 1}
+              {others.length > 2 ? "others" : "other"}
+            {/if}
+          </p>
+        </div>
+        {#if others.length > 2}
+          <Button onclick={showMembers} class="btn btn-link hidden sm:block"
+            >Show all members</Button>
         {/if}
-      </div>
-    {/snippet}
-    {#snippet action()}
-      <div>
-        {#if remove($pubkey, missingInboxes).length > 0}
-          {@const count = remove($pubkey, missingInboxes).length}
-          {@const label = count > 1 ? "inboxes are" : "inbox is"}
-          <div
-            class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
-            data-tip="{count} {label} not configured.">
-            <Icon icon="danger" />
-            {count}
-          </div>
-        {/if}
-      </div>
-    {/snippet}
-  </PageBar>
-{/if}
+      {/if}
+    </div>
+  {/snippet}
+  {#snippet action()}
+    <div>
+      {#if remove($pubkey, missingInboxes).length > 0}
+        {@const count = remove($pubkey, missingInboxes).length}
+        {@const label = count > 1 ? "inboxes are" : "inbox is"}
+        <div
+          class="row-2 badge badge-error badge-lg tooltip tooltip-left cursor-pointer"
+          data-tip="{count} {label} not configured.">
+          <Icon icon="danger" />
+          {count}
+        </div>
+      {/if}
+    </div>
+  {/snippet}
+</PageBar>
 
 <PageContent class="flex flex-col-reverse pt-4">
   <div bind:this={dynamicPadding}></div>

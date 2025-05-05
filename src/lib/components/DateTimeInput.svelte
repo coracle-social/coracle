@@ -1,6 +1,6 @@
 <script lang="ts">
   import {DateInput} from "date-picker-svelte"
-  import {secondsToDate, dateToSeconds} from "@welshman/app"
+  import {secondsToDate, dateToSeconds} from "@welshman/lib"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
 

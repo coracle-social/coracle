@@ -304,7 +304,7 @@ export const defaultSettings = {
   show_media: true,
   hide_sensitive: true,
   report_usage: true,
-  report_errors: false,
+  report_errors: true,
   send_delay: 3000,
 }
 

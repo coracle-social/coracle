@@ -1,14 +1,7 @@
 <script lang="ts">
-  import {hash, now} from "@welshman/lib"
+  import {hash, now, formatTimestampAsTime, formatTimestampAsDate} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    thunks,
-    pubkey,
-    formatTimestampAsDate,
-    formatTimestampAsTime,
-    deriveProfile,
-    deriveProfileDisplay,
-  } from "@welshman/app"
+  import {thunks, pubkey, deriveProfile, deriveProfileDisplay} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import TapTarget from "@lib/components/TapTarget.svelte"
   import Avatar from "@lib/components/Avatar.svelte"

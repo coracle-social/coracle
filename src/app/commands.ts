@@ -2,7 +2,7 @@ import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
 import {randomId, ifLet, poll, uniq, equals} from "@welshman/lib"
 import type {Feed} from "@welshman/feeds"
-import type {TrustedEvent, EventContent, EventTemplate} from "@welshman/util"
+import type {TrustedEvent, EventContent} from "@welshman/util"
 import {
   DELETE,
   REPORT,
@@ -34,14 +34,12 @@ import {
   RelayMode,
 } from "@welshman/util"
 import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
-import {Nip59, stamp} from "@welshman/signer"
 import {Router} from "@welshman/router"
 import {
   pubkey,
   signer,
   repository,
   publishThunk,
-  MergedThunk,
   profilesByPubkey,
   relaySelectionsByPubkey,
   tagEvent,
@@ -335,30 +333,6 @@ export const attemptRelayAccess = async (url: string, claim = "") => {
 }
 
 // Actions
-
-export const sendWrapped = async ({
-  template,
-  pubkeys,
-  delay,
-}: {
-  template: EventTemplate
-  pubkeys: string[]
-  delay?: number
-}) => {
-  const nip59 = Nip59.fromSigner(signer.get()!)
-
-  return new MergedThunk(
-    await Promise.all(
-      uniq(pubkeys).map(async recipient =>
-        publishThunk({
-          event: await nip59.wrap(recipient, stamp(template)),
-          relays: Router.get().PubkeyInbox(recipient).getUrls(),
-          delay,
-        }),
-      ),
-    ),
-  )
-}
 
 export const makeDelete = ({event}: {event: TrustedEvent}) => {
   const tags = [["k", String(event.kind)], ...tagEvent(event)]

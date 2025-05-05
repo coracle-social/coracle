@@ -1,14 +1,8 @@
 <script lang="ts">
   import {type Instance} from "tippy.js"
-  import {hash} from "@welshman/lib"
+  import {hash, formatTimestampAsTime} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    thunks,
-    formatTimestampAsTime,
-    pubkey,
-    deriveProfile,
-    deriveProfileDisplay,
-  } from "@welshman/app"
+  import {thunks, pubkey, deriveProfile, deriveProfileDisplay, sendWrapped} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -22,7 +16,7 @@
   import ChatMessageMenu from "@app/components/ChatMessageMenu.svelte"
   import ChatMessageMenuMobile from "@app/components/ChatMessageMenuMobile.svelte"
   import {colors} from "@app/state"
-  import {makeDelete, makeReaction, sendWrapped} from "@app/commands"
+  import {makeDelete, makeReaction} from "@app/commands"
   import {pushModal} from "@app/modal"
 
   interface Props {

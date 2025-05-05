@@ -1,8 +1,12 @@
 <script lang="ts">
-  import {fromPairs} from "@welshman/lib"
+  import {
+    fromPairs,
+    formatTimestamp,
+    formatTimestampAsDate,
+    formatTimestampAsTime,
+  } from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
-  import {formatTimestamp, formatTimestampAsDate, formatTimestampAsTime} from "@welshman/app"
 
   type Props = {
     event: TrustedEvent
