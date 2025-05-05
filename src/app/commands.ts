@@ -1,6 +1,6 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
-import {randomId, ifLet, poll, uniq, equals} from "@welshman/lib"
+import {randomId, ifLet, poll, uniq, equals, TIMEZONE, LOCALE} from "@welshman/lib"
 import type {Feed} from "@welshman/feeds"
 import type {TrustedEvent, EventContent} from "@welshman/util"
 import {
@@ -418,6 +418,8 @@ export const makeAlert = async ({cron, email, feed, bunker, secret, description}
     ["feed", JSON.stringify(feed)],
     ["cron", cron],
     ["email", email],
+    ["locale", LOCALE],
+    ["timezone", TIMEZONE],
     ["description", description],
     ["channel", "email"],
     [
