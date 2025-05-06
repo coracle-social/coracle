@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.14
+
+* Fix safe areas
+
 # 0.6.13
 
 * Add safe areas
