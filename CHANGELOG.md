@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.13
+
+* Add safe areas
+
 # 0.6.12
 
 * Upgrade capacitor

@@ -99,6 +99,52 @@ body,
   height: 100%;
 }
 
+/* safe area */
+
+.sait {
+  padding-top: env(safe-area-inset-top);
+}
+
+.sair {
+  padding-right: env(safe-area-inset-right);
+}
+
+.saib {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sail {
+  padding-left: env(safe-area-inset-left);
+}
+
+.saix {
+  @apply sail sair;
+}
+
+.saiy {
+  @apply sait saib;
+}
+
+.sai {
+  @apply saiy saix;
+}
+
+.top-sai {
+  top: env(safe-area-inset-top);
+}
+
+.right-sai {
+  right: env(safe-area-inset-right);
+}
+
+.bottom-sai {
+  bottom: env(safe-area-inset-bottom);
+}
+
+.left-sai {
+  left: env(safe-area-inset-left);
+}
+
 /* Tippy dark */
 
 .tippy-box[data-theme~="dark"] {
