@@ -1,20 +1,40 @@
 <script lang="ts">
   import {repository, pubkey, profilesByPubkey} from "@welshman/app"
+  import {Capacitor} from "@capacitor/core"
+  import {Filesystem, Directory, Encoding} from "@capacitor/filesystem"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {showInfo} from "src/partials/Toast.svelte"
 
-  const submit = async () => {
-    const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))
-    const jsonl = events
-      .filter(e => includeEncrypted || (!e.wrap && e.kind !== 4))
-      // Important: re-wrap encrypted messages
-      .map(e => JSON.stringify(e.wrap || e))
-      .join("\n")
+  let userOnly = true
+  let includeEncrypted = false
 
-    const filename = $profilesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
+  const downloadNative = async (filename, jsonl) => {
+    try {
+      const permissionStatus = await Filesystem.checkPermissions()
+
+      if (permissionStatus.publicStorage !== "granted") {
+        await Filesystem.requestPermissions()
+      }
+
+      await Filesystem.writeFile({
+        path: `${filename}.jsonl`,
+        data: jsonl,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      })
+
+      showInfo(`File saved to your documents folder as ${filename}.jsonl`)
+    } catch (error) {
+      console.error("Error saving file:", error)
+      showInfo("Error saving file. Please try again.")
+    }
+  }
+
+  const downloadWeb = (filename, jsonl) => {
     const data = new TextEncoder().encode(jsonl)
     const blob = new Blob([data], {type: "application/octet-stream"})
     const url = URL.createObjectURL(blob)
@@ -27,8 +47,21 @@
     URL.revokeObjectURL(url)
   }
 
-  let userOnly = true
-  let includeEncrypted = false
+  const submit = async () => {
+    const filename = $profilesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
+    const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))
+    const jsonl = events
+      .filter(e => includeEncrypted || (!e.wrap && e.kind !== 4))
+      // Important: re-wrap encrypted messages
+      .map(e => JSON.stringify(e.wrap || e))
+      .join("\n")
+
+    if (Capacitor.isNativePlatform()) {
+      downloadNative(filename, jsonl)
+    } else {
+      downloadWeb(filename, jsonl)
+    }
+  }
 </script>
 
 <form on:submit|preventDefault={submit}>
