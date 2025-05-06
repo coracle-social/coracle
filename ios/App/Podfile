@@ -1,4 +1,4 @@
-require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+require_relative '../../node_modules/.pnpm/@capacitor+ios@7.2.0_@capacitor+core@7.2.0/node_modules/@capacitor/ios/scripts/pods_helpers'
 
 platform :ios, '14.0'
 use_frameworks!
@@ -9,11 +9,11 @@ use_frameworks!
 install! 'cocoapods', :disable_input_output_paths => true
 
 def capacitor_pods
-  pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
-  pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
-  pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
-  pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
-  pod 'NostrSignerCapacitorPlugin', :path => '../../node_modules/nostr-signer-capacitor-plugin'
+  pod 'Capacitor', :path => '../../node_modules/.pnpm/@capacitor+ios@7.2.0_@capacitor+core@7.2.0/node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../node_modules/.pnpm/@capacitor+ios@7.2.0_@capacitor+core@7.2.0/node_modules/@capacitor/ios'
+  pod 'CapacitorApp', :path => '../../node_modules/.pnpm/@capacitor+app@7.0.1_@capacitor+core@7.2.0/node_modules/@capacitor/app'
+  pod 'CapacitorKeyboard', :path => '../../node_modules/.pnpm/@capacitor+keyboard@7.0.1_@capacitor+core@7.2.0/node_modules/@capacitor/keyboard'
+  pod 'NostrSignerCapacitorPlugin', :path => '../../node_modules/.pnpm/nostr-signer-capacitor-plugin@0.0.4_@capacitor+core@7.2.0/node_modules/nostr-signer-capacitor-plugin'
 end
 
 target 'Flotilla Chat' do

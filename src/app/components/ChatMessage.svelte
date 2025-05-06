@@ -119,7 +119,7 @@
         <Content showEntire {event} />
       </div>
     </TapTarget>
-    <div class="row-2 z-feature -mt-1 ml-4">
+    <div class="row-2 z-feature -mt-4 ml-4">
       <ReactionSummary {event} {onReactionClick} noTooltip />
     </div>
   </div>

@@ -4,6 +4,16 @@
 
 * Add alerts via Anchor
 * Fix nip46 signer connect
+* Allow use of cleartext relays on native builds
+* Fix some modal state bugs caused by svelte 5
+* Detect blossom support on community relays
+* Use user blossom server list in settings
+* Fix some feed bugs
+* Improve thunk indicator
+* Update storage adapters
+* Fix modal flash
+* Switch to pnpm
+* Improve calendar windowing
 
 # 0.2.14
 

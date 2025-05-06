@@ -1,6 +1,6 @@
 {
   "name": "flotilla",
-  "version": "0.2.13",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vite dev",
@@ -89,6 +89,13 @@
       "@welshman/signer": "link:../welshman/packages/signer",
       "@welshman/store": "link:../welshman/packages/store",
       "@welshman/editor": "link:../welshman/packages/editor"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@sentry/cli",
+      "esbuild"
+    ],
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
   }
 }
