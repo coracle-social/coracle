@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.6.12
+
+* Upgrade capacitor
+* Fix mini modals on small screens
+* Allow use of ws:// relays on android
+* Fix database exports on android
+* Fix blog posts with naddrs
+
 # 0.6.11
 
 * Fix draft restoration bugs
