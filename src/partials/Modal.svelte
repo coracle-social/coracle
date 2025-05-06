@@ -80,7 +80,7 @@
   const translateY = tweened(0, {easing: cubicOut, duration: 150})
 
   function handleSwipe(e: CustomEvent) {
-    if (e.detail.isTop) {
+    if (e.detail.isTop && !mini) {
       translateY.set(e.detail.deltaY, {duration: 0})
     }
   }
@@ -131,7 +131,7 @@
           <div
             class="pointer-events-auto flex min-h-full flex-col justify-center transition-all duration-500"
             class:mt-12={drawer}
-            class:mt-[55vh]={mini}>
+            class:mt-[45vh]={mini && window.innerHeight > 600}>
             {#if canClose}
               <div
                 class="pointer-events-none sticky top-0 z-popover mx-auto flex min-h-16 w-full flex-col items-end gap-2 p-2">
