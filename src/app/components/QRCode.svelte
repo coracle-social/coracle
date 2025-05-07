@@ -4,7 +4,7 @@
   import Button from "@lib/components/Button.svelte"
   import {clip} from "@app/toast"
 
-  const {code} = $props()
+  const {code, ...props} = $props()
 
   let canvas: Element | undefined = $state()
   let wrapper: Element | undefined = $state()
@@ -26,7 +26,7 @@
   })
 </script>
 
-<Button class="max-w-full" onclick={copy}>
+<Button class="max-w-full {props.class}" onclick={copy}>
   <div bind:this={wrapper} style={`height: ${height}px`}>
     <canvas
       class="rounded-box"

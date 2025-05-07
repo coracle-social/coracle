@@ -1,10 +1,11 @@
 <script lang="ts">
   import {displayRelayUrl} from "@welshman/util"
+  import {parse, renderAsHtml} from "@welshman/content"
   import Spinner from "@lib/components/Spinner.svelte"
   import Button from "@lib/components/Button.svelte"
-  import Field from "@lib/components/Field.svelte"
   import Icon from "@lib/components/Icon.svelte"
   import {preventDefault} from "@lib/html"
+  import {ucFirst} from "@lib/util"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import {pushToast} from "@app/toast"
@@ -15,8 +16,8 @@
 
   const back = () => history.back()
 
-  const joinRelay = async (claim: string) => {
-    const error = await attemptRelayAccess(url, claim)
+  const joinRelay = async () => {
+    const error = await attemptRelayAccess(url)
 
     if (error) {
       return pushToast({theme: "error", message: error})
@@ -33,13 +34,12 @@
     loading = true
 
     try {
-      await joinRelay(claim)
+      await joinRelay()
     } finally {
       loading = false
     }
   }
 
-  let claim = $state("")
   let loading = $state(false)
 </script>
 
@@ -53,32 +53,17 @@
     {/snippet}
   </ModalHeader>
   <p>
-    We received an error from the relay indicating you don't have access to {displayRelayUrl(url)}.
+    We received an error from the relay indicating you don't have access to {displayRelayUrl(url)}:
   </p>
-  <p class="border-l border-solid border-error pl-4 text-error">
-    {error}
+  <p class="bg-alt card2 welshman-content">
+    {@html renderAsHtml(parse({content: ucFirst(error)}))}
   </p>
-  <p>If you have one, you can try entering an invite code below to request access.</p>
-  <Field>
-    {#snippet label()}
-      <p>Invite code</p>
-    {/snippet}
-    {#snippet input()}
-      <label class="input input-bordered flex w-full items-center gap-2">
-        <Icon icon="link-round" />
-        <input bind:value={claim} class="grow" type="text" />
-      </label>
-    {/snippet}
-    {#snippet info()}
-      <p>Enter an invite code provided to you by the admin of the relay.</p>
-    {/snippet}
-  </Field>
   <ModalFooter>
     <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={!claim || loading}>
+    <Button type="submit" class="btn btn-primary" disabled={loading}>
       <Spinner {loading}>Request Access</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

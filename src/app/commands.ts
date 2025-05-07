@@ -1,6 +1,6 @@
 import * as nip19 from "nostr-tools/nip19"
 import {get} from "svelte/store"
-import {randomId, ifLet, poll, uniq, equals, TIMEZONE, LOCALE} from "@welshman/lib"
+import {randomId, poll, uniq, equals, TIMEZONE, LOCALE} from "@welshman/lib"
 import type {Feed} from "@welshman/feeds"
 import type {TrustedEvent, EventContent} from "@welshman/util"
 import {
@@ -266,18 +266,20 @@ export const checkRelayAccess = async (url: string, claim = "") => {
     relays: [url],
   })
 
-  ifLet(await getThunkError(thunk), error => {
+  const error = await getThunkError(thunk)
+
+  if (error) {
     const message =
-      socket.auth.details?.replace(/^.*: /, "") ||
-      error?.replace(/^.*: /, "") ||
+      socket.auth.details?.replace(/^\w+: /, "") ||
+      error?.replace(/^\w+: /, "") ||
       "join request rejected"
 
     // If it's a strict NIP 29 relay don't worry about requesting access
     // TODO: remove this if relay29 ever gets less strict
     if (message !== "missing group (`h`) tag") {
-      return `Failed to join relay (${message})`
+      return message
     }
-  })
+  }
 }
 
 export const checkRelayProfile = async (url: string) => {

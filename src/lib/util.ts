@@ -15,3 +15,5 @@ export const nsecDecode = (nsec: string) => {
 export const day = (seconds: number) => Math.floor(seconds / DAY)
 
 export const daysBetween = (start: number, end: number) => [...range(start, end, DAY)].map(day)
+
+export const ucFirst = (s: string) => s.slice(0, 1).toUpperCase() + s.slice(1)

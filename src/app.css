@@ -294,6 +294,16 @@ html {
   color: var(--base-content);
 }
 
+/* content rendered by welshman/content */
+
+.welshman-content a {
+  @apply link;
+}
+
+.welshman-content-error a {
+  @apply underline;
+}
+
 /* date input */
 
 .picker {

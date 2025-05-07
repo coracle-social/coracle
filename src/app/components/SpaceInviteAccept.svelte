@@ -23,7 +23,7 @@
     const error = await attemptRelayAccess(url, claim)
 
     if (error) {
-      return pushToast({theme: "error", message: error})
+      return pushToast({theme: "error", message: error, timeout: 30_000})
     }
 
     const socket = Pool.get().get(url)
