@@ -9,7 +9,7 @@
     loading = $state(false)
     clientSecret = makeSecret()
     abortController = new AbortController()
-    broker = Nip46Broker.get({clientSecret: this.clientSecret, relays: SIGNER_RELAYS})
+    broker = new Nip46Broker({clientSecret: this.clientSecret, relays: SIGNER_RELAYS})
     onNostrConnect: (response: Nip46ResponseWithResult) => void
 
     constructor({onNostrConnect}: {onNostrConnect: (response: Nip46ResponseWithResult) => void}) {
@@ -45,6 +45,7 @@
     }
 
     stop() {
+      this.broker.cleanup()
       this.abortController.abort()
     }
   }

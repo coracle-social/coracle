@@ -34,7 +34,7 @@
     ? [normalizeRelayUrl("ws://" + stripProtocol(BURROW_URL))]
     : [normalizeRelayUrl(BURROW_URL)]
 
-  const broker = Nip46Broker.get({clientSecret, relays})
+  const broker = new Nip46Broker({clientSecret, relays})
 
   const back = () => history.back()
 
@@ -89,7 +89,7 @@
       await loadUserData(pubkey)
 
       addSession({...session, email})
-
+      broker.cleanup()
       setChecked("*")
       clearModals()
     }

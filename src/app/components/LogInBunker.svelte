@@ -46,12 +46,13 @@
 
     try {
       const {clientSecret} = controller
-      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+      const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
       const result = await broker.connect(connectSecret, NIP46_PERMS)
       const pubkey = await broker.getPublicKey()
 
       // TODO: remove ack result
       if (pubkey && ["ack", connectSecret].includes(result)) {
+        broker.cleanup()
         controller.stop()
 
         await loadUserData(pubkey)

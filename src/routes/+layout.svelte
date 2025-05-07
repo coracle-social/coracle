@@ -96,7 +96,7 @@
         if (login?.startsWith("bunker://")) {
           const clientSecret = makeSecret()
           const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
-          const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+          const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
           const result = await broker.connect(connectSecret, appState.NIP46_PERMS)
           const pubkey = await broker.getPublicKey()
 
@@ -105,6 +105,7 @@
             await loadUserData(pubkey)
 
             loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+            broker.cleanup()
             success = true
           }
         } else if (login) {
