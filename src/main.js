@@ -4,7 +4,6 @@ import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"
 import {makeSecret, Nip46Broker} from "@welshman/signer"
 import {App as CapacitorApp} from "@capacitor/app"
 import {nsecDecode} from "src/util/nostr"
-import {info} from "src/util/logger"
 import {router} from "src/app/util"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
@@ -21,7 +20,7 @@ if (window.location.hash?.startsWith("#nostr-login")) {
       if (login.startsWith("bunker://")) {
         const clientSecret = makeSecret()
         const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
-        const broker = Nip46Broker.get({relays, clientSecret, signerPubkey, debug: info})
+        const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
         const result = await broker.connect(connectSecret, nip46Perms)
         const pubkey = await broker.getPublicKey()
 
@@ -30,6 +29,8 @@ if (window.location.hash?.startsWith("#nostr-login")) {
           loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
           success = true
         }
+
+        broker.cleanup()
       } else {
         const secret = nsecDecode(login)
 

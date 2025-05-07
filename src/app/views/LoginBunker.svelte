@@ -1,8 +1,8 @@
 <script lang="ts">
+  import {debounce} from "throttle-debounce"
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import {nip46Perms, loginWithNip46} from "@welshman/app"
-  import {info} from "src/util/logger"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -23,6 +23,18 @@
 
   const back = () => history.back()
 
+  // Because of ack responses, this sometimes gets called by both flows at once
+  const finalize = debounce(300, async (broker: Nip46Broker, signerPubkey, relays) => {
+    const pubkey = await broker.getPublicKey()
+
+    if (pubkey) {
+      loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+      abortController.abort()
+      broker.cleanup()
+      boot()
+    }
+  })
+
   const logIn = async () => {
     loading = true
 
@@ -37,15 +49,12 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey, debug: info})
+      const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
       const result = await broker.connect(connectSecret, nip46Perms)
-      const pubkey = await broker.getPublicKey()
 
       // TODO: remove ack result
-      if (pubkey && ["ack", connectSecret].includes(result)) {
-        loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
-        abortController.abort()
-        boot()
+      if (["ack", connectSecret].includes(result)) {
+        finalize(broker, signerPubkey, relays)
       }
     } finally {
       loading = false
@@ -53,7 +62,7 @@
   }
 
   onMount(async () => {
-    const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS, debug: info})
+    const broker = new Nip46Broker({clientSecret, relays: env.SIGNER_RELAYS})
 
     url = await broker.makeNostrconnectUrl({
       url: env.APP_URL,
@@ -74,10 +83,7 @@
     }
 
     if (response) {
-      const pubkey = await broker.getPublicKey()
-
-      loginWithNip46(pubkey, clientSecret, response.event.pubkey, env.SIGNER_RELAYS)
-      boot()
+      finalize(broker, response.event.pubkey, env.SIGNER_RELAYS)
     }
   })
 
