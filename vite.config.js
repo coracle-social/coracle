@@ -9,6 +9,7 @@ import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
 
 dotenv.config({path: ".env"})
+dotenv.config({path: ".env.template"})
 
 const accentColor = process.env.VITE_LIGHT_THEME.match(/accent:(#\w+)/)[1]
 
