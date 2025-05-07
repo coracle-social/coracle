@@ -2,6 +2,7 @@
   import {onMount, onDestroy} from "svelte"
   import {Nip46Broker, makeSecret} from "@welshman/signer"
   import {nip46Perms, loginWithNip46} from "@welshman/app"
+  import {info} from "src/util/logger"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -36,7 +37,7 @@
         return showWarning("That connection string doesn't have any relays.")
       }
 
-      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey})
+      const broker = Nip46Broker.get({relays, clientSecret, signerPubkey, debug: info})
       const result = await broker.connect(connectSecret, nip46Perms)
       const pubkey = await broker.getPublicKey()
 
@@ -52,7 +53,7 @@
   }
 
   onMount(async () => {
-    const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS})
+    const broker = Nip46Broker.get({clientSecret, relays: env.SIGNER_RELAYS, debug: info})
 
     url = await broker.makeNostrconnectUrl({
       url: env.APP_URL,
