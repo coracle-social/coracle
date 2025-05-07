@@ -1,5 +1,10 @@
 # Changelog
 
+# 1.0.1
+
+* Fix relay images in nav
+* Fix relay nav overflow
+
 # 1.0.0
 
 * Add alerts via Anchor
