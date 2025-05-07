@@ -11,26 +11,29 @@ import {makeMentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
 export const hasBlossomSupport = simpleCache(async ([url]: [string]) => {
-  try {
-    const event = await signer.get()!.sign(
-      makeEvent(BLOSSOM_AUTH, {
-        tags: [
-          ["t", "upload"],
-          ["server", url],
-          ["expiration", String(now() + 30)],
-        ],
-      }),
-    )
+  const $signer = signer.get()
+  const headers: Record<string, string> = {
+    "X-Content-Type": "text/plain",
+    "X-Content-Length": "1",
+    "X-SHA-256": "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac",
+  }
 
-    const res = await fetch(normalizeUrl(url) + "/upload", {
-      method: "head",
-      headers: {
-        Authorization: `Nostr ${btoa(JSON.stringify(event))}`,
-        "X-Content-Type": "text/plain",
-        "X-Content-Length": "1",
-        "X-SHA-256": "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac",
-      },
-    })
+  try {
+    if ($signer) {
+      const event = await signer.get().sign(
+        makeEvent(BLOSSOM_AUTH, {
+          tags: [
+            ["t", "upload"],
+            ["server", url],
+            ["expiration", String(now() + 30)],
+          ],
+        }),
+      )
+
+      headers.Authorization = `Nostr ${btoa(JSON.stringify(event))}`
+    }
+
+    const res = await fetch(normalizeUrl(url) + "/upload", {method: "head", headers})
 
     return res.status === 200
   } catch (e) {
@@ -38,6 +41,8 @@ export const hasBlossomSupport = simpleCache(async ([url]: [string]) => {
       console.error(e)
     }
   }
+
+  return false
 })
 
 export const getUploadUrl = async (spaceUrl?: string) => {

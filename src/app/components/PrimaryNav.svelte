@@ -1,6 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
+  import {splitAt} from "@welshman/lib"
   import {userProfile} from "@welshman/app"
   import Avatar from "@lib/components/Avatar.svelte"
   import Divider from "@lib/components/Divider.svelte"
@@ -8,6 +9,7 @@
   import SpaceAdd from "@app/components/SpaceAdd.svelte"
   import ChatEnable from "@app/components/ChatEnable.svelte"
   import MenuSpaces from "@app/components/MenuSpaces.svelte"
+  import MenuOtherSpaces from "@app/components/MenuOtherSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
   import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
   import {userRoomsByUrl, canDecrypt, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
@@ -22,18 +24,32 @@
 
   const addSpace = () => pushModal(SpaceAdd)
 
-  const showSpacesMenu = () => (spacePaths.length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd))
+  const showSpacesMenu = () => (spaceUrls.length > 0 ? pushModal(MenuSpaces) : pushModal(SpaceAdd))
+
+  const showOtherSpacesMenu = () => pushModal(MenuOtherSpaces, {urls: secondarySpaceUrls})
 
   const showSettingsMenu = () => pushModal(MenuSettings)
 
   const openChat = () => ($canDecrypt ? goto("/chat") : pushModal(ChatEnable, {next: "/chat"}))
 
+  const hasNotification = (url: string) => {
+    const path = makeSpacePath(url)
+
+    return !$page.url.pathname.startsWith(path) && $notifications.has(path)
+  }
+
+  let windowHeight = $state(0)
+
+  const itemHeight = 56
+  const navPadding = 6 * itemHeight
+  const itemLimit = $derived((windowHeight - navPadding) / itemHeight)
   const spaceUrls = $derived(Array.from($userRoomsByUrl.keys()))
-  const spacePaths = $derived(spaceUrls.map(url => makeSpacePath(url)))
-  const anySpaceNotifications = $derived(
-    spacePaths.some(path => !$page.url.pathname.startsWith(path) && $notifications.has(path)),
-  )
+  const [primarySpaceUrls, secondarySpaceUrls] = $derived(splitAt(itemLimit, spaceUrls))
+  const anySpaceNotifications = $derived(spaceUrls.some(hasNotification))
+  const otherSpaceNotifications = $derived(secondarySpaceUrls.some(hasNotification))
 </script>
+
+<svelte:window bind:innerHeight={windowHeight} />
 
 <div class="sail sait saib relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
@@ -45,9 +61,18 @@
           <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
         </PrimaryNavItem>
         <Divider />
-        {#each spaceUrls as url (url)}
+        {#each primarySpaceUrls as url (url)}
           <PrimaryNavItemSpace {url} />
         {/each}
+        {#if secondarySpaceUrls.length > 0}
+          <PrimaryNavItem
+            title="Other Spaces"
+            class="tooltip-right"
+            onclick={showOtherSpacesMenu}
+            notification={otherSpaceNotifications}>
+            <Avatar icon="widget" class="!h-10 !w-10" />
+          </PrimaryNavItem>
+        {/if}
         <PrimaryNavItem title="Add Space" onclick={addSpace} class="tooltip-right">
           <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
         </PrimaryNavItem>

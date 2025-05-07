@@ -58,6 +58,7 @@
   import Mailbox from "@assets/icons/Mailbox.svg?dataurl"
   import MapPoint from "@assets/icons/Map Point.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
+  import MenuDotsCircle from "@assets/icons/Menu Dots Circle.svg?dataurl"
   import NotesMinimalistic from "@assets/icons/Notes Minimalistic.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Paperclip from "@assets/icons/Paperclip.svg?dataurl"
@@ -149,6 +150,7 @@
     mailbox: Mailbox,
     "map-point": MapPoint,
     "menu-dots": MenuDots,
+    "menu-dots-circle": MenuDotsCircle,
     "notes-minimalistic": NotesMinimalistic,
     "pallete-2": Pallete2,
     paperclip: Paperclip,

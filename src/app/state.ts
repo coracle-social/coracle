@@ -629,11 +629,11 @@ export const userRoomsByUrl = withGetter(
     const $userRoomsByUrl = new Map<string, Set<string>>()
 
     for (const [_, room, url] of getGroupTags(tags)) {
-      addToMapKey($userRoomsByUrl, url, room)
+      addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), room)
     }
 
     for (const url of getRelayTagValues(tags)) {
-      addToMapKey($userRoomsByUrl, url, GENERAL)
+      addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), GENERAL)
     }
 
     return $userRoomsByUrl
