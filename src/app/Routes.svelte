@@ -66,7 +66,7 @@
     {#if $page}
       {@const {component} = router.getMatch($page.path).route}
       {#key router.getKey($page)}
-        <div class="sai m-auto w-full max-w-2xl">
+        <div class="my-sai m-auto w-full max-w-2xl">
           <div class="flex max-w-2xl flex-grow flex-col gap-4 p-4">
             <svelte:component this={component} {...router.getProps($page)} />
           </div>

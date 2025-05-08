@@ -48,7 +48,7 @@
 
 <!-- top nav -->
 {#if innerWidth >= 1024}
-  <div class="sait saix fixed left-0 right-0 top-0 z-nav">
+  <div class="top-sai left-sai right-sai fixed z-nav">
     <div class="flex h-16 items-center justify-end gap-8 bg-neutral-900 pl-4 pr-8">
       <div class="relative">
         <div class="flex">
@@ -106,8 +106,8 @@
 <!-- bottom nav -->
 {#if innerWidth < 1024}
   <div
-    class="fixed bottom-0 left-0 right-0 z-nav border-neutral-600 bg-tinted-800 dark:bg-black">
-    <div class="flex items-center justify-between rounded-t-xl px-4 py-2 saib saix">
+    class="px-sai pb-sai fixed bottom-0 left-0 right-0 z-nav border-neutral-600 bg-tinted-800 dark:bg-black">
+    <div class="flex items-center justify-between rounded-t-xl px-4 py-2">
       <div class="w-1/3">
         <div
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-solid border-neutral-600 text-accent dark:border-tinted-600 dark:bg-tinted-800"

@@ -4,7 +4,7 @@
 
 <div
   in:slide={{delay: 500}}
-  class="fixed bottom-0 bottom-14 left-0 right-0 rounded-t-xl bg-neutral-900 px-4 py-2 group-[.modal]:bottom-0 lg:bottom-0 lg:left-72 lg:group-[.modal]:left-0">
+  class="fixed bottom-[calc(var(--saib)+3.5rem)] left-0 right-0 rounded-t-xl bg-neutral-900 px-4 py-2 lg:bottom-0 lg:left-72">
   <div class="m-auto flex max-w-2xl p-4">
     <slot />
   </div>

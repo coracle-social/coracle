@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.15
+
+* Fix safe areas more
+* Improve remote signing
+
 # 0.6.14
 
 * Fix safe areas

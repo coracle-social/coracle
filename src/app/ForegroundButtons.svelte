@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class="fixed bottom-20 right-4 z-feature flex flex-col items-center gap-3 lg:bottom-8 lg:right-8">
+  class="fixed bottom-[calc(var(--saib)+4.5rem)] right-[calc(var(--sair)+1rem)] z-feature flex flex-col items-center gap-3 lg:bottom-8 lg:right-8">
   {#if scrollY > 1000}
     <div transition:fade|local={{delay: 200, duration: 200}}>
       <ForegroundButton theme="secondary" size="small" on:click={scrollToTop}>

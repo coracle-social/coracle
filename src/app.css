@@ -97,52 +97,86 @@ body,
 #app,
 #app > div {
   height: 100%;
+  --sait: env(safe-area-inset-top);
+  --saib: env(safe-area-inset-bottom);
+  --sail: env(safe-area-inset-left);
+  --sair: env(safe-area-inset-right);
 }
 
 /* safe area */
 
-.sait {
-  padding-top: env(safe-area-inset-top);
-}
+@layer components {
+  .pt-sai {
+    padding-top: var(--sait);
+  }
 
-.sair {
-  padding-right: env(safe-area-inset-right);
-}
+  .pr-sai {
+    padding-right: var(--sair);
+  }
 
-.saib {
-  padding-bottom: env(safe-area-inset-bottom);
-}
+  .pb-sai {
+    padding-bottom: var(--saib);
+  }
 
-.sail {
-  padding-left: env(safe-area-inset-left);
-}
+  .pl-sai {
+    padding-left: var(--sail);
+  }
 
-.saix {
-  @apply sail sair;
-}
+  .px-sai {
+    @apply pl-sai pr-sai;
+  }
 
-.saiy {
-  @apply sait saib;
-}
+  .py-sai {
+    @apply pt-sai pb-sai;
+  }
 
-.sai {
-  @apply saiy saix;
-}
+  .p-sai {
+    @apply py-sai px-sai;
+  }
 
-.top-sai {
-  top: env(safe-area-inset-top);
-}
+  .mt-sai {
+    padding-top: var(--sait);
+  }
 
-.right-sai {
-  right: env(safe-area-inset-right);
-}
+  .mr-sai {
+    padding-right: var(--sair);
+  }
 
-.bottom-sai {
-  bottom: env(safe-area-inset-bottom);
-}
+  .mb-sai {
+    padding-bottom: var(--saib);
+  }
 
-.left-sai {
-  left: env(safe-area-inset-left);
+  .ml-sai {
+    padding-left: var(--sail);
+  }
+
+  .mx-sai {
+    @apply ml-sai mr-sai;
+  }
+
+  .my-sai {
+    @apply mt-sai mb-sai;
+  }
+
+  .m-sai {
+    @apply my-sai mx-sai;
+  }
+
+  .top-sai {
+    top: var(--sait);
+  }
+
+  .right-sai {
+    right: var(--sair);
+  }
+
+  .bottom-sai {
+    bottom: var(--saib);
+  }
+
+  .left-sai {
+    left: var(--sail);
+  }
 }
 
 /* Tippy dark */
@@ -160,7 +194,6 @@ body,
 .tippy-content {
   padding: 0 !important;
 }
-
 .tippy-box[data-theme~="dark"][data-placement^="top"] > .tippy-arrow {
   bottom: -1px !important;
 }
