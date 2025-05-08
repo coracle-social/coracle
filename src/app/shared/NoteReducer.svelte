@@ -29,13 +29,14 @@
   export let items: TrustedEvent[] = []
 
   const timestamps = new Map<string, number>()
-
+  const seenIds = new Set<string>()
   const context = new Map<string, Set<TrustedEvent>>()
 
   const shouldSkip = (event: TrustedEvent, strict: boolean) => {
     if (!showMuted && $isEventMuted(event, strict)) return true
     if (!showDeleted && repository.isDeleted(event)) return true
     if (hideReplies && getParentIdOrAddr(event)) return true
+    if (seenIds.has(event.id)) return true
 
     return false
   }
@@ -68,6 +69,8 @@
     const original = event
     let currentDepth = depth
 
+    seenIds.add(event.id)
+
     while (currentDepth > 0) {
       const parent = await getParent(event)
 
@@ -86,6 +89,7 @@
       }
 
       addToMapKey(context, getIdOrAddress(parent), event)
+      seenIds.add(parent.id)
       currentDepth--
       event = parent
     }
