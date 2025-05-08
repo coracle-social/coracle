@@ -1,30 +1,19 @@
 <script lang="ts">
   import cx from "classnames"
   import {signer, pubkey} from "@welshman/app"
-  import logger from "src/util/logger"
   import {isMobile} from "src/util/html"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
 
-  const {current, page, modal, modals} = router
+  const {current, page, modals} = router
 
   let prevPage
 
   $: {
-    if ($modal) {
-      logger.info("modal", $modal, router.getProps($modal))
-    }
-  }
-
-  $: {
-    if ($page) {
-      logger.info("page", $page, router.getProps($page))
-
-      if ($page.path !== prevPage?.path) {
-        window.scrollTo(0, 0)
-        prevPage = $page
-      }
+    if ($page && $page.path !== prevPage?.path) {
+      window.scrollTo(0, 0)
+      prevPage = $page
     }
   }
 
