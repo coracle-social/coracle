@@ -45,7 +45,8 @@
           e => e.id,
           sortBy(e => -e.created_at, buffer),
         )
-        events = [...events, ...buffer.splice(0, 5)]
+
+        events = uniqBy(e => e.id, [...events, ...buffer.splice(0, 5)])
 
         if (buffer.length < 50) {
           ctrl.load(50)

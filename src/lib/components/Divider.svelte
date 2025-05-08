@@ -1,9 +1,11 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
+
   interface Props {
-    children?: import("svelte").Snippet
+    children?: Snippet
   }
 
-  const {children}: Props = $props()
+  const {children, ...props}: Props = $props()
 </script>
 
 <div class="flex items-center gap-2 p-2 text-xs uppercase opacity-50">

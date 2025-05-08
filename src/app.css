@@ -54,6 +54,10 @@
   --primary-content: oklch(var(--pc));
   --secondary: oklch(var(--s));
   --secondary-content: oklch(var(--sc));
+  --sait: env(safe-area-inset-top);
+  --saib: env(safe-area-inset-bottom);
+  --sail: env(safe-area-inset-left);
+  --sair: env(safe-area-inset-right);
 }
 
 :root,
@@ -64,48 +68,80 @@ html {
 
 /* ios */
 
-.sait {
-  padding-top: env(safe-area-inset-top);
+.pt-sai {
+  padding-top: var(--sait);
 }
 
-.sair {
-  padding-right: env(safe-area-inset-right);
+.pr-sai {
+  padding-right: var(--sair);
 }
 
-.saib {
-  padding-bottom: env(safe-area-inset-bottom);
+.pb-sai {
+  padding-bottom: var(--saib);
 }
 
-.sail {
-  padding-left: env(safe-area-inset-left);
+.pl-sai {
+  padding-left: var(--sail);
 }
 
-.saix {
-  @apply sail sair;
+.px-sai {
+  @apply pl-sai pr-sai;
 }
 
-.saiy {
-  @apply sait saib;
+.py-sai {
+  @apply pt-sai pb-sai;
 }
 
-.sai {
-  @apply saiy saix;
+.p-sai {
+  @apply py-sai px-sai;
+}
+
+.mt-sai {
+  padding-top: var(--sait);
+}
+
+.mr-sai {
+  padding-right: var(--sair);
+}
+
+.mb-sai {
+  padding-bottom: var(--saib);
+}
+
+.ml-sai {
+  padding-left: var(--sail);
+}
+
+.mx-sai {
+  @apply ml-sai mr-sai;
+}
+
+.my-sai {
+  @apply mt-sai mb-sai;
+}
+
+.m-sai {
+  @apply my-sai mx-sai;
 }
 
 .top-sai {
-  top: env(safe-area-inset-top);
+  top: var(--sait);
 }
 
 .right-sai {
-  right: env(safe-area-inset-right);
+  right: var(--sair);
 }
 
 .bottom-sai {
-  bottom: env(safe-area-inset-bottom);
+  bottom: var(--saib);
 }
 
 .left-sai {
-  left: env(safe-area-inset-left);
+  left: var(--sail);
+}
+
+.h-saib {
+  height: var(--saib);
 }
 
 /* utilities */
@@ -349,7 +385,7 @@ progress[value]::-webkit-progress-value {
 }
 
 .cb {
-  @apply saib bottom-14 md:bottom-0;
+  @apply bottom-14 md:bottom-0;
 }
 
 /* chat view */
@@ -359,5 +395,5 @@ progress[value]::-webkit-progress-value {
 }
 
 .chat__scroll-down {
-  @apply saib fixed bottom-28 right-4 md:bottom-16;
+  @apply fixed bottom-28 right-4 md:bottom-16;
 }
