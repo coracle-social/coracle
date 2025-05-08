@@ -51,7 +51,8 @@
 
 <svelte:window bind:innerHeight={windowHeight} />
 
-<div class="relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
+<div
+  class="ml-sai mt-sai mb-sai relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
       {#if PLATFORM_RELAY}
@@ -103,9 +104,9 @@
 {@render children?.()}
 
 <!-- a little extra something for ios -->
-<div class="fixed bottom-0 left-0 right-0 z-nav h-saib bg-base-100 md:hidden"></div>
+<div class="fixed bottom-0 left-0 right-0 z-nav h-[var(--saib)] bg-base-100 md:hidden"></div>
 <div
-  class="border-top bottom-0 fixed left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
+  class="border-top bottom-sai fixed left-0 right-0 z-nav h-14 border border-base-200 bg-base-100 md:hidden">
   <div class="content-padding-x content-sizing flex justify-between px-2">
     <div class="flex gap-2 sm:gap-8">
       <PrimaryNavItem title="Home" href="/home">

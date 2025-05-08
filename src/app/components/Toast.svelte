@@ -8,7 +8,7 @@
 
 {#if $toast}
   {@const theme = $toast.theme || "info"}
-  <div transition:fly class="toast z-toast">
+  <div transition:fly class="bottom-sai right-sai toast z-toast">
     {#key $toast.id}
       <div
         role="alert"

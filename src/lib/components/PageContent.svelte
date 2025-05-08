@@ -13,6 +13,7 @@
 <div
   {...props}
   bind:this={element}
-  class="scroll-container cw fixed top-12 h-[calc(100%-6.5rem)] overflow-y-auto overflow-x-hidden md:h-[calc(100%-3rem)] {props.class}">
+  data-component="PageContent"
+  class="scroll-container cw md:bottom-sai fixed bottom-[calc(var(--saib)+3.5rem)] top-[calc(var(--sait)+3rem)] overflow-y-auto overflow-x-hidden {props.class}">
   {@render children?.()}
 </div>

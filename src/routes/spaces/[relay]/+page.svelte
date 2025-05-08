@@ -189,8 +189,8 @@
     </Button>
   </div>
   {#if pubkey}
+    <Divider>Recent posts from the relay admin</Divider>
     <div class="hidden flex-col gap-2" class:!flex={relayAdminEvents.length > 0}>
-      <Divider>Recent posts from the relay admin</Divider>
       <ProfileFeed hideLoading {url} {pubkey} bind:events={relayAdminEvents} />
     </div>
   {/if}

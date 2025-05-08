@@ -66,82 +66,80 @@ html {
   @apply bg-base-300;
 }
 
-/* ios */
+/* safe area insets */
 
-.pt-sai {
-  padding-top: var(--sait);
-}
+@layer components {
+  .pt-sai {
+    padding-top: var(--sait);
+  }
 
-.pr-sai {
-  padding-right: var(--sair);
-}
+  .pr-sai {
+    padding-right: var(--sair);
+  }
 
-.pb-sai {
-  padding-bottom: var(--saib);
-}
+  .pb-sai {
+    padding-bottom: var(--saib);
+  }
 
-.pl-sai {
-  padding-left: var(--sail);
-}
+  .pl-sai {
+    padding-left: var(--sail);
+  }
 
-.px-sai {
-  @apply pl-sai pr-sai;
-}
+  .px-sai {
+    @apply pl-sai pr-sai;
+  }
 
-.py-sai {
-  @apply pt-sai pb-sai;
-}
+  .py-sai {
+    @apply pt-sai pb-sai;
+  }
 
-.p-sai {
-  @apply py-sai px-sai;
-}
+  .p-sai {
+    @apply py-sai px-sai;
+  }
 
-.mt-sai {
-  padding-top: var(--sait);
-}
+  .mt-sai {
+    padding-top: var(--sait);
+  }
 
-.mr-sai {
-  padding-right: var(--sair);
-}
+  .mr-sai {
+    padding-right: var(--sair);
+  }
 
-.mb-sai {
-  padding-bottom: var(--saib);
-}
+  .mb-sai {
+    padding-bottom: var(--saib);
+  }
 
-.ml-sai {
-  padding-left: var(--sail);
-}
+  .ml-sai {
+    padding-left: var(--sail);
+  }
 
-.mx-sai {
-  @apply ml-sai mr-sai;
-}
+  .mx-sai {
+    @apply ml-sai mr-sai;
+  }
 
-.my-sai {
-  @apply mt-sai mb-sai;
-}
+  .my-sai {
+    @apply mt-sai mb-sai;
+  }
 
-.m-sai {
-  @apply my-sai mx-sai;
-}
+  .m-sai {
+    @apply my-sai mx-sai;
+  }
 
-.top-sai {
-  top: var(--sait);
-}
+  .top-sai {
+    top: var(--sait);
+  }
 
-.right-sai {
-  right: var(--sair);
-}
+  .right-sai {
+    right: var(--sair);
+  }
 
-.bottom-sai {
-  bottom: var(--saib);
-}
+  .bottom-sai {
+    bottom: var(--saib);
+  }
 
-.left-sai {
-  left: var(--sail);
-}
-
-.h-saib {
-  height: var(--saib);
+  .left-sai {
+    left: var(--sail);
+  }
 }
 
 /* utilities */
@@ -381,11 +379,11 @@ progress[value]::-webkit-progress-value {
 /* content width for fixed elements */
 
 .cw {
-  @apply w-full md:w-[calc(100%-18.5rem)];
+  @apply w-full md:left-[18.5rem] md:w-[calc(100%-18.5rem-var(--sair))];
 }
 
 .cb {
-  @apply bottom-14 md:bottom-0;
+  @apply md:bottom-sai bottom-[calc(var(--saib)+3.5rem)];
 }
 
 /* chat view */

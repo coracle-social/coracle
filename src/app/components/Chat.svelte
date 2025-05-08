@@ -126,9 +126,11 @@
     })
 
     observer.observe(chatCompose!)
+    observer.observe(dynamicPadding!)
 
     return () => {
       observer.unobserve(chatCompose!)
+      observer.unobserve(dynamicPadding!)
     }
   })
 
