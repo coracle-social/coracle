@@ -29,7 +29,7 @@
         >{displayUrl($relay.profile.contact)}</Link>
       &bull;
     {/if}
-    {#if $relay?.profile?.supported_nips}
+    {#if Array.isArray($relay?.profile?.supported_nips)}
       <span
         class="tooltip cursor-pointer underline"
         data-tip="NIPs supported: {$relay.profile.supported_nips.join(', ')}">

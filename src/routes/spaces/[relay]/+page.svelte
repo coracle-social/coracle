@@ -112,7 +112,7 @@
             <span class="ellipsize">Requires PoW {limitation?.min_pow_difficulty}</span>
           </p>
         {/if}
-        {#if supported_nips}
+        {#if Array.isArray(supported_nips)}
           <p class="badge badge-neutral">
             <span class="ellipsize">NIPs: {supported_nips.join(", ")}</span>
           </p>
