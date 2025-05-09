@@ -3,6 +3,7 @@
     getFeedArgs,
     isGlobalFeed,
     isCreatedAtFeed,
+    isWOTFeed,
     isAuthorFeed,
     isKindFeed,
     isDVMFeed,
@@ -15,6 +16,7 @@
     makeSearchFeed,
     makeKindFeed,
     makeCreatedAtFeed,
+    makeWOTFeed,
     makeListFeed,
     makeDVMFeed,
   } from "@welshman/feeds"
@@ -32,6 +34,7 @@
   import FeedFormSectionMentions from "src/app/shared/FeedFormSectionMentions.svelte"
   import FeedFormSectionKinds from "src/app/shared/FeedFormSectionKinds.svelte"
   import FeedFormSectionCreatedAt from "src/app/shared/FeedFormSectionCreatedAt.svelte"
+  import FeedFormSectionWOT from "src/app/shared/FeedFormSectionWOT.svelte"
   import FeedFormSectionList from "src/app/shared/FeedFormSectionList.svelte"
   import FeedFormSectionDVM from "src/app/shared/FeedFormSectionDVM.svelte"
   import FeedFormSaveAsList from "src/app/shared/FeedFormSaveAsList.svelte"
@@ -66,6 +69,7 @@
   $: hasSearch = subFeeds.some(isSearchFeed)
   $: hasKinds = subFeeds.some(isKindFeed)
   $: hasDate = subFeeds.some(isDateFeed)
+  $: hasWOT = subFeeds.some(isWOTFeed)
   $: hasList = subFeeds.some(isListFeed)
   $: hasDVM = subFeeds.some(isDVMFeed)
 </script>
@@ -97,6 +101,8 @@
               <FeedFormSectionKinds feed={subFeed} onChange={change} />
             {:else if isDateFeed(subFeed)}
               <FeedFormSectionCreatedAt feed={subFeed} onChange={change} />
+            {:else if isWOTFeed(subFeed)}
+              <FeedFormSectionWOT feed={subFeed} onChange={change} />
             {:else if isListFeed(subFeed)}
               <FeedFormSectionList feed={subFeed} onChange={change} />
             {:else if isDVMFeed(subFeed)}
@@ -147,6 +153,9 @@
           {/if}
           {#if !hasDate}
             <MenuItem on:click={() => addFeed(makeCreatedAtFeed())}>Date range</MenuItem>
+          {/if}
+          {#if !hasWOT}
+            <MenuItem on:click={() => addFeed(makeWOTFeed())}>Web of trust</MenuItem>
           {/if}
           {#if !hasList}
             <MenuItem on:click={() => addFeed(makeListFeed())}>From a list</MenuItem>

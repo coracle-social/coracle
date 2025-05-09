@@ -5,6 +5,7 @@
     makeIntersectionFeed,
     hasSubFeeds,
     getFeedArgs,
+    isWOTFeed,
     isAuthorFeed,
     isScopeFeed,
     isTagFeed,
@@ -43,7 +44,7 @@
 
   const normalize = feed => (isNormalized(feed) ? feed : [FeedType.Intersection, feed])
 
-  const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
+  const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f) || isWOTFeed(f)
 
   const isTopicsFeed = f => isTagFeed(f) && f[1] === "#t"
 
@@ -65,7 +66,7 @@
   const inferFormType = feed => {
     for (const subFeed of getFeedArgs(normalize(feed))) {
       if (isGlobalFeed(subFeed)) return FormType.Global
-      if (isScopeFeed(subFeed) || isAuthorFeed(subFeed)) return FormType.People
+      if (isPeopleFeed(subFeed)) return FormType.People
       if (isTagFeed(subFeed) && subFeed[1] === "#t") return FormType.Topics
       if (isRelayFeed(subFeed)) return FormType.Relays
       if (isListFeed(subFeed)) return FormType.Lists
@@ -217,7 +218,7 @@
     {#if formType === FormType.Advanced}
       <FeedFormAdvanced {feed} onChange={onFeedChange} />
     {:else}
-      <FeedFormFilters {feed} onChange={onFeedChange} />
+      <FeedFormFilters feed={normalize(feed)} onChange={onFeedChange} />
     {/if}
   </FlexColumn>
 </FlexColumn>
