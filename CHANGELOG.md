@@ -4,6 +4,10 @@
 
 * Fix safe areas more
 * Improve remote signing
+* Drop nip 96 support
+* Use user blossom servers
+* Improve profile edit page
+* Avoid duplicate notes in feeds
 
 # 0.6.14
 
