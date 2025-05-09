@@ -58,8 +58,6 @@
   let settings = $state({...$userSettingValues})
   let mutedPubkeys = $state(getPubkeyTagValues(getListTags($userMutes)))
   let blossomServers = $state(getTagValues("server", getListTags($userBlossomServers)))
-
-  $inspect(blossomServers)
 </script>
 
 <form class="content column gap-4" {onsubmit}>

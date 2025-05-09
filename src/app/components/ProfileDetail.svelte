@@ -66,7 +66,7 @@
   </div>
   <ProfileInfo {pubkey} {url} />
   <ModalFooter>
-    <Button onclick={back} class="btn btn-link hidden md:block">
+    <Button onclick={back} class="hidden md:btn md:btn-link">
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>

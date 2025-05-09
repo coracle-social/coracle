@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.0.2
+
+* Fix add relay button
+* Fix safe inset areas
+* Better rendering for errors from relays
+* Improve remote signer login
+
 # 1.0.1
 
 * Fix relay images in nav
