@@ -134,7 +134,9 @@
         <Anchor
           button
           class="w-full !bg-neutral-800 dark:!bg-white"
-          on:click={router.at("/settings/profile").open}>Edit</Anchor>
+          href={router.at("/settings/profile").toString()}>
+          Edit
+        </Anchor>
       {:else if $session}
         <Anchor
           button
@@ -146,7 +148,7 @@
         <Anchor
           button
           low
-          on:click={router.at("channels").of([$session.pubkey, pubkey]).push}
+          href={router.at("channels").of([$session.pubkey, pubkey]).toString()}
           class="w-full">Message</Anchor>
       {/if}
     </div>
