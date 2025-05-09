@@ -5,6 +5,7 @@
   import Textarea from "src/partials/Textarea.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import Footer from "src/partials/Footer.svelte"
+  import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {publishProfile} from "src/engine"
@@ -17,7 +18,8 @@
 
   const submit = () => {
     publishProfile(values)
-    router.pop()
+    showInfo("Your profile has been saved!")
+    router.at("people").of($pubkey).replace()
   }
 
   const values = {...$profilesByPubkey.get($pubkey)}

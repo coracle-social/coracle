@@ -1,23 +1,24 @@
 <script lang="ts">
-  import {displayList} from "@welshman/lib"
-  import {getTagValue} from "@welshman/util"
-  import {createEventDispatcher} from "svelte"
+  import {displayUrl, first} from "@welshman/lib"
+  import {getTagValue, getListTags} from "@welshman/util"
+  import {userBlossomServers} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Anchor from "src/partials/Anchor.svelte"
+  import {showWarning} from "src/partials/Toast.svelte"
+  import {ensureProto} from "src/util/misc"
   import {listenForFile} from "src/util/html"
-  import {uploadFiles, getSetting} from "src/engine"
+  import {env, uploadFile} from "src/engine"
 
   export let icon = null
   export let value = null
-  export let multi = false
   export let maxWidth = null
   export let maxHeight = null
-  export let hostLimit = 1
 
-  const urls = getSetting("nip96_urls").slice(0, hostLimit)
-  const dispatch = createEventDispatcher()
+  const url = ensureProto(
+    getTagValue("server", getListTags($userBlossomServers)) || first(env.BLOSSOM_URLS),
+  )
 
   let input, loading
   let isOpen = false
@@ -29,17 +30,15 @@
           loading = true
 
           try {
-            const tags = await uploadFiles(urls, inputFiles, {
+            const result = await uploadFile(url, inputFiles[0], {
               maxWidth,
               maxHeight,
             })
 
-            // For inputs that only want one file
-            value = getTagValue("url", tags)
-
-            if (value) {
-              dispatch("change", value)
-            }
+            value = result.url
+          } catch (e) {
+            console.error(e)
+            showWarning(e.toString())
           } finally {
             isOpen = false
             loading = false
@@ -77,7 +76,7 @@
 {#if isOpen}
   <Modal mini onEscape={decline}>
     {#if loading}
-      <Spinner delay={0}>Uploading files using: {displayList(urls)}</Spinner>
+      <Spinner delay={0}>Uploading files to {displayUrl(url)}</Spinner>
     {:else}
       <h1 class="staatliches text-2xl">Upload a File</h1>
       <div class="flex flex-col gap-2">
@@ -87,7 +86,7 @@
           Note that images are stored unencrypted and publicly accessible.
         </p>
       </div>
-      <input multiple={multi} type="file" bind:this={input} />
+      <input type="file" bind:this={input} />
     {/if}
   </Modal>
 {/if}

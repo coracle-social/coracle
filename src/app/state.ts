@@ -14,6 +14,7 @@ import {
   loadZapper,
   loadHandle,
   loadRelaySelections,
+  loadBlossomServers,
   loadProfile,
   loadFollows,
   loadMutes,
@@ -64,6 +65,7 @@ export const loadUserData = async (hints: string[] = []) => {
   await Promise.all([
     loadInboxRelaySelections($pubkey, hints),
     loadRelaySelections($pubkey, hints),
+    loadBlossomServers($pubkey, hints),
     loadProfile($pubkey, hints),
     loadFollows($pubkey, hints),
     loadMutes($pubkey, hints),

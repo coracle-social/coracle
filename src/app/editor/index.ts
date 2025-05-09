@@ -3,23 +3,21 @@ import "@welshman/editor/index.css"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {UploadTask} from "@welshman/editor"
+import {first} from "@welshman/lib"
 import type {StampedEvent} from "@welshman/util"
+import {getTagValue, getListTags} from "@welshman/util"
 import {Router} from "@welshman/router"
-import {signer, profileSearch} from "@welshman/app"
+import {signer, profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
-import {getSetting, userSettings} from "src/engine/state"
+import {ensureProto} from "src/util/misc"
+import {env} from "src/engine/state"
 import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
-export const getUploadType = () => getSetting("upload_type")
-
-export const getUploadUrl = () => {
-  const {upload_type, nip96_urls, blossom_urls} = userSettings.get()
-
-  return upload_type === "nip96"
-    ? nip96_urls[0] || "https://nostr.build"
-    : blossom_urls[0] || "https://cdn.satellite.earth"
-}
+export const getUploadUrl = () =>
+  ensureProto(
+    getTagValue("server", getListTags(userBlossomServers.get())) || first(env.BLOSSOM_URLS),
+  )
 
 export const signWithAssert = async (template: StampedEvent) => {
   const event = await signer.get().sign(template)
@@ -57,7 +55,7 @@ export const makeEditor = ({
       WelshmanExtension.configure({
         submit,
         sign: signWithAssert,
-        defaultUploadType: getUploadType(),
+        defaultUploadType: "blossom",
         defaultUploadUrl: getUploadUrl(),
         extensions: {
           placeholder: {

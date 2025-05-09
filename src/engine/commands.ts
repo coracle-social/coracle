@@ -11,23 +11,10 @@ import {
   userRelaySelections,
   publishThunk,
 } from "@welshman/app"
-import {
-  identity,
-  append,
-  cached,
-  groupBy,
-  now,
-  remove,
-  prop,
-  flatten,
-  nthNe,
-  uniq,
-  fetchJson,
-  sleep,
-  tryCatch,
-} from "@welshman/lib"
+import {append, now, remove, nthNe, uniq, bufferToHex} from "@welshman/lib"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
+import {uploadBlossom} from "@welshman/editor"
 import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
   Address,
@@ -47,11 +34,8 @@ import {
   makeList,
   normalizeRelayUrl,
   removeFromList,
-  getTagValue,
-  uniqTags,
   getRelaysFromList,
 } from "@welshman/util"
-import crypto from "crypto"
 import {
   addClientTags,
   anonymous,
@@ -61,7 +45,6 @@ import {
   withIndexers,
 } from "src/engine/state"
 import {blobToFile, stripExifData} from "src/util/html"
-import {joinPath} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {get} from "svelte/store"
 
@@ -93,98 +76,17 @@ export const nip44EncryptToSelf = (payload: string) =>
 
 // Files
 
-export const nip98Fetch = async (url, method, body = null) => {
-  const tags = [
-    ["u", url],
-    ["method", method],
-  ]
+export const hashFile = async (file: File) =>
+  bufferToHex(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()))
 
-  if (body) {
-    tags.push(["payload", crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex")])
-  }
-
+export const uploadFile = async (serverUrl: string, file: File, compressorOpts = {}) => {
   const $signer = signer.get() || Nip01Signer.ephemeral()
-  const event = await $signer.sign(makeEvent(27235, {tags}))
-  const auth = btoa(JSON.stringify(event))
-  const headers = {Authorization: `Nostr ${auth}`}
 
-  return fetchJson(url, {body, method, headers})
-}
-
-export const getMediaProviderURL = cached({
-  maxSize: 10,
-  getKey: ([url]) => url,
-  getValue: ([url]) => fetchMediaProviderURL(url),
-})
-
-const fetchMediaProviderURL = async host =>
-  prop("api_url")(await fetchJson(joinPath(host, ".well-known/nostr/nip96.json")))
-
-const fileToFormData = file => {
-  const formData = new FormData()
-
-  formData.append("file[]", file)
-
-  return formData
-}
-
-export const uploadFileToHost = async <T = any>(url: string, file: File): Promise<T> => {
-  const startTime = now()
-  const apiUrl = await getMediaProviderURL(url)
-  const response = await nip98Fetch(apiUrl, "POST", fileToFormData(file))
-
-  // If the media provider uses delayed processing, we need to wait for the processing to be done
-  while (response.processing_url) {
-    const {status, nip94_event} = await nip98Fetch(response.processing_url, "GET")
-
-    if (status === "success") {
-      return nip94_event
-    }
-
-    if (now() - startTime > 60) {
-      break
-    }
-
-    await sleep(3000)
+  if (!file.type.match("image/(webp|gif)")) {
+    file = blobToFile(await stripExifData(file, compressorOpts))
   }
 
-  return response.nip94_event
-}
-
-export const uploadFilesToHost = <T = any>(url: string, files: File[]): Promise<T[]> =>
-  Promise.all(files.map(file => tryCatch(async () => await uploadFileToHost<T>(url, file))))
-
-export const uploadFileToHosts = <T = any>(urls: string[], file: File): Promise<T[]> =>
-  Promise.all(urls.map(url => tryCatch(async () => await uploadFileToHost<T>(url, file))))
-
-export const uploadFilesToHosts = async <T = any>(urls: string[], files: File[]): Promise<T[]> =>
-  flatten(await Promise.all(urls.map(url => uploadFilesToHost<T>(url, files)))).filter(identity)
-
-export const compressFiles = (files, opts) =>
-  Promise.all(
-    files.map(async f => {
-      if (f.type.match("image/(webp|gif)")) {
-        return f
-      }
-
-      return blobToFile(await stripExifData(f, opts))
-    }),
-  )
-
-export const eventsToMeta = (events: TrustedEvent[]) => {
-  const tagsByHash = groupBy(
-    imeta => getTagValue("ox", imeta),
-    events.map(e => e.tags),
-  )
-
-  return uniqTags(Array.from(tagsByHash.values()).flatMap(identity).flatMap(identity))
-}
-
-export const uploadFiles = async (urls, files, compressorOpts = {}) => {
-  const compressedFiles = await compressFiles(files, compressorOpts)
-  const nip94Events = await uploadFilesToHosts(urls, compressedFiles)
-
-  return eventsToMeta(nip94Events as TrustedEvent[])
+  return uploadBlossom({file, serverUrl, sign: $signer.sign, hash: hashFile})
 }
 
 // Key state management
