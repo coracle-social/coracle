@@ -5,6 +5,8 @@
 * Add light theme
 * Use correct alerts server
 * Ignore relay errors for claims
+* Fix inline code blocks
+* Add custom emoji parsing and display
 
 # 1.0.2
 
