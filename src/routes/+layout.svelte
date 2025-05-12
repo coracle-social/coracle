@@ -51,9 +51,9 @@
   import {setupTracking} from "@app/tracking"
   import {setupAnalytics} from "@app/analytics"
   import {nsecDecode} from "@lib/util"
-  import {theme} from "@app/theme"
   import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
   import {loadUserData, listenForNotifications} from "@app/requests"
+  import {theme} from "@app/theme"
   import * as commands from "@app/commands"
   import * as requests from "@app/requests"
   import * as notifications from "@app/notifications"
@@ -120,6 +120,11 @@
         goto("/home")
       }
     }
+
+    // Sync theme
+    theme.subscribe($theme => {
+      document.body.setAttribute("data-theme", $theme)
+    })
 
     if (!db) {
       setupTracking()
@@ -228,9 +233,9 @@
 </svelte:head>
 
 {#await ready}
-  <div data-theme={$theme}></div>
+  <div></div>
 {:then}
-  <div data-theme={$theme}>
+  <div>
     <AppContainer>
       {@render children()}
     </AppContainer>
