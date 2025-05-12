@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.16
+
+* Add support for editing WOT feeds
+* Change default blossom servers
+
 # 0.6.15
 
 * Fix safe areas more
