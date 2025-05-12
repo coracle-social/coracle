@@ -46,6 +46,9 @@
 
 :root {
   font-family: Lato;
+}
+
+[data-theme] {
   --base-100: oklch(var(--b1));
   --base-200: oklch(var(--b2));
   --base-300: oklch(var(--b3));

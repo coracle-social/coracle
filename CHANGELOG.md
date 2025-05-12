@@ -1,5 +1,10 @@
 # Changelog
 
+# 1.0.3
+
+* Add light theme
+* Use correct alerts server
+
 # 1.0.2
 
 * Fix add relay button

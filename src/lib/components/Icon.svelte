@@ -59,6 +59,7 @@
   import MapPoint from "@assets/icons/Map Point.svg?dataurl"
   import MenuDots from "@assets/icons/Menu Dots.svg?dataurl"
   import MenuDotsCircle from "@assets/icons/Menu Dots Circle.svg?dataurl"
+  import Moon from "@assets/icons/Moon.svg?dataurl"
   import NotesMinimalistic from "@assets/icons/Notes Minimalistic.svg?dataurl"
   import Pallete2 from "@assets/icons/Pallete 2.svg?dataurl"
   import Paperclip from "@assets/icons/Paperclip.svg?dataurl"
@@ -151,6 +152,7 @@
     "map-point": MapPoint,
     "menu-dots": MenuDots,
     "menu-dots-circle": MenuDotsCircle,
+    moon: Moon,
     "notes-minimalistic": NotesMinimalistic,
     "pallete-2": Pallete2,
     paperclip: Paperclip,

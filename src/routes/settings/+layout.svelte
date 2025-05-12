@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Page from "@lib/components/Page.svelte"
@@ -7,13 +8,17 @@
   import SecondaryNavSection from "@lib/components/SecondaryNavSection.svelte"
   import LogOut from "@app/components/LogOut.svelte"
   import {pushModal} from "@app/modal"
-  interface Props {
-    children?: import("svelte").Snippet
+  import {theme} from "@app/theme"
+
+  type Props = {
+    children?: Snippet
   }
 
   const {children}: Props = $props()
 
   const logout = () => pushModal(LogOut)
+
+  const toggleTheme = () => theme.set($theme === "dark" ? "light" : "dark")
 </script>
 
 <SecondaryNav>
@@ -34,11 +39,16 @@
       </SecondaryNavItem>
     </div>
     <div in:fly|local={{delay: 150}}>
+      <SecondaryNavItem onclick={toggleTheme}>
+        <Icon icon="moon" /> Theme
+      </SecondaryNavItem>
+    </div>
+    <div in:fly|local={{delay: 200}}>
       <SecondaryNavItem href="/settings/about">
         <Icon icon="info-square" /> About
       </SecondaryNavItem>
     </div>
-    <div in:fly|local={{delay: 200}}>
+    <div in:fly|local={{delay: 250}}>
       <SecondaryNavItem class="text-error hover:text-error" onclick={logout}>
         <Icon icon="exit" /> Log Out
       </SecondaryNavItem>
