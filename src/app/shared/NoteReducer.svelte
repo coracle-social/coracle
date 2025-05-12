@@ -29,14 +29,13 @@
   export let items: TrustedEvent[] = []
 
   const timestamps = new Map<string, number>()
-  const seenIds = new Set<string>()
   const context = new Map<string, Set<TrustedEvent>>()
 
   const shouldSkip = (event: TrustedEvent, strict: boolean) => {
     if (!showMuted && $isEventMuted(event, strict)) return true
     if (!showDeleted && repository.isDeleted(event)) return true
     if (hideReplies && getParentIdOrAddr(event)) return true
-    if (seenIds.has(event.id)) return true
+    if (timestamps.has(getIdOrAddress(event))) return true
 
     return false
   }
@@ -69,18 +68,14 @@
     const original = event
     let currentDepth = depth
 
-    seenIds.add(event.id)
+    timestamps.set(getIdOrAddress(event), original.created_at)
 
     while (currentDepth > 0) {
       const parent = await getParent(event)
 
+      // Unable to get the parent? we're done traversing parents
       if (!parent) {
         break
-      }
-
-      // Hide replies to deleted/muted parents
-      if (shouldSkip(parent, true)) {
-        return
       }
 
       // Skip zaps that fail our zapper check
@@ -88,16 +83,23 @@
         return
       }
 
+      // Link the events, even if we end up skipping this one (since we deduplicate)
       addToMapKey(context, getIdOrAddress(parent), event)
-      seenIds.add(parent.id)
+
+      // Hide replies to deleted/muted parents, or parents we've already seen
+      if (shouldSkip(parent, true)) {
+        return
+      }
+
+      timestamps.set(getIdOrAddress(parent), original.created_at)
       currentDepth--
       event = parent
     }
 
-    const id = getIdOrAddress(event)
+    // If it's not displayable, skip it
+    if ([...repostKinds, ...reactionKinds].includes(event.kind)) return
 
-    // If we've already seen it, or it's not displayable, skip it
-    if (timestamps.has(id) || [...repostKinds, ...reactionKinds].includes(event.kind)) return
+    // If the caller wants to skip it, skip it
     if (shouldAddEvent && !shouldAddEvent(event, getContext)) return
 
     let inserted = false
@@ -115,8 +117,6 @@
     if (!inserted) {
       items = [...items, event]
     }
-
-    timestamps.set(id, original.created_at)
   }
 
   const addEvents = async (events: TrustedEvent[]) => {

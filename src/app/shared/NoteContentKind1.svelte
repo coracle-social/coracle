@@ -7,6 +7,7 @@
     truncate,
     renderAsHtml,
     isText,
+    isEmoji,
     isTopic,
     isCode,
     isCashu,
@@ -25,6 +26,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
+  import NoteContentEmoji from "src/app/shared/NoteContentEmoji.svelte"
   import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
   import NoteContentCode from "src/app/shared/NoteContentCode.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
@@ -126,6 +128,8 @@
             {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
           </Anchor>
         {/if}
+      {:else if isEmoji(parsed)}
+        <NoteContentEmoji {...parsed.value} />
       {:else}
         {@html renderAsHtml(parsed)}
       {/if}

@@ -12,11 +12,12 @@
     toNostrURI,
     getPubkeyTagValues,
     ZAP_RESPONSE,
+    REACTION,
   } from "@welshman/util"
   import {repository} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
-  import {isLike, replyKinds} from "src/util/nostr"
+  import {replyKinds} from "src/util/nostr"
   import {formatSats, quantify} from "src/util/misc"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -64,7 +65,7 @@
   let handlersShown = false
 
   $: json = JSON.stringify(event, null, 2)
-  $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
+  $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: $likesCount = likes.length

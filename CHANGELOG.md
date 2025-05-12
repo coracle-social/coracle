@@ -2,8 +2,10 @@
 
 # 0.6.16
 
-* Add support for editing WOT feeds
+* Add support for editing WOT feepnpm i --no-frozen-lockfileds
 * Change default blossom servers
+* Add support for custom emojis
+* Fix note deduplication
 
 # 0.6.15
 

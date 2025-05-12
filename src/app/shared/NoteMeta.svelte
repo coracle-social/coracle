@@ -6,6 +6,7 @@
   import Icon from "src/partials/Icon.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
+  import NoteContentKind7 from "src/app/shared/NoteContentKind7.svelte"
 
   export let context: TrustedEvent[]
 
@@ -41,14 +42,9 @@
 {:else if reactions.length > 0}
   <p class="flex items-center gap-1 pb-2 text-sm text-neutral-300">
     {#if reactions.length === 1}
-      {@const {pubkey, content} = reactions[0]}
-      <PersonLink {pubkey} />
+      <PersonLink pubkey={reactions[0].pubkey} />
       reacted with
-      {#if content === "+"}
-        <Icon icon="heart" />
-      {:else}
-        {content}
-      {/if}
+      <NoteContentKind7 note={reactions[0]} />
     {:else}
       {reactions.length} people reacted:
       {#each groupBy(e => e.content, reactions) as [content, events] (content)}

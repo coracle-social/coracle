@@ -28,7 +28,7 @@
 </script>
 
 <FlexColumn>
-  {#each notifications as [seconds, events], i (seconds)}
+  {#each notifications as [i, events] (i)}
     <NotificationItem
       depth={0}
       {notifications}

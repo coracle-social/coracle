@@ -4,6 +4,7 @@
   import NoteContentKind0 from "src/app/shared/NoteContentKind0.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
+  import NoteContentKind7 from "src/app/shared/NoteContentKind7.svelte"
   import NoteContentKind20 from "src/app/shared/NoteContentKind20.svelte"
   import NoteContentKind40 from "src/app/shared/NoteContentKind40.svelte"
   import NoteContentKind1111 from "src/app/shared/NoteContentKind1111.svelte"
@@ -53,6 +54,8 @@
     <NoteContentKind0 {note} />
   {:else if note.kind === 3}
     <NoteContentKind3 {note} {showEntire} />
+  {:else if note.kind === 7}
+    <NoteContentKind7 {note} />
   {:else if note.kind === 20}
     <NoteContentKind20 {note} {showEntire} />
   {:else if [40, 41].includes(note.kind)}

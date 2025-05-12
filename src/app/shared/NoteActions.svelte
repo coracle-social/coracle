@@ -27,13 +27,14 @@
     createEvent,
     getLnUrl,
     ZAP_RESPONSE,
+    REACTION,
     getReplyFilters,
     isChildOf,
   } from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
-  import {isLike, replyKinds} from "src/util/nostr"
+  import {replyKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -158,7 +159,7 @@
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutes.has(event.id)
   $: pinned = $userPins.has(event.id)
-  $: likes = uniqBy(prop("pubkey"), children.filter(isLike))
+  $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: disableActions = !$signer || (muted && !showHidden)

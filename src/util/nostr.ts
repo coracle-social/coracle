@@ -96,10 +96,6 @@ export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
 }
 
-export const isLike = (e: TrustedEvent) =>
-  e.kind === REACTION &&
-  ["", "+", "🤙", "👍", "❤️", "😎", "🏅", "🫂", "🤣", "😂", "💜", "🔥"].includes(e.content)
-
 export const toHex = (data: string): string | null => {
   if (data.match(/[a-zA-Z0-9]{64}/)) {
     return data
