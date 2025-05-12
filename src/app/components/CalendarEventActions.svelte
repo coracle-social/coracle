@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type {TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent, EventContent} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -26,20 +26,15 @@
 
   const editEvent = () => pushModal(CalendarEventEdit, {url, event})
 
-  const onReactionClick = (content: string, events: TrustedEvent[]) => {
-    const reaction = events.find(e => e.pubkey === $pubkey)
+  const deleteReaction = (event: TrustedEvent) => publishDelete({relays: [url], event})
 
-    if (reaction) {
-      publishDelete({relays: [url], event: reaction})
-    } else {
-      publishReaction({event, content, relays: [url]})
-    }
-  }
+  const createReaction = (template: EventContent) =>
+    publishReaction({...template, event, relays: [url]})
 </script>
 
 <div class="flex flex-wrap items-center justify-between gap-2">
   <div class="flex flex-grow flex-wrap justify-end gap-2">
-    <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-left" />
+    <ReactionSummary {url} {event} {deleteReaction} {createReaction} reactionClass="tooltip-left" />
     <ThunkStatusOrDeleted {event} />
     {#if showActivity}
       <EventActivity {url} {path} {event} />

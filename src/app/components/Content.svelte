@@ -6,6 +6,7 @@
     truncate,
     renderAsHtml,
     isText,
+    isEmoji,
     isTopic,
     isCode,
     isCashu,
@@ -22,6 +23,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import ContentToken from "@app/components/ContentToken.svelte"
+  import ContentEmoji from "@app/components/ContentEmoji.svelte"
   import ContentCode from "@app/components/ContentCode.svelte"
   import ContentLinkInline from "@app/components/ContentLinkInline.svelte"
   import ContentLinkBlock from "@app/components/ContentLinkBlock.svelte"
@@ -133,6 +135,8 @@
           <ContentNewline value={parsed.value} />
         {:else if isTopic(parsed)}
           <ContentTopic value={parsed.value} />
+        {:else if isEmoji(parsed)}
+          <ContentEmoji value={parsed.value} />
         {:else if isCode(parsed)}
           <ContentCode
             value={parsed.value}

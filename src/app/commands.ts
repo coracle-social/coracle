@@ -380,10 +380,12 @@ export const publishReport = ({
 export type ReactionParams = {
   event: TrustedEvent
   content: string
+  tags?: string[][]
 }
 
-export const makeReaction = ({event, content}: ReactionParams) => {
-  const tags = tagEventForReaction(event)
+export const makeReaction = ({content, event, tags: paramTags = []}: ReactionParams) => {
+  const tags = [...paramTags, ...tagEventForReaction(event)]
+
   const groupTag = getTag("h", event.tags)
 
   if (groupTag) {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {type Instance} from "tippy.js"
   import {hash, formatTimestampAsTime} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent, EventContent} from "@welshman/util"
   import {thunks, pubkey, deriveProfile, deriveProfileDisplay, sendWrapped} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import Icon from "@lib/components/Icon.svelte"
@@ -36,12 +36,11 @@
 
   const reply = () => replyTo(event)
 
-  const onReactionClick = async (content: string, events: TrustedEvent[]) => {
-    const reaction = events.find(e => e.pubkey === $pubkey)
-    const template = reaction ? makeDelete({event: reaction}) : makeReaction({event, content})
+  const deleteReaction = (event: TrustedEvent) =>
+    sendWrapped({template: makeDelete({event}), pubkeys})
 
-    await sendWrapped({template, pubkeys})
-  }
+  const createReaction = (template: EventContent) =>
+    sendWrapped({template: makeReaction({event, ...template}), pubkeys})
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey})
 
@@ -120,7 +119,7 @@
       </div>
     </TapTarget>
     <div class="row-2 z-feature -mt-4 ml-4">
-      <ReactionSummary {event} {onReactionClick} noTooltip />
+      <ReactionSummary {event} {deleteReaction} {createReaction} noTooltip />
     </div>
   </div>
 </div>

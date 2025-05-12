@@ -1,7 +1,6 @@
 <script lang="ts">
   import type {NativeEmoji} from "emoji-picker-element/shared"
-  import type {TrustedEvent} from "@welshman/util"
-  import {pubkey} from "@welshman/app"
+  import type {TrustedEvent, EventContent} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import EmojiButton from "@lib/components/EmojiButton.svelte"
   import NoteContent from "@app/components/NoteContent.svelte"
@@ -11,15 +10,10 @@
 
   const {url, event} = $props()
 
-  const onReactionClick = (content: string, events: TrustedEvent[]) => {
-    const reaction = events.find(e => e.pubkey === $pubkey)
+  const deleteReaction = (event: TrustedEvent) => publishDelete({relays: [url], event})
 
-    if (reaction) {
-      publishDelete({relays: [url], event: reaction})
-    } else {
-      publishReaction({event, content, relays: [url]})
-    }
-  }
+  const createReaction = (template: EventContent) =>
+    publishReaction({...template, event, relays: [url]})
 
   const onEmoji = (emoji: NativeEmoji) =>
     publishReaction({event, content: emoji.unicode, relays: [url]})
@@ -28,7 +22,7 @@
 <NoteCard {event} {url} class="card2 bg-alt">
   <NoteContent {event} expandMode="inline" />
   <div class="flex w-full justify-between gap-2">
-    <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right">
+    <ReactionSummary {url} {event} {deleteReaction} {createReaction} reactionClass="tooltip-right">
       <EmojiButton {onEmoji} class="btn btn-neutral btn-xs h-[26px] rounded-box">
         <Icon icon="smile-circle" size={4} />
       </EmojiButton>

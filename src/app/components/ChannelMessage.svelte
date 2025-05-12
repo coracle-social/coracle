@@ -1,7 +1,7 @@
 <script lang="ts">
   import {hash, now, formatTimestampAsTime, formatTimestampAsDate} from "@welshman/lib"
-  import type {TrustedEvent} from "@welshman/util"
-  import {thunks, pubkey, deriveProfile, deriveProfileDisplay} from "@welshman/app"
+  import type {TrustedEvent, EventContent} from "@welshman/util"
+  import {thunks, deriveProfile, deriveProfileDisplay} from "@welshman/app"
   import {isMobile} from "@lib/html"
   import TapTarget from "@lib/components/TapTarget.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
@@ -41,15 +41,10 @@
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey: event.pubkey, url})
 
-  const onReactionClick = (content: string, events: TrustedEvent[]) => {
-    const reaction = events.find(e => e.pubkey === $pubkey)
+  const deleteReaction = (event: TrustedEvent) => publishDelete({relays: [url], event})
 
-    if (reaction) {
-      publishDelete({relays: [url], event: reaction})
-    } else {
-      publishReaction({event, content, relays: [url]})
-    }
-  }
+  const createReaction = (template: EventContent) =>
+    publishReaction({...template, event, relays: [url]})
 </script>
 
 <TapTarget
@@ -89,7 +84,12 @@
     </div>
   </div>
   <div class="row-2 ml-10 mt-1">
-    <ReactionSummary {url} {event} {onReactionClick} reactionClass="tooltip-right" />
+    <ReactionSummary
+      {url}
+      {event}
+      {deleteReaction}
+      {createReaction}
+      reactionClass="tooltip-right" />
   </div>
   {#if !isMobile}
     <button
