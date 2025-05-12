@@ -79,10 +79,9 @@ export const ALERT = 32830
 
 export const ALERT_STATUS = 32831
 
-export const NOTIFIER_PUBKEY = "27b7c2ed89ef78322114225ea3ebf5f72c7767c2528d4d0c1854d039c00085df"
+export const NOTIFIER_PUBKEY = import.meta.env.VITE_NOTIFIER_PUBKEY
 
-// export const NOTIFIER_RELAY = 'wss://notifier.flotilla.social/'
-export const NOTIFIER_RELAY = "ws://localhost:4738/"
+export const NOTIFIER_RELAY = import.meta.env.VITE_NOTIFIER_RELAY
 
 export const INDEXER_RELAYS = fromCsv(import.meta.env.VITE_INDEXER_RELAYS)
 

@@ -5,7 +5,7 @@ import {sveltekit} from "@sveltejs/kit/vite"
 import svg from "@poppanator/sveltekit-svg"
 
 config({path: ".env.local"})
-config({path: ".env"})
+config({path: ".env.template"})
 
 export default defineConfig({
   server: {
