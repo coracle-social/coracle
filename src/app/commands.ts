@@ -276,9 +276,12 @@ export const checkRelayAccess = async (url: string, claim = "") => {
 
     // If it's a strict NIP 29 relay don't worry about requesting access
     // TODO: remove this if relay29 ever gets less strict
-    if (message !== "missing group (`h`) tag") {
-      return message
-    }
+    if (message === "missing group (`h`) tag") return
+
+    // Ignore messages about the relay ignoring ours
+    if (error?.startsWith("mute: ")) return
+
+    return message
   }
 }
 

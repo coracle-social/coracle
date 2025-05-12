@@ -4,6 +4,7 @@
 
 * Add light theme
 * Use correct alerts server
+* Ignore relay errors for claims
 
 # 1.0.2
 
