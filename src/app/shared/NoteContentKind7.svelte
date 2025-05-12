@@ -8,6 +8,8 @@
 
 {#if note.content === "+" || note.content === ""}
   <Icon icon="heart" />
+{:else if note.content === "-"}
+  <Icon icon="thumbs-down" />
 {:else}
   {#each parse(note) as parsed}
     {#if isEmoji(parsed)}
