@@ -44,7 +44,7 @@
     "@welshman/app": "^0.2.5",
     "@welshman/content": "^0.2.1",
     "@welshman/dvm": "^0.2.0",
-    "@welshman/editor": "^0.2.3",
+    "@welshman/editor": "^0.2.4",
     "@welshman/feeds": "^0.2.2",
     "@welshman/lib": "^0.2.2",
     "@welshman/net": "^0.2.3",
