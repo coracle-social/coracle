@@ -6,8 +6,8 @@ if [ -f .env.template ]; then
   source .env.template
 fi
 
-if [ -f .env.local ]; then
-  source .env.local
+if [ -f .env ]; then
+  source .env
 fi
 
 # Avoid overwriting env vars provided directly

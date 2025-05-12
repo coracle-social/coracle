@@ -2,7 +2,7 @@ import {config} from "dotenv"
 import daisyui from "daisyui"
 import themes from "daisyui/src/theming/themes"
 
-config({path: ".env.local"})
+config({path: ".env"})
 config({path: ".env.template"})
 
 /** @type {import('tailwindcss').Config} */

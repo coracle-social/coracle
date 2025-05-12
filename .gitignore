@@ -1,5 +1,5 @@
 # Env
-.env.local
+.env
 
 # Vite
 vite.config.js.timestamp-*

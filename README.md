@@ -14,7 +14,7 @@ To run your own Flotilla, it's as simple as:
 
 ## Environment
 
-You can also optionally create an `.env.local` file and populate it with the following environment variables (see `.env` for examples):
+You can also optionally create an `.env` file and populate it with the following environment variables (see `.env` for examples):
 
 - `VITE_DEFAULT_PUBKEYS` - A comma-separated list of hex pubkeys for bootstrapping web of trust.
 - `VITE_PLATFORM_URL` - The url where the app will be hosted. This is only used for build-time population of meta tags.
@@ -38,7 +38,7 @@ First, create an `A` record with your DNS provider pointing to the IP of your se
 
 Next install `nginx`, `git`, and `certbot`. If you're on a debian- or ubuntu-based distro, run `sudo apt-get update && sudo apt-get install nginx git certbot python3-certbot-nginx`.
 
-Now, create a new user where your code will be stored, clone the repository, fill in your `.env.local` file, and build the app.
+Now, create a new user where your code will be stored, clone the repository, fill in your `.env` file, and build the app.
 
 ```sh
 # Replace with your password
@@ -67,7 +67,7 @@ nvm install
 nvm use
 pnpm i
 
-# Optionally create and populate .env.local to suit your use case
+# Optionally create and populate .env to suit your use case
 
 # Build the app
 NODE_OPTIONS=--max_old_space_size=16384 pnpm run build
