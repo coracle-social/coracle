@@ -16,7 +16,7 @@
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, makeFeed, readFeed, displayFeed} from "src/domain"
-  import {userListFeeds, deleteEvent, userFeeds, userFavoritedFeeds} from "src/engine"
+  import {userListFeeds, deleteEvent, userFeeds, userFavoritedFeeds, defaultFeed} from "src/engine"
 
   export let feed
   export let updateFeed
@@ -125,6 +125,16 @@
           </Anchor>
         </div>
         <div class="flex flex-wrap gap-1">
+          <Chip
+            class="cursor-pointer"
+            accent={equals($defaultFeed.definition, feed.definition)}
+            on:click={() => setFeed($defaultFeed)}>
+            {#if $userFeeds.length > 0}
+              All Feeds
+            {:else}
+              Default Feed
+            {/if}
+          </Chip>
           {#each allFeeds as other}
             <Chip
               class="cursor-pointer"

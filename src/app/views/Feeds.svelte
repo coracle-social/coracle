@@ -1,23 +1,13 @@
 <script lang="ts">
-  import {makeScopeFeed, makeAuthorFeed, Scope} from "@welshman/feeds"
   import {pubkey} from "@welshman/app"
   import Anchor from "src/partials/Anchor.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"
-  import {makeFeed} from "src/domain"
-  import {env, userFollows} from "src/engine"
+  import {defaultFeed} from "src/engine"
 
   export let feed = null
 
   const showLogin = () => router.at("login").open()
-
-  if (!feed) {
-    if ($userFollows?.size > 0) {
-      feed = makeFeed({definition: makeScopeFeed(Scope.Follows)})
-    } else {
-      feed = makeFeed({definition: makeAuthorFeed(...env.DEFAULT_FOLLOWS)})
-    }
-  }
 
   document.title = "Feeds"
 </script>
@@ -31,4 +21,4 @@
   </div>
 {/if}
 
-<Feed showControls {feed} />
+<Feed showControls feed={feed || $defaultFeed} />

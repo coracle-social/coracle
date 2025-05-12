@@ -8,7 +8,12 @@
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
+  import {quantify} from "src/util/misc"
   import {replyKinds} from "src/util/nostr"
+  import AltColor from "src/partials/AltColor.svelte"
+  import Popover from "src/partials/Popover.svelte"
+  import Spinner from "src/partials/Spinner.svelte"
+  import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
   import {
@@ -19,11 +24,6 @@
     userSettings,
     myRequest,
   } from "src/engine"
-  import AltColor from "src/partials/AltColor.svelte"
-  import Popover from "src/partials/Popover.svelte"
-  import Spinner from "src/partials/Spinner.svelte"
-  import {fly, slide} from "src/util/transition"
-  import {quantify} from "src/util/misc"
 
   export let note
   export let relays = []

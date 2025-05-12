@@ -26,6 +26,7 @@ import {
   appContext,
   defaultStorageAdapters,
 } from "@welshman/app"
+import {makeAuthorFeed, makeScopeFeed, makeUnionFeed, simplifyFeed, Scope} from "@welshman/feeds"
 import {
   TaskQueue,
   groupBy,
@@ -105,6 +106,7 @@ import {
   readHandlers,
   readUserList,
   subscriptionNotices,
+  makeFeed,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
@@ -479,6 +481,19 @@ export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
 export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [PublishedFeed[], string]) =>
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
 )
+
+export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $userFeeds]) => {
+  let definition
+  if ($userFeeds.length > 0) {
+    definition = simplifyFeed(makeUnionFeed(...$userFeeds.map(f => f.definition)))
+  } else if ($userFollows?.size > 0) {
+    definition = makeScopeFeed(Scope.Follows)
+  } else {
+    definition = makeAuthorFeed(...env.DEFAULT_FOLLOWS)
+  }
+
+  return makeFeed({definition})
+})
 
 export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
 
