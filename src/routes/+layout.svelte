@@ -51,7 +51,13 @@
   import {setupTracking} from "@app/tracking"
   import {setupAnalytics} from "@app/analytics"
   import {nsecDecode} from "@lib/util"
-  import {INDEXER_RELAYS, userMembership, ensureUnwrapped, canDecrypt} from "@app/state"
+  import {
+    INDEXER_RELAYS,
+    userMembership,
+    userSettingValues,
+    ensureUnwrapped,
+    canDecrypt,
+  } from "@app/state"
   import {loadUserData, listenForNotifications} from "@app/requests"
   import {theme} from "@app/theme"
   import * as commands from "@app/commands"
@@ -124,6 +130,12 @@
     // Sync theme
     theme.subscribe($theme => {
       document.body.setAttribute("data-theme", $theme)
+    })
+
+    // Sync font size
+    userSettingValues.subscribe($userSettingValues => {
+      // @ts-ignore
+      document.documentElement.style["font-size"] = `${$userSettingValues.font_size}rem`
     })
 
     if (!db) {

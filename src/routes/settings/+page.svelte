@@ -166,6 +166,24 @@
         <p>Choose a media server type and url for files you upload to {PLATFORM_NAME}.</p>
       {/snippet}
     </Field>
+    <strong class="text-lg">Accessibility</strong>
+    <Field>
+      {#snippet label()}
+        <p>Font size</p>
+      {/snippet}
+      {#snippet secondary()}
+        <p>{Math.round(settings.font_size * 100)}%</p>
+      {/snippet}
+      {#snippet input()}
+        <input
+          class="range range-primary"
+          type="range"
+          min="0.8"
+          max="1.3"
+          step="0.05"
+          bind:value={settings.font_size} />
+      {/snippet}
+    </Field>
     <div class="mt-4 flex flex-row items-center justify-between gap-4">
       <Button class="btn btn-neutral" onclick={reset}>Discard Changes</Button>
       <Button type="submit" class="btn btn-primary">Save Changes</Button>

@@ -105,7 +105,7 @@
     {#if url && $reports.length > 0}
       <button
         type="button"
-        data-tip="{`This content has been reported as "${displayList(reportReasons)}".`}}"
+        data-tip={`This content has been reported as "${displayList(reportReasons)}".`}
         class="btn btn-error btn-xs tooltip-right flex items-center gap-1 rounded-full"
         class:tooltip={!noTooltip && !isMobile}
         onclick={stopPropagation(preventDefault(onReportClick))}>
