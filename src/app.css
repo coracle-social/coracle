@@ -388,6 +388,10 @@ progress[value]::-webkit-progress-value {
   @apply w-full md:left-[18.5rem] md:w-[calc(100%-18.5rem-var(--sair))];
 }
 
+.cw-full {
+  @apply w-full md:left-[4rem] md:w-[calc(100%-4rem-var(--sair))];
+}
+
 .cb {
   @apply md:bottom-sai bottom-[calc(var(--saib)+3.5rem)];
 }

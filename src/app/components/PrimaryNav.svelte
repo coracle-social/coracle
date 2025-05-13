@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {page} from "$app/stores"
   import {goto} from "$app/navigation"
   import {splitAt} from "@welshman/lib"
@@ -16,8 +17,9 @@
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
-  interface Props {
-    children?: import("svelte").Snippet
+
+  type Props = {
+    children?: Snippet
   }
 
   const {children}: Props = $props()
@@ -118,9 +120,14 @@
         notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      <PrimaryNavItem title="Spaces" onclick={showSpacesMenu} notification={anySpaceNotifications}>
-        <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
-      </PrimaryNavItem>
+      {#if !PLATFORM_RELAY}
+        <PrimaryNavItem
+          title="Spaces"
+          onclick={showSpacesMenu}
+          notification={anySpaceNotifications}>
+          <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
+        </PrimaryNavItem>
+      {/if}
     </div>
     <PrimaryNavItem title="Settings" onclick={showSettingsMenu}>
       <Avatar icon="settings" src={$userProfile?.picture} class="!h-10 !w-10" />

@@ -52,7 +52,7 @@
               {/snippet}
             </CardButton>
           </Link>
-          <Link href="/people">
+          <Link href="/chat">
             <CardButton>
               {#snippet icon()}
                 <div><Icon icon="chat-round" size={7} /></div>

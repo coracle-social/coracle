@@ -28,7 +28,7 @@
   })
 </script>
 
-<Page>
+<Page class="cw-full">
   <ContentSearch>
     {#snippet input()}
       <label class="row-2 input input-bordered">

@@ -10,7 +10,7 @@
   import Link from "@lib/components/Link.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
-  import {makeChatPath} from "@app/routes"
+  import {pubkeyLink} from "@app/state"
 
   type Props = {
     pubkey: string
@@ -37,9 +37,9 @@
 <div class="card2 bg-alt col-2 shadow-xl">
   <div class="flex justify-between">
     <Profile {pubkey} {url} />
-    <Link class="btn btn-primary hidden sm:flex" href={makeChatPath([pubkey])}>
-      <Icon icon="letter" />
-      Start a Chat
+    <Link external href={pubkeyLink(pubkey)} class="btn btn-primary hidden sm:flex">
+      <Icon icon="user-circle" />
+      See Complete Profile
     </Link>
   </div>
   <ProfileInfo {pubkey} {url} />
@@ -48,8 +48,8 @@
       Last active {formatTimestampRelative($events[0].created_at)}
     </div>
   {/if}
-  <Link class="btn btn-primary sm:hidden" href={makeChatPath([pubkey])}>
-    <Icon icon="letter" />
-    Start a Chat
+  <Link external href={pubkeyLink(pubkey)} class="btn btn-primary sm:hidden">
+    <Icon icon="user-circle" />
+    See Complete Profile
   </Link>
 </div>
