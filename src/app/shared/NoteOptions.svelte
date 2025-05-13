@@ -1,4 +1,16 @@
+<script lang="ts" context="module">
+  export type Values = {
+    warning: string
+    anonymous: boolean
+    pow_difficulty: number
+    publish_at?: Date
+    relays?: string[]
+  }
+</script>
+
 <script lang="ts">
+  import {relaySearch} from "@welshman/app"
+  import {Router} from "@welshman/router"
   import Anchor from "src/partials/Anchor.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
@@ -8,20 +20,20 @@
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
+  import SearchSelect from "src/partials/SearchSelect.svelte"
   import Toggle from "src/partials/Toggle.svelte"
 
   export let publishAt = false
   export let onClose
   export let onSubmit
-  export let initialValues: {
-    warning: string
-    anonymous: boolean
-    pow_difficulty: number
-    publish_at?: number
-  }
+  export let initialValues: Values
 
   const values = {
     ...initialValues,
+  }
+
+  const initRelays = () => {
+    values.relays = Router.get().FromUser().getUrls()
   }
 
   const submit = () =>
@@ -58,6 +70,15 @@
         <Toggle bind:value={values.anonymous} />
         <p slot="info">Enable this to create an anonymous note.</p>
       </FieldInline>
+      {#if values.relays}
+        <Field icon="fa-server" label="Relays">
+          <SearchSelect multiple bind:value={values.relays} search={$relaySearch.searchValues} />
+        </Field>
+      {:else}
+        <FieldInline icon="fa-server" label="Relays">
+          <Anchor underline on:click={initRelays}>Select relays</Anchor>
+        </FieldInline>
+      {/if}
       <Anchor button tag="button" type="submit">Done</Anchor>
     </FlexColumn>
   </form>

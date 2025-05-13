@@ -6,11 +6,11 @@
 <div class="flex flex-col gap-2">
   <slot name="label">
     <div class="grid grid-cols-2 gap-2">
-      <label class="font-bold">
+      <label class="flex items-center gap-2 font-bold">
         {#if icon}
           <i class={`fa ${icon}`} />
         {/if}
-        {label}
+        <span>{label}</span>
       </label>
       <slot />
     </div>

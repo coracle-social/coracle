@@ -5,6 +5,8 @@
 * Fix reaction notifications crash
 * Show web of trust badge on DM items
 * Make name on messages clickable
+* Reduce duplicate dependencies
+* Add relays to note options form
 
 # 0.6.16
 

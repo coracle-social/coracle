@@ -20,6 +20,7 @@
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
+  import type {Values} from "src/app/shared/NoteOptions.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
@@ -42,7 +43,11 @@
   let loading
   let pow: ProofOfWork
   let showOptions = false
-  let options = {warning: "", anonymous: false, pow_difficulty: $userSettings.pow_difficulty}
+  let options: Values = {
+    warning: "",
+    anonymous: false,
+    pow_difficulty: $userSettings.pow_difficulty,
+  }
 
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
@@ -109,9 +114,14 @@
       hashedEvent = await pow.result
     }
 
+    const relays =
+      options.relays?.length > 0
+        ? options.relays
+        : Router.get().PublishEvent(hashedEvent).policy(addMaximalFallbacks).getUrls()
+
     const thunk = publishThunk({
+      relays,
       event: await sign(hashedEvent, options),
-      relays: Router.get().PublishEvent(hashedEvent).policy(addMaximalFallbacks).getUrls(),
       delay: $userSettings.send_delay,
     })
 

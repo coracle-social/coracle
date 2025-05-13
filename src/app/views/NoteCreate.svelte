@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last} from "@welshman/lib"
+  import {last, dateToSeconds} from "@welshman/lib"
   import {now, own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
@@ -35,6 +35,7 @@
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
+  import type {Values} from "src/app/shared/NoteOptions.svelte"
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
@@ -112,7 +113,10 @@
     publishing = "signing"
 
     const signedEvent = await sign(hashedEvent, options)
-    const relays = Router.get().PublishEvent(signedEvent).policy(addMaximalFallbacks).getUrls()
+    const relays =
+      options.relays?.length > 0
+        ? options.relays
+        : Router.get().PublishEvent(signedEvent).policy(addMaximalFallbacks).getUrls()
 
     let thunk: Thunk
 
@@ -242,7 +246,7 @@
   let showOptions = false
   let publishing: "signing" | "pow"
   let pow: ProofOfWork
-  let options = {
+  let options: Values = {
     warning: "",
     anonymous: false,
     publish_at: null,
@@ -329,7 +333,7 @@
             {:else}
               <i class="fa fa-circle-notch fa-spin" /> Uploading media...
             {/if}
-          {:else if options?.publish_at && Math.floor(options?.publish_at / 1000) > now()}
+          {:else if options?.publish_at && dateToSeconds(options.publish_at) > now()}
             Schedule
           {:else}
             Send
