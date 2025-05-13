@@ -9,9 +9,11 @@
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
-  import PersonBadgeMedium from "src/app/shared/PersonBadgeMedium.svelte"
+  import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import PersonName from "src/app/shared/PersonName.svelte"
   import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {ensureMessagePlaintext, userSettings} from "src/engine"
+  import {router} from "src/app/util/router"
 
   export let message
 
@@ -30,7 +32,13 @@
       "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}
-      <PersonBadgeMedium pubkey={message.pubkey} />
+      <Anchor
+        modal
+        href={router.at("people").of(message.pubkey).toString()}
+        class="relative z-feature flex items-center gap-2">
+        <PersonCircle pubkey={message.pubkey} class="h-8 w-8" />
+        <PersonName pubkey={message.pubkey} />
+      </Anchor>
     {/if}
     <div class="break-words">
       {#await getContent(message)}

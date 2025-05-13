@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.17
+
+* Fix reaction notifications crash
+* Show web of trust badge on DM items
+* Make name on messages clickable
+
 # 0.6.16
 
 * Add support for editing WOT feeds

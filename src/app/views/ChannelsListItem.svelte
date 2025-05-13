@@ -3,6 +3,7 @@
   import {pubkey, profiles, displayProfileByPubkey} from "@welshman/app"
   import {without, displayList} from "@welshman/lib"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
+  import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
   import {channelHasNewMessages} from "src/engine"
@@ -19,10 +20,14 @@
 </script>
 
 <Card interactive on:click={enter}>
-  <div class="flex justify-between gap-8 px-2 py-4">
-    <div class="flex gap-8" class:flex-col={members.length > 3}>
-      <PersonCircles pubkeys={members} />
-      <h2>{displayList($membersDisplay)}</h2>
+  <div class="flex items-center justify-between gap-8">
+    <div class="flex items-center gap-4" class:flex-col={members.length > 3}>
+      {#if members.length === 1}
+        <PersonBadge pubkey={members[0]} />
+      {:else}
+        <PersonCircles pubkeys={members} />
+        <h2>{displayList($membersDisplay)}</h2>
+      {/if}
     </div>
     <div class="relative">
       <i class="fa fa-bell" class:text-neutral-600={!showAlert} />
