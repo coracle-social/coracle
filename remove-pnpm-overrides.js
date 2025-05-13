@@ -12,7 +12,12 @@ if (!pkgName?.endsWith("package.json")) {
 const pkg = JSON.parse(fs.readFileSync(pkgName, "utf8"))
 
 if (pkg.pnpm && pkg.pnpm.overrides) {
-  delete pkg.pnpm.overrides
+  // Use $package notation to make sure we only get one copy of each welshman dependency
+  // TODO: move welshman to a single package to straighten all this out.
+  for (const k of Object.keys(pkg.pnpm.overrides)) {
+    pkg.pnpm.overrides[k] = '$' + k
+  }
+
   fs.writeFileSync(pkgName, JSON.stringify(pkg, null, 2) + "\n")
   console.log("Removed pnpm.overrides from package.json")
 } else {
