@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.0.4
+
+* Fix thunk status click handler
+* Remove duplicate dependencies
+* Improve navigation on white-labeled instances
+* Add setting for font size
+
 # 1.0.3
 
 * Add light theme
