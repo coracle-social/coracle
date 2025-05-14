@@ -1,7 +1,7 @@
 {
   "name": "coracle",
   "private": true,
-  "version": "0.6.16",
+  "version": "0.6.17",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -41,8 +41,7 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/throttle-debounce": "^5.0.2",
     "@vite-pwa/assets-generator": "^0.2.6",
-    "@welshman/app": "^0.2.5",
-    "@welshman/content": "^0.2.2",
+    "@welshman/app": "^0.2.5",    "@welshman/content": "^0.2.2",
     "@welshman/dvm": "^0.2.0",
     "@welshman/editor": "^0.2.4",
     "@welshman/feeds": "^0.2.2",
