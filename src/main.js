@@ -1,4 +1,5 @@
 import "src/app.css"
+import "@capacitor-community/safe-area"
 import * as Sentry from "@sentry/browser"
 import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"
 import {makeSecret, Nip46Broker} from "@welshman/signer"

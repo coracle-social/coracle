@@ -22,6 +22,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@capacitor-community/safe-area": "7.0.0-alpha.1",
     "@capacitor/android": "^7.2.0",
     "@capacitor/app": "^7.0.1",
     "@capacitor/assets": "^3.0.5",
@@ -41,7 +42,8 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/throttle-debounce": "^5.0.2",
     "@vite-pwa/assets-generator": "^0.2.6",
-    "@welshman/app": "^0.2.5",    "@welshman/content": "^0.2.2",
+    "@welshman/app": "^0.2.5",
+    "@welshman/content": "^0.2.2",
     "@welshman/dvm": "^0.2.0",
     "@welshman/editor": "^0.2.4",
     "@welshman/feeds": "^0.2.2",
