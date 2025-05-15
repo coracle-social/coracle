@@ -6,11 +6,8 @@ git describe --tags --abbrev=0
 export VITE_BUILD_VERSION=$RENDER_GIT_COMMIT
 export VITE_BUILD_HASH=$RENDER_GIT_COMMIT
 
-# Remove link overrides
-node remove-pnpm-overrides.js package.json
-
-# When CI=true as it is on render.com, removing link overrides breaks the lockfile
-pnpm i --no-frozen-lockfile
+# Install dependencies
+pnpm i
 
 # Rebuild sharp
 pnpm rebuild

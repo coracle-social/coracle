@@ -1,2 +1,8 @@
 pnpm run lint
 pnpm run check
+
+if [[ ! -z $(cat package.json | grep 'link:') ]]; then
+  echo "Some packages are linked to local files!"
+  exit 1
+fi
+
