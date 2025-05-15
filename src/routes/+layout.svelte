@@ -1,5 +1,6 @@
 <script lang="ts">
   import "@src/app.css"
+  import "@capacitor-community/safe-area"
   import {onMount} from "svelte"
   import * as nip19 from "nostr-tools/nip19"
   import {get, derived} from "svelte/store"
