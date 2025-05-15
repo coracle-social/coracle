@@ -105,18 +105,18 @@
   },
   "pnpm": {
     "overrides": {
-      "@welshman/lib": "link:../welshman/packages/lib",
-      "@welshman/util": "link:../welshman/packages/util",
-      "@welshman/app": "link:../welshman/packages/app",
-      "@welshman/content": "link:../welshman/packages/content",
-      "@welshman/dvm": "link:../welshman/packages/dvm",
-      "@welshman/feeds": "link:../welshman/packages/feeds",
-      "@welshman/net": "link:../welshman/packages/net",
-      "@welshman/relay": "link:../welshman/packages/relay",
-      "@welshman/router": "link:../welshman/packages/router",
-      "@welshman/signer": "link:../welshman/packages/signer",
-      "@welshman/store": "link:../welshman/packages/store",
-      "@welshman/editor": "link:../welshman/packages/editor"
+      "@welshman/lib": "$@welshman/lib",
+      "@welshman/util": "$@welshman/util",
+      "@welshman/app": "$@welshman/app",
+      "@welshman/content": "$@welshman/content",
+      "@welshman/dvm": "$@welshman/dvm",
+      "@welshman/feeds": "$@welshman/feeds",
+      "@welshman/net": "$@welshman/net",
+      "@welshman/relay": "$@welshman/relay",
+      "@welshman/router": "$@welshman/router",
+      "@welshman/signer": "$@welshman/signer",
+      "@welshman/store": "$@welshman/store",
+      "@welshman/editor": "$@welshman/editor"
     },
     "ignoredBuiltDependencies": [
       "@sentry/cli",
