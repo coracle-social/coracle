@@ -26,7 +26,7 @@ import {
   appContext,
   defaultStorageAdapters,
 } from "@welshman/app"
-import {makeAuthorFeed, makeScopeFeed, makeUnionFeed, simplifyFeed, Scope} from "@welshman/feeds"
+import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
 import {
   TaskQueue,
   groupBy,
@@ -484,9 +484,7 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
 
 export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $userFeeds]) => {
   let definition
-  if ($userFeeds.length > 0) {
-    definition = simplifyFeed(makeUnionFeed(...$userFeeds.map(f => f.definition)))
-  } else if ($userFollows?.size > 0) {
+  if ($userFollows?.size > 0) {
     definition = makeScopeFeed(Scope.Follows)
   } else {
     definition = makeAuthorFeed(...env.DEFAULT_FOLLOWS)
