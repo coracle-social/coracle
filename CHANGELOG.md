@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.0.5
+
+* Add better theming support
+
 # 1.0.4
 
 * Fix thunk status click handler
