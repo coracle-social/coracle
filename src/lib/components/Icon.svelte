@@ -43,6 +43,7 @@
   import Hashtag from "@assets/icons/Hashtag.svg?dataurl"
   import HamburgerMenu from "@assets/icons/Hamburger Menu.svg?dataurl"
   import HandPills from "@assets/icons/Hand Pills.svg?dataurl"
+  import Heart from "@assets/icons/Heart.svg?dataurl"
   import HomeSmile from "@assets/icons/Home Smile.svg?dataurl"
   import Inbox from "@assets/icons/Inbox.svg?dataurl"
   import InfoCircle from "@assets/icons/Info Circle.svg?dataurl"
@@ -136,6 +137,7 @@
     hashtag: Hashtag,
     "hamburger-menu": HamburgerMenu,
     "hand-pills": HandPills,
+    heart: Heart,
     "home-smile": HomeSmile,
     inbox: Inbox,
     "info-circle": InfoCircle,

@@ -18,3 +18,7 @@ COPY . .
 # Build the application
 ENV NODE_OPTIONS=--max_old_space_size=16384
 RUN pnpm run build
+
+# Default to serving the build directory
+CMD ["npx", "serve", "build"]
+
