@@ -270,9 +270,15 @@
 
       editor.commands.insertContent("\n")
       editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
-    } else if (pubkey && pubkey !== $session.pubkey) {
+    } else if (
+      pubkey &&
+      pubkey !== $session.pubkey &&
+      !editor.getText({blockSeparator: "\n"}).trim()
+    ) {
       editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
     }
+
+    setTimeout(() => editor.commands.focus("end"))
 
     return () => {
       pow?.worker.terminate()

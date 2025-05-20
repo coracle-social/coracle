@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.18
+
+* Fix a few small bugs with initial content on note creation
+
 # 0.6.17
 
 * Fix reaction notifications crash
