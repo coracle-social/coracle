@@ -3,6 +3,7 @@
 # 1.0.5
 
 * Add better theming support
+* Improve forms for entering invite codes
 
 # 1.0.4
 

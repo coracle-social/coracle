@@ -1,7 +1,9 @@
 <script lang="ts">
+  import type {Snippet} from 'svelte'
   import {page} from "$app/stores"
-  interface Props {
-    children?: import("svelte").Snippet
+
+  type Props = {
+    children?: Snippet
   }
 
   const {children}: Props = $props()

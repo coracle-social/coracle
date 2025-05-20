@@ -74,6 +74,7 @@
   import SettingsMinimalistic from "@assets/icons/Settings Minimalistic.svg?dataurl"
   import Station from "@assets/icons/Station.svg?dataurl"
   import TagHorizontal from "@assets/icons/Tag Horizontal.svg?dataurl"
+  import Ticket from "@assets/icons/Ticket.svg?dataurl"
   import ShareCircle from "@assets/icons/Share Circle.svg?dataurl"
   import ShopMinimalistic from "@assets/icons/Shop Minimalistic.svg?dataurl"
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
@@ -171,6 +172,7 @@
     "settings-minimalistic": SettingsMinimalistic,
     station: Station,
     "tag-horizontal": TagHorizontal,
+    ticket: Ticket,
     "trash-bin-2": TrashBin2,
     "ufo-3": UFO3,
     "square-share-line": SquareShareLine,

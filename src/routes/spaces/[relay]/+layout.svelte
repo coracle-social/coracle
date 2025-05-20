@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type {Snippet} from "svelte"
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, WEEK} from "@welshman/lib"
@@ -16,8 +17,9 @@
   import {decodeRelay, userRoomsByUrl} from "@app/state"
   import {pullConservatively} from "@app/requests"
   import {notifications} from "@app/notifications"
-  interface Props {
-    children?: import("svelte").Snippet
+
+  type Props = {
+    children?: Snippet
   }
 
   const {children}: Props = $props()

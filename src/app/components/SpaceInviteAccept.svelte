@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {tryCatch} from "@welshman/lib"
+  import {tryCatch, first, removeNil} from "@welshman/lib"
   import {isRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {Pool, AuthStatus} from "@welshman/net"
   import {preventDefault} from "@lib/html"
@@ -17,21 +17,36 @@
 
   const back = () => history.back()
 
-  const joinRelay = async (invite: string) => {
-    const [raw, claim] = invite.split("|")
-    const url = normalizeRelayUrl(raw)
-    const error = await attemptRelayAccess(url, claim)
+  const joinRelay = async () => {
+    const promises: Promise<string | undefined>[] = []
+
+    const [rawUrl, rawClaim] = url.split("|")
+    const normalizedUrl = normalizeRelayUrl(rawUrl)
+
+    if (claim) {
+      promises.push(attemptRelayAccess(normalizedUrl, claim))
+    }
+
+    if (rawClaim) {
+      promises.push(attemptRelayAccess(normalizedUrl, rawClaim))
+    }
+
+    if (promises.length === 0) {
+      promises.push(attemptRelayAccess(normalizedUrl, ""))
+    }
+
+    const error = first(removeNil(await Promise.all(promises)))
 
     if (error) {
       return pushToast({theme: "error", message: error, timeout: 30_000})
     }
 
-    const socket = Pool.get().get(url)
+    const socket = Pool.get().get(normalizedUrl)
 
     if (socket.auth.status === AuthStatus.None) {
-      pushModal(SpaceJoinConfirm, {url}, {replaceState: true})
+      pushModal(SpaceJoinConfirm, {url: normalizedUrl}, {replaceState: true})
     } else {
-      await confirmSpaceJoin(url)
+      await confirmSpaceJoin(normalizedUrl)
     }
   }
 
@@ -39,13 +54,14 @@
     loading = true
 
     try {
-      await joinRelay(url)
+      await joinRelay()
     } finally {
       loading = false
     }
   }
 
   let url = $state("")
+  let claim = $state("")
   let loading = $state(false)
 
   const linkIsValid = $derived(
@@ -59,12 +75,12 @@
       <div>Join a Space</div>
     {/snippet}
     {#snippet info()}
-      <div>Enter an invite code below to join an existing space.</div>
+      <div>Enter a relay URL below to join an existing space.</div>
     {/snippet}
   </ModalHeader>
   <Field>
     {#snippet label()}
-      <p>Invite code*</p>
+      <p>Relay URL*</p>
     {/snippet}
     {#snippet input()}
       <label class="input input-bordered flex w-full items-center gap-2">
@@ -74,9 +90,23 @@
     {/snippet}
     {#snippet info()}
       <p>
-        You can also directly join any relay by entering its URL here.
+        Enter the URL of the relay that hosts the space you'd like to join.
         <Button class="link" onclick={() => pushModal(InfoRelay)}>What is a relay?</Button>
       </p>
+    {/snippet}
+  </Field>
+  <Field>
+    {#snippet label()}
+      <p>Invite Code (optional)</p>
+    {/snippet}
+    {#snippet input()}
+      <label class="input input-bordered flex w-full items-center gap-2">
+        <Icon icon="ticket" />
+        <input bind:value={claim} class="grow" type="text" />
+      </label>
+    {/snippet}
+    {#snippet info()}
+      <p>If you have an invite code, enter it here to get access.</p>
     {/snippet}
   </Field>
   <ModalFooter>
