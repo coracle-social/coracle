@@ -14,13 +14,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import InfoBunker from "@app/components/InfoBunker.svelte"
   import BunkerConnect, {BunkerConnectController} from "@app/components/BunkerConnect.svelte"
-  import {
-    GENERAL,
-    alerts,
-    getMembershipUrls,
-    getMembershipRoomsByUrl,
-    userMembership,
-  } from "@app/state"
+  import {alerts, getMembershipUrls, getMembershipRoomsByUrl, userMembership} from "@app/state"
   import {loadAlertStatuses} from "@app/requests"
   import {publishAlert} from "@app/commands"
   import {pushToast} from "@app/toast"
@@ -107,7 +101,7 @@
       display.push("chat")
       filters.push({
         kinds: [MESSAGE],
-        "#h": [GENERAL, ...getMembershipRoomsByUrl(relay, $userMembership)],
+        "#h": getMembershipRoomsByUrl(relay, $userMembership),
       })
     }
 

@@ -13,7 +13,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import DateTimeInput from "@lib/components/DateTimeInput.svelte"
   import EditorContent from "@app/editor/EditorContent.svelte"
-  import {PROTECTED, GENERAL, tagRoom} from "@app/state"
+  import {PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
   import {pushToast} from "@app/toast"
 
@@ -73,7 +73,6 @@
         ["end", end.toString()],
         ...daysBetween(start, end).map(D => ["D", D.toString()]),
         ...ed.storage.nostr.getEditorTags(),
-        tagRoom(GENERAL, url),
         PROTECTED,
       ],
     })

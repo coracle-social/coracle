@@ -10,7 +10,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import EditorContent from "@app/editor/EditorContent.svelte"
   import {pushToast} from "@app/toast"
-  import {GENERAL, tagRoom, PROTECTED} from "@app/state"
+  import {PROTECTED} from "@app/state"
   import {makeEditor} from "@app/editor"
 
   const {url} = $props()
@@ -41,12 +41,7 @@
       })
     }
 
-    const tags = [
-      ...ed.storage.nostr.getEditorTags(),
-      tagRoom(GENERAL, url),
-      ["title", title],
-      PROTECTED,
-    ]
+    const tags = [...ed.storage.nostr.getEditorTags(), ["title", title], PROTECTED]
 
     publishThunk({
       relays: [url],

@@ -71,8 +71,6 @@ export const fromCsv = (s: string) => (s || "").split(",").filter(identity)
 
 export const ROOM = "h"
 
-export const GENERAL = "_"
-
 export const PROTECTED = ["-"]
 
 export const ALERT = 32830
@@ -582,13 +580,8 @@ export const channelsByUrl = derived(channelsById, $channelsById => {
   return $channelsByUrl
 })
 
-export const displayChannel = (url: string, room: string) => {
-  if (room === GENERAL) {
-    return "general"
-  }
-
-  return channelsById.get().get(makeChannelId(url, room))?.name || room
-}
+export const displayChannel = (url: string, room: string) =>
+  channelsById.get().get(makeChannelId(url, room))?.name || room
 
 export const roomComparator = (url: string) => (room: string) =>
   displayChannel(url, room).toLowerCase()
@@ -633,17 +626,13 @@ export const userRoomsByUrl = withGetter(
       addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), room)
     }
 
-    for (const url of getRelayTagValues(tags)) {
-      addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), GENERAL)
-    }
-
     return $userRoomsByUrl
   }),
 )
 
 export const deriveUserRooms = (url: string) =>
   derived(userRoomsByUrl, $userRoomsByUrl =>
-    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || [GENERAL]))),
+    sortBy(roomComparator(url), uniq(Array.from($userRoomsByUrl.get(url) || []))),
   )
 
 export const deriveOtherRooms = (url: string) =>
