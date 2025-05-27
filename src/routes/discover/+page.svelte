@@ -1,6 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {addToMapKey, dec, gt} from "@welshman/lib"
+  import {GROUPS} from "@welshman/util"
+  import {Router} from "@welshman/router"
+  import {load} from "@welshman/net"
   import type {Relay} from "@welshman/app"
   import {relays, createSearch, loadRelay, loadRelaySelections} from "@welshman/app"
   import {createScroller} from "@lib/html"
@@ -24,8 +27,12 @@
   import {pushModal} from "@app/modal"
 
   const discoverRelays = () =>
-    Promise.all(
-      getDefaultPubkeys().map(async pubkey => {
+    Promise.all([
+      load({
+        filters: [{kinds: [GROUPS]}],
+        relays: Router.get().Index().getUrls(),
+      }),
+      ...getDefaultPubkeys().map(async pubkey => {
         await loadRelaySelections(pubkey)
 
         const membership = await loadMembership(pubkey)
@@ -33,7 +40,7 @@
 
         await Promise.all(urls.map(url => loadRelay(url)))
       }),
-    )
+    ])
 
   const wotGraph = $derived.by(() => {
     const scores = new Map<string, Set<string>>()
@@ -87,7 +94,7 @@
   })
 </script>
 
-<Page>
+<Page class="cw-full">
   <div class="content column gap-4" bind:this={element}>
     <PageHeader>
       {#snippet title()}

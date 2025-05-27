@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {displayRelayUrl} from "@welshman/util"
+  import {deriveRelay} from "@welshman/app"
   import {fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -20,6 +21,7 @@
     memberships,
     deriveUserRooms,
     deriveOtherRooms,
+    hasNip29,
   } from "@app/state"
   import {notifications} from "@app/notifications"
   import {pushModal} from "@app/modal"
@@ -27,6 +29,7 @@
 
   const {url} = $props()
 
+  const relay = deriveRelay(url)
   const threadsPath = makeSpacePath(url, "threads")
   const calendarPath = makeSpacePath(url, "calendar")
   const userRooms = deriveUserRooms(url)
@@ -143,10 +146,12 @@
       {#each $otherRooms as room, i (room)}
         <MenuSpaceRoomItem {replaceState} {url} {room} />
       {/each}
-      <SecondaryNavItem {replaceState} onclick={addRoom}>
-        <Icon icon="add-circle" />
-        Create room
-      </SecondaryNavItem>
+      {#if hasNip29($relay)}
+        <SecondaryNavItem {replaceState} onclick={addRoom}>
+          <Icon icon="add-circle" />
+          Create room
+        </SecondaryNavItem>
+      {/if}
     </div>
   </SecondaryNavSection>
 </div>

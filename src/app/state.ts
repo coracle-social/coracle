@@ -3,6 +3,7 @@ import {get, derived} from "svelte/store"
 import * as nip19 from "nostr-tools/nip19"
 import {
   remove,
+  uniqBy,
   sortBy,
   sort,
   uniq,
@@ -528,7 +529,7 @@ export const channels = derived(
       }
     }
 
-    return $channels
+    return uniqBy(c => c.id, $channels)
   },
 )
 
@@ -594,12 +595,18 @@ export const userMembership = withGetter(
 )
 
 export const userRoomsByUrl = withGetter(
-  derived(userMembership, $userMembership => {
+  derived([userMembership, channelsById], ([$userMembership, $channelsById]) => {
     const tags = getListTags($userMembership)
     const $userRoomsByUrl = new Map<string, Set<string>>()
 
+    for (const url of getRelayTagValues(tags)) {
+      $userRoomsByUrl.set(normalizeRelayUrl(url), new Set())
+    }
+
     for (const [_, room, url] of getGroupTags(tags)) {
-      addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), room)
+      if ($channelsById.has(makeChannelId(url, room))) {
+        addToMapKey($userRoomsByUrl, normalizeRelayUrl(url), room)
+      }
     }
 
     return $userRoomsByUrl

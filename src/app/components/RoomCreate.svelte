@@ -23,24 +23,22 @@
   const back = () => history.back()
 
   const tryCreate = async () => {
-    if (hasNip29($relay)) {
-      const createMessage = await getThunkError(nip29.createRoom(url, room))
+    const createMessage = await getThunkError(nip29.createRoom(url, room))
 
-      if (createMessage && !createMessage.match(/^duplicate:|already a member/)) {
-        return pushToast({theme: "error", message: createMessage})
-      }
+    if (createMessage && !createMessage.match(/^duplicate:|already a member/)) {
+      return pushToast({theme: "error", message: createMessage})
+    }
 
-      const editMessage = await getThunkError(nip29.editMeta(url, room, {name}))
+    const editMessage = await getThunkError(nip29.editMeta(url, room, {name}))
 
-      if (editMessage) {
-        return pushToast({theme: "error", message: editMessage})
-      }
+    if (editMessage) {
+      return pushToast({theme: "error", message: editMessage})
+    }
 
-      const joinMessage = await getThunkError(nip29.joinRoom(url, room))
+    const joinMessage = await getThunkError(nip29.joinRoom(url, room))
 
-      if (joinMessage && !joinMessage.includes("already")) {
-        return pushToast({theme: "error", message: joinMessage})
-      }
+    if (joinMessage && !joinMessage.includes("already")) {
+      return pushToast({theme: "error", message: joinMessage})
     }
 
     addRoomMembership(url, room, name)
@@ -72,23 +70,30 @@
       </div>
     {/snippet}
   </ModalHeader>
-  <Field>
-    {#snippet label()}
-      <p>Room Name</p>
-    {/snippet}
-    {#snippet input()}
-      <label class="input input-bordered flex w-full items-center gap-2">
-        <Icon icon="hashtag" />
-        <input bind:value={name} class="grow" type="text" />
-      </label>
-    {/snippet}
-  </Field>
+  {#if hasNip29($relay)}
+    <Field>
+      {#snippet label()}
+        <p>Room Name</p>
+      {/snippet}
+      {#snippet input()}
+        <label class="input input-bordered flex w-full items-center gap-2">
+          <Icon icon="hashtag" />
+          <input bind:value={name} class="grow" type="text" />
+        </label>
+      {/snippet}
+    </Field>
+  {:else}
+    <p class="bg-alt card2 row-2">
+      <Icon icon="danger" />
+      This relay does not support creating rooms.
+    </p>
+  {/if}
   <ModalFooter>
     <Button class="btn btn-link" onclick={back}>
       <Icon icon="alt-arrow-left" />
       Go back
     </Button>
-    <Button type="submit" class="btn btn-primary" disabled={!name || loading}>
+    <Button type="submit" class="btn btn-primary" disabled={!name || loading || !hasNip29($relay)}>
       <Spinner {loading}>Create Room</Spinner>
       <Icon icon="alt-arrow-right" />
     </Button>

@@ -18,6 +18,7 @@
   import RoomCreate from "@app/components/RoomCreate.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import {
+    hasNip29,
     decodeRelay,
     channelIsLocked,
     makeChannelId,
@@ -183,10 +184,12 @@
         </div>
       </Link>
     {/each}
-    <Button onclick={addRoom} class="btn btn-neutral whitespace-nowrap">
-      <Icon icon="add-circle" />
-      Create
-    </Button>
+    {#if hasNip29($relay)}
+      <Button onclick={addRoom} class="btn btn-neutral whitespace-nowrap">
+        <Icon icon="add-circle" />
+        Create
+      </Button>
+    {/if}
   </div>
   {#if pubkey}
     <Divider>Recent posts from the relay admin</Divider>
