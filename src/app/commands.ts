@@ -53,6 +53,7 @@ import {
   tagEventForComment,
   tagEventForQuote,
   thunkIsComplete,
+  getThunkError,
 } from "@welshman/app"
 import type {Thunk} from "@welshman/app"
 import {
@@ -82,21 +83,6 @@ export const getPubkeyPetname = (pubkey: string) => {
 
   return display
 }
-
-export const getThunkError = (thunk: Thunk) =>
-  new Promise<string>(resolve => {
-    thunk.subscribe($thunk => {
-      for (const [relay, status] of Object.entries($thunk.status)) {
-        if (status === PublishStatus.Failure) {
-          resolve($thunk.details[relay])
-        }
-      }
-
-      if (thunkIsComplete($thunk)) {
-        resolve("")
-      }
-    })
-  })
 
 export const prependParent = (parent: TrustedEvent | undefined, {content, tags}: EventContent) => {
   if (parent) {
@@ -189,12 +175,9 @@ export const removeSpaceMembership = async (url: string) => {
   return publishThunk({event, relays})
 }
 
-export const addRoomMembership = async (url: string, room: string, name: string) => {
+export const addRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: GROUPS})
-  const newTags = [
-    ["r", url],
-    ["group", room, url, name],
-  ]
+  const newTags = [["r", url], ["group", room, url]]
   const event = await addToListPublicly(list, ...newTags).reconcile(nip44EncryptToSelf)
   const relays = uniq([...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 

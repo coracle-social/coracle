@@ -3,7 +3,7 @@
   import SecondaryNavItem from "@lib/components/SecondaryNavItem.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import {makeRoomPath} from "@app/routes"
-  import {deriveChannel, channelIsLocked} from "@app/state"
+  import {deriveChannel} from "@app/state"
   import {notifications} from "@app/notifications"
 
   interface Props {
@@ -23,7 +23,7 @@
   href={path}
   {replaceState}
   notification={notify ? $notifications.has(path) : false}>
-  {#if channelIsLocked($channel)}
+  {#if $channel?.closed || $channel?.private}
     <Icon icon="lock" size={4} />
   {:else}
     <Icon icon="hashtag" />

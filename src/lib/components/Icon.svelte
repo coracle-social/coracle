@@ -9,6 +9,7 @@
   import {switcher} from "@welshman/lib"
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import ArrowsALogout2 from "@assets/icons/Arrows ALogout 2.svg?dataurl"
+  import Bookmark from "@assets/icons/Bookmark.svg?dataurl"
   import Code2 from "@assets/icons/Code 2.svg?dataurl"
   import Document from "@assets/icons/Document.svg?dataurl"
   import Earth from "@assets/icons/Earth.svg?dataurl"
@@ -80,6 +81,7 @@
   import SmileCircle from "@assets/icons/Smile Circle.svg?dataurl"
   import SquareShareLine from "@assets/icons/Square Share Line.svg?dataurl"
   import SortVertical from "@assets/icons/Sort Vertical.svg?dataurl"
+  import Star from "@assets/icons/Star.svg?dataurl"
   import TrashBin2 from "@assets/icons/Trash Bin 2.svg?dataurl"
   import UFO3 from "@assets/icons/UFO 3.svg?dataurl"
   import UserHeart from "@assets/icons/User Heart.svg?dataurl"
@@ -104,6 +106,7 @@
   const data = switcher(icon, {
     "add-square": AddSquare,
     "arrows-a-logout-2": ArrowsALogout2,
+    bookmark: Bookmark,
     "code-2": Code2,
     document: Document,
     earth: Earth,
@@ -177,6 +180,7 @@
     "ufo-3": UFO3,
     "square-share-line": SquareShareLine,
     "sort-vertical": SortVertical,
+    star: Star,
     "user-heart": UserHeart,
     "user-circle": UserCircle,
     "user-rounded": UserRounded,

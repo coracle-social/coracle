@@ -17,7 +17,6 @@
     MESSAGE,
     INBOX_RELAYS,
     DIRECT_MESSAGE,
-    GROUP_META,
     MUTES,
     FOLLOWS,
     PROFILE,
@@ -174,11 +173,7 @@
           limit: 10_000,
           repository,
           rankEvent: (e: TrustedEvent) => {
-            if (
-              [PROFILE, FOLLOWS, MUTES, RELAYS, BLOSSOM_SERVERS, INBOX_RELAYS, GROUP_META].includes(
-                e.kind,
-              )
-            ) {
+            if ([PROFILE, FOLLOWS, MUTES, RELAYS, BLOSSOM_SERVERS, INBOX_RELAYS].includes(e.kind)) {
               return 1
             }
 

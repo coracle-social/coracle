@@ -1,12 +1,14 @@
 <script lang="ts">
+  import cx from 'classnames'
   import {readable} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
   import type {Readable} from "svelte/store"
   import {now, formatTimestampAsDate} from "@welshman/lib"
+  import {request} from "@welshman/net"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent, MESSAGE, DELETE, REACTION} from "@welshman/util"
-  import {pubkey, publishThunk, deriveRelay} from "@welshman/app"
+  import {createEvent, MESSAGE, DELETE, REACTION, GROUP_ADD_USER, GROUP_REMOVE_USER} from "@welshman/util"
+  import {pubkey, publishThunk, deriveRelay, getThunkError, waitForThunkCompletion} from "@welshman/app"
   import {slide, fade, fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -20,12 +22,15 @@
   import ChannelCompose from "@app/components/ChannelCompose.svelte"
   import ChannelComposeParent from "@app/components/ChannelComposeParent.svelte"
   import {
+    userRoomsByUrl,
     userSettingValues,
     decodeRelay,
     tagRoom,
-    userRoomsByUrl,
     displayChannel,
     getEventsForUrl,
+    deriveUserMembershipStatus,
+    deriveChannel,
+    MembershipStatus,
   } from "@app/state"
   import {setChecked, checked} from "@app/notifications"
   import {
@@ -34,7 +39,6 @@
     addRoomMembership,
     removeRoomMembership,
     prependParent,
-    getThunkError,
   } from "@app/commands"
   import {PROTECTED} from "@app/state"
   import {makeFeed} from "@app/requests"
@@ -45,25 +49,43 @@
   const mounted = now()
   const lastChecked = $checked[$page.url.pathname]
   const url = decodeRelay($page.params.relay)
+  const channel = deriveChannel(url, room)
   const filter = {kinds: [MESSAGE], "#h": [room]}
+  const isFavorite = $derived($userRoomsByUrl.get(url)?.has(room))
+  const membershipStatus = deriveUserMembershipStatus(url, room)
+
+  const addFavorite = () => addRoomMembership(url, room)
+
+  const removeFavorite = () => removeRoomMembership(url, room)
 
   const join = async () => {
-    joiningRoom = true
+    joining = true
 
-    const message = await getThunkError(joinRoom(url, room))
+    try {
+      const message = await getThunkError(joinRoom(url, room))
 
-    joiningRoom = false
-
-    if (message && !message.includes("already")) {
-      return pushToast({theme: "error", message})
+      if (message && !message.startsWith("duplicate:")) {
+        return pushToast({theme: "error", message})
+      } else {
+        // Restart the feed now that we're a member
+        start()
+      }
+    } finally {
+      joining = false
     }
-
-    addRoomMembership(url, room, displayChannel(url, room))
   }
 
-  const leave = () => {
-    leaveRoom(url, room)
-    removeRoomMembership(url, room)
+  const leave = async () => {
+    leaving = true
+    try {
+      const message = await getThunkError(leaveRoom(url, room))
+
+      if (message && !message.startsWith("duplicate:")) {
+        pushToast({theme: "error", message})
+      }
+    } finally {
+      leaving = false
+    }
   }
 
   const replyTo = (event: TrustedEvent) => {
@@ -124,7 +146,8 @@
 
   const scrollToBottom = () => element?.scrollTo({top: 0, behavior: "smooth"})
 
-  let joiningRoom = $state(false)
+  let joining = $state(false)
+  let leaving = $state(false)
   let loadingEvents = $state(true)
   let share = $state(popKey<TrustedEvent | undefined>("share"))
   let parent: TrustedEvent | undefined = $state()
@@ -196,8 +219,10 @@
     return elements
   })
 
-  onMount(() => {
-    ;({events, cleanup} = makeFeed({
+  const start = () => {
+    cleanup?.()
+
+    const feed = makeFeed({
       element: element!,
       relays: [url],
       feedFilters: [filter],
@@ -206,7 +231,25 @@
       onExhausted: () => {
         loadingEvents = false
       },
-    }))
+    })
+
+    events = feed.events
+    cleanup = feed.cleanup
+  }
+
+  onMount(() => {
+    const controller = new AbortController()
+
+    const req = request({
+      signal: controller.signal,
+      relays: [url],
+      filters: [{
+        kinds: [GROUP_ADD_USER, GROUP_REMOVE_USER],
+        '#p': [$pubkey!],
+        '#h': [room],
+        limit: 10,
+      }],
+    })
 
     const observer = new ResizeObserver(() => {
       if (dynamicPadding && chatCompose) {
@@ -216,8 +259,10 @@
 
     observer.observe(chatCompose!)
     observer.observe(dynamicPadding!)
+    start()
 
     return () => {
+      controller.abort()
       observer.unobserve(chatCompose!)
       observer.unobserve(dynamicPadding!)
     }
@@ -246,21 +291,12 @@
   {/snippet}
   {#snippet action()}
     <div class="row-2">
-      {#if $userRoomsByUrl.get(url)?.has(room)}
-        <Button class="btn btn-neutral btn-sm" onclick={leave}>
-          <Icon icon="arrows-a-logout-2" />
-          Leave Room
-        </Button>
-      {:else}
-        <Button class="btn btn-neutral btn-sm" disabled={joiningRoom} onclick={join}>
-          {#if joiningRoom}
-            <span class="loading loading-spinner loading-sm"></span>
-          {:else}
-            <Icon icon="login-2" />
-          {/if}
-          Join Room
-        </Button>
-      {/if}
+      <Button
+        class="btn btn-neutral btn-sm tooltip tooltip-left"
+        data-tip={isFavorite ? "Remove Favorite" : "Add Favorite"}
+        onclick={isFavorite ? removeFavorite : addFavorite}>
+        <Icon size={4} icon="bookmark" class={cx({'text-primary': isFavorite})} />
+      </Button>
       <MenuSpaceButton {url} />
     </div>
   {/snippet}
@@ -268,48 +304,96 @@
 
 <PageContent bind:element onscroll={onScroll} class="flex flex-col-reverse pt-4">
   <div bind:this={dynamicPadding}></div>
-  {#each elements as { type, id, value, showPubkey } (id)}
-    {#if type === "new-messages"}
-      <div
-        bind:this={newMessages}
-        class="flex items-center py-2 text-xs transition-colors"
-        class:opacity-0={showFixedNewMessages}>
-        <div class="h-px flex-grow bg-primary"></div>
-        <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
-        <div class="h-px flex-grow bg-primary"></div>
+  {#if $channel?.private && $membershipStatus !== MembershipStatus.Granted}
+    <div class="py-20">
+      <div class="card2 col-8 m-auto max-w-md items-center text-center">
+        <p class="row-2">
+          You aren't currently a member of this room.
+        </p>
+        {#if $membershipStatus === MembershipStatus.Pending}
+          <Button class="btn btn-neutral btn-sm" disabled={leaving} onclick={leave}>
+            <Icon icon="clock-circle" />
+            Access Pending
+          </Button>
+        {:else}
+          <Button class="btn btn-neutral btn-sm" disabled={joining} onclick={join}>
+            {#if joining}
+              <span class="loading loading-spinner loading-sm"></span>
+            {:else}
+              <Icon icon="login-2" />
+            {/if}
+            Join Room
+          </Button>
+        {/if}
       </div>
-    {:else if type === "date"}
-      <Divider>{value}</Divider>
-    {:else}
-      <div in:slide class:-mt-1={!showPubkey}>
-        <ChannelMessage
-          {url}
-          {room}
-          {replyTo}
-          event={$state.snapshot(value as TrustedEvent)}
-          {showPubkey} />
-      </div>
-    {/if}
-  {/each}
-  <p class="flex h-10 items-center justify-center py-20">
-    {#if loadingEvents}
-      <Spinner loading={loadingEvents}>Looking for messages...</Spinner>
-    {:else}
-      <Spinner>End of message history</Spinner>
-    {/if}
-  </p>
+    </div>
+  {:else}
+    {#each elements as { type, id, value, showPubkey } (id)}
+      {#if type === "new-messages"}
+        <div
+          bind:this={newMessages}
+          class="flex items-center py-2 text-xs transition-colors"
+          class:opacity-0={showFixedNewMessages}>
+          <div class="h-px flex-grow bg-primary"></div>
+          <p class="rounded-full bg-primary px-2 py-1 text-primary-content">New Messages</p>
+          <div class="h-px flex-grow bg-primary"></div>
+        </div>
+      {:else if type === "date"}
+        <Divider>{value}</Divider>
+      {:else}
+        <div in:slide class:-mt-1={!showPubkey}>
+          <ChannelMessage
+            {url}
+            {room}
+            {replyTo}
+            event={$state.snapshot(value as TrustedEvent)}
+            {showPubkey} />
+        </div>
+      {/if}
+    {/each}
+    <p class="flex h-10 items-center justify-center py-20">
+      {#if loadingEvents}
+        <Spinner loading={loadingEvents}>Looking for messages...</Spinner>
+      {:else}
+        <Spinner>End of message history</Spinner>
+      {/if}
+    </p>
+  {/if}
 </PageContent>
 
 <div class="chat__compose bg-base-200" bind:this={chatCompose}>
-  <div>
-    {#if parent}
-      <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
-    {/if}
-    {#if share}
-      <ChannelComposeParent event={share} clear={clearShare} verb="Sharing" />
-    {/if}
-  </div>
-  <ChannelCompose bind:this={compose} {onSubmit} {url} />
+  {#if $channel?.private && $membershipStatus !== MembershipStatus.Granted}
+    <!-- pass -->
+  {:else if $channel?.closed && $membershipStatus !== MembershipStatus.Granted}
+    <div class="flex flex-row items-center justify-between m-4 px-4 py-3 card bg-alt">
+      <p>Only members are allowed to post to this room.</p>
+      {#if $membershipStatus === MembershipStatus.Pending}
+        <Button class="btn btn-neutral btn-sm" disabled={leaving} onclick={leave}>
+          <Icon icon="clock-circle" />
+          Access Pending
+        </Button>
+      {:else}
+        <Button class="btn btn-neutral btn-sm" disabled={joining} onclick={join}>
+          {#if joining}
+            <span class="loading loading-spinner loading-sm"></span>
+          {:else}
+            <Icon icon="login-2" />
+          {/if}
+          Ask to Join
+        </Button>
+      {/if}
+    </div>
+  {:else}
+    <div>
+      {#if parent}
+        <ChannelComposeParent event={parent} clear={clearParent} verb="Replying to" />
+      {/if}
+      {#if share}
+        <ChannelComposeParent event={share} clear={clearShare} verb="Sharing" />
+      {/if}
+    </div>
+    <ChannelCompose bind:this={compose} {onSubmit} {url} />
+  {/if}
 </div>
 
 {#if showScrollButton}

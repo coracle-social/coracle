@@ -4243,8 +4243,8 @@ packages:
       svelte:
         optional: true
 
-  svelte@4.2.19:
-    resolution: {integrity: sha512-IY1rnGr6izd10B0A8LqsBfmlT5OILVuZ7XsI0vdGPEvuonFV7NYEUK4dAkm9Zg2q0Um92kYjTpS1CAP3Nh/KWw==}
+  svelte@4.2.20:
+    resolution: {integrity: sha512-eeEgGc2DtiUil5ANdtd8vPwt9AgaMdnuUFnPft9F5oMvU/FHu5IHFic+p1dR/UOB7XU2mX2yHW+NcTch4DCh5Q==}
     engines: {node: '>=16'}
 
   svelte@5.25.10:
@@ -6442,7 +6442,7 @@ snapshots:
       '@welshman/util': 0.3.0(typescript@5.8.3)
       fuse.js: 7.1.0
       idb: 8.0.2
-      svelte: 4.2.19
+      svelte: 4.2.20
       throttle-debounce: 5.0.2
     transitivePeerDependencies:
       - nostr-signer-capacitor-plugin
@@ -6563,7 +6563,7 @@ snapshots:
       '@welshman/lib': 0.3.0
       '@welshman/relay': 0.3.0(typescript@5.8.3)
       '@welshman/util': 0.3.0(typescript@5.8.3)
-      svelte: 4.2.19
+      svelte: 4.2.20
     transitivePeerDependencies:
       - typescript
 
@@ -9327,7 +9327,7 @@ snapshots:
     optionalDependencies:
       svelte: 5.25.10
 
-  svelte@4.2.19:
+  svelte@4.2.20:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@jridgewell/sourcemap-codec': 1.5.0

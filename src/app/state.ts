@@ -34,6 +34,9 @@ import {
   GROUPS,
   THREAD,
   COMMENT,
+  GROUP_JOIN,
+  GROUP_ADD_USER,
+  GROUP_REMOVE_USER,
   getGroupTags,
   getRelayTagValues,
   getPubkeyTagValues,
@@ -43,6 +46,8 @@ import {
   getListTags,
   asDecryptedEvent,
   normalizeRelayUrl,
+  getTag,
+  getTagValues,
 } from "@welshman/util"
 import type {TrustedEvent, SignedEvent, PublishedList, List, Filter} from "@welshman/util"
 import {Nip59, decrypt} from "@welshman/signer"
@@ -486,8 +491,8 @@ export type Channel = {
   room: string
   name: string
   event: TrustedEvent
-  access: "public" | "private"
-  membership: "open" | "closed"
+  closed: boolean
+  private: boolean
   picture?: string
   about?: string
 }
@@ -520,8 +525,8 @@ export const channels = derived(
             room,
             event,
             name: meta.name || room,
-            access: meta.private ? "private" : "public",
-            membership: meta.closed ? "closed" : "open",
+            closed: Boolean(getTag("closed", event.tags)),
+            private: Boolean(getTag("private", event.tags)),
             picture: meta.picture,
             about: meta.about,
           })
@@ -562,9 +567,6 @@ export const displayChannel = (url: string, room: string) =>
 
 export const roomComparator = (url: string) => (room: string) =>
   displayChannel(url, room).toLowerCase()
-
-export const channelIsLocked = (channel?: Channel) =>
-  channel?.access === "private" && channel?.membership === "closed"
 
 // User stuff
 
@@ -624,6 +626,36 @@ export const deriveOtherRooms = (url: string) =>
       roomComparator(url),
       ($channelsByUrl.get(url) || []).filter(c => !$userRooms.includes(c.room)).map(c => c.room),
     ),
+  )
+
+export enum MembershipStatus {
+  Initial,
+  Pending,
+  Granted,
+}
+
+export const deriveUserMembershipStatus = (url: string, room: string) =>
+  derived(
+    [pubkey, deriveEventsForUrl(url, [{kinds: [GROUP_JOIN, GROUP_ADD_USER, GROUP_REMOVE_USER], '#h': [room]}])],
+    ([$pubkey, $events]) => {
+      let status = MembershipStatus.Initial
+
+      for (const event of $events) {
+        if (event.kind === GROUP_JOIN && event.pubkey === $pubkey) {
+          status = MembershipStatus.Pending
+        }
+
+        if (event.kind === GROUP_REMOVE_USER && getTagValues("p", event.tags).includes($pubkey!)) {
+          break
+        }
+
+        if (event.kind === GROUP_ADD_USER && getTagValues("p", event.tags).includes($pubkey!)) {
+          return MembershipStatus.Granted
+        }
+      }
+
+      return status
+    }
   )
 
 // Other utils

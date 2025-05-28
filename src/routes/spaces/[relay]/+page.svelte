@@ -20,7 +20,6 @@
   import {
     hasNip29,
     decodeRelay,
-    channelIsLocked,
     makeChannelId,
     channelsById,
     deriveUserRooms,
@@ -155,9 +154,10 @@
     </Link>
     {#each $userRooms as room (room)}
       {@const roomPath = makeRoomPath(url, room)}
+      {@const channel = $channelsById.get(makeChannelId(url, room))}
       <Link href={roomPath} class="btn btn-neutral relative">
         <div class="flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
-          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+          {#if channel?.closed || channel?.private}
             <Icon icon="lock" size={4} />
           {:else}
             <Icon icon="hashtag" />
@@ -173,9 +173,10 @@
   <Divider>Other Rooms</Divider>
   <div class="grid grid-cols-3 gap-2">
     {#each $otherRooms as room (room)}
+      {@const channel = $channelsById.get(makeChannelId(url, room))}
       <Link href={makeRoomPath(url, room)} class="btn btn-neutral">
         <div class="relative flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
-          {#if channelIsLocked($channelsById.get(makeChannelId(url, room)))}
+          {#if channel?.closed || channel?.private}
             <Icon icon="lock" size={4} />
           {:else}
             <Icon icon="hashtag" />
