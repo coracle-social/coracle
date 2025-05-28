@@ -144,29 +144,30 @@ export const broadcastUserData = async (relays: string[]) => {
 
 // NIP 29 stuff
 
-export const nip29 = {
-  createRoom: (url: string, room: string) => {
-    const event = createEvent(GROUP_CREATE, {tags: [tagRoom(room, url)]})
+export const createRoom = (url: string, room: string) => {
+  const event = createEvent(GROUP_CREATE, {tags: [tagRoom(room, url)]})
 
-    return publishThunk({event, relays: [url]})
-  },
-  editMeta: (url: string, room: string, meta: Record<string, string>) => {
-    const event = createEvent(GROUP_EDIT_META, {
-      tags: [tagRoom(room, url), ...Object.entries(meta)],
-    })
+  return publishThunk({event, relays: [url]})
+}
 
-    return publishThunk({event, relays: [url]})
-  },
-  joinRoom: (url: string, room: string) => {
-    const event = createEvent(GROUP_JOIN, {tags: [tagRoom(room, url)]})
+export const editRoom = (url: string, room: string, meta: Record<string, string>) => {
+  const event = createEvent(GROUP_EDIT_META, {
+    tags: [tagRoom(room, url), ...Object.entries(meta)],
+  })
 
-    return publishThunk({event, relays: [url]})
-  },
-  leaveRoom: (url: string, room: string) => {
-    const event = createEvent(GROUP_LEAVE, {tags: [tagRoom(room, url)]})
+  return publishThunk({event, relays: [url]})
+}
 
-    return publishThunk({event, relays: [url]})
-  },
+export const joinRoom = (url: string, room: string) => {
+  const event = createEvent(GROUP_JOIN, {tags: [tagRoom(room, url)]})
+
+  return publishThunk({event, relays: [url]})
+}
+
+export const leaveRoom = (url: string, room: string) => {
+  const event = createEvent(GROUP_LEAVE, {tags: [tagRoom(room, url)]})
+
+  return publishThunk({event, relays: [url]})
 }
 
 // List updates

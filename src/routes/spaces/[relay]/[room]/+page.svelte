@@ -29,13 +29,14 @@
   } from "@app/state"
   import {setChecked, checked} from "@app/notifications"
   import {
-    nip29,
+    joinRoom,
+    leaveRoom,
     addRoomMembership,
     removeRoomMembership,
     prependParent,
     getThunkError,
   } from "@app/commands"
-  import {PROTECTED, hasNip29} from "@app/state"
+  import {PROTECTED} from "@app/state"
   import {makeFeed} from "@app/requests"
   import {popKey} from "@app/implicit"
   import {pushToast} from "@app/toast"
@@ -45,29 +46,23 @@
   const lastChecked = $checked[$page.url.pathname]
   const url = decodeRelay($page.params.relay)
   const filter = {kinds: [MESSAGE], "#h": [room]}
-  const relay = deriveRelay(url)
 
-  const joinRoom = async () => {
-    if (hasNip29($relay)) {
-      joiningRoom = true
+  const join = async () => {
+    joiningRoom = true
 
-      const message = await getThunkError(nip29.joinRoom(url, room))
+    const message = await getThunkError(joinRoom(url, room))
 
-      joiningRoom = false
+    joiningRoom = false
 
-      if (message && !message.includes("already")) {
-        return pushToast({theme: "error", message})
-      }
+    if (message && !message.includes("already")) {
+      return pushToast({theme: "error", message})
     }
 
     addRoomMembership(url, room, displayChannel(url, room))
   }
 
-  const leaveRoom = () => {
-    if (hasNip29($relay)) {
-      nip29.leaveRoom(url, room)
-    }
-
+  const leave = () => {
+    leaveRoom(url, room)
     removeRoomMembership(url, room)
   }
 
@@ -252,12 +247,12 @@
   {#snippet action()}
     <div class="row-2">
       {#if $userRoomsByUrl.get(url)?.has(room)}
-        <Button class="btn btn-neutral btn-sm" onclick={leaveRoom}>
+        <Button class="btn btn-neutral btn-sm" onclick={leave}>
           <Icon icon="arrows-a-logout-2" />
           Leave Room
         </Button>
       {:else}
-        <Button class="btn btn-neutral btn-sm" disabled={joiningRoom} onclick={joinRoom}>
+        <Button class="btn btn-neutral btn-sm" disabled={joiningRoom} onclick={join}>
           {#if joiningRoom}
             <span class="loading loading-spinner loading-sm"></span>
           {:else}

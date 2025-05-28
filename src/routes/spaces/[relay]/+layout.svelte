@@ -3,8 +3,7 @@
   import {onMount} from "svelte"
   import {page} from "$app/stores"
   import {ago, WEEK} from "@welshman/lib"
-  import {GROUP_META, EVENT_TIME, GROUPS, THREAD, COMMENT, MESSAGE} from "@welshman/util"
-  import {request} from "@welshman/net"
+  import {GROUP_META, EVENT_TIME, THREAD, COMMENT, MESSAGE} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
   import MenuSpace from "@app/components/MenuSpace.svelte"
@@ -72,9 +71,6 @@
         ...rooms.map(room => ({kinds: [MESSAGE], "#h": [room], since})),
       ],
     })
-
-    // Completely refresh our groups list and listen for new ones
-    request({relays, filters: [{kinds: [GROUPS]}], signal: controller.signal})
 
     return () => {
       controller.abort()

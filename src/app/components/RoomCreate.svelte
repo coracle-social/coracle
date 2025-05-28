@@ -10,8 +10,8 @@
   import Icon from "@lib/components/Icon.svelte"
   import ModalHeader from "@lib/components/ModalHeader.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
-  import {hasNip29} from "@app/state"
-  import {addRoomMembership, nip29, getThunkError} from "@app/commands"
+  import {hasNip29, loadChannel} from "@app/state"
+  import {addRoomMembership, createRoom, editRoom, joinRoom, getThunkError} from "@app/commands"
   import {makeSpacePath} from "@app/routes"
   import {pushToast} from "@app/toast"
 
@@ -23,23 +23,25 @@
   const back = () => history.back()
 
   const tryCreate = async () => {
-    const createMessage = await getThunkError(nip29.createRoom(url, room))
+    const createMessage = await getThunkError(createRoom(url, room))
 
     if (createMessage && !createMessage.match(/^duplicate:|already a member/)) {
       return pushToast({theme: "error", message: createMessage})
     }
 
-    const editMessage = await getThunkError(nip29.editMeta(url, room, {name}))
+    const editMessage = await getThunkError(editRoom(url, room, {name}))
 
     if (editMessage) {
       return pushToast({theme: "error", message: editMessage})
     }
 
-    const joinMessage = await getThunkError(nip29.joinRoom(url, room))
+    const joinMessage = await getThunkError(joinRoom(url, room))
 
     if (joinMessage && !joinMessage.includes("already")) {
       return pushToast({theme: "error", message: joinMessage})
     }
+
+    await loadChannel(url, room)
 
     addRoomMembership(url, room, name)
     goto(makeSpacePath(url, room))
