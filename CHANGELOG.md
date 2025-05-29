@@ -1,9 +1,13 @@
 # Changelog
 
-# 1.0.5
+# 1.1.0
 
 * Add better theming support
 * Improve forms for entering invite codes
+* Rely more heavily on NIP 29 for rooms
+* Support multiple platform relays
+* Remove default general room
+* Remove room tag from threads/calendars
 
 # 1.0.4
 
