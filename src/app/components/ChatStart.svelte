@@ -1,5 +1,10 @@
 <script lang="ts">
+  import * as nip19 from "nostr-tools/nip19"
+  import {onMount} from "svelte"
+  import {writable} from "svelte/store"
   import {goto} from "$app/navigation"
+  import {tryCatch, uniq} from "@welshman/lib"
+  import {fromNostrURI} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import {preventDefault} from "@lib/html"
   import Field from "@lib/components/Field.svelte"
@@ -14,7 +19,36 @@
 
   const onSubmit = () => goto(makeChatPath([...pubkeys, $pubkey!]))
 
+  const addPubkey = (pubkey: string) => {
+    pubkeys = uniq([...pubkeys, pubkey])
+    term.set("")
+  }
+
+  const term = writable("")
+
   let pubkeys: string[] = $state([])
+
+  onMount(() => {
+    return term.subscribe(t => {
+      if (t.match(/^[0-9a-f]{64}$/)) {
+        addPubkey(t)
+      }
+
+      if (t.match(/^(nostr:)?(npub1|nprofile1)/)) {
+        tryCatch(() => {
+          const {type, data} = nip19.decode(fromNostrURI(t))
+
+          if (type === "npub") {
+            addPubkey(data)
+          }
+
+          if (type === "nprofile") {
+            addPubkey(data.pubkey)
+          }
+        })
+      }
+    })
+  })
 </script>
 
 <form class="column gap-4" onsubmit={preventDefault(onSubmit)}>
@@ -28,7 +62,7 @@
   </ModalHeader>
   <Field>
     {#snippet input()}
-      <ProfileMultiSelect autofocus bind:value={pubkeys} />
+      <ProfileMultiSelect autofocus bind:value={pubkeys} {term} />
     {/snippet}
   </Field>
   <ModalFooter>

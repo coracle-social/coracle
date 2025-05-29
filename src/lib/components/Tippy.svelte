@@ -14,8 +14,6 @@
     ...restProps
   } = $props()
 
-  const reactiveProps = $derived(props)
-
   let element: Element
 
   onMount(() => {
@@ -28,7 +26,7 @@
       ...params,
     })
 
-    instance = mount(component, {target, props: reactiveProps})
+    instance = mount(component, {target, props})
 
     return () => {
       popover?.destroy()

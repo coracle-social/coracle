@@ -3,7 +3,7 @@
   import {throttle, clamp} from "@welshman/lib"
   import {preventDefault, stopPropagation} from "@lib/html"
 
-  const {term, search, select, component: Component, allowCreate = false} = $props()
+  const {term, search, select, component: Component, style = "", allowCreate = false} = $props()
 
   let index = $state(0)
   let items: string[] = $state([])
@@ -57,7 +57,7 @@
   })
 </script>
 
-<div transition:fly|local={{duration: 200}} class="tiptap-suggestions">
+<div transition:fly|local={{duration: 200}} class="tiptap-suggestions" {style}>
   <div class="tiptap-suggestions__content max-h-[40vh]">
     {#if $term && allowCreate && !items.includes($term)}
       <button

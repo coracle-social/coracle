@@ -13,7 +13,7 @@
       const image = new Image()
 
       image.addEventListener("error", () => {
-        element.querySelector(".hidden")?.classList.remove("hidden")
+        element?.querySelector(".hidden")?.classList.remove("hidden")
       })
 
       image.src = src

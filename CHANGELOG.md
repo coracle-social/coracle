@@ -8,6 +8,8 @@
 * Support multiple platform relays
 * Remove default general room
 * Remove room tag from threads/calendars
+* Show pubkey on profile detail
+* Support pasting pubkey into chat start dialog
 
 # 1.0.4
 

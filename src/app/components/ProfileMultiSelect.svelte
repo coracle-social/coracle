@@ -1,5 +1,6 @@
 <script lang="ts">
   import {writable} from "svelte/store"
+  import type {Writable} from "svelte/store"
   import {type Instance} from "tippy.js"
   import {append, remove, uniq} from "@welshman/lib"
   import {profileSearch} from "@welshman/app"
@@ -15,11 +16,10 @@
   interface Props {
     value: string[]
     autofocus?: boolean
+    term?: Writable<string>
   }
 
-  let {value = $bindable(), autofocus = false}: Props = $props()
-
-  const term = writable("")
+  let {value = $bindable(), term = writable(""), autofocus = false}: Props = $props()
 
   const search = (term: string) => $profileSearch.searchValues(term)
 
@@ -44,6 +44,9 @@
   let instance: any = $state()
 
   $effect(() => {
+    // @ts-ignore
+    oninput?.($term)
+
     if ($term) {
       popover?.show()
     } else {
