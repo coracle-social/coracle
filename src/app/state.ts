@@ -102,7 +102,7 @@ export const PLATFORM_LOGO = PLATFORM_URL + "/pwa-192x192.png"
 
 export const PLATFORM_NAME = import.meta.env.VITE_PLATFORM_NAME
 
-export const PLATFORM_RELAY = import.meta.env.VITE_PLATFORM_RELAY
+export const PLATFORM_RELAYS = fromCsv(import.meta.env.VITE_PLATFORM_RELAYS)
 
 export const PLATFORM_ACCENT = import.meta.env.VITE_PLATFORM_ACCENT
 

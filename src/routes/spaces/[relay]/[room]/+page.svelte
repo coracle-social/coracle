@@ -299,7 +299,25 @@
   {/snippet}
   {#snippet action()}
     <div class="row-2">
-      {#if $membershipStatus !== MembershipStatus.Initial}
+      {#if $membershipStatus === MembershipStatus.Initial}
+        <Button
+          class="btn btn-neutral btn-sm tooltip tooltip-left"
+          data-tip="Request to be added to the member list"
+          disabled={joining}
+          onclick={join}>
+          {#if joining}
+            <span class="loading loading-spinner loading-sm"></span>
+          {:else}
+            <Icon size={4} icon="login-2" />
+          {/if}
+        </Button>
+      {:else if $membershipStatus === MembershipStatus.Pending}
+        <Button
+          class="btn btn-neutral btn-sm tooltip tooltip-left"
+          data-tip="Membership is pending">
+          <Icon size={4} icon="clock-circle" />
+        </Button>
+      {:else}
         <Button
           class="btn btn-neutral btn-sm tooltip tooltip-left"
           data-tip="Request to be removed from member list"

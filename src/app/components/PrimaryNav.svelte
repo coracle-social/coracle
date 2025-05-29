@@ -13,7 +13,7 @@
   import MenuOtherSpaces from "@app/components/MenuOtherSpaces.svelte"
   import MenuSettings from "@app/components/MenuSettings.svelte"
   import PrimaryNavItemSpace from "@app/components/PrimaryNavItemSpace.svelte"
-  import {userRoomsByUrl, canDecrypt, PLATFORM_RELAY, PLATFORM_LOGO} from "@app/state"
+  import {userRoomsByUrl, canDecrypt, PLATFORM_RELAYS, PLATFORM_LOGO} from "@app/state"
   import {pushModal} from "@app/modal"
   import {makeSpacePath} from "@app/routes"
   import {notifications} from "@app/notifications"
@@ -57,8 +57,8 @@
   class="ml-sai mt-sai mb-sai relative z-nav hidden w-14 flex-shrink-0 bg-base-200 pt-4 md:block">
   <div class="flex h-full flex-col justify-between">
     <div>
-      {#if PLATFORM_RELAY}
-        <PrimaryNavItemSpace url={PLATFORM_RELAY} />
+      {#each PLATFORM_RELAYS as url (url)}
+        <PrimaryNavItemSpace {url} />
       {:else}
         <PrimaryNavItem title="Home" href="/home" class="tooltip-right">
           <Avatar src={PLATFORM_LOGO} class="!h-10 !w-10" />
@@ -79,7 +79,7 @@
         <PrimaryNavItem title="Add Space" onclick={addSpace} class="tooltip-right">
           <Avatar icon="settings-minimalistic" class="!h-10 !w-10" />
         </PrimaryNavItem>
-      {/if}
+      {/each}
     </div>
     <div>
       <PrimaryNavItem
@@ -120,7 +120,7 @@
         notification={$notifications.has("/chat")}>
         <Avatar icon="letter" class="!h-10 !w-10" />
       </PrimaryNavItem>
-      {#if !PLATFORM_RELAY}
+      {#if PLATFORM_RELAYS.length !== 1}
         <PrimaryNavItem
           title="Spaces"
           onclick={showSpacesMenu}
