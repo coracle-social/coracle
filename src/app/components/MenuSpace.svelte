@@ -30,6 +30,7 @@
   const {url} = $props()
 
   const relay = deriveRelay(url)
+  const chatPath = makeSpacePath(url, "chat")
   const threadsPath = makeSpacePath(url, "threads")
   const calendarPath = makeSpacePath(url, "calendar")
   const userRooms = deriveUserRooms(url)
@@ -128,28 +129,37 @@
         notification={$notifications.has(calendarPath)}>
         <Icon icon="calendar-minimalistic" /> Calendar
       </SecondaryNavItem>
-      <div class="h-2"></div>
-      <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
-      {#each $userRooms as room, i (room)}
-        <MenuSpaceRoomItem {replaceState} notify {url} {room} />
-      {/each}
-      {#if $otherRooms.length > 0}
-        <div class="h-2"></div>
-        <SecondaryNavHeader>
-          {#if $userRooms.length > 0}
-            Other Rooms
-          {:else}
-            Rooms
-          {/if}
-        </SecondaryNavHeader>
-      {/if}
-      {#each $otherRooms as room, i (room)}
-        <MenuSpaceRoomItem {replaceState} {url} {room} />
-      {/each}
       {#if hasNip29($relay)}
+        {#if $userRooms.length > 0}
+          <div class="h-2"></div>
+          <SecondaryNavHeader>Your Rooms</SecondaryNavHeader>
+        {/if}
+        {#each $userRooms as room, i (room)}
+          <MenuSpaceRoomItem {replaceState} notify {url} {room} />
+        {/each}
+        {#if $otherRooms.length > 0}
+          <div class="h-2"></div>
+          <SecondaryNavHeader>
+            {#if $userRooms.length > 0}
+              Other Rooms
+            {:else}
+              Rooms
+            {/if}
+          </SecondaryNavHeader>
+        {/if}
+        {#each $otherRooms as room, i (room)}
+          <MenuSpaceRoomItem {replaceState} {url} {room} />
+        {/each}
         <SecondaryNavItem {replaceState} onclick={addRoom}>
           <Icon icon="add-circle" />
           Create room
+        </SecondaryNavItem>
+      {:else}
+        <SecondaryNavItem
+          {replaceState}
+          href={chatPath}
+          notification={$notifications.has(chatPath)}>
+          <Icon icon="chat-round" /> Chat
         </SecondaryNavItem>
       {/if}
     </div>

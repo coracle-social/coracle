@@ -20,14 +20,13 @@
 
   interface Props {
     url: string
-    room: string
     event: TrustedEvent
     replyTo?: (event: TrustedEvent) => void
     showPubkey?: boolean
     inert?: boolean
   }
 
-  const {url, room, event, replyTo = undefined, showPubkey = false, inert = false}: Props = $props()
+  const {url, event, replyTo = undefined, showPubkey = false, inert = false}: Props = $props()
 
   const thunk = $thunks[event.id]
   const today = formatTimestampAsDate(now())
@@ -95,7 +94,7 @@
     <button
       class="join absolute right-1 top-1 border border-solid border-neutral text-xs opacity-0 transition-all"
       class:group-hover:opacity-100={!isMobile}>
-      <ChannelMessageEmojiButton {url} {room} {event} />
+      <ChannelMessageEmojiButton {url} {event} />
       {#if replyTo}
         <Button class="btn join-item btn-xs" onclick={reply}>
           <Icon icon="reply" size={4} />

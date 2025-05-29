@@ -33,7 +33,7 @@ import {
   getRelaysFromList,
   RelayMode,
 } from "@welshman/util"
-import {Pool, PublishStatus, AuthStatus, SocketStatus} from "@welshman/net"
+import {Pool, AuthStatus, SocketStatus} from "@welshman/net"
 import {Router} from "@welshman/router"
 import {
   pubkey,
@@ -52,10 +52,8 @@ import {
   dropSession,
   tagEventForComment,
   tagEventForQuote,
-  thunkIsComplete,
   getThunkError,
 } from "@welshman/app"
-import type {Thunk} from "@welshman/app"
 import {
   tagRoom,
   PROTECTED,
@@ -177,7 +175,10 @@ export const removeSpaceMembership = async (url: string) => {
 
 export const addRoomMembership = async (url: string, room: string) => {
   const list = get(userMembership) || makeList({kind: GROUPS})
-  const newTags = [["r", url], ["group", room, url]]
+  const newTags = [
+    ["r", url],
+    ["group", room, url],
+  ]
   const event = await addToListPublicly(list, ...newTags).reconcile(nip44EncryptToSelf)
   const relays = uniq([...Router.get().FromUser().getUrls(), ...getRelayTagValues(event.tags)])
 

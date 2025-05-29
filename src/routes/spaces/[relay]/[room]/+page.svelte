@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cx from 'classnames'
+  import cx from "classnames"
   import {readable} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
   import {page} from "$app/stores"
@@ -7,8 +7,15 @@
   import {now, formatTimestampAsDate} from "@welshman/lib"
   import {request} from "@welshman/net"
   import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent, MESSAGE, DELETE, REACTION, GROUP_ADD_USER, GROUP_REMOVE_USER} from "@welshman/util"
-  import {pubkey, publishThunk, deriveRelay, getThunkError, waitForThunkCompletion} from "@welshman/app"
+  import {
+    createEvent,
+    MESSAGE,
+    DELETE,
+    REACTION,
+    GROUP_ADD_USER,
+    GROUP_REMOVE_USER,
+  } from "@welshman/util"
+  import {pubkey, publishThunk, getThunkError} from "@welshman/app"
   import {slide, fade, fly} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
@@ -26,7 +33,6 @@
     userSettingValues,
     decodeRelay,
     tagRoom,
-    displayChannel,
     getEventsForUrl,
     deriveUserMembershipStatus,
     deriveChannel,
@@ -240,15 +246,17 @@
   onMount(() => {
     const controller = new AbortController()
 
-    const req = request({
+    request({
       signal: controller.signal,
       relays: [url],
-      filters: [{
-        kinds: [GROUP_ADD_USER, GROUP_REMOVE_USER],
-        '#p': [$pubkey!],
-        '#h': [room],
-        limit: 10,
-      }],
+      filters: [
+        {
+          kinds: [GROUP_ADD_USER, GROUP_REMOVE_USER],
+          "#p": [$pubkey!],
+          "#h": [room],
+          limit: 10,
+        },
+      ],
     })
 
     const observer = new ResizeObserver(() => {
@@ -291,11 +299,20 @@
   {/snippet}
   {#snippet action()}
     <div class="row-2">
+      {#if $membershipStatus !== MembershipStatus.Initial}
+        <Button
+          class="btn btn-neutral btn-sm tooltip tooltip-left"
+          data-tip="Request to be removed from member list"
+          disabled={leaving}
+          onclick={leave}>
+          <Icon size={4} icon="arrows-a-logout-2" />
+        </Button>
+      {/if}
       <Button
         class="btn btn-neutral btn-sm tooltip tooltip-left"
         data-tip={isFavorite ? "Remove Favorite" : "Add Favorite"}
         onclick={isFavorite ? removeFavorite : addFavorite}>
-        <Icon size={4} icon="bookmark" class={cx({'text-primary': isFavorite})} />
+        <Icon size={4} icon="bookmark" class={cx({"text-primary": isFavorite})} />
       </Button>
       <MenuSpaceButton {url} />
     </div>
@@ -307,9 +324,7 @@
   {#if $channel?.private && $membershipStatus !== MembershipStatus.Granted}
     <div class="py-20">
       <div class="card2 col-8 m-auto max-w-md items-center text-center">
-        <p class="row-2">
-          You aren't currently a member of this room.
-        </p>
+        <p class="row-2">You aren't currently a member of this room.</p>
         {#if $membershipStatus === MembershipStatus.Pending}
           <Button class="btn btn-neutral btn-sm" disabled={leaving} onclick={leave}>
             <Icon icon="clock-circle" />
@@ -344,7 +359,6 @@
         <div in:slide class:-mt-1={!showPubkey}>
           <ChannelMessage
             {url}
-            {room}
             {replyTo}
             event={$state.snapshot(value as TrustedEvent)}
             {showPubkey} />
@@ -365,7 +379,7 @@
   {#if $channel?.private && $membershipStatus !== MembershipStatus.Granted}
     <!-- pass -->
   {:else if $channel?.closed && $membershipStatus !== MembershipStatus.Granted}
-    <div class="flex flex-row items-center justify-between m-4 px-4 py-3 card bg-alt">
+    <div class="bg-alt card m-4 flex flex-row items-center justify-between px-4 py-3">
       <p>Only members are allowed to post to this room.</p>
       {#if $membershipStatus === MembershipStatus.Pending}
         <Button class="btn btn-neutral btn-sm" disabled={leaving} onclick={leave}>
