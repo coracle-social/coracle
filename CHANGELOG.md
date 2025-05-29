@@ -10,6 +10,7 @@
 * Remove room tag from threads/calendars
 * Show pubkey on profile detail
 * Support pasting pubkey into chat start dialog
+* Add minimal style for quoted messages
 
 # 1.0.4
 

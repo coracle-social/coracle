@@ -75,7 +75,7 @@
         </div>
       {/if}
       <div class="text-sm">
-        <Content {event} {url} />
+        <Content minimalQuote {event} {url} />
         {#if thunk}
           <ThunkStatus {thunk} class="mt-2" />
         {/if}

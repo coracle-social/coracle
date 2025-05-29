@@ -5,14 +5,14 @@
   import {Router} from "@welshman/router"
   import {tracker, repository} from "@welshman/app"
   import type {TrustedEvent} from "@welshman/util"
-  import {Address, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
+  import {Address, getTagValue, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
   import {scrollToEvent} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import NoteContent from "@app/components/NoteContent.svelte"
   import {deriveEvent, entityLink, ROOM} from "@app/state"
-  import {makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
+  import {makeThreadPath, makeSpacePath, makeCalendarPath, makeRoomPath} from "@app/routes"
 
   type Props = {
     value: any
@@ -20,9 +20,10 @@
     event: TrustedEvent
     depth: number
     url?: string
+    minimal?: boolean
   }
 
-  const {value, event, depth, hideMediaAtDepth, url}: Props = $props()
+  const {value, event, depth, hideMediaAtDepth, url, minimal}: Props = $props()
 
   const {id, identifier, kind, pubkey, relays = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
@@ -37,11 +38,12 @@
     ? nip19.neventEncode({id, relays: mergedRelays})
     : new Address(kind, pubkey, identifier, mergedRelays).toNaddr()
 
-  const openMessage = (url: string, room: string, id: string) => {
+  const openMessage = (url: string, room: string | undefined, id: string) => {
     const event = repository.getEvent(id)
+    const path = room ? makeRoomPath(url, room) : makeSpacePath(url, "chat")
 
     if (event) {
-      goto(makeRoomPath(url, room))
+      goto(path)
       scrollToEvent(id)
     }
 
@@ -55,9 +57,9 @@
       }
 
       const [url] = tracker.getRelays($quote.id)
-      const room = $quote.tags.find(nthEq(0, ROOM))?.[1]
+      const room = getTagValue(ROOM, $quote.tags)
 
-      if (url && room) {
+      if (url) {
         if ($quote.kind === THREAD) {
           return goto(makeThreadPath(url, $quote.id))
         }
@@ -95,9 +97,17 @@
 
 <Button class="my-2 block max-w-full text-left" {onclick}>
   {#if $quote}
-    <NoteCard event={$quote} {url} class="bg-alt rounded-box p-4">
-      <NoteContent {hideMediaAtDepth} {url} event={$quote} depth={depth + 1} />
-    </NoteCard>
+    {#if minimal && $quote.kind === MESSAGE}
+      <div
+        class="border-l-2 border-solid border-l-primary py-1 pl-2 opacity-90"
+        style="background-color: color-mix(in srgb, var(--primary) 10%, var(--base-300) 90%);">
+        <NoteContent {hideMediaAtDepth} {url} event={$quote} depth={depth + 1} />
+      </div>
+    {:else}
+      <NoteCard event={$quote} {url} class="bg-alt rounded-box p-4">
+        <NoteContent {hideMediaAtDepth} {url} event={$quote} depth={depth + 1} />
+      </NoteCard>
+    {/if}
   {:else}
     <div class="rounded-box p-4">
       <Spinner loading>Loading event...</Spinner>
