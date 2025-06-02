@@ -117,7 +117,7 @@
             <span slot="item" let:item>#{item}</span>
           </SearchSelect>
         {:else}
-          <p>Sorry, editing kind ${list.kind} lists isn't currently supported.</p>{/if}
+          <p>Sorry, editing kind {list.kind} lists isn't currently supported.</p>{/if}
       </Field>
     {/if}
     <div class="flex justify-between">
