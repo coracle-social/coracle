@@ -2,59 +2,18 @@ import {mount} from "svelte"
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {StampedEvent} from "@welshman/util"
-import {makeEvent, getTagValues, getListTags, BLOSSOM_AUTH} from "@welshman/util"
-import {simpleCache, normalizeUrl, removeNil, now} from "@welshman/lib"
+import {getTagValues, getListTags} from "@welshman/util"
 import {Router} from "@welshman/router"
 import {signer, profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {makeMentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
-export const hasBlossomSupport = simpleCache(async ([url]: [string]) => {
-  const $signer = signer.get()
-  const headers: Record<string, string> = {
-    "X-Content-Type": "text/plain",
-    "X-Content-Length": "1",
-    "X-SHA-256": "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac",
-  }
-
-  try {
-    if ($signer) {
-      const event = await signer.get().sign(
-        makeEvent(BLOSSOM_AUTH, {
-          tags: [
-            ["t", "upload"],
-            ["server", url],
-            ["expiration", String(now() + 30)],
-          ],
-        }),
-      )
-
-      headers.Authorization = `Nostr ${btoa(JSON.stringify(event))}`
-    }
-
-    const res = await fetch(normalizeUrl(url) + "/upload", {method: "head", headers})
-
-    return res.status === 200
-  } catch (e) {
-    if (!String(e).includes("Failed to fetch")) {
-      console.error(e)
-    }
-  }
-
-  return false
-})
-
-export const getUploadUrl = async (spaceUrl?: string) => {
+export const getUploadUrl = () => {
   const userUrls = getTagValues("server", getListTags(userBlossomServers.get()))
-  const allUrls = removeNil([spaceUrl, ...userUrls])
 
-  for (let url of allUrls) {
-    url = url.replace(/^ws/, "http")
-
-    if (await hasBlossomSupport(url)) {
-      return url
-    }
+  for (const url of userUrls) {
+    return url.replace(/^ws/, "http")
   }
 
   return "https://cdn.satellite.earth"
@@ -98,7 +57,7 @@ export const makeEditor = async ({
         submit,
         sign: signWithAssert,
         defaultUploadType: "blossom",
-        defaultUploadUrl: await getUploadUrl(url),
+        defaultUploadUrl: getUploadUrl(),
         extensions: {
           placeholder: {
             config: {
