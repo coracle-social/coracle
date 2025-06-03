@@ -10,7 +10,7 @@
   const meta =
     getTags("imeta", event.tags)
       .map(tagsFromIMeta)
-      .find(meta => getTagValue("url", meta) === url) || []
+      .find(meta => getTagValue("url", meta) === url) || event.tags
 
   const key = getTagValue("decryption-key", meta)
   const nonce = getTagValue("decryption-nonce", meta)

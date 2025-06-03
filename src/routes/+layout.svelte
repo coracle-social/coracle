@@ -17,6 +17,7 @@
     MESSAGE,
     INBOX_RELAYS,
     DIRECT_MESSAGE,
+    DIRECT_MESSAGE_FILE,
     MUTES,
     FOLLOWS,
     PROFILE,
@@ -177,7 +178,9 @@
               return 1
             }
 
-            if ([EVENT_TIME, THREAD, MESSAGE, DIRECT_MESSAGE].includes(e.kind)) {
+            if (
+              [EVENT_TIME, THREAD, MESSAGE, DIRECT_MESSAGE, DIRECT_MESSAGE_FILE].includes(e.kind)
+            ) {
               return 0.9
             }
 

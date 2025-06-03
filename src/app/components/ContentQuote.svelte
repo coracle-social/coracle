@@ -5,7 +5,15 @@
   import {Router} from "@welshman/router"
   import {tracker, repository} from "@welshman/app"
   import type {TrustedEvent} from "@welshman/util"
-  import {Address, getTagValue, DIRECT_MESSAGE, MESSAGE, THREAD, EVENT_TIME} from "@welshman/util"
+  import {
+    Address,
+    getTagValue,
+    DIRECT_MESSAGE,
+    DIRECT_MESSAGE_FILE,
+    MESSAGE,
+    THREAD,
+    EVENT_TIME,
+  } from "@welshman/util"
   import {scrollToEvent} from "@lib/html"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
@@ -52,7 +60,7 @@
 
   const onclick = () => {
     if ($quote) {
-      if ($quote.kind === DIRECT_MESSAGE) {
+      if ($quote.kind === DIRECT_MESSAGE || $quote.kind === DIRECT_MESSAGE_FILE) {
         return scrollToEvent($quote.id)
       }
 

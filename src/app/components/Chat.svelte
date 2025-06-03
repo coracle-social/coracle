@@ -1,9 +1,28 @@
 <script lang="ts">
   import type {Snippet} from "svelte"
   import {onMount} from "svelte"
-  import {int, nthNe, MINUTE, sortBy, remove, formatTimestampAsDate} from "@welshman/lib"
-  import type {TrustedEvent, EventContent} from "@welshman/util"
-  import {createEvent, DIRECT_MESSAGE, INBOX_RELAYS} from "@welshman/util"
+  import {
+    int,
+    ms,
+    partition,
+    spec,
+    nthEq,
+    nthNe,
+    MINUTE,
+    sortBy,
+    remove,
+    formatTimestampAsDate,
+  } from "@welshman/lib"
+  import type {TrustedEvent, EventTemplate, EventContent} from "@welshman/util"
+  import {parse, isLink} from "@welshman/content"
+  import {
+    createEvent,
+    tagsFromIMeta,
+    getTags,
+    DIRECT_MESSAGE,
+    DIRECT_MESSAGE_FILE,
+    INBOX_RELAYS,
+  } from "@welshman/util"
   import {
     pubkey,
     tagPubkey,
@@ -61,14 +80,53 @@
   }
 
   const onSubmit = async (params: EventContent) => {
-    // Remove p tags since they result in forking the conversation
-    const tags = [...params.tags.filter(nthNe(0, "p")), ...remove($pubkey!, pubkeys).map(tagPubkey)]
+    const ptags = remove($pubkey!, pubkeys).map(tagPubkey)
 
-    await sendWrapped({
-      pubkeys,
-      template: createEvent(DIRECT_MESSAGE, prependParent(parent, {...params, tags})),
-      delay: $userSettingValues.send_delay,
-    })
+    // Remove p tags since they result in forking the conversation
+    params.tags = params.tags.filter(nthNe(0, "p"))
+
+    // Add our reply quote to content
+    params = prependParent(parent, params)
+
+    const [imetaTags, tags] = partition(nthEq(0, "imeta"), params.tags)
+    const imetas = getTags("imeta", imetaTags).map(tagsFromIMeta)
+    const templates: EventTemplate[] = []
+    const buffer = []
+
+    const addTemplate = (kind: number, content: string, tags: string[][]) => {
+      content = content.trim()
+
+      if (content) {
+        templates.push(createEvent(kind, {content, tags: [...tags, ...ptags]}))
+      }
+    }
+
+    for (const p of parse(params)) {
+      const imeta = isLink(p)
+        ? imetas.find(tags => tags.find(spec(["url", p.value.url.toString()])))
+        : undefined
+
+      if (isLink(p) && imeta) {
+        addTemplate(DIRECT_MESSAGE, buffer.splice(0).join(""), tags)
+        addTemplate(
+          DIRECT_MESSAGE_FILE,
+          p.value.url.toString(),
+          imeta.slice(1).filter(nthNe(0, "url")),
+        )
+      } else {
+        buffer.push(p.raw)
+      }
+    }
+
+    addTemplate(DIRECT_MESSAGE, buffer.splice(0).join(""), tags)
+
+    // Split the message into multiple pieces so that we can use kind 15 to send images per nip 17
+    // Sleep 1 second between each one to make sure timestamps are distinct
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i]
+
+      await sendWrapped({pubkeys, template, delay: $userSettingValues.send_delay + ms(i)})
+    }
 
     clearParent()
   }
@@ -191,7 +249,7 @@
   {/snippet}
 </PageBar>
 
-<PageContent class="flex flex-col-reverse pt-4">
+<PageContent class="flex flex-col-reverse gap-2 pt-4">
   <div bind:this={dynamicPadding}></div>
   {#if missingInboxes.includes($pubkey!)}
     <div class="py-12">
