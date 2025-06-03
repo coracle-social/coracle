@@ -20,6 +20,8 @@
 
   export const focus = () => editor.then(ed => ed.chain().focus().run())
 
+  const uploadFiles = () => editor.then(ed => ed.chain().selectFiles().run())
+
   const submit = async () => {
     if ($uploading) return
 
@@ -40,11 +42,21 @@
     submit,
     uploading,
     aggressive: true,
-    disableFileUpload: true,
   })
 </script>
 
 <form class="relative z-feature flex gap-2 p-2" onsubmit={preventDefault(submit)}>
+  <Button
+    data-tip="Add an image"
+    class="center tooltip tooltip-right h-10 w-10 min-w-10 rounded-box bg-base-300 transition-colors hover:bg-base-200"
+    disabled={$uploading}
+    onclick={uploadFiles}>
+    {#if $uploading}
+      <span class="loading loading-spinner loading-xs"></span>
+    {:else}
+      <Icon icon="gallery-send" />
+    {/if}
+  </Button>
   <div class="chat-editor flex-grow overflow-hidden">
     <EditorContent {editor} />
   </div>

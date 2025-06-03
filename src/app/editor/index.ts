@@ -35,7 +35,6 @@ export const makeEditor = async ({
   submit,
   uploading,
   wordCount,
-  disableFileUpload,
 }: {
   aggressive?: boolean
   autofocus?: boolean
@@ -46,7 +45,6 @@ export const makeEditor = async ({
   submit: () => void
   uploading?: Writable<boolean>
   wordCount?: Writable<number>
-  disableFileUpload?: boolean
 }) => {
   return new Editor({
     content,
@@ -69,18 +67,17 @@ export const makeEditor = async ({
               aggressive,
             },
           },
-          fileUpload: disableFileUpload
-            ? false
-            : {
-                config: {
-                  onDrop() {
-                    uploading?.set(true)
-                  },
-                  onComplete() {
-                    uploading?.set(false)
-                  },
-                },
+          fileUpload: {
+            config: {
+              encryptionAlgorithm: "aes-gcm",
+              onDrop() {
+                uploading?.set(true)
               },
+              onComplete() {
+                uploading?.set(false)
+              },
+            },
+          },
           nprofile: {
             extend: {
               addNodeView: () => makeMentionNodeView(url),
