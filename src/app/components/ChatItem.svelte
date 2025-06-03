@@ -22,7 +22,7 @@
   const {...props}: Props = $props()
 
   const others = remove($pubkey!, props.pubkeys)
-  const active = $page.params.chat === props.id
+  const active = $derived($page.params.chat === props.id)
   const path = makeChatPath(props.pubkeys)
 
   onMount(() => {
