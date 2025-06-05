@@ -1,7 +1,7 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import {displayRelayUrl} from "@welshman/util"
-  import {deriveRelay} from "@welshman/app"
+  import {displayRelayUrl, MESSAGE, THREAD} from "@welshman/util"
+  import {deriveRelay, pubkey} from "@welshman/app"
   import {AuthStatus, SocketStatus} from "@welshman/net"
   import {fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
@@ -10,6 +10,7 @@
   import PageBar from "@lib/components/PageBar.svelte"
   import PageContent from "@lib/components/PageContent.svelte"
   import StatusIndicator from "@lib/components/StatusIndicator.svelte"
+  import ProfileLink from "@app/components/ProfileLink.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileLatest from "@app/components/ProfileLatest.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
@@ -26,6 +27,7 @@
     deriveOtherRooms,
     userRoomsByUrl,
     deriveSocket,
+    deriveEventsForUrl,
   } from "@app/state"
   import {makeChatPath, makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
   import {notifications} from "@app/notifications"
@@ -38,6 +40,7 @@
   const otherRooms = deriveOtherRooms(url)
   const threadsPath = makeThreadPath(url)
   const calendarPath = makeCalendarPath(url)
+  const mentions = deriveEventsForUrl(url, [{'#p': [$pubkey!], kinds: [MESSAGE, THREAD]}])
 
   const joinSpace = () => pushModal(SpaceJoin, {url})
 
@@ -45,7 +48,7 @@
 
   let roomSearchQuery = $state("")
 
-  const pubkey = $derived($relay?.profile?.pubkey)
+  const owner = $derived($relay?.profile?.pubkey)
 
   const filteredRooms = $derived(() => {
     if (!roomSearchQuery) return [...$userRooms, ...$otherRooms]
@@ -77,8 +80,8 @@
           <Icon icon="login-2" />
           Join Space
         </Button>
-      {:else if pubkey}
-        <Link class="btn btn-primary btn-sm" href={makeChatPath([pubkey])}>
+      {:else if owner}
+        <Link class="btn btn-primary btn-sm" href={makeChatPath([owner])}>
           <Icon icon="letter" />
           Contact Owner
         </Link>
@@ -103,22 +106,14 @@
           </div>
         </div>
       </div>
-      <div class="min-w-0 flex-1">
+      <div class="min-w-0 flex flex-col gap-1">
         <h1 class="ellipsize whitespace-nowrap text-2xl font-bold">
           <RelayName {url} />
         </h1>
-        <p class="ellipsize mb-2 text-sm opacity-75">{displayRelayUrl(url)}</p>
-        {#if $relay?.profile?.pubkey}
-          <p class="text-sm opacity-60">
-            <Icon icon="user-rounded" size={4} class="mr-1 inline" />
-            Relay Admin: {$relay.profile.pubkey.slice(0, 8)}...{$relay.profile.pubkey.slice(-8)}
-          </p>
-        {/if}
+        <p class="ellipsize text-sm opacity-75">{displayRelayUrl(url)}</p>
       </div>
     </div>
-    <div class="mt-4">
-      <RelayDescription {url} />
-    </div>
+    <RelayDescription {url} />
   </div>
   <div class="card2 bg-alt md:hidden">
     <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
@@ -151,15 +146,16 @@
         </div>
       </Link>
       {#if $userRooms.length + $otherRooms.length > 10}
-        <div class="mt-4">
+        <label class="input input-sm input-bordered flex flex-grow items-center gap-2">
+          <Icon icon="magnifer" size={4} />
           <input
+            bind:value={roomSearchQuery}
+            class="grow"
             type="text"
-            placeholder="Search rooms..."
-            class="input input-sm mb-2 w-full"
-            bind:value={roomSearchQuery} />
-        </div>
+            placeholder="Search rooms..." />
+        </label>
       {/if}
-      {#each ($userRooms.length + $otherRooms.length > 10 ? filteredRooms() : [...$userRooms, ...$otherRooms]).slice(0, 10) as room (room)}
+      {#each filteredRooms() as room (room)}
         {@const roomPath = makeRoomPath(url, room)}
         {@const channel = $channelsById.get(makeChannelId(url, room))}
         <Link href={roomPath} class="btn btn-neutral btn-sm relative w-full justify-start">
@@ -251,6 +247,11 @@
           {#if $relay?.profile}
             {@const {software, version, supported_nips, limitation} = $relay.profile}
             <div class="flex flex-wrap gap-1">
+              {#if owner}
+                <div class="badge badge-neutral">
+                  <span class="ellipsize">Administrator: <ProfileLink unstyled pubkey={owner} /></span>
+                </div>
+              {/if}
               {#if $relay?.profile?.contact}
                 <div class="badge badge-neutral">
                   <span class="ellipsize">Contact: {$relay.profile.contact}</span>
@@ -290,13 +291,13 @@
           {/if}
         </div>
       </div>
-      {#if pubkey}
+      {#if owner}
         <div class="card2 bg-alt">
           <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
             <Icon icon="user-rounded" />
             Latest Updates
           </h3>
-          <ProfileLatest {url} {pubkey}>
+          <ProfileLatest {url} pubkey={owner}>
             {#snippet fallback()}
               <p class="text-sm opacity-60">No recent posts from the relay admin</p>
             {/snippet}
