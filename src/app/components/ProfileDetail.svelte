@@ -7,6 +7,7 @@
   import ModalFooter from "@lib/components/ModalFooter.svelte"
   import Profile from "@app/components/Profile.svelte"
   import ProfileInfo from "@app/components/ProfileInfo.svelte"
+  import ProfileBadges from "@app/components/ProfileBadges.svelte"
   import ChatEnable from "@app/components/ChatEnable.svelte"
   import {canDecrypt, pubkeyLink} from "@app/state"
   import {pushModal} from "@app/modal"
@@ -26,9 +27,10 @@
   const openChat = () => ($canDecrypt ? goto(chatPath) : pushModal(ChatEnable, {next: chatPath}))
 </script>
 
-<div class="column gap-4">
+<div class="flex flex-col gap-4">
   <Profile showPubkey avatarSize={14} {pubkey} {url} />
   <ProfileInfo {pubkey} {url} />
+  <ProfileBadges {pubkey} {url} />
   <ModalFooter>
     <Button onclick={back} class="hidden md:btn md:btn-link">
       <Icon icon="alt-arrow-left" />
