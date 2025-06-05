@@ -15,6 +15,7 @@
   import ProfileList from "@app/components/ProfileList.svelte"
   import RoomCreate from "@app/components/RoomCreate.svelte"
   import MenuSpaceRoomItem from "@app/components/MenuSpaceRoomItem.svelte"
+  import InfoMissingRooms from "@app/components/InfoMissingRooms.svelte"
   import {
     userRoomsByUrl,
     hasMembershipUrl,
@@ -43,6 +44,8 @@
   const toggleMenu = () => {
     showMenu = !showMenu
   }
+
+  const showMissingRooms = () => pushModal(InfoMissingRooms)
 
   const showMembers = () =>
     pushModal(
@@ -161,6 +164,10 @@
           notification={$notifications.has(chatPath)}>
           <Icon icon="chat-round" /> Chat
         </SecondaryNavItem>
+        <Button class="link flex items-center gap-2 py-2 pl-4 text-sm" onclick={showMissingRooms}>
+          <Icon icon="info-circle" size={4} />
+          Where did my rooms go?
+        </Button>
       {/if}
     </div>
   </SecondaryNavSection>
