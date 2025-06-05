@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {groupBy, first, last, uniq, avg, overlappingPairs} from "@welshman/lib"
+  import {groupBy, ago, MONTH, first, last, uniq, avg, overlappingPairs} from "@welshman/lib"
   import {formatTimestamp} from "@welshman/lib"
   import {MESSAGE, getTagValue} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -17,8 +17,8 @@
   }
 
   const {url}: Props = $props()
-
-  const messages = deriveEventsForUrl(url, [{kinds: [MESSAGE]}])
+  const since = ago(MONTH)
+  const messages = deriveEventsForUrl(url, [{kinds: [MESSAGE], since}])
 
   const conversations = derived(messages, $messages => {
     const convs = []

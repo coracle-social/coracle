@@ -2,7 +2,7 @@
   import type {Snippet} from "svelte"
   import {onMount} from "svelte"
   import {page} from "$app/stores"
-  import {ago, WEEK} from "@welshman/lib"
+  import {ago, MONTH} from "@welshman/lib"
   import {GROUP_META, EVENT_TIME, THREAD, COMMENT, MESSAGE} from "@welshman/util"
   import Page from "@lib/components/Page.svelte"
   import SecondaryNav from "@lib/components/SecondaryNav.svelte"
@@ -53,7 +53,7 @@
     checkConnection()
 
     const relays = [url]
-    const since = ago(WEEK)
+    const since = ago(MONTH)
     const controller = new AbortController()
 
     // Load group meta, threads, calendar events, comments, and recent messages

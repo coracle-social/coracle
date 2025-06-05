@@ -31,7 +31,7 @@
 </script>
 
 <Link external href={url} class="my-2 block">
-  <div class="overflow-hidden rounded-box leading-[0]">
+  <div class="overflow-hidden rounded-box">
     {#if url.match(/\.(mov|webm|mp4)$/)}
       <video controls src={url} class="max-h-96 object-contain object-center">
         <track kind="captions" />

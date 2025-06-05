@@ -1,4 +1,5 @@
 import type {Page} from "@sveltejs/kit"
+import * as nip19 from "nostr-tools/nip19"
 import {goto} from "$app/navigation"
 import {nthEq, sleep} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
@@ -13,7 +14,7 @@ import {
   THREAD,
   EVENT_TIME,
 } from "@welshman/util"
-import {makeChatId, decodeRelay, encodeRelay, userRoomsByUrl, ROOM} from "@app/state"
+import {makeChatId, entityLink, decodeRelay, encodeRelay, userRoomsByUrl, ROOM} from "@app/state"
 
 export const makeSpacePath = (url: string, ...extra: (string | undefined)[]) => {
   let path = `/spaces/${encodeRelay(url)}`
@@ -72,10 +73,12 @@ export const goToEvent = async (event: TrustedEvent) => {
     return await scrollToEvent(event.id)
   }
 
-  const [url] = tracker.getRelays(event.id)
+  const urls = Array.from(tracker.getRelays(event.id))
   const room = getTagValue(ROOM, event.tags)
 
-  if (url) {
+  if (urls.length > 0) {
+    const url = urls[0]
+
     if (event.kind === THREAD) {
       return goto(makeThreadPath(url, event.id))
     }
@@ -105,4 +108,6 @@ export const goToEvent = async (event: TrustedEvent) => {
       }
     }
   }
+
+  window.open(entityLink(nip19.neventEncode({id: event.id, relays: urls})))
 }

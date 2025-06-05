@@ -10,6 +10,7 @@
   import Button from "@lib/components/Button.svelte"
   import ProfileSpaces from "@app/components/ProfileSpaces.svelte"
   import {membershipsByPubkey} from "@app/state"
+  import {goToEvent} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   type Props = {
@@ -22,6 +23,8 @@
   const events = deriveEvents(repository, {filters})
   const membership = $derived($membershipsByPubkey.get(pubkey))
   const relays = $derived(getRelayTags(getListTags(membership)))
+
+  const viewEvent = () => goToEvent($events[0]!)
 
   const openSpaces = () => pushModal(ProfileSpaces, {pubkey, url})
 
@@ -42,9 +45,9 @@
 
 <div class="flex flex-wrap gap-2">
   {#if $events.length > 0}
-    <div class="badge badge-neutral">
+    <Button onclick={viewEvent} class="badge badge-neutral">
       Last active {formatTimestampRelative($events[0].created_at)}
-    </div>
+    </Button>
   {/if}
   {#if relays.length > 0}
     <Button onclick={openSpaces} class="badge badge-neutral">
