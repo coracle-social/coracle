@@ -1,6 +1,5 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import type {TrustedEvent} from "@welshman/util"
   import {displayRelayUrl} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
   import {AuthStatus, SocketStatus} from "@welshman/net"
@@ -12,7 +11,7 @@
   import PageContent from "@lib/components/PageContent.svelte"
   import StatusIndicator from "@lib/components/StatusIndicator.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
-  import ProfileFeed from "@app/components/ProfileFeed.svelte"
+  import ProfileLatest from "@app/components/ProfileLatest.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RelayName from "@app/components/RelayName.svelte"
@@ -44,7 +43,6 @@
 
   const addRoom = () => pushModal(RoomCreate, {url})
 
-  let relayAdminEvents: TrustedEvent[] = $state([])
   let roomSearchQuery = $state("")
 
   const pubkey = $derived($relay?.profile?.pubkey)
@@ -189,21 +187,6 @@
   </div>
   <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
     <div class="flex flex-col gap-2">
-      {#if pubkey}
-        <div class="card2 bg-alt">
-          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <Icon icon="user-rounded" />
-            Recent Posts from Relay Admin
-          </h3>
-          <div class="flex flex-col gap-3">
-            {#if relayAdminEvents.length > 0}
-              <ProfileFeed hideLoading {url} {pubkey} bind:events={relayAdminEvents} />
-            {:else}
-              <p class="text-sm opacity-60">No recent posts from the relay admin</p>
-            {/if}
-          </div>
-        </div>
-      {/if}
       <div class="card2 bg-alt">
         <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
           <Icon icon="chat-round" />
@@ -213,7 +196,7 @@
           {#if $userRooms.length > 0}
             {#each $userRooms.slice(0, 3) as room (room)}
               {@const channel = $channelsById.get(makeChannelId(url, room))}
-              <div class="flex items-center gap-3 rounded bg-base-100 p-2">
+              <div class="flex items-center gap-3 rounded bg-base-100">
                 <div class="flex items-center gap-2">
                   {#if channel?.closed || channel?.private}
                     <Icon icon="lock" size={4} />
@@ -233,7 +216,7 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-2">
       <div class="card2 bg-alt">
         <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
           <Icon icon="server" />
@@ -307,6 +290,19 @@
           {/if}
         </div>
       </div>
+      {#if pubkey}
+        <div class="card2 bg-alt">
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+            <Icon icon="user-rounded" />
+            Latest Updates
+          </h3>
+          <ProfileLatest {url} {pubkey}>
+            {#snippet fallback()}
+              <p class="text-sm opacity-60">No recent posts from the relay admin</p>
+            {/snippet}
+          </ProfileLatest>
+        </div>
+      {/if}
     </div>
   </div>
 </PageContent>
