@@ -1,67 +1,37 @@
 <script lang="ts">
   import {page} from "$app/stores"
-  import {displayRelayUrl, MESSAGE, THREAD} from "@welshman/util"
-  import {deriveRelay, pubkey} from "@welshman/app"
-  import {AuthStatus, SocketStatus} from "@welshman/net"
-  import {fade} from "@lib/transition"
+  import {displayRelayUrl} from "@welshman/util"
+  import {deriveRelay} from "@welshman/app"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import PageContent from "@lib/components/PageContent.svelte"
-  import StatusIndicator from "@lib/components/StatusIndicator.svelte"
+  import SocketStatusIndicator from "@lib/components/SocketStatusIndicator.svelte"
   import ProfileLink from "@app/components/ProfileLink.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileLatest from "@app/components/ProfileLatest.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RelayName from "@app/components/RelayName.svelte"
-  import RoomCreate from "@app/components/RoomCreate.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
+  import SpaceQuickLinks from "@app/components/SpaceQuickLinks.svelte"
   import {
-    hasNip29,
     decodeRelay,
     makeChannelId,
     channelsById,
     deriveUserRooms,
-    deriveOtherRooms,
     userRoomsByUrl,
-    deriveSocket,
-    deriveEventsForUrl,
   } from "@app/state"
-  import {makeChatPath, makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
-  import {notifications} from "@app/notifications"
+  import {makeChatPath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-  const socket = deriveSocket(url)
   const userRooms = deriveUserRooms(url)
-  const otherRooms = deriveOtherRooms(url)
-  const threadsPath = makeThreadPath(url)
-  const calendarPath = makeCalendarPath(url)
-  const mentions = deriveEventsForUrl(url, [{'#p': [$pubkey!], kinds: [MESSAGE, THREAD]}])
-
   const joinSpace = () => pushModal(SpaceJoin, {url})
 
-  const addRoom = () => pushModal(RoomCreate, {url})
-
-  let roomSearchQuery = $state("")
-
   const owner = $derived($relay?.profile?.pubkey)
-
-  const filteredRooms = $derived(() => {
-    if (!roomSearchQuery) return [...$userRooms, ...$otherRooms]
-
-    const query = roomSearchQuery.toLowerCase()
-    const allRooms = [...$userRooms, ...$otherRooms]
-
-    return allRooms.filter(room => {
-      const channel = $channelsById.get(makeChannelId(url, room))
-      const roomName = channel?.name || room
-      return roomName.toLowerCase().includes(query)
-    })
-  })
 </script>
 
 <PageBar>
@@ -106,7 +76,7 @@
           </div>
         </div>
       </div>
-      <div class="min-w-0 flex flex-col gap-1">
+      <div class="flex min-w-0 flex-col gap-1">
         <h1 class="ellipsize whitespace-nowrap text-2xl font-bold">
           <RelayName {url} />
         </h1>
@@ -115,72 +85,7 @@
     </div>
     <RelayDescription {url} />
   </div>
-  <div class="card2 bg-alt md:hidden">
-    <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-      <Icon icon="compass-big" />
-      Quick Links
-    </h3>
-    <div class="flex flex-col gap-2">
-      <Link href={threadsPath} class="btn btn-primary w-full justify-start">
-        <div class="relative flex items-center gap-2">
-          <Icon icon="notes-minimalistic" />
-          Threads
-          {#if $notifications.has(threadsPath)}
-            <div
-              class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary-content"
-              transition:fade>
-            </div>
-          {/if}
-        </div>
-      </Link>
-      <Link href={calendarPath} class="btn btn-secondary w-full justify-start">
-        <div class="relative flex items-center gap-2">
-          <Icon icon="calendar-minimalistic" />
-          Calendar
-          {#if $notifications.has(calendarPath)}
-            <div
-              class="absolute -right-3 -top-1 h-2 w-2 rounded-full bg-primary-content"
-              transition:fade>
-            </div>
-          {/if}
-        </div>
-      </Link>
-      {#if $userRooms.length + $otherRooms.length > 10}
-        <label class="input input-sm input-bordered flex flex-grow items-center gap-2">
-          <Icon icon="magnifer" size={4} />
-          <input
-            bind:value={roomSearchQuery}
-            class="grow"
-            type="text"
-            placeholder="Search rooms..." />
-        </label>
-      {/if}
-      {#each filteredRooms() as room (room)}
-        {@const roomPath = makeRoomPath(url, room)}
-        {@const channel = $channelsById.get(makeChannelId(url, room))}
-        <Link href={roomPath} class="btn btn-neutral btn-sm relative w-full justify-start">
-          <div class="flex min-w-0 items-center gap-2 overflow-hidden text-nowrap">
-            {#if channel?.closed || channel?.private}
-              <Icon icon="lock" size={4} />
-            {:else}
-              <Icon icon="hashtag" />
-            {/if}
-            <ChannelName {url} {room} />
-          </div>
-          {#if $notifications.has(roomPath)}
-            <div class="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" transition:fade>
-            </div>
-          {/if}
-        </Link>
-      {/each}
-      {#if hasNip29($relay)}
-        <Button onclick={addRoom} class="btn btn-neutral btn-sm w-full justify-start">
-          <Icon icon="add-circle" />
-          Create Room
-        </Button>
-      {/if}
-    </div>
-  </div>
+  <SpaceQuickLinks {url} />
   <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
     <div class="flex flex-col gap-2">
       <div class="card2 bg-alt">
@@ -219,37 +124,14 @@
           Relay Status
         </h3>
         <div class="flex flex-col gap-3">
-          {#if $socket.status === SocketStatus.Open}
-            {#if $socket.auth.status === AuthStatus.None}
-              <StatusIndicator class="bg-green-500">Connected</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.Requested}
-              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.PendingSignature}
-              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.DeniedSignature}
-              <StatusIndicator class="bg-red-500">Failed to Authenticate</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.PendingResponse}
-              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.Forbidden}
-              <StatusIndicator class="bg-red-500">Access Denied</StatusIndicator>
-            {:else if $socket.auth.status === AuthStatus.Ok}
-              <StatusIndicator class="bg-green-500">Connected</StatusIndicator>
-            {/if}
-          {:else if $socket.status === SocketStatus.Opening}
-            <StatusIndicator class="bg-yellow-500">Connecting</StatusIndicator>
-          {:else if $socket.status === SocketStatus.Closing}
-            <StatusIndicator class="bg-gray-500">Not Connected</StatusIndicator>
-          {:else if $socket.status === SocketStatus.Closed}
-            <StatusIndicator class="bg-gray-500">Not Connected</StatusIndicator>
-          {:else if $socket.status === SocketStatus.Error}
-            <StatusIndicator class="bg-red-500">Failed to Connect</StatusIndicator>
-          {/if}
+          <SocketStatusIndicator {url} />
           {#if $relay?.profile}
             {@const {software, version, supported_nips, limitation} = $relay.profile}
             <div class="flex flex-wrap gap-1">
               {#if owner}
                 <div class="badge badge-neutral">
-                  <span class="ellipsize">Administrator: <ProfileLink unstyled pubkey={owner} /></span>
+                  <span class="ellipsize"
+                    >Administrator: <ProfileLink unstyled pubkey={owner} /></span>
                 </div>
               {/if}
               {#if $relay?.profile?.contact}
