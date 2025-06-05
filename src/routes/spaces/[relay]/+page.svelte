@@ -7,8 +7,6 @@
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import PageContent from "@lib/components/PageContent.svelte"
-  import SocketStatusIndicator from "@lib/components/SocketStatusIndicator.svelte"
-  import ProfileLink from "@app/components/ProfileLink.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileLatest from "@app/components/ProfileLatest.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
@@ -16,6 +14,7 @@
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceQuickLinks from "@app/components/SpaceQuickLinks.svelte"
   import SpaceRecentActivity from "@app/components/SpaceRecentActivity.svelte"
+  import SpaceRelayStatus from "@app/components/SpaceRelayStatus.svelte"
   import {decodeRelay, userRoomsByUrl} from "@app/state"
   import {makeChatPath} from "@app/routes"
   import {pushModal} from "@app/modal"
@@ -84,61 +83,7 @@
       <SpaceRecentActivity {url} />
     </div>
     <div class="flex flex-col gap-2">
-      <div class="card2 bg-alt">
-        <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-          <Icon icon="server" />
-          Relay Status
-        </h3>
-        <div class="flex flex-col gap-3">
-          <SocketStatusIndicator {url} />
-          {#if $relay?.profile}
-            {@const {software, version, supported_nips, limitation} = $relay.profile}
-            <div class="flex flex-wrap gap-1">
-              {#if owner}
-                <div class="badge badge-neutral">
-                  <span class="ellipsize"
-                    >Administrator: <ProfileLink unstyled pubkey={owner} /></span>
-                </div>
-              {/if}
-              {#if $relay?.profile?.contact}
-                <div class="badge badge-neutral">
-                  <span class="ellipsize">Contact: {$relay.profile.contact}</span>
-                </div>
-              {/if}
-              {#if software}
-                <div class="badge badge-neutral">
-                  <span class="ellipsize">Software: {software}</span>
-                </div>
-              {/if}
-              {#if version}
-                <div class="badge badge-neutral">
-                  <span class="ellipsize">Version: {version}</span>
-                </div>
-              {/if}
-              {#if Array.isArray(supported_nips)}
-                <p class="badge badge-neutral">
-                  <span class="ellipsize">Supported NIPs: {supported_nips.join(", ")}</span>
-                </p>
-              {/if}
-              {#if limitation?.auth_required}
-                <p class="badge badge-warning">
-                  <span class="ellipsize">Auth Required</span>
-                </p>
-              {/if}
-              {#if limitation?.payment_required}
-                <p class="badge badge-warning">
-                  <span class="ellipsize">Payment Required</span>
-                </p>
-              {/if}
-              {#if limitation?.min_pow_difficulty}
-                <p class="badge badge-warning">
-                  <span class="ellipsize">Min PoW: {limitation?.min_pow_difficulty}</span>
-                </p>
-              {/if}
-            </div>
-          {/if}
-        </div>
-      </div>
+      <SpaceRelayStatus {url} />
       {#if owner}
         <div class="card2 bg-alt">
           <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
