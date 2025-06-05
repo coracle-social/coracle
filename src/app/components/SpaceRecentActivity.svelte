@@ -1,70 +1,70 @@
 <script lang="ts">
+  import {derived} from "svelte/store"
+  import {groupBy, first, last, uniq, avg, overlappingPairs} from "@welshman/lib"
+  import {formatTimestamp} from "@welshman/lib"
+  import {MESSAGE, getTagValue} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
+  import Content from "@app/components/Content.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
-  import {formatTimestamp} from "@welshman/lib"
+  import {deriveEventsForUrl} from "@app/state"
 
-  interface Props {
+  type Props = {
     url: string
   }
 
   const {url}: Props = $props()
 
-  // Mock conversation data similar to Slack's threads view
-  const mockConversations = [
-    {
-      id: "conv1",
-      starter: {
-        pubkey: "npub1xyz123",
-        content:
-          "What's everyone's thoughts on the new relay implementation? I'm seeing some interesting performance improvements...",
-        timestamp: Date.now() - 3600000, // 1 hour ago
-      },
-      room: "general",
-      replyCount: 12,
-      lastActivity: Date.now() - 900000, // 15 minutes ago
-      participants: ["npub1abc", "npub1def", "npub1ghi", "npub1jkl"],
-      latestReply: {
-        pubkey: "npub1abc",
-        content: "The latency improvements are definitely noticeable in my tests",
-      },
-    },
-    {
-      id: "conv2",
-      starter: {
-        pubkey: "npub2abc456",
-        content:
-          "Has anyone tried the new calendar integration? Looking for feedback before we roll it out to more spaces",
-        timestamp: Date.now() - 7200000, // 2 hours ago
-      },
-      room: "development",
-      replyCount: 8,
-      lastActivity: Date.now() - 1800000, // 30 minutes ago
-      participants: ["npub2def", "npub2ghi", "npub2jkl"],
-      latestReply: {
-        pubkey: "npub2def",
-        content: "Works great on mobile, had one small sync issue but figured it out",
-      },
-    },
-    {
-      id: "conv3",
-      starter: {
-        pubkey: "npub3def789",
-        content:
-          "Quick question about zap splitting - should we implement this at the relay level or client level?",
-        timestamp: Date.now() - 10800000, // 3 hours ago
-      },
-      room: "random",
-      replyCount: 5,
-      lastActivity: Date.now() - 3600000, // 1 hour ago
-      participants: ["npub3abc", "npub3ghi"],
-      latestReply: {
-        pubkey: "npub3abc",
-        content: "I think client level makes more sense for privacy",
-      },
-    },
-  ]
+  const messages = deriveEventsForUrl(url, [{kinds: [MESSAGE]}])
+
+  const conversations = derived(messages, $messages => {
+    const convs = []
+
+    for (const [room, messages] of groupBy(e => getTagValue("h", e.tags), $messages).entries()) {
+      const avgTime = avg(overlappingPairs(messages).map(([a, b]) => a.created_at - b.created_at))
+      const groups: TrustedEvent[][] = []
+      const group: TrustedEvent[] = []
+
+      // Group conversations by time between messages
+      let prevCreatedAt = messages[0].created_at
+      for (const message of messages) {
+        if (prevCreatedAt - message.created_at < avgTime) {
+          group.push(message)
+        } else {
+          groups.push(group.splice(0))
+        }
+
+        prevCreatedAt = message.created_at
+      }
+
+      if (group.length > 0) {
+        groups.push(group.splice(0))
+      }
+
+      // Convert each group into a conversation
+      for (const events of groups) {
+        if (events.length < 2) {
+          continue
+        }
+
+        const latest = first(events)!
+        const earliest = last(events)!
+        const participants = uniq(events.map(msg => msg.pubkey))
+
+        convs.push({room, events, latest, earliest, participants})
+      }
+    }
+
+    return convs
+  })
+
+  const viewMore = () => {
+    limit += 3
+  }
+
+  let limit = $state(3)
 </script>
 
 <div class="card2 bg-alt">
@@ -74,53 +74,58 @@
       Recent Conversations
     </h3>
     <div class="flex flex-col gap-4">
-      {#each mockConversations as conversation (conversation.id)}
-        <div class="card2 bg-alt">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-start gap-3">
-              <ProfileCircle pubkey={conversation.starter.pubkey} size={10} />
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 text-sm opacity-70">
-                  <span class="font-medium text-blue-400">#{conversation.room}</span>
-                  <span class="opacity-50">•</span>
-                  <span>{formatTimestamp(conversation.starter.timestamp)}</span>
-                </div>
-                <div class="flex flex-col gap-2">
-                  <p class="text-base leading-relaxed">{conversation.starter.content}</p>
+      {#if $conversations.length === 0}
+        <div class="py-8 text-center opacity-70">
+          <p>No recent conversations</p>
+        </div>
+      {:else}
+        {#each $conversations.slice(0, limit) as { room, events, latest, earliest, participants } (latest.id)}
+          <div class="card2 bg-alt">
+            <div class="flex flex-col gap-3">
+              <div class="flex items-start gap-3">
+                <ProfileCircle pubkey={earliest.pubkey} size={10} />
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 text-sm opacity-70">
+                    <span class="font-medium text-blue-400">#{room}</span>
+                    <span class="opacity-50">•</span>
+                    <span>{formatTimestamp(earliest.created_at)}</span>
+                  </div>
+                  <Content minimalQuote minLength={100} maxLength={200} event={earliest} />
                 </div>
               </div>
-            </div>
-            <div class="ml-13 flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <span class="flex items-center gap-2 text-sm opacity-70">
-                  <Icon icon="alt-arrow-left" size={4} />
-                  {conversation.replyCount} replies
+              <div class="ml-13 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span class="flex items-center gap-2 text-sm opacity-70">
+                    <Icon icon="alt-arrow-left" size={4} />
+                    {events.length} messages
+                  </span>
+                  <div class="flex -space-x-2">
+                    <ProfileCircles pubkeys={participants} size={6} />
+                  </div>
+                </div>
+                <span class="text-sm opacity-50">
+                  {formatTimestamp(latest.created_at)}
                 </span>
-                <div class="flex -space-x-2">
-                  <ProfileCircles pubkeys={conversation.participants} size={6} />
-                </div>
               </div>
-              <span class="text-sm opacity-50">
-                {formatTimestamp(conversation.lastActivity)}
-              </span>
-            </div>
-            {#if conversation.latestReply}
               <div class="card2 bg-alt">
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center gap-2 text-sm opacity-70">
-                    <ProfileCircle pubkey={conversation.latestReply.pubkey} size={5} />
+                    <ProfileCircle pubkey={latest.pubkey} size={5} />
                     <span class="font-medium">Latest reply:</span>
                   </div>
-                  <p class="text-sm leading-relaxed opacity-90">
-                    {conversation.latestReply.content}
-                  </p>
+                  <Content minimalQuote minLength={100} maxLength={200} event={latest} />
                 </div>
               </div>
-            {/if}
+            </div>
           </div>
-        </div>
-      {/each}
-      <Button class="btn btn-primary btn-sm">View all conversations →</Button>
+        {/each}
+        {#if $conversations.length > limit}
+          <Button class="btn btn-primary" onclick={viewMore}>
+            View more conversations
+            <Icon icon="alt-arrow-down" />
+          </Button>
+        {/if}
+      {/if}
     </div>
   </div>
 </div>
