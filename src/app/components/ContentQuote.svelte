@@ -1,26 +1,14 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
-  import {goto} from "$app/navigation"
-  import {nthEq} from "@welshman/lib"
   import {Router} from "@welshman/router"
-  import {tracker, repository} from "@welshman/app"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    Address,
-    getTagValue,
-    DIRECT_MESSAGE,
-    DIRECT_MESSAGE_FILE,
-    MESSAGE,
-    THREAD,
-    EVENT_TIME,
-  } from "@welshman/util"
-  import {scrollToEvent} from "@lib/html"
+  import {Address, MESSAGE} from "@welshman/util"
   import Button from "@lib/components/Button.svelte"
   import Spinner from "@lib/components/Spinner.svelte"
   import NoteCard from "@app/components/NoteCard.svelte"
   import NoteContent from "@app/components/NoteContent.svelte"
-  import {deriveEvent, entityLink, ROOM} from "@app/state"
-  import {makeThreadPath, makeSpacePath, makeCalendarPath, makeRoomPath} from "@app/routes"
+  import {deriveEvent, entityLink} from "@app/state"
+  import {goToEvent} from "@app/routes"
 
   type Props = {
     value: any
@@ -46,60 +34,12 @@
     ? nip19.neventEncode({id, relays: mergedRelays})
     : new Address(kind, pubkey, identifier, mergedRelays).toNaddr()
 
-  const openMessage = (url: string, room: string | undefined, id: string) => {
-    const event = repository.getEvent(id)
-    const path = room ? makeRoomPath(url, room) : makeSpacePath(url, "chat")
-
-    if (event) {
-      goto(path)
-      scrollToEvent(id)
-    }
-
-    return Boolean(event)
-  }
-
   const onclick = () => {
     if ($quote) {
-      if ($quote.kind === DIRECT_MESSAGE || $quote.kind === DIRECT_MESSAGE_FILE) {
-        return scrollToEvent($quote.id)
-      }
-
-      const [url] = tracker.getRelays($quote.id)
-      const room = getTagValue(ROOM, $quote.tags)
-
-      if (url) {
-        if ($quote.kind === THREAD) {
-          return goto(makeThreadPath(url, $quote.id))
-        }
-
-        if ($quote.kind === EVENT_TIME) {
-          return goto(makeCalendarPath(url, $quote.id))
-        }
-
-        if ($quote.kind === MESSAGE) {
-          return scrollToEvent($quote.id) || openMessage(url, room, $quote.id)
-        }
-
-        const kind = $quote.tags.find(nthEq(0, "K"))?.[1]
-        const id = $quote.tags.find(nthEq(0, "E"))?.[1]
-
-        if (id && kind) {
-          if (parseInt(kind) === THREAD) {
-            return goto(makeThreadPath(url, id))
-          }
-
-          if (parseInt(kind) === EVENT_TIME) {
-            return goto(makeCalendarPath(url, id))
-          }
-
-          if (parseInt(kind) === MESSAGE) {
-            return scrollToEvent(id) || openMessage(url, room, id)
-          }
-        }
-      }
+      goToEvent($quote)
+    } else {
+      window.open(entityLink(entity))
     }
-
-    window.open(entityLink(entity))
   }
 </script>
 
