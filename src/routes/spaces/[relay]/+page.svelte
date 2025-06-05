@@ -3,12 +3,14 @@
   import type {TrustedEvent} from "@welshman/util"
   import {displayRelayUrl} from "@welshman/util"
   import {deriveRelay} from "@welshman/app"
+  import {AuthStatus, SocketStatus} from "@welshman/net"
   import {fade} from "@lib/transition"
   import Icon from "@lib/components/Icon.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import PageBar from "@lib/components/PageBar.svelte"
   import PageContent from "@lib/components/PageContent.svelte"
+  import StatusIndicator from "@lib/components/StatusIndicator.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileFeed from "@app/components/ProfileFeed.svelte"
   import ChannelName from "@app/components/ChannelName.svelte"
@@ -24,6 +26,7 @@
     deriveUserRooms,
     deriveOtherRooms,
     userRoomsByUrl,
+    deriveSocket,
   } from "@app/state"
   import {makeChatPath, makeThreadPath, makeCalendarPath, makeRoomPath} from "@app/routes"
   import {notifications} from "@app/notifications"
@@ -31,6 +34,7 @@
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
+  const socket = deriveSocket(url)
   const userRooms = deriveUserRooms(url)
   const otherRooms = deriveOtherRooms(url)
   const threadsPath = makeThreadPath(url)
@@ -236,10 +240,31 @@
           Relay Status
         </h3>
         <div class="flex flex-col gap-3">
-          <div class="flex items-center gap-2">
-            <div class="h-2 w-2 rounded-full bg-green-500"></div>
-            <span class="text-sm">Connected</span>
-          </div>
+          {#if $socket.status === SocketStatus.Open}
+            {#if $socket.auth.status === AuthStatus.None}
+              <StatusIndicator class="bg-green-500">Connected</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.Requested}
+              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.PendingSignature}
+              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.DeniedSignature}
+              <StatusIndicator class="bg-red-500">Failed to Authenticate</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.PendingResponse}
+              <StatusIndicator class="bg-yellow-500">Authenticating</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.Forbidden}
+              <StatusIndicator class="bg-red-500">Access Denied</StatusIndicator>
+            {:else if $socket.auth.status === AuthStatus.Ok}
+              <StatusIndicator class="bg-green-500">Connected</StatusIndicator>
+            {/if}
+          {:else if $socket.status === SocketStatus.Opening}
+            <StatusIndicator class="bg-yellow-500">Connecting</StatusIndicator>
+          {:else if $socket.status === SocketStatus.Closing}
+            <StatusIndicator class="bg-gray-500">Not Connected</StatusIndicator>
+          {:else if $socket.status === SocketStatus.Closed}
+            <StatusIndicator class="bg-gray-500">Not Connected</StatusIndicator>
+          {:else if $socket.status === SocketStatus.Error}
+            <StatusIndicator class="bg-red-500">Failed to Connect</StatusIndicator>
+          {/if}
           {#if $relay?.profile}
             {@const {software, version, supported_nips, limitation} = $relay.profile}
             <div class="flex flex-wrap gap-1">
