@@ -76,6 +76,22 @@
       </div>
     </div>
     <RelayDescription {url} />
+    {#if $relay?.profile?.terms_of_service || $relay?.profile?.privacy_policy}
+      <div class="flex gap-3">
+        {#if $relay.profile.terms_of_service}
+          <Link href={$relay.profile.terms_of_service} class="badge badge-neutral flex gap-2">
+            <Icon icon="bill-list" size={4} />
+            Terms of Service
+          </Link>
+        {/if}
+        {#if $relay.profile.privacy_policy}
+          <Link href={$relay?.profile?.privacy_policy} class="badge badge-neutral flex gap-2">
+            <Icon icon="shield-user" size={4} />
+            Privacy Policy
+          </Link>
+        {/if}
+      </div>
+    {/if}
   </div>
   <SpaceQuickLinks {url} />
   <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">

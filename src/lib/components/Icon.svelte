@@ -10,6 +10,7 @@
   import AddSquare from "@assets/icons/Add Square.svg?dataurl"
   import ArrowsALogout2 from "@assets/icons/Arrows ALogout 2.svg?dataurl"
   import Bookmark from "@assets/icons/Bookmark.svg?dataurl"
+  import BillList from "@assets/icons/Bill List.svg?dataurl"
   import Code2 from "@assets/icons/Code 2.svg?dataurl"
   import Document from "@assets/icons/Document.svg?dataurl"
   import Earth from "@assets/icons/Earth.svg?dataurl"
@@ -73,6 +74,7 @@
   import Server from "@assets/icons/Server.svg?dataurl"
   import Settings from "@assets/icons/Settings.svg?dataurl"
   import SettingsMinimalistic from "@assets/icons/Settings Minimalistic.svg?dataurl"
+  import ShieldUser from "@assets/icons/Shield User.svg?dataurl"
   import Station from "@assets/icons/Station.svg?dataurl"
   import TagHorizontal from "@assets/icons/Tag Horizontal.svg?dataurl"
   import Ticket from "@assets/icons/Ticket.svg?dataurl"
@@ -107,6 +109,7 @@
     "add-square": AddSquare,
     "arrows-a-logout-2": ArrowsALogout2,
     bookmark: Bookmark,
+    "bill-list": BillList,
     "code-2": Code2,
     document: Document,
     earth: Earth,
@@ -173,6 +176,7 @@
     server: Server,
     settings: Settings,
     "settings-minimalistic": SettingsMinimalistic,
+    "shield-user": ShieldUser,
     station: Station,
     "tag-horizontal": TagHorizontal,
     ticket: Ticket,
