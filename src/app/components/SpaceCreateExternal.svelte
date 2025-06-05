@@ -28,12 +28,18 @@
     {/snippet}
   </ModalHeader>
   <p>
-    <Link class="text-primary" external href="https://relay.tools">relay.tools</Link> is a third-party
-    service that allows anyone to run their own relay for use with {PLATFORM_NAME}, or any other
+    <Link class="link" external href="https://relay.tools">relay.tools</Link> is a third-party service
+    that allows anyone to run their own relay for use with {PLATFORM_NAME}, or any other
     nostr-compatible app.
   </p>
   <p>
     Once you've created a relay of your own, come back here to link {PLATFORM_NAME} with your new relay.
+  </p>
+  <p>
+    Alternatively, you can
+    <Link external class="link" href="https://github.com/coracle-social/frith"
+      >run your own community relay</Link
+    >.
   </p>
   <ModalFooter>
     <Button class="btn btn-link" onclick={back}>
