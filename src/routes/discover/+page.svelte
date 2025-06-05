@@ -18,7 +18,7 @@
   import SpaceCheck from "@app/components/SpaceCheck.svelte"
   import ProfileCircles from "@app/components/ProfileCircles.svelte"
   import {
-    membershipByPubkey,
+    membershipsByPubkey,
     getMembershipUrls,
     loadMembership,
     userRoomsByUrl,
@@ -46,7 +46,7 @@
     const scores = new Map<string, Set<string>>()
 
     for (const pubkey of getDefaultPubkeys()) {
-      for (const url of getMembershipUrls($membershipByPubkey.get(pubkey))) {
+      for (const url of getMembershipUrls($membershipsByPubkey.get(pubkey))) {
         addToMapKey(scores, url, pubkey)
       }
     }

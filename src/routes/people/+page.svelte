@@ -43,7 +43,7 @@
       </label>
     {/snippet}
     {#snippet content()}
-      <div class="col-2" bind:this={element}>
+      <div class="col-2 h-full" bind:this={element}>
         {#each pubkeys.slice(0, limit) as pubkey (pubkey)}
           <PeopleItem {pubkey} />
         {/each}

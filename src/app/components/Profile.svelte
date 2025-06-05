@@ -1,11 +1,8 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
   import {removeNil} from "@welshman/lib"
-  import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
+  import {displayPubkey} from "@welshman/util"
   import {
-    session,
-    userFollows,
-    deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
     deriveProfile,
@@ -14,7 +11,7 @@
   import Icon from "@lib/components/Icon.svelte"
   import Button from "@lib/components/Button.svelte"
   import Avatar from "@lib/components/Avatar.svelte"
-  import WotScore from "@lib/components/WotScore.svelte"
+  import WotScore from "@app/components/WotScore.svelte"
   import ProfileDetail from "@app/components/ProfileDetail.svelte"
   import {pushModal} from "@app/modal"
   import {clip} from "@app/toast"
@@ -32,15 +29,10 @@
   const profile = deriveProfile(pubkey, relays)
   const profileDisplay = deriveProfileDisplay(pubkey, relays)
   const handle = deriveHandleForPubkey(pubkey)
-  const score = deriveUserWotScore(pubkey)
 
   const openProfile = () => pushModal(ProfileDetail, {pubkey, url})
 
   const copyPubkey = () => clip(nip19.npubEncode(pubkey))
-
-  const following = $derived(
-    pubkey === $session!.pubkey || getPubkeyTagValues(getListTags($userFollows)).includes(pubkey),
-  )
 </script>
 
 <div class="flex max-w-full items-start gap-3">
@@ -52,7 +44,7 @@
       <Button onclick={openProfile} class="text-bold overflow-hidden text-ellipsis">
         {$profileDisplay}
       </Button>
-      <WotScore score={$score} active={following} />
+      <WotScore {pubkey} />
     </div>
     {#if $handle}
       <div class="overflow-hidden text-ellipsis text-sm opacity-75">

@@ -15,19 +15,21 @@
 
 <script lang="ts">
   import {clamp} from "@welshman/lib"
+  import {pubkey, getFollows, deriveUserWotScore} from "@welshman/app"
 
   interface Props {
-    score: any
-    max?: number
-    active?: boolean
+    pubkey: string
   }
 
-  const {score, max = 100, active = false}: Props = $props()
+  const {pubkey: target}: Props = $props()
 
+  const max = 100
   const radius = 6
   const center = radius + 1
 
-  const normalizedScore = $derived(clamp([0, max], score) / max)
+  const score = deriveUserWotScore(target)
+  const active = $derived(getFollows($pubkey!).includes(target))
+  const normalizedScore = $derived(clamp([0, max], $score) / max)
   const dashOffset = $derived(100 - 44 * normalizedScore)
   const style = $derived(`transform: rotate(${135 - normalizedScore * 180}deg)`)
   const stroke = $derived(active ? "var(--primary)" : "var(--base-content)")

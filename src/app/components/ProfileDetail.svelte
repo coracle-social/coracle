@@ -1,6 +1,7 @@
 <script lang="ts">
   import {goto} from "$app/navigation"
   import Icon from "@lib/components/Icon.svelte"
+  import Avatar from "@lib/components/Avatar.svelte"
   import Link from "@lib/components/Link.svelte"
   import Button from "@lib/components/Button.svelte"
   import ModalFooter from "@lib/components/ModalFooter.svelte"
@@ -35,8 +36,8 @@
     </Button>
     <div class="flex gap-2">
       <Link external href={pubkeyLink(pubkey)} class="btn btn-neutral">
-        <Icon icon="user-circle" />
-        See Complete Profile
+        <Avatar src="/coracle.png" />
+        Open in Coracle
       </Link>
       <Button onclick={openChat} class="btn btn-primary">
         <Icon icon="letter" />

@@ -14,7 +14,7 @@
       {@render props.input?.()}
     </div>
   </div>
-  <div class="scroll-container content-sizing overflow-auto pt-2">
+  <div class="scroll-container content-sizing h-full overflow-auto pt-2">
     {@render props.content?.()}
   </div>
 </div>

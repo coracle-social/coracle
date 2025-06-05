@@ -14,5 +14,5 @@
 </script>
 
 {#if $profile}
-  <Content event={{content: $profile.about, tags: []}} hideMediaAtDepth={0} />
+  <Content event={{content: $profile.about || "", tags: []}} hideMediaAtDepth={0} />
 {/if}

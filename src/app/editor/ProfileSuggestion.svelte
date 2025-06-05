@@ -1,14 +1,8 @@
 <script lang="ts">
   import {removeNil} from "@welshman/lib"
-  import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
-  import {
-    userFollows,
-    deriveUserWotScore,
-    deriveHandleForPubkey,
-    displayHandle,
-    deriveProfileDisplay,
-  } from "@welshman/app"
-  import WotScore from "@lib/components/WotScore.svelte"
+  import {displayPubkey} from "@welshman/util"
+  import {deriveHandleForPubkey, displayHandle, deriveProfileDisplay} from "@welshman/app"
+  import WotScore from "@app/components/WotScore.svelte"
   import ProfileCircle from "@app/components/ProfileCircle.svelte"
 
   type Props = {
@@ -21,9 +15,6 @@
   const pubkey = value
   const profileDisplay = deriveProfileDisplay(pubkey, removeNil([url]))
   const handle = deriveHandleForPubkey(pubkey)
-  const score = deriveUserWotScore(pubkey)
-
-  const following = $derived(getPubkeyTagValues(getListTags($userFollows)).includes(pubkey))
 </script>
 
 <div class="flex max-w-full gap-3">
@@ -35,7 +26,7 @@
       <div class="text-bold overflow-hidden text-ellipsis text-base">
         {$profileDisplay}
       </div>
-      <WotScore score={$score} active={following} />
+      <WotScore {pubkey} />
     </div>
     <div class="overflow-hidden text-ellipsis text-sm opacity-75">
       {$handle ? displayHandle($handle) : displayPubkey(pubkey)}
