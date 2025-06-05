@@ -11,24 +11,17 @@
   import ProfileLink from "@app/components/ProfileLink.svelte"
   import MenuSpaceButton from "@app/components/MenuSpaceButton.svelte"
   import ProfileLatest from "@app/components/ProfileLatest.svelte"
-  import ChannelName from "@app/components/ChannelName.svelte"
   import SpaceJoin from "@app/components/SpaceJoin.svelte"
   import RelayName from "@app/components/RelayName.svelte"
   import RelayDescription from "@app/components/RelayDescription.svelte"
   import SpaceQuickLinks from "@app/components/SpaceQuickLinks.svelte"
-  import {
-    decodeRelay,
-    makeChannelId,
-    channelsById,
-    deriveUserRooms,
-    userRoomsByUrl,
-  } from "@app/state"
+  import SpaceRecentActivity from "@app/components/SpaceRecentActivity.svelte"
+  import {decodeRelay, userRoomsByUrl} from "@app/state"
   import {makeChatPath} from "@app/routes"
   import {pushModal} from "@app/modal"
 
   const url = decodeRelay($page.params.relay)
   const relay = deriveRelay(url)
-  const userRooms = deriveUserRooms(url)
   const joinSpace = () => pushModal(SpaceJoin, {url})
 
   const owner = $derived($relay?.profile?.pubkey)
@@ -88,34 +81,7 @@
   <SpaceQuickLinks {url} />
   <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
     <div class="flex flex-col gap-2">
-      <div class="card2 bg-alt">
-        <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
-          <Icon icon="chat-round" />
-          Recent Activity
-        </h3>
-        <div class="flex flex-col gap-3">
-          {#if $userRooms.length > 0}
-            {#each $userRooms.slice(0, 3) as room (room)}
-              {@const channel = $channelsById.get(makeChannelId(url, room))}
-              <div class="flex items-center gap-3 rounded bg-base-100">
-                <div class="flex items-center gap-2">
-                  {#if channel?.closed || channel?.private}
-                    <Icon icon="lock" size={4} />
-                  {:else}
-                    <Icon icon="hashtag" />
-                  {/if}
-                  <span class="font-medium">
-                    <ChannelName {url} {room} />
-                  </span>
-                </div>
-                <span class="ml-auto text-sm opacity-60">Active conversations</span>
-              </div>
-            {/each}
-          {:else}
-            <p class="text-sm opacity-60">No recent activity</p>
-          {/if}
-        </div>
-      </div>
+      <SpaceRecentActivity {url} />
     </div>
     <div class="flex flex-col gap-2">
       <div class="card2 bg-alt">
