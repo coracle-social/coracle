@@ -171,8 +171,8 @@ importers:
         specifier: ^0.0.4
         version: 0.0.4(@capacitor/core@7.2.0)
       nostr-tools:
-        specifier: ^2.12.0
-        version: 2.12.0(typescript@5.5.4)
+        specifier: ^2.14.2
+        version: 2.14.2(typescript@5.5.4)
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
@@ -3979,8 +3979,8 @@ packages:
     peerDependencies:
       '@capacitor/core': ^7.0.0
 
-  nostr-tools@2.12.0:
-    resolution: {integrity: sha512-pUWEb020gTvt1XZvTa8AKNIHWFapjsv2NKyk43Ez2nnvz6WSXsrTFE0XtkNLSRBjPn6EpxumKeNiVzLz74jNSA==}
+  nostr-tools@2.14.2:
+    resolution: {integrity: sha512-YOIOn5EdJ2Kq5sQW5Zh4wOcqzR6kUyrCDHG4+mVD2szzthsyOTpiWX0yrwaRZGlHJG6q83vkhg95qc2W201XTQ==}
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -7522,7 +7522,7 @@ snapshots:
   '@welshman/content@0.3.0(typescript@5.5.4)':
     dependencies:
       '@braintree/sanitize-url': 7.1.1
-      nostr-tools: 2.12.0(typescript@5.5.4)
+      nostr-tools: 2.14.2(typescript@5.5.4)
     transitivePeerDependencies:
       - typescript
 
@@ -7555,8 +7555,8 @@ snapshots:
       '@tiptap/suggestion': 2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0)
       '@welshman/lib': 0.3.0
       '@welshman/util': 0.3.0(typescript@5.5.4)
-      nostr-editor: 0.0.4-pre.17(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/extension-image@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))(@tiptap/extension-link@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0)(linkifyjs@4.3.1)(nostr-tools@2.12.0(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))
-      nostr-tools: 2.12.0(typescript@5.5.4)
+      nostr-editor: 0.0.4-pre.17(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/extension-image@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))(@tiptap/extension-link@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0)(linkifyjs@4.3.1)(nostr-tools@2.14.2(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))
+      nostr-tools: 2.14.2(typescript@5.5.4)
       tippy.js: 6.3.7
     transitivePeerDependencies:
       - '@tiptap/extension-image'
@@ -7623,7 +7623,7 @@ snapshots:
       '@welshman/net': 0.3.0(typescript@5.5.4)(ws@8.18.2)
       '@welshman/util': 0.3.0(typescript@5.5.4)
       nostr-signer-capacitor-plugin: 0.0.4(@capacitor/core@7.2.0)
-      nostr-tools: 2.12.0(typescript@5.5.4)
+      nostr-tools: 2.14.2(typescript@5.5.4)
     transitivePeerDependencies:
       - typescript
       - ws
@@ -7641,7 +7641,7 @@ snapshots:
     dependencies:
       '@types/ws': 8.18.1
       '@welshman/lib': 0.3.0
-      nostr-tools: 2.12.0(typescript@5.5.4)
+      nostr-tools: 2.14.2(typescript@5.5.4)
       nostr-wasm: 0.1.0
     transitivePeerDependencies:
       - typescript
@@ -9753,7 +9753,7 @@ snapshots:
 
   normalize-url@8.0.1: {}
 
-  nostr-editor@0.0.4-pre.17(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/extension-image@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))(@tiptap/extension-link@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0)(linkifyjs@4.3.1)(nostr-tools@2.12.0(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))):
+  nostr-editor@0.0.4-pre.17(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/extension-image@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))(@tiptap/extension-link@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0))(@tiptap/pm@2.12.0)(linkifyjs@4.3.1)(nostr-tools@2.14.2(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))):
     dependencies:
       '@tiptap/core': 2.12.0(@tiptap/pm@2.12.0)
       '@tiptap/extension-image': 2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))
@@ -9762,7 +9762,7 @@ snapshots:
       js-base64: 3.7.7
       light-bolt11-decoder: 3.2.0
       linkifyjs: 4.3.1
-      nostr-tools: 2.12.0(typescript@5.5.4)
+      nostr-tools: 2.14.2(typescript@5.5.4)
       prosemirror-markdown: 1.13.2
       prosemirror-model: 1.25.1
       prosemirror-state: 1.4.3
@@ -9772,7 +9772,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.2.0
 
-  nostr-tools@2.12.0(typescript@5.5.4):
+  nostr-tools@2.14.2(typescript@5.5.4):
     dependencies:
       '@noble/ciphers': 0.5.3
       '@noble/curves': 1.2.0
@@ -9780,8 +9780,8 @@ snapshots:
       '@scure/base': 1.1.1
       '@scure/bip32': 1.3.1
       '@scure/bip39': 1.2.1
-    optionalDependencies:
       nostr-wasm: 0.1.0
+    optionalDependencies:
       typescript: 5.5.4
 
   nostr-tools@2.9.4(typescript@5.5.4):
