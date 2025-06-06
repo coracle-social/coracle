@@ -1,6 +1,5 @@
-import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
 import * as nip19 from "nostr-tools/nip19"
-import {range, DAY} from "@welshman/lib"
+import {range, DAY, hexToBytes, bytesToHex} from "@welshman/lib"
 
 export const nsecEncode = (secret: string) => nip19.nsecEncode(hexToBytes(secret))
 

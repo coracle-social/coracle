@@ -1,6 +1,6 @@
 <script lang="ts">
   import {encrypt} from "nostr-tools/nip49"
-  import {hexToBytes} from "@noble/hashes/utils"
+  import {hexToBytes} from "@welshman/lib"
   import {makeSecret} from "@welshman/signer"
   import {preventDefault, downloadText} from "@lib/html"
   import Link from "@lib/components/Link.svelte"

@@ -7,7 +7,6 @@
   import {App} from "@capacitor/app"
   import {dev} from "$app/environment"
   import {goto} from "$app/navigation"
-  import {bytesToHex, hexToBytes} from "@noble/hashes/utils"
   import {identity, memoize, sleep, defer, ago, WEEK, TaskQueue} from "@welshman/lib"
   import type {TrustedEvent, StampedEvent} from "@welshman/util"
   import {
@@ -80,8 +79,6 @@
     Object.assign(window, {
       get,
       nip19,
-      bytesToHex,
-      hexToBytes,
       ...lib,
       ...welshmanSigner,
       ...util,
