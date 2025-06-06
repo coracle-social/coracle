@@ -11,10 +11,9 @@ import {
   userRelaySelections,
   publishThunk,
 } from "@welshman/app"
-import {append, now, remove, nthNe, uniq, bufferToHex} from "@welshman/lib"
+import {append, sha256, now, remove, nthNe, uniq} from "@welshman/lib"
 import {Nip01Signer, Nip59} from "@welshman/signer"
 import type {Profile, TrustedEvent} from "@welshman/util"
-import {uploadBlossom} from "@welshman/editor"
 import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
   Address,
@@ -32,6 +31,8 @@ import {
   isPublishedProfile,
   isSignedEvent,
   makeList,
+  uploadBlob,
+  makeBlossomAuthEvent,
   normalizeRelayUrl,
   removeFromList,
   getRelaysFromList,
@@ -44,7 +45,7 @@ import {
   userFeedFavorites,
   withIndexers,
 } from "src/engine/state"
-import {blobToFile, stripExifData} from "src/util/html"
+import {stripExifData} from "src/util/html"
 import {appDataKeys} from "src/util/nostr"
 import {get} from "svelte/store"
 
@@ -76,17 +77,17 @@ export const nip44EncryptToSelf = (payload: string) =>
 
 // Files
 
-export const hashFile = async (file: File) =>
-  bufferToHex(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()))
-
-export const uploadFile = async (serverUrl: string, file: File, compressorOpts = {}) => {
-  const $signer = signer.get() || Nip01Signer.ephemeral()
-
+export const uploadFile = async (server: string, file: File, compressorOpts = {}) => {
   if (!file.type.match("image/(webp|gif)")) {
-    file = blobToFile(await stripExifData(file, compressorOpts))
+    file = await stripExifData(file, compressorOpts)
   }
 
-  return uploadBlossom({file, serverUrl, sign: $signer.sign, hash: hashFile})
+  const hashes = [await sha256(await file.arrayBuffer())]
+  const $signer = signer.get() || Nip01Signer.ephemeral()
+  const authEvent = await $signer.sign(makeBlossomAuthEvent({action: "upload", server, hashes}))
+  const res = await uploadBlob(server, file, {authEvent})
+
+  return res.json()
 }
 
 // Key state management

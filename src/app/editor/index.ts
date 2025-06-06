@@ -2,28 +2,17 @@ import "@welshman/editor/index.css"
 
 import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
-import type {UploadTask} from "@welshman/editor"
+import type {UploadTask, FileAttributes} from "@welshman/editor"
 import {first} from "@welshman/lib"
-import type {StampedEvent} from "@welshman/util"
 import {getTagValue, getListTags} from "@welshman/util"
 import {Router} from "@welshman/router"
-import {signer, profileSearch, userBlossomServers} from "@welshman/app"
+import {profileSearch, userBlossomServers} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
 import {ensureProto} from "src/util/misc"
 import {env} from "src/engine/state"
+import {uploadFile} from "src/engine/commands"
 import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
-
-export const getUploadUrl = () =>
-  ensureProto(
-    getTagValue("server", getListTags(userBlossomServers.get())) || first(env.BLOSSOM_URLS),
-  )
-
-export const signWithAssert = async (template: StampedEvent) => {
-  const event = await signer.get().sign(template)
-
-  return event!
-}
 
 export const makeEditor = ({
   aggressive = false,
@@ -43,7 +32,7 @@ export const makeEditor = ({
   placeholder?: string
   submit: () => void
   onUpdate?: () => void
-  onUploadError?: (url: string, task: UploadTask) => void
+  onUploadError?: (task: UploadTask) => void
   uploading?: Writable<boolean>
   charCount?: Writable<number>
   wordCount?: Writable<number>
@@ -54,9 +43,6 @@ export const makeEditor = ({
     extensions: [
       WelshmanExtension.configure({
         submit,
-        sign: signWithAssert,
-        defaultUploadType: "blossom",
-        defaultUploadUrl: getUploadUrl(),
         extensions: {
           placeholder: {
             config: {
@@ -70,6 +56,29 @@ export const makeEditor = ({
           },
           fileUpload: {
             config: {
+              upload: async (attrs: FileAttributes) => {
+                const userServer = getTagValue("server", getListTags(userBlossomServers.get()))
+                const server = ensureProto(userServer || first(env.BLOSSOM_URLS))
+
+                try {
+                  let {uploaded, url, ...task} = await uploadFile(server, attrs.file)
+
+                  if (!uploaded) {
+                    return {error: "Server refused to process the file"}
+                  }
+
+                  // Always append file extension if missing
+                  if (new URL(url).pathname.split(".").length === 1) {
+                    url += "." + attrs.file.type.split("/")[1]
+                  }
+
+                  const result = {...task, url, tags: []}
+
+                  return {result}
+                } catch (e) {
+                  return {error: e.toString()}
+                }
+              },
               onDrop(currentEditor, file: File) {
                 uploading?.set(true)
                 setTimeout(() => {
@@ -86,7 +95,7 @@ export const makeEditor = ({
               },
               onUploadError(currentEditor, task: UploadTask) {
                 currentEditor.commands.removeFailedUploads()
-                onUploadError?.(getUploadUrl(), task)
+                onUploadError?.(task)
                 uploading?.set(false)
               },
             },

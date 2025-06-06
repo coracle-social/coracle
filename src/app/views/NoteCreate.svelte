@@ -234,9 +234,7 @@
     onUpdate: () => {
       drafts.set(DRAFT_KEY, editor.getJSON())
     },
-    onUploadError: (url, file) => {
-      showWarning(`Failed to upload file to ${url}: ${file.uploadError}`)
-    },
+    onUploadError: task => showWarning(`Failed to upload file: ${task.error}`),
     uploading,
     charCount,
     wordCount,
