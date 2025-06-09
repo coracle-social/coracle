@@ -7,7 +7,7 @@ export VITE_BUILD_VERSION=$RENDER_GIT_COMMIT
 export VITE_BUILD_HASH=$RENDER_GIT_COMMIT
 
 # Install dependencies
-pnpm i
+CI=0 pnpm i
 
 # Rebuild sharp
 pnpm rebuild
