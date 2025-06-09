@@ -19,16 +19,13 @@
     <Link external class="link" href="https://0xchat.com">0xChat</Link>.
   </p>
   <p>
-    This one is particularly annoying, but there is a migration path. To start with, your messages
-    are all still available under the "Chat" tab - all conversations have just been merged together.
-  </p>
-  <p>
-    Next, if you run a relay please upgrade to a version that supports NIP 29. {PLATFORM_NAME} works
-    best with the latest version of <Link
+    If you run a relay, please upgrade to a version that supports NIP 29. {PLATFORM_NAME} works best
+    with the latest version of <Link
       external
       class="link"
       href="https://github.com/coracle-social/frith">Frith</Link
-    >, which includes a migrate script to upgrade your old rooms into NIP 29 compatible rooms.
+    >, which will automatically migrate your rooms. In the meantime, your messages are all still
+    available under the "Chat" tab (all conversations have been temporarily merged together).
   </p>
   <Button class="btn btn-primary" onclick={() => history.back()}>Got it</Button>
 </div>
