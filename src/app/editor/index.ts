@@ -4,7 +4,6 @@ import {get} from "svelte/store"
 import {sha256} from "@welshman/lib"
 import {
   getTagValues,
-  getTagValue,
   encryptFile,
   uploadBlob,
   makeBlossomAuthEvent,

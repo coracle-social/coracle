@@ -91,7 +91,7 @@
                     <span class="opacity-50">•</span>
                     <span>{formatTimestamp(earliest.created_at)}</span>
                   </div>
-                  <Content minimalQuote minLength={100} maxLength={200} event={earliest} />
+                  <Content minimalQuote minLength={100} maxLength={400} event={earliest} />
                 </div>
               </div>
               <div class="ml-13 flex items-center justify-between">
@@ -119,7 +119,7 @@
                       {formatTimestamp(latest.created_at)}
                     </span>
                   </div>
-                  <Content minimalQuote minLength={100} maxLength={200} event={latest} />
+                  <Content minimalQuote minLength={100} maxLength={400} event={latest} />
                 </div>
               </Button>
             </div>
