@@ -19,7 +19,7 @@ import {
   CHANNELS,
   BLOCKED_RELAYS,
   SEARCH_RELAYS,
-  GROUPS,
+  ROOMS,
   TOPICS,
   getAddress,
 } from "@welshman/util"
@@ -44,7 +44,7 @@ export const CUSTOM_LIST_KINDS = [
   CHANNELS,
   BLOCKED_RELAYS,
   SEARCH_RELAYS,
-  GROUPS,
+  ROOMS,
   TOPICS,
 ]
 
@@ -123,7 +123,7 @@ export const displayUserList = (list?: UserList) => {
     if (list.kind === CHANNELS) return "[channels list]"
     if (list.kind === BLOCKED_RELAYS) return "[blocked relays list]"
     if (list.kind === SEARCH_RELAYS) return "[search relays list]"
-    if (list.kind === GROUPS) return "[groups list]"
+    if (list.kind === ROOMS) return "[rooms list]"
     if (list.kind === TOPICS) return "[topics list]"
   }
 

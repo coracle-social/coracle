@@ -5,13 +5,14 @@
   import type {TrustedEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
-    createEvent,
+    makeEvent,
     toNostrURI,
     DVM_REQUEST_PUBLISH_SCHEDULE,
     Address,
     isReplaceable,
   } from "@welshman/util"
   import type {Thunk} from "@welshman/app"
+  import {request} from "@welshman/net"
   import {
     session,
     publishThunk,
@@ -20,7 +21,6 @@
     signer,
     abortThunk,
   } from "@welshman/app"
-  import {requestDvmResponse} from "@welshman/dvm"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"
   import {makePow} from "src/util/pow"
@@ -90,7 +90,7 @@
     }
 
     const ownedEvent = own(
-      createEvent(1, {
+      makeEvent(1, {
         content,
         tags,
         created_at:
@@ -133,7 +133,7 @@
       )
 
       const dvmEvent = await sign(
-        createEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
+        makeEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
           content: dvmContent,
           tags: [["p", SHIPYARD_PUBKEY], ["encrypted"]],
         }),
@@ -145,18 +145,25 @@
         delay: $userSettings.send_delay,
       })
 
-      requestDvmResponse({
-        event: dvmEvent,
+      const abortController = new AbortController()
+
+      await request({
         relays: env.DVM_RELAYS,
-        onProgress: (event: TrustedEvent, url: string) => {
-          $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
-            try {
-              data = JSON.parse(data)[0]
-              showInfo(data[2] || "Your note is " + data[1] + "!")
-            } catch (e) {
-              warn(e)
-            }
-          })
+        signal: AbortSignal.any([abortController.signal, AbortSignal.timeout(30_000)]),
+        filters: [{kinds: [dvmEvent.kind + 1000, 7000], since: now() - 30, "#e": [dvmEvent.id]}],
+        onEvent: (event: TrustedEvent, url: string) => {
+          if (event.kind === 7000) {
+            $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+              try {
+                data = JSON.parse(data)[0]
+                showInfo(data[2] || "Your note is " + data[1] + "!")
+              } catch (e) {
+                warn(e)
+              }
+            })
+          } else {
+            abortController.abort()
+          }
         },
       })
     } else {

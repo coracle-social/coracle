@@ -1,7 +1,7 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
   import {sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
-  import {createEvent, ZAP_REQUEST} from "@welshman/util"
+  import {makeEvent, ZAP_REQUEST} from "@welshman/util"
   import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
@@ -45,7 +45,7 @@
 
     const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
     const content = pubkey === env.PLATFORM_PUBKEY ? "" : message
-    const event = await sig.sign(createEvent(ZAP_REQUEST, {content, tags}))
+    const event = await sig.sign(makeEvent(ZAP_REQUEST, {content, tags}))
     const zapString = encodeURI(JSON.stringify(event))
     const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
     const res = await tryCatch(() => fetchJson(zapper.callback + qs))

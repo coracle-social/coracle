@@ -19,7 +19,7 @@ import {
   getTags,
   getTagValue,
   getTopicTagValues,
-  GROUPS,
+  ROOMS,
   FEED,
   NAMED_PEOPLE,
   NAMED_RELAYS,
@@ -72,7 +72,7 @@ export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
 export const headerlessKinds = [
-  GROUPS,
+  ROOMS,
   FEED,
   NAMED_PEOPLE,
   NAMED_RELAYS,
@@ -88,7 +88,7 @@ export const headerlessKinds = [
   BOOKMARKS,
   COMMUNITIES,
   CHANNELS,
-  GROUPS,
+  ROOMS,
   TOPICS,
 ]
 

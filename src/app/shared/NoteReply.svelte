@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {without, uniq, now} from "@welshman/lib"
-  import {NOTE, COMMENT, getPubkeyTagValues, createEvent, uniqTags} from "@welshman/util"
+  import {NOTE, COMMENT, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     session,
@@ -103,7 +103,7 @@
     loading = true
     clearDraft()
 
-    const ownedEvent = own(createEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
+    const ownedEvent = own(makeEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
 
     let hashedEvent = hash(ownedEvent)
 

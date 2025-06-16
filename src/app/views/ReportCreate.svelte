@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {asSignedEvent, createEvent} from "@welshman/util"
+  import {asSignedEvent, makeEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
   import {Router} from "@welshman/router"
@@ -28,7 +28,7 @@
 
     // Don't use our session wrapper so that reports are anonymous
     const helper = new Nip59(Nip01Signer.ephemeral())
-    const template = createEvent(14, {content})
+    const template = makeEvent(14, {content})
     const rumor = await helper.wrap(tagr, template)
 
     publishThunk({

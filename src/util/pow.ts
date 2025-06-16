@@ -1,5 +1,5 @@
 import type {OwnedEvent, HashedEvent} from "@welshman/util"
-import {createEvent, getTag} from "@welshman/util"
+import {makeEvent, getTag} from "@welshman/util"
 import {makeSecret, own, getPubkey} from "@welshman/signer"
 import {synced, withGetter} from "@welshman/store"
 import PowWorker from "src/workers/pow?worker"
@@ -62,7 +62,7 @@ export const getPow = (event: HashedEvent): number => {
 if (benchmark.get() === 0) {
   const secret = makeSecret()
   const pubkey = getPubkey(secret)
-  const event = own(createEvent(1, {}), pubkey)
+  const event = own(makeEvent(1, {}), pubkey)
   const pow = makePow(event, benchmarkDifficulty)
   const start = Date.now()
 

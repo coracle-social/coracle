@@ -24,7 +24,7 @@
   import {
     asSignedEvent,
     isSignedEvent,
-    createEvent,
+    makeEvent,
     getLnUrl,
     ZAP_RESPONSE,
     REACTION,
@@ -99,7 +99,7 @@
 
   const react = async content => {
     const tags = [...tagEventForReaction(event), ...getClientTags()]
-    const template = createEvent(7, {content, tags})
+    const template = makeEvent(7, {content, tags})
     await signAndPublish(template)
   }
 
