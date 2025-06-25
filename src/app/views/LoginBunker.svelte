@@ -10,6 +10,7 @@
   import Anchor from "src/partials/Anchor.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import Popover from "src/partials/Popover.svelte"
   import {env} from "src/engine"
   import {boot} from "src/app/state"
 
@@ -99,7 +100,12 @@
     <Anchor underline modal href="/help/remote-signers">What's a signer?</Anchor>
   </p>
   {#if url}
-    <QRCode code={url} />
+    <Popover triggerType="mouseenter">
+      <div slot="trigger">
+        <QRCode code={url} />
+      </div>
+      <div slot="tooltip">Click to copy the connection string to your signer app</div>
+    </Popover>
   {/if}
   <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
     <i slot="before" class="fa fa-box" />
