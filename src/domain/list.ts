@@ -25,8 +25,11 @@ import {
 } from "@welshman/util"
 import {SearchHelper} from "src/util/misc"
 
+export const FOLLOW_PACK = 39089
+
 export const CUSTOM_LIST_KINDS = [
   FOLLOWS,
+  FOLLOW_PACK,
   NAMED_PEOPLE,
   NAMED_RELAYS,
   NAMED_CURATIONS,
@@ -106,6 +109,7 @@ export const displayUserList = (list?: UserList) => {
   if (list) {
     if (list.title) return list.title
     if (list.kind === FOLLOWS) return "[follows list]"
+    if (list.kind === FOLLOW_PACK) return "[follow pack]"
     if (list.kind === NAMED_PEOPLE) return "[named people list]"
     if (list.kind === NAMED_RELAYS) return "[named relays list]"
     if (list.kind === NAMED_CURATIONS) return "[named curations list]"
