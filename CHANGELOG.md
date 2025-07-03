@@ -3,6 +3,8 @@
 # 0.6.18
 
 * Fix a few small bugs with initial content on note creation
+* Fix NIP 05 validation
+* Show profile json on person info
 
 # 0.6.17
 
