@@ -11,7 +11,7 @@
   const shouldSkip = author === $pubkey || $userFollows.has(author) || !getSetting("hide_sensitive")
 
   let maxScore = 0
-  let threshold = shouldSkip ? 1 : 0.9
+  let threshold = shouldSkip ? 1 : 0.92
 
   const ignoreWarning = () => {
     threshold = 1

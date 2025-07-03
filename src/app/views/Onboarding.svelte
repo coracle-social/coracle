@@ -116,7 +116,7 @@
     {:else if stage === "follows"}
       <OnboardingFollows {setStage} bind:state />
     {:else if stage === "note"}
-      <OnboardingNote {setStage} {signup} />
+      <OnboardingNote {setStage} {signup} {state} />
     {/if}
   {/key}
   <div class="m-auto flex gap-2">
