@@ -1,7 +1,7 @@
 <script lang="ts">
   import {init, launchPaymentModal, onModalClosed} from "@getalby/bitcoin-connect"
-  import {sum, nth, now, tryCatch, fetchJson} from "@welshman/lib"
-  import {makeEvent, ZAP_REQUEST} from "@welshman/util"
+  import {sum, nth} from "@welshman/lib"
+  import {makeZapRequest, requestZap, getZapResponseFilter} from "@welshman/util"
   import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
@@ -15,7 +15,7 @@
   import {env, myLoad, getSetting} from "src/engine"
 
   export let splits
-  export let id = null
+  export let eventId = null
   export let anonymous = false
   export let amount = getSetting<number>("default_zap")
 
@@ -26,55 +26,6 @@
     .FromPubkeys([env.PLATFORM_PUBKEY])
     .policy(addMinimalFallbacks)
     .getUrl()
-
-  const requestZap = async ({pubkey, msats, zapper, relays}) => {
-    const tags = [
-      ["relays", ...relays],
-      ["amount", msats.toString()],
-      ["lnurl", zapper.lnurl],
-      ["p", pubkey],
-    ]
-
-    if (id) {
-      tags.push(["e", id])
-    }
-
-    if (anonymous) {
-      tags.push(["anon"])
-    }
-
-    const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
-    const content = pubkey === env.PLATFORM_PUBKEY ? "" : message
-    const event = await sig.sign(makeEvent(ZAP_REQUEST, {content, tags}))
-    const zapString = encodeURI(JSON.stringify(event))
-    const qs = `?amount=${msats}&nostr=${zapString}&lnurl=${zapper.lnurl}`
-    const res = await tryCatch(() => fetchJson(zapper.callback + qs))
-
-    return {invoice: res?.pr, error: res?.reason}
-  }
-
-  const sendZap = async ({pubkey, relays, zapper}, {invoice, error}) => {
-    if (!invoice) {
-      const profileDisplay = displayProfileByPubkey(pubkey)
-      const message = error || "no error given"
-
-      return alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
-    }
-
-    launchPaymentModal({invoice})
-
-    await new Promise<void>(resolve => {
-      const unsub = onModalClosed(() => {
-        resolve()
-        unsub()
-      })
-    })
-
-    myLoad({
-      relays,
-      filters: [{kinds: [9735], authors: [zapper.nostrPubkey], "#p": [pubkey], since: now() - 30}],
-    })
-  }
 
   const startZapping = async () => {
     const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
@@ -100,10 +51,29 @@
       const router = Router.get()
       const scenarios = [router.ForPubkey(pubkey), router.FromRelays([relay])]
       const relays = router.merge(scenarios).policy(addMaximalFallbacks).getUrls()
+      const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
+      const content = pubkey === env.PLATFORM_PUBKEY ? "" : message
+      const params = {msats, zapper, pubkey, relays, content, eventId, anonymous}
+      const event = await sig.sign(makeZapRequest(params))
+      const {invoice, error} = await requestZap({zapper, event})
 
-      const zap = {pubkey, msats, zapper, relays}
+      if (!invoice) {
+        const profileDisplay = displayProfileByPubkey(pubkey)
+        const message = error || "no error given"
 
-      await sendZap(zap, await requestZap(zap))
+        return alert(`Failed to get an invoice for ${profileDisplay}: ${message}`)
+      }
+
+      launchPaymentModal({invoice})
+
+      await new Promise<void>(resolve => {
+        const unsub = onModalClosed(() => {
+          resolve()
+          unsub()
+        })
+      })
+
+      myLoad({relays, filters: [getZapResponseFilter({zapper, pubkey, eventId})]})
     }
 
     router.pop()

@@ -296,7 +296,7 @@
   router.register("/zap", Zap, {
     required: ["splits"],
     serializers: {
-      id: asNote,
+      eventId: asNote,
       amount: asJson("amount"),
       splits: asJson("splits"),
       anonymous: asJson("anonymous"),

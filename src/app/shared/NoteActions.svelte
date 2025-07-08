@@ -116,7 +116,7 @@
       .at("zap")
       .qp({
         splits,
-        id: event.id,
+        eventId: event.id,
         anonymous: Boolean(event.wrap),
       })
       .open()
