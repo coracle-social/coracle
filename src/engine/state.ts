@@ -25,6 +25,7 @@ import {
   tracker,
   appContext,
   defaultStorageAdapters,
+  loadRelaySelections,
 } from "@welshman/app"
 import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
 import {
@@ -226,6 +227,8 @@ const decryptKinds = [APP_DATA, FOLLOWS, MUTES]
 
 repository.on("update", ({added}: {added: TrustedEvent[]}) => {
   for (const event of added) {
+    loadRelaySelections(event.pubkey)
+
     if (decryptKinds.includes(event.kind) && event.content && !getPlaintext(event)) {
       unwrapper.push(event)
     }
