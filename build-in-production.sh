@@ -3,8 +3,8 @@
 set -e
 
 # Fetch tags and set to env vars
-git fetch --prune --unshallow --tags
-git describe --tags --abbrev=0
+git fetch --prune --unshallow --tags || true
+git describe --tags --abbrev=0 || true
 export VITE_BUILD_VERSION=$RENDER_GIT_COMMIT
 export VITE_BUILD_HASH=$RENDER_GIT_COMMIT
 
