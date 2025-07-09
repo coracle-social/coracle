@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Fetch tags and set to env vars
 git fetch --prune --unshallow --tags
 git describe --tags --abbrev=0
