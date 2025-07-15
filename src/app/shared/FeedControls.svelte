@@ -1,10 +1,11 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
+  import {writable} from 'svelte/store'
   import {sortBy, not, equals, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
-  import {synced} from "@welshman/store"
+  import {synced, localStorageProvider} from "@welshman/store"
   import {isSearchFeed, makeScopeFeed, Scope, makeSearchFeed, getFeedArgs} from "@welshman/feeds"
-  import {signer} from "@welshman/app"
+  import {signer, pubkey} from "@welshman/app"
   import {toSpliced} from "src/util/misc"
   import {slideAndFade} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
@@ -24,7 +25,11 @@
   feed.definition = normalizeFeedDefinition(feed.definition)
 
   const form = boolCtrl()
-  const expanded = synced("FeedControls/expanded", false)
+  const expanded = $pubkey ? synced({
+    key: "FeedControls/expanded",
+    defaultValue: false,
+    storage: localStorageProvider,
+  }) : writable(false)
 
   const toggleExpanded = () => expanded.update(not)
 

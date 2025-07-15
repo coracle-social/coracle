@@ -4,6 +4,7 @@
     anonymous: boolean
     pow_difficulty: number
     publish_at?: Date
+    expiration?: Date
     relays?: string[]
   }
 </script>
@@ -65,6 +66,9 @@
         </div>
         <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32}></Input>
         <p slot="info">Add a proof-of-work stamp to your notes to increase your reach.</p>
+      </Field>
+      <Field icon="fa-wind" label="Expire at">
+        <DateTimeInput bind:value={values.expiration} />
       </Field>
       <FieldInline icon="fa-user-secret" label="Post anonymously">
         <Toggle bind:value={values.anonymous} />

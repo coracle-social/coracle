@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, dateToSeconds} from "@welshman/lib"
-  import {now, own, hash} from "@welshman/signer"
+  import {last, dateToSeconds, now} from "@welshman/lib"
+  import {own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
@@ -85,19 +85,16 @@
       tags.push(["content-warning", options.warning])
     }
 
+    if (options.expiration) {
+      tags.push(["expiration", String(dateToSeconds(options.expiration))])
+    }
+
     if (quote) {
       tags.push(tagPubkey(quote.pubkey))
     }
 
-    const ownedEvent = own(
-      makeEvent(1, {
-        content,
-        tags,
-        created_at:
-          (options.publish_at && Math.floor(options.publish_at.getTime() / 1000)) || undefined,
-      }),
-      $session.pubkey,
-    )
+    const created_at = options.publish_at ? dateToSeconds(options.publish_at) : now()
+    const ownedEvent = own(makeEvent(1, {content, tags, created_at}), $session.pubkey)
 
     let hashedEvent = hash(ownedEvent)
 

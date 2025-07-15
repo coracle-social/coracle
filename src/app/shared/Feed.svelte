@@ -3,7 +3,7 @@
   import {writable} from "svelte/store"
   import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {synced} from "@welshman/store"
+  import {synced, localStorageProvider} from "@welshman/store"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
   import {
     isRelayFeed,
@@ -38,9 +38,19 @@
 
   const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
 
-  const promptDismissed = synced("feed/promptDismissed", 0)
+  const promptDismissed = synced({
+    key: "feed/promptDismissed",
+    defaultValue: 0,
+    storage: localStorageProvider,
+  })
 
-  const shouldHideReplies = showControls ? synced("Feed.shouldHideReplies", false) : writable(false)
+  const shouldHideReplies = showControls
+    ? synced({
+        key: "Feed.shouldHideReplies",
+        defaultValue: false,
+        storage: localStorageProvider,
+      })
+    : writable(false)
 
   const reload = () => {
     abortController.abort()

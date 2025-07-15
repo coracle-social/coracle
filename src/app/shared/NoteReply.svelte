@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {without, uniq, now} from "@welshman/lib"
+  import {without, dateToSeconds, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
@@ -98,6 +98,10 @@
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])
+    }
+
+    if (options.expiration) {
+      tags.push(["expiration", String(dateToSeconds(options.expiration))])
     }
 
     loading = true

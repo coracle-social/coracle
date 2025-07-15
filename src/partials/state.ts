@@ -1,7 +1,7 @@
 import Bowser from "bowser"
 import {derived, writable, get} from "svelte/store"
 import {fromPairs} from "@welshman/lib"
-import {synced} from "@welshman/store"
+import {synced, localStorageProvider} from "@welshman/store"
 import {parseHex} from "src/util/html"
 
 // Browser
@@ -33,7 +33,11 @@ const DARK_THEME = parseTheme(import.meta.env.VITE_DARK_THEME)
 
 const LIGHT_THEME = parseTheme(import.meta.env.VITE_LIGHT_THEME)
 
-export const theme = synced("ui/theme", "dark")
+export const theme = synced({
+  key: "ui/theme",
+  defaultValue: "dark",
+  storage: localStorageProvider,
+})
 
 theme.subscribe(value => {
   if (value === "dark") {

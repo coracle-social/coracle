@@ -16,6 +16,7 @@ import {
   mutesByPubkey,
   plaintext,
   pinsByPubkey,
+  sessions,
   pubkey,
   relay,
   repository,
@@ -55,7 +56,14 @@ import {
   defaultSocketPolicies,
 } from "@welshman/net"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import {deriveEvents, deriveEventsMapped, synced, withGetter} from "@welshman/store"
+import {
+  deriveEvents,
+  deriveEventsMapped,
+  synced,
+  localStorageProvider,
+  withGetter,
+  sync,
+} from "@welshman/store"
 import type {
   EventTemplate,
   PublishedList,
@@ -143,7 +151,13 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 
-export const canDecrypt = withGetter(synced("canDecrypt", false))
+export const canDecrypt = withGetter(
+  synced({
+    key: "canDecrypt",
+    defaultValue: false,
+    storage: localStorageProvider,
+  }),
+)
 
 // Plaintext
 
@@ -384,7 +398,11 @@ export const isEventMuted = withGetter(
 
 // Read receipts
 
-export const checked = synced<Record<string, number>>("checked", {})
+export const checked = synced<Record<string, number>>({
+  key: "checked",
+  defaultValue: {},
+  storage: localStorageProvider,
+})
 
 export const deriveChecked = (key: string) => derived(checked, prop(key))
 
@@ -718,6 +736,20 @@ if (!db) {
   routerContext.getIndexerRelays = always(env.INDEXER_RELAYS)
   routerContext.getSearchRelays = always(env.SEARCH_RELAYS)
   routerContext.getLimit = () => getSetting("relay_limit")
+
+  // Sync current pubkey
+  sync({
+    key: 'pubkey',
+    store: pubkey,
+    storage: localStorageProvider,
+  })
+
+  // Sync user sessions
+  sync({
+    key: 'sessions',
+    store: sessions,
+    storage: localStorageProvider,
+  })
 
   // Sync user settings
   userSettings.subscribe($settings => {
