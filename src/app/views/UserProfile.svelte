@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pubkey, profilesByPubkey} from "@welshman/app"
+  import {pubkey, profilesByPubkey, setProfile} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -8,7 +8,6 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
-  import {publishProfile} from "src/engine"
   import {router} from "src/app/util/router"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
@@ -17,7 +16,7 @@
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   const submit = () => {
-    publishProfile(values)
+    setProfile(values)
     showInfo("Your profile has been saved!")
     router.at("people").of($pubkey).replace()
   }

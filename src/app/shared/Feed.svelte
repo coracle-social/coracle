@@ -152,6 +152,7 @@
       {shouldSort}
       {depth}
       {events}
+      shouldAwait
       hideReplies={$shouldHideReplies}
       let:event
       let:getContext

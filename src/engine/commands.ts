@@ -13,7 +13,7 @@ import {
 } from "@welshman/app"
 import {append, sha256, now, remove, nthNe, uniq} from "@welshman/lib"
 import {Nip01Signer, Nip59} from "@welshman/signer"
-import type {Profile, TrustedEvent} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
 import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
   Address,
@@ -25,10 +25,7 @@ import {
   RELAYS,
   addToListPublicly,
   makeEvent,
-  createProfile,
-  editProfile,
   getAddress,
-  isPublishedProfile,
   isSignedEvent,
   makeList,
   uploadBlob,
@@ -37,14 +34,7 @@ import {
   removeFromList,
   getRelaysFromList,
 } from "@welshman/util"
-import {
-  addClientTags,
-  anonymous,
-  getClientTags,
-  sign,
-  userFeedFavorites,
-  withIndexers,
-} from "src/engine/state"
+import {anonymous, getClientTags, sign, userFeedFavorites, withIndexers} from "src/engine/state"
 import {stripExifData} from "src/util/html"
 import {appDataKeys} from "src/util/nostr"
 import {get} from "svelte/store"
@@ -123,15 +113,6 @@ export const deleteEvent = (event: TrustedEvent) =>
 
 export const deleteEventByAddress = (address: string) =>
   publishDeletion({address, kind: Address.from(address).kind})
-
-// Profile
-
-export const publishProfile = (profile: Profile) => {
-  const relays = withIndexers(Router.get().FromUser().getUrls())
-  const template = isPublishedProfile(profile) ? editProfile(profile) : createProfile(profile)
-
-  return publishThunk({event: addClientTags(template), relays})
-}
 
 // Follows
 
