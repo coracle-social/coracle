@@ -342,15 +342,21 @@ export class Router {
     window.history.back()
   }
 
-  back(times: number) {
-    let count = 0
-    const goBack = () => {
-      if (count < times) {
-        this.pop()
-        count++
+  back(extra = 0) {
+    if (extra > 0) {
+      let count = 0
+      const goBack = () => {
+        if (count < extra) {
+          this.pop()
+          count++
+        } else {
+          window.removeEventListener("popstate", goBack)
+        }
       }
+
+      window.addEventListener("popstate", goBack)
     }
-    window.addEventListener("popstate", goBack)
+
     this.pop()
   }
 

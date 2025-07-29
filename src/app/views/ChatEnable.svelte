@@ -26,7 +26,7 @@
   }
 
   const back = () => {
-    router.back(2)
+    router.back(1)
   }
 </script>
 

@@ -3,6 +3,8 @@
 # 0.6.19
 
 * Improve relay hint reliability
+* Enable DMs on conversation link
+* Improve feed parent fetching
 
 # 0.6.18
 

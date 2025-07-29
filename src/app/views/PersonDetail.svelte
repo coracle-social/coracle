@@ -147,7 +147,7 @@
           >{$following ? "Unfollow" : "Follow"}</Anchor>
         <Anchor
           button
-          low
+          low={!$following}
           href={router.at("channels").of([$session.pubkey, pubkey]).toString()}
           class="w-full">Message</Anchor>
       {/if}
