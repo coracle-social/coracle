@@ -78,10 +78,6 @@
         maxHeight={480} />
       <p slot="info">Please be mindful of others and only use small images.</p>
     </Field>
-    <Field label="Profile Banner">
-      <ImageInput bind:value={values.banner} icon="panorama" />
-      <div slot="info">In most clients, this image will be shown on your profile page.</div>
-    </Field>
   </div>
   <Footer>
     <Anchor grow button tag="button" type="submit">Save</Anchor>

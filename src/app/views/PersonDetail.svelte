@@ -36,7 +36,6 @@
   import {deriveEvents} from "@welshman/store"
   import {ensureProto, toTitle} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
-  import {themeBackgroundGradient} from "src/partials/state"
   import Tabs from "src/partials/Tabs.svelte"
   import Anchor from "src/partials/Anchor.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
@@ -53,7 +52,7 @@
   import PersonFollowers from "src/app/views/PersonFollowers.svelte"
   import PersonFollows from "src/app/views/PersonFollows.svelte"
   import {makeFeed} from "src/domain"
-  import {myLoad, userMutes, imgproxy, userFollows, follow, unfollow} from "src/engine"
+  import {myLoad, userMutes, userFollows, follow, unfollow} from "src/engine"
   import {router} from "src/app/util"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
@@ -89,8 +88,6 @@
 
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
-  $: ({rgb, rgba} = $themeBackgroundGradient)
-  $: banner = imgproxy($profile?.banner, {w: window.innerWidth})
   $: pinnedIds = getTagValues(["e"], getListTags($pinsByPubkey.get(pubkey)))
   $: pinnedEvents = deriveEvents(repository, {filters: getIdFilters(pinnedIds)})
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
@@ -117,12 +114,6 @@
 
   document.title = displayProfileByPubkey(pubkey)
 </script>
-
-<div
-  class="absolute left-0 -mt-4 h-96 w-full"
-  style={`z-index: -1;
-       background-size: cover;
-       background-image: linear-gradient(to bottom, ${rgba}, ${rgba}, ${rgb}), url('${banner}')`} />
 
 <div>
   <AltColor

@@ -5,6 +5,7 @@
 * Improve relay hint reliability
 * Enable DMs on conversation link
 * Improve feed parent fetching
+* Remove profile banners
 
 # 0.6.18
 
