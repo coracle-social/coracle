@@ -3,17 +3,17 @@
   import {derived} from "svelte/store"
   import {toNostrURI} from "@welshman/util"
   import {Router} from "@welshman/router"
-  import {session, signer, tagPubkey, mute, unmute, loginWithPubkey} from "@welshman/app"
+  import {session, signer, tagPubkey, mutePrivately, unmute, loginWithPubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Anchor from "src/partials/Anchor.svelte"
-  import {userMutes} from "src/engine"
+  import {userMutedPubkeys} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
 
   export let pubkey
 
   const isSelf = $session?.pubkey === pubkey
-  const muted = derived(userMutes, $m => $m.has(pubkey))
+  const muted = derived(userMutedPubkeys, $userMutedPubkeys => $userMutedPubkeys.has(pubkey))
 
   const loginAsUser = () => {
     router.clearModals()
@@ -23,7 +23,7 @@
 
   const unmutePerson = () => unmute(pubkey)
 
-  const mutePerson = () => mute(tagPubkey(pubkey))
+  const mutePerson = () => mutePrivately(tagPubkey(pubkey))
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 

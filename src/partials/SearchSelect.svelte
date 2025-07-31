@@ -118,7 +118,7 @@
 
 {#if multiple}
   <div class="text-sm">
-    {#each value as item}
+    {#each value as item (getKey(item))}
       <div
         class="mb-1 mr-1 inline-flex h-7 items-center rounded-full bg-neutral-900 px-3 text-neutral-400">
         <div class="flex h-7 w-5 cursor-pointer items-center" on:click={() => remove(item)}>

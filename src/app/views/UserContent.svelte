@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {identity, equals} from "@welshman/lib"
-  import {MUTES, makeEvent} from "@welshman/util"
-  import {addMaximalFallbacks, Router} from "@welshman/router"
-  import {topicSearch, publishThunk, tagPubkey} from "@welshman/app"
+  import {identity, uniq, equals} from "@welshman/lib"
+  import {tagger, getTagValues} from "@welshman/util"
+  import {topicSearch, setMutes, userMutes} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -16,28 +15,52 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {userSettings, publishSettings, userMutes} from "src/engine"
+  import {userSettings, publishSettings} from "src/engine"
 
   const values = {...$userSettings}
 
   const noteActionOptions = ["zaps", "replies", "reactions", "recommended_apps"]
 
+  const setMutesDirty = () => {
+    mutesDirty = true
+  }
+
   const submit = () => {
-    if (!equals($userSettings, values)) {
-      publishSettings(values)
+    if (!equals($userSettings, values) && !mutesDirty) {
+      // Migrate away from muted words
+      publishSettings({...values, muted_words: []})
     }
 
-    if (!equals(mutedPubkeys, Array.from($userMutes))) {
-      publishThunk({
-        event: makeEvent(MUTES, {tags: mutedPubkeys.map(pk => tagPubkey(pk))}),
-        relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+    if (mutesDirty) {
+      setMutes({
+        privateTags: [
+          ...$userMutes.privateTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...privatelyMutedPubkeys.map(tagger("p")),
+          ...privatelyMutedTopics.map(tagger("t")),
+          ...privatelyMutedWords.map(tagger("word")),
+        ],
+        publicTags: [
+          ...$userMutes.publicTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...publiclyMutedPubkeys.map(tagger("p")),
+          ...publiclyMutedTopics.map(tagger("t")),
+          ...publiclyMutedWords.map(tagger("word")),
+        ],
       })
     }
 
     showInfo("Your preferences have been saved!")
   }
 
-  let mutedPubkeys = Array.from($userMutes)
+  let mutesDirty = false
+  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMutes.publicTags))
+  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMutes.privateTags))
+  let publiclyMutedTopics = uniq(getTagValues("t", $userMutes.publicTags))
+  let privatelyMutedTopics = uniq(getTagValues("t", $userMutes.privateTags))
+  let publiclyMutedWords = uniq(getTagValues("word", $userMutes.publicTags))
+  let privatelyMutedWords = uniq([
+    ...getTagValues("word", $userMutes.privateTags),
+    ...$userSettings.muted_words,
+  ])
 
   document.title = "Content Preferences"
 </script>
@@ -93,22 +116,66 @@
         difficulty, it will be hidden.
       </p>
     </Field>
-    <Field label="Muted accounts">
-      <PersonSelect multiple bind:value={mutedPubkeys} />
-      <p slot="info">Notes from these people will be hidden by default.</p>
+    <p>Mutes</p>
+    <Field label="Publicly muted accounts">
+      <PersonSelect multiple bind:value={publiclyMutedPubkeys} onChange={setMutesDirty} />
+      <p slot="info">
+        Notes from these people will be hidden by default. This information may be used to identify
+        impersonators and spammers.
+      </p>
     </Field>
-    <Field label="Muted words and topics">
+    <Field label="Privately muted accounts">
+      <PersonSelect multiple bind:value={privatelyMutedPubkeys} onChange={setMutesDirty} />
+      <p slot="info">
+        Notes from these people will be hidden by default. This information will be encrypted.
+      </p>
+    </Field>
+    <Field label="Publicly muted words">
       <SearchSelect
         multiple
-        bind:value={values.muted_words}
+        bind:value={publiclyMutedWords}
         search={$topicSearch.searchValues}
+        onChange={setMutesDirty}
         termToItem={identity} />
-      <p slot="info">Notes containing these words will be hidden by default.</p>
+      <p slot="info">
+        Notes containing these words will be hidden by default. This information may be used to
+        identify impersonators and spammers.
+      </p>
     </Field>
-    <FieldInline label="Ignore muted content">
-      <Toggle bind:value={values.ignore_muted_content} />
-      <p slot="info">If enabled, muted replies will be ignored.</p>
-    </FieldInline>
+    <Field label="Privately muted words">
+      <SearchSelect
+        multiple
+        bind:value={privatelyMutedWords}
+        search={$topicSearch.searchValues}
+        onChange={setMutesDirty}
+        termToItem={identity} />
+      <p slot="info">
+        Notes containing these words will be hidden by default. This information will be encrypted.
+      </p>
+    </Field>
+    <Field label="Publicly muted topics">
+      <SearchSelect
+        multiple
+        bind:value={publiclyMutedTopics}
+        search={$topicSearch.searchValues}
+        onChange={setMutesDirty}
+        termToItem={identity} />
+      <p slot="info">
+        Notes tagging these topics will be hidden by default. This information may be used to
+        identify impersonators and spammers.
+      </p>
+    </Field>
+    <Field label="Privately muted topics">
+      <SearchSelect
+        multiple
+        bind:value={privatelyMutedTopics}
+        search={$topicSearch.searchValues}
+        onChange={setMutesDirty}
+        termToItem={identity} />
+      <p slot="info">
+        Notes tagging these topics will be hidden by default. This information will be encrypted.
+      </p>
+    </Field>
   </div>
   <Footer>
     <Anchor grow button tag="button" type="submit">Save</Anchor>

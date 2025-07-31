@@ -13,7 +13,7 @@
     signer,
     tagEventForReaction,
     tagZapSplit,
-    mute,
+    mutePrivately,
     pubkey,
     unmute,
     pin,
@@ -30,6 +30,7 @@
     REACTION,
     getReplyFilters,
     isChildOf,
+    getAddress,
   } from "@welshman/util"
   import {publishThunk} from "@welshman/app"
   import {getPow} from "src/util/pow"
@@ -56,7 +57,7 @@
     getSetting,
     getClientTags,
     trackerStore,
-    userMutes,
+    userMutedEvents,
     sortEventsDesc,
     userPins,
   } from "src/engine"
@@ -157,7 +158,7 @@
 
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
-  $: muted = $userMutes.has(event.id)
+  $: muted = $userMutedEvents.has(event.id) || $userMutedEvents.has(getAddress(event))
   $: pinned = $userPins.has(event.id)
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
@@ -196,7 +197,7 @@
         actions.push({
           label: "Mute",
           icon: "microphone-slash",
-          onClick: () => mute(["e", event.id]),
+          onClick: () => mutePrivately(["e", event.id]),
         })
       }
 

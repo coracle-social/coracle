@@ -9,7 +9,7 @@
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
-  const getBunkerUrl = () => ($signer as Nip46Signer).broker.getBunkerUrl()
+  const getBunkerUrl = () => ($signer.signer as Nip46Signer).broker.getBunkerUrl()
 
   document.title = "Keys"
 </script>

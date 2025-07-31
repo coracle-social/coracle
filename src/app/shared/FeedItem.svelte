@@ -16,14 +16,7 @@
   import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {
-    ensureUnwrapped,
-    getSetting,
-    isEventMuted,
-    sortEventsDesc,
-    userSettings,
-    myRequest,
-  } from "src/engine"
+  import {ensureUnwrapped, getSetting, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
 
   export let note
   export let relays = []
@@ -43,7 +36,6 @@
   let ready = false
   let event = note
   let replyIsOpen = false
-  let showMutedReplies = false
   let collapsed = depth === 0
   let showHiddenReplies = anchor === getIdOrAddress(event)
   let pendingReplies: Thunk[] = []
@@ -59,21 +51,22 @@
   }
 
   const replies = derived(
-    deriveEvents(repository, {filters: getReplyFilters([event], {kinds: replyKinds})}),
-    events => sortEventsDesc(events.filter(e => isChildOf(e, event))),
+    [
+      deriveEvents(repository, {filters: getReplyFilters([event], {kinds: replyKinds})}),
+      isEventMuted,
+    ],
+    ([$events, $isEventMuted]) =>
+      sortEventsDesc($events.filter(e => isChildOf(e, event) && !$isEventMuted(e))),
   )
 
-  let mutedReplies, hiddenReplies, visibleReplies
+  let hiddenReplies, visibleReplies
 
   $: {
-    mutedReplies = []
     hiddenReplies = []
     visibleReplies = []
 
     for (const e of $replies) {
-      if ($isEventMuted(e)) {
-        mutedReplies.push(e)
-      } else if (pendingReplies.some(thunk => thunk.event.id === e.id)) {
+      if (pendingReplies.some(thunk => thunk.event.id === e.id)) {
         visibleReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)
@@ -85,17 +78,11 @@
     }
 
     if (depth === 0) {
-      mutedReplies.splice(0)
       hiddenReplies.splice(0)
     }
 
     if (!showHiddenReplies && visibleReplies.length === 0) {
-      mutedReplies.splice(0)
       hiddenReplies.splice(0)
-    }
-
-    if (showMutedReplies) {
-      visibleReplies = visibleReplies.concat(mutedReplies.splice(0))
     }
 
     if (!showHiddenReplies) {
@@ -184,7 +171,7 @@
         </div>
       {/if}
 
-      {#if visibleReplies.length > 0 || hiddenReplies.length > 0 || mutedReplies.length > 0}
+      {#if visibleReplies.length > 0 || hiddenReplies.length > 0}
         <div
           class="note-children relative ml-4 mt-4 flex flex-col gap-4"
           in:fly|local={{y: 20}}
@@ -218,16 +205,6 @@
                 </div>
               {/each}
             {/key}
-          {/if}
-          {#if showHiddenReplies && mutedReplies.length > 0 && !$userSettings.ignore_muted_content}
-            <button
-              class="cursor-pointer rounded-md bg-gradient-to-l from-transparent via-tinted-700 to-tinted-700 py-2 text-neutral-100 outline-0 transition-colors hover:bg-tinted-700"
-              on:click={() => {
-                showMutedReplies = true
-              }}>
-              <i class="fa fa-up-down pr-2 text-sm" />
-              Show {quantify(mutedReplies.length, "hidden reply", "hidden replies")}
-            </button>
           {/if}
         </div>
       {/if}

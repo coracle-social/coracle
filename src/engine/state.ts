@@ -13,7 +13,7 @@ import {
   loadRelay,
   makeTrackerStore,
   maxWot,
-  mutesByPubkey,
+  userMutes,
   plaintext,
   pinsByPubkey,
   sessions,
@@ -99,6 +99,7 @@ import {
   readList,
   getAncestors,
   getTag,
+  getIdAndAddress,
 } from "@welshman/util"
 import Fuse from "fuse.js"
 import {getPow} from "nostr-tools/nip13"
@@ -267,8 +268,7 @@ export const defaultSettings = {
   show_media: true,
   send_delay: 0, // undo send delay in ms
   pow_difficulty: 0,
-  muted_words: [],
-  ignore_muted_content: true,
+  muted_words: [], // Deprecated
   hide_sensitive: true,
   report_analytics: true,
   min_wot_score: 0,
@@ -341,12 +341,16 @@ export const userFollows = derived(userFollowList, l => new Set(getPubkeyTagValu
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
-export const userMuteList = derived([mutesByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
+export const userMutedPubkeys = derived(userMutes, l => new Set(getTagValues("p", getListTags(l))))
 
-export const userMutes = derived(
-  userMuteList,
-  l => new Set(getTagValues(["p", "e"], getListTags(l))),
+export const userMutedEvents = derived(
+  userMutes,
+  l => new Set(getTagValues(["a", "e"], getListTags(l))),
 )
+
+export const userMutedWords = derived(userMutes, l => new Set(getTagValues("word", getListTags(l))))
+
+export const userMutedTopics = derived(userMutes, l => new Set(getTagValues("t", getListTags(l))))
 
 export const userPinList = derived([pinsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
 
@@ -354,9 +358,27 @@ export const userPins = derived(userPinList, l => new Set(getTagValues(["e"], ge
 
 export const isEventMuted = withGetter(
   derived(
-    [userMutes, userFollows, userSettings, profilesByPubkey, pubkey],
-    ([$userMutes, $userFollows, $userSettings, $profilesByPubkey, $pubkey]) => {
-      const words = $userSettings.muted_words
+    [
+      userMutedEvents,
+      userMutedPubkeys,
+      userMutedWords,
+      userMutedTopics,
+      userFollows,
+      userSettings,
+      profilesByPubkey,
+      pubkey,
+    ],
+    ([
+      $userMutedEvents,
+      $userMutedPubkeys,
+      $userMutedWords,
+      $userMutedTopics,
+      $userFollows,
+      $userSettings,
+      $profilesByPubkey,
+      $pubkey,
+    ]) => {
+      const words = [...$userSettings.muted_words, ...$userMutedWords]
       const minWot = $userSettings.min_wot_score
       const minPow = $userSettings.min_pow_difficulty
       const regex =
@@ -368,12 +390,21 @@ export const isEventMuted = withGetter(
         maxSize: 5000,
         getKey: ([e, strict = false]: [e: HashedEvent, strict?: boolean]) => `${e.id}:${strict}`,
         getValue: ([e, strict = false]: [e: HashedEvent, strict?: boolean]) => {
-          if (!$pubkey || !e.pubkey) return false
+          if (!$pubkey || !e.pubkey || $pubkey === e.pubkey) return false
+
+          if ($userMutedPubkeys.has(e.pubkey)) {
+            return true
+          }
 
           const {roots, replies} = getAncestors(e)
 
-          if ([e.id, e.pubkey, ...roots, ...replies].some(x => x !== $pubkey && $userMutes.has(x)))
+          if ([...getIdAndAddress(e), ...roots, ...replies].some(x => $userMutedEvents.has(x))) {
             return true
+          }
+
+          if (getTagValues("t", e.tags).some(t => $userMutedTopics.has(t))) {
+            return true
+          }
 
           if (regex) {
             if (e.content?.toLowerCase().match(regex)) return true
@@ -739,14 +770,14 @@ if (!db) {
 
   // Sync current pubkey
   sync({
-    key: 'pubkey',
+    key: "pubkey",
     store: pubkey,
     storage: localStorageProvider,
   })
 
   // Sync user sessions
   sync({
-    key: 'sessions',
+    key: "sessions",
     store: sessions,
     storage: localStorageProvider,
   })

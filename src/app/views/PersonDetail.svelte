@@ -52,7 +52,7 @@
   import PersonFollowers from "src/app/views/PersonFollowers.svelte"
   import PersonFollows from "src/app/views/PersonFollows.svelte"
   import {makeFeed} from "src/domain"
-  import {myLoad, userMutes, userFollows, follow, unfollow} from "src/engine"
+  import {myLoad, userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
   import {router} from "src/app/util"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
@@ -226,7 +226,7 @@
     </Tabs>
   </div>
 </div>
-{#if $userMutes.has(pubkey)}
+{#if $userMutedPubkeys.has(pubkey)}
   <Content size="lg" class="text-center">You have muted this person.</Content>
 {:else if activeTab === "notes"}
   {#each $pinnedEvents as event (event.id)}

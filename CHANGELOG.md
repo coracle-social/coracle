@@ -6,6 +6,8 @@
 * Enable DMs on conversation link
 * Improve feed parent fetching
 * Remove profile banners
+* Add better mute support
+* Mute privately by default
 
 # 0.6.18
 
