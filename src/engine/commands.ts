@@ -275,6 +275,18 @@ export const setAppData = async (d: string, data: any) => {
 export const publishSettings = ($settings: Record<string, any>) =>
   setAppData(appDataKeys.USER_SETTINGS, $settings)
 
+export const broadcastUserRelays = async (relays: string[]) => {
+  const authors = [pubkey.get()]
+  const kinds = [RELAYS]
+  const events = repository.query([{kinds, authors}])
+
+  for (const event of events) {
+    if (isSignedEvent(event)) {
+      await publishThunk({event, relays})
+    }
+  }
+}
+
 export const broadcastUserData = async (relays: string[]) => {
   const authors = [pubkey.get()]
   const kinds = [RELAYS, INBOX_RELAYS, FOLLOWS, PROFILE]

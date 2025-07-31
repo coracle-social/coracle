@@ -40,7 +40,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {env, getClientTags, sign, userSettings} from "src/engine"
+  import {env, getClientTags, sign, userSettings, broadcastUserRelays} from "src/engine"
 
   export let quote = null
   export let pubkey = null
@@ -197,6 +197,7 @@
 
     if (!aborted) {
       showPublishInfo(thunk)
+      broadcastUserRelays(relays)
     }
 
     publishing = null

@@ -24,7 +24,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {getClientTags, sign, userSettings} from "src/engine"
+  import {getClientTags, sign, broadcastUserRelays, userSettings} from "src/engine"
   import {makeEditor} from "src/app/editor"
 
   export let parent
@@ -131,6 +131,7 @@
 
     loading = false
     onReplyPublish(thunk)
+    broadcastUserRelays(relays)
   }
 
   const onBodyClick = e => {
