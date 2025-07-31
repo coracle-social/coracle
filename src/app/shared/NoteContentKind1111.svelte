@@ -16,7 +16,7 @@
   {#if linkParent}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-link fa-xs mt-1" />
-      <NoteContentLinks urls={[linkParent]} {showMedia} />
+      <NoteContentLinks urls={[linkParent]} />
     </div>
   {/if}
 </div>
