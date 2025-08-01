@@ -11,15 +11,13 @@ import {
 import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   pubkey,
-  loadZapper,
-  loadHandle,
-  loadRelaySelections,
-  loadBlossomServers,
-  loadProfile,
-  loadFollows,
-  loadMutes,
+  loadUserRelaySelections,
+  loadUserInboxRelaySelections,
+  loadUserBlossomServers,
+  loadUserProfile,
+  loadUserFollows,
+  loadUserMutes,
   getFollows,
-  loadInboxRelaySelections,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
@@ -57,23 +55,21 @@ export const slowConnections = writable([])
 
 // Synchronization from events to state
 
-export const loadUserData = async (hints: string[] = []) => {
+export const loadUserData = async () => {
   // Load relays, then load everything else so we have a better chance of finding it
   const $pubkey = pubkey.get()
 
-  // Load crucial user data
-  await Promise.all([
-    loadInboxRelaySelections($pubkey, hints),
-    loadRelaySelections($pubkey, hints),
-    loadBlossomServers($pubkey, hints),
-    loadProfile($pubkey, hints),
-    loadFollows($pubkey, hints),
-    loadMutes($pubkey, hints),
-  ])
+  // Load relay selections first
+  await loadUserRelaySelections()
 
-  // Load less important user data
-  loadZapper($pubkey)
-  loadHandle($pubkey)
+  // Load other crucial user data
+  await Promise.all([
+    loadUserInboxRelaySelections(),
+    loadUserBlossomServers(),
+    loadUserProfile(),
+    loadUserFollows(),
+    loadUserMutes(),
+  ])
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({

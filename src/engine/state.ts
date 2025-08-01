@@ -263,7 +263,7 @@ export const trackerStore = makeTrackerStore({throttle: 1000})
 // Settings
 
 export const defaultSettings = {
-  relay_limit: 5,
+  relay_limit: 3,
   default_zap: 21,
   show_media: true,
   send_delay: 0, // undo send delay in ms
