@@ -1,7 +1,14 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep} from "@welshman/lib"
-  import {RELAYS, FOLLOWS, PROFILE, normalizeRelayUrl, isRelayUrl} from "@welshman/util"
+  import {sleep, spec} from "@welshman/lib"
+  import {
+    RELAYS,
+    FOLLOWS,
+    PROFILE,
+    getRelayTagValues,
+    normalizeRelayUrl,
+    isRelayUrl,
+  } from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {session, repository} from "@welshman/app"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -55,6 +62,14 @@
   let customRelay = ""
 
   tryDefaultRelays()
+
+  $: {
+    const relaySelectionsEvent = $events.find(spec({kind: RELAYS}))
+
+    if (!found && relaySelectionsEvent) {
+      searchRelays(getRelayTagValues(relaySelectionsEvent.tags))
+    }
+  }
 
   $: {
     if (!found && $events.length === 3) {

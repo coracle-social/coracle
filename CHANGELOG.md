@@ -8,6 +8,8 @@
 * Remove profile banners
 * Add better mute support
 * Mute privately by default
+* Broadcast user relays when publishing
+* Aggresively refresh user data before updating to reduce race conditions
 
 # 0.6.18
 
