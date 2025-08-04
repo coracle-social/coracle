@@ -23,19 +23,19 @@
   const goToDetail = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: Router.get().Event(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: Router.get().Event(event).limit(10).getUrls()})
       .push()
 
   const goToParent = () =>
     router
       .at("notes")
-      .of(reply, {relays: Router.get().EventParents(event).getUrls()})
+      .of(reply, {relays: Router.get().EventParents(event).limit(10).getUrls()})
       .open()
 
   const goToThread = () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: Router.get().EventRoots(event).getUrls()})
+      .of(getIdOrAddress(event), {relays: Router.get().EventRoots(event).limit(10).getUrls()})
       .at("thread")
       .open()
 </script>

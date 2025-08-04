@@ -46,7 +46,7 @@ import {
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, myRequest, canDecrypt, myLoad, type MyRequestOptions} from "src/engine/state"
+import {env, myRequest, canDecrypt, myLoad, userSettings} from "src/engine/state"
 
 // Utils
 
@@ -100,7 +100,11 @@ export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) =
   return {promise, loading, stop: onExhausted}
 }
 
-export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptions> = {}) => {
+export type DeriveEventOptions = {
+  relays?: string[]
+}
+
+export const deriveEvent = (idOrAddress: string, {relays = []}: DeriveEventOptions = {}) => {
   let attempted = false
 
   const router = Router.get()
@@ -110,17 +114,20 @@ export const deriveEvent = (idOrAddress: string, request: Partial<MyRequestOptio
     deriveEvents(repository, {filters, includeDeleted: true}),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
-        const scenarios = [router.FromRelays(request.relays || [])]
+        const scenarios = [router.FromRelays(relays)]
 
         if (Address.isAddress(idOrAddress)) {
           scenarios.push(router.ForPubkey(Address.from(idOrAddress).pubkey))
         }
 
-        const relays = router.merge(scenarios).policy(addMaximalFallbacks).getUrls()
+        const scenario = router
+          .merge(scenarios)
+          .limit(Math.max(relays.length, userSettings.get().relay_limit))
+          .policy(addMaximalFallbacks)
 
         attempted = true
 
-        myLoad({...request, skipCache: true, relays, filters})
+        myLoad({skipCache: true, relays: scenario.getUrls(), filters})
       }
 
       return events[0]
