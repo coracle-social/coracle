@@ -141,7 +141,7 @@
     showNewMessages = false
   }} />
 
-<div class="fixed inset-0 z-chat flex flex-col bg-neutral-800 lg:ml-72">
+<div class="inset-sai fixed z-chat flex flex-col bg-neutral-800 lg:ml-72">
   <div class="bg-neutral-900">
     <slot name="header" />
   </div>

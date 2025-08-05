@@ -116,7 +116,7 @@
         class="absolute inset-0 cursor-pointer bg-black opacity-50"
         on:click|stopPropagation={tryClose} />
       <div
-        class="modal-content p-sai ml-0 h-full overflow-auto"
+        class="modal-content scroll-container p-sai ml-0 h-full overflow-auto"
         class:overflow-hidden={mini}
         class:pointer-events-none={mini}
         use:swipe

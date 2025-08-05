@@ -44,7 +44,7 @@ export const createScroller = (
   loadMore: () => Promise<void>,
   {delay = 1000, threshold = 2000, reverse = false, element}: ScrollerOpts = {},
 ) => {
-  element = element.closest(".modal-content") || element
+  element = element.closest(".scroll-container") || element
 
   let done = false
   const check = async () => {

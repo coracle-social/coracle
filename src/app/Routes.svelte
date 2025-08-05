@@ -49,13 +49,16 @@
 {#key $pubkey}
   <div
     id="page"
-    class={cx("relative pb-32 text-neutral-100 lg:ml-72 lg:pt-16", {
-      "pointer-events-none": $menuIsOpen,
-    })}>
+    class={cx(
+      "m-sai scroll-container relative overflow-auto pb-32 text-neutral-100 lg:pl-72 lg:pt-16",
+      {
+        "pointer-events-none": $menuIsOpen,
+      },
+    )}>
     {#if $page}
       {@const {component} = router.getMatch($page.path).route}
       {#key router.getKey($page)}
-        <div class="my-sai m-auto w-full max-w-2xl">
+        <div class="m-auto w-full max-w-2xl">
           <div class="flex max-w-2xl flex-grow flex-col gap-4 p-4">
             <svelte:component this={component} {...router.getProps($page)} />
           </div>
