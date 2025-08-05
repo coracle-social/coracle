@@ -7,7 +7,8 @@
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import QRCode from "src/partials/QRCode.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -97,7 +98,7 @@
   <Heading>Login with Signer</Heading>
   <p>
     To log in using a remote signer, scan the QR code below or enter a connection link.
-    <Anchor underline modal href="/help/remote-signers">What's a signer?</Anchor>
+    <Link class="underline" modal href="/help/remote-signers">What's a signer?</Link>
   </p>
   {#if url}
     <Popover triggerType="mouseenter">
@@ -111,7 +112,8 @@
     <i slot="before" class="fa fa-box" />
   </Input>
   <div class="flex gap-2">
-    <Anchor button on:click={back} disabled={loading}><i class="fa fa-arrow-left" /> Back</Anchor>
-    <Anchor button accent class="flex-grow" {loading} on:click={logIn}>Continue</Anchor>
+    <Button class="btn" on:click={back} disabled={loading}
+      ><i class="fa fa-arrow-left" /> Back</Button>
+    <Button class="btn btn-accent flex-grow" {loading} on:click={logIn}>Continue</Button>
   </div>
 </FlexColumn>

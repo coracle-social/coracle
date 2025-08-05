@@ -7,7 +7,7 @@
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Field from "src/partials/Field.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
@@ -61,6 +61,6 @@
       </div>
     </Field>
     <FeedItem note={event} showMedia={false} />
-    <Anchor button tag="button" type="submit">Save</Anchor>
+    <Button class="btn" type="submit">Save</Button>
   </FlexColumn>
 </form>

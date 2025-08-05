@@ -1,6 +1,6 @@
 <script lang="ts">
   import {pubkey} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util"
   import {deriveEvent} from "src/engine"
@@ -14,9 +14,9 @@
   <ListCard {address}>
     <div slot="controls" class="flex gap-2">
       {#if $event.pubkey === $pubkey}
-        <Anchor modal href={router.at("lists").of(address).at("edit").toString()}>
+        <Link modal href={router.at("lists").of(address).at("edit").toString()}>
           <i class="fa fa-edit" /> Edit
-        </Anchor>
+        </Link>
       {/if}
     </div>
   </ListCard>

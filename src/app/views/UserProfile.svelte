@@ -3,7 +3,8 @@
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import Footer from "src/partials/Footer.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -32,7 +33,7 @@
     <p>
       Give people a friendly way to recognize you. We recommend you do not use your real name or
       share your personal information. The future of the internet is
-      <Anchor underline external href={pseudUrl}>pseudonymous</Anchor>.
+      <Link class="underline" external href={pseudUrl}>pseudonymous</Link>.
     </p>
   </div>
   <div class="flex w-full flex-col gap-8">
@@ -47,8 +48,8 @@
         <i slot="before" class="fa-solid fa-user-check" />
       </Input>
       <div slot="info">
-        Enter a <Anchor underline external href={nip05Url}>NIP-05</Anchor> address to verify your public
-        key.
+        Enter a <Link class="underline" external href={nip05Url}>NIP-05</Link> address to verify your
+        public key.
       </div>
     </Field>
     <Field label="Lightning address">
@@ -56,7 +57,7 @@
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
-        Enter a <Anchor underline external href={lud16Url}>lightning address</Anchor> to enable sending
+        Enter a <Link class="underline" external href={lud16Url}>lightning address</Link> to enable sending
         and receiving bitcoin tips.
       </div>
     </Field>
@@ -80,6 +81,6 @@
     </Field>
   </div>
   <Footer>
-    <Anchor grow button tag="button" type="submit">Save</Anchor>
+    <Button class="btn flex-grow" type="submit">Save</Button>
   </Footer>
 </form>

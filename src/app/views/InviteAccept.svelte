@@ -4,7 +4,7 @@
   import PersonList from "src/app/shared/PersonList.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -49,7 +49,7 @@
       </FlexColumn>
     </Card>
   {/if}
-  <Anchor button accent href="/">Done</Anchor>
+  <Link class="btn btn-accent" href="/">Done</Link>
 {:else}
   <Onboarding invite={{people, relays, parsedRelays}} />
 {/if}

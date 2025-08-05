@@ -1,7 +1,8 @@
 <script lang="ts">
   import {isMobile} from "src/util/html"
   import {themeColors, appName} from "src/partials/state"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
 
   export let setStage
   export let nstartCompleted
@@ -37,10 +38,10 @@
   here to finish setting up your account.
 </p>
 <div class="flex gap-2">
-  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
+  <Button class="btn" on:click={prev}><i class="fa fa-arrow-left" /> Back</Button>
   {#if nstartCompleted}
-    <Anchor button accent class="flex-grow" on:click={next}>Continue</Anchor>
+    <Button class="btn btn-accent flex-grow" on:click={next}>Continue</Button>
   {:else}
-    <Anchor button accent class="flex-grow" externalHref={nstart}>Continue</Anchor>
+    <Link class="btn btn-accent flex-grow" href={nstart} external target="">Continue</Link>
   {/if}
 </div>

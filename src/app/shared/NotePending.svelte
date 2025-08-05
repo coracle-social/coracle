@@ -23,7 +23,7 @@
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import {timestamp1} from "src/util/misc"
 
   const rendered = now()
@@ -72,13 +72,13 @@
         <span class="hidden sm:inline">
           Published to {success.length}/{relays.length} relays
         </span>
-        <Anchor
+        <Link
           class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
           modal
           href="/publishes">
           <span class="sm:hidden"> Details </span>
           <span class="hidden sm:inline"> See details </span>
-        </Anchor>
+        </Link>
       {/if}
     {:else if $userSettings.send_delay > 0}
       {@const seconds = rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {makeTagFeed} from "@welshman/feeds"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {router} from "src/app/util/router"
   import {makeFeed} from "src/domain"
 
@@ -11,6 +11,6 @@
   const onClick = () => router.at("notes").cx({feed}).push()
 </script>
 
-<Anchor modal underline on:click={onClick}>
+<Button modal class="underline" on:click={onClick}>
   #{value}
-</Anchor>
+</Button>

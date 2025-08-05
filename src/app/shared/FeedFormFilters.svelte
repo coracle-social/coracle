@@ -25,7 +25,7 @@
   import Menu from "src/partials/Menu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import FeedFormSectionPeople from "src/app/shared/FeedFormSectionPeople.svelte"
   import FeedFormSectionRelays from "src/app/shared/FeedFormSectionRelays.svelte"
@@ -167,10 +167,10 @@
         </Menu>
       </Popover2>
     {/if}
-    <Anchor
+    <Button
       class="flex items-center justify-center rounded-lg border border-dashed border-neutral-500 p-4 text-neutral-300"
       on:click={openMenu}>
       <span class="staatliches underline">Add a filter</span>
-    </Anchor>
+    </Button>
   </div>
 {/if}

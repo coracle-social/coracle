@@ -17,7 +17,7 @@
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
@@ -121,11 +121,11 @@
       </Field>
     {/if}
     <div class="flex justify-between">
-      <Anchor button on:click={() => exit()}>Discard</Anchor>
+      <Button class="btn" on:click={() => exit()}>Discard</Button>
       {#if showDelete}
-        <Anchor button on:click={openDelete}>Delete</Anchor>
+        <Button class="btn" on:click={openDelete}>Delete</Button>
       {/if}
-      <Anchor button accent tag="button" type="submit">Save</Anchor>
+      <Button class="btn btn-accent" type="submit">Save</Button>
     </div>
   </FlexColumn>
 </form>
@@ -137,8 +137,8 @@
       Are you sure you want to delete your {displayUserList(list)} list?
     </p>
     <div class="flex justify-between gap-2">
-      <Anchor button on:click={closeDelete}>Cancel</Anchor>
-      <Anchor button danger on:click={confirmDelete}>Confirm</Anchor>
+      <Button class="btn" on:click={closeDelete}>Cancel</Button>
+      <Button class="btn btn-danger" on:click={confirmDelete}>Confirm</Button>
     </div>
   </Modal>
 {/if}

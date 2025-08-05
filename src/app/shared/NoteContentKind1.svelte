@@ -23,7 +23,7 @@
     isLinkGrid,
   } from "@welshman/content"
   import QRCode from "src/partials/QRCode.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
   import NoteContentEmoji from "src/app/shared/NoteContentEmoji.svelte"
@@ -120,13 +120,13 @@
             </div>
           </NoteContentQuote>
         {:else}
-          <Anchor
+          <Link
             modal
             stopPropagation
             class="overflow-hidden text-ellipsis whitespace-nowrap underline"
             href={fromNostrURI(parsed.raw)}>
             {fromNostrURI(parsed.raw).slice(0, 16) + "…"}
-          </Anchor>
+          </Link>
         {/if}
       {:else if isEmoji(parsed)}
         <NoteContentEmoji {...parsed.value} />

@@ -5,7 +5,7 @@
   import {Router} from "@welshman/router"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
@@ -18,7 +18,7 @@
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 
-<Anchor external href={`https://zap.stream/${address.toNaddr()}`}>
+<Link external href={`https://zap.stream/${address.toNaddr()}`}>
   <Card interactive>
     <FlexColumn>
       {#if p}
@@ -40,4 +40,4 @@
       <NoteContentTopics {note} />
     </FlexColumn>
   </Card>
-</Anchor>
+</Link>

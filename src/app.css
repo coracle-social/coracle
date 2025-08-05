@@ -367,3 +367,49 @@ body,
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* anchors and buttons */
+
+.btn {
+  @apply bg-white text-black text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2 px-6 h-7 transition-all;
+}
+
+.btn[disabled=true], .btn.btn-disabled {
+  @apply opacity-50 pointer-events-none;
+}
+
+.btn.btn-low {
+  @apply bg-tinted-700 text-tinted-200;
+}
+
+.btn.btn-low:hover {
+  @apply bg-tinted-600;
+}
+
+.btn.btn-accent {
+  @apply bg-accent text-white;
+}
+
+.btn.btn-accent:hover {
+  @apply bg-accent;
+}
+
+.btn.btn-danger {
+  @apply text-danger border border-solid border-danger;
+}
+
+.btn.btn-circle {
+  @apply aspect-square flex justify-center items-center rounded-full !p-0 w-7;
+}
+
+.btn.btn-square {
+  @apply aspect-square flex justify-center items-center;
+}
+
+.btn.btn-tall {
+  @apply h-10;
+}
+
+.btn.btn-tall.btn-circle {
+  @apply w-10;
+}

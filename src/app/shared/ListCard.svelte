@@ -7,7 +7,7 @@
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readUserList, displayUserList, mapListToFeed} from "src/domain"
@@ -59,7 +59,7 @@
         </div>
       </span>
       <slot name="controls">
-        <Anchor underline on:click={loadFeed}>Load feed</Anchor>
+        <Button class="underline" on:click={loadFeed}>Load feed</Button>
       </slot>
     </div>
     {#if list.description}

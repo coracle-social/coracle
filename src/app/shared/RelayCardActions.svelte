@@ -4,7 +4,7 @@
   import {leaveRelay, joinRelay} from "src/engine"
   import {router} from "../util"
   import Popover from "src/partials/Popover.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
 
   export let url
   export let details = false
@@ -67,28 +67,31 @@
       class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
       on:click={_ => (details = !details)}>
       <span class="whitespace-nowrap">Info</span>
-      <Anchor tall button circle class="text-accent"><i class="fa fa-info text-sm" /></Anchor>
+      <Button class="btn btn-tall btn-circle text-accent"><i class="fa fa-info text-sm" /></Button>
     </div>
     <div
       class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
       on:click={() =>
         router.at(router.at("relays").of(encodeURIComponent(url)).toString()).push({modal: true})}>
       <span class="whitespace-nowrap">Explore</span>
-      <Anchor tall button circle class="text-accent"><i class="fa fa-search text-sm" /></Anchor>
+      <Button class="btn btn-tall btn-circle text-accent"
+        ><i class="fa fa-search text-sm" /></Button>
     </div>
     {#if !userRelayUrls.includes(url)}
       <div
         class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
         on:click={join}>
         <span class="whitespace-nowrap">Join</span>
-        <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
+        <Button class="btn btn-tall btn-circle text-accent"
+          ><i class="fa fa-sign-out text-sm" /></Button>
       </div>
     {:else if userRelayUrls.length > 1}
       <div
         class="relative z-popover flex cursor-pointer items-center justify-end gap-2 text-neutral-100"
         on:click={leave}>
         <span class="whitespace-nowrap">Leave</span>
-        <Anchor tall button circle class="text-accent"><i class="fa fa-sign-out text-sm" /></Anchor>
+        <Button class="btn btn-tall btn-circle text-accent"
+          ><i class="fa fa-sign-out text-sm" /></Button>
       </div>
     {/if}
     <div

@@ -5,7 +5,7 @@
   import {pubkey, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {hasNip44} from "src/engine"
@@ -32,7 +32,7 @@
     <Field label="Who do you want to talk to?">
       <PersonSelect multiple autofocus bind:value />
     </Field>
-    <Anchor disabled={nip44Disabled} button tag="button" type="submit">Start Chat</Anchor>
+    <Button class="btn" disabled={nip44Disabled} type="submit">Start Chat</Button>
     {#if nip44Disabled}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />

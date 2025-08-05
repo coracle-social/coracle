@@ -11,7 +11,8 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
+  import Link from "src/partials/Link.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {fuzzy, pluralize} from "src/util/misc"
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
@@ -125,9 +126,10 @@
       </Input>
       <p slot="info">
         Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting images
-        and loading link previews. You can find the source code <Anchor
-          underline
-          href="https://github.com/coracle-social/dufflepud">here</Anchor
+        and loading link previews. You can find the source code <Link
+          class="underline"
+          external
+          href="https://github.com/coracle-social/dufflepud">here</Link
         >.
       </p>
     </Field>
@@ -137,8 +139,10 @@
       </Input>
       <p slot="info">
         Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
-        privacy. You can set up your own proxy <Anchor underline href="https://imgproxy.net/"
-          >here</Anchor
+        privacy. You can set up your own proxy <Link
+          class="underline"
+          external
+          href="https://imgproxy.net/">here</Link
         >.
       </p>
     </Field>
@@ -158,6 +162,6 @@
     </FieldInline>
   </div>
   <Footer>
-    <Anchor grow button tag="button" type="submit">Save</Anchor>
+    <Button class="btn flex-grow" type="submit">Save</Button>
   </Footer>
 </form>

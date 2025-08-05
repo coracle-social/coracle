@@ -4,7 +4,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {getIdAndAddress, getIdFilters, getAncestors} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import {deriveEvent, myRequest} from "src/engine"
@@ -83,14 +83,14 @@
       <FeedItem topLevel showParent={false} note={ancestor} />
     {/each}
   {:else if ancestors.length > 0}
-    <Anchor
+    <Button
       class="text-center text-neutral-100"
       on:click={() => {
         showAncestors = true
       }}>
       <i class="fa fa-up-down pr-2 text-sm" />
       Show {quantify(ancestors.length, "other note")}
-    </Anchor>
+    </Button>
   {/if}
   <FeedItem topLevel showParent={false} note={parent} />
   <FeedItem topLevel showParent={false} note={$event} depth={2} />

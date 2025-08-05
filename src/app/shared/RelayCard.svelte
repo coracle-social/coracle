@@ -7,7 +7,7 @@
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
@@ -110,8 +110,8 @@
         <span class="flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
-            <Anchor external underline href={$relay.profile.contact}>
-              {displayUrl($relay.profile.contact)}</Anchor>
+            <Link external class="underline" href={$relay.profile.contact}>
+              {displayUrl($relay.profile.contact)}</Link>
           {/if}
         </span>
       {/if}
@@ -191,8 +191,8 @@
         <span class="flex items-center gap-1">
           {#if $relay?.profile?.contact}
             <span class="opacity-75">Contact: </span>
-            <Anchor external underline href={$relay.profile.contact}>
-              {displayUrl($relay.profile.contact)}</Anchor>
+            <Link external class="underline" href={$relay.profile.contact}>
+              {displayUrl($relay.profile.contact)}</Link>
           {/if}
         </span>
       {/if}

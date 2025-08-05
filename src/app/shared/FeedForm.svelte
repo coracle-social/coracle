@@ -10,7 +10,7 @@
   import Input from "src/partials/Input.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
   import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
   import {deleteEvent, removeFeedFavorite} from "src/engine"
@@ -97,7 +97,7 @@
   {#if !saveIsOpen}
     <Card class="flex flex-col justify-between sm:flex-row">
       <p>Would you like to save this feed?</p>
-      <Anchor underline on:click={openSave} class="text-neutral-400">Save this feed</Anchor>
+      <Button class="text-neutral-400 underline" on:click={openSave}>Save this feed</Button>
     </Card>
   {:else if draft.event || draft.list}
     {@const event = draft.event || draft.list.event}
@@ -111,16 +111,16 @@
           )}.
         </p>
       {/if}
-      <Anchor underline on:click={startClone} class="whitespace-nowrap text-neutral-400">
+      <Button class="whitespace-nowrap text-neutral-400 underline" on:click={startClone}>
         Create a new feed instead
-      </Anchor>
+      </Button>
     </Card>
   {:else if feed.event || feed.list}
     <Card class="flex flex-col justify-between sm:flex-row">
       <p>You are currently creating a new feed.</p>
-      <Anchor underline on:click={stopClone} class="text-neutral-400">
+      <Button class="text-neutral-400 underline" on:click={stopClone}>
         Edit "{displayFeed(feed)}" instead
-      </Anchor>
+      </Button>
     </Card>
   {/if}
 {/if}
@@ -147,17 +147,17 @@
 {/if}
 
 <div class="flex justify-between gap-2">
-  <Anchor button on:click={() => exit()}>Discard</Anchor>
+  <Button class="btn" on:click={() => exit()}>Discard</Button>
   {#if showDelete}
-    <Anchor button on:click={openDelete}>Delete</Anchor>
+    <Button class="btn" on:click={openDelete}>Delete</Button>
   {/if}
   <div class="flex gap-2">
     {#if saveIsOpen && apply}
-      <Anchor button accent on:click={saveFeed}>Save and apply</Anchor>
+      <Button class="btn btn-accent" on:click={saveFeed}>Save and apply</Button>
     {:else if saveIsOpen}
-      <Anchor button accent on:click={saveFeed}>Save feed</Anchor>
+      <Button class="btn btn-accent" on:click={saveFeed}>Save feed</Button>
     {:else if apply}
-      <Anchor button accent on:click={apply}>Apply filter</Anchor>
+      <Button class="btn btn-accent" on:click={apply}>Apply filter</Button>
     {/if}
   </div>
 </div>
@@ -169,8 +169,8 @@
       Are you sure you want to delete your "{displayFeed(feed)}" feed?
     </p>
     <div class="flex justify-between gap-2">
-      <Anchor button on:click={closeDelete}>Cancel</Anchor>
-      <Anchor button danger on:click={confirmDelete}>Confirm</Anchor>
+      <Button class="btn" on:click={closeDelete}>Cancel</Button>
+      <Button class="btn btn-danger" on:click={confirmDelete}>Confirm</Button>
     </div>
   </Modal>
 {/if}
@@ -183,8 +183,8 @@
       you like to delete the old version?
     </p>
     <div class="flex justify-between">
-      <Anchor button on:click={closeListDelete}>Keep it</Anchor>
-      <Anchor button accent on:click={confirmDelete}>Delete it</Anchor>
+      <Button class="btn" on:click={closeListDelete}>Keep it</Button>
+      <Button class="btn btn-accent" on:click={confirmDelete}>Delete it</Button>
     </div>
   </Modal>
 {/if}

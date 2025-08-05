@@ -7,7 +7,7 @@
   import {timestamp1} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
   import Popover from "src/partials/Popover.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
@@ -32,13 +32,13 @@
       "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
     })}>
     {#if message.showProfile && message.pubkey !== $session.pubkey}
-      <Anchor
+      <Link
         modal
         href={router.at("people").of(message.pubkey).toString()}
         class="relative z-feature flex items-center gap-2">
         <PersonCircle pubkey={message.pubkey} class="h-8 w-8" />
         <PersonName pubkey={message.pubkey} />
-      </Anchor>
+      </Link>
     {/if}
     <div class="break-words">
       {#await getContent(message)}
@@ -77,7 +77,7 @@
             <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
             <p slot="tooltip">
               This message was sent using nostr's legacy DMs, which have a number of shortcomings.
-              Read more <Anchor underline modal href="/help/nip-44-dms">here</Anchor>.
+              Read more <Link class="underline" modal href="/help/nip-44-dms">here</Link>.
             </p>
           </Popover>
         {:else}
@@ -86,10 +86,10 @@
             <div slot="tooltip" class="flex flex-col gap-2">
               <p>
                 This message was sent using nostr's new group chat specification, which solves
-                several problems with legacy DMs. Read more <Anchor
-                  underline
+                several problems with legacy DMs. Read more <Link
+                  class="underline"
                   modal
-                  href="/help/nip-44-dms">here</Anchor
+                  href="/help/nip-44-dms">here</Link
                 >.
               </p>
               {#if message.pubkey === $session.pubkey}

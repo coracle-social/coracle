@@ -1,6 +1,6 @@
 <script lang="ts">
   import Modal from "src/partials/Modal.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
 
   export let onAbort
@@ -17,8 +17,8 @@
       signing messages - effectively equivalent to a password. Are you sure you want to continue?
     </p>
     <div class="flex gap-2">
-      <Anchor button on:click={onAbort}>Abort</Anchor>
-      <Anchor button danger on:click={onBypass}>Proceed</Anchor>
+      <Button class="btn" on:click={onAbort}>Abort</Button>
+      <Button class="btn btn-danger" on:click={onBypass}>Proceed</Button>
     </div>
   </Content>
 </Modal>

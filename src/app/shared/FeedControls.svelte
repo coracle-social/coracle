@@ -1,6 +1,6 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
-  import {writable} from 'svelte/store'
+  import {writable} from "svelte/store"
   import {sortBy, not, equals, uniqBy} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {synced, localStorageProvider} from "@welshman/store"
@@ -13,7 +13,8 @@
   import Modal from "src/partials/Modal.svelte"
   import Input from "src/partials/Input.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FeedForm from "src/app/shared/FeedForm.svelte"
   import {router} from "src/app/util"
   import {normalizeFeedDefinition, makeFeed, readFeed, displayFeed} from "src/domain"
@@ -25,11 +26,13 @@
   feed.definition = normalizeFeedDefinition(feed.definition)
 
   const form = boolCtrl()
-  const expanded = $pubkey ? synced({
-    key: "FeedControls/expanded",
-    defaultValue: false,
-    storage: localStorageProvider,
-  }) : writable(false)
+  const expanded = $pubkey
+    ? synced({
+        key: "FeedControls/expanded",
+        defaultValue: false,
+        storage: localStorageProvider,
+      })
+    : writable(false)
 
   const toggleExpanded = () => expanded.update(not)
 
@@ -117,7 +120,7 @@
     </Input>
     <slot name="controls" />
     {#if $signer}
-      <Anchor button low on:click={toggleExpanded}>Customize</Anchor>
+      <Button class="btn btn-low" on:click={toggleExpanded}>Customize</Button>
     {/if}
   </div>
   {#if $expanded}
@@ -125,9 +128,9 @@
       <Card class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <p class="staatliches text-2xl">Your Feeds</p>
-          <Anchor on:click={toggleExpanded}>
+          <Button on:click={toggleExpanded}>
             <i class="fa fa-lg fa-times transition-all duration-700" class:rotate-180={$expanded} />
-          </Anchor>
+          </Button>
         </div>
         <div class="flex flex-wrap gap-1">
           {#each allFeeds as other}
@@ -145,10 +148,10 @@
         </div>
         <div class="my-4 flex flex-col-reverse justify-between gap-2 sm:flex-row">
           <div class="flex flex-col gap-2 sm:flex-row">
-            <Anchor button href={router.at("lists").toString()}>Manage lists</Anchor>
-            <Anchor button href={router.at("feeds").toString()}>Manage feeds</Anchor>
+            <Link class="btn" href={router.at("lists").toString()}>Manage lists</Link>
+            <Link class="btn" href={router.at("feeds").toString()}>Manage feeds</Link>
           </div>
-          <Anchor button accent on:click={openForm}>Edit feed</Anchor>
+          <Button class="btn btn-accent" on:click={openForm}>Edit feed</Button>
         </div>
       </Card>
     </div>

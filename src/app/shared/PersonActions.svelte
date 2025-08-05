@@ -5,7 +5,7 @@
   import {Router} from "@welshman/router"
   import {session, signer, tagPubkey, mutePrivately, unmute, loginWithPubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {userMutedPubkeys} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
@@ -95,8 +95,8 @@
         class="relative z-popover flex cursor-pointer items-center text-neutral-100"
         on:click={onClick}>
         <span class="absolute right-0 mr-12 whitespace-nowrap">{label}</span>
-        <Anchor tall button circle class="text-accent"
-          ><i class={`fa fa-${icon} text-sm`} /></Anchor>
+        <Button class="btn-tall btn btn-circle text-accent"
+          ><i class={`fa fa-${icon} text-sm`} /></Button>
       </div>
     {/each}
   </div>

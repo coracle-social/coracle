@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
   import {publishDeletion} from "src/engine"
@@ -24,7 +24,7 @@
     this request.
   </p>
   <div class="flex gap-2">
-    <Anchor button on:click={onCancel}>Cancel</Anchor>
-    <Anchor button danger on:click={onConfirm}>Confirm</Anchor>
+    <Button class="btn" on:click={onCancel}>Cancel</Button>
+    <Button class="btn btn-danger" on:click={onConfirm}>Confirm</Button>
   </div>
 </FlexColumn>

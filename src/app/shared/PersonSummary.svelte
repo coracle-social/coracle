@@ -1,7 +1,7 @@
 <script lang="ts">
   import {tagPubkey} from "@welshman/app"
   import cx from "classnames"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
@@ -26,7 +26,7 @@
 
 <div class="relative flex flex-grow flex-col gap-4">
   <div class="relative grid grid-cols-4 gap-4">
-    <Anchor
+    <Button
       on:click={inert ? null : showDetail}
       class={cx("col-span-3 flex gap-4 overflow-hidden", {"col-span-4": hideActions})}>
       <PersonCircle class="h-14 w-14" {pubkey} />
@@ -34,16 +34,16 @@
         <PersonName class="text-lg" {pubkey} />
         <PersonHandle {pubkey} />
       </div>
-    </Anchor>
+    </Button>
     {#if !hideActions}
       <div class="flex items-start justify-end">
         <div class="flex items-center justify-end gap-2">
           {#if !hideFollowActions}
             {#if $following}
-              <Anchor button low class="border-none bg-tinted-800-d" on:click={unfollowPerson}
-                >Followed</Anchor>
+              <Button class="btn btn-low border-none bg-tinted-800-d" on:click={unfollowPerson}
+                >Followed</Button>
             {:else}
-              <Anchor button accent on:click={followPerson}>Follow</Anchor>
+              <Button class="btn btn-accent" on:click={followPerson}>Follow</Button>
             {/if}
           {/if}
           <slot name="actions" {pubkey}>

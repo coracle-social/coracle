@@ -9,7 +9,8 @@
   import {createScroller, pluralize} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -222,13 +223,13 @@
     {:else if !userHasInbox}
       <p>
         You don't have any inbox relays set up yet, which will make it difficult for you to receive
-        replies to this conversation. Click <Anchor underline href="/settings/relays">here</Anchor> to
-        set up your inbox relays.
+        replies to this conversation. Click <Link class="underline" href="/settings/relays"
+          >here</Link> to set up your inbox relays.
       </p>
     {/if}
     <div class="flex justify-between">
-      <Anchor button on:click={closeConfirm}>Cancel</Anchor>
-      <Anchor button accent on:click={sendAnyway}>Send anyway</Anchor>
+      <Button class="btn" on:click={closeConfirm}>Cancel</Button>
+      <Button class="btn btn-accent" on:click={sendAnyway}>Send anyway</Button>
     </div>
   </Modal>
 {/if}

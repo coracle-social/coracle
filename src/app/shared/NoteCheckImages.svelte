@@ -2,7 +2,7 @@
   import {onMount} from "svelte"
   import {postJson} from "@welshman/lib"
   import {pubkey} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {dufflepud, getSetting, userFollows} from "src/engine"
 
   export let urls: string[]
@@ -33,7 +33,7 @@
     <i class="fa fa-warning m-1" />
     <p>
       This note contains sensitive content.<br />
-      <Anchor underline on:click={ignoreWarning}>Show anyway</Anchor>
+      <Button class="underline" on:click={ignoreWarning}>Show anyway</Button>
     </p>
   </div>
 {:else}

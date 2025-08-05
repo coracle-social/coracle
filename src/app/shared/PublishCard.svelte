@@ -9,7 +9,8 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
   import {ensureUnwrapped} from "src/engine"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
+  import Link from "src/partials/Link.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Note from "src/app/shared/Note.svelte"
@@ -22,8 +23,6 @@
 
   const retry = (url: string, event: TrustedEvent) =>
     publishThunk({relays: [url], event: thunk.event as SignedEvent})
-
-  const open = (event: TrustedEvent) => router.at("notes").of(event.id).open()
 
   const expand = () => {
     expanded = true
@@ -50,7 +49,8 @@
         <FlexColumn>
           <div class="flex justify-between">
             <span>Kind {event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
-            <Anchor underline modal class="text-sm" on:click={() => open(event)}>View Note</Anchor>
+            <Link class="text-sm underline" modal href={router.at("notes").of(event.id).toString()}
+              >View Note</Link>
           </div>
           <NoteReducer events={[event]} let:event>
             <Note {event} />
@@ -81,15 +81,15 @@
               {/if}
             </div>
             {#if expanded}
-              <Anchor class="flex items-center gap-2" on:click={collapse}>
+              <Button class="flex items-center gap-2" on:click={collapse}>
                 <i class="fa fa-caret-up" />
                 <span class="text-underline">Hide Details</span>
-              </Anchor>
+              </Button>
             {:else}
-              <Anchor class="flex items-center gap-2" on:click={expand}>
+              <Button class="flex items-center gap-2" on:click={expand}>
                 <i class="fa fa-caret-down" />
                 <span class="text-underline">Show Details</span>
-              </Anchor>
+              </Button>
             {/if}
           </div>
           {#if expanded}
@@ -116,11 +116,11 @@
                   {#each failure as url}
                     <RelayCard {url}>
                       <div slot="actions">
-                        <Anchor
+                        <Button
                           on:click={() => retry(url, event)}
                           class="flex items-center gap-2 text-sm">
                           <i class="fa fa-rotate" /> Retry
-                        </Anchor>
+                        </Button>
                       </div>
                     </RelayCard>
                   {/each}
@@ -130,11 +130,11 @@
                   {#each timeout as url}
                     <RelayCard {url}>
                       <div slot="actions">
-                        <Anchor
+                        <Button
                           on:click={() => retry(url, event)}
                           class="flex items-center gap-2 text-sm">
                           <i class="fa fa-rotate" /> Retry
-                        </Anchor>
+                        </Button>
                       </div>
                     </RelayCard>
                   {/each}

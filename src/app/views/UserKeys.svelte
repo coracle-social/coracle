@@ -2,7 +2,7 @@
   import type {Nip46Signer} from "@welshman/signer"
   import {session, signer} from "@welshman/app"
   import * as nip19 from "nostr-tools/nip19"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {nsecEncode} from "src/util/nostr"
@@ -21,9 +21,9 @@
       <h2 class="staatliches text-2xl">Your keys</h2>
     </div>
     <p>
-      Your account is identified across the network using a public/private <Anchor
+      Your account is identified across the network using a public/private <Link
         href={keypairUrl}
-        external>keypair</Anchor
+        external>keypair</Link
       >. This allows you to fully own your account, and move to another app if needed.
     </p>
     <div>
@@ -44,9 +44,9 @@
         <small class="text-neutral-100">
           Your private key is used to prove your identity by cryptographically signing messages. <strong
             >Do not share this with anyone.</strong>
-          Be careful about copying this into other apps - instead, consider using a <Anchor
+          Be careful about copying this into other apps - instead, consider using a <Link
             href={nip07}
-            external>compatible browser extension</Anchor> to securely store your key.
+            external>compatible browser extension</Link> to securely store your key.
         </small>
       </div>
     {/if}

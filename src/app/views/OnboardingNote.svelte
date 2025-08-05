@@ -6,7 +6,7 @@
   import {own} from "@welshman/signer"
   import {makePow} from "src/util/pow"
   import EditorContent from "src/app/editor/EditorContent.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {makeEditor} from "src/app/editor"
 
   export let state
@@ -67,13 +67,13 @@
   <EditorContent {editor} class="min-h-24" />
 </div>
 <div class="flex gap-2">
-  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  <Anchor button accent class="flex-grow text-center" {loading} on:click={next}>Say Hello</Anchor>
+  <Button class="btn" on:click={prev}><i class="fa fa-arrow-left" /> Back</Button>
+  <Button class="btn btn-accent flex-grow text-center" {loading} on:click={next}>Say Hello</Button>
 </div>
 {#if loading}
   <p class="text-center">Hang on tight, we're calculating proof of work...</p>
 {:else}
-  <Anchor class="text-center" on:click={skip}>
+  <Button class="text-center" on:click={skip}>
     Skip and see your feed <i class="fa fa-arrow-right" />
-  </Anchor>
+  </Button>
 {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {tagZapSplit} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -31,9 +31,9 @@
         <h3 class="text-xl sm:h-12">Support development</h3>
         <p class="sm:h-20">All funds will be used to support server costs and development.</p>
         <div class="flex justify-center">
-          <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
+          <Link modal class="btn btn-accent" href={router.at("zap").qp({splits}).toString()}>
             Zap the developer
-          </Anchor>
+          </Link>
         </div>
       </FlexColumn>
     </Card>
@@ -42,51 +42,50 @@
         <h3 class="text-xl sm:h-12">Get in touch</h3>
         <p class="sm:h-20">Having problems? Let us know.</p>
         <div class="flex justify-center">
-          <Anchor
-            button
-            accent
+          <Link
+            class="btn btn-accent"
             external
             href="https://github.com/coracle-social/coracle/issues/new">
             Open an Issue
-          </Anchor>
+          </Link>
         </div>
       </FlexColumn>
     </Card>
   </div>
   <div class="flex flex-col gap-4">
     <p class="text-center">
-      Built with 💜 by @<Anchor
+      Built with 💜 by @<Link
         modal
-        underline
-        href={router.at("people").of(hodlbodPubkey).toString()}>hodlbod</Anchor>
+        class="underline"
+        href={router.at("people").of(hodlbodPubkey).toString()}>hodlbod</Link>
     </p>
     <p class="flex justify-center gap-4">
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://github.com/coracle-social/coracle"
-            ><i class="fa fa-code-branch" /></Anchor>
+          <Link external href="https://github.com/coracle-social/coracle"
+            ><i class="fa fa-code-branch" /></Link>
         </div>
         <div slot="tooltip">Source Code</div>
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://info.coracle.social">
+          <Link external href="https://info.coracle.social">
             <i class="fa fa-earth-americas" />
-          </Anchor>
+          </Link>
         </div>
         <div slot="tooltip">Website</div>
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://hodlbod.npub.pro/"><i class="fa fa-pen-clip" /></Anchor>
+          <Link external href="https://hodlbod.npub.pro/"><i class="fa fa-pen-clip" /></Link>
         </div>
         <div slot="tooltip">Dev Blog</div>
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Anchor external href="https://fountain.fm/show/vnmoRQQ50siLFRE8k061">
+          <Link external href="https://fountain.fm/show/vnmoRQQ50siLFRE8k061">
             <i class="fa fa-rss" />
-          </Anchor>
+          </Link>
         </div>
         <div slot="tooltip">Podcast</div>
       </Popover>

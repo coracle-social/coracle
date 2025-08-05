@@ -3,7 +3,7 @@
   import {getTag, displayRelayUrl} from "@welshman/util"
   import {Router} from "@welshman/router"
   import {displayProfileByPubkey} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
 
@@ -38,7 +38,7 @@
   <div class="mb-4 flex items-center gap-2 border-l-2 border-solid border-neutral-600 pl-2">
     Rated
     {#if href}
-      <Anchor modal underline {href}>{display}</Anchor>
+      <Link modal class="underline" {href}>{display}</Link>
     {:else}
       {display}
     {/if}

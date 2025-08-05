@@ -5,7 +5,7 @@
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {showWarning} from "src/partials/Toast.svelte"
   import {ensureProto} from "src/util/misc"
   import {listenForFile} from "src/util/html"
@@ -59,18 +59,16 @@
       <i slot="before" class={`fa fa-${icon}`} />
     </Input>
   {/if}
-  <div
+  <Button
     on:click={() => {
       isOpen = true
     }}>
     <slot name="button">
-      <div class="flex">
-        <Anchor button>
-          <i class="fa fa-upload" />
-        </Anchor>
+      <div class="btn">
+        <i class="fa fa-upload" />
       </div>
     </slot>
-  </div>
+  </Button>
 </div>
 
 {#if isOpen}

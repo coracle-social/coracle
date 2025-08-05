@@ -1,7 +1,7 @@
 <script lang="ts">
   import QRCode from "qrcode"
   import {onMount} from "svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import {copyToClipboard} from "src/util/html"
 
@@ -30,11 +30,11 @@
   })
 </script>
 
-<Anchor external {href} on:click={onClick || (copyOnClick ? copy : null)}>
+<Button on:click={onClick || (copyOnClick ? copy : null)}>
   <div bind:this={wrapper} style={`height: ${height}px`}>
     <canvas
       class="rounded-xl"
       bind:this={canvas}
       style={`transform-origin: top left; transform: scale(${scale}, ${scale})`} />
   </div>
-</Anchor>
+</Button>

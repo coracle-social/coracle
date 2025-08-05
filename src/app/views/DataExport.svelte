@@ -4,7 +4,7 @@
   import {Filesystem, Directory, Encoding} from "@capacitor/filesystem"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -82,7 +82,7 @@
           encrypted, so this will not reduce security.
         </p>
       </FieldInline>
-      <Anchor button tag="button" type="submit">Export</Anchor>
+      <Button class="btn" type="submit">Export</Button>
     </div>
   </FlexColumn>
 </form>

@@ -5,7 +5,7 @@
   import {now} from "@welshman/lib"
   import {createScroller, toTitle} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import Popover from "src/partials/Popover.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Content from "src/partials/Content.svelte"
@@ -54,9 +54,9 @@
       <i class="fa fa-comments fa-lg" />
       <h2 class="staatliches text-2xl">Your conversations</h2>
     </div>
-    <Anchor modal button accent href="/channels/create" disabled={!$signer}>
+    <Link modal class="btn btn-accent" href="/channels/create" disabled={!$signer}>
       <i class="fa-solid fa-plus" /> Create
-    </Anchor>
+    </Link>
   </div>
   <div class="relative">
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>

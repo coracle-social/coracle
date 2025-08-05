@@ -5,7 +5,8 @@
   import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
   import {Nip01Signer} from "@welshman/signer"
   import {signer, displayProfileByPubkey, loadZapper, loadProfile} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
   import Toggle from "src/partials/Toggle.svelte"
   import Input from "src/partials/Input.svelte"
@@ -101,9 +102,9 @@
   {@const pubkeys = splits.map(nth(1))}
   <div class="flex items-center gap-1 text-sm">
     <p>This note has zap splits enabled. You'll be zapping {splits.length} people:</p>
-    <Anchor modal href={router.at("people/list").qp({pubkeys}).toString()}>
+    <Link modal href={router.at("people/list").qp({pubkeys}).toString()}>
       <PersonCircles class="h-5 w-5" {pubkeys} />
-    </Anchor>
+    </Link>
   </div>
 {/if}
-<Anchor button accent on:click={startZapping} loading={zapping}>Zap!</Anchor>
+<Button class="btn btn-accent" on:click={startZapping} loading={zapping}>Zap!</Button>

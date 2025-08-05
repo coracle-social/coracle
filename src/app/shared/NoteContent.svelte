@@ -1,6 +1,6 @@
 <script lang="ts">
   import {getContentWarning} from "src/util/nostr"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import NoteContentKind0 from "src/app/shared/NoteContentKind0.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
@@ -47,7 +47,7 @@
       <i class="fa fa-warning m-1" />
       <p>
         This note has been flagged by the author as "{warning}".<br />
-        <Anchor underline on:click={ignoreWarning}>Show anyway</Anchor>
+        <Button class="underline" on:click={ignoreWarning}>Show anyway</Button>
       </p>
     </div>
   {:else if note.kind === 0}

@@ -4,7 +4,8 @@
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
   import {loginWithNip55, loginWithNip07} from "@welshman/app"
   import {appName} from "src/partials/state"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
@@ -55,32 +56,32 @@
       <Heading>Welcome!</Heading>
       <p>
         {appName} is built using the
-        <Anchor external underline href="https://nostr.com/">nostr protocol</Anchor>, which allows
+        <Link class="underline" external href="https://nostr.com/">nostr protocol</Link>, which allows
         you to own your social identity.
       </p>
     </div>
     <div class="relative flex flex-col gap-4">
       {#if getNip07()}
-        <Anchor button tall accent on:click={useExtension}>
+        <Button class="btn btn-tall btn-accent" on:click={useExtension}>
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
-        </Anchor>
+        </Button>
       {/if}
       {#each signerApps as app}
-        <Anchor button tall on:click={() => useSigner(app)}>
+        <Button class="btn btn-tall" on:click={() => useSigner(app)}>
           <img src={app.iconUrl} alt={app.name} width="20" height="20" />
           Use {app.name}
-        </Anchor>
+        </Button>
       {/each}
-      <Anchor button tall on:click={useBunker}>
+      <Button class="btn btn-tall" on:click={useBunker}>
         <i class="fa fa-box" /> Use Remote Signer
-      </Anchor>
-      <Anchor external button tall low href="https://nostrapps.com/#signers">
+      </Button>
+      <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#signers">
         <i class="fa fa-compass" /> Browse Signer Apps
-      </Anchor>
+      </Link>
     </div>
     <span class="text-center">
       Need an account?
-      <Anchor underline on:click={signUp}>Register instead</Anchor>
+      <Button class="underline" on:click={signUp}>Register instead</Button>
     </span>
   </FlexColumn>
 </div>

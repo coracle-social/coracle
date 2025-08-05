@@ -12,7 +12,7 @@
     profilesByPubkey,
   } from "@welshman/app"
   import {userFollows} from "src/engine"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import Popover from "src/partials/Popover.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
@@ -59,30 +59,32 @@
           <PersonHandle {pubkey} />
         </div>
       {/if}
-      <Anchor modal class="mt-4 flex items-center gap-2" href={zapLink}>
-        <i class="fa fa-bolt" />
-        <div class="overflow-hidden overflow-ellipsis">
-          {zapDisplay}
-        </div>
-      </Anchor>
+      {#if zapDisplay}
+        <Link modal class="mt-4 flex items-center gap-2" href={zapLink}>
+          <i class="fa fa-bolt" />
+          <div class="overflow-hidden overflow-ellipsis">
+            {zapDisplay}
+          </div>
+        </Link>
+      {/if}
       {#if $profile?.website}
-        <Anchor
+        <Link
           external
           class="mt-4 flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
           href={ensureProto($profile.website)}>
           <i class="fa fa-link text-accent" />
           {stripProtocol($profile.website)}
-        </Anchor>
+        </Link>
       {/if}
       <div class="mt-4 break-all">
         <span class="text-neutral-400">{nip19.npubEncode(pubkey)}</span>
         <CopyValueSimple class="!inline-flex pl-1" value={nip19.npubEncode(pubkey)} label="Npub" />
       </div>
       <div class="mt-4 flex items-center gap-2">
-        <Anchor modal class="flex items-center gap-1" href="/help/web-of-trust">
+        <Link modal class="flex items-center gap-1" href="/help/web-of-trust">
           WoT Score: {wotScore}
           <i class="fa fa-info-circle" />
-        </Anchor>
+        </Link>
       </div>
     </div>
   </Popover>

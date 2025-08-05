@@ -3,7 +3,7 @@
   import {makeEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {publishThunk} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -62,7 +62,7 @@
       <AltColor background class="overflow-hidden rounded">
         <EditorContent {editor} class="min-h-24 bg-white p-3 text-black" />
       </AltColor>
-      <Anchor button tag="button" type="submit" class="flex-grow">Send</Anchor>
+      <Button class="btn flex-grow" type="submit">Send</Button>
     </div>
   </Content>
 </form>

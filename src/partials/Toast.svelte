@@ -50,7 +50,7 @@
   import {onDestroy} from "svelte"
   import cx from "classnames"
   import {fly} from "src/util/transition"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import ThunkStatus from "src/partials/ThunkStatus.svelte"
   import {randomId} from "@welshman/lib"
 
@@ -116,14 +116,12 @@
         {message}
       {:else if type === "delay"}
         Sending in {timeLeft} seconds...
-        <Anchor
-          class="ml-3 inline-flex"
-          link
-          underline
+        <Button
+          class="ml-3 inline-flex underline"
           on:click={() => {
             onCancel()
             toast.set(null)
-          }}>Cancel</Anchor>
+          }}>Cancel</Button>
       {:else if type === "publish"}
         <ThunkStatus {thunk} />
       {/if}

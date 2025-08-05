@@ -1,7 +1,7 @@
 <script lang="ts">
   import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import {toTitle} from "src/util/misc"
 
   export let topic
@@ -39,18 +39,18 @@
     </p>
     <p>
       Some signers live on the internet, others can be installed on your phone or computer. If
-      you're new to nostr, we recommend getting started with <Anchor
+      you're new to nostr, we recommend getting started with <Link
         external
-        underline
-        href="https://nsec.app/">nsec.app</Anchor
+        class="underline"
+        href="https://nsec.app/">nsec.app</Link
       >.
     </p>
-    <Anchor external button tall low href="https://nostrapps.com/#Signers">
+    <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#Signers">
       <i class="fa fa-compass" /> Browse Signer Apps
-    </Anchor>
+    </Link>
   {:else if topic === "nip-17-dms"}
     <p>
-      <Anchor underline external href={nip17Url}>NIP 17</Anchor> improves upon the old NIP 04 direct
+      <Link class="underline" external href={nip17Url}>NIP 17</Link> improves upon the old NIP 04 direct
       messages standard by adding support for group chats and better metadata hiding.
     </p>
     <p>

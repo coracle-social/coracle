@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
 </script>
 
 <div class="flex gap-3">
@@ -10,6 +10,6 @@
   relay-based groups client at <strong>flotilla.social</strong>.
 </p>
 <div class="flex justify-end gap-2">
-  <Anchor external button href="https://groups.coracle.social">Continue to Groups</Anchor>
-  <Anchor external button accent href="https://flotilla.social">Try Flotilla</Anchor>
+  <Link external class="btn" href="https://groups.coracle.social">Continue to Groups</Link>
+  <Link external class="btn btn-accent" href="https://flotilla.social">Try Flotilla</Link>
 </div>

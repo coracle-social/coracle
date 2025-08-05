@@ -1,7 +1,8 @@
 <script lang="ts">
   import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
+  import Link from "src/partials/Link.svelte"
   import SliderMenu from "src/partials/SliderMenu.svelte"
   import MenuItem from "src/partials/MenuItem.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
@@ -44,19 +45,19 @@
   <SliderMenu onEscape={closeMenu}>
     <div class="m-auto max-w-[236px] py-8">
       {#if $pubkey}
-        <Anchor
+        <Button
           stopPropagation
-          class="flex items-center justify-center gap-2"
+          class="text-start flex items-center justify-center gap-2"
           on:click={openAccount}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
             <span>@{displayProfileByPubkey($pubkey)}</span>
             <PersonHandle class="text-sm" pubkey={$pubkey} />
           </div>
-        </Anchor>
+        </Button>
       {:else}
         <div class="flex justify-center">
-          <Anchor button accent modal href="/login">Log In</Anchor>
+          <Link class="btn btn-accent" modal href="/login">Log In</Link>
         </div>
       {/if}
     </div>
@@ -102,9 +103,9 @@
       </MenuMobileItem>
     </div>
     <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-tinted-400">
-      <Anchor class="hover:text-tinted-200" href="/about">About</Anchor> /
-      <Anchor external class="hover:text-tinted-200" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-tinted-200" href="/privacy.html">Privacy</Anchor>
+      <Link class="hover:text-tinted-200" href="/about">About</Link> /
+      <Link external class="hover:text-tinted-200" href="/terms.html">Terms</Link> /
+      <Link external class="hover:text-tinted-200" href="/privacy.html">Privacy</Link>
     </div>
   </SliderMenu>
 {/if}
@@ -151,10 +152,10 @@
       </MenuMobileItem>
     </div>
     <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-tinted-400">
-      <Anchor class="hover:text-tinted-200" href="/logout" on:click={closeMenu}>Logout</Anchor> /
-      <Anchor class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
+      <Link class="hover:text-tinted-200" href="/logout" on:click={closeMenu}>Logout</Link> /
+      <Button class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
         Switch Accounts
-      </Anchor>
+      </Button>
     </div>
   </SliderMenu>
 {/if}

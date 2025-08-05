@@ -1,7 +1,7 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
   import {profileSearch, displayProfileByPubkey} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import {router} from "src/app/util/router"
@@ -18,9 +18,9 @@
   onChange={pubkeys => onChange([FeedType.Tag, "#p", ...pubkeys])}>
   <span slot="item" let:item let:context>
     {#if context === "value"}
-      <Anchor modal href={router.at("people").of(item).toString()}>
+      <Link modal href={router.at("people").of(item).toString()}>
         {displayProfileByPubkey(item)}
-      </Anchor>
+      </Link>
     {:else}
       <PersonBadge inert pubkey={item} />
     {/if}

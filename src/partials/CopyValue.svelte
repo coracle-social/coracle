@@ -10,7 +10,7 @@
   import Input from "src/partials/Input.svelte"
   import {encrypt} from "nostr-tools/nip49"
   import {hexToBytes} from "@noble/hashes/utils"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
 
   export let value
   export let label
@@ -104,11 +104,12 @@
       <Input type="password" bind:value={confirmedPassword} />
     </Field>
     <div class="flex justify-between gap-2">
-      <Anchor button on:click={closeEncryptModal}>Cancel</Anchor>
+      <Button class="btn" on:click={closeEncryptModal}>Cancel</Button>
       <div class="flex gap-2">
-        <Anchor button on:click={copyEncoded}>Copy plaintext</Anchor>
-        <Anchor button accent on:click={copyEncrypted} disabled={!passwordIsValid}
-          >Copy encrypted</Anchor>
+        <Button class="btn" on:click={copyEncoded}>Copy plaintext</Button>
+        <Button class="btn btn-accent" on:click={copyEncrypted} disabled={!passwordIsValid}>
+          Copy encrypted
+        </Button>
       </div>
     </div>
   </Modal>

@@ -27,7 +27,7 @@
   import type {ProofOfWork} from "src/util/pow"
   import {warn} from "src/util/logger"
   import {commaFormat} from "src/util/misc"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -328,26 +328,24 @@
         </div>
       </Field>
       <div class="flex gap-2">
-        <Anchor
-          button
-          tag="button"
+        <Button
           type="submit"
-          class="flex-grow"
-          disabled={$uploading || Boolean(publishing)}>
+          class="btn btn-accent flex-grow"
+          loading={$uploading || Boolean(publishing)}>
           {#if $uploading || !!publishing}
             {#if publishing === "signing"}
-              <i class="fa fa-circle-notch fa-spin" /> Signing your note...
+              Signing your note...
             {:else if publishing === "pow"}
-              <i class="fa fa-circle-notch fa-spin" /> Generating Work...
+              Generating Work...
             {:else}
-              <i class="fa fa-circle-notch fa-spin" /> Uploading media...
+              Uploading media...
             {/if}
           {:else if options?.publish_at && dateToSeconds(options.publish_at) > now()}
             Schedule
           {:else}
             Send
           {/if}
-        </Anchor>
+        </Button>
         <button
           class="hover:bg-white-l staatliches flex h-7 w-7 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded bg-white px-6 text-xl text-black transition-all"
           on:click|preventDefault={() => editor.chain().selectFiles().run()}>

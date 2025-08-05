@@ -2,7 +2,7 @@
   import {formatTimestamp} from "@welshman/lib"
   import {getAncestors, getIdOrAddress, type TrustedEvent} from "@welshman/util"
   import {Router} from "@welshman/router"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import {router} from "src/app/util"
@@ -42,22 +42,19 @@
 
 <div class="flex gap-4">
   <div>
-    <Anchor class="text-lg font-bold" on:click={showPerson}>
+    <Button stopPropagation class="text-lg font-bold" on:click={showPerson}>
       <PersonCircle class="h-10 w-10" pubkey={event.pubkey} />
-    </Anchor>
+    </Button>
   </div>
   <div class="flex min-w-0 flex-grow flex-col gap-2">
     <div class="flex min-w-0 flex-shrink flex-col items-start justify-between sm:flex-row">
-      <Anchor type="unstyled" class="mr-4 w-full min-w-0" on:click={showPerson}>
+      <Button stopPropagation class="mr-4 w-full min-w-0" on:click={showPerson}>
         <PersonName pubkey={event.pubkey} />
-      </Anchor>
+      </Button>
       <div class="flex items-center gap-3 pt-1 text-xs sm:pt-0">
-        <Anchor
-          on:click={goToDetail}
-          class="whitespace-nowrap text-end text-neutral-100"
-          type="unstyled">
+        <Button on:click={goToDetail} class="whitespace-nowrap text-end text-neutral-100">
           {formatTimestamp(event.created_at)}
-        </Anchor>
+        </Button>
       </div>
     </div>
     <div class="flex flex-col gap-2">
@@ -65,13 +62,13 @@
         {#if showReply}
           <small class="text-neutral-100">
             <i class="fa fa-code-merge" />
-            <Anchor underline on:click={goToParent}>View Parent</Anchor>
+            <Button stopPropagation class="underline" on:click={goToParent}>View Parent</Button>
           </small>
         {/if}
         {#if showRoot}
           <small class="text-neutral-100">
             <i class="fa fa-code-pull-request" />
-            <Anchor underline on:click={goToThread}>View Thread</Anchor>
+            <Button stopPropagation class="underline" on:click={goToThread}>View Thread</Button>
           </small>
         {/if}
       </div>

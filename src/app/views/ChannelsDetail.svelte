@@ -10,7 +10,8 @@
     displayProfileByPubkey,
     loadInboxRelaySelections,
   } from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import Channel from "src/app/shared/Channel.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -67,7 +68,7 @@
   <div slot="header" class="flex h-16 justify-between px-4">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-4 pt-1">
-        <Anchor
+        <Link
           class="fa fa-arrow-left cursor-pointer text-2xl"
           href={"/channels" + (isAccepted ? "" : "/requests")} />
         <PersonCircles {pubkeys} />
@@ -76,9 +77,9 @@
         <div>
           {#each pubkeys as pubkey, i (pubkey)}
             {#if i > 0}&bullet;{/if}
-            <Anchor class="hover:underline" on:click={() => showPerson(pubkey)}>
+            <Button class="hover:underline" on:click={() => showPerson(pubkey)}>
               {displayProfileByPubkey(pubkey)}
-            </Anchor>
+            </Button>
           {/each}
         </div>
         {#if pubkeys.length === 1}

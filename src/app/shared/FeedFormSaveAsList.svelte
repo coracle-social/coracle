@@ -3,7 +3,7 @@
   import {tagPubkey} from "@welshman/app"
   import {isAuthorFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
   import Card from "src/partials/Card.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
   import ListForm from "src/app/shared/ListForm.svelte"
   import {makeUserList, isTopicFeed, isMentionFeed} from "src/domain"
@@ -44,7 +44,7 @@
 </script>
 
 <div class="flex flex-col items-end">
-  <Anchor underline class="text-neutral-500" on:click={openForm}>Save selection as list</Anchor>
+  <Button class="text-neutral-500 underline" on:click={openForm}>Save selection as list</Button>
   {#if formIsOpen}
     <div class="relative w-full">
       <Popover2 onClose={closeForm}>

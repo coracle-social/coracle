@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import OnboardingTaskComponent from "src/app/shared/OnboardingTask.svelte"
   import {env, OnboardingTask} from "src/engine"
 </script>
@@ -13,14 +13,14 @@
     is proof of your identity, so keep it safe!
   </p>
   <p>
-    We recommend storing your key in a password manager like <Anchor
+    We recommend storing your key in a password manager like <Link
       external
-      underline
-      href="https://bitwarden.com/">Bitwarden</Anchor
-    >, and logging in to other apps only using a signer extension like <Anchor
+      class="underline"
+      href="https://bitwarden.com/">Bitwarden</Link
+    >, and logging in to other apps only using a signer extension like <Link
       external
-      underline
-      href="https://getalby.com/">Alby</Anchor
+      class="underline"
+      href="https://getalby.com/">Alby</Link
     >.
   </p>
   <p>You can find your keys by clicking on your profile picture, then the "Keys" menu item.</p>
@@ -36,15 +36,15 @@
       start letting people tip you.
     </p>
     <p>
-      If you used <Anchor external underline href="https://getalby.com/">Alby</Anchor> to store your
+      If you used <Link external class="underline" href="https://getalby.com/">Alby</Link> to store your
       keys, they're also a great option for holding your bitcoin.
     </p>
     <p>
-      Copy your <Anchor
+      Copy your <Link
         external
-        underline
+        class="underline"
         href="https://getalby.com/lightning_addresses/hodlbod/edit">
-        lightning address</Anchor> into your profile settings (click "Edit" in the menu on your profile
+        lightning address</Link> into your profile settings (click "Edit" in the menu on your profile
       page) and you're good to go!
     </p>
   </OnboardingTaskComponent>

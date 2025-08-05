@@ -14,7 +14,7 @@
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
@@ -53,11 +53,11 @@
   <div class="flex flex-col justify-between sm:flex-row">
     <span class="flex items-start gap-3">
       <div>
-        <Anchor on:click={loadFeed} class="staatliches text-xl">
+        <Button on:click={loadFeed} class="staatliches text-xl">
           <span class:text-neutral-400={!feed.title} class:line-through={deleted}>
             {displayFeed(feed)}
           </span>
-        </Anchor>
+        </Button>
         {#if deleted}
           <Chip danger small>Deleted</Chip>
         {/if}
@@ -67,7 +67,7 @@
       </div>
     </span>
     <slot name="controls">
-      <Anchor underline on:click={loadFeed}>Load feed</Anchor>
+      <Button class="underline" on:click={loadFeed}>Load feed</Button>
     </slot>
   </div>
   {#if feed.description}

@@ -37,7 +37,8 @@
   import {ensureProto, toTitle} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -122,25 +123,21 @@
     <div class="flex flex-col items-center gap-4">
       <PersonCircle {pubkey} class="mt-1 h-32 w-32" />
       {#if pubkey === $session?.pubkey}
-        <Anchor
-          button
-          class="w-full !bg-neutral-800 dark:!bg-white"
+        <Link
+          class="btn w-full !bg-neutral-800 dark:!bg-white"
           href={router.at("/settings/profile").toString()}>
           Edit
-        </Anchor>
+        </Link>
       {:else if $session}
-        <Anchor
-          button
-          accent={!$following}
-          low={$following}
-          class="w-full"
+        <Button
+          class="btn w-full {$following ? 'btn-low' : 'btn-accent'}"
           on:click={() => ($following ? unfollow(pubkey) : follow(tagPubkey(pubkey)))}
-          >{$following ? "Unfollow" : "Follow"}</Anchor>
-        <Anchor
-          button
-          low={!$following}
-          href={router.at("channels").of([$session.pubkey, pubkey]).toString()}
-          class="w-full">Message</Anchor>
+          >{$following ? "Unfollow" : "Follow"}</Button>
+        <Link
+          class="btn w-full {$following ? '' : 'btn-low'}"
+          href={router.at("channels").of([$session.pubkey, pubkey]).toString()}>
+          Message
+        </Link>
       {/if}
     </div>
     <div class="flex min-w-0 flex-grow flex-col gap-4">
@@ -158,14 +155,14 @@
                       max={$maxWot}
                       accent={$following || pubkey === $session?.pubkey} />
                   </div>
-                  <Anchor
+                  <Link
                     modal
                     slot="tooltip"
                     class="flex items-center gap-1"
                     href="/help/web-of-trust">
                     <i class="fa fa-info-circle" />
                     WoT Score: {wotScore}
-                  </Anchor>
+                  </Link>
                 </Popover>
               </div>
             </div>
@@ -187,21 +184,21 @@
           </div>
         {/if}
         {#if $zapper && zapDisplay}
-          <Anchor modal class="flex items-center gap-2" href={zapLink}>
+          <Link modal class="flex items-center gap-2" href={zapLink}>
             <i class="fa fa-bolt w-4 text-accent" />
             <div class="overflow-hidden overflow-ellipsis">
               {zapDisplay}
             </div>
-          </Anchor>
+          </Link>
         {/if}
         {#if $profile?.website}
-          <Anchor
+          <Link
             external
             class="col-span-2 flex items-center gap-2"
             href={ensureProto($profile.website)}>
             <i class="fa fa-link w-4 text-accent" />
             {stripProtocol($profile.website)}
-          </Anchor>
+          </Link>
         {/if}
       </div>
       <div class="flex flex-grow flex-col gap-4">

@@ -1,9 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+
+  export let href = ""
 </script>
 
-<Anchor
+<Link
+  {href}
   {...$$props}
   randomizeKey
   class={cx(
@@ -12,4 +15,4 @@
   )}
   on:click>
   <slot />
-</Anchor>
+</Link>

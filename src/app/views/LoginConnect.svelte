@@ -18,7 +18,7 @@
   import Content from "src/partials/Content.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {router} from "src/app/util/router"
   import {env, myLoad} from "src/engine"
   import {loadUserData} from "src/app/state"
@@ -105,23 +105,25 @@
   {:else}
     <p class="text-2xl">We're searching for your profile on the network.</p>
     <p>
-      If you'd like to select your relays manually instead, click <Anchor
-        underline
-        on:click={() => openModal("custom_relay")}>here</Anchor
+      If you'd like to select your relays manually instead, click <Button
+        class="text-inherit cursor-pointer bg-transparent p-0 underline"
+        on:click={() => openModal("custom_relay")}>here</Button
       >.
     </p>
   {/if}
   {#if !showFound}
     <p>
-      You can also <Anchor underline on:click={skip}>skip this step</Anchor>, but be aware that your
-      profile and relays may not get properly synchronized.
+      You can also <Button
+        class="text-inherit cursor-pointer bg-transparent p-0 underline"
+        on:click={skip}>skip this step</Button
+      >, but be aware that your profile and relays may not get properly synchronized.
     </p>
   {/if}
   {#if failed && !found}
     <div class="flex justify-between gap-2">
-      <Anchor button on:click={tryDefaultRelays}>Try again</Anchor>
-      <Anchor button accent on:click={() => openModal("custom_relay")}
-        >Select relays manually</Anchor>
+      <Button class="btn" on:click={tryDefaultRelays}>Try again</Button>
+      <Button class="btn btn-accent" on:click={() => openModal("custom_relay")}
+        >Select relays manually</Button>
     </div>
   {/if}
   <Spinner />
@@ -136,8 +138,8 @@
         <Input bind:value={customRelay} />
       </Field>
       <div class="flex justify-between gap-2">
-        <Anchor button on:click={closeModal}>Cancel</Anchor>
-        <Anchor button accent on:click={confirmCustomRelay}>Search relay</Anchor>
+        <Button class="btn" on:click={closeModal}>Cancel</Button>
+        <Button class="btn btn-accent" on:click={confirmCustomRelay}>Search relay</Button>
       </div>
     </Content>
   </Modal>

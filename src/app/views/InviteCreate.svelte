@@ -4,7 +4,7 @@
   import {displayRelayUrl} from "@welshman/util"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -131,13 +131,13 @@
   {/if}
 {/each}
 <div class="flex justify-end gap-4">
-  <Anchor disabled={sections.includes("people")} on:click={() => showSection("people")}>
+  <Button disabled={sections.includes("people")} on:click={() => showSection("people")}>
     <i class="fa fa-plus" /> Add people
-  </Anchor>
-  <Anchor disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
+  </Button>
+  <Button disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
     <i class="fa fa-plus" /> Add relays
-  </Anchor>
+  </Button>
 </div>
-<Anchor button accent disabled={[...pubkeys, ...relays].length === 0} on:click={onSubmit}>
+<Button class="btn btn-accent" disabled={[...pubkeys, ...relays].length === 0} on:click={onSubmit}>
   Create Invite Link
-</Anchor>
+</Button>

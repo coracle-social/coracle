@@ -4,7 +4,7 @@
   import {REACTION, ZAP_RESPONSE} from "@welshman/util"
   import {repostKinds} from "src/util/nostr"
   import Icon from "src/partials/Icon.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import NoteContentKind7 from "src/app/shared/NoteContentKind7.svelte"
@@ -42,13 +42,13 @@
         </div>
         {#each groupBy(z => z.request.content, $zaps) as [content, zapEvents] (content)}
           {@const pubkeys = zapEvents.map(z => z.request.pubkey)}
-          <Anchor
+          <Link
             modal
             href={router.at("people/list").qp({pubkeys}).toString()}
             class="flex items-center gap-1 rounded-full bg-neutral-700-l px-2 py-1 text-sm">
             <NoteContentKind7 note={zapEvents[0].request} />
             <PersonCircles class="h-5 w-5" {pubkeys} />
-          </Anchor>
+          </Link>
         {/each}
       </div>
     {/if}
@@ -61,9 +61,9 @@
       {#if pubkeys.length === 1}
         <PersonLink pubkey={pubkeys[0]} />
       {:else}
-        <Anchor modal href={router.at("people/list").qp({pubkeys}).toString()}>
+        <Link modal href={router.at("people/list").qp({pubkeys}).toString()}>
           {pubkeys.length} people
-        </Anchor>
+        </Link>
       {/if}
     </p>
   {/if}
@@ -79,13 +79,13 @@
         {reactions.length} people reacted:
         {#each groupBy(e => e.content, reactions) as [content, events] (content)}
           {@const pubkeys = getPubkeys(events)}
-          <Anchor
+          <Link
             class="flex items-center gap-1 rounded-full bg-neutral-700-l px-2 py-1 text-sm"
             modal
             href={router.at("people/list").qp({pubkeys}).toString()}>
             <NoteContentKind7 note={events[0]} />
             <PersonCircles class="h-5 w-5" {pubkeys} />
-          </Anchor>
+          </Link>
         {/each}
       </p>
     {/if}

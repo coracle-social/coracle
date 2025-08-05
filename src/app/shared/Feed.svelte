@@ -16,7 +16,8 @@
   import {createScroller} from "src/util/misc"
   import {noteKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -138,9 +139,9 @@
   <FeedControls {feed} {updateFeed}>
     <div slot="controls">
       {#if $shouldHideReplies}
-        <Anchor button low class="border-none opacity-50" on:click={toggleReplies}>Replies</Anchor>
+        <Button class="btn btn-low border-none opacity-50" on:click={toggleReplies}>Replies</Button>
       {:else}
-        <Anchor button accent class="border-none" on:click={toggleReplies}>Replies</Anchor>
+        <Button class="btn btn-accent border-none" on:click={toggleReplies}>Replies</Button>
       {/if}
     </div>
   </FeedControls>
@@ -164,14 +165,14 @@
         <Card class="group flex items-center justify-between">
           <p class="text-xl">Enjoying Coracle?</p>
           <div class="flex gap-2">
-            <Anchor
+            <Button
               class="hidden text-neutral-400 opacity-0 transition-all group-hover:opacity-100 sm:visible"
               on:click={() => promptDismissed.set(now())}>
               Dismiss
-            </Anchor>
-            <Anchor modal button accent href={router.at("zap").qp({splits}).toString()}>
+            </Button>
+            <Link modal class="btn btn-accent" href={router.at("zap").qp({splits}).toString()}>
               Zap the developer
-            </Anchor>
+            </Link>
           </div>
         </Card>
       {/if}

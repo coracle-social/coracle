@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {elasticOut} from "svelte/easing"
   import {fly} from "src/util/transition"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
 
   export let path = null
   export let isActive = false
@@ -20,7 +20,7 @@
   })
 </script>
 
-<Anchor {...$$props} randomizeKey class={className} href={path} on:click>
+<Link {...$$props} randomizeKey class={className} href={path} on:click>
   <div class="absolute left-8 flex gap-5 whitespace-nowrap pt-2" class:-right-3={isActive}>
     <slot />
     {#if isActive}
@@ -31,4 +31,4 @@
         class:top-3={small} />
     {/if}
   </div>
-</Anchor>
+</Link>

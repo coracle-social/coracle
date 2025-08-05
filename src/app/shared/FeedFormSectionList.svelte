@@ -1,7 +1,7 @@
 <script lang="ts">
   import {makeListFeed} from "@welshman/feeds"
   import {repository, displayProfileByPubkey} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {listSearch} from "src/engine"
   import {router} from "src/app/util"
@@ -32,9 +32,9 @@
     {#if context === "option"}
       {displayAddress(item)}
     {:else}
-      <Anchor modal href={router.at("lists").of(item).toString()}>
+      <Link modal href={router.at("lists").of(item).toString()}>
         {displayAddress(item)}
-      </Anchor>
+      </Link>
     {/if}
   </span>
 </SearchSelect>

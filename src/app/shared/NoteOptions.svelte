@@ -12,7 +12,7 @@
 <script lang="ts">
   import {relaySearch} from "@welshman/app"
   import {Router} from "@welshman/router"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -80,10 +80,10 @@
         </Field>
       {:else}
         <FieldInline icon="fa-server" label="Relays">
-          <Anchor underline on:click={initRelays}>Select relays</Anchor>
+          <Button class="underline" on:click={initRelays}>Select relays</Button>
         </FieldInline>
       {/if}
-      <Anchor button tag="button" type="submit">Done</Anchor>
+      <Button class="btn" type="submit">Done</Button>
     </FlexColumn>
   </form>
 </Modal>

@@ -2,7 +2,8 @@
   import {pubkey, signer} from "@welshman/app"
   import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
+  import Link from "src/partials/Link.svelte"
   import SearchResults from "src/app/shared/SearchResults.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -59,8 +60,8 @@
             on:keydown={onSearchKeydown}
             bind:element={searchInput}
             bind:value={$searchTerm} />
-          <Anchor button class="z-feature -ml-2 border-none !bg-tinted-700 !text-tinted-200"
-            >Search</Anchor>
+          <Button class="btn z-feature -ml-2 border-none !bg-tinted-700 !text-tinted-200"
+            >Search</Button>
         </div>
         {#if $searchTerm}
           <div
@@ -95,9 +96,9 @@
         {/if}
       </div>
       {#if $signer}
-        <Anchor button accent on:click={createNote}>Post +</Anchor>
+        <Button class="btn btn-accent" on:click={createNote}>Post +</Button>
       {:else if !$pubkey}
-        <Anchor modal button accent href="/login">Log In</Anchor>
+        <Link modal class="btn btn-accent" href="/login">Log In</Link>
       {/if}
     </div>
   </div>
@@ -117,9 +118,9 @@
       </div>
       <div>
         {#if $signer}
-          <Anchor button accent on:click={createNote}>Post +</Anchor>
+          <Button class="btn btn-accent" on:click={createNote}>Post +</Button>
         {:else if !$pubkey}
-          <Anchor modal button accent href="/login">Log In</Anchor>
+          <Link modal class="btn btn-accent" href="/login">Log In</Link>
         {/if}
       </div>
       <div class="relative flex w-1/3 justify-end">

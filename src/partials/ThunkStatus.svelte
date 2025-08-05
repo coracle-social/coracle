@@ -3,7 +3,7 @@
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
 
   export let thunk: Thunk
 
@@ -15,5 +15,5 @@
 
 <div>
   Published to {relays.length - pending.length}/{relays.length} relays.
-  <Anchor modal underline href="/publishes">View details</Anchor>
+  <Link modal class="underline" href="/publishes">View details</Link>
 </div>

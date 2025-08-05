@@ -11,7 +11,8 @@
   import Toggle from "src/partials/Toggle.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
@@ -97,7 +98,7 @@
       </div>
       <Input type="range" bind:value={values.min_wot_score} min={-10} max={10} />
       <p slot="info">
-        Select a minimum <Anchor underline modal href="/help/web-of-trust">web-of-trust</Anchor>
+        Select a minimum <Link class="underline" modal href="/help/web-of-trust">web-of-trust</Link>
         score. Notes from accounts with a lower score will be automatically hidden.
       </p>
     </Field>
@@ -178,6 +179,6 @@
     </Field>
   </div>
   <Footer>
-    <Anchor grow button tag="button" type="submit">Save</Anchor>
+    <Button class="btn flex-grow" type="submit">Save</Button>
   </Footer>
 </form>

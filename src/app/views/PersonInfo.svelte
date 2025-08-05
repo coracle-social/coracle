@@ -6,7 +6,7 @@
   import {copyToClipboard} from "src/util/html"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
 
@@ -59,9 +59,9 @@
     <p slot="label">Profile JSON</p>
     <div class="relative rounded bg-tinted-700 p-1">
       <pre class="overflow-auto text-xs"><code>{json}</code></pre>
-      <Anchor circle class="absolute right-1 top-1 bg-neutral-800" on:click={copyJson}>
+      <Button class="absolute right-1 top-1" on:click={copyJson}>
         <i class="fa fa-copy m-2" />
-      </Anchor>
+      </Button>
     </div>
   </Field>
 {/if}

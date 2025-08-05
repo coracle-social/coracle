@@ -29,7 +29,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Input from "src/partials/Input.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import {myRequest, userFollows, sortEventsDesc, joinRelay} from "src/engine"
@@ -157,9 +157,9 @@
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your relays</h2>
     </div>
-    <Anchor button accent on:click={addCustomRelay}>
+    <Button class="btn btn-accent" on:click={addCustomRelay}>
       <i class="fa-solid fa-compass" /> Add Relay
-    </Anchor>
+    </Button>
   </div>
   <p>
     Relays are hubs for your content and connections. At least one is required to interact with the
@@ -212,6 +212,6 @@
     <Input autofocus bind:value={customRelay} placeholder="wss://...">
       <i slot="before" class="fa fa-server" />
     </Input>
-    <Anchor button accent on:click={confirmAddCustomRelay}>Add Relay</Anchor>
+    <Button class="btn btn-accent" on:click={confirmAddCustomRelay}>Add Relay</Button>
   </Modal>
 {/if}

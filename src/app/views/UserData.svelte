@@ -4,7 +4,7 @@
   import {Router} from "@welshman/router"
   import {repository} from "@welshman/app"
   import {commaFormat, createScroller} from "src/util/misc"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
@@ -44,7 +44,7 @@
         events in your database.
       </p>
       <div class="flex justify-center">
-        <Anchor modal button accent href="/settings/data/export">Create Backup</Anchor>
+        <Link modal class="btn btn-accent" href="/settings/data/export">Create Backup</Link>
       </div>
     </FlexColumn>
   </Card>
@@ -53,7 +53,7 @@
       <h3 class="text-xl sm:h-12">Import Database</h3>
       <p class="sm:h-24">Upload a nostr export file to pull events into your database.</p>
       <div class="flex justify-center">
-        <Anchor modal button accent href="/settings/data/import">Upload Backup</Anchor>
+        <Link modal class="btn btn-accent" href="/settings/data/import">Upload Backup</Link>
       </div>
     </FlexColumn>
   </Card>
@@ -72,13 +72,13 @@
     {#each events.slice(0, limit) as event}
       <tr>
         <td class="py-1 pr-2">
-          <Anchor
+          <Link
             href={router
               .at("notes")
               .of(event.id, {relays: Router.get().Event(event).getUrls()})
               .toString()}>
             <i class="fa fa-link text-accent" />
-          </Anchor>
+          </Link>
         </td>
         <td class="px-2 py-1">
           {formatTimestamp(event.created_at)}

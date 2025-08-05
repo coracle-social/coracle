@@ -3,7 +3,7 @@
   import {getAddress, getTags} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
   import Subheading from "src/partials/Subheading.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {router} from "src/app/util/router"
@@ -27,9 +27,9 @@
 <FlexColumn>
   <div class="flex items-center justify-between">
     <Subheading>Select a List</Subheading>
-    <Anchor button accent on:click={createList}>
+    <Button class="btn btn-accent" on:click={createList}>
       <i class="fa fa-plus" /> List
-    </Anchor>
+    </Button>
   </div>
   <p>Select a list to add your selection to.</p>
   {#each $userLists as list (getAddress(list.event))}

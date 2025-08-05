@@ -17,7 +17,7 @@
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteHeader from "src/app/shared/NoteHeader.svelte"
   import NoteReply from "src/app/shared/NoteReply.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
   import {timestamp1} from "src/util/misc"
   import {headerlessKinds} from "src/util/nostr"
@@ -109,11 +109,11 @@
     {#if hidden && !showHidden}
       <p class="ml-14 mt-4 border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
         You have hidden this note.
-        <Anchor
-          underline
+        <Button
+          class="underline"
           on:click={() => {
             showHidden = true
-          }}>Show</Anchor>
+          }}>Show</Button>
       </p>
     {:else}
       <div class:!pl-0={headerlessKinds.includes(event.kind)} class="mt-2 sm:pl-14">

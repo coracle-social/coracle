@@ -16,7 +16,8 @@
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import MenuDesktopItem from "src/app/MenuDesktopItem.svelte"
@@ -72,16 +73,13 @@
 </script>
 
 <div class="bottom-sai left-sai top-sai fixed z-sidebar w-72 bg-tinted-700 transition-colors">
-  <Anchor
-    external
-    class="mb-4 mt-4 flex items-center gap-2 px-6"
-    href="https://info.coracle.social">
+  <Link external class="mb-4 mt-4 flex items-center gap-2 px-6" href="https://info.coracle.social">
     <img
       alt="App Logo"
       src={$theme === "dark"
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
-  </Anchor>
+  </Link>
   <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
   <MenuDesktopItem
     path="/settings/relays"
@@ -118,13 +116,13 @@
   </MenuDesktopItem>
   <MenuDesktopItem modal path="/groups" disabled={!$signer}>Groups</MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
-    <Anchor
-      class="staatliches px-8 text-tinted-400 hover:text-tinted-100"
-      on:click={() => setSubMenu("settings")}>Settings</Anchor>
+    <Button
+      class="staatliches px-8 text-start text-tinted-400 hover:text-tinted-100"
+      on:click={() => setSubMenu("settings")}>Settings</Button>
     <div class="staatliches flex h-8 gap-2 px-8 text-tinted-500">
-      <Anchor class="hover:text-tinted-100" href="/about">About</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/terms.html">Terms</Anchor> /
-      <Anchor external class="hover:text-tinted-100" href="/privacy.html">Privacy</Anchor>
+      <Link class="hover:text-tinted-100" href="/about">About</Link> /
+      <Link external class="hover:text-tinted-100" href="/terms.html">Terms</Link> /
+      <Link external class="hover:text-tinted-100" href="/privacy.html">Privacy</Link>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
@@ -196,7 +194,7 @@
       </MenuDesktopSecondary>
     {/if}
     <div>
-      <Anchor
+      <Link
         modal
         href="/publishes"
         class="flex h-12 cursor-pointer items-center justify-between border-t border-solid border-neutral-600 pl-7 pr-12">
@@ -215,18 +213,18 @@
           <i class="fa fa-triangle-exclamation" />
           {$hud.failure}
         </div>
-      </Anchor>
+      </Link>
       <div class="h-20 cursor-pointer border-t border-solid border-neutral-600 px-7 py-4">
         {#if $pubkey}
-          <Anchor class="flex items-center gap-2" on:click={() => setSubMenu("account")}>
+          <Button class="flex items-center gap-2 text-start" on:click={() => setSubMenu("account")}>
             <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
             <div class="flex min-w-0 flex-col">
               <span>@{$userDisplay}</span>
               <PersonHandle class="text-sm" pubkey={$pubkey} />
             </div>
-          </Anchor>
+          </Button>
         {:else}
-          <Anchor modal button accent href="/login">Log In</Anchor>
+          <Link modal class="btn btn-accent" href="/login">Log In</Link>
         {/if}
       </div>
     </div>

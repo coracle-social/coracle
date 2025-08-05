@@ -6,7 +6,7 @@
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
@@ -124,9 +124,9 @@
   <p class="text-2xl font-bold">Find your people</p>
 </div>
 <p>
-  Pick a category to find some people to follow, or click <Anchor
-    underline
-    on:click={openPersonSearch}>here</Anchor> to search for specific accounts.
+  Pick a category to find some people to follow, or click <Button
+    class="underline"
+    on:click={openPersonSearch}>here</Button> to search for specific accounts.
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
   {#each state.onboardingLists as event (getAddress(event))}
@@ -149,11 +149,11 @@
     <span>•</span>
     <span>{quantify(state.relays.length, "relay")}</span>
   </div>
-  <Anchor underline on:click={openSelections}>View selections</Anchor>
+  <Button class="underline" on:click={openSelections}>View selections</Button>
 </div>
 <div class="flex gap-2">
-  <Anchor button on:click={prev}><i class="fa fa-arrow-left" /> Back</Anchor>
-  <Anchor button accent class="flex-grow" {loading} on:click={next}>Continue</Anchor>
+  <Button class="btn" on:click={prev}><i class="fa fa-arrow-left" /> Back</Button>
+  <Button class="btn btn-accent flex-grow" {loading} on:click={next}>Continue</Button>
 </div>
 
 {#if showList}
@@ -163,13 +163,13 @@
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{title}</p>
       {#if listPubkeys.every(pubkey => state.follows.includes(pubkey))}
-        <Anchor button class="flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
+        <Button class="btn flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
           Unfollow all
-        </Anchor>
+        </Button>
       {:else}
-        <Anchor button class="flex items-center gap-2" on:click={() => followAll(listEvent)}>
+        <Button class="btn flex items-center gap-2" on:click={() => followAll(listEvent)}>
           Follow all
-        </Anchor>
+        </Button>
       {/if}
     </div>
     <p class="pb-5 text-lg">{description}</p>
@@ -177,17 +177,15 @@
       <PersonSummary hideFollowActions {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if state.follows.includes(pubkey)}
-            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
+            <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
-            </Anchor>
+            </Button>
           {:else}
-            <Anchor
-              button
-              accent
-              class="flex items-center gap-2"
+            <Button
+              class="btn btn-accent flex items-center gap-2"
               on:click={() => addFollow(pubkey)}>
               <i class="fa fa-user-plus" /> Follow
-            </Anchor>
+            </Button>
           {/if}
         </div>
       </PersonSummary>
@@ -211,17 +209,17 @@
       {#each state.follows as pubkey (pubkey)}
         <PersonSummary {pubkey}>
           <div slot="actions" class="flex items-start justify-end">
-            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
+            <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
-            </Anchor>
+            </Button>
           </div>
         </PersonSummary>
       {/each}
     {/if}
-    <Anchor button on:click={openPersonSearch}>
+    <Button class="btn" on:click={openPersonSearch}>
       <i class="fa fa-search" />
       Search for more people
-    </Anchor>
+    </Button>
     <div />
     <Subheading>Relays you use</Subheading>
     <p class="text-lg">
@@ -239,18 +237,18 @@
         {#each state.relays as [_, url] (url)}
           <RelayCard {url}>
             <div slot="actions">
-              <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
+              <Button class="btn flex items-center gap-2" on:click={() => removeRelay(url)}>
                 <i class="fa fa-right-from-bracket" /> Leave
-              </Anchor>
+              </Button>
             </div>
           </RelayCard>
         {/each}
       </FlexColumn>
     {/if}
-    <Anchor button on:click={openRelaySearch}>
+    <Button class="btn" on:click={openRelaySearch}>
       <i class="fa fa-search" />
       Search for more relays
-    </Anchor>
+    </Button>
   </Modal>
 {/if}
 
@@ -263,17 +261,15 @@
       <PersonSummary hideFollowActions {pubkey}>
         <div slot="actions" class="flex items-start justify-end">
           {#if state.follows.includes(pubkey)}
-            <Anchor button class="flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
+            <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
-            </Anchor>
+            </Button>
           {:else}
-            <Anchor
-              button
-              accent
-              class="flex items-center gap-2"
+            <Button
+              class="btn btn-accent flex items-center gap-2"
               on:click={() => addFollow(pubkey)}>
               <i class="fa fa-user-plus" /> Follow
-            </Anchor>
+            </Button>
           {/if}
         </div>
       </PersonSummary>
@@ -291,13 +287,13 @@
         <RelayCard {url}>
           <div slot="actions">
             {#if urls.includes(url)}
-              <Anchor button class="flex items-center gap-2" on:click={() => removeRelay(url)}>
+              <Button class="btn flex items-center gap-2" on:click={() => removeRelay(url)}>
                 <i class="fa fa-right-from-bracket" /> Leave
-              </Anchor>
+              </Button>
             {:else}
-              <Anchor button class="flex items-center gap-2" on:click={() => addRelay(url)}>
+              <Button class="btn flex items-center gap-2" on:click={() => addRelay(url)}>
                 <i class="fa fa-right-to-bracket" /> Join
-              </Anchor>
+              </Button>
             {/if}
           </div>
         </RelayCard>

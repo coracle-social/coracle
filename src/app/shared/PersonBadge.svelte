@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Link from "src/partials/Link.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
@@ -19,7 +19,7 @@
     </div>
   </div>
 {:else}
-  <Anchor
+  <Link
     modal
     href={router.at("people").of(pubkey).toString()}
     class={cx($$props.class, "relative flex gap-4")}>
@@ -28,5 +28,5 @@
       <PersonName {pubkey} />
       <PersonHandle {pubkey} />
     </div>
-  </Anchor>
+  </Link>
 {/if}

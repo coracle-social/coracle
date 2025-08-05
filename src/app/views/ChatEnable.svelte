@@ -1,11 +1,9 @@
 <script lang="ts">
   import {WRAP} from "@welshman/util"
   import {repository} from "@welshman/app"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import {canDecrypt, loadMessages, ensureUnwrapped, env} from "src/engine"
   import {router} from "src/app/util"
-
-  let loading = false
 
   const enableChat = async () => {
     canDecrypt.set(true)
@@ -18,10 +16,7 @@
   }
 
   const submit = () => {
-    loading = true
-
     enableChat()
-    loading = false
     router.pop()
   }
 
@@ -44,13 +39,13 @@
   </p>
   <br />
   <div class="flex justify-between">
-    <Anchor button tag="a" on:click={back}>
+    <Button class="btn" on:click={back}>
       <span class="fa fa-arrow-left" />
       Go back
-    </Anchor>
-    <Anchor button accent type="submit" tag="button" disabled={loading}>
+    </Button>
+    <Button class="btn btn-accent" type="submit">
       Enable Messages
       <span class="fa fa-arrow-right" />
-    </Anchor>
+    </Button>
   </div>
 </form>

@@ -6,7 +6,7 @@
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
@@ -86,7 +86,7 @@
           uncompressed version.
         </p>
       </Field>
-      <Anchor {loading} button tag="button" type="submit" class="text-center">Import</Anchor>
+      <Button {loading} class="btn text-center" type="submit">Import</Button>
     </div>
   </FlexColumn>
 </form>

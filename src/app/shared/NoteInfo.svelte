@@ -21,7 +21,7 @@
   import {formatSats, quantify} from "src/util/misc"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
-  import Anchor from "src/partials/Anchor.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -126,9 +126,9 @@
         This note can also be viewed using {quantify(handlers.length, "other nostr app")}.
       </p>
       {#if handlersShown}
-        <Anchor underline on:click={hideHandlers}>Hide apps</Anchor>
+        <Button class="underline" on:click={hideHandlers}>Hide apps</Button>
       {:else}
-        <Anchor underline on:click={showHandlers}>Show apps</Anchor>
+        <Button class="underline" on:click={showHandlers}>Show apps</Button>
       {/if}
     </div>
     {#if handlersShown}
@@ -153,8 +153,8 @@
   <p slot="label">Event JSON</p>
   <div class="relative rounded bg-tinted-700 p-1">
     <pre class="overflow-auto text-xs"><code>{json}</code></pre>
-    <Anchor circle class="absolute right-1 top-1 bg-neutral-800" on:click={copyJson}>
+    <Button class="btn-circle absolute right-1 top-1 bg-neutral-800" on:click={copyJson}>
       <i class="fa fa-copy m-2" />
-    </Anchor>
+    </Button>
   </div>
 </Field>
