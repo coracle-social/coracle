@@ -10,6 +10,8 @@
 * Mute privately by default
 * Broadcast user relays when publishing
 * Aggresively refresh user data before updating to reduce race conditions
+* Add NWC wallet management
+* Re-work zaps
 
 # 0.6.18
 

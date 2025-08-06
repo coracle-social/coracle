@@ -2,7 +2,7 @@
   import {debounce} from "throttle-debounce"
   import {nwc} from "@getalby/sdk"
   import {assoc, sleep} from "@welshman/lib"
-  import type {NWCInfo} from "@welshman/app"
+  import type {NWCInfo} from "@welshman/util"
   import {pubkey, updateSession} from "@welshman/app"
   import Link from "src/partials/Link.svelte"
   import Input from "src/partials/Input.svelte"
@@ -33,7 +33,11 @@
 
         await sleep(400)
 
-        next ? next() : back()
+        if (next) {
+          next()
+        } else {
+          back()
+        }
       }
     } catch (e) {
       console.error(e)
@@ -61,7 +65,11 @@
 
         await sleep(400)
 
-        next ? next() : back()
+        if (next) {
+          next()
+        } else {
+          back()
+        }
       }
     } catch (e) {
       console.error(e)
