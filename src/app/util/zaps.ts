@@ -2,7 +2,8 @@ import {writable} from "svelte/store"
 import {identity} from "@welshman/lib"
 import type {TrustedEvent, Zap} from "@welshman/util"
 import {getTagValues, getLnUrl, zapFromEvent} from "@welshman/util"
-import {loadProfile, loadZapper} from "@welshman/app"
+import {session, loadProfile, loadZapper} from "@welshman/app"
+import {router} from "./router"
 
 export const getLnUrlsForEvent = async (event: TrustedEvent) => {
   const lnurls = getTagValues("zap", event.tags).map(getLnUrl)
@@ -42,4 +43,15 @@ export const deriveValidZaps = (zaps: TrustedEvent[], parent: TrustedEvent) => {
   })
 
   return store
+}
+
+export const zap = (qp: Record<string, any>) => {
+  if (!session.get().wallet) {
+    router
+      .at("settings/wallet/connect")
+      .cx({next: () => router.at("zap").qp(qp).replaceModal()})
+      .open()
+  } else {
+    router.at("zap").qp(qp).open()
+  }
 }

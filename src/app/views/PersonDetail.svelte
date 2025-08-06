@@ -54,7 +54,7 @@
   import PersonFollows from "src/app/views/PersonFollows.svelte"
   import {makeFeed} from "src/domain"
   import {myLoad, userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
-  import {router} from "src/app/util"
+  import {router, zap} from "src/app/util"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
@@ -81,6 +81,8 @@
   const profileDisplay = deriveProfileDisplay(pubkey)
   const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
 
+  const startZap = () => zap({splits: [tagZapSplit(pubkey)]})
+
   const setActiveTab = tab => {
     activeTab = tab
   }
@@ -92,10 +94,6 @@
   $: pinnedIds = getTagValues(["e"], getListTags($pinsByPubkey.get(pubkey)))
   $: pinnedEvents = deriveEvents(repository, {filters: getIdFilters(pinnedIds)})
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
-  $: zapLink = router
-    .at("zap")
-    .qp({splits: [tagZapSplit(pubkey)]})
-    .toString()
 
   $: {
     myLoad({
@@ -184,12 +182,12 @@
           </div>
         {/if}
         {#if $zapper && zapDisplay}
-          <Link modal class="flex items-center gap-2" href={zapLink}>
+          <Button class="flex items-center gap-2" on:click={startZap}>
             <i class="fa fa-bolt w-4 text-accent" />
             <div class="overflow-hidden overflow-ellipsis">
               {zapDisplay}
             </div>
-          </Link>
+          </Button>
         {/if}
         {#if $profile?.website}
           <Link

@@ -72,6 +72,9 @@
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
   import UserContent from "src/app/views/UserContent.svelte"
   import UserData from "src/app/views/UserData.svelte"
+  import UserWallet from "src/app/views/UserWallet.svelte"
+  import WalletConnect from "src/app/views/WalletConnect.svelte"
+  import WalletDisconnect from "src/app/views/WalletDisconnect.svelte"
   import UserKeys from "src/app/views/UserKeys.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
@@ -277,6 +280,15 @@
     requireUser: true,
   })
   router.register("/settings/data", UserData, {
+    requireUser: true,
+  })
+  router.register("/settings/wallet", UserWallet, {
+    requireUser: true,
+  })
+  router.register("/settings/wallet/connect", WalletConnect, {
+    requireUser: true,
+  })
+  router.register("/settings/wallet/disconnect", WalletDisconnect, {
     requireUser: true,
   })
   router.register("/settings/data/export", DataExport, {

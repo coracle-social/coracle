@@ -13,11 +13,12 @@
   } from "@welshman/app"
   import {userFollows} from "src/engine"
   import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import Popover from "src/partials/Popover.svelte"
   import WotScore from "src/partials/WotScore.svelte"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
-  import {router} from "src/app/util"
+  import {router, zap} from "src/app/util"
   import {ensureProto} from "src/util/misc"
   import {stripProtocol} from "@welshman/lib"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
@@ -29,11 +30,8 @@
   const handle = deriveHandleForPubkey(pubkey)
   const profileDisplay = deriveProfileDisplay(pubkey)
   const showPerson = () => router.at("people").of(pubkey).open()
+  const startZap = () => zap({splits: [tagZapSplit(pubkey)]})
 
-  $: zapLink = router
-    .at("zap")
-    .qp({splits: [tagZapSplit(pubkey)]})
-    .toString()
   $: following = $userFollows.has(pubkey)
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
   $: accent = following || pubkey === $session?.pubkey
@@ -60,12 +58,12 @@
         </div>
       {/if}
       {#if zapDisplay}
-        <Link modal class="mt-4 flex items-center gap-2" href={zapLink}>
+        <Button class="mt-4 flex items-center gap-2" on:click={startZap}>
           <i class="fa fa-bolt" />
           <div class="overflow-hidden overflow-ellipsis">
             {zapDisplay}
           </div>
-        </Link>
+        </Button>
       {/if}
       {#if $profile?.website}
         <Link

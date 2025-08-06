@@ -47,7 +47,7 @@
       {#if $pubkey}
         <Button
           stopPropagation
-          class="text-start flex items-center justify-center gap-2"
+          class="flex items-center justify-center gap-2 text-start"
           on:click={openAccount}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
@@ -124,6 +124,9 @@
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/data" on:click={closeMenu}>
         <i class="fa fa-database" /> Database
+      </MenuMobileItem>
+      <MenuMobileItem disabled={!$signer} href="/settings/wallet" on:click={closeMenu}>
+        <i class="fa fa-wallet" /> Wallet
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/content" on:click={closeMenu}>
         <i class="fa fa-volume-xmark" /> Content

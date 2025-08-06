@@ -33,6 +33,7 @@
     "@eslint/js": "^9.25.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@getalby/bitcoin-connect": "^3.7.1",
+    "@getalby/sdk": "^5.1.0",
     "@noble/curves": "^1.9.0",
     "@noble/hashes": "^1.8.0",
     "@scure/base": "^1.2.5",

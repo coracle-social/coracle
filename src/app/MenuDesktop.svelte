@@ -137,6 +137,12 @@
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
+          href="/settings/wallet"
+          disabled={!$signer}>
+          <i class="fa fa-wallet" /> Wallet
+        </MenuItem>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
           disabled={!$signer}>
           <i class="fa fa-cog" /> App Settings

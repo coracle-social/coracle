@@ -39,8 +39,6 @@
   }
 
   const searchBlossomProviders = fuzzy(env.BLOSSOM_URLS, {keys: ["url"]})
-  const formatPercent = d => String(Math.round(d * 100))
-  const parsePercent = p => parseInt(p) / 100
 
   const values = {...$userSettings}
 
@@ -61,14 +59,12 @@
       </Input>
       <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
     </Field>
-    <Field label="Platform zap split">
-      <Input
-        type="number"
-        bind:value={values.platform_zap_split}
-        format={formatPercent}
-        parse={parsePercent}>
-        <i slot="before" class="fa fa-percent" />
-      </Input>
+    <Field>
+      <div slot="label" class="flex justify-between">
+        <strong>Platform zap split</strong>
+        <div>{Math.round(values.platform_zap_split * 100)}%</div>
+      </div>
+      <Input type="range" step="0.01" bind:value={values.platform_zap_split} min={0} max={0.5} />
       <p slot="info">
         How much you'd like to tip the developer of {appName} whenever you send a zap.
       </p>
@@ -78,7 +74,7 @@
         <strong>Send Delay</strong>
         <div>{values.send_delay / 1000} {pluralize(values.send_delay / 1000, "second")}</div>
       </div>
-      <Input type="range" step="1000" bind:value={values.send_delay} min={0} max={15_000}></Input>
+      <Input type="range" step="1000" bind:value={values.send_delay} min={0} max={15_000} />
       <p slot="info">A delay period allowing you to cancel a reply or note creation, in seconds.</p>
     </Field>
     <Field>
@@ -88,7 +84,7 @@
           difficulty {values.pow_difficulty} (<WorkEstimate difficulty={values.pow_difficulty} />)
         </div>
       </div>
-      <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32}></Input>
+      <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32} />
       <p slot="info">Add a proof-of-work stamp to your notes to increase your reach.</p>
     </Field>
     <Field>

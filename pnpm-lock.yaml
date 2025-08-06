@@ -41,6 +41,9 @@ importers:
       '@getalby/bitcoin-connect':
         specifier: ^3.7.1
         version: 3.7.1(react@19.1.0)(typescript@5.5.4)
+      '@getalby/sdk':
+        specifier: ^5.1.0
+        version: 5.1.2(typescript@5.5.4)
       '@noble/curves':
         specifier: ^1.9.0
         version: 1.9.0
@@ -1154,8 +1157,16 @@ packages:
     resolution: {integrity: sha512-BwGm8eGbPh59BVa1gI5yJMantBl/Fdps6X4p1ZACnmxz9vDINX8/3aFoOnDlF7yyA2boXWCsReVQSr26Q2yjiQ==}
     engines: {node: '>=14'}
 
+  '@getalby/lightning-tools@5.2.1':
+    resolution: {integrity: sha512-dxOmJLJAh6qJ8rsbA5/Bwj7MSI9X3RkxxqmCedl5rfP+yKwNSdfu8i4EiCZN/tk2hNBJb8GHSCcPRNZfwfmEHg==}
+    engines: {node: '>=14'}
+
   '@getalby/sdk@4.1.1':
     resolution: {integrity: sha512-Tm0Puqm3qpXxSfUhiO8W7Uaq9Fx/Ww2aOv3sjRYL1jukLi+GRj4s65QCsjCIWaKWUN+RCJMlW3LtKFnUQC/O3A==}
+    engines: {node: '>=14'}
+
+  '@getalby/sdk@5.1.2':
+    resolution: {integrity: sha512-yUF9LhuvdIFOwjV1aG0ryzfwDiGBFk/CRLkRvrrM9dsE38SUjKsf1FDga5jxsKMu80nWcPZR9TiGGASWedoYPA==}
     engines: {node: '>=14'}
 
   '@humanfs/core@0.19.1':
@@ -3982,6 +3993,14 @@ packages:
       typescript:
         optional: true
 
+  nostr-tools@2.15.0:
+    resolution: {integrity: sha512-Jj/+UFbu3JbTAWP4ipPFNuyD4W5eVRBNAP+kmnoRCYp3bLmTrlQ0Qhs5O1xSQJTFpjdZqoS0zZOUKdxUdjc+pw==}
+    peerDependencies:
+      typescript: '>=5.0.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   nostr-tools@2.9.4:
     resolution: {integrity: sha512-Powumwkp+EWbdK1T8IsEX4daTLQhtWJvitfZ6OP2BdU1jJZvNlUp3SQB541UYw4uc9jgLbxZW6EZSdZoSfIygQ==}
     peerDependencies:
@@ -4783,6 +4802,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   sourcemap-codec@1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
@@ -6633,9 +6653,18 @@ snapshots:
 
   '@getalby/lightning-tools@5.1.2': {}
 
+  '@getalby/lightning-tools@5.2.1': {}
+
   '@getalby/sdk@4.1.1(typescript@5.5.4)':
     dependencies:
       nostr-tools: 2.9.4(typescript@5.5.4)
+    transitivePeerDependencies:
+      - typescript
+
+  '@getalby/sdk@5.1.2(typescript@5.5.4)':
+    dependencies:
+      '@getalby/lightning-tools': 5.2.1
+      nostr-tools: 2.15.0(typescript@5.5.4)
     transitivePeerDependencies:
       - typescript
 
@@ -7516,7 +7545,7 @@ snapshots:
   '@welshman/content@0.4.1(typescript@5.5.4)':
     dependencies:
       '@braintree/sanitize-url': 7.1.1
-      nostr-tools: 2.14.2(typescript@5.5.4)
+      nostr-tools: 2.15.0(typescript@5.5.4)
     transitivePeerDependencies:
       - typescript
 
@@ -7537,8 +7566,8 @@ snapshots:
       '@tiptap/suggestion': 2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)
       '@welshman/lib': 0.4.1
       '@welshman/util': 0.4.1(typescript@5.5.4)
-      nostr-editor: 1.0.0(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/extension-image@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))(@tiptap/extension-link@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)(linkifyjs@4.3.2)(nostr-tools@2.14.2(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.2)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(tiptap-markdown@0.8.10(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))
-      nostr-tools: 2.14.2(typescript@5.5.4)
+      nostr-editor: 1.0.0(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/extension-image@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))(@tiptap/extension-link@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)(linkifyjs@4.3.2)(nostr-tools@2.15.0(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.2)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(tiptap-markdown@0.8.10(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))
+      nostr-tools: 2.15.0(typescript@5.5.4)
       tippy.js: 6.3.7
     transitivePeerDependencies:
       - '@tiptap/extension-image'
@@ -7605,7 +7634,7 @@ snapshots:
       '@welshman/net': 0.4.1(typescript@5.5.4)(ws@8.18.3)
       '@welshman/util': 0.4.1(typescript@5.5.4)
       nostr-signer-capacitor-plugin: 0.0.4(@capacitor/core@7.2.0)
-      nostr-tools: 2.14.2(typescript@5.5.4)
+      nostr-tools: 2.15.0(typescript@5.5.4)
     transitivePeerDependencies:
       - typescript
       - ws
@@ -7624,7 +7653,7 @@ snapshots:
       '@types/ws': 8.18.1
       '@welshman/lib': 0.4.1
       js-base64: 3.7.7
-      nostr-tools: 2.14.2(typescript@5.5.4)
+      nostr-tools: 2.15.0(typescript@5.5.4)
       nostr-wasm: 0.1.0
     transitivePeerDependencies:
       - typescript
@@ -9736,7 +9765,7 @@ snapshots:
 
   normalize-url@8.0.1: {}
 
-  nostr-editor@1.0.0(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/extension-image@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))(@tiptap/extension-link@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)(linkifyjs@4.3.2)(nostr-tools@2.14.2(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.2)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(tiptap-markdown@0.8.10(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))):
+  nostr-editor@1.0.0(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/extension-image@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1)))(@tiptap/extension-link@2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)(linkifyjs@4.3.2)(nostr-tools@2.15.0(typescript@5.5.4))(prosemirror-markdown@1.13.2)(prosemirror-model@1.25.2)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(tiptap-markdown@0.8.10(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))):
     dependencies:
       '@tiptap/core': 2.26.1(@tiptap/pm@2.26.1)
       '@tiptap/extension-image': 2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))
@@ -9745,7 +9774,7 @@ snapshots:
       js-base64: 3.7.7
       light-bolt11-decoder: 3.2.0
       linkifyjs: 4.3.2
-      nostr-tools: 2.14.2(typescript@5.5.4)
+      nostr-tools: 2.15.0(typescript@5.5.4)
       prosemirror-markdown: 1.13.2
       prosemirror-model: 1.25.2
       prosemirror-state: 1.4.3
@@ -9757,6 +9786,18 @@ snapshots:
       '@capacitor/core': 7.2.0
 
   nostr-tools@2.14.2(typescript@5.5.4):
+    dependencies:
+      '@noble/ciphers': 0.5.3
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.1
+      '@scure/base': 1.1.1
+      '@scure/bip32': 1.3.1
+      '@scure/bip39': 1.2.1
+      nostr-wasm: 0.1.0
+    optionalDependencies:
+      typescript: 5.5.4
+
+  nostr-tools@2.15.0(typescript@5.5.4):
     dependencies:
       '@noble/ciphers': 0.5.3
       '@noble/curves': 1.2.0

@@ -48,7 +48,7 @@
   import Modal from "src/partials/Modal.svelte"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import NoteInfo from "src/app/shared/NoteInfo.svelte"
-  import {router, deriveValidZaps} from "src/app/util"
+  import {router, deriveValidZaps, zap} from "src/app/util"
   import {
     env,
     deriveHandlersForKind,
@@ -113,14 +113,11 @@
     const defaultSplit = tagZapSplit(event.pubkey)
     const splits = zapTags.length > 0 ? zapTags : [defaultSplit]
 
-    router
-      .at("zap")
-      .qp({
-        splits,
-        eventId: event.id,
-        anonymous: Boolean(event.wrap),
-      })
-      .open()
+    zap({
+      splits,
+      eventId: event.id,
+      anonymous: Boolean(event.wrap),
+    })
   }
 
   const broadcast = () => {

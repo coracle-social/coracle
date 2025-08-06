@@ -374,7 +374,7 @@ body,
   @apply bg-white text-black text-xl staatliches rounded whitespace-nowrap flex justify-center items-center gap-2 px-6 h-7 transition-all;
 }
 
-.btn[disabled=true], .btn.btn-disabled {
+.btn.btn-disabled {
   @apply opacity-50 pointer-events-none;
 }
 

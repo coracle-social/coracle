@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {createEventDispatcher} from 'svelte'
+  import {createEventDispatcher} from "svelte"
 
   export let loading = false
   export let disabled = false
@@ -13,15 +13,14 @@
       e.stopPropagation()
     }
 
-    dispatch('click', e)
+    dispatch("click", e)
   }
 </script>
 
 <button
   {...$$restProps}
-  disabled={Boolean(disabled || loading)}
   {type}
-  class="cursor-pointer {$$props.class}"
+  class="cursor-pointer {disabled || loading ? 'btn-disabled' : ''} {$$props.class}"
   on:click={onClick}>
   {#if loading}
     <i class="fa fa-circle-notch fa-spin fa-sm" />

@@ -1,3 +1,4 @@
+import {nwc} from "@getalby/sdk"
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
@@ -296,5 +297,25 @@ export const broadcastUserData = async (relays: string[]) => {
     if (isSignedEvent(event)) {
       await publishThunk({event, relays})
     }
+  }
+}
+
+// Lightning
+
+export const getWebLn = () => (window as any).webln
+
+export const payInvoice = async (invoice: string) => {
+  const {wallet} = session.get()
+
+  if (!wallet) {
+    throw new Error("No wallet is connected")
+  }
+
+  if (wallet.type === "nwc") {
+    return new nwc.NWCClient(wallet.info).payInvoice({invoice})
+  } else if (wallet.type === "webln") {
+    return getWebLn()
+      .enable()
+      .then(() => getWebLn().sendPayment(invoice))
   }
 }

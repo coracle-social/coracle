@@ -2,15 +2,16 @@
   import {tagZapSplit} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Link from "src/partials/Link.svelte"
+  import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
-  import {router} from "src/app/util/router"
+  import {router, zap} from "src/app/util"
   import {loadPubkeys, env} from "src/engine"
 
   const hash = import.meta.env.VITE_BUILD_HASH
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
-  const splits = [tagZapSplit(env.PLATFORM_PUBKEY)]
+  const startZap = () => zap({splits: [tagZapSplit(env.PLATFORM_PUBKEY)]})
 
   loadPubkeys([env.PLATFORM_PUBKEY])
 
@@ -31,9 +32,7 @@
         <h3 class="text-xl sm:h-12">Support development</h3>
         <p class="sm:h-20">All funds will be used to support server costs and development.</p>
         <div class="flex justify-center">
-          <Link modal class="btn btn-accent" href={router.at("zap").qp({splits}).toString()}>
-            Zap the developer
-          </Link>
+          <Button class="btn btn-accent" on:click={startZap}>Zap the developer</Button>
         </div>
       </FlexColumn>
     </Card>

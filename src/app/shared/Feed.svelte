@@ -23,7 +23,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import FeedControls from "src/app/shared/FeedControls.svelte"
-  import {router} from "src/app/util"
+  import {router, zap} from "src/app/util"
   import type {Feed} from "src/domain"
   import {env, sortEventsDesc} from "src/engine"
   import FeedItem from "src/app/shared/FeedItem.svelte"
@@ -37,7 +37,7 @@
 
   let abortController = new AbortController()
 
-  const splits = [["zap", env.PLATFORM_PUBKEY, "", "1"]]
+  const startZap = () => zap({splits: [["zap", env.PLATFORM_PUBKEY, "", "1"]]})
 
   const promptDismissed = synced({
     key: "feed/promptDismissed",
@@ -170,9 +170,7 @@
               on:click={() => promptDismissed.set(now())}>
               Dismiss
             </Button>
-            <Link modal class="btn btn-accent" href={router.at("zap").qp({splits}).toString()}>
-              Zap the developer
-            </Link>
+            <Button class="btn btn-accent" on:click={startZap}>Zap the developer</Button>
           </div>
         </Card>
       {/if}
