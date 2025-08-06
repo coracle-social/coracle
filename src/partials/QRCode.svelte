@@ -6,7 +6,6 @@
   import {copyToClipboard} from "src/util/html"
 
   export let code
-  export let href = null
   export let onClick = null
   export let copyOnClick = true
 
