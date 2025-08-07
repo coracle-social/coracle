@@ -52,7 +52,10 @@
         <PersonName pubkey={event.pubkey} />
       </Button>
       <div class="flex items-center gap-3 pt-1 text-xs sm:pt-0">
-        <Button on:click={goToDetail} class="whitespace-nowrap text-end text-neutral-100">
+        <Button
+          stopPropagation
+          on:click={goToDetail}
+          class="whitespace-nowrap text-end text-neutral-100">
           {formatTimestamp(event.created_at)}
         </Button>
       </div>

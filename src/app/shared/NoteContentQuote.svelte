@@ -46,32 +46,32 @@
   $: muted = $quote && $isEventMuted($quote, true)
 </script>
 
-<div class="my-2" on:click|stopPropagation>
-  <Card interactive stopPropagation class="my-2" on:click={openQuote}>
-    {#if muted && !showHidden}
-      <p class="mb-1 py-24 text-center text-neutral-600">
-        You have hidden this note.
-        <Button class="underline" stopPropagation on:click={unmute}>Show</Button>
-      </p>
-    {:else if $quote}
-      {#if !headerlessKinds.includes($quote.kind)}
-        <div class="mb-4 flex items-center gap-4">
-          <PersonCircle class="h-6 w-6" pubkey={$quote.pubkey} />
-          <Link
-            modal
-            stopPropagation
-            type="unstyled"
-            class="flex items-center gap-2"
-            href={router.at("people").of($quote.pubkey).toString()}>
-            <h2 class="text-lg">{$profileDisplay}</h2>
-          </Link>
-        </div>
-      {/if}
-      <slot name="note-content" quote={$quote} {depth} />
-    {:else}
-      <div class="px-20">
-        <Spinner />
+<Card interactive stopPropagation class="my-2" on:click={openQuote}>
+  {#if muted && !showHidden}
+    <p class="mb-1 py-24 text-center text-neutral-600">
+      You have hidden this note.
+      <Button class="underline" stopPropagation on:click={unmute}>Show</Button>
+    </p>
+  {:else if $quote}
+    {#if !headerlessKinds.includes($quote.kind)}
+      <div class="mb-4 flex items-center gap-4">
+        <PersonCircle class="h-6 w-6" pubkey={$quote.pubkey} />
+        <Link
+          modal
+          stopPropagation
+          type="unstyled"
+          class="flex items-center gap-2"
+          href={router.at("people").of($quote.pubkey).toString()}>
+          <h2 class="text-lg">{$profileDisplay}</h2>
+        </Link>
       </div>
     {/if}
-  </Card>
-</div>
+    <div on:click|stopPropagation>
+      <slot name="note-content" quote={$quote} {depth} />
+    </div>
+  {:else}
+    <div class="px-20">
+      <Spinner />
+    </div>
+  {/if}
+</Card>
