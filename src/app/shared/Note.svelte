@@ -110,6 +110,7 @@
       <p class="ml-14 mt-4 border-l-2 border-solid border-neutral-600 pl-4 text-neutral-100">
         You have hidden this note.
         <Button
+          stopPropagation
           class="underline"
           on:click={() => {
             showHidden = true

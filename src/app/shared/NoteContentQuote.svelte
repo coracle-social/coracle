@@ -66,9 +66,7 @@
         </Link>
       </div>
     {/if}
-    <div on:click|stopPropagation>
-      <slot name="note-content" quote={$quote} {depth} />
-    </div>
+    <slot name="note-content" quote={$quote} {depth} />
   {:else}
     <div class="px-20">
       <Spinner />
