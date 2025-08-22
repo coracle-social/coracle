@@ -117,6 +117,7 @@ import {
   readUserList,
   subscriptionNotices,
   makeFeed,
+  normalizeFeedDefinition,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
@@ -542,7 +543,7 @@ export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $us
     definition = makeAuthorFeed(...env.DEFAULT_FOLLOWS)
   }
 
-  return makeFeed({definition})
+  return makeFeed({definition: normalizeFeedDefinition(definition)})
 })
 
 export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
