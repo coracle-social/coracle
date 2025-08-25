@@ -52,7 +52,7 @@
       class:text-tinted-700={message.pubkey === $session.pubkey}
       class:text-neutral-100={message.pubkey !== $session.pubkey}>
       {#if $thunk}
-        {#if thunkHasStatus($thunk, PublishStatus.Pending)}
+        {#if thunkHasStatus(PublishStatus.Pending, $thunk)}
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...

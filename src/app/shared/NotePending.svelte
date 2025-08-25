@@ -16,7 +16,7 @@
 
 <script lang="ts">
   import {remove} from "@welshman/lib"
-  import {abortThunk, thunkCompleteUrls, thunkUrlsWithStatus} from "@welshman/app"
+  import {abortThunk, getCompleteThunkUrls, getThunkUrlsWithStatus} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {now} from "@welshman/signer"
@@ -39,9 +39,9 @@
   }
 
   $: relays = remove(LOCAL_RELAY_URL, $thunk?.options?.relays)
-  $: completed = remove(LOCAL_RELAY_URL, thunkCompleteUrls($thunk))
-  $: pending = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Pending))
-  $: success = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Success))
+  $: completed = remove(LOCAL_RELAY_URL, getCompleteThunkUrls($thunk))
+  $: pending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Pending, $thunk))
+  $: success = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Success, $thunk))
   $: showProgress = pending.length > 0 || completed.length > 0
 
   $: completedDisplay.set((completed.length / relays.length) * 80)

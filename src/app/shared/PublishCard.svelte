@@ -1,7 +1,7 @@
 <script lang="ts">
   import {formatTimestamp} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
-  import {thunkUrlsWithStatus, publishThunk} from "@welshman/app"
+  import {getThunkUrlsWithStatus, publishThunk} from "@welshman/app"
   import {remove} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
   import type {SignedEvent, TrustedEvent} from "@welshman/util"
@@ -34,10 +34,10 @@
 
   let expanded = false
 
-  $: pending = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Pending))
-  $: success = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Success))
-  $: failure = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Failure))
-  $: timeout = remove(LOCAL_RELAY_URL, thunkUrlsWithStatus($thunk, PublishStatus.Timeout))
+  $: pending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Pending, $thunk))
+  $: success = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Success, $thunk))
+  $: failure = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Failure, $thunk))
+  $: timeout = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Timeout, $thunk))
 </script>
 
 {#await promise}
