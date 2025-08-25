@@ -6,13 +6,15 @@
   import {session, signer, tagPubkey, mutePrivately, unmute, loginWithPubkey} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Button from "src/partials/Button.svelte"
-  import {userMutedPubkeys} from "src/engine"
+  import {userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
   import {boot} from "src/app/state"
   import {router} from "src/app/util/router"
 
   export let pubkey
+  export let showFollowActions = false
 
   const isSelf = $session?.pubkey === pubkey
+  const following = derived(userFollows, $m => $m.has(pubkey))
   const muted = derived(userMutedPubkeys, $userMutedPubkeys => $userMutedPubkeys.has(pubkey))
 
   const loginAsUser = () => {
@@ -20,6 +22,10 @@
     loginWithPubkey(pubkey)
     boot()
   }
+
+  const unfollowPerson = () => unfollow(pubkey)
+
+  const followPerson = () => follow(tagPubkey(pubkey))
 
   const unmutePerson = () => unmute(pubkey)
 
@@ -41,6 +47,14 @@
 
   $: {
     actions = []
+
+    if (!isSelf && $signer && showFollowActions) {
+      actions.push({
+        onClick: $following ? unfollowPerson : followPerson,
+        label: $following ? "Unfollow" : "Follow",
+        icon: $following ? "user-minus" : "user-plus",
+      })
+    }
 
     if (!isSelf && $signer) {
       actions.push({

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {tagPubkey} from "@welshman/app"
-  import cx from "classnames"
   import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -19,18 +18,23 @@
   const following = derived(userFollows, $m => $m.has(pubkey))
 
   const unfollowPerson = () => unfollow(pubkey)
+
   const followPerson = () => follow(tagPubkey(pubkey))
 
   const showDetail = () => router.at("people").of(pubkey).open()
+
+  let innerWidth = 0
+
+  $: isSmall = innerWidth < 640
 </script>
 
-<div class="relative flex flex-grow flex-col gap-4">
-  <div class="relative grid grid-cols-4 gap-4">
-    <Button
-      on:click={inert ? null : showDetail}
-      class={cx("col-span-3 flex gap-4 overflow-hidden", {"col-span-4": hideActions})}>
+<svelte:window bind:innerWidth />
+
+<div class="flex flex-grow flex-col gap-4">
+  <div class="relative flex justify-between gap-4">
+    <Button on:click={inert ? null : showDetail} class="flex gap-4 overflow-hidden">
       <PersonCircle class="h-14 w-14" {pubkey} />
-      <div class="mr-16 flex min-w-0 flex-grow flex-col gap-1">
+      <div class="flex min-w-0 flex-grow flex-col gap-1">
         <PersonName class="text-lg" {pubkey} />
         <PersonHandle {pubkey} />
       </div>
@@ -38,7 +42,7 @@
     {#if !hideActions}
       <div class="flex items-start justify-end">
         <div class="flex items-center justify-end gap-2">
-          {#if !hideFollowActions}
+          {#if !hideFollowActions && !isSmall}
             {#if $following}
               <Button class="btn btn-low border-none bg-tinted-800-d" on:click={unfollowPerson}
                 >Followed</Button>
@@ -47,7 +51,7 @@
             {/if}
           {/if}
           <slot name="actions" {pubkey}>
-            <PersonActions {pubkey} />
+            <PersonActions showFollowActions={!hideFollowActions && isSmall} {pubkey} />
           </slot>
         </div>
       </div>
