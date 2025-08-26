@@ -308,7 +308,7 @@ export const payInvoice = async (invoice: string) => {
   const {wallet} = session.get()
 
   if (!wallet) {
-    throw new Error("No wallet is connected")
+    return alert(invoice)
   }
 
   if (wallet.type === "nwc") {

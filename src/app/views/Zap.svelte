@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {load} from "@welshman/net"
+  import {request} from "@welshman/net"
   import {nth, sum} from "@welshman/lib"
   import {Router, addMinimalFallbacks} from "@welshman/router"
   import {Nip01Signer} from "@welshman/signer"
@@ -66,6 +66,11 @@
         const weight = parseFloat(weightString)
         const msats = 1000 * amount * (weight / totalWeight)
         const zapper = await loadZapperForPubkey(pubkey)
+
+        if (!zapper) {
+          return showWarning(`Failed to zap: no zapper found`)
+        }
+
         const relays = [relay, ...Router.get().ForPubkey(pubkey).getUrls()]
         const filters = [getZapResponseFilter({zapper, pubkey, eventId})]
         const params = {pubkey, content, eventId, msats, relays, zapper}
@@ -83,7 +88,20 @@
 
         try {
           await payInvoice(res.invoice)
-          requests.push(load({filters, relays}))
+
+          const ctrl = new AbortController()
+
+          requests.push(
+            new Promise<void>(resolve =>
+              request({
+                filters,
+                relays,
+                signal: AbortSignal.any([AbortSignal.timeout(8000), ctrl.signal]),
+                onEvent: () => ctrl.abort(),
+                onClose: resolve,
+              }),
+            ),
+          )
         } catch (e) {
           const message = String(e).replace(/^.*Error: /, "")
 

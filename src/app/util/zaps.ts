@@ -47,10 +47,7 @@ export const deriveValidZaps = (zaps: TrustedEvent[], parent: TrustedEvent) => {
 
 export const zap = (qp: Record<string, any>) => {
   if (!session.get().wallet) {
-    router
-      .at("settings/wallet/connect")
-      .cx({next: () => router.at("zap").qp(qp).replaceModal()})
-      .open()
+    router.at("settings/wallet/connect").cx({qp}).open()
   } else {
     router.at("zap").qp(qp).open()
   }

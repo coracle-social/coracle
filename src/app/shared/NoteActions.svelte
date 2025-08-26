@@ -148,8 +148,6 @@
 
   const context = deriveEvents(repository, {filters: getReplyFilters([event])})
 
-  $: children = $context.filter(e => isChildOf(e, event))
-
   let view
   let actions = []
 
@@ -157,6 +155,7 @@
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
   $: muted = $userMutedEvents.has(event.id) || $userMutedEvents.has(getAddress(event))
   $: pinned = $userPins.has(event.id)
+  $: children = $context.filter(e => isChildOf(e, event))
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))

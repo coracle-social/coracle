@@ -14,9 +14,11 @@
   import {getWebLn} from "src/engine"
   import {router} from "src/app/util"
 
-  export let next
+  export let qp
 
   const back = () => router.clearModals()
+
+  const next = () => router.at("zap").qp(qp).replaceModal()
 
   const connectWithWebLn = async () => {
     loading = true
@@ -101,19 +103,30 @@
   </div>
   <div>
     {#if getWebLn()}
-      <Button
-        class="btn btn-accent w-full"
-        loading={loading && !nostrWalletConnectUrl}
-        disabled={Boolean(nostrWalletConnectUrl)}
-        on:click={connectWithWebLn}>
-        {#if loading && !nostrWalletConnectUrl}
-          Connecting...
-        {:else}
-          <i class="fa fa-puzzle-piece fa-sm" />
-          Connect with WebLN
+      <div class="flex flex-col gap-2">
+        <Button
+          class="btn btn-accent w-full"
+          loading={loading && !nostrWalletConnectUrl}
+          disabled={Boolean(nostrWalletConnectUrl)}
+          on:click={connectWithWebLn}>
+          {#if loading && !nostrWalletConnectUrl}
+            Connecting...
+          {:else}
+            <i class="fa fa-puzzle-piece fa-sm" />
+            Connect with WebLN
+          {/if}
+        </Button>
+        {#if qp}
+          <Button
+            class="btn btn-low w-full"
+            disabled={Boolean(nostrWalletConnectUrl)}
+            on:click={next}>
+            <i class="fa fa-qrcode fa-sm" />
+            Pay manually
+          </Button>
         {/if}
-      </Button>
-      <Divider>Or</Divider>
+        <Divider>Or</Divider>
+      </div>
     {/if}
     <Field label="Connection Secret">
       <Input
