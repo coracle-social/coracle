@@ -59,6 +59,7 @@
     trackerStore,
     userMutedEvents,
     sortEventsDesc,
+    isEventMuted,
     userPins,
   } from "src/engine"
 
@@ -158,7 +159,9 @@
   $: children = $context.filter(e => isChildOf(e, event))
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
-  $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
+  $: replies = sortEventsDesc(
+    children.filter(e => replyKinds.includes(e.kind) && !$isEventMuted(e)),
+  )
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length
