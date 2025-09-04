@@ -207,7 +207,7 @@
       </div>
     {:else}
       {#each state.follows as pubkey (pubkey)}
-        <PersonSummary {pubkey}>
+        <PersonSummary hideFollowActions {pubkey}>
           <div slot="actions" class="flex items-start justify-end">
             <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
               <i class="fa fa-user-slash" /> Unfollow
