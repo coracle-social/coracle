@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.20
+
+* Fix duplicate follow actions in onboarding
+* Fix feed controls changing themselves
+* Fix long form topic chips
+* Remove global feeds
+* Only count non-muted events in reply count
+* Improve zap receipt fetching
+
 # 0.6.19
 
 * Improve relay hint reliability
