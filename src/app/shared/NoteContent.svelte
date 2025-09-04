@@ -47,7 +47,7 @@
       <i class="fa fa-warning m-1" />
       <p>
         This note has been flagged by the author as "{warning}".<br />
-        <Button class="underline" on:click={ignoreWarning}>Show anyway</Button>
+        <Button stopPropagation class="underline" on:click={ignoreWarning}>Show anyway</Button>
       </p>
     </div>
   {:else if note.kind === 0}

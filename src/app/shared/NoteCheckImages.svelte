@@ -33,7 +33,7 @@
     <i class="fa fa-warning m-1" />
     <p>
       This note contains sensitive content.<br />
-      <Button class="underline" on:click={ignoreWarning}>Show anyway</Button>
+      <Button stopPropagation class="underline" on:click={ignoreWarning}>Show anyway</Button>
     </p>
   </div>
 {:else}
