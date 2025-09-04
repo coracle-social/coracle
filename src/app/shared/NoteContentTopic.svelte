@@ -12,5 +12,7 @@
 </script>
 
 <Button modal class="underline" on:click={onClick}>
-  #{value}
+  <slot>
+    #{value}
+  </slot>
 </Button>

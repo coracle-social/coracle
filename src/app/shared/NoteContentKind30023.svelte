@@ -8,8 +8,8 @@
   import {displayProfileByPubkey} from "@welshman/app"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
-  import Link from "src/partials/Link.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
+  import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
   import {router} from "src/app/util/router"
 
   export let note, showEntire
@@ -71,9 +71,9 @@
   {/if}
   <div>
     {#each getTopicTagValues(note.tags) as topic}
-      <Link modal href={router.at("topics").of(topic).toString()}>
+      <NoteContentTopic value={topic}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
-      </Link>
+      </NoteContentTopic>
     {/each}
   </div>
 </div>
