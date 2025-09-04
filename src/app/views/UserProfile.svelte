@@ -75,8 +75,7 @@
       <ImageInput
         bind:value={values.picture}
         icon="image-portrait"
-        maxWidth={480}
-        maxHeight={480} />
+        opts={{quality: 0.7, maxWidth: 480, maxHeight: 480}} />
       <p slot="info">Please be mindful of others and only use small images.</p>
     </Field>
   </div>

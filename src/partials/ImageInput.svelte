@@ -8,13 +8,13 @@
   import Button from "src/partials/Button.svelte"
   import {showWarning} from "src/partials/Toast.svelte"
   import {ensureProto} from "src/util/misc"
+  import type {CompressorOpts} from "src/util/html"
   import {listenForFile} from "src/util/html"
   import {env, uploadFile} from "src/engine"
 
   export let icon = null
   export let value = null
-  export let maxWidth = null
-  export let maxHeight = null
+  export let opts: CompressorOpts = {}
 
   const url = ensureProto(
     getTagValue("server", getListTags($userBlossomServers)) || first(env.BLOSSOM_URLS),
@@ -30,10 +30,7 @@
           loading = true
 
           try {
-            const result = await uploadFile(url, inputFiles[0], {
-              maxWidth,
-              maxHeight,
-            })
+            const result = await uploadFile(url, inputFiles[0], opts)
 
             value = result.url
           } catch (e) {

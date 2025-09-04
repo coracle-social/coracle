@@ -14,7 +14,13 @@ export const copyToClipboard = text => {
   return result
 }
 
-export const stripExifData = async (file, {maxWidth = null, maxHeight = null} = {}) => {
+export type CompressorOpts = {
+  quality?: number
+  maxWidth?: number
+  maxHeight?: number
+}
+
+export const stripExifData = async (file, opts: CompressorOpts = {}) => {
   if (window.DataTransferItem && file instanceof DataTransferItem) {
     file = file.getAsFile()
   }
@@ -25,15 +31,14 @@ export const stripExifData = async (file, {maxWidth = null, maxHeight = null} = 
 
   const {default: Compressor} = await import("compressorjs")
 
-  /* eslint no-new: 0 */
-
   return new Promise((resolve, _reject) => {
     new Compressor(file, {
-      maxWidth: maxWidth || 2048,
-      maxHeight: maxHeight || 2048,
-      convertSize: 10 * 1024 * 1024,
+      ...opts,
+      maxWidth: 2048,
+      maxHeight: 2048,
       success: resolve,
       error: e => {
+        console.warn("Failed to compress file", e)
         // Non-images break compressor
         if (e.toString().includes("File or Blob")) {
           return resolve(file)
