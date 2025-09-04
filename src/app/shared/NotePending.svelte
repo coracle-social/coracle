@@ -73,8 +73,8 @@
           Published to {success.length}/{relays.length} relays
         </span>
         <Link
-          class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
           modal
+          class="staatliches z-feature rounded-r-md bg-tinted-100-d px-4 py-1 uppercase text-tinted-700-d"
           href="/publishes">
           <span class="sm:hidden"> Details </span>
           <span class="hidden sm:inline"> See details </span>

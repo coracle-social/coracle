@@ -249,3 +249,6 @@ export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ..
   ...items,
   ...xs.slice(start + deleteCount),
 ]
+
+export const ensureMailto = (value: string) =>
+  !value.includes(":") && value.includes("@") ? "mailto:" + value : value

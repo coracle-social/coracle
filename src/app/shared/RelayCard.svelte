@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {displayRelayUrl, RelayMode} from "@welshman/util"
   import {pubkey, signer, deriveRelay, derivePubkeyRelays} from "@welshman/app"
-  import {displayUrl, quantify} from "src/util/misc"
+  import {displayUrl, ensureMailto, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -109,9 +109,9 @@
       {#if $relay?.stats}
         <span class="flex items-center gap-1 text-sm">
           {#if $relay?.profile?.contact}
+            {@const value = $relay.profile.contact}
             <span class="opacity-75">Contact: </span>
-            <Link external class="underline" href={$relay.profile.contact}>
-              {displayUrl($relay.profile.contact)}</Link>
+            <Link external class="underline" href={ensureMailto(value)}>{displayUrl(value)}</Link>
           {/if}
         </span>
       {/if}

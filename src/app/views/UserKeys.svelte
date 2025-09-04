@@ -22,8 +22,9 @@
     </div>
     <p>
       Your account is identified across the network using a public/private <Link
+        external
         href={keypairUrl}
-        external>keypair</Link
+        class="underline">keypair</Link
       >. This allows you to fully own your account, and move to another app if needed.
     </p>
     <div>
@@ -45,8 +46,9 @@
           Your private key is used to prove your identity by cryptographically signing messages. <strong
             >Do not share this with anyone.</strong>
           Be careful about copying this into other apps - instead, consider using a <Link
+            external
             href={nip07}
-            external>compatible browser extension</Link> to securely store your key.
+            class="underline">compatible browser extension</Link> to securely store your key.
         </small>
       </div>
     {/if}

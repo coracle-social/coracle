@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {last} from "@welshman/lib"
   import {getRelaysFromList} from "@welshman/util"
   import {
     pubkey,
@@ -8,6 +7,7 @@
     deriveInboxRelaySelections,
     deriveRelay,
   } from "@welshman/app"
+  import {ensureMailto} from "src/util/misc"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {joinRelay, leaveRelay} from "src/engine"
   import {router} from "src/app/util/router"
@@ -60,7 +60,7 @@
 
     if ($relay?.profile?.contact) {
       actions.push({
-        onClick: () => window.open("mailto:" + last($relay.profile?.contact.split(":"))),
+        onClick: () => window.open(ensureMailto($relay.profile.contact)),
         label: "Contact",
         icon: "envelope",
       })

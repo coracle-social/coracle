@@ -123,7 +123,7 @@
       {#if pubkey === $session?.pubkey}
         <Link
           class="btn w-full !bg-neutral-800 dark:!bg-white"
-          href={router.at("/settings/profile").toString()}>
+          href={router.at("settings/profile").toString()}>
           Edit
         </Link>
       {:else if $session}
