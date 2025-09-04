@@ -9,6 +9,8 @@
 
   const showLogin = () => router.at("login").open()
 
+  const initialFeed = feed || $defaultFeed
+
   document.title = "Feeds"
 </script>
 
@@ -23,4 +25,4 @@
   </div>
 {/if}
 
-<Feed showControls feed={feed || $defaultFeed} />
+<Feed showControls feed={initialFeed} />
