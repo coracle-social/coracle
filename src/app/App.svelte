@@ -372,8 +372,10 @@
       document.body.setAttribute("style", "")
 
       if (scrollY !== undefined) {
-        window.scrollTo(0, scrollY)
-        scrollY = undefined
+        requestAnimationFrame(() => {
+          window.scrollTo(0, scrollY)
+          scrollY = undefined
+        })
       }
     }
   })
