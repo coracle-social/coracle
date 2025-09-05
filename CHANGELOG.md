@@ -9,6 +9,7 @@
 * Only count non-muted events in reply count
 * Improve zap receipt fetching
 * Fix "show anyway" button opening a drawer
+* Fix scroll bug
 
 # 0.6.19
 
