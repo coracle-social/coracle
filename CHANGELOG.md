@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.22
+
+* Support clicks on images in long form content
+
 # 0.6.20
 
 * Fix duplicate follow actions in onboarding

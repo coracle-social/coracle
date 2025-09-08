@@ -44,6 +44,18 @@
     return markdown
   }
 
+  const onClick = event => {
+    if (event.target.tagName === "IMG") {
+      const url = event.target.getAttribute("src")
+
+      if (event.metaKey) {
+        return window.open(url, "_blank")
+      }
+
+      router.at("media").of(url).open({overlay: true})
+    }
+  }
+
   onMount(() => {
     if (content) {
       ;[...content.querySelectorAll("a")].forEach(a => {
@@ -81,6 +93,7 @@
 {#if showEntire}
   <div
     bind:this={content}
+    on:click|stopPropagation={onClick}
     class="long-form-content flex flex-col gap-4 overflow-hidden text-ellipsis leading-6">
     {@html insane(marked.parse(convertEntities(note.content)))}
   </div>
