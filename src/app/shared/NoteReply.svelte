@@ -78,6 +78,11 @@
     drafts.delete(parent.id)
   }
 
+  const restoreDraft = draft => {
+    editor.commands.setContent(draft)
+    drafts.set(parent.id, draft)
+  }
+
   const removeMention = pubkey => {
     mentions = without([pubkey], mentions)
   }
@@ -95,6 +100,7 @@
     const parentTags = kind === NOTE ? tagEventForReply(parent) : tagEventForComment(parent)
     const editorTags = editor.storage.nostr.getEditorTags()
     const tags = uniqTags([...editorTags, ...parentTags, ...getClientTags()])
+    const draft = editor.getJSON()
 
     if (options.warning) {
       tags.push(["content-warning", options.warning])
@@ -128,6 +134,8 @@
       event: await sign(hashedEvent, options),
       delay: $userSettings.send_delay,
     })
+
+    thunk.controller.signal.addEventListener("abort", () => restoreDraft(draft))
 
     loading = false
     onReplyPublish(thunk)

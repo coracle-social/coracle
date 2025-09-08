@@ -3,6 +3,7 @@
 # 0.6.22
 
 * Support clicks on images in long form content
+* Restore draft when aborting reply
 
 # 0.6.20
 
