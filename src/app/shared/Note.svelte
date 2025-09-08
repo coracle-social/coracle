@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount, getContext} from "svelte"
-  import {nth, nthEq} from "@welshman/lib"
+  import {nth, now, nthEq} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
@@ -19,7 +19,7 @@
   import NoteReply from "src/app/shared/NoteReply.svelte"
   import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
-  import {timestamp1} from "src/util/misc"
+  import {ticker} from "src/util/misc"
   import {headerlessKinds} from "src/util/nostr"
   import NotePending from "src/app/shared/NotePending.svelte"
   import {getSetting, env, isEventMuted, loadPubkeys, myLoad} from "src/engine"
@@ -39,6 +39,10 @@
   let showHidden = false
 
   const topLevel = getContext("topLevel")
+
+  const start = now()
+
+  const elapsed = ticker()
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -71,6 +75,7 @@
 
   $: thunk = $thunks[event.id] as Thunk
   $: hidden = $isEventMuted(event, true)
+  $: pending = event.created_at + 60 > start + $elapsed
 
   onMount(() => {
     loadPubkeys(event.tags.filter(nthEq(0, "zap")).map(nth(1)))
@@ -121,7 +126,7 @@
         <NoteContent note={event} {depth} {showEntire} {showMedia} />
       </div>
       <div class:!pl-10={headerlessKinds.includes(event.kind)} class="pt-4 sm:pl-14">
-        {#if event.created_at > $timestamp1 - 45 && event.pubkey === $pubkey && !topLevel && thunk}
+        {#if pending && event.pubkey === $pubkey && !topLevel && thunk}
           <NotePending {thunk} {onReplyAbort} />
         {:else}
           <NoteActions {event} {onReplyStart} />

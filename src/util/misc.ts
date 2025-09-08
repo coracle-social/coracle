@@ -1,4 +1,3 @@
-import {derived, type Readable} from "svelte/store"
 import {
   stripProtocol,
   first,
@@ -12,15 +11,20 @@ import {
   ensurePlural,
   round,
 } from "@welshman/lib"
+import {custom} from "@welshman/store"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
-export const timestamp1: Readable<number> = derived([], (_, set) => {
-  const interval = setInterval(() => {
-    set(Math.floor(Date.now() / 1000))
-  }, 1000)
-  return () => clearInterval(interval)
-})
+export const ticker = () =>
+  custom<number>(set => {
+    let seconds = 0
+
+    set(seconds)
+
+    const interval = setInterval(() => set(++seconds), 1000)
+
+    return () => clearInterval(interval)
+  })
 
 export const formatDateAsLocalISODate = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60000

@@ -19,17 +19,16 @@
   import {abortThunk, getCompleteThunkUrls, getThunkUrlsWithStatus} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
-  import {now} from "@welshman/signer"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Link from "src/partials/Link.svelte"
-  import {timestamp1} from "src/util/misc"
-
-  const rendered = now()
+  import {ticker} from "src/util/misc"
 
   export let thunk: Thunk
   export let onReplyAbort: (thunk: Thunk) => void
+
+  const elapsed = ticker()
 
   const completedDisplay = tweened(0)
 
@@ -40,20 +39,21 @@
 
   $: relays = remove(LOCAL_RELAY_URL, $thunk?.options?.relays)
   $: completed = remove(LOCAL_RELAY_URL, getCompleteThunkUrls($thunk))
+  $: sending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Sending, $thunk))
   $: pending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Pending, $thunk))
   $: success = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Success, $thunk))
-  $: showProgress = pending.length > 0 || completed.length > 0
-
+  $: showProgress = sending.length === 0
   $: completedDisplay.set((completed.length / relays.length) * 80)
+  $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
 {#if $thunk}
   <div
+    on:click|stopPropagation
     class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"
     class:bg-neutral-500={showProgress}
     class:border={!showProgress}
-    class:px-4={pending.length > 0}
-    on:click|stopPropagation>
+    class:px-4={pending.length > 0}>
     {#if showProgress}
       <div
         class="loading-bar absolute left-0 top-0 h-full bg-accent"
@@ -81,12 +81,11 @@
         </Link>
       {/if}
     {:else if $userSettings.send_delay > 0}
-      {@const seconds = rendered + Math.ceil($userSettings.send_delay / 1000) - $timestamp1}
       <span class="hidden sm:inline">
-        Sending reply in {seconds} seconds
+        Sending reply in {remaining} seconds
       </span>
       <span class="sm:hidden">
-        Sending in {seconds}s
+        Sending in {remaining}s
       </span>
       <button
         class="ml-2 cursor-pointer rounded-md bg-neutral-100-d px-4 py-1 text-tinted-700-d"

@@ -4,7 +4,7 @@
   import {PublishStatus} from "@welshman/net"
   import {abortThunk, session, thunkHasStatus, thunks, type Thunk} from "@welshman/app"
   import {fly} from "svelte/transition"
-  import {timestamp1} from "src/util/misc"
+  import {ticker} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
   import Popover from "src/partials/Popover.svelte"
   import Link from "src/partials/Link.svelte"
@@ -19,9 +19,12 @@
 
   const getContent = e => (e.kind === 4 ? ensureMessagePlaintext(e) : e.content) || ""
 
+  const elapsed = ticker()
+
   let showDetails = false
 
   $: thunk = $thunks[message.wrap?.id || message.id] as Thunk
+  $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
 <div in:fly={{y: 20}} class="grid gap-2 py-1">
@@ -56,7 +59,7 @@
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...
-            {#if message.created_at > $timestamp1 - $userSettings.send_delay / 1000}
+            {#if remaining > 0}
               <button
                 class="cursor-pointer py-1 text-tinted-700-d underline"
                 on:click={() => abortThunk(thunk)}>Cancel</button>
