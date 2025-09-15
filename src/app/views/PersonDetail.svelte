@@ -87,7 +87,22 @@
     activeTab = tab
   }
 
+  const toggleFollowing = async () => {
+    togglingFollowing = $following
+
+    try {
+      if ($following) {
+        await unfollow(pubkey)
+      } else {
+        await follow(tagPubkey(pubkey))
+      }
+    } finally {
+      togglingFollowing = undefined
+    }
+  }
+
   let activeTab = "notes"
+  let togglingFollowing: boolean = undefined
 
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
@@ -129,8 +144,8 @@
       {:else if $session}
         <Button
           class="btn w-full {$following ? 'btn-low' : 'btn-accent'}"
-          on:click={() => ($following ? unfollow(pubkey) : follow(tagPubkey(pubkey)))}
-          >{$following ? "Unfollow" : "Follow"}</Button>
+          loading={togglingFollowing === $following}
+          on:click={toggleFollowing}>{$following ? "Unfollow" : "Follow"}</Button>
         <Link
           class="btn w-full {$following ? '' : 'btn-low'}"
           href={router.at("channels").of([$session.pubkey, pubkey]).toString()}>
