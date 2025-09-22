@@ -44,15 +44,10 @@
 
   const back = () => router.pop()
 
-  const platformRelay = Router.get()
-    .FromPubkey(env.PLATFORM_PUBKEY)
-    .policy(addMinimalFallbacks)
-    .getUrl()
-
   const sendZap = async () => {
     const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
     const percent = getSetting("platform_zap_split") as number
-    const platformSplit = ["zap", env.PLATFORM_PUBKEY, platformRelay, percent * totalWeight]
+    const platformSplit = ["zap", env.PLATFORM_PUBKEY, "", percent * totalWeight]
 
     loading = true
 
@@ -71,7 +66,9 @@
           return showWarning(`Failed to zap: no zapper found`)
         }
 
-        const relays = [relay, ...Router.get().ForPubkey(pubkey).getUrls()]
+        const router = Router.get()
+        const scenarios = [router.ForPubkey(pubkey), router.FromRelays([relay])]
+        const relays = router.merge(scenarios).policy(addMinimalFallbacks).getUrls()
         const filters = [getZapResponseFilter({zapper, pubkey, eventId})]
         const params = {pubkey, content, eventId, msats, relays, zapper}
         const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
