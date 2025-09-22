@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.23
+
+* Show loading when following/unfollowing
+* Add relay fallback to zaps
+
 # 0.6.22
 
 * Support clicks on images in long form content
