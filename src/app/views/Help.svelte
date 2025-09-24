@@ -45,7 +45,7 @@
         href="https://nsec.app/">nsec.app</Link
       >.
     </p>
-    <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#Signers">
+    <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#signers">
       <i class="fa fa-compass" /> Browse Signer Apps
     </Link>
   {:else if topic === "nip-17-dms"}
