@@ -99,7 +99,7 @@
       </p>
     </Field>
     <FieldInline label="Authenticate with relays">
-      <Toggle bind:value={values.auto_authenticate} />
+      <Toggle bind:value={values.auto_authenticate2} />
       <p slot="info">
         Allows {appName} to authenticate with relays that have access controls automatically.
       </p>

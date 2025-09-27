@@ -275,7 +275,7 @@ export const defaultSettings = {
   min_wot_score: 0,
   min_pow_difficulty: 0,
   enable_client_tag: false,
-  auto_authenticate: false,
+  auto_authenticate2: true,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
   upload_type: "blossom",
   imgproxy_url: env.IMGPROXY_URL,
@@ -785,7 +785,7 @@ if (!db) {
 
   // Sync user settings
   userSettings.subscribe($settings => {
-    autoAuthenticate = $settings.auto_authenticate
+    autoAuthenticate = $settings.auto_authenticate2
     appContext.dufflepudUrl = getSetting("dufflepud_url")
   })
 
