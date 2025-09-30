@@ -1,5 +1,4 @@
 import {
-  db,
   displayProfileByPubkey,
   ensurePlaintext,
   followsByPubkey,
@@ -9,7 +8,6 @@ import {
   getSession,
   getSigner,
   getUserWotScore,
-  initStorage,
   loadRelay,
   makeTrackerStore,
   maxWot,
@@ -25,7 +23,6 @@ import {
   signer,
   tracker,
   appContext,
-  defaultStorageAdapters,
   loadRelaySelections,
 } from "@welshman/app"
 import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
@@ -85,6 +82,9 @@ import {
   MUTES,
   NAMED_BOOKMARKS,
   WRAP,
+  PROFILE,
+  RELAYS,
+  INBOX_RELAYS,
   asDecryptedEvent,
   getAddress,
   getAddressTagValues,
@@ -120,6 +120,16 @@ import {
   normalizeFeedDefinition,
 } from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
+import {
+  RelaysStorageAdapter,
+  HandlesStorageAdapter,
+  ZappersStorageAdapter,
+  FreshnessStorageAdapter,
+  PlaintextStorageAdapter,
+  TrackerStorageAdapter,
+  EventsStorageAdapter,
+  initStorage,
+} from "src/engine/storage"
 import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {derived, writable} from "svelte/store"
@@ -338,7 +348,9 @@ export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m
   return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})
 })
 
-export const userFollows = derived(userFollowList, l => new Set(getPubkeyTagValues(getListTags(l))))
+export const userFollows = withGetter(
+  derived(userFollowList, l => new Set(getPubkeyTagValues(getListTags(l)))),
+)
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
@@ -740,9 +752,11 @@ export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...e
 // Storage
 
 let ready: Promise<any> = Promise.resolve()
+let initialized = false
 
 // Avoid initializing multiple times on hot reload
-if (!db) {
+if (!initialized) {
+  initialized = true
   const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
   const initialRelays = [
     ...env.DEFAULT_RELAYS,
@@ -802,7 +816,29 @@ if (!db) {
     })
   })
 
-  ready = initStorage("coracle", 6, defaultStorageAdapters)
+  ready = initStorage("coracle", 7, {
+    relays: new RelaysStorageAdapter({name: "relays"}),
+    handles: new HandlesStorageAdapter({name: "handles"}),
+    zappers: new ZappersStorageAdapter({name: "zappers"}),
+    freshness: new FreshnessStorageAdapter({name: "freshness"}),
+    plaintext: new PlaintextStorageAdapter({name: "plaintext"}),
+    tracker: new TrackerStorageAdapter({name: "tracker", tracker}),
+    events: new EventsStorageAdapter({
+      repository,
+      name: "events",
+      limit: 10_000,
+      rankEvent: (e: TrustedEvent) => {
+        const $sessions = sessions.get()
+        const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS]
+
+        if ($sessions[e.pubkey] || e.tags.some(t => $sessions[t[1]])) return 1
+        if (metaKinds.includes(e.kind) && userFollows.get()?.has(e.pubkey)) return 1
+
+        return 0
+      },
+    }),
+  })
+
   ready.then(() => Promise.all(initialRelays.map(url => loadRelay(url))))
 }
 
