@@ -132,7 +132,7 @@ const getBadDomainsWarning = (e: TrustedEvent) => {
     }
 
     for (const tag of e.tags) {
-      if (tag.some(t => t.includes(domain))) {
+      if (tag.some(t => t?.includes(domain))) {
         return "This note includes media from untrusted hosts."
       }
     }
