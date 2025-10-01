@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {remove, nthNe, nthEq} from "@welshman/lib"
+  import {remove, omit, spec} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
@@ -8,9 +8,9 @@
   export let thunk: Thunk
 
   $: relays = remove(LOCAL_RELAY_URL, thunk.options.relays)
-  $: pending = Object.entries($thunk.status)
-    .filter(nthNe(0, LOCAL_RELAY_URL))
-    .filter(nthEq(1, PublishStatus.Pending))
+  $: pending = Object.values(omit([LOCAL_RELAY_URL], $thunk.results)).filter(
+    spec({status: PublishStatus.Pending}),
+  )
 </script>
 
 <div>

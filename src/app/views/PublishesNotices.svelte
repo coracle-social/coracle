@@ -26,10 +26,10 @@
   $: pubNotices = Object.values($thunks).flatMap(thunk => {
     if (!isThunk(thunk)) return []
 
-    return Object.entries(thunk.status).map(([url, status]) => ({
+    return Object.entries(thunk.results).map(([url, {status, detail}]) => ({
       url,
       status,
-      message: thunk.details[url],
+      message: detail,
       eventId: thunk.event.id,
       created_at: thunk.event.created_at,
       eventKind: "Kind" + thunk.event.kind,

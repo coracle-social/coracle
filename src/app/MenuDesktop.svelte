@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {now, nthNe, nthEq, MINUTE} from "@welshman/lib"
+  import {now, omit, spec, MINUTE} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -53,11 +53,11 @@
     let failure = 0
 
     for (const thunk of $recentThunks) {
-      const statuses = Object.entries(thunk.status).filter(nthNe(0, LOCAL_RELAY_URL))
+      const results = Object.values(omit([LOCAL_RELAY_URL], thunk.results))
 
       if (!thunkIsComplete(thunk)) {
         pending += 1
-      } else if (statuses.find(nthEq(1, PublishStatus.Success))) {
+      } else if (results.some(spec({status: PublishStatus.Success}))) {
         success += 1
       } else {
         failure += 1

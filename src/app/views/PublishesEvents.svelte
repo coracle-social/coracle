@@ -21,7 +21,7 @@
     let success = 0
 
     for (const thunk of recent) {
-      const statuses = Object.entries(thunk.status).filter(nthNe(0, LOCAL_RELAY_URL)).map(nth(1))
+      const statuses = Object.entries(thunk.results).filter(nthNe(0, LOCAL_RELAY_URL)).map(nth(1))
 
       if (statuses.includes(PublishStatus.Success)) {
         success += 1
@@ -37,9 +37,9 @@
   $: {
     for (const t of recent) {
       if (t.event.created_at < now() - MINUTE) {
-        for (const [url, status] of Object.entries(t.status)) {
+        for (const [url, {status}] of Object.entries(t.results)) {
           if (status === PublishStatus.Pending) {
-            t.status[url] = PublishStatus.Failure
+            t.results[url].status = PublishStatus.Failure
           }
         }
       }
