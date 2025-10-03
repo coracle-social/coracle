@@ -85,7 +85,7 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
 
 export const signAndPublish = async (template, {anonymous = false} = {}) => {
   const event = await sign(template, {anonymous})
-  const relays = Router.get().PublishEvent(event).policy(addMaximalFallbacks).getUrls()
+  const relays = Router.get().PublishEvent(event).policy(addMinimalFallbacks).getUrls()
 
   return await publishThunk({event, relays})
 }

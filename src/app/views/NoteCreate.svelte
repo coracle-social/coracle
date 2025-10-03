@@ -3,7 +3,7 @@
   import {last, dateToSeconds, now} from "@welshman/lib"
   import {own, hash} from "@welshman/signer"
   import type {TrustedEvent} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {Router, addMinimalFallbacks} from "@welshman/router"
   import {
     makeEvent,
     toNostrURI,
@@ -113,7 +113,7 @@
     const relays =
       options.relays?.length > 0
         ? options.relays
-        : Router.get().PublishEvent(signedEvent).policy(addMaximalFallbacks).getUrls()
+        : Router.get().PublishEvent(signedEvent).policy(addMinimalFallbacks).getUrls()
 
     let thunk: Thunk
 

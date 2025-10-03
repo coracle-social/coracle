@@ -2,7 +2,7 @@
   import {onDestroy} from "svelte"
   import {without, dateToSeconds, uniq, now} from "@welshman/lib"
   import {NOTE, COMMENT, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {Router, addMinimalFallbacks} from "@welshman/router"
   import {
     session,
     displayProfileByPubkey,
@@ -127,7 +127,7 @@
     const relays =
       options.relays?.length > 0
         ? options.relays
-        : Router.get().PublishEvent(hashedEvent).policy(addMaximalFallbacks).getUrls()
+        : Router.get().PublishEvent(hashedEvent).policy(addMinimalFallbacks).getUrls()
 
     const thunk = publishThunk({
       relays,
