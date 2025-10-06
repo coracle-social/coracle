@@ -33,7 +33,9 @@ export const unsubscribers: Unsubscriber[] = []
 export const getAll = async (name: string) => {
   await ready
 
-  const tx = db!.transaction(name, "readwrite")
+  if (!db) return []
+
+  const tx = db.transaction(name, "readwrite")
   const store = tx.objectStore(name)
   const result = await store.getAll()
 
@@ -45,7 +47,9 @@ export const getAll = async (name: string) => {
 export const bulkPut = async (name: string, data: any[]) => {
   await ready
 
-  const tx = db!.transaction(name, "readwrite")
+  if (!db) return
+
+  const tx = db.transaction(name, "readwrite")
   const store = tx.objectStore(name)
 
   await Promise.all(
@@ -64,7 +68,9 @@ export const bulkPut = async (name: string, data: any[]) => {
 export const bulkDelete = async (name: string, ids: string[]) => {
   await ready
 
-  const tx = db!.transaction(name, "readwrite")
+  if (!db) return
+
+  const tx = db.transaction(name, "readwrite")
   const store = tx.objectStore(name)
 
   await Promise.all(ids.map(id => store.delete(id)))
@@ -76,7 +82,11 @@ export const initStorage = async (
   version: number,
   adapters: Record<string, StorageAdapter>,
 ) => {
-  if (!window.indexedDB) return
+  if (!window.indexedDB) {
+    console.warn("IndexedDB not available, running without persistence")
+    ready.resolve()
+    return
+  }
 
   window.addEventListener("beforeunload", () => closeStorage())
 
@@ -84,35 +94,40 @@ export const initStorage = async (
     throw new Error("Db initialized multiple times")
   }
 
-  db = await openDB(name, version, {
-    upgrade(db: IDBPDatabase) {
-      const names = Object.keys(adapters)
+  try {
+    db = await openDB(name, version, {
+      upgrade(db: IDBPDatabase) {
+        const names = Object.keys(adapters)
 
-      for (const name of db.objectStoreNames) {
-        if (!names.includes(name)) {
-          db.deleteObjectStore(name)
+        for (const name of db.objectStoreNames) {
+          if (!names.includes(name)) {
+            db.deleteObjectStore(name)
+          }
         }
-      }
 
-      for (const [name, {keyPath}] of Object.entries(adapters)) {
-        try {
-          db.createObjectStore(name, {keyPath})
-        } catch (e) {
-          console.warn(e)
+        for (const [name, {keyPath}] of Object.entries(adapters)) {
+          try {
+            db.createObjectStore(name, {keyPath})
+          } catch (e) {
+            console.warn(e)
+          }
         }
-      }
-    },
-  })
+      },
+    })
 
-  ready.resolve()
+    ready.resolve()
 
-  await Promise.all(
-    Object.values(adapters).map(async adapter => {
-      await adapter.init()
+    await Promise.all(
+      Object.values(adapters).map(async adapter => {
+        await adapter.init()
 
-      unsubscribers.push(adapter.sync())
-    }),
-  )
+        unsubscribers.push(adapter.sync())
+      }),
+    )
+  } catch (e) {
+    console.error("Failed to initialize IndexedDB:", e)
+    ready.resolve()
+  }
 }
 
 export const closeStorage = async () => {
