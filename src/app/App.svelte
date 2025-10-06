@@ -4,7 +4,6 @@
 
   import * as nip19 from "nostr-tools/nip19"
   import {get} from "svelte/store"
-  import {Capacitor} from "@capacitor/core"
   import {sleep, memoize} from "@welshman/lib"
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
@@ -373,16 +372,10 @@
       document.body.setAttribute("style", "")
 
       if (scrollY !== undefined) {
-        // ???
-        if (Capacitor.isNativePlatform()) {
+        requestAnimationFrame(() => {
           window.scrollTo(0, scrollY)
           scrollY = undefined
-        } else {
-          requestAnimationFrame(() => {
-            window.scrollTo(0, scrollY)
-            scrollY = undefined
-          })
-        }
+        })
       }
     }
   })
