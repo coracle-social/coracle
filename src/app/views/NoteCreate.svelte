@@ -48,7 +48,7 @@
   const uploading = writable(false)
   const wordCount = writable(0)
   const charCount = writable(0)
-  const SHIPYARD_PUBKEY = "85c20d3760ef4e1976071a569fb363f4ff086ca907669fb95167cdc5305934d1"
+  const SHIPYARD_PUBKEY = "5f13f66425c39afa13afd82870952e10d584cebd87f9d02f00ccd871aaaae9eb"
   const nsecWarning = writable(null)
 
   const openOptions = () => {
