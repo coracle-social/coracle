@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.24
+
+* Use new shipyard pubkey
+* Small optimizations
+
 # 0.6.23
 
 * Show loading when following/unfollowing
