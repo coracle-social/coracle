@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.25
+
+* Show a tags on highlights
+
 # 0.6.24
 
 * Use new shipyard pubkey
