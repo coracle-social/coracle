@@ -95,7 +95,6 @@ Coracle is intended to be fully white-labeled by groups of various kinds. The fo
 - `VITE_DEFAULT_FOLLOWS` is a comma-separated list of hex pubkeys to fetch content from when the user isn't following anyone.
 - `VITE_ONBOARDING_LISTS` is a comma-separated list of `kind:30003` person lists to populate onboarding with.
 - `VITE_NIP96_URLS` is a comma-separated list of default upload providers.
-- `VITE_IMGPROXY_URL` is an [imgproxy](https://imgproxy.net) instance url for protecting user privacy and reducing bandwidth use.
 - `VITE_DUFFLEPUD_URL` is a [Dufflepud](https://github.com/coracle-social/dufflepud) instance url, which helps Coracle with things like link previews and image uploads.
 - `VITE_PLATFORM_ZAP_SPLIT` is a decimal between 0 and 1 defining the default zap split percent.
 - `VITE_PLATFORM_PUBKEY` is the pubkey of the platform owner. This gets zapped when using the platform zap split.

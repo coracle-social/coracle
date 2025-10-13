@@ -3,6 +3,7 @@
 # 0.6.25
 
 * Show a tags on highlights
+* Disable imgproxy by default
 
 # 0.6.24
 

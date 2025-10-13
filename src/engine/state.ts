@@ -145,7 +145,6 @@ export const env = {
   ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
   ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
   BLUR_CONTENT: JSON.parse(import.meta.env.VITE_BLUR_CONTENT) as boolean,
-  IMGPROXY_URL: import.meta.env.VITE_IMGPROXY_URL as string,
   BLOSSOM_URLS: fromCsv(import.meta.env.VITE_BLOSSOM_URLS) as string[],
   ONBOARDING_LISTS: fromCsv(import.meta.env.VITE_ONBOARDING_LISTS) as string[],
   PLATFORM_PUBKEY: import.meta.env.VITE_PLATFORM_PUBKEY as string,
@@ -288,7 +287,7 @@ export const defaultSettings = {
   auto_authenticate2: true,
   note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
   upload_type: "blossom",
-  imgproxy_url: env.IMGPROXY_URL,
+  imgproxy_url: "",
   dufflepud_url: env.DUFFLEPUD_URL,
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
 }
@@ -312,12 +311,14 @@ export const userSettings = withGetter<typeof defaultSettings>(
   }),
 )
 
-export const getSetting = <T = any>(k: string): T => prop(k)(userSettings.get()) as T
+export function getSetting<T = any>(k: string): T {
+  return userSettings.get()[k] as T
+}
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
 
-  if (!url || url.match("gif$")) {
+  if (!base || !url || url.match("gif$")) {
     return url
   }
 
