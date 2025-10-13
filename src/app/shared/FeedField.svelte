@@ -12,11 +12,13 @@
     isRelayFeed,
     isListFeed,
     isDVMFeed,
+    isGlobalFeed,
     makeListFeed,
     makeDVMFeed,
     makeScopeFeed,
     makeTagFeed,
     makeRelayFeed,
+    makeGlobalFeed,
     Scope,
   } from "@welshman/feeds"
   import {toSpliced} from "src/util/misc"
@@ -31,6 +33,7 @@
   export let feed
 
   enum FormType {
+    Global = "global",
     Advanced = "advanced",
     DVMs = "dvms",
     Lists = "lists",
@@ -62,6 +65,7 @@
 
   const inferFormType = feed => {
     for (const subFeed of getFeedArgs(normalize(feed))) {
+      if (isGlobalFeed(subFeed)) return FormType.Global
       if (isPeopleFeed(subFeed)) return FormType.People
       if (isTagFeed(subFeed) && subFeed[1] === "#t") return FormType.Topics
       if (isRelayFeed(subFeed)) return FormType.Relays
@@ -84,7 +88,9 @@
 
     // Remove filters directly related to the previous type
     if (newFormType !== FormType.Advanced) {
-      if (formType === FormType.People) {
+      if (formType === FormType.Global) {
+        removeSubFeed(isGlobalFeed)
+      } else if (formType === FormType.People) {
         removeSubFeed(isPeopleFeed)
       } else if (formType === FormType.Topics) {
         removeSubFeed(isTopicsFeed)
@@ -100,7 +106,9 @@
     formType = newFormType
 
     // Add a default filter depending on the new form type
-    if (formType === FormType.People) {
+    if (formType === FormType.Global) {
+      prependDefaultSubFeed(isGlobalFeed, makeGlobalFeed())
+    } else if (formType === FormType.People) {
       prependDefaultSubFeed(isPeopleFeed, makeScopeFeed(Scope.Follows))
     } else if (formType === FormType.Topics) {
       prependDefaultSubFeed(isTopicsFeed, makeTagFeed("#t"))
@@ -120,6 +128,7 @@
   let formType = inferFormType(feed)
 
   $: formTypeOptions = [
+    FormType.Global,
     FormType.People,
     FormType.Topics,
     FormType.Relays,
@@ -139,7 +148,9 @@
         onChange={onFormTypeChange}
         value={formType}>
         <div slot="item" class="flex items-center gap-2" let:option let:active>
-          {#if option === FormType.People}
+          {#if option === FormType.Global}
+            <i class="fa fa-earth-europe" /> Global
+          {:else if option === FormType.People}
             <i class="fa fa-person" /> People
           {:else if option === FormType.Topics}
             <i class="fa fa-tags" /> Topics
@@ -160,7 +171,12 @@
         onChange={onFormTypeChange}
         value={formType}>
         <div slot="item" class="flex flex-col items-center" let:option let:active>
-          {#if option === FormType.People}
+          {#if option === FormType.Global}
+            <span class="flex h-12 w-12 items-center justify-center" class:text-accent={active}>
+              <i class="fa fa-2xl fa-earth-europe" />
+            </span>
+            <span class="staatliches text-2xl">Global</span>
+          {:else if option === FormType.People}
             <Icon icon="people-nearby" class="h-12 w-12" color={active ? "accent" : "tinted-800"} />
             <span class="staatliches text-2xl">People</span>
           {:else if option === FormType.Topics}
@@ -190,6 +206,15 @@
     </FlexColumn>
   </Card>
   <FlexColumn>
+    {#if formType === FormType.Global && feed.length === 2}
+      <Card class="flex items-center gap-4">
+        <i class="fa fa-triangle-exclamation fa-xl text-warning" />
+        <p>
+          Be aware that feeds with no filters can result in obscene or otherwise objectionable
+          content being displayed.
+        </p>
+      </Card>
+    {/if}
     {#if formType === FormType.Advanced}
       <FeedFormAdvanced {feed} onChange={onFeedChange} />
     {:else}
