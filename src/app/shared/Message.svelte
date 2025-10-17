@@ -80,7 +80,7 @@
             <i slot="trigger" class="fa fa-unlock cursor-pointer text-neutral-400" />
             <p slot="tooltip">
               This message was sent using nostr's legacy DMs, which have a number of shortcomings.
-              Read more <Link class="underline" modal href="/help/nip-44-dms">here</Link>.
+              Read more <Link class="underline" modal href="/help/nip-17-dms">here</Link>.
             </p>
           </Popover>
         {:else}
@@ -92,7 +92,7 @@
                 several problems with legacy DMs. Read more <Link
                   class="underline"
                   modal
-                  href="/help/nip-44-dms">here</Link
+                  href="/help/nip-17-dms">here</Link
                 >.
               </p>
               {#if message.pubkey === $session.pubkey}
