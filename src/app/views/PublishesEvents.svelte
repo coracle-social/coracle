@@ -1,15 +1,13 @@
 <script lang="ts">
-  import {call, nthNe, nth, DAY, MINUTE, now, remove, sortBy} from "@welshman/lib"
-  import {thunks, isThunk, type Thunk} from "@welshman/app"
+  import {call, ago, nthNe, nth, DAY, MINUTE, now, remove, sortBy} from "@welshman/lib"
+  import {thunks} from "@welshman/app"
   import {PublishStatus} from "@welshman/net"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
   import {pluralize} from "src/util/misc"
 
-  $: recent = Object.values($thunks).filter(
-    t => isThunk(t) && t.event.created_at > now() - DAY,
-  ) as Thunk[]
+  $: recent = $thunks.filter(t => t.event.created_at > ago(DAY))
 
   $: relays = new Set(
     remove(

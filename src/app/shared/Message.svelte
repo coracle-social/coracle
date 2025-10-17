@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {formatTimestamp} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {abortThunk, session, thunkHasStatus, thunks, type Thunk} from "@welshman/app"
+  import {abortThunk, session, thunkHasStatus, thunks} from "@welshman/app"
   import {fly} from "svelte/transition"
   import {ticker} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
@@ -23,7 +23,7 @@
 
   let showDetails = false
 
-  $: thunk = $thunks[message.wrap?.id || message.id] as Thunk
+  $: thunk = $thunks.find(t => t.event.id === message.id)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
@@ -54,8 +54,8 @@
       class="mt-1 flex items-center justify-between gap-2 text-xs"
       class:text-tinted-700={message.pubkey === $session.pubkey}
       class:text-neutral-100={message.pubkey !== $session.pubkey}>
-      {#if $thunk}
-        {#if thunkHasStatus(PublishStatus.Pending, $thunk)}
+      {#if thunk}
+        {#if thunkHasStatus(PublishStatus.Pending, thunk)}
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...

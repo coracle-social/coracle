@@ -11,8 +11,8 @@
     ZAP_RESPONSE,
   } from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {thunks, pubkey} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
+  import {thunks, pubkey} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteHeader from "src/app/shared/NoteHeader.svelte"
@@ -73,8 +73,8 @@
     replyIsOpen = true
   }
 
-  $: thunk = $thunks[event.id] as Thunk
   $: hidden = $isEventMuted(event, true)
+  $: thunk = $thunks.find(t => t.event.id === event.id)
   $: pending = event.created_at + 60 > start + $elapsed
 
   onMount(() => {

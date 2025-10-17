@@ -1,6 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {now, omit, spec, MINUTE} from "@welshman/lib"
+  import {ago, omit, spec, MINUTE} from "@welshman/lib"
   import {LOCAL_RELAY_URL} from "@welshman/relay"
   import {PublishStatus} from "@welshman/net"
   import {
@@ -10,7 +10,6 @@
     deriveProfileDisplay,
     displayProfileByPubkey,
     thunks,
-    isThunk,
     thunkIsComplete,
   } from "@welshman/app"
   import {toggleTheme, theme} from "src/partials/state"
@@ -28,8 +27,6 @@
 
   const {page} = router
 
-  const isRecent = t => t.event.created_at > now() - 5 * MINUTE && t.event.pubkey === $pubkey
-
   const closeSubMenu = () => {
     subMenu = null
   }
@@ -45,14 +42,20 @@
 
   let subMenu
 
-  $: recentThunks = Object.values($thunks).filter(isThunk).filter(isRecent)
-
-  $: hud = derived(recentThunks, $recentThunks => {
+  $: hud = derived(thunks, $thunks => {
     let pending = 0
     let success = 0
     let failure = 0
 
-    for (const thunk of $recentThunks) {
+    for (const thunk of $thunks) {
+      if (thunk.event.pubkey !== $pubkey) {
+        continue
+      }
+
+      if (thunk.event.created_at < ago(5, MINUTE)) {
+        continue
+      }
+
       const results = Object.values(omit([LOCAL_RELAY_URL], thunk.results))
 
       if (!thunkIsComplete(thunk)) {
