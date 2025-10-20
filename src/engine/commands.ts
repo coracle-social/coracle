@@ -11,9 +11,10 @@ import {
   userInboxRelaySelections,
   userRelaySelections,
   publishThunk,
+  sendWrapped,
 } from "@welshman/app"
-import {append, sha256, now, remove, nthNe, uniq} from "@welshman/lib"
-import {Nip01Signer, Nip59} from "@welshman/signer"
+import {append, sha256, remove, nthNe, uniq} from "@welshman/lib"
+import {Nip01Signer} from "@welshman/signer"
 import type {TrustedEvent} from "@welshman/util"
 import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
@@ -24,6 +25,7 @@ import {
   INBOX_RELAYS,
   PROFILE,
   RELAYS,
+  DIRECT_MESSAGE,
   addToListPublicly,
   makeEvent,
   getAddress,
@@ -238,25 +240,17 @@ export const joinRelay = async (url: string, claim?: string) => {
 
 // Messages
 
-export const sendMessage = async (channelId: string, content: string, delay: number) => {
-  const recipients = channelId.split(",")
-  const template = {
-    content,
-    kind: 14,
-    created_at: now(),
-    tags: [...remove(pubkey.get(), recipients).map(tagPubkey), ...getClientTags()],
-  }
+export const sendMessage = (channelId: string, content: string, delay: number) => {
+  const recipients = uniq(channelId.split(",").concat(pubkey.get()))
 
-  for (const recipient of uniq(recipients.concat(pubkey.get()))) {
-    const helper = Nip59.fromSigner(signer.get())
-    const rumor = await helper.wrap(recipient, template)
-
-    publishThunk({
-      event: rumor.wrap,
-      relays: Router.get().PubkeyInbox(recipient).policy(addMinimalFallbacks).getUrls(),
-      delay,
-    })
-  }
+  return sendWrapped({
+    delay,
+    recipients,
+    event: makeEvent(DIRECT_MESSAGE, {
+      content,
+      tags: [...remove(pubkey.get(), recipients).map(tagPubkey), ...getClientTags()],
+    }),
+  })
 }
 
 // Settings

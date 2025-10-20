@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
-  import {isTrustedEvent} from "@welshman/util"
+  import {isSignedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
   import {error} from "src/util/logger"
   import {appName} from "src/partials/state"
@@ -49,7 +49,7 @@
         }
 
         for (const event of newEvents) {
-          if (isTrustedEvent(event)) {
+          if (isSignedEvent(event)) {
             repository.publish(event)
           }
         }

@@ -16,13 +16,14 @@ import {
   pinsByPubkey,
   sessions,
   pubkey,
-  relay,
   repository,
   session,
   setPlaintext,
   signer,
   tracker,
   appContext,
+  wrapManager,
+  shouldUnwrap,
   loadRelaySelections,
 } from "@welshman/app"
 import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
@@ -51,8 +52,9 @@ import {
   request,
   makeSocketPolicyAuth,
   defaultSocketPolicies,
+  LOCAL_RELAY_URL,
 } from "@welshman/net"
-import {Nip01Signer, Nip59} from "@welshman/signer"
+import {Nip01Signer} from "@welshman/signer"
 import {
   deriveEvents,
   deriveEventsMapped,
@@ -69,7 +71,6 @@ import type {
   HashedEvent,
   StampedEvent,
 } from "@welshman/util"
-import {LOCAL_RELAY_URL} from "@welshman/relay"
 import {
   APP_DATA,
   DIRECT_MESSAGE,
@@ -81,7 +82,6 @@ import {
   LABEL,
   MUTES,
   NAMED_BOOKMARKS,
-  WRAP,
   PROFILE,
   RELAYS,
   INBOX_RELAYS,
@@ -93,7 +93,6 @@ import {
   getPubkeyTagValues,
   getTagValue,
   getTagValues,
-  isHashedEvent,
   makeList,
   normalizeRelayUrl,
   readList,
@@ -127,6 +126,7 @@ import {
   FreshnessStorageAdapter,
   PlaintextStorageAdapter,
   TrackerStorageAdapter,
+  WrapManagerStorageAdapter,
   EventsStorageAdapter,
   initStorage,
 } from "src/engine/storage"
@@ -162,14 +162,6 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 
-export const canDecrypt = withGetter(
-  synced({
-    key: "canDecrypt",
-    defaultValue: false,
-    storage: localStorageProvider,
-  }),
-)
-
 // Plaintext
 
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
@@ -192,60 +184,11 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   return getPlaintext(e)
 }
 
-const pendingUnwraps = new Map<string, Promise<TrustedEvent>>()
+// Decrypt stuff as it comes in
 
-export const ensureUnwrapped = async (event: TrustedEvent) => {
-  if (event.kind !== WRAP) {
-    return event
-  }
-
-  let rumor = repository.eventsByWrap.get(event.id)
-
-  if (rumor) {
-    return rumor
-  }
-
-  const pending = pendingUnwraps.get(event.id)
-
-  if (pending) {
-    return pending
-  }
-
-  // Decrypt by session
-  const session = getSession(getTagValue("p", event.tags))
-  const signer = getSigner(session)
-
-  if (signer) {
-    try {
-      const pending = Nip59.fromSigner(signer).unwrap(event as SignedEvent)
-
-      pendingUnwraps.set(event.id, pending)
-      rumor = await pending
-    } catch (e) {
-      // pass
-    }
-  }
-
-  if (rumor && isHashedEvent(rumor)) {
-    pendingUnwraps.delete(event.id)
-    tracker.copy(event.id, rumor.id)
-    relay.send("EVENT", rumor)
-  }
-
-  return rumor
-}
-
-// Unwrap/decrypt stuff as it comes in
-
-const unwrapper = new TaskQueue<TrustedEvent>({
+const decrypter = new TaskQueue<TrustedEvent>({
   batchSize: 10,
-  processItem: async (event: TrustedEvent) => {
-    if (event.kind === WRAP) {
-      await ensureUnwrapped(event)
-    } else {
-      await ensurePlaintext(event)
-    }
-  },
+  processItem: ensurePlaintext,
 })
 
 const decryptKinds = [APP_DATA, FOLLOWS, MUTES]
@@ -255,13 +198,7 @@ repository.on("update", ({added}: {added: TrustedEvent[]}) => {
     loadRelaySelections(event.pubkey)
 
     if (decryptKinds.includes(event.kind) && event.content && !getPlaintext(event)) {
-      unwrapper.push(event)
-    }
-
-    if (event.kind === WRAP) {
-      if (canDecrypt.get()) {
-        unwrapper.push(event)
-      }
+      decrypter.push(event)
     }
   }
 })
@@ -798,6 +735,13 @@ if (!initialized) {
     storage: localStorageProvider,
   })
 
+  // Sync decrypt setting
+  sync({
+    key: "shouldUnwrap",
+    store: shouldUnwrap,
+    storage: localStorageProvider,
+  })
+
   // Sync user settings
   userSettings.subscribe($settings => {
     autoAuthenticate = $settings.auto_authenticate2
@@ -817,13 +761,14 @@ if (!initialized) {
     })
   })
 
-  ready = initStorage("coracle", 7, {
+  ready = initStorage("coracle", 8, {
     relays: new RelaysStorageAdapter({name: "relays"}),
     handles: new HandlesStorageAdapter({name: "handles"}),
     zappers: new ZappersStorageAdapter({name: "zappers"}),
     freshness: new FreshnessStorageAdapter({name: "freshness"}),
     plaintext: new PlaintextStorageAdapter({name: "plaintext"}),
     tracker: new TrackerStorageAdapter({name: "tracker", tracker}),
+    wraps: new WrapManagerStorageAdapter({name: "wraps", wrapManager}),
     events: new EventsStorageAdapter({
       repository,
       name: "events",

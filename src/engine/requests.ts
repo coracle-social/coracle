@@ -40,13 +40,14 @@ import {
   loadMutes,
   getFollows,
   pull,
+  shouldUnwrap,
   hasNegentropy,
   makeFeedController,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
 import {noteKinds, reactionKinds} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, myRequest, canDecrypt, myLoad, userSettings} from "src/engine/state"
+import {env, myRequest, myLoad, userSettings} from "src/engine/state"
 
 // Utils
 
@@ -242,7 +243,7 @@ export const loadMessages = () => {
   const router = Router.get()
   const scenario = router.merge([router.ForUser(), router.FromUser(), router.UserInbox()])
 
-  if (canDecrypt.get()) {
+  if (shouldUnwrap.get()) {
     pullConservatively({
       relays: scenario.getUrls(),
       filters: [
@@ -257,7 +258,7 @@ export const listenForMessages = (pubkeys: string[]) => {
   const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
   const controller = new AbortController()
 
-  if (canDecrypt.get()) {
+  if (shouldUnwrap.get()) {
     myRequest({
       skipCache: true,
       signal: controller.signal,

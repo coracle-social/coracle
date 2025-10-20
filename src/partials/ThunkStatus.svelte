@@ -1,8 +1,7 @@
 <script lang="ts">
   import {remove, omit, spec} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
-  import {PublishStatus} from "@welshman/net"
-  import {LOCAL_RELAY_URL} from "@welshman/relay"
+  import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
   import Link from "src/partials/Link.svelte"
 
   export let thunk: Thunk

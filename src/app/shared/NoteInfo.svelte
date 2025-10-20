@@ -5,7 +5,7 @@
   import {sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
   import {Router} from "@welshman/router"
   import type {TrustedEvent, Handler} from "@welshman/util"
-  import {LOCAL_RELAY_URL} from "@welshman/relay"
+  import {LOCAL_RELAY_URL} from "@welshman/net"
   import {
     isReplaceable,
     Address,

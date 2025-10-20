@@ -10,7 +10,6 @@
   import {showInfo} from "src/partials/Toast.svelte"
 
   let userOnly = true
-  let includeEncrypted = false
 
   const downloadNative = async (filename, jsonl) => {
     try {
@@ -51,9 +50,8 @@
     const filename = $profilesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
     const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))
     const jsonl = events
-      .filter(e => includeEncrypted || (!e.wrap && e.kind !== 4))
-      // Important: re-wrap encrypted messages
-      .map(e => JSON.stringify(e.wrap || e))
+      .filter(e => e.sig)
+      .map(e => JSON.stringify(e))
       .join("\n")
 
     if (Capacitor.isNativePlatform()) {
@@ -74,13 +72,6 @@
       <FieldInline label="Only export user events">
         <Toggle bind:value={userOnly} />
         <p slot="info">If enabled, only your events will be exported.</p>
-      </FieldInline>
-      <FieldInline label="Include encrypted events">
-        <Toggle bind:value={includeEncrypted} />
-        <p slot="info">
-          If enabled, encrypted DMs and wrapped events will be exported. The events will remain
-          encrypted, so this will not reduce security.
-        </p>
       </FieldInline>
       <Button class="btn" type="submit">Export</Button>
     </div>

@@ -4,7 +4,7 @@
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import {sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
-  import {LOCAL_RELAY_URL} from "@welshman/relay"
+  import {LOCAL_RELAY_URL} from "@welshman/net"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     deriveZapper,
@@ -14,6 +14,7 @@
     tagEventForReaction,
     tagZapSplit,
     mutePrivately,
+    publishThunk,
     pubkey,
     unmute,
     pin,
@@ -32,7 +33,6 @@
     isChildOf,
     getAddress,
   } from "@welshman/util"
-  import {publishThunk} from "@welshman/app"
   import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
   import {replyKinds} from "src/util/nostr"
@@ -117,7 +117,7 @@
     zap({
       splits,
       eventId: event.id,
-      anonymous: Boolean(event.wrap),
+      anonymous: !event.sig,
     })
   }
 
@@ -327,7 +327,7 @@
         <div slot="tooltip" class="px-1">This event cost {pow} bits of work</div>
       </Popover>
     {/if}
-    {#if event.wrap}
+    {#if !event.sig}
       <div
         class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
         <i class="fa fa-lock text-xs sm:text-accent" />

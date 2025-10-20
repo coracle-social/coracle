@@ -27,12 +27,12 @@
     })
 
     // Don't use our session wrapper so that reports are anonymous
-    const helper = new Nip59(Nip01Signer.ephemeral())
     const template = makeEvent(14, {content})
-    const rumor = await helper.wrap(tagr, template)
+    const helper = new Nip59(Nip01Signer.ephemeral())
+    const wrap = await helper.wrap(tagr, template)
 
     publishThunk({
-      event: rumor.wrap,
+      event: wrap,
       relays: Router.get()
         .merge([
           Router.get().FromRelays(["wss://relay.nos.social"]),

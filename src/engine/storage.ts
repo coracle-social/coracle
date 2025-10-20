@@ -5,10 +5,9 @@ import {writable} from "svelte/store"
 import {batch, sortBy, call, fromPairs, defer} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {throttled, withGetter} from "@welshman/store"
-import {Tracker} from "@welshman/net"
+import type {RepositoryUpdate, WrapItem} from "@welshman/net"
+import {Tracker, Repository, WrapManager} from "@welshman/net"
 import {freshness} from "@welshman/store"
-import type {RepositoryUpdate} from "@welshman/relay"
-import {Repository} from "@welshman/relay"
 import {relays, handles, onHandle, zappers, onZapper, plaintext} from "@welshman/app"
 
 export type StorageAdapterOptions = {
@@ -276,25 +275,41 @@ export class TrackerStorageAdapter {
     const updateOne = (id: string, relay: string) =>
       bulkPut(this.options.name, [{id, relays: Array.from(this.options.tracker.getRelays(id))}])
 
-    const updateAll = () =>
-      bulkPut(
-        this.options.name,
-        Array.from(this.options.tracker.relaysById.entries()).map(([id, relays]) => ({
-          id,
-          relays: Array.from(relays),
-        })),
-      )
-
     this.options.tracker.on("add", updateOne)
     this.options.tracker.on("remove", updateOne)
-    this.options.tracker.on("load", updateAll)
-    this.options.tracker.on("clear", updateAll)
 
     return () => {
       this.options.tracker.off("add", updateOne)
       this.options.tracker.off("remove", updateOne)
-      this.options.tracker.off("load", updateAll)
-      this.options.tracker.off("clear", updateAll)
+    }
+  }
+}
+
+export type WrapManagerStorageAdapterOptions = {
+  name: string
+  wrapManager: WrapManager
+}
+
+export class WrapManagerStorageAdapter {
+  keyPath = "id"
+
+  constructor(readonly options: WrapManagerStorageAdapterOptions) {}
+
+  async init() {
+    this.options.wrapManager.load(await getAll(this.options.name))
+  }
+
+  sync() {
+    const addOne = (wrapItem: WrapItem) => bulkPut(this.options.name, [wrapItem])
+
+    const removeOne = (wrapItem: WrapItem) => bulkDelete(this.options.name, [wrapItem.id])
+
+    this.options.wrapManager.on("add", addOne)
+    this.options.wrapManager.on("remove", removeOne)
+
+    return () => {
+      this.options.wrapManager.off("add", addOne)
+      this.options.wrapManager.off("remove", removeOne)
     }
   }
 }

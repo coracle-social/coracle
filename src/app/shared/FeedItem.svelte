@@ -16,7 +16,7 @@
   import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {ensureUnwrapped, getSetting, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
+  import {getSetting, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
 
   export let note
   export let relays = []
@@ -101,8 +101,6 @@
         }),
       )
     }
-
-    event = await ensureUnwrapped(event)
 
     if (event.pubkey) {
       ready = true

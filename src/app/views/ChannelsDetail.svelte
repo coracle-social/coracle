@@ -5,6 +5,7 @@
   import {DIRECT_MESSAGE, isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
   import {
     inboxRelaySelectionsByPubkey,
+    shouldUnwrap,
     session,
     repository,
     displayProfileByPubkey,
@@ -17,7 +18,7 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
   import Popover from "src/partials/Popover.svelte"
-  import {canDecrypt, getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
+  import {getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
 
   export let pubkeys
   export let channelId
@@ -39,7 +40,7 @@
   const showPerson = pubkey => router.at("people").of(pubkey).open()
 
   onMount(() => {
-    if (!$canDecrypt) {
+    if (!$shouldUnwrap) {
       router.at("channels/enable").open({mini: true, noEscape: true})
     }
 
