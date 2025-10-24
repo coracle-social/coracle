@@ -160,7 +160,7 @@
       <div in:fly={{y: 20}}>
         <FeedItem showMeta topLevel {getContext} {depth} {anchor} note={event} />
       </div>
-      {#if i > 20 && parseInt(hash(event.id)) % 100 === 0 && $promptDismissed < ago(WEEK)}
+      {#if i > 20 && hash(event.id) % 100 === 0 && $promptDismissed < ago(WEEK)}
         <Card class="group flex items-center justify-between">
           <p class="text-xl">Enjoying Coracle?</p>
           <div class="flex gap-2">
