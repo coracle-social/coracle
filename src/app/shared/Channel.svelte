@@ -1,8 +1,13 @@
 <script lang="ts">
   import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
+  import {isShareableRelayUrl, getRelaysFromList, getPubkeyTagValues} from "@welshman/util"
+  import {
+    session,
+    displayProfileByPubkey,
+    inboxRelaySelectionsByPubkey,
+    repository,
+  } from "@welshman/app"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
@@ -14,7 +19,14 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
-  import {hasNip44, sendMessage, userSettings} from "src/engine"
+  import {
+    hasNip44,
+    sendMessage,
+    userSettings,
+    unwrapErrors,
+    ensureUnwrapped,
+    getChannelId,
+  } from "src/engine"
   import {makeEditor} from "src/app/editor"
   import Message from "src/app/shared/Message.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
@@ -50,6 +62,26 @@
         !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
+
+  // Filter unwrap errors to only show failures for this specific conversation
+  const failedWraps = derived(unwrapErrors, $errors => {
+    return Object.values($errors)
+      .filter(errorData => {
+        // Match errors to this channel by comparing pubkeys in conversation
+        const errorChannelId = getChannelId([errorData.pubkey, ...getPubkeyTagValues(errorData.tags)])
+        return errorChannelId === channelId
+      })
+      .map(errorData => ({
+        id: errorData.id,
+        pubkey: errorData.pubkey,
+        tags: errorData.tags,
+        created_at: errorData.created_at,
+        error: {message: errorData.message},
+      }))
+  })
+
+  const contactMaintainerUrl =
+    "https://github.com/coracle-social/coracle/issues/new?labels=support&title=Coracle%20DM%20support"
 
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
 
@@ -107,25 +139,56 @@
   let limit = 10
   let showNewMessages = false
   let groupedMessages = []
+  let failedWrapList = []
+  let retrying: Record<string, boolean> = {}
 
   $: userHasInbox = !$pubkeysWithoutInbox.includes($session?.pubkey)
 
-  // Group messages so we're only showing the person once per chunk
+  // Merge regular messages with failed wrap error placeholders
+  $: failedWrapList = $failedWraps
+  $: combinedMessages = [...messages, ...failedWrapList]
+
+  // Sort by timestamp and add profile display hints for message grouping
+  $: sortedMessages = sortBy(prop("created_at"), combinedMessages).reduce((mx, m) => {
+    const previous = last(mx)
+    const isError = "error" in m
+    // Hide profile for error messages, show for regular messages when sender changes
+    const showProfile = isError ? false : m.pubkey !== previous?.pubkey
+
+    return mx.concat({...m, showProfile})
+  }, [])
+
+  // Display messages in reverse chronological order, limited by scroll position
   $: {
-    if (groupedMessages?.length === messages.length) {
+    const result = sortedMessages.reverse()
+    groupedMessages = result.slice(0, limit) as (TrustedEvent & {showProfile: boolean})[]
+
+    // Stop auto-scrolling if message count is stable
+    if (groupedMessages?.length === combinedMessages.length) {
       scroller?.stop()
     }
 
-    const result = sortBy(prop("created_at"), messages)
-      .reduce((mx, m) => {
-        return mx.concat({...m, showProfile: m.pubkey !== last(mx)?.pubkey})
-      }, [])
-      .reverse()
-
     setTimeout(stickToBottom, 100)
-
-    groupedMessages = result.slice(0, limit) as (TrustedEvent & {showProfile: boolean})[]
   }
+
+  // Retry decrypting a failed message
+  const retryWrap = async (errorData: {id: string; error?: {message: string}}) => {
+    retrying = {...retrying, [errorData.id]: true}
+
+    try {
+      // Retrieve full WRAP event from repository (error store only has minimal data)
+      const fullEvent = repository.getEvent(errorData.id)
+      if (fullEvent) {
+        // Attempt to unwrap again - if successful, error will be cleared automatically
+        await ensureUnwrapped(fullEvent)
+      }
+    } finally {
+      // Always reset retry state, even if decryption fails again
+      retrying = {...retrying, [errorData.id]: false}
+    }
+  }
+
+  const isRetrying = (id: string) => Boolean(retrying[id])
 
   onMount(() => {
     startScroller()
@@ -160,7 +223,37 @@
       </div>
     {/if}
     {#each groupedMessages as message (message.id)}
-      <Message {message} />
+      {#if message.error}
+        <!-- Error UI: Show when message decryption fails (e.g., locked signer, wrong key) -->
+        <div class="grid gap-2 py-1">
+          <div class="mr-12 max-w-xl rounded-2xl rounded-bl-none bg-neutral-900 px-4 py-3 text-neutral-100">
+            <p class="font-semibold">We couldn't open this message.</p>
+            <p class="mt-1 text-sm text-neutral-200">
+              Make sure your secure chat app is unlocked, then try again.
+            </p>
+            <div class="mt-3 flex flex-wrap gap-3 text-sm">
+              <button
+                class="underline"
+                class:opacity-50={isRetrying(message.id)}
+                class:pointer-events-none={isRetrying(message.id)}
+                on:click={() => retryWrap(message)}>
+                {#if isRetrying(message.id)}
+                  Trying...
+                {:else}
+                  Try again
+                {/if}
+              </button>
+              <span aria-hidden="true">•</span>
+              <Link external class="underline" href={contactMaintainerUrl}>
+                Contact hodlbod for help
+              </Link>
+            </div>
+          </div>
+        </div>
+      {:else}
+        <!-- Normal message display -->
+        <Message {message} />
+      {/if}
     {/each}
     {#await loading}
       <Spinner>Looking for messages...</Spinner>

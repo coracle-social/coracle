@@ -134,6 +134,9 @@ import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {derived, writable} from "svelte/store"
 
+// Debug flag: Set to true to simulate unwrap errors for testing NIP-17/NIP-59 error handling
+const SIMULATE_UNWRAP_ERRORS = false
+
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
   CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
@@ -194,6 +197,56 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 
 const pendingUnwraps = new Map<string, Promise<TrustedEvent>>()
 
+// Error tracking for NIP-17/NIP-59 message decryption failures
+// Only stores essential event data needed for UI display and retry, not full event objects
+export const unwrapErrors = withGetter(
+  writable<
+    Record<
+      string,
+      {
+        id: string // Event ID for tracking and retry
+        pubkey: string // Sender's public key
+        tags: string[][] // Event tags (contains recipient info)
+        created_at: number // Timestamp for message ordering
+        message: string // Human-readable error message
+      }
+    >
+  >({}),
+)
+
+// Record an unwrap error with just the essential data
+const setUnwrapError = (event: TrustedEvent, error: unknown) => {
+  // Extract human-readable error message
+  const message =
+    error instanceof Error
+      ? error.message || "Failed to open message"
+      : typeof error === "string"
+        ? error
+        : "Failed to open message"
+
+  // Store minimal event data - avoids keeping full event in memory
+  unwrapErrors.update($errors => ({
+    ...$errors,
+    [event.id]: {
+      id: event.id,
+      pubkey: event.pubkey,
+      tags: event.tags,
+      created_at: event.created_at,
+      message,
+    },
+  }))
+}
+
+// Remove an error from tracking (called on successful retry)
+const clearUnwrapError = (id: string) =>
+  unwrapErrors.update($errors => {
+    if (!$errors[id]) return $errors
+    const rest = {...$errors}
+    delete rest[id]
+
+    return rest
+  })
+
 export const ensureUnwrapped = async (event: TrustedEvent) => {
   if (event.kind !== WRAP) {
     return event
@@ -217,17 +270,29 @@ export const ensureUnwrapped = async (event: TrustedEvent) => {
 
   if (signer) {
     try {
+      // Debug: Simulate unwrap errors for testing
+      if (SIMULATE_UNWRAP_ERRORS) {
+        throw new Error("Simulated unwrap error for testing")
+      }
+
       const pending = Nip59.fromSigner(signer).unwrap(event as SignedEvent)
 
       pendingUnwraps.set(event.id, pending)
       rumor = await pending
+
+      // Successful unwrap - clear any previous error for this event
+      clearUnwrapError(event.id)
     } catch (e) {
-      // pass
+      // Decryption failed - track error for UI display
+      setUnwrapError(event, e)
+      console.error("Failed to unwrap event", {eventId: event.id, error: e})
+    } finally {
+      // Always clean up pending promise
+      pendingUnwraps.delete(event.id)
     }
   }
 
   if (rumor && isHashedEvent(rumor)) {
-    pendingUnwraps.delete(event.id)
     tracker.copy(event.id, rumor.id)
     relay.send("EVENT", rumor)
   }
