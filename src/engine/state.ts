@@ -24,7 +24,7 @@ import {
   appContext,
   wrapManager,
   shouldUnwrap,
-  loadRelaySelections,
+  getFollows,
 } from "@welshman/app"
 import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
 import {
@@ -42,6 +42,7 @@ import {
   max,
   always,
   tryCatch,
+  first,
 } from "@welshman/lib"
 import {routerContext} from "@welshman/router"
 import type {Socket, RequestOptions} from "@welshman/net"
@@ -99,6 +100,7 @@ import {
   getAncestors,
   getTag,
   getIdAndAddress,
+  getIdFilters,
 } from "@welshman/util"
 import Fuse from "fuse.js"
 import {getPow} from "nostr-tools/nip13"
@@ -195,9 +197,7 @@ const decryptKinds = [APP_DATA, FOLLOWS, MUTES]
 
 repository.on("update", ({added}: {added: TrustedEvent[]}) => {
   for (const event of added) {
-    loadRelaySelections(event.pubkey)
-
-    if (decryptKinds.includes(event.kind) && event.content && !getPlaintext(event)) {
+    if (decryptKinds.includes(event.kind)) {
       decrypter.push(event)
     }
   }
@@ -595,20 +595,59 @@ export const recommendations = deriveEvents(repository, {
   filters: [{kinds: [HANDLER_RECOMMENDATION]}],
 })
 
-export const recommendationsByHandlerAddress = derived(recommendations, $events =>
-  groupBy(getHandlerAddress, $events),
-)
+export const deriveRecommendations = simpleCache(([address]: [string]) => {
+  myLoad({
+    skipCache: true,
+    relays: env.DEFAULT_RELAYS,
+    filters: [
+      {
+        kinds: [HANDLER_RECOMMENDATION],
+        authors: getFollows(pubkey.get()),
+        "#a": [address],
+      },
+    ],
+  })
 
-export const deriveHandlersForKind = simpleCache(([kind]: [number]) =>
-  derived([handlers, recommendationsByHandlerAddress], ([$handlers, $recs]) =>
+  return derived(recommendations, $events => $events.filter(e => getHandlerAddress(e) === address))
+})
+
+export const deriveHandlersForKind = simpleCache(([kind]: [number]) => {
+  myLoad({
+    skipCache: true,
+    relays: env.DEFAULT_RELAYS,
+    filters: [
+      {
+        kinds: [HANDLER_RECOMMENDATION],
+        authors: getFollows(pubkey.get()),
+        "#d": [String(kind)],
+      },
+      {
+        kinds: [HANDLER_INFORMATION],
+        "#k": [String(kind)],
+      },
+    ],
+  })
+
+  return derived([handlers, recommendations], ([$handlers, $recs]) =>
     sortBy(
       h => -h.recommendations.length,
       $handlers
         .filter(h => h.kind === kind)
-        .map(h => ({...h, recommendations: $recs.get(getAddress(h.event)) || []})),
+        .map(h => ({
+          ...h,
+          recommendations: $recs.filter(e => getHandlerAddress(e) === getAddress(h.event)),
+        })),
     ),
-  ),
-)
+  )
+})
+
+export const deriveHandlerEvent = simpleCache(([address]: [string]) => {
+  const filters = getIdFilters([address])
+
+  myLoad({relays: env.DEFAULT_RELAYS, filters})
+
+  return derived(deriveEvents(repository, {filters}), first)
+})
 
 // Collections
 

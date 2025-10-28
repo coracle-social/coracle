@@ -2,7 +2,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
-  import {sum, pluck, spec, nthEq, remove, uniqBy, prop} from "@welshman/lib"
+  import {sum, pluck, spec, remove, uniqBy, prop} from "@welshman/lib"
   import {Router} from "@welshman/router"
   import type {TrustedEvent, Handler} from "@welshman/util"
   import {LOCAL_RELAY_URL} from "@welshman/net"
@@ -10,11 +10,11 @@
     isReplaceable,
     Address,
     toNostrURI,
+    getTag,
     getPubkeyTagValues,
     ZAP_RESPONSE,
     REACTION,
   } from "@welshman/util"
-  import {repository} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
   import {replyKinds} from "src/util/nostr"
@@ -28,7 +28,7 @@
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {deriveValidZaps} from "src/app/util"
-  import {trackerStore, sortEventsDesc} from "src/engine"
+  import {trackerStore, sortEventsDesc, deriveHandlerEvent} from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let event: TrustedEvent
@@ -43,8 +43,7 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const handlerId = String(event.tags.find(nthEq(0, "client"))?.[2] || "")
-  const handlerEvent = handlerId ? repository.getEvent(handlerId) : null
+  const handlerEvent = deriveHandlerEvent(getTag("client", event.tags)?.[2] || "")
   const seenOn = derived(trackerStore, $t =>
     remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
   )
@@ -111,10 +110,10 @@
     {/each}
   </div>
 {/if}
-{#if handlers.length > 0 || handlerEvent}
+{#if handlers.length > 0 || $handlerEvent}
   <h1 class="staatliches text-2xl">Apps</h1>
-  {#if handlerEvent}
-    {@const [handler] = readHandlers(handlerEvent)}
+  {#if $handlerEvent}
+    {@const [handler] = readHandlers($handlerEvent)}
     {#if handler}
       <p>This note was published using {displayHandler(handler)}.</p>
       <HandlerCard {handler} />

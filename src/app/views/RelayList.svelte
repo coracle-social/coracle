@@ -1,13 +1,13 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import type {RelayProfile} from "@welshman/util"
   import {nthEq, displayList, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     pubkey,
     relays,
     relaySearch,
-    type Relay,
     displayProfileByPubkey,
     profilesByPubkey,
     deriveRelaySelections,
@@ -64,12 +64,12 @@
       (term
         ? $relaySearch.searchOptions(term)
         : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
-      ).map((relay: Relay) => {
+      ).map((relay: RelayProfile) => {
         const pubkeys = pubkeysByUrl.get(relay.url) || []
         const description =
           pubkeys.length > 0
             ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
-            : relay.profile?.description
+            : relay.description
 
         return {...relay, description}
       }),
@@ -197,7 +197,7 @@
       placeholder="Search relays or add a custom url">
       <i slot="before" class="fa-solid fa-search" />
     </Input>
-    {#each $searchRelays(q).slice(0, limit) as { url, description, profile } (url)}
+    {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
       <RelayCard {url} ratings={ratings[url]}>
         <p slot="description">{description}</p>
       </RelayCard>

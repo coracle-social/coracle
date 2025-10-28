@@ -1,7 +1,7 @@
 <script lang="ts">
   import cx from "classnames"
   import {displayRelayUrl, RelayMode} from "@welshman/util"
-  import {pubkey, signer, deriveRelay, derivePubkeyRelays} from "@welshman/app"
+  import {pubkey, signer, deriveRelayStats, deriveRelay, derivePubkeyRelays} from "@welshman/app"
   import {displayUrl, ensureMailto, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
@@ -26,6 +26,7 @@
   let innerWidth = 0
 
   const relay = deriveRelay(url)
+  const stats = deriveRelayStats(url)
   const readRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Read)
   const writeRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Write)
   const inboxRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Inbox)
@@ -62,8 +63,8 @@
 <AltColor background class="justify-between rounded-md p-6 shadow">
   <div class="flex items-center justify-between gap-2">
     <div class="flex min-w-0 items-center gap-3">
-      {#if $relay?.profile?.icon}
-        <img class="h-9 w-9 min-w-9 rounded-full border" src={$relay.profile.icon} />
+      {#if $relay?.icon}
+        <img class="h-9 w-9 min-w-9 rounded-full border" src={$relay.icon} />
       {:else}
         <div class="flex h-9 w-9 min-w-9 items-center justify-center rounded-full border">
           <i class="fa fa-server text-xl text-neutral-100"></i>
@@ -79,13 +80,13 @@
           {/if}
         </div>
         <div class="flex gap-4 text-xs text-neutral-400">
-          {#if $relay?.profile?.supported_nips}
+          {#if $relay?.supported_nips}
             <span>
-              {$relay.profile.supported_nips.length} NIPs
+              {$relay.supported_nips.length} NIPs
             </span>
           {/if}
           <span>
-            Connected {quantify($relay?.stats?.open_count || 0, "time")}
+            Connected {quantify($stats?.open_count || 0, "time")}
           </span>
         </div>
       </div>
@@ -106,23 +107,23 @@
   </div>
   {#if details}
     <div transition:slide class="hidden flex-col gap-2 py-2 md:flex">
-      {#if $relay?.stats}
+      {#if $stats}
         <span class="flex items-center gap-1 text-sm">
-          {#if $relay?.profile?.contact}
-            {@const value = $relay.profile.contact}
+          {#if $relay?.contact}
+            {@const value = $relay.contact}
             <span class="opacity-75">Contact: </span>
             <Link external class="underline" href={ensureMailto(value)}>{displayUrl(value)}</Link>
           {/if}
         </span>
       {/if}
       <slot name="description text-sm">
-        {#if $relay?.profile?.description}
-          {$relay?.profile.description}
+        {#if $relay?.description}
+          {$relay?.description}
         {/if}
       </slot>
-      {#if $relay?.profile?.supported_nips}
+      {#if $relay?.supported_nips}
         <div class="text-sm opacity-75">
-          Supported NIPs: {$relay?.profile?.supported_nips.join(", ")}
+          Supported NIPs: {$relay?.supported_nips.join(", ")}
         </div>
       {/if}
     </div>
@@ -187,22 +188,22 @@
 {#if isMobile && details}
   <Modal mini onEscape={close}>
     <div class="flex flex-col gap-2">
-      {#if $relay?.stats}
+      {#if $stats}
         <span class="flex items-center gap-1">
-          {#if $relay?.profile?.contact}
+          {#if $relay?.contact}
             <span class="opacity-75">Contact: </span>
-            <Link external class="underline" href={$relay.profile.contact}>
-              {displayUrl($relay.profile.contact)}</Link>
+            <Link external class="underline" href={$relay.contact}>
+              {displayUrl($relay.contact)}</Link>
           {/if}
         </span>
       {/if}
       <slot name="description">
-        {#if $relay?.profile?.description}
-          <p>{$relay?.profile.description}</p>
+        {#if $relay?.description}
+          <p>{$relay.description}</p>
         {/if}
       </slot>
-      {#if $relay?.profile?.supported_nips}
-        <span class="opacity-75">Supported NIPs: </span>{$relay?.profile?.supported_nips.join(", ")}
+      {#if $relay?.supported_nips}
+        <span class="opacity-75">Supported NIPs: </span>{$relay.supported_nips.join(", ")}
       {/if}
     </div>
   </Modal>

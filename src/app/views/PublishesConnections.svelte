@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {relaysByUrl} from "@welshman/app"
+  import {relaysByUrl, relayStatsByUrl} from "@welshman/app"
   import {addToMapKey} from "@welshman/lib"
   import {Pool} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
@@ -55,6 +55,7 @@
 </SelectButton>
 {#each connections as url (url)}
   {@const relay = $relaysByUrl.get(url)}
+  {@const stats = $relayStatsByUrl.get(url)}
   <AltColor
     background
     class="cursor-pointer justify-between rounded-md p-6 shadow"
@@ -63,8 +64,8 @@
       activeTab = "notices"
     }}>
     <div class="flex min-w-0 shrink-0 items-start gap-3">
-      {#if relay?.profile?.icon}
-        <img class="h-9 w-9 shrink-0 rounded-full border" src={relay.profile.icon} />
+      {#if relay?.icon}
+        <img class="h-9 w-9 shrink-0 rounded-full border" src={relay.icon} />
       {:else}
         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border">
           <i class="fa fa-server text-xl text-neutral-100"></i>
@@ -77,13 +78,13 @@
           </div>
         </div>
         <div class="flex gap-4 text-xs text-neutral-400">
-          {#if relay?.profile?.supported_nips}
+          {#if relay?.supported_nips}
             <span>
-              {relay.profile.supported_nips.length} NIPs
+              {relay.supported_nips.length} NIPs
             </span>
           {/if}
           <span>
-            Connected {quantify(relay?.stats?.open_count || 0, "time")}
+            Connected {quantify(stats?.open_count || 0, "time")}
           </span>
         </div>
       </div>

@@ -25,8 +25,6 @@ import {
   DELETE,
   FEED,
   NAMED_BOOKMARKS,
-  HANDLER_INFORMATION,
-  HANDLER_RECOMMENDATION,
   DEPRECATED_DIRECT_MESSAGE,
   FEEDS,
   Address,
@@ -38,7 +36,6 @@ import {
   loadProfile,
   loadFollows,
   loadMutes,
-  getFollows,
   pull,
   shouldUnwrap,
   hasNegentropy,
@@ -272,16 +269,3 @@ export const listenForMessages = (pubkeys: string[]) => {
 
   return () => controller.abort()
 }
-
-export const loadHandlers = () =>
-  myLoad({
-    skipCache: true,
-    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
-    filters: [
-      addSinceToFilter({
-        kinds: [HANDLER_RECOMMENDATION],
-        authors: getFollows(pubkey.get()),
-      }),
-      addSinceToFilter({kinds: [HANDLER_INFORMATION]}),
-    ],
-  })

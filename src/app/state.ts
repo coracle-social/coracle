@@ -26,7 +26,6 @@ import {
   myLoad,
   loadPubkeys,
   loadDeletes,
-  loadHandlers,
   loadMessages,
   loadNotifications,
   loadFeedsAndLists,
@@ -102,7 +101,6 @@ export const loadUserData = async () => {
   loadMessages()
   loadNotifications()
   loadFeedsAndLists()
-  loadHandlers()
   loadDeletes()
 
   // Start listening for notifications

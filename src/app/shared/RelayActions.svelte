@@ -58,9 +58,9 @@
       })
     }
 
-    if ($relay?.profile?.contact) {
+    if ($relay?.contact) {
       actions.push({
-        onClick: () => window.open(ensureMailto($relay.profile.contact)),
+        onClick: () => window.open(ensureMailto($relay.contact)),
         label: "Contact",
         icon: "envelope",
       })

@@ -4,14 +4,14 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
   import PeopleAction from "src/app/shared/PeopleAction.svelte"
-  import {recommendationsByHandlerAddress} from "src/engine"
+  import {deriveRecommendations} from "src/engine"
   import {pluralize} from "src/util/misc"
 
   export let handler
 
   const address = getAddress(handler.event)
-  const recommendations = $recommendationsByHandlerAddress.get(address) || []
-  const pubkeys = uniq(pluck("pubkey", recommendations))
+  const recommendations = deriveRecommendations(address)
+  const pubkeys = uniq(pluck("pubkey", $recommendations))
   const actionText = `${pluralize(pubkeys.length, "recommends", "recommend")} this app`
 </script>
 
@@ -23,7 +23,7 @@
       <p class="text-tinted-200">{handler.about}</p>
     {/if}
     <slot />
-    {#if recommendations.length > 0}
+    {#if $recommendations.length > 0}
       <div class="text-tinted-200">
         <PeopleAction {pubkeys} {actionText} />
       </div>
