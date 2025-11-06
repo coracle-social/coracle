@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.26
+
+* Be more permissive when parsing nip 05s
+* Stop publishing notes with e-tag `mention` markers
+* Improve performance
+* Fix help link
+* Bring global feeds back
+* Improve negentropy support
+
 # 0.6.25
 
 * Show a tags on highlights
