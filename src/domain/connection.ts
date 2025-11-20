@@ -64,7 +64,7 @@ export const displayConnectionType = (type: ConnectionType) => {
     case ConnectionType.ConnectFailed:
       return "Failed to connect"
     case ConnectionType.WaitReconnect:
-      return "Wainting to reconnect"
+      return "Waiting to reconnect"
     case ConnectionType.NotConnected:
       return "Not connected"
     case ConnectionType.UnstableConnection:
