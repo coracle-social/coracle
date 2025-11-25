@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.27
+
+* Fix imgproxy urls
+* Don't linkify non-link highlight sources
+* Fix a typo
+
 # 0.6.26
 
 * Be more permissive when parsing nip 05s
