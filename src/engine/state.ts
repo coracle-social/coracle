@@ -132,7 +132,7 @@ import {
   EventsStorageAdapter,
   initStorage,
 } from "src/engine/storage"
-import {SearchHelper, fromCsv, parseJson} from "src/util/misc"
+import {SearchHelper, fromCsv, parseJson, ensureProto} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {derived, writable} from "svelte/store"
 
@@ -253,7 +253,7 @@ export function getSetting<T = any>(k: string): T {
 }
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
-  const base = getSetting("imgproxy_url")
+  const base = ensureProto(getSetting("imgproxy_url"))
 
   if (!base || !url || url.match("gif$")) {
     return url
