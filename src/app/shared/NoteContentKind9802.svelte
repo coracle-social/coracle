@@ -3,6 +3,7 @@
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {Address, getTag} from "@welshman/util"
+  import {parseLink} from "@welshman/content"
   import Link from "src/partials/Link.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
@@ -55,7 +56,11 @@
   {:else if meta.r}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-highlighter fa-xs mt-1" />
-      <NoteContentLinks urls={[meta.r]} />
+      {#if parseLink(meta.r, {results: [], content: "", tags: []})}
+        <NoteContentLinks urls={[meta.r]} />
+      {:else}
+        {meta.r}
+      {/if}
     </div>
   {/if}
 </div>
