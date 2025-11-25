@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {nth, removeNil} from "@welshman/lib"
+  import {nth, removeUndefined} from "@welshman/lib"
   import {zapFromEvent, getTags, getTagValue} from "@welshman/util"
   import {deriveZapperForPubkey, loadZapper} from "@welshman/app"
   import {formatSats} from "src/util/misc"
@@ -11,7 +11,7 @@
   export let note, showEntire, showMedia
 
   const recipient = getTagValue("p", note.tags)
-  const urls = removeNil(getTags("i", note.tags).map(nth(2)))
+  const urls = removeUndefined(getTags("i", note.tags).map(nth(2)))
   const zapper = deriveZapperForPubkey(recipient)
 
   $: zap = zapFromEvent(note, $zapper)
