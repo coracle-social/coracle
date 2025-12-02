@@ -1,5 +1,9 @@
 # Changelog
 
+# Current
+
+* Fix topic feeds
+
 # 0.6.27
 
 * Fix imgproxy urls
