@@ -1,8 +1,9 @@
 # Changelog
 
-# Current
+# 0.6.28
 
 * Fix topic feeds
+* Fix images when imgproxy is disabled
 
 # 0.6.27
 
