@@ -1,2 +1,10 @@
+# Block Facebook/Meta crawlers
+User-agent: Facebot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+# Allow all other crawlers
 User-agent: *
 Allow: /
