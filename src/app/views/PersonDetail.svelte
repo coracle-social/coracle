@@ -59,6 +59,7 @@
   import {tweened} from "svelte/motion"
   import {derived} from "svelte/store"
   import WotScore from "src/partials/WotScore.svelte"
+  import ZenBalance from "src/partials/ZenBalance.svelte"
   import FeedItem from "../shared/FeedItem.svelte"
   import {fly} from "svelte/transition"
 
@@ -213,6 +214,7 @@
             {stripProtocol($profile.website)}
           </Link>
         {/if}
+        <ZenBalance {pubkey} profile={$profile} />
       </div>
       <div class="flex flex-grow flex-col gap-4">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
