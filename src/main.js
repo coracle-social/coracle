@@ -8,10 +8,6 @@ import {nsecDecode} from "src/util/nostr"
 import {router} from "src/app/util"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
-import {initLocale} from "src/util/translations"
-
-// Initialize i18n locale from saved preferences
-initLocale()
 
 // Nstart login - hash is replaced somewhere else, maybe router?
 if (window.location.hash?.startsWith("#nostr-login")) {

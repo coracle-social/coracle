@@ -18,8 +18,6 @@
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {env, userSettings, publishSettings} from "src/engine"
-  import LanguageSelector from "src/partials/LanguageSelector.svelte"
-  import {currentLocale, LOCALE_NAMES} from "src/util/translations"
 
   const initialBlossomServers = getTagValues("server", getListTags($userBlossomServers))
 
@@ -55,13 +53,6 @@
     <p>Make {appName} work the way you want it to.</p>
   </div>
   <div class="flex w-full flex-col gap-8">
-    <Field label="Language">
-      <LanguageSelector />
-      <p slot="info">
-        Choose your preferred language for the {appName} interface.
-        Current: {LOCALE_NAMES[$currentLocale]}
-      </p>
-    </Field>
     <Field label="Default zap amount">
       <Input bind:value={values.default_zap}>
         <i slot="before" class="fa fa-bolt" />

@@ -205,7 +205,7 @@
             </div>
           </Button>
         {/if}
-        <ZenBalance {pubkey} profile={$profile} />
+        <ZenBalance profile={$profile} />
         {#if $profile?.website}
           <Link
             external

@@ -1,14 +1,9 @@
 <script lang="ts">
-  import {onMount} from 'svelte'
-  import {derived, writable} from 'svelte/store'
   import {
-    createZenBalanceStore, 
     extractIdentitiesFromTags, 
     checkAllZenBalances, 
     checkZenReceivability,
-    formatZen, 
     getApiServerUrl,
-    getTokenTypeLabel,
     getTokenTypeDescription,
     type ZenBalance, 
     type ProfileIdentities,
@@ -17,9 +12,7 @@
   import Popover from 'src/partials/Popover.svelte'
   import Link from 'src/partials/Link.svelte'
   
-  export let pubkey: string
   export let profile: {g1pub?: string; zencard?: string; email?: string; tags?: string[][]} | null = null
-  export let compact = false
   
   let loading = true
   let balanceData: {

@@ -271,35 +271,21 @@
       </button>
     {/if}
     {#if noteActions.includes("reactions")}
-      <Popover triggerType="mouseenter" opts={{hideOnClick: true}}>
-        <button
-          slot="trigger"
-          class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-            "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
-          })}
-          on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
-          <Icon
-            icon="heart"
-            color={liked ? "accent" : "neutral-100"}
-            class={cx("cursor-pointer", {
-              "fa-beat fa-beat-custom": liked,
-            })} />
-          {#if $likesCount > 0}
-            <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
-          {/if}
-        </button>
-        <div slot="tooltip" class="zen-like-tooltip px-3 py-2 text-sm">
-          <div class="flex items-center gap-2">
-            <span class="text-accent font-bold">Ẑ</span>
-            <span>{liked ? 'Unlike' : 'Like costs 1 ẐEN'}</span>
-          </div>
-          {#if !liked}
-            <div class="text-xs text-neutral-400 mt-1">
-              Transfers 1 ẐEN to author
-            </div>
-          {/if}
-        </div>
-      </Popover>
+      <button
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
+          "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
+        })}
+        on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
+        <Icon
+          icon="heart"
+          color={liked ? "accent" : "neutral-100"}
+          class={cx("cursor-pointer", {
+            "fa-beat fa-beat-custom": liked,
+          })} />
+        {#if $likesCount > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+        {/if}
+      </button>
     {/if}
     {#if handlers.length > 0 && noteActions.includes("recommended_apps")}
       <Popover theme="transparent" opts={{hideOnClick: true}}>
