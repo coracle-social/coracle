@@ -14,10 +14,8 @@
     type ProfileIdentities,
     type ZenReceivability,
   } from 'src/util/zen'
-  import {t, currentLocale} from 'src/util/translations'
   import Popover from 'src/partials/Popover.svelte'
   import Link from 'src/partials/Link.svelte'
-  import Icon from 'src/partials/Icon.svelte'
   
   export let pubkey: string
   export let profile: {g1pub?: string; zencard?: string; email?: string; tags?: string[][]} | null = null
@@ -89,8 +87,8 @@
     `${identities.zencard.substring(0, 6)}...${identities.zencard.substring(identities.zencard.length - 4)}` : 
     null
   
-  // Current locale for translations
-  $: locale = $currentLocale || 'en'
+  // Default locale for translations
+  const locale = 'en'
 </script>
 
 {#if identities.g1pub || identities.zencard}
@@ -204,7 +202,7 @@
         <!-- Like cost info -->
         <div class="pt-2 border-t border-neutral-700 text-xs text-neutral-500">
           <div class="flex items-center gap-1">
-            <Icon icon="heart" class="w-3 h-3" />
+            <span>❤️</span>
             <span>Liking costs 1 ẐEN (transferred to author)</span>
           </div>
         </div>

@@ -205,6 +205,7 @@
             </div>
           </Button>
         {/if}
+        <ZenBalance {pubkey} profile={$profile} />
         {#if $profile?.website}
           <Link
             external
@@ -214,7 +215,6 @@
             {stripProtocol($profile.website)}
           </Link>
         {/if}
-        <ZenBalance {pubkey} profile={$profile} />
       </div>
       <div class="flex flex-grow flex-col gap-4">
         <PersonAbout class="font-thin opacity-75" {pubkey} />
