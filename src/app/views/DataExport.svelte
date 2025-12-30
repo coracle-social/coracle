@@ -69,7 +69,7 @@
       <p>Select which events you'd like to export</p>
     </div>
     <div class="flex w-full flex-col gap-8">
-      <FieldInline label="Only export user events">
+      <FieldInline label="Only export your events">
         <Toggle bind:value={userOnly} />
         <p slot="info">If enabled, only your events will be exported.</p>
       </FieldInline>
