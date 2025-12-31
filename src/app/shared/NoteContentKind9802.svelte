@@ -2,24 +2,27 @@
   import * as nip19 from "nostr-tools/nip19"
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {Address, getTag} from "@welshman/util"
+  import {Address, getTag, getTopicTagValues} from "@welshman/util"
   import {parseLink} from "@welshman/content"
   import Link from "src/partials/Link.svelte"
+  import Chip from "src/partials/Chip.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
+  import NoteContentTopic from "src/app/shared/NoteContentTopic.svelte"
 
   export let note: TrustedEvent
   export let showEntire: boolean
   export let showMedia: boolean
 
   const meta = fromPairs(note.tags)
+  const context = meta.context || meta.comment
   const aTag = getTag("a", note.tags)
   const eTag = getTag("e", note.tags)
 </script>
 
 <div class="flex flex-col gap-2">
-  {#if meta.context}
-    <NoteContentKind1 note={{content: meta.context}} {showMedia} {showEntire} />
+  {#if context}
+    <NoteContentKind1 note={{content: context}} {showMedia} {showEntire} />
   {/if}
   <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
     <div class="border-l-2 border-solid border-neutral-600 pl-4">
@@ -63,4 +66,11 @@
       {/if}
     </div>
   {/if}
+  <div>
+    {#each getTopicTagValues(note.tags) as topic}
+      <NoteContentTopic value={topic}>
+        <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
+      </NoteContentTopic>
+    {/each}
+  </div>
 </div>
