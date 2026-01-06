@@ -1,5 +1,10 @@
 # Changelog
 
+# Current
+
+* Show topics/comment on highlights
+* Update default relays
+
 # 0.6.28
 
 * Fix topic feeds
