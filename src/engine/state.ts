@@ -1,7 +1,7 @@
 import {
   displayProfileByPubkey,
   ensurePlaintext,
-  followsByPubkey,
+  followListsByPubkey,
   profilesByPubkey,
   getNetwork,
   getPlaintext,
@@ -9,11 +9,10 @@ import {
   getSigner,
   getUserWotScore,
   loadRelay,
-  makeTrackerStore,
-  maxWot,
-  userMutes,
+  getMaxWot,
+  userMuteList,
   plaintext,
-  pinsByPubkey,
+  userPinList,
   sessions,
   pubkey,
   repository,
@@ -43,6 +42,9 @@ import {
   always,
   tryCatch,
   first,
+  remove,
+  call,
+  on,
 } from "@welshman/lib"
 import {routerContext} from "@welshman/router"
 import type {Socket, RequestOptions} from "@welshman/net"
@@ -58,7 +60,8 @@ import {
 import {Nip01Signer} from "@welshman/signer"
 import {
   deriveEvents,
-  deriveEventsMapped,
+  deriveItemsByKey,
+  deriveItems,
   synced,
   localStorageProvider,
   withGetter,
@@ -85,7 +88,7 @@ import {
   NAMED_BOOKMARKS,
   PROFILE,
   RELAYS,
-  INBOX_RELAYS,
+  MESSAGING_RELAYS,
   asDecryptedEvent,
   getAddress,
   getAddressTagValues,
@@ -125,7 +128,6 @@ import {
   RelaysStorageAdapter,
   HandlesStorageAdapter,
   ZappersStorageAdapter,
-  FreshnessStorageAdapter,
   PlaintextStorageAdapter,
   TrackerStorageAdapter,
   WrapManagerStorageAdapter,
@@ -134,7 +136,7 @@ import {
 } from "src/engine/storage"
 import {SearchHelper, fromCsv, parseJson, ensureProto} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
-import {derived, writable} from "svelte/store"
+import {readable, derived, writable} from "svelte/store"
 
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
@@ -205,7 +207,28 @@ repository.on("update", ({added}: {added: TrustedEvent[]}) => {
 
 // Tracker
 
-export const trackerStore = makeTrackerStore({throttle: 1000})
+export const deriveRelaysForEvent = (event: TrustedEvent) => {
+  const urls = new Set(remove(LOCAL_RELAY_URL, Array.from(tracker.getRelays(event.id))))
+
+  return readable(urls, set => {
+    const unsubscribers = [
+      on(tracker, "add", (id: string, url: string) => {
+        if (id === event.id && url !== LOCAL_RELAY_URL) {
+          urls.add(url)
+          set(urls)
+        }
+      }),
+      on(tracker, "remove", (id: string, url: string) => {
+        if (id === event.id && url !== LOCAL_RELAY_URL) {
+          urls.delete(url)
+          set(urls)
+        }
+      }),
+    ]
+
+    return () => unsubscribers.forEach(call)
+  })
+}
 
 // Settings
 
@@ -229,7 +252,7 @@ export const defaultSettings = {
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
 }
 
-export const settingsEvents = deriveEvents(repository, {filters: [{kinds: [APP_DATA]}]})
+export const settingsEvents = deriveEvents({repository, filters: [{kinds: [APP_DATA]}]})
 
 export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $settingsEvents]) =>
   $settingsEvents.find(e => e.pubkey === $pubkey && getIdentifier(e) === appDataKeys.USER_SETTINGS),
@@ -280,11 +303,14 @@ export const dufflepud = (path: string) => {
 
 // User follows/mutes/network
 
-export const getMinWot = () => getSetting("min_wot_score") / maxWot.get()
+export const getMinWot = () => getSetting("min_wot_score") / getMaxWot()
 
-export const userFollowList = derived([followsByPubkey, pubkey, anonymous], ([$m, $pk, $anon]) => {
-  return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})
-})
+export const userFollowList = derived(
+  [followListsByPubkey, pubkey, anonymous],
+  ([$m, $pk, $anon]) => {
+    return $pk ? $m.get($pk) : makeList({kind: FOLLOWS, publicTags: $anon.follows})
+  },
+)
 
 export const userFollows = withGetter(
   derived(userFollowList, l => new Set(getPubkeyTagValues(getListTags(l)))),
@@ -292,18 +318,25 @@ export const userFollows = withGetter(
 
 export const userNetwork = derived(userFollowList, l => getNetwork(l.event.pubkey))
 
-export const userMutedPubkeys = derived(userMutes, l => new Set(getTagValues("p", getListTags(l))))
+export const userMutedPubkeys = derived(
+  userMuteList,
+  l => new Set(getTagValues("p", getListTags(l))),
+)
 
 export const userMutedEvents = derived(
-  userMutes,
+  userMuteList,
   l => new Set(getTagValues(["a", "e"], getListTags(l))),
 )
 
-export const userMutedWords = derived(userMutes, l => new Set(getTagValues("word", getListTags(l))))
+export const userMutedWords = derived(
+  userMuteList,
+  l => new Set(getTagValues("word", getListTags(l))),
+)
 
-export const userMutedTopics = derived(userMutes, l => new Set(getTagValues("t", getListTags(l))))
-
-export const userPinList = derived([pinsByPubkey, pubkey], ([$m, $pk]) => $m.get($pk))
+export const userMutedTopics = derived(
+  userMuteList,
+  l => new Set(getTagValues("t", getListTags(l))),
+)
 
 export const userPins = derived(userPinList, l => new Set(getTagValues(["e"], getListTags(l))))
 
@@ -403,7 +436,7 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...getPubkeyTagValues(event.tags)])
 
-export const messages = deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]})
+export const messages = deriveEvents({repository, filters: [{kinds: [4, DIRECT_MESSAGE]}]})
 
 export const channels = derived(
   [pubkey, messages, getSeenAt],
@@ -456,11 +489,14 @@ export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER
 
 // Lists
 
-export const lists = deriveEventsMapped<PublishedUserList>(repository, {
+export const listsById = deriveItemsByKey({
+  repository,
+  getKey: list => list.event.id,
   filters: [{kinds: EDITABLE_LIST_KINDS}],
   eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readUserList(event) : null),
-  itemToEvent: prop<TrustedEvent>("event"),
 })
+
+export const lists = deriveItems(listsById)
 
 export const userLists = derived(
   [lists, pubkey],
@@ -475,11 +511,14 @@ export const listSearch = derived(lists, $lists => new UserListSearch($lists))
 
 // Feeds
 
-export const feeds = deriveEventsMapped<PublishedFeed>(repository, {
+export const feedsById = deriveItemsByKey({
+  repository,
+  getKey: feed => feed.event.id,
   filters: [{kinds: [FEED]}],
-  itemToEvent: prop<TrustedEvent>("event"),
   eventToItem: readFeed,
 })
+
+export const feeds = deriveItems(feedsById)
 
 export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [PublishedFeed[], string]) =>
   $feeds.filter(feed => feed.event.pubkey === $pubkey),
@@ -496,7 +535,7 @@ export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $us
   return makeFeed({definition: normalizeFeedDefinition(definition)})
 })
 
-export const feedFavoriteEvents = deriveEvents(repository, {filters: [{kinds: [FEEDS]}]})
+export const feedFavoriteEvents = deriveEvents({repository, filters: [{kinds: [FEEDS]}]})
 
 export const feedFavorites = derived(
   [plaintext, feedFavoriteEvents],
@@ -564,12 +603,15 @@ export class FeedSearch extends SearchHelper<PublishedFeed, string> {
 
 export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
 
-export const listFeeds = deriveEventsMapped<PublishedListFeed>(repository, {
+export const listFeedsById = deriveItemsByKey({
+  repository,
+  getKey: feed => feed.event.id,
   filters: [{kinds: [NAMED_BOOKMARKS]}],
   eventToItem: (event: TrustedEvent) =>
     event.tags.length > 1 ? mapListToFeed(readUserList(event)) : undefined,
-  itemToEvent: prop<TrustedEvent>("event"),
 })
+
+export const listFeeds = deriveItems(listFeedsById)
 
 export const userListFeeds = derived(
   [listFeeds, pubkey],
@@ -583,7 +625,7 @@ export const userListFeeds = derived(
 // Handlers
 
 export const handlers = derived(
-  deriveEvents(repository, {filters: [{kinds: [HANDLER_INFORMATION]}]}),
+  deriveEvents({repository, filters: [{kinds: [HANDLER_INFORMATION]}]}),
   $events => $events.flatMap(readHandlers),
 )
 
@@ -591,7 +633,8 @@ export const handlersByKind = derived(handlers, $handlers =>
   groupBy(handler => handler.kind, $handlers),
 )
 
-export const recommendations = deriveEvents(repository, {
+export const recommendations = deriveEvents({
+  repository,
   filters: [{kinds: [HANDLER_RECOMMENDATION]}],
 })
 
@@ -646,13 +689,13 @@ export const deriveHandlerEvent = simpleCache(([address]: [string]) => {
 
   myLoad({relays: env.DEFAULT_RELAYS, filters})
 
-  return derived(deriveEvents(repository, {filters}), first)
+  return derived(deriveEvents({repository, filters}), first)
 })
 
 // Collections
 
 export const collections = derived(
-  deriveEvents(repository, {filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
+  deriveEvents({repository, filters: [{kinds: [LABEL], "#L": ["#t"]}]}),
   readCollections,
 )
 
@@ -800,11 +843,10 @@ if (!initialized) {
     })
   })
 
-  ready = initStorage("coracle", 8, {
+  ready = initStorage("coracle", 9, {
     relays: new RelaysStorageAdapter({name: "relays"}),
     handles: new HandlesStorageAdapter({name: "handles"}),
     zappers: new ZappersStorageAdapter({name: "zappers"}),
-    freshness: new FreshnessStorageAdapter({name: "freshness"}),
     plaintext: new PlaintextStorageAdapter({name: "plaintext"}),
     tracker: new TrackerStorageAdapter({name: "tracker", tracker}),
     wraps: new WrapManagerStorageAdapter({name: "wraps", wrapManager}),
@@ -814,7 +856,7 @@ if (!initialized) {
       limit: 10_000,
       rankEvent: (e: TrustedEvent) => {
         const $sessions = sessions.get()
-        const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS]
+        const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS]
 
         if ($sessions[e.pubkey] || e.tags.some(t => $sessions[t[1]])) return 1
         if (metaKinds.includes(e.kind) && userFollows.get()?.has(e.pubkey)) return 1

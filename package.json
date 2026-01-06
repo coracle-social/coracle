@@ -43,16 +43,16 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/throttle-debounce": "^5.0.2",
     "@vite-pwa/assets-generator": "^0.2.6",
-    "@welshman/app": "^0.6.8",
-    "@welshman/content": "^0.6.8",
-    "@welshman/editor": "^0.6.8",
-    "@welshman/feeds": "^0.6.8",
-    "@welshman/lib": "^0.6.8",
-    "@welshman/net": "^0.6.8",
-    "@welshman/router": "^0.6.8",
-    "@welshman/signer": "^0.6.8",
-    "@welshman/store": "^0.6.8",
-    "@welshman/util": "^0.6.8",
+    "@welshman/app": "^0.7.2",
+    "@welshman/content": "^0.7.2",
+    "@welshman/editor": "^0.7.2",
+    "@welshman/feeds": "^0.7.2",
+    "@welshman/lib": "^0.7.2",
+    "@welshman/net": "^0.7.2",
+    "@welshman/router": "^0.7.2",
+    "@welshman/signer": "^0.7.2",
+    "@welshman/store": "^0.7.2",
+    "@welshman/util": "^0.7.2",
     "autoprefixer": "^10.4.21",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
@@ -111,6 +111,18 @@
     ],
     "onlyBuiltDependencies": [
       "sharp"
-    ]
+    ],
+    "overrides": {
+      "@welshman/app": "link:../welshman/packages/app",
+      "@welshman/content": "link:../welshman/packages/content",
+      "@welshman/editor": "link:../welshman/packages/editor",
+      "@welshman/feeds": "link:../welshman/packages/feeds",
+      "@welshman/lib": "link:../welshman/packages/lib",
+      "@welshman/net": "link:../welshman/packages/net",
+      "@welshman/router": "link:../welshman/packages/router",
+      "@welshman/signer": "link:../welshman/packages/signer",
+      "@welshman/store": "link:../welshman/packages/store",
+      "@welshman/util": "link:../welshman/packages/util"
+    }
   }
 }

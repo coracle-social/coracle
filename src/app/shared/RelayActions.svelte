@@ -1,12 +1,6 @@
 <script lang="ts">
   import {getRelaysFromList} from "@welshman/util"
-  import {
-    pubkey,
-    signer,
-    deriveRelaySelections,
-    deriveInboxRelaySelections,
-    deriveRelay,
-  } from "@welshman/app"
+  import {signer, userRelayList, userMessagingRelayList, deriveRelay} from "@welshman/app"
   import {ensureMailto} from "src/util/misc"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {joinRelay, leaveRelay} from "src/engine"
@@ -16,18 +10,14 @@
 
   const relay = deriveRelay(url)
 
-  const userRelaySelections = deriveRelaySelections($pubkey)
-
-  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
-
   let actions = []
 
   $: {
     actions = []
 
     const userRelayUrls = [
-      ...getRelaysFromList($userRelaySelections),
-      ...getRelaysFromList($userInboxRelaySelections),
+      ...getRelaysFromList($userRelayList),
+      ...getRelaysFromList($userMessagingRelayList),
     ]
 
     if (!userRelayUrls.includes(url)) {

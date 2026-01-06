@@ -13,7 +13,7 @@
 
   const relays = Router.get().ForPubkey(pubkey).policy(addMaximalFallbacks).getUrls()
   const filters = [{kinds: [3], "#p": [pubkey]}]
-  const events = deriveEvents(repository, {filters})
+  const events = deriveEvents({repository, filters})
 
   $: pubkeys = uniq($events.map(event => event.pubkey))
 

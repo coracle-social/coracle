@@ -6,8 +6,8 @@ import type {UploadTask, FileAttributes} from "@welshman/editor"
 import {first} from "@welshman/lib"
 import {getTagValue, getListTags} from "@welshman/util"
 import {Router} from "@welshman/router"
-import {profileSearch, userBlossomServers} from "@welshman/app"
-import {Editor, MentionSuggestion, WelshmanExtension} from "@welshman/editor"
+import {profileSearch, userBlossomServerList} from "@welshman/app"
+import {Editor, MentionSuggestion, WelshmanExtension, editorProps} from "@welshman/editor"
 import {ensureProto} from "src/util/misc"
 import {env} from "src/engine/state"
 import {uploadFile} from "src/engine/commands"
@@ -40,6 +40,7 @@ export const makeEditor = ({
   new Editor({
     content,
     autofocus,
+    editorProps,
     extensions: [
       WelshmanExtension.configure({
         submit,
@@ -57,7 +58,7 @@ export const makeEditor = ({
           fileUpload: {
             config: {
               upload: async (attrs: FileAttributes) => {
-                const userServer = getTagValue("server", getListTags(userBlossomServers.get()))
+                const userServer = getTagValue("server", getListTags(get(userBlossomServerList)))
                 const server = ensureProto(userServer || first(env.BLOSSOM_URLS))
 
                 try {

@@ -13,7 +13,7 @@ import {
   Address,
   RELAYS,
   PROFILE,
-  INBOX_RELAYS,
+  MESSAGING_RELAYS,
   FOLLOWS,
   MUTES,
   getTags,
@@ -35,10 +35,10 @@ import {
   COMMUNITIES,
   CHANNELS,
   TOPICS,
+  getPubkey,
 } from "@welshman/util"
 import {identity} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {getPubkey} from "@welshman/signer"
 import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
 import * as nip19 from "nostr-tools/nip19"
 import * as nip05 from "nostr-tools/nip05"
@@ -70,7 +70,7 @@ export const replyKinds = [NOTE, COMMENT]
 export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
-export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, INBOX_RELAYS] as number[]
+export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS] as number[]
 export const headerlessKinds = [
   ROOMS,
   FEED,

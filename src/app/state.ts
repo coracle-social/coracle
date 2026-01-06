@@ -11,12 +11,12 @@ import {
 import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   pubkey,
-  loadUserRelaySelections,
-  loadUserInboxRelaySelections,
-  loadUserBlossomServers,
+  loadUserRelayList,
+  loadUserMessagingRelayList,
+  loadUserBlossomServerList,
   loadUserProfile,
-  loadUserFollows,
-  loadUserMutes,
+  loadUserFollowList,
+  loadUserMuteList,
   getFollows,
 } from "@welshman/app"
 import {appDataKeys} from "src/util/nostr"
@@ -59,15 +59,15 @@ export const loadUserData = async () => {
   const $pubkey = pubkey.get()
 
   // Load relay selections first
-  await loadUserRelaySelections()
+  await loadUserRelayList()
 
   // Load other crucial user data
   await Promise.all([
-    loadUserInboxRelaySelections(),
-    loadUserBlossomServers(),
+    loadUserMessagingRelayList(),
+    loadUserBlossomServerList(),
     loadUserProfile(),
-    loadUserFollows(),
-    loadUserMutes(),
+    loadUserFollowList(),
+    loadUserMuteList(),
   ])
 
   // Load user feed selections, app data, and feeds that were favorited by the user

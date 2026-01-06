@@ -2,7 +2,7 @@
   import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {session, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
+  import {session, displayProfileByPubkey, messagingRelayListsByPubkey} from "@welshman/app"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
@@ -44,11 +44,13 @@
     confirmIsOpen = false
   }
 
-  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
-    pubkeys.filter(
-      pubkey =>
-        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
-    ),
+  const pubkeysWithoutMessaging = derived(
+    messagingRelayListsByPubkey,
+    $messagingRelayListsByPubkey =>
+      pubkeys.filter(
+        pubkey =>
+          !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+      ),
   )
 
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
@@ -70,7 +72,7 @@
   }
 
   const sendOrConfirm = () => {
-    if ($pubkeysWithoutInbox.length > 0) {
+    if ($pubkeysWithoutMessaging.length > 0) {
       openConfirm()
     } else {
       send()
@@ -108,7 +110,7 @@
   let showNewMessages = false
   let groupedMessages = []
 
-  $: userHasInbox = !$pubkeysWithoutInbox.includes($session?.pubkey)
+  $: userHasMessaging = !$pubkeysWithoutMessaging.includes($session?.pubkey)
 
   // Group messages so we're only showing the person once per chunk
   $: {
@@ -149,14 +151,14 @@
   <div
     bind:this={element}
     class="flex flex-grow flex-col-reverse justify-start overflow-auto p-4 pb-6">
-    {#if !userHasInbox}
+    {#if !userHasMessaging}
       <div class="m-auto max-w-96 py-20 text-center">
         <div class="mb-4 text-lg text-accent">
-          <i class="fa fa-exclamation-triangle"></i> Your inbox is not configured.
+          <i class="fa fa-exclamation-triangle"></i> Messaging is not configured.
         </div>
         In order to deliver messages, Coracle needs to know where to send them. Please visit your
         <a class="cursor-pointer underline" href="/settings/relays"> relay settings page</a> and set
-        up your inbox relays.
+        up your messaging relays.
       </div>
     {/if}
     {#each groupedMessages as message (message.id)}
@@ -213,18 +215,18 @@
 
 {#if confirmIsOpen}
   <Modal onEscape={closeConfirm}>
-    <Subheading>Missing Inbox Relays</Subheading>
-    {#if $pubkeysWithoutInbox.length > 0}
+    <Subheading>Missing Messaging Relays</Subheading>
+    {#if $pubkeysWithoutMessaging.length > 0}
       <p>
-        {displayList($pubkeysWithoutInbox.map(displayProfileByPubkey))}
-        {pluralize($pubkeysWithoutInbox.length, "does not have", "do not have")}
-        inbox relays, which means they may not be able to receive DMs.
+        {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
+        {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
+        messaging relays, which means they may not be able to receive DMs.
       </p>
-    {:else if !userHasInbox}
+    {:else if !userHasMessaging}
       <p>
-        You don't have any inbox relays set up yet, which will make it difficult for you to receive
-        replies to this conversation. Click <Link class="underline" href="/settings/relays"
-          >here</Link> to set up your inbox relays.
+        You don't have any messaging relays set up yet, which will make it difficult for you to
+        receive replies to this conversation. Click <Link class="underline" href="/settings/relays"
+          >here</Link> to set up your messaging relays.
       </p>
     {/if}
     <div class="flex justify-between">

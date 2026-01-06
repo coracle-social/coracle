@@ -1,11 +1,9 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
-  import {derived} from "svelte/store"
-  import {sum, pluck, spec, remove, uniqBy, prop} from "@welshman/lib"
+  import {sum, pluck, spec, uniqBy, prop} from "@welshman/lib"
   import {Router} from "@welshman/router"
   import type {TrustedEvent, Handler} from "@welshman/util"
-  import {LOCAL_RELAY_URL} from "@welshman/net"
   import {
     isReplaceable,
     Address,
@@ -28,7 +26,7 @@
   import HandlerCard from "src/app/shared/HandlerCard.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {deriveValidZaps} from "src/app/util"
-  import {trackerStore, sortEventsDesc, deriveHandlerEvent} from "src/engine"
+  import {sortEventsDesc, deriveHandlerEvent, deriveRelaysForEvent} from "src/engine"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
 
   export let event: TrustedEvent
@@ -44,9 +42,7 @@
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
   const handlerEvent = deriveHandlerEvent(getTag("client", event.tags)?.[2] || "")
-  const seenOn = derived(trackerStore, $t =>
-    remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
-  )
+  const seenOn = deriveRelaysForEvent(event)
 
   const showHandlers = () => {
     handlersShown = true
@@ -92,9 +88,9 @@
     {/each}
   </div>
 {/if}
-{#if $seenOn?.length > 0}
+{#if $seenOn.size > 0}
   <h1 class="staatliches text-2xl">Relays</h1>
-  <p>This note was found on {quantify($seenOn.length, "relay")} below.</p>
+  <p>This note was found on {quantify($seenOn.size, "relay")} below.</p>
   <div class="flex flex-col gap-2">
     {#each $seenOn as url}
       <RelayCard {url} />

@@ -1,9 +1,8 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {NOTE, makeEvent} from "@welshman/util"
+  import {NOTE, makeEvent, own} from "@welshman/util"
   import {publishThunk} from "@welshman/app"
-  import {own} from "@welshman/signer"
   import {makePow} from "src/util/pow"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import Button from "src/partials/Button.svelte"

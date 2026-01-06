@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity, uniq, equals} from "@welshman/lib"
   import {tagger, getTagValues} from "@welshman/util"
-  import {topicSearch, setMutes, userMutes} from "@welshman/app"
+  import {topicSearch, setMutes, userMuteList} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -35,13 +35,13 @@
     if (mutesDirty) {
       setMutes({
         privateTags: [
-          ...$userMutes.privateTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...$userMuteList.privateTags.filter(t => !["p", "t", "word"].includes(t[0])),
           ...privatelyMutedPubkeys.map(tagger("p")),
           ...privatelyMutedTopics.map(tagger("t")),
           ...privatelyMutedWords.map(tagger("word")),
         ],
         publicTags: [
-          ...$userMutes.publicTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...$userMuteList.publicTags.filter(t => !["p", "t", "word"].includes(t[0])),
           ...publiclyMutedPubkeys.map(tagger("p")),
           ...publiclyMutedTopics.map(tagger("t")),
           ...publiclyMutedWords.map(tagger("word")),
@@ -53,13 +53,13 @@
   }
 
   let mutesDirty = false
-  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMutes.publicTags))
-  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMutes.privateTags))
-  let publiclyMutedTopics = uniq(getTagValues("t", $userMutes.publicTags))
-  let privatelyMutedTopics = uniq(getTagValues("t", $userMutes.privateTags))
-  let publiclyMutedWords = uniq(getTagValues("word", $userMutes.publicTags))
+  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMuteList.publicTags))
+  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMuteList.privateTags))
+  let publiclyMutedTopics = uniq(getTagValues("t", $userMuteList.publicTags))
+  let privatelyMutedTopics = uniq(getTagValues("t", $userMuteList.privateTags))
+  let publiclyMutedWords = uniq(getTagValues("word", $userMuteList.publicTags))
   let privatelyMutedWords = uniq([
-    ...getTagValues("word", $userMutes.privateTags),
+    ...getTagValues("word", $userMuteList.privateTags),
     ...$userSettings.muted_words,
   ])
 

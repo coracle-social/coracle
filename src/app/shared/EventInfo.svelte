@@ -1,6 +1,6 @@
 <script lang="ts">
   import {getTagValue} from "@welshman/util"
-  import {deriveIsDeletedByAddress} from "@welshman/store"
+  import {deriveIsDeleted} from "@welshman/store"
   import {repository} from "@welshman/app"
   import {
     fromPairs,
@@ -19,7 +19,7 @@
 
   const timeFmt = new Intl.DateTimeFormat(LOCALE, {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(LOCALE, {dateStyle: "short", timeStyle: "short"})
-  const deleted = deriveIsDeletedByAddress(repository, event)
+  const deleted = deriveIsDeleted(repository, event)
 
   $: ({name, title, location} = fromPairs(event.tags))
   $: end = parseInt(getTagValue("end", event.tags))

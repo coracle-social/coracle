@@ -10,9 +10,9 @@
     relaySearch,
     displayProfileByPubkey,
     profilesByPubkey,
-    deriveRelaySelections,
-    deriveInboxRelaySelections,
-    relaySelectionsByPubkey,
+    deriveRelayList,
+    deriveMessagingRelayList,
+    relayListsByPubkey,
   } from "@welshman/app"
   import {
     isShareableRelayUrl,
@@ -36,9 +36,9 @@
 
   const tabs = ["search", "reviews"]
 
-  const userRelaySelections = deriveRelaySelections($pubkey)
+  const userRelayList = deriveRelayList($pubkey)
 
-  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
+  const userMessagingRelayList = deriveMessagingRelayList($pubkey)
 
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
@@ -48,7 +48,7 @@
         continue
       }
 
-      for (const url of getRelaysFromList($relaySelectionsByPubkey.get(pk), RelayMode.Write)) {
+      for (const url of getRelaysFromList($relayListsByPubkey.get(pk), RelayMode.Write)) {
         if (isShareableRelayUrl(url)) {
           pushToMapKey(m, url, pk)
         }
@@ -114,8 +114,8 @@
 
   $: currentRelayUrls = uniq([
     ...currentRelayUrls,
-    ...getRelaysFromList($userRelaySelections),
-    ...getRelaysFromList($userInboxRelaySelections),
+    ...getRelaysFromList($userRelayList),
+    ...getRelaysFromList($userMessagingRelayList),
   ]).sort()
 
   $: ratings = groupBy(e => {

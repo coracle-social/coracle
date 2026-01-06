@@ -5,7 +5,7 @@
     REACTION,
     PROFILE,
     RELAYS,
-    INBOX_RELAYS,
+    MESSAGING_RELAYS,
     FOLLOWS,
     isShareableRelayUrl,
     getPubkeyTagValues,
@@ -21,17 +21,17 @@
     deriveHandleForPubkey,
     deriveZapperForPubkey,
     displayProfileByPubkey,
-    deriveRelaySelections,
+    deriveRelayList,
     tagZapSplit,
     deriveProfileDisplay,
-    deriveFollows,
+    deriveFollowList,
     followersByPubkey,
     getUserWotScore,
     maxWot,
     session,
     tagPubkey,
     repository,
-    pinsByPubkey,
+    pinListsByPubkey,
   } from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {ensureProto, toTitle} from "src/util/misc"
@@ -68,13 +68,13 @@
   const handle = deriveHandleForPubkey(pubkey)
   const profile = deriveProfile(pubkey, relays)
   const zapper = deriveZapperForPubkey(pubkey, relays)
-  const relaySelections = deriveRelaySelections(pubkey, relays)
+  const relayList = deriveRelayList(pubkey, relays)
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const followsCount = tweened(0, {interpolate, duration: 1000})
   const followersCount = tweened(0, {interpolate, duration: 1300})
-  const follows = deriveFollows(pubkey)
+  const follows = deriveFollowList(pubkey)
   const following = derived(userFollows, $m => $m.has(pubkey))
   const wotScore = getUserWotScore(pubkey)
   const npub = nip19.npubEncode(pubkey)
@@ -106,8 +106,8 @@
 
   $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
   $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
-  $: pinnedIds = getTagValues(["e"], getListTags($pinsByPubkey.get(pubkey)))
-  $: pinnedEvents = deriveEvents(repository, {filters: getIdFilters(pinnedIds)})
+  $: pinnedIds = getTagValues(["e"], getListTags($pinListsByPubkey.get(pubkey)))
+  $: pinnedEvents = deriveEvents({repository, filters: getIdFilters(pinnedIds)})
   $: zapDisplay = $profile?.lud16 || $profile?.lud06
 
   $: {
@@ -119,7 +119,7 @@
 
   // Force load profile when the user visits the detail page
   myLoad({
-    filters: [{kinds: [PINS, PROFILE, RELAYS, INBOX_RELAYS, FOLLOWS], authors: [pubkey]}],
+    filters: [{kinds: [PINS, PROFILE, RELAYS, MESSAGING_RELAYS, FOLLOWS], authors: [pubkey]}],
     relays: Router.get()
       .merge([Router.get().Index(), Router.get().FromPubkey(pubkey)])
       .policy(addMaximalFallbacks)
@@ -250,8 +250,8 @@
 {:else if activeTab === "collections"}
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
-  {#if $relaySelections}
-    <PersonRelays urls={getRelaysFromList($relaySelections).filter(isShareableRelayUrl)} />
+  {#if $relayList}
+    <PersonRelays urls={getRelaysFromList($relayList).filter(isShareableRelayUrl)} />
   {:else}
     <Spinner />
   {/if}

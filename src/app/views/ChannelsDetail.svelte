@@ -4,12 +4,12 @@
   import {deriveEvents} from "@welshman/store"
   import {DIRECT_MESSAGE, isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
   import {
-    inboxRelaySelectionsByPubkey,
+    messagingRelayListsByPubkey,
     shouldUnwrap,
     session,
     repository,
     displayProfileByPubkey,
-    loadInboxRelaySelections,
+    loadMessagingRelayList,
   } from "@welshman/app"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
@@ -24,15 +24,17 @@
   export let channelId
 
   const messages = derived(
-    deriveEvents(repository, {filters: [{kinds: [4, DIRECT_MESSAGE]}]}),
+    deriveEvents({repository, filters: [{kinds: [4, DIRECT_MESSAGE]}]}),
     $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
-  const pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
-    pubkeys.filter(
-      pubkey =>
-        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
-    ),
+  const pubkeysWithoutMessaging = derived(
+    messagingRelayListsByPubkey,
+    $messagingRelayListsByPubkey =>
+      pubkeys.filter(
+        pubkey =>
+          !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+      ),
   )
 
   let isAccepted
@@ -44,13 +46,13 @@
       router.at("channels/enable").open({mini: true, noEscape: true})
     }
 
-    const unsubscriber = listenForMessages(pubkeys)
+    const unsubscriber = listenForMessages()
 
     isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
     setChecked("channels/" + channelId)
 
     for (const pubkey of pubkeys) {
-      loadInboxRelaySelections(pubkey)
+      loadMessagingRelayList(pubkey)
     }
 
     return () => {
@@ -88,7 +90,7 @@
         {/if}
       </div>
     </div>
-    {#if $pubkeysWithoutInbox.length > 0}
+    {#if $pubkeysWithoutMessaging.length > 0}
       <div class="flex items-center">
         <Popover triggerType="mouseenter" placement="left">
           <div
@@ -96,11 +98,11 @@
             class="flex cursor-pointer items-center gap-1 rounded-full bg-danger px-2">
             <i class="fa fa-exclamation-triangle" />
             <span>
-              {$pubkeysWithoutInbox.length}
+              {$pubkeysWithoutMessaging.length}
             </span>
           </div>
           <div slot="tooltip">
-            {$pubkeysWithoutInbox.length} inbox is not configured
+            {$pubkeysWithoutMessaging.length} inbox is not configured
           </div>
         </Popover>
       </div>

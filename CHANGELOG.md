@@ -4,6 +4,7 @@
 
 * Show topics/comment on highlights
 * Update default relays
+* Update to new welshman version
 
 # 0.6.28
 

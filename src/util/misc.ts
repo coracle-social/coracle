@@ -11,20 +11,19 @@ import {
   ensurePlural,
   round,
 } from "@welshman/lib"
-import {custom} from "@welshman/store"
+import {readable} from "svelte/store"
 import Fuse from "fuse.js"
 import logger from "src/util/logger"
 
-export const ticker = () =>
-  custom<number>(set => {
-    let seconds = 0
+export const ticker = () => {
+  let seconds = 0
 
-    set(seconds)
-
+  return readable(seconds, set => {
     const interval = setInterval(() => set(++seconds), 1000)
 
     return () => clearInterval(interval)
   })
+}
 
 export const formatDateAsLocalISODate = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60000

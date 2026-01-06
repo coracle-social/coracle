@@ -2,7 +2,7 @@
   import {derived} from "svelte/store"
   import {displayList, uniq} from "@welshman/lib"
   import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {pubkey, displayProfileByPubkey, inboxRelaySelectionsByPubkey} from "@welshman/app"
+  import {pubkey, displayProfileByPubkey, messagingRelayListsByPubkey} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Button from "src/partials/Button.svelte"
@@ -16,14 +16,14 @@
   const submit = () => router.at("channels").of(pubkeys).push()
 
   $: pubkeys = uniq(value.concat($pubkey))
-  $: pubkeysWithoutInbox = derived(inboxRelaySelectionsByPubkey, $inboxRelaySelectionsByPubkey =>
+  $: pubkeysWithoutMessaging = derived(messagingRelayListsByPubkey, $messagingRelayListsByPubkey =>
     pubkeys.filter(
       pubkey =>
-        !getRelaysFromList($inboxRelaySelectionsByPubkey.get(pubkey)).some(isShareableRelayUrl),
+        !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
     ),
   )
   $: nip44Disabled = pubkeys.length > 2 && !$hasNip44
-  $: missingInbox = pubkeys.length > 2 && $pubkeysWithoutInbox.length > 0
+  $: missingMessaging = pubkeys.length > 2 && $pubkeysWithoutMessaging.length > 0
 </script>
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
@@ -40,12 +40,12 @@
         your signer to access this feature.
       </p>
     {/if}
-    {#if missingInbox}
+    {#if missingMessaging}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
-        {displayList($pubkeysWithoutInbox.map(displayProfileByPubkey))}
-        {pluralize($pubkeysWithoutInbox.length, "does not have", "do not have")}
-        inbox relays, which means they likely either don't want to receive DMs, or are using a client
+        {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
+        {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
+        messaging relays, which means they likely either don't want to receive DMs, or are using a client
         that does not support nostr group chats.
       </p>
     {/if}

@@ -52,7 +52,7 @@
 
   const replies = derived(
     [
-      deriveEvents(repository, {filters: getReplyFilters([event], {kinds: replyKinds})}),
+      deriveEvents({repository, filters: getReplyFilters([event], {kinds: replyKinds})}),
       isEventMuted,
     ],
     ([$events, $isEventMuted]) =>

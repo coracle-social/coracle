@@ -2,13 +2,20 @@ import {openDB, deleteDB} from "idb"
 import type {IDBPDatabase} from "idb"
 import type {Unsubscriber} from "svelte/store"
 import {writable} from "svelte/store"
-import {batch, sortBy, call, fromPairs, defer} from "@welshman/lib"
+import {batch, indexBy, sortBy, call, fromPairs, defer} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {throttled, withGetter} from "@welshman/store"
+import {withGetter} from "@welshman/store"
 import type {RepositoryUpdate, WrapItem} from "@welshman/net"
 import {Tracker, Repository, WrapManager} from "@welshman/net"
-import {freshness} from "@welshman/store"
-import {relays, handles, onHandle, zappers, onZapper, plaintext} from "@welshman/app"
+import {
+  relaysByUrl,
+  onRelay,
+  handlesByNip05,
+  onHandle,
+  zappersByLnurl,
+  onZapper,
+  plaintext,
+} from "@welshman/app"
 
 export type StorageAdapterOptions = {
   throttle?: number
@@ -153,11 +160,11 @@ export class RelaysStorageAdapter {
   constructor(readonly options: RelaysStorageAdapterOptions) {}
 
   async init() {
-    relays.set(await getAll(this.options.name))
+    relaysByUrl.set(indexBy(r => r.url, await getAll(this.options.name)))
   }
 
   sync() {
-    return throttled(3000, relays).subscribe($relays => bulkPut(this.options.name, $relays))
+    return onRelay(batch(1000, $relays => bulkPut(this.options.name, $relays)))
   }
 }
 
@@ -171,11 +178,11 @@ export class HandlesStorageAdapter {
   constructor(readonly options: HandlesStorageAdapterOptions) {}
 
   async init() {
-    handles.set(await getAll(this.options.name))
+    handlesByNip05.set(indexBy(r => r.url, await getAll(this.options.name)))
   }
 
   sync() {
-    return onHandle(batch(300, $handles => bulkPut(this.options.name, $handles)))
+    return onHandle(batch(1000, $handles => bulkPut(this.options.name, $handles)))
   }
 }
 
@@ -189,38 +196,11 @@ export class ZappersStorageAdapter {
   constructor(readonly options: ZappersStorageAdapterOptions) {}
 
   async init() {
-    zappers.set(await getAll(this.options.name))
+    zappersByLnurl.set(indexBy(r => r.url, await getAll(this.options.name)))
   }
 
   sync() {
-    return onZapper(batch(300, $zappers => bulkPut(this.options.name, $zappers)))
-  }
-}
-
-export type FreshnessStorageAdapterOptions = {
-  name: string
-}
-
-export class FreshnessStorageAdapter {
-  keyPath = "key"
-
-  constructor(readonly options: FreshnessStorageAdapterOptions) {}
-
-  async init() {
-    const items = await getAll(this.options.name)
-
-    freshness.set(fromPairs(items.map(item => [item.key, item.value])))
-  }
-
-  sync() {
-    const interval = setInterval(() => {
-      bulkPut(
-        this.options.name,
-        Object.entries(freshness.get()).map(([key, value]) => ({key, value})),
-      )
-    }, 10_000)
-
-    return () => clearInterval(interval)
+    return onZapper(batch(1000, $zappers => bulkPut(this.options.name, $zappers)))
   }
 }
 
