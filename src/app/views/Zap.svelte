@@ -59,8 +59,12 @@
       for (const [_, pubkey, relay, weightString] of [...splits, platformSplit]) {
         const eventId = id
         const weight = parseFloat(weightString)
-        const msats = 1000 * amount * (weight / totalWeight)
+        const msats = Math.round(1000 * amount * (weight / totalWeight))
         const zapper = await loadZapperForPubkey(pubkey)
+
+        if (msats === 0) {
+          continue
+        }
 
         if (!zapper) {
           return showWarning(`Failed to zap: no zapper found`)

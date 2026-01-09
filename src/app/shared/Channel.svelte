@@ -157,8 +157,8 @@
           <i class="fa fa-exclamation-triangle"></i> Messaging is not configured.
         </div>
         In order to deliver messages, Coracle needs to know where to send them. Please visit your
-        <a class="cursor-pointer underline" href="/settings/relays"> relay settings page</a> and set
-        up your messaging relays.
+        <Link class="underline" href="/settings/relays">relay settings page</Link> and set up your messaging
+        relays.
       </div>
     {/if}
     {#each groupedMessages as message (message.id)}
