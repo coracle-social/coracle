@@ -1,6 +1,6 @@
 # Changelog
 
-# Current
+# 0.6.29
 
 * Show topics/comment on highlights
 * Update default relays
