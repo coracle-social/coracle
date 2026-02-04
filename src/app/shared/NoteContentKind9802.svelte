@@ -15,14 +15,13 @@
   export let showMedia: boolean
 
   const meta = fromPairs(note.tags)
-  const context = meta.context || meta.comment
   const aTag = getTag("a", note.tags)
   const eTag = getTag("e", note.tags)
 </script>
 
 <div class="flex flex-col gap-2">
-  {#if context}
-    <NoteContentKind1 note={{content: context}} {showMedia} {showEntire} />
+  {#if meta.comment}
+    <NoteContentKind1 note={{content: meta.comment}} {showMedia} {showEntire} />
   {/if}
   <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
     <div class="border-l-2 border-solid border-neutral-600 pl-4">

@@ -5,6 +5,8 @@
 * Show topics/comment on highlights
 * Update default relays
 * Update to new welshman version
+* Add list nav item
+* Remove glitchtip
 
 # 0.6.28
 

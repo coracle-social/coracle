@@ -9,7 +9,6 @@
     "test:unit": "vitest --dir=tests/unit --watch=false",
     "test:e2e": "cypress run",
     "build": "rm -rf dist && pwa-assets-generator && vite build",
-    "sourcemaps": "sentry-cli --url https://glitchtip.coracle.social --auth-token $GLITCHTIP_AUTH_TOKEN --api-key $VITE_GLITCHTIP_API_KEY sourcemaps --org coracle --project coracle --release $(cat package.json|jq -r '.version') upload --url-prefix /assets/ dist/assets",
     "run:android": "cap sync && cap run android",
     "release:android": "cap sync && cap build android --androidreleasetype APK --signing-type apksigner",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
@@ -37,8 +36,6 @@
     "@noble/curves": "^1.9.0",
     "@noble/hashes": "^1.8.0",
     "@scure/base": "^1.2.5",
-    "@sentry/browser": "^8.55.0",
-    "@sentry/cli": "^2.43.0",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.4",
     "@types/throttle-debounce": "^5.0.2",
@@ -104,25 +101,12 @@
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
-      "@sentry/cli",
       "cypress",
       "esbuild",
       "svelte-preprocess"
     ],
     "onlyBuiltDependencies": [
       "sharp"
-    ],
-    "overrides": {
-      "@welshman/app": "link:../welshman/packages/app",
-      "@welshman/content": "link:../welshman/packages/content",
-      "@welshman/editor": "link:../welshman/packages/editor",
-      "@welshman/feeds": "link:../welshman/packages/feeds",
-      "@welshman/lib": "link:../welshman/packages/lib",
-      "@welshman/net": "link:../welshman/packages/net",
-      "@welshman/router": "link:../welshman/packages/router",
-      "@welshman/signer": "link:../welshman/packages/signer",
-      "@welshman/store": "link:../welshman/packages/store",
-      "@welshman/util": "link:../welshman/packages/util"
-    }
+    ]
   }
 }

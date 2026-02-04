@@ -80,10 +80,6 @@ Make sure you have the android build tools in your path and run:
 pnpm run build:android --keystorepath <path> --keystorepass <password> --keystorealias <alias> --keystorealiaspass <password>
 ```
 
-# Uploading sourcemaps
-
-Source maps are uploaded using the sentry cli to a self-hosted glitchtip instance. See the `sourcemaps` script in `package.json` for details. More information here: https://gitlab.com/glitchtip/glitchtip-backend/-/issues/322
-
 # Customization
 
 Coracle is intended to be fully white-labeled by groups of various kinds. The following environment variables can be set in `.env.local` to customize Coracle's appearance and behavior:
@@ -106,8 +102,6 @@ Coracle is intended to be fully white-labeled by groups of various kinds. The fo
 - `VITE_APP_DESCRIPTION` is the app's description.
 - `VITE_CLIENT_NAME` is the client's name. Only change this if you have forked Coracle.
 - `VITE_CLIENT_ID` is the client's NIP 89 handler id. Only change this if you have forked Coracle.
-- `VITE_GLITCHTIP_API_KEY` is your glitchtip DSN.
-- `GLITCHTIP_API_KEY` is your glitchtip auth token for uploading source maps.
 - `VITE_BUILD_HASH` can be set during build to indicate the software version on the about page.
 - `VITE_LOG_LEVEL` can be set to `info`, `warn`, or `error`. This controls how much shows up in the console.
 - `VITE_ENABLE_MARKET` can be set to `false` to disable the marketplace tab.

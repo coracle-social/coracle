@@ -1,6 +1,5 @@
 import "src/app.css"
 import "@capacitor-community/safe-area"
-import * as Sentry from "@sentry/browser"
 import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"
 import {Nip46Broker} from "@welshman/signer"
 import {makeSecret} from "@welshman/util"
@@ -50,16 +49,6 @@ if (window.location.hash?.startsWith("#nostr-login")) {
       )
     }
   })()
-}
-
-if (import.meta.env.VITE_GLITCHTIP_API_KEY) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_GLITCHTIP_API_KEY,
-    tracesSampleRate: 0.01,
-    integrations(integrations) {
-      return integrations.filter(integration => integration.name !== "Breadcrumbs")
-    },
-  })
 }
 
 // Analytics
