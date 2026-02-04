@@ -37,9 +37,8 @@ import {
   TOPICS,
   getPubkey,
 } from "@welshman/util"
-import {identity} from "@welshman/lib"
+import {identity, hexToBytes, bytesToHex} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {hexToBytes, bytesToHex} from "@noble/hashes/utils"
 import * as nip19 from "nostr-tools/nip19"
 import * as nip05 from "nostr-tools/nip05"
 import {parseJson} from "src/util/misc"
