@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.30
+
+* Add video thumbnails
+
 # 0.6.29
 
 * Show topics/comment on highlights
