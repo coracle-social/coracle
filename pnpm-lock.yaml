@@ -32,6 +32,9 @@ importers:
       '@capacitor/ios':
         specifier: ^7.2.0
         version: 7.2.0(@capacitor/core@7.2.0)
+      '@capgo/capacitor-video-thumbnails':
+        specifier: ^8.1.6
+        version: 8.1.6(@capacitor/core@7.2.0)
       '@eslint/js':
         specifier: ^9.25.1
         version: 9.25.1
@@ -786,6 +789,11 @@ packages:
     resolution: {integrity: sha512-MQgRZcXZpbpjN83bjkGrzQd7s3XeHBZplmWf38/msF/siMGJKLrXNmNzmmPIWA5Xpi/aH6UoJFk1wXuU2U+zMg==}
     peerDependencies:
       '@capacitor/core': ^7.2.0
+
+  '@capgo/capacitor-video-thumbnails@8.1.6':
+    resolution: {integrity: sha512-Vc9omm5Vs2f/9bGUQJfK8oCK78Fcs7sCrVTtUhALcrmQUP6pKmmAbxBk0fW9sW+pPNKKnIySSCpHN4fHncCzng==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@cmdcode/buff@2.2.5':
     resolution: {integrity: sha512-+nc3QDoJ+MU/fp+YkX6WuEjJrXLF6ME+eVX1sj5a+MfBKO9LWb4R9Y2zH6APBrySd7nFr48ozscAui7SKvLmXg==}
@@ -6398,6 +6406,10 @@ snapshots:
       '@capacitor/core': 7.2.0
 
   '@capacitor/ios@7.2.0(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+
+  '@capgo/capacitor-video-thumbnails@8.1.6(@capacitor/core@7.2.0)':
     dependencies:
       '@capacitor/core': 7.2.0
 

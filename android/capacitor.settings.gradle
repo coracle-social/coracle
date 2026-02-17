@@ -11,5 +11,8 @@ project(':capacitor-app').projectDir = new File('../node_modules/.pnpm/@capacito
 include ':capacitor-filesystem'
 project(':capacitor-filesystem').projectDir = new File('../node_modules/.pnpm/@capacitor+filesystem@7.0.1_@capacitor+core@7.2.0/node_modules/@capacitor/filesystem/android')
 
+include ':capgo-capacitor-video-thumbnails'
+project(':capgo-capacitor-video-thumbnails').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-video-thumbnails@8.1.6_@capacitor+core@7.2.0/node_modules/@capgo/capacitor-video-thumbnails/android')
+
 include ':nostr-signer-capacitor-plugin'
 project(':nostr-signer-capacitor-plugin').projectDir = new File('../node_modules/.pnpm/nostr-signer-capacitor-plugin@0.0.4_@capacitor+core@7.2.0/node_modules/nostr-signer-capacitor-plugin/android')
