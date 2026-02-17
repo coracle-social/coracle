@@ -1,7 +1,7 @@
 {
   "name": "coracle",
   "private": true,
-  "version": "0.6.30",
+  "version": "0.6.29",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -29,7 +29,6 @@
     "@capacitor/core": "^7.2.0",
     "@capacitor/filesystem": "^7.0.1",
     "@capacitor/ios": "^7.2.0",
-    "@capgo/capacitor-video-thumbnails": "^8.1.6",
     "@eslint/js": "^9.25.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@getalby/bitcoin-connect": "^3.7.1",

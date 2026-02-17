@@ -3,49 +3,56 @@
 </script>
 
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {Capacitor} from "@capacitor/core"
-  import {CapgoVideoThumbnails} from "@capgo/capacitor-video-thumbnails"
+  export let url
 
-  export let url: string
+  let loaded = false
+  let thumbnail: string | null = null
+  let videoEl: HTMLVideoElement | null = null
 
-  let thumbnail = thumbnailCache.get(url)
-  let loaded = Boolean(thumbnail)
+  $: if (url) {
+    loaded = false
+    thumbnail = thumbnailCache.get(url) ?? null
+  }
 
-  const captureThumbnail = async () => {
-    if (thumbnail) {
+  const captureThumbnail = () => {
+    if (!videoEl || thumbnail) {
       return
     }
 
+    const {videoWidth, videoHeight} = videoEl
+
+    if (!videoWidth || !videoHeight) {
+      return
+    }
+
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+
+    if (!context) {
+      return
+    }
+
+    canvas.width = videoWidth
+    canvas.height = videoHeight
+
     try {
-      const {uri} = await CapgoVideoThumbnails.getThumbnail({
-        sourceUri: url,
-        time: 0,
-        quality: 0.7,
-      })
-
-      const resolvedUri = Capacitor.isNativePlatform() ? Capacitor.convertFileSrc(uri) : uri
-
-      thumbnail = resolvedUri
+      context.drawImage(videoEl, 0, 0, videoWidth, videoHeight)
+      thumbnail = canvas.toDataURL("image/jpeg", 0.7)
       thumbnailCache.set(url, thumbnail)
     } catch (error) {
-      // Ignore thumbnail generation failures.
+      // Ignore cross-origin or rendering failures.
     }
   }
 
   const onLoad = () => {
     loaded = true
+    captureThumbnail()
   }
-
-  onMount(() => {
-    if (url && !thumbnail) {
-      captureThumbnail()
-    }
-  })
 </script>
 
 <video
   controls
+  bind:this={videoEl}
   src={url}
   on:loadeddata={onLoad}
   on:click|stopPropagation
