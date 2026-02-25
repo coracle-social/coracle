@@ -35,13 +35,13 @@
     if (mutesDirty) {
       setMutes({
         privateTags: [
-          ...$userMuteList.privateTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...($userMuteList?.privateTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
           ...privatelyMutedPubkeys.map(tagger("p")),
           ...privatelyMutedTopics.map(tagger("t")),
           ...privatelyMutedWords.map(tagger("word")),
         ],
         publicTags: [
-          ...$userMuteList.publicTags.filter(t => !["p", "t", "word"].includes(t[0])),
+          ...($userMuteList?.publicTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
           ...publiclyMutedPubkeys.map(tagger("p")),
           ...publiclyMutedTopics.map(tagger("t")),
           ...publiclyMutedWords.map(tagger("word")),
@@ -53,13 +53,13 @@
   }
 
   let mutesDirty = false
-  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMuteList.publicTags))
-  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMuteList.privateTags))
-  let publiclyMutedTopics = uniq(getTagValues("t", $userMuteList.publicTags))
-  let privatelyMutedTopics = uniq(getTagValues("t", $userMuteList.privateTags))
-  let publiclyMutedWords = uniq(getTagValues("word", $userMuteList.publicTags))
+  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMuteList?.publicTags || []))
+  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMuteList?.privateTags || []))
+  let publiclyMutedTopics = uniq(getTagValues("t", $userMuteList?.publicTags || []))
+  let privatelyMutedTopics = uniq(getTagValues("t", $userMuteList?.privateTags || []))
+  let publiclyMutedWords = uniq(getTagValues("word", $userMuteList?.publicTags || []))
   let privatelyMutedWords = uniq([
-    ...getTagValues("word", $userMuteList.privateTags),
+    ...getTagValues("word", $userMuteList?.privateTags || []),
     ...$userSettings.muted_words,
   ])
 
