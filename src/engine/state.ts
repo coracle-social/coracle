@@ -191,7 +191,8 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 // Decrypt stuff as it comes in
 
 const decrypter = new TaskQueue<TrustedEvent>({
-  batchSize: 10,
+  batchSize: 5,
+  batchDelay: 50,
   processItem: ensurePlaintext,
 })
 
