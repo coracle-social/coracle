@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.31
+
+* Upgrade capacitorjs
+* Upgrade nip 55 signer library
+* Fix crash in UserContent when mute list is empty
+
 # 0.6.30
 
 * Add video thumbnails
