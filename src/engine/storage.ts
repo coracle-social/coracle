@@ -41,7 +41,7 @@ export const getAll = async (name: string) => {
 
   if (!db) return []
 
-  const tx = db.transaction(name, "readwrite")
+  const tx = db.transaction(name, "readonly")
   const store = tx.objectStore(name)
   const result = await store.getAll()
 

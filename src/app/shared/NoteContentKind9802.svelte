@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
-  import {fromPairs} from "@welshman/lib"
+  import {fromPairs, tryCatch} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {Address, getTag, getTopicTagValues} from "@welshman/util"
   import {parseLink} from "@welshman/content"
@@ -44,7 +44,7 @@
     {@const id = eTag[1]}
     {@const relays = eTag.slice(2, 3)}
     {@const author = eTag[3]}
-    {@const nevent = nip19.neventEncode({id, relays, author})}
+    {@const nevent = tryCatch(() => nip19.neventEncode({id, relays, author}))}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-highlighter fa-xs mt-1" />
       <Link
