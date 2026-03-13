@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {without, dateToSeconds, uniq, now} from "@welshman/lib"
-  import {NOTE, COMMENT, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
+  import {NOTE, COMMENT, own, hash, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
   import {Router, addMinimalFallbacks} from "@welshman/router"
   import {
     session,
@@ -11,7 +11,6 @@
     publishThunk,
   } from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {own, hash} from "@welshman/signer"
   import {writable} from "svelte/store"
   import {makePow} from "src/util/pow"
   import type {ProofOfWork} from "src/util/pow"

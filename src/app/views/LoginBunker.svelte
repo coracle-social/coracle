@@ -1,7 +1,8 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {onMount, onDestroy} from "svelte"
-  import {Nip46Broker, makeSecret} from "@welshman/signer"
+  import {makeSecret} from "@welshman/util"
+  import {Nip46Broker} from "@welshman/signer"
   import {nip46Perms, loginWithNip46} from "@welshman/app"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"

@@ -10,7 +10,7 @@
     getRelaysFromList,
   } from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {session, userRelaySelections, thunkIsComplete} from "@welshman/app"
+  import {session, userRelayList, thunkIsComplete} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -78,7 +78,7 @@
     }
 
     // Make sure our profile gets to the right relays
-    broadcastUserData(getRelaysFromList($userRelaySelections, RelayMode.Write))
+    broadcastUserData(getRelaysFromList($userRelayList, RelayMode.Write))
 
     // Start our notifications listener
     listenForNotifications()

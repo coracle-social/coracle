@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {last, dateToSeconds, now} from "@welshman/lib"
-  import {own, hash} from "@welshman/signer"
+  import {own, hash} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {Router, addMinimalFallbacks} from "@welshman/router"
   import {

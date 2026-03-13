@@ -15,8 +15,7 @@
   interface AppInfo {
     name: string
     packageName: string
-    iconData: string
-    iconUrl: string // the url to the App's icon
+    iconUrl?: string
   }
 
   const signUp = () => router.at("signup").replaceModal()
@@ -31,7 +30,9 @@
     boot()
   }
 
+  console.log("=========== hi")
   const useSigner = async (app: AppInfo) => {
+    console.log("=======", JSON.stringify(app))
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
 
@@ -56,8 +57,8 @@
       <Heading>Welcome!</Heading>
       <p>
         {appName} is built using the
-        <Link class="underline" external href="https://nostr.com/">nostr protocol</Link>, which allows
-        you to own your social identity.
+        <Link class="underline" external href="https://nostr.com/">nostr protocol</Link>, which
+        allows you to own your social identity.
       </p>
     </div>
     <div class="relative flex flex-col gap-4">

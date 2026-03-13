@@ -11,7 +11,7 @@
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
   import RelayCardActions from "src/app/shared/RelayCardActions.svelte"
-  import {setInboxPolicy, setOutboxPolicy} from "src/engine"
+  import {setMessagingPolicy, setOutboxPolicy} from "src/engine"
   import {slide} from "svelte/transition"
   import Modal from "src/partials/Modal.svelte"
 
@@ -29,12 +29,12 @@
   const stats = deriveRelayStats(url)
   const readRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Read)
   const writeRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Write)
-  const inboxRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Inbox)
+  const messagingRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Messaging)
 
   const policySetter = (mode: string) => () => {
     const read = $readRelayUrls.includes(url)
     const write = $writeRelayUrls.includes(url)
-    const inbox = $inboxRelayUrls.includes(url)
+    const messaging = $messagingRelayUrls.includes(url)
 
     if (mode === "read") {
       setOutboxPolicy(url, !read, write)
@@ -44,8 +44,8 @@
       setOutboxPolicy(url, read, !write)
     }
 
-    if (mode === "inbox") {
-      setInboxPolicy(url, !inbox)
+    if (mode === "messaging") {
+      setMessagingPolicy(url, !messaging)
     }
   }
 
@@ -169,15 +169,15 @@
             <Chip
               pad
               class={cx("cursor-pointer transition-opacity", {
-                "opacity-50": !$inboxRelayUrls.includes(url),
+                "opacity-50": !$messagingRelayUrls.includes(url),
               })}
-              on:click={policySetter("inbox")}>
-              <i class="fa fa-inbox text-neutral-300" /> Inbox
+              on:click={policySetter("messaging")}>
+              <i class="fa fa-inbox text-neutral-300" /> Messaging
             </Chip>
           </div>
           <div slot="tooltip">
-            Encrypted messages will {$inboxRelayUrls.includes(url) ? "" : "not"} be delivered to this
-            relay.
+            Encrypted messages will {$messagingRelayUrls.includes(url) ? "" : "not"} be delivered to
+            this relay.
           </div>
         </Popover>
       {/if}

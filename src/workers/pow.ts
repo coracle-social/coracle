@@ -1,5 +1,5 @@
 import {createSHA256} from "hash-wasm"
-import {bytesToHex} from "@noble/curves/abstract/utils"
+import {bytesToHex} from "@welshman/lib"
 
 self.onmessage = async function (ev: MessageEvent) {
   const {event, difficulty, start = 0, step = 1} = ev.data

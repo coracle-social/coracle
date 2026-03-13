@@ -2,14 +2,13 @@ import {nwc} from "@getalby/sdk"
 import {
   follow as baseFollow,
   unfollow as baseUnfollow,
-  inboxRelaySelectionsByPubkey,
+  userMessagingRelayList,
   pubkey,
   repository,
   session,
   signer,
   tagPubkey,
-  userInboxRelaySelections,
-  userRelaySelections,
+  userRelayList,
   publishThunk,
   sendWrapped,
 } from "@welshman/app"
@@ -22,7 +21,7 @@ import {
   DELETE,
   FEEDS,
   FOLLOWS,
-  INBOX_RELAYS,
+  MESSAGING_RELAYS,
   PROFILE,
   RELAYS,
   DIRECT_MESSAGE,
@@ -156,7 +155,7 @@ export const requestRelayAccess = async (url: string, claim: string) =>
 
 export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
   if (signer.get()) {
-    const list = get(userRelaySelections) || makeList({kind: RELAYS})
+    const list = get(userRelayList) || makeList({kind: RELAYS})
 
     publishThunk({
       event: makeEvent(list.kind, {
@@ -170,8 +169,8 @@ export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string
   }
 }
 
-export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
-  const list = get(userInboxRelaySelections) || makeList({kind: INBOX_RELAYS})
+export const setMessagingPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
+  const list = get(userMessagingRelayList) || makeList({kind: MESSAGING_RELAYS})
 
   publishThunk({
     event: makeEvent(list.kind, {
@@ -182,12 +181,12 @@ export const setInboxPolicies = async (modifyTags: (tags: string[][]) => string[
   })
 }
 
-export const setInboxPolicy = (url: string, enabled: boolean) => {
-  const urls = getRelaysFromList(inboxRelaySelectionsByPubkey.get().get(pubkey.get()))
+export const setMessagingPolicy = (url: string, enabled: boolean) => {
+  const urls = getRelaysFromList(get(userMessagingRelayList))
 
-  // Only update inbox policies if they already exist or we're adding them
+  // Only update messaging policies if they already exist or we're adding them
   if (enabled || urls.includes(url)) {
-    setInboxPolicies($tags => {
+    setMessagingPolicies($tags => {
       $tags = $tags.filter(t => normalizeRelayUrl(t[1]) !== url)
 
       if (enabled) {
@@ -215,7 +214,7 @@ export const setOutboxPolicy = (url: string, read: boolean, write: boolean) =>
   })
 
 export const leaveRelay = async (url: string) => {
-  await Promise.all([setInboxPolicy(url, false), setOutboxPolicy(url, false, false)])
+  await Promise.all([setMessagingPolicy(url, false), setOutboxPolicy(url, false, false)])
 
   // Make sure the new relay selections get to the old relay
   if (pubkey.get()) {
@@ -284,7 +283,7 @@ export const broadcastUserRelays = async (relays: string[]) => {
 
 export const broadcastUserData = async (relays: string[]) => {
   const authors = [pubkey.get()]
-  const kinds = [RELAYS, INBOX_RELAYS, FOLLOWS, PROFILE]
+  const kinds = [RELAYS, MESSAGING_RELAYS, FOLLOWS, PROFILE]
   const events = repository.query([{kinds, authors}])
 
   for (const event of events) {

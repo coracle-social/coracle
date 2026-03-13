@@ -1,6 +1,6 @@
 <script lang="ts">
   import cx from "classnames"
-  import {deriveIsDeletedByAddress} from "@welshman/store"
+  import {deriveIsDeleted} from "@welshman/store"
   import {fromPairs} from "@welshman/lib"
   import {getTagValue} from "@welshman/util"
   import {repository} from "@welshman/app"
@@ -17,7 +17,7 @@
 
   const {title, summary, location, status} = fromPairs(note.tags)
   const [price, code = "SAT"] = getTagValue("price", note.tags)?.slice(1) || []
-  const deleted = deriveIsDeletedByAddress(repository, note)
+  const deleted = deriveIsDeleted(repository, note)
 </script>
 
 <FlexColumn>

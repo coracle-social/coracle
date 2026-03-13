@@ -1,7 +1,7 @@
 <script lang="ts">
   import {displayUrl, first} from "@welshman/lib"
   import {getTagValue, getListTags} from "@welshman/util"
-  import {userBlossomServers} from "@welshman/app"
+  import {userBlossomServerList} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -17,7 +17,7 @@
   export let opts: CompressorOpts = {}
 
   const url = ensureProto(
-    getTagValue("server", getListTags($userBlossomServers)) || first(env.BLOSSOM_URLS),
+    getTagValue("server", getListTags($userBlossomServerList)) || first(env.BLOSSOM_URLS),
   )
 
   let input, loading

@@ -2,7 +2,7 @@
   import {identity, equals} from "@welshman/lib"
   import {BLOSSOM_SERVERS, tagger, getListTags, getTagValues, makeEvent} from "@welshman/util"
   import {Router} from "@welshman/router"
-  import {userBlossomServers, publishThunk} from "@welshman/app"
+  import {userBlossomServerList, publishThunk} from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {appName} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -19,7 +19,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {env, userSettings, publishSettings} from "src/engine"
 
-  const initialBlossomServers = getTagValues("server", getListTags($userBlossomServers))
+  const initialBlossomServers = getTagValues("server", getListTags($userBlossomServerList))
 
   const submit = () => {
     if (!equals($userSettings, values)) {

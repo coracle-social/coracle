@@ -2,9 +2,7 @@
   import cx from "classnames"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
-  import {derived} from "svelte/store"
-  import {sum, pluck, spec, nthEq, remove, last, sortBy, uniqBy, prop} from "@welshman/lib"
-  import {LOCAL_RELAY_URL} from "@welshman/net"
+  import {sum, pluck, spec, nthEq, last, sortBy, uniqBy, prop} from "@welshman/lib"
   import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     deriveZapper,
@@ -56,11 +54,11 @@
     deleteEvent,
     getSetting,
     getClientTags,
-    trackerStore,
     userMutedEvents,
     sortEventsDesc,
     isEventMuted,
     userPins,
+    deriveRelaysForEvent,
   } from "src/engine"
 
   export let event: TrustedEvent
@@ -81,9 +79,7 @@
   const repliesCount = tweened(0, {interpolate})
   const kindHandlers = deriveHandlersForKind(event.kind)
   const noteActions = getSetting("note_actions")
-  const seenOn = derived(trackerStore, $t =>
-    remove(LOCAL_RELAY_URL, Array.from($t.getRelays(event.id))),
-  )
+  const seenOn = deriveRelaysForEvent(event)
   const setView = v => {
     view = v
   }
@@ -147,7 +143,7 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const context = deriveEvents(repository, {filters: getReplyFilters([event])})
+  const context = deriveEvents({repository, filters: getReplyFilters([event])})
 
   let view
   let actions = []
@@ -334,12 +330,12 @@
         <span class="hidden sm:inline">Encrypted</span>
       </div>
     {/if}
-    {#if $seenOn?.length > 0}
+    {#if $seenOn.size > 0}
       <div
         class="staatliches hidden cursor-pointer rounded bg-neutral-800 px-2 text-neutral-100 transition-colors hover:bg-neutral-700 dark:bg-neutral-600 dark:hover:bg-neutral-500 sm:block"
         on:click={() => setView("info")}>
-        <span class="text-accent">{$seenOn.length}</span>
-        {pluralize($seenOn.length, "relay")}
+        <span class="text-accent">{$seenOn.size}</span>
+        {pluralize($seenOn.size, "relay")}
       </div>
     {/if}
     <OverflowMenu {actions} />

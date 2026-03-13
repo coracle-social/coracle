@@ -2,7 +2,6 @@ import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
 import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
-  uniq,
   without,
   partition,
   assoc,
@@ -34,8 +33,8 @@ import {
   pubkey,
   repository,
   loadProfile,
-  loadFollows,
-  loadMutes,
+  loadFollowList,
+  loadMuteList,
   pull,
   shouldUnwrap,
   hasNegentropy,
@@ -109,7 +108,7 @@ export const deriveEvent = (idOrAddress: string, {relays = []}: DeriveEventOptio
   const filters = getIdFilters([idOrAddress])
 
   return derived(
-    deriveEvents(repository, {filters, includeDeleted: true}),
+    deriveEvents({repository, filters, includeDeleted: true}),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
         const scenarios = [router.FromRelays(relays)]
@@ -178,8 +177,8 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 
     for (const pubkey of pubkeyChunk) {
       loadProfile(pubkey)
-      loadFollows(pubkey)
-      loadMutes(pubkey)
+      loadFollowList(pubkey)
+      loadMuteList(pubkey)
     }
   }
 }
@@ -238,32 +237,49 @@ export const loadFeedsAndLists = () =>
 
 export const loadMessages = () => {
   const router = Router.get()
-  const scenario = router.merge([router.ForUser(), router.FromUser(), router.UserInbox()])
 
   if (shouldUnwrap.get()) {
     pullConservatively({
-      relays: scenario.getUrls(),
-      filters: [
-        {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]},
-        {kinds: [DEPRECATED_DIRECT_MESSAGE, WRAP], "#p": [pubkey.get()]},
-      ],
+      relays: router.ForUser().getUrls(),
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [pubkey.get()]}],
+    })
+
+    pullConservatively({
+      relays: router.FromUser().getUrls(),
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]}],
+    })
+
+    pullConservatively({
+      relays: router.MessagesForUser().getUrls(),
+      filters: [{kinds: [WRAP], "#p": [pubkey.get()]}],
     })
   }
 }
 
-export const listenForMessages = (pubkeys: string[]) => {
-  const allPubkeys = uniq(pubkeys.concat(pubkey.get()))
+export const listenForMessages = () => {
   const controller = new AbortController()
+  const router = Router.get()
 
   if (shouldUnwrap.get()) {
     myRequest({
       skipCache: true,
       signal: controller.signal,
-      relays: Router.get().UserInbox().getUrls(),
-      filters: [
-        {kinds: [DEPRECATED_DIRECT_MESSAGE], authors: allPubkeys, "#p": allPubkeys},
-        {kinds: [WRAP], "#p": [pubkey.get()]},
-      ],
+      relays: router.ForUser().getUrls(),
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [pubkey.get()]}],
+    })
+
+    myRequest({
+      skipCache: true,
+      signal: controller.signal,
+      relays: router.FromUser().getUrls(),
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]}],
+    })
+
+    myRequest({
+      skipCache: true,
+      signal: controller.signal,
+      relays: router.MessagesForUser().getUrls(),
+      filters: [{kinds: [WRAP], "#p": [pubkey.get()]}],
     })
   }
 

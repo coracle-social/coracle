@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pubkey, deriveRelaySelections, deriveInboxRelaySelections} from "@welshman/app"
+  import {userRelayList, userMessagingRelayList} from "@welshman/app"
   import {getRelaysFromList} from "@welshman/util"
   import {leaveRelay, joinRelay} from "src/engine"
   import {router} from "../util"
@@ -10,17 +10,13 @@
   export let details = false
   export let claim = null
 
-  const userRelaySelections = deriveRelaySelections($pubkey)
-
-  const userInboxRelaySelections = deriveInboxRelaySelections($pubkey)
-
   const join = () => joinRelay(url, claim)
 
   const leave = () => leaveRelay(url)
 
   $: userRelayUrls = [
-    ...getRelaysFromList($userRelaySelections),
-    ...getRelaysFromList($userInboxRelaySelections),
+    ...getRelaysFromList($userRelayList),
+    ...getRelaysFromList($userMessagingRelayList),
   ]
 </script>
 

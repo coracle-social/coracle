@@ -27,7 +27,7 @@
 
   const kinds = [PROFILE, RELAYS, FOLLOWS]
   const filters = [{kinds, authors: [$session.pubkey]}]
-  const events = deriveEvents(repository, {filters})
+  const events = deriveEvents({repository, filters})
 
   const skip = () => router.at("notes").push()
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
   import {
-    userFollows,
+    userFollowList,
     deriveUserWotScore,
     deriveHandleForPubkey,
     displayHandle,
@@ -17,7 +17,7 @@
   const handle = deriveHandleForPubkey(pubkey)
   const score = deriveUserWotScore(pubkey)
 
-  $: following = getPubkeyTagValues(getListTags($userFollows)).includes(pubkey)
+  $: following = getPubkeyTagValues(getListTags($userFollowList)).includes(pubkey)
 </script>
 
 <div class="flex max-w-full gap-3">

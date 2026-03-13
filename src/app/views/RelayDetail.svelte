@@ -16,7 +16,7 @@
   const relay = deriveRelay(url)
   const tabs = ["notes", "reviews"]
   const filter = {kinds: [1986], "#l": ["review/relay"], "#r": [url]}
-  const reviews = deriveEvents(repository, {filters: [filter]})
+  const reviews = deriveEvents({repository, filters: [filter]})
 
   const notesFeed = makeFeed({
     definition: makeRelayFeed(url),

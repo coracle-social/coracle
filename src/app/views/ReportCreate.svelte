@@ -3,7 +3,7 @@
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
   import {Router} from "@welshman/router"
-  import {repository, publishThunk, loadRelaySelections} from "@welshman/app"
+  import {repository, publishThunk, loadRelayList} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -36,7 +36,7 @@
       relays: Router.get()
         .merge([
           Router.get().FromRelays(["wss://relay.nos.social"]),
-          Router.get().PubkeyInbox(tagr),
+          Router.get().MessagesForPubkey(tagr),
         ])
         .getUrls(),
     })
@@ -47,7 +47,7 @@
 
   let message = ""
 
-  loadRelaySelections(tagr)
+  loadRelayList(tagr)
 </script>
 
 <form on:submit|preventDefault={submit}>

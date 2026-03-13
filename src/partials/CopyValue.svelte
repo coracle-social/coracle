@@ -9,7 +9,7 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import {encrypt} from "nostr-tools/nip49"
-  import {hexToBytes} from "@noble/hashes/utils"
+  import {hexToBytes} from "@welshman/lib"
   import Button from "src/partials/Button.svelte"
 
   export let value
