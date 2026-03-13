@@ -1,10 +1,11 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {identity, equals} from "@welshman/lib"
   import {BLOSSOM_SERVERS, tagger, getListTags, getTagValues, makeEvent} from "@welshman/util"
   import {Router} from "@welshman/router"
   import {userBlossomServerList, publishThunk} from "@welshman/app"
   import {ensureProto} from "src/util/misc"
-  import {appName} from "src/partials/state"
+  import {appName, locale} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Footer from "src/partials/Footer.svelte"
@@ -35,7 +36,7 @@
       })
     }
 
-    showInfo("Your settings have been saved!")
+    showInfo($_("settings.saved"))
   }
 
   const searchBlossomProviders = fuzzy(env.BLOSSOM_URLS, {keys: ["url"]})
@@ -44,68 +45,77 @@
 
   let blossomServers = Array.from(initialBlossomServers)
 
-  document.title = "Settings"
+  document.title = $_("settings.title")
 </script>
 
 <form on:submit|preventDefault={submit}>
   <div class="mb-4 flex flex-col items-center justify-center">
-    <Heading>App Settings</Heading>
-    <p>Make {appName} work the way you want it to.</p>
+    <Heading>{$_("settings.appSettings")}</Heading>
+    <p>{$_("settings.makeAppWork", {values: {appName}})}</p>
   </div>
   <div class="flex w-full flex-col gap-8">
-    <Field label="Default zap amount">
+    <Field label={$_("settings.language")}>
+      <select
+        class="bg-input rounded border border-solid border-tinted-700 px-4 py-2"
+        bind:value={$locale}>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+      </select>
+      <p slot="info">{$_("settings.languageInfo")}</p>
+    </Field>
+    <Field label={$_("settings.defaultZapAmount")}>
       <Input bind:value={values.default_zap}>
         <i slot="before" class="fa fa-bolt" />
       </Input>
-      <p slot="info">The default amount of sats to use when sending a lightning tip.</p>
+      <p slot="info">{$_("settings.defaultZapInfo")}</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Platform zap split</strong>
+        <strong>{$_("settings.platformZapSplit")}</strong>
         <div>{Math.round(values.platform_zap_split * 100)}%</div>
       </div>
       <Input type="range" step="0.01" bind:value={values.platform_zap_split} min={0} max={0.5} />
       <p slot="info">
-        How much you'd like to tip the developer of {appName} whenever you send a zap.
+        {$_("settings.platformZapInfo", {values: {appName}})}
       </p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Send Delay</strong>
+        <strong>{$_("settings.sendDelay")}</strong>
         <div>{values.send_delay / 1000} {pluralize(values.send_delay / 1000, "second")}</div>
       </div>
       <Input type="range" step="1000" bind:value={values.send_delay} min={0} max={15_000} />
-      <p slot="info">A delay period allowing you to cancel a reply or note creation, in seconds.</p>
+      <p slot="info">{$_("settings.sendDelayInfo")}</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Proof Of Work</strong>
+        <strong>{$_("settings.proofOfWork")}</strong>
         <div>
-          difficulty {values.pow_difficulty} (<WorkEstimate difficulty={values.pow_difficulty} />)
+          {$_("settings.difficulty", {values: {n: values.pow_difficulty}})} (<WorkEstimate
+            difficulty={values.pow_difficulty} />)
         </div>
       </div>
       <Input type="range" step="1" bind:value={values.pow_difficulty} min={0} max={32} />
-      <p slot="info">Add a proof-of-work stamp to your notes to increase your reach.</p>
+      <p slot="info">{$_("settings.proofOfWorkInfo")}</p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Max relays per request</strong>
-        <div>{values.relay_limit} relays</div>
+        <strong>{$_("settings.maxRelays")}</strong>
+        <div>{values.relay_limit} {$_("common.relays")}</div>
       </div>
       <Input type="range" bind:value={values.relay_limit} min={1} max={10} parse={parseInt} />
       <p slot="info">
-        This controls how many relays to max out at when loading feeds and event context. More is
-        faster, but will require more bandwidth and processing power.
+        {$_("settings.maxRelaysInfo")}
       </p>
     </Field>
-    <FieldInline label="Authenticate with relays">
+    <FieldInline label={$_("settings.authenticateRelays")}>
       <Toggle bind:value={values.auto_authenticate2} />
       <p slot="info">
-        Allows {appName} to authenticate with relays that have access controls automatically.
+        {$_("settings.authenticateRelaysInfo", {values: {appName}})}
       </p>
     </FieldInline>
-    <Field label="Blossom Provider URLs">
-      <p slot="info">Enter one or more urls for blossom compatible nostr media servers.</p>
+    <Field label={$_("settings.blossomUrls")}>
+      <p slot="info">{$_("settings.blossomInfo")}</p>
       <SearchSelect
         multiple
         search={searchBlossomProviders}
@@ -116,48 +126,44 @@
         </div>
       </SearchSelect>
     </Field>
-    <Field label="Dufflepud URL">
+    <Field label={$_("settings.dufflepudUrl")}>
       <Input bind:value={values.dufflepud_url}>
         <i slot="before" class="fa-solid fa-server" />
       </Input>
       <p slot="info">
-        Enter a custom url for {appName}'s helper application. Dufflepud is used for hosting images
-        and loading link previews. You can find the source code <Link
+        {$_("settings.dufflepudInfo", {values: {appName}})} You can find the source code <Link
           class="underline"
           external
-          href="https://github.com/coracle-social/dufflepud">here</Link
+          href="https://github.com/coracle-social/dufflepud">{$_("settings.sourceCode")}</Link
         >.
       </p>
     </Field>
-    <Field label="Imgproxy URL">
+    <Field label={$_("settings.imgproxyUrl")}>
       <Input bind:value={values.imgproxy_url}>
         <i slot="before" class="fa-solid fa-image" />
       </Input>
       <p slot="info">
-        Enter a custom imgproxy url for resizing images on the fly to reduce bandwidth and improve
-        privacy. You can set up your own proxy <Link
+        {$_("settings.imgproxyInfo")} You can set up your own proxy <Link
           class="underline"
           external
-          href="https://imgproxy.net/">here</Link
+          href="https://imgproxy.net/">{$_("settings.imgproxySetup")}</Link
         >.
       </p>
     </Field>
-    <FieldInline label="Report errors and analytics">
+    <FieldInline label={$_("settings.reportAnalytics")}>
       <Toggle bind:value={values.report_analytics} />
       <p slot="info">
-        Keep this enabled if you would like developers to be able to know what features are used,
-        and to diagnose and fix bugs.
+        {$_("settings.reportAnalyticsInfo")}
       </p>
     </FieldInline>
-    <FieldInline label="Enable client fingerprinting">
+    <FieldInline label={$_("settings.clientFingerprinting")}>
       <Toggle bind:value={values.enable_client_tag} />
       <p slot="info">
-        If this is turned on, public notes you create will have a "client" tag added. This helps
-        with troubleshooting, and allows other people to find out about {appName}.
+        {$_("settings.clientFingerprintingInfo", {values: {appName}})}
       </p>
     </FieldInline>
   </div>
   <Footer>
-    <Button class="btn flex-grow" type="submit">Save</Button>
+    <Button class="btn flex-grow" type="submit">{$_("common.save")}</Button>
   </Footer>
 </form>

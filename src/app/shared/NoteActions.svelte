@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import cx from "classnames"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
@@ -123,7 +124,7 @@
       relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     })
 
-    showInfo("Note has been re-published!")
+    showInfo($_("actions.republished"))
   }
 
   const openWithHandler = handler => {
@@ -182,30 +183,34 @@
     actions = []
 
     if ($signer) {
-      actions.push({label: "Quote", icon: "quote-left", onClick: quote})
+      actions.push({label: $_("actions.quote"), icon: "quote-left", onClick: quote})
 
-      actions.push({label: "Tag", icon: "tag", onClick: createLabel})
+      actions.push({label: $_("actions.tag"), icon: "tag", onClick: createLabel})
 
       if (muted) {
-        actions.push({label: "Unmute", icon: "microphone", onClick: () => unmute(event.id)})
+        actions.push({
+          label: $_("actions.unmute"),
+          icon: "microphone",
+          onClick: () => unmute(event.id),
+        })
       } else {
         actions.push({
-          label: "Mute",
+          label: $_("actions.mute"),
           icon: "microphone-slash",
           onClick: () => mutePrivately(["e", event.id]),
         })
       }
 
-      actions.push({label: "Report", icon: "triangle-exclamation", onClick: report})
+      actions.push({label: $_("actions.report"), icon: "triangle-exclamation", onClick: report})
     }
 
     if (isSignedEvent(event)) {
-      actions.push({label: "Broadcast", icon: "rss", onClick: broadcast})
+      actions.push({label: $_("actions.broadcast"), icon: "rss", onClick: broadcast})
     }
 
     if (event.pubkey === $pubkey) {
       actions.push({
-        label: "Delete",
+        label: $_("actions.delete"),
         icon: "trash",
         onClick: deleteNote,
       })
@@ -213,7 +218,7 @@
 
     if (!pinned) {
       actions.push({
-        label: "Pin",
+        label: $_("actions.pin"),
         icon: "thumbtack",
         onClick: () => {
           pin(["e", event.id])
@@ -221,7 +226,7 @@
       })
     } else {
       actions.push({
-        label: "Unpin",
+        label: $_("actions.unpin"),
         icon: "thumbtack-slash",
         onClick: () => {
           unpin(event.id)
@@ -230,7 +235,7 @@
     }
 
     actions.push({
-      label: "Details",
+      label: $_("actions.details"),
       icon: "info",
       onClick: () => setView("info"),
     })
@@ -292,7 +297,7 @@
         </button>
         <div slot="tooltip" class="max-h-[300px] min-w-[180px] overflow-auto">
           <Menu>
-            <MenuItem inert class="bg-neutral-900">Open with:</MenuItem>
+            <MenuItem inert class="bg-neutral-900">{$_("actions.openWith")}</MenuItem>
             {#each handlers as handler}
               <MenuItem
                 class="flex h-12 items-center justify-between gap-2"
@@ -320,14 +325,14 @@
           <i class="fa fa-hammer text-accent" />
           <span>{pow}</span>
         </div>
-        <div slot="tooltip" class="px-1">This event cost {pow} bits of work</div>
+        <div slot="tooltip" class="px-1">{$_("actions.powCost", {values: {pow}})}</div>
       </Popover>
     {/if}
     {#if !event.sig}
       <div
         class="staatliches flex h-6 items-center gap-1 rounded bg-neutral-800 px-2 text-neutral-100 transition-colors dark:bg-neutral-600 dark:hover:bg-neutral-500">
         <i class="fa fa-lock text-xs sm:text-accent" />
-        <span class="hidden sm:inline">Encrypted</span>
+        <span class="hidden sm:inline">{$_("actions.encrypted")}</span>
       </div>
     {/if}
     {#if $seenOn.size > 0}

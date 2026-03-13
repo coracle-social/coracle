@@ -1,3 +1,4 @@
+import "src/util/i18n"
 import "src/app.css"
 import "@capacitor-community/safe-area"
 import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"

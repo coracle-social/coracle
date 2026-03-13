@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {sleep, spec} from "@welshman/lib"
   import {
@@ -41,7 +42,7 @@
       customRelay = ""
       closeModal()
     } else {
-      showWarning("Please enter a valid relay url")
+      showWarning($_("login.invalidRelayUrl"))
     }
   }
 
@@ -99,31 +100,32 @@
 
 <Content size="lg">
   {#if showFound}
-    <p class="text-center text-2xl">Success! Logging you in...</p>
+    <p class="text-center text-2xl">{$_("login.connectSuccess")}</p>
   {:else if failed && !found}
-    <p class="text-2xl">We're having a hard time finding your profile.</p>
+    <p class="text-2xl">{$_("login.connectFailed")}</p>
   {:else}
-    <p class="text-2xl">We're searching for your profile on the network.</p>
+    <p class="text-2xl">{$_("login.connectSearching")}</p>
     <p>
-      If you'd like to select your relays manually instead, click <Button
+      {$_("login.selectRelaysHint")}
+      <Button
         class="text-inherit cursor-pointer bg-transparent p-0 underline"
-        on:click={() => openModal("custom_relay")}>here</Button
+        on:click={() => openModal("custom_relay")}>{$_("common.here")}</Button
       >.
     </p>
   {/if}
   {#if !showFound}
     <p>
-      You can also <Button
-        class="text-inherit cursor-pointer bg-transparent p-0 underline"
-        on:click={skip}>skip this step</Button
-      >, but be aware that your profile and relays may not get properly synchronized.
+      {$_("login.youCanAlso")}
+      <Button class="text-inherit cursor-pointer bg-transparent p-0 underline" on:click={skip}
+        >{$_("login.skipThisStep")}</Button
+      >{$_("login.skipWarning")}
     </p>
   {/if}
   {#if failed && !found}
     <div class="flex justify-between gap-2">
-      <Button class="btn" on:click={tryDefaultRelays}>Try again</Button>
+      <Button class="btn" on:click={tryDefaultRelays}>{$_("login.tryAgain")}</Button>
       <Button class="btn btn-accent" on:click={() => openModal("custom_relay")}
-        >Select relays manually</Button>
+        >{$_("login.selectRelaysManually")}</Button>
     </div>
   {/if}
   <Spinner />
@@ -132,14 +134,15 @@
 {#if !showFound && modal === "custom_relay"}
   <Modal>
     <Content size="lg">
-      <Subheading>Use a custom relay</Subheading>
-      <p>If you know which relay your profile is on, you can enter it below.</p>
-      <Field label="Relay">
+      <Subheading>{$_("login.customRelay")}</Subheading>
+      <p>{$_("login.customRelayDescription")}</p>
+      <Field label={$_("login.relay")}>
         <Input bind:value={customRelay} />
       </Field>
       <div class="flex justify-between gap-2">
-        <Button class="btn" on:click={closeModal}>Cancel</Button>
-        <Button class="btn btn-accent" on:click={confirmCustomRelay}>Search relay</Button>
+        <Button class="btn" on:click={closeModal}>{$_("common.cancel")}</Button>
+        <Button class="btn btn-accent" on:click={confirmCustomRelay}
+          >{$_("login.searchRelay")}</Button>
       </div>
     </Content>
   </Modal>

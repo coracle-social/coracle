@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
@@ -138,9 +139,11 @@
   <FeedControls {feed} {updateFeed}>
     <div slot="controls">
       {#if $shouldHideReplies}
-        <Button class="btn btn-low border-none opacity-50" on:click={toggleReplies}>Replies</Button>
+        <Button class="btn btn-low border-none opacity-50" on:click={toggleReplies}
+          >{$_("feed.replies")}</Button>
       {:else}
-        <Button class="btn btn-accent border-none" on:click={toggleReplies}>Replies</Button>
+        <Button class="btn btn-accent border-none" on:click={toggleReplies}
+          >{$_("feed.replies")}</Button>
       {/if}
     </div>
   </FeedControls>
@@ -162,14 +165,14 @@
       </div>
       {#if i > 20 && hash(event.id) % 100 === 0 && $promptDismissed < ago(WEEK)}
         <Card class="group flex items-center justify-between">
-          <p class="text-xl">Enjoying Coracle?</p>
+          <p class="text-xl">{$_("feed.enjoying")}</p>
           <div class="flex gap-2">
             <Button
               class="hidden text-neutral-400 opacity-0 transition-all group-hover:opacity-100 sm:visible"
               on:click={() => promptDismissed.set(now())}>
-              Dismiss
+              {$_("feed.dismiss")}
             </Button>
-            <Button class="btn btn-accent" on:click={startZap}>Zap the developer</Button>
+            <Button class="btn btn-accent" on:click={startZap}>{$_("feed.zapDeveloper")}</Button>
           </div>
         </Card>
       {/if}
@@ -181,7 +184,7 @@
   {#if exhausted}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
       <img alt="" class="h-20 w-20" src="/images/pumpkin.png" />
-      That's all!
+      {$_("feed.thatsAll")}
     </div>
   {:else}
     <div out:fade|local>

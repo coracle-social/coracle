@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {debounce} from "throttle-debounce"
   import {onMount, onDestroy} from "svelte"
   import {makeSecret} from "@welshman/util"
@@ -45,11 +46,11 @@
       const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(input)
 
       if (!isKeyValid(signerPubkey)) {
-        return showWarning("Sorry, but that's an invalid public key.")
+        return showWarning($_("login.invalidPublicKey"))
       }
 
       if (relays.length === 0) {
-        return showWarning("That connection string doesn't have any relays.")
+        return showWarning($_("login.noRelays"))
       }
 
       const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
@@ -79,7 +80,7 @@
       response = await broker.waitForNostrconnect(url, abortController.signal)
     } catch (errorResponse: any) {
       if (errorResponse?.error) {
-        showWarning(`Received error from signer: ${errorResponse.error}`)
+        showWarning($_("login.signerError", {values: {error: errorResponse.error}}))
       } else if (errorResponse) {
         console.error(errorResponse)
       }
@@ -96,17 +97,17 @@
 </script>
 
 <FlexColumn class="max-w-md text-center">
-  <Heading>Login with Signer</Heading>
+  <Heading>{$_("login.bunkerTitle")}</Heading>
   <p>
-    To log in using a remote signer, scan the QR code below or enter a connection link.
-    <Link class="underline" modal href="/help/remote-signers">What's a signer?</Link>
+    {$_("login.bunkerDescription")}
+    <Link class="underline" modal href="/help/remote-signers">{$_("login.whatsASigner")}</Link>
   </p>
   {#if url}
     <Popover triggerType="mouseenter">
       <div slot="trigger">
         <QRCode code={url} />
       </div>
-      <div slot="tooltip">Click to copy the connection string to your signer app</div>
+      <div slot="tooltip">{$_("login.bunkerTooltip")}</div>
     </Popover>
   {/if}
   <Input bind:value={input} placeholder="bunker://..." disabled={loading}>
@@ -114,7 +115,8 @@
   </Input>
   <div class="flex gap-2">
     <Button class="btn" on:click={back} disabled={loading}
-      ><i class="fa fa-arrow-left" /> Back</Button>
-    <Button class="btn btn-accent flex-grow" {loading} on:click={logIn}>Continue</Button>
+      ><i class="fa fa-arrow-left" /> {$_("common.back")}</Button>
+    <Button class="btn btn-accent flex-grow" {loading} on:click={logIn}
+      >{$_("common.continue")}</Button>
   </div>
 </FlexColumn>

@@ -2,11 +2,24 @@ import Bowser from "bowser"
 import {derived, writable, get} from "svelte/store"
 import {fromPairs} from "@welshman/lib"
 import {synced, localStorageProvider} from "@welshman/store"
+import {locale as svelteLocale} from "svelte-i18n"
 import {parseHex} from "src/util/html"
 
 // Browser
 
 export const browser = Bowser.parse(window.navigator.userAgent)
+
+// Locale
+
+export const locale = synced({
+  key: "ui/locale",
+  defaultValue: "en",
+  storage: localStorageProvider,
+})
+
+locale.subscribe(value => {
+  svelteLocale.set(value)
+})
 
 // Settings
 

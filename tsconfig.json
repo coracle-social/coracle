@@ -8,6 +8,7 @@
     "paths": {
       "src/*": ["src/*"]
     },
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "noImplicitAny": false,
     "strictPropertyInitialization": false,

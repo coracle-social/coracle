@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Button from "src/partials/Button.svelte"
@@ -57,18 +58,19 @@
         </Button>
       {:else}
         <div class="flex justify-center">
-          <Link class="btn btn-accent" modal href="/login">Log In</Link>
+          <Link class="btn btn-accent" modal href="/login">{$_("nav.logIn")}</Link>
         </div>
       {/if}
     </div>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       <MenuMobileItem stopPropagation on:click={openSettings}>
-        <i class="fa fa-cog" /> Settings
+        <i class="fa fa-cog" />
+        {$_("menu.settings")}
       </MenuMobileItem>
       <MenuMobileItem href="/settings/relays" disabled={!$signer} on:click={closeMenu}>
         <i class="fa fa-server" />
         <div class="relative inline-block">
-          Relays
+          {$_("menu.relays")}
           {#if $slowConnections.length > 0}
             <div
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
@@ -78,7 +80,7 @@
       <MenuMobileItem disabled={!$signer} href="/notifications" on:click={closeMenu}>
         <i class="fa fa-bell" />
         <div class="relative inline-block">
-          Notifications
+          {$_("menu.notifications")}
           {#if $hasNewNotifications}
             <div
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
@@ -86,12 +88,13 @@
         </div>
       </MenuMobileItem>
       <MenuMobileItem modal disabled={!$signer} href="/groups" on:click={closeMenu}>
-        <i class="fa fa-circle-nodes" /> Groups
+        <i class="fa fa-circle-nodes" />
+        {$_("menu.groups")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/channels" on:click={closeMenu}>
         <i class="fa fa-message" />
         <div class="relative inline-block">
-          Messages
+          {$_("menu.messages")}
           {#if $hasNewMessages}
             <div
               class="absolute -right-2 top-0 h-2 w-2 rounded border border-solid border-white bg-accent" />
@@ -99,43 +102,51 @@
         </div>
       </MenuMobileItem>
       <MenuMobileItem on:click={openFeeds}>
-        <i class="fa fa-rss" /> Feeds
+        <i class="fa fa-rss" />
+        {$_("menu.feeds")}
       </MenuMobileItem>
     </div>
     <div class="staatliches mt-8 block flex h-8 justify-center gap-2 px-8 text-tinted-400">
-      <Link class="hover:text-tinted-200" href="/about">About</Link> /
-      <Link external class="hover:text-tinted-200" href="/terms.html">Terms</Link> /
-      <Link external class="hover:text-tinted-200" href="/privacy.html">Privacy</Link>
+      <Link class="hover:text-tinted-200" href="/about">{$_("menu.about")}</Link> /
+      <Link external class="hover:text-tinted-200" href="/terms.html">{$_("menu.terms")}</Link> /
+      <Link external class="hover:text-tinted-200" href="/privacy.html">{$_("menu.privacy")}</Link>
     </div>
   </SliderMenu>
 {/if}
 
 {#if subMenu === "settings"}
   <SliderMenu onEscape={closeSubMenu}>
-    <p class="staatliches mb-8 text-center text-3xl">Settings</p>
+    <p class="staatliches mb-8 text-center text-3xl">{$_("menu.settings")}</p>
     <div class="staatliches m-auto grid grid-cols-2 gap-3">
       {#if $installPrompt}
         <MenuMobileItem on:click={installAsPWA} on:click={closeMenu}>
-          <i class="fa fa-rocket" /> Install
+          <i class="fa fa-rocket" />
+          {$_("menu.install")}
         </MenuMobileItem>
       {/if}
       <MenuMobileItem on:click={toggleTheme} on:click={closeMenu}>
-        <i class="fa fa-palette" /> Theme
+        <i class="fa fa-palette" />
+        {$_("menu.theme")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/data" on:click={closeMenu}>
-        <i class="fa fa-database" /> Database
+        <i class="fa fa-database" />
+        {$_("menu.database")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/wallet" on:click={closeMenu}>
-        <i class="fa fa-wallet" /> Wallet
+        <i class="fa fa-wallet" />
+        {$_("menu.wallet")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings/content" on:click={closeMenu}>
-        <i class="fa fa-volume-xmark" /> Content
+        <i class="fa fa-volume-xmark" />
+        {$_("menu.content")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/settings" on:click={closeMenu}>
-        <i class="fa fa-sliders" /> App Settings
+        <i class="fa fa-sliders" />
+        {$_("menu.appSettings")}
       </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/lists" on:click={closeMenu}>
-        <i class="fa fa-list" /> Lists
+        <i class="fa fa-list" />
+        {$_("menu.lists")}
       </MenuMobileItem>
     </div>
   </SliderMenu>
@@ -143,24 +154,29 @@
 
 {#if subMenu === "account"}
   <SliderMenu onEscape={closeSubMenu}>
-    <p class="staatliches mb-8 text-center text-3xl">Account</p>
+    <p class="staatliches mb-8 text-center text-3xl">{$_("menu.account")}</p>
     <div class="staatliches m-auto mb-8 grid grid-cols-2 gap-3">
       <MenuMobileItem href="/settings/keys" on:click={closeMenu}>
-        <i class="fa fa-key" /> Keys
+        <i class="fa fa-key" />
+        {$_("menu.keys")}
       </MenuMobileItem>
       <MenuMobileItem href={router.at("people").of($pubkey).toString()} on:click={closeMenu}>
-        <i class="fa fa-user-circle" /> Profile
+        <i class="fa fa-user-circle" />
+        {$_("menu.profile")}
       </MenuMobileItem>
       <MenuMobileItem
         href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}
         on:click={closeMenu}>
-        <i class="fa fa-paper-plane" /> Create Invite
+        <i class="fa fa-paper-plane" />
+        {$_("menu.createInvite")}
       </MenuMobileItem>
     </div>
     <div class="staatliches block flex h-8 justify-center gap-2 px-8 text-tinted-400">
-      <Link class="hover:text-tinted-200" href="/logout" on:click={closeMenu}>Logout</Link> /
+      <Link class="hover:text-tinted-200" href="/logout" on:click={closeMenu}
+        >{$_("menu.logout")}</Link>
+      /
       <Button class="hover:text-tinted-200" stopPropagation on:click={() => setSubMenu("accounts")}>
-        Switch Accounts
+        {$_("menu.switchAccounts")}
       </Button>
     </div>
   </SliderMenu>
@@ -179,7 +195,8 @@
       {/if}
     {/each}
     <MenuItem class="staatliches py-4 text-center" on:click={() => router.at("login").open()}>
-      <i class="fa fa-plus" /> Add Account
+      <i class="fa fa-plus" />
+      {$_("menu.addAccount")}
     </MenuItem>
   </SliderMenu>
 {/if}

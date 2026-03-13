@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {debounce} from "throttle-debounce"
   import {writable} from "svelte/store"
   import {sortBy, not, equals, uniqBy} from "@welshman/lib"
@@ -120,14 +121,14 @@
     </Input>
     <slot name="controls" />
     {#if $signer}
-      <Button class="btn btn-low" on:click={toggleExpanded}>Customize</Button>
+      <Button class="btn btn-low" on:click={toggleExpanded}>{$_("feedControls.customize")}</Button>
     {/if}
   </div>
   {#if $expanded}
     <div transition:slideAndFade class="pt-4">
       <Card class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
-          <p class="staatliches text-2xl">Your Feeds</p>
+          <p class="staatliches text-2xl">{$_("feedControls.yourFeeds")}</p>
           <Button on:click={toggleExpanded}>
             <i class="fa fa-lg fa-times transition-all duration-700" class:rotate-180={$expanded} />
           </Button>
@@ -143,15 +144,17 @@
           {/each}
           <Chip class="cursor-pointer" on:click={createFeed}>
             <i class="fa fa-plus" />
-            Add feed
+            {$_("feedControls.addFeed")}
           </Chip>
         </div>
         <div class="my-4 flex flex-col-reverse justify-between gap-2 sm:flex-row">
           <div class="flex flex-col gap-2 sm:flex-row">
-            <Link class="btn" href={router.at("lists").toString()}>Manage lists</Link>
-            <Link class="btn" href={router.at("feeds").toString()}>Manage feeds</Link>
+            <Link class="btn" href={router.at("lists").toString()}
+              >{$_("feedControls.manageLists")}</Link>
+            <Link class="btn" href={router.at("feeds").toString()}
+              >{$_("feedControls.manageFeeds")}</Link>
           </div>
-          <Button class="btn btn-accent" on:click={openForm}>Edit feed</Button>
+          <Button class="btn btn-accent" on:click={openForm}>{$_("feedControls.editFeed")}</Button>
         </div>
       </Card>
     </div>

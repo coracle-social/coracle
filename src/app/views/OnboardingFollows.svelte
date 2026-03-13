@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getPubkeyTagValues, getAddress, makeEvent, FOLLOWS} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
@@ -114,19 +115,24 @@
       loadPeople(term)
     }
   }
+
+  // Pre-compute translated labels to avoid store-in-slot issues in {#each}
+  $: labelUnfollow = $_("common.unfollow")
+  $: labelFollow = $_("common.follow")
+  $: labelLeave = $_("onboarding.leave")
 </script>
 
 <div class="flex gap-3">
   <p
     class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
-    3/4
+    {$_("onboarding.step3")}
   </p>
-  <p class="text-2xl font-bold">Find your people</p>
+  <p class="text-2xl font-bold">{$_("onboarding.findPeople")}</p>
 </div>
 <p>
-  Pick a category to find some people to follow, or click <Button
-    class="underline"
-    on:click={openPersonSearch}>here</Button> to search for specific accounts.
+  {$_("onboarding.pickCategory")}
+  <Button class="underline" on:click={openPersonSearch}>{$_("common.here")}</Button>
+  {$_("onboarding.searchAccounts")}
 </p>
 <div class="grid grid-cols-1 gap-3 overflow-auto xs:grid-cols-2 sm:grid-cols-3">
   {#each state.onboardingLists as event (getAddress(event))}
@@ -137,7 +143,8 @@
       <p class="text-xl font-bold">{title}</p>
       <p class="pb-5">{description}</p>
       <div class="absolute bottom-4 text-neutral-200">
-        {getPubkeyTagValues(event.tags).length} people
+        {getPubkeyTagValues(event.tags).length}
+        {$_("common.people")}
       </div>
     </Card>
   {/each}
@@ -145,15 +152,22 @@
 <div class="flex justify-between">
   <div class="flex items-center gap-2">
     <i class="fa fa-info-circle" />
-    <span>Following {quantify(state.follows.length, "person", "people")}</span>
+    <span
+      >{$_("onboarding.following", {
+        values: {
+          count: state.follows.length,
+          people: quantify(state.follows.length, "person", "people"),
+        },
+      })}</span>
     <span>•</span>
     <span>{quantify(state.relays.length, "relay")}</span>
   </div>
-  <Button class="underline" on:click={openSelections}>View selections</Button>
+  <Button class="underline" on:click={openSelections}>{$_("onboarding.viewSelections")}</Button>
 </div>
 <div class="flex gap-2">
-  <Button class="btn" on:click={prev}><i class="fa fa-arrow-left" /> Back</Button>
-  <Button class="btn btn-accent flex-grow" {loading} on:click={next}>Continue</Button>
+  <Button class="btn" on:click={prev}><i class="fa fa-arrow-left" /> {$_("common.back")}</Button>
+  <Button class="btn btn-accent flex-grow" {loading} on:click={next}
+    >{$_("common.continue")}</Button>
 </div>
 
 {#if showList}
@@ -164,11 +178,11 @@
       <p class="text-2xl font-bold">{title}</p>
       {#if listPubkeys.every(pubkey => state.follows.includes(pubkey))}
         <Button class="btn flex items-center gap-2" on:click={() => unfollowAll(listEvent)}>
-          Unfollow all
+          {$_("onboarding.unfollowAll")}
         </Button>
       {:else}
         <Button class="btn flex items-center gap-2" on:click={() => followAll(listEvent)}>
-          Follow all
+          {$_("onboarding.followAll")}
         </Button>
       {/if}
     </div>
@@ -178,13 +192,15 @@
         <div slot="actions" class="flex items-start justify-end">
           {#if state.follows.includes(pubkey)}
             <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
-              <i class="fa fa-user-slash" /> Unfollow
+              <i class="fa fa-user-slash" />
+              {labelUnfollow}
             </Button>
           {:else}
             <Button
               class="btn btn-accent flex items-center gap-2"
               on:click={() => addFollow(pubkey)}>
-              <i class="fa fa-user-plus" /> Follow
+              <i class="fa fa-user-plus" />
+              {labelFollow}
             </Button>
           {/if}
         </div>
@@ -195,22 +211,23 @@
 
 {#if showSelections}
   <Modal onEscape={closeSelections} canCloseAll={false}>
-    <Subheading>People you follow</Subheading>
+    <Subheading>{$_("onboarding.peopleYouFollow")}</Subheading>
     <p class="text-lg">
-      These are the people you'll be following once you finish creating your account.
+      {$_("onboarding.peopleYouFollowDescription")}
     </p>
     <div />
     {#if state.follows.length === 0}
       <div class="my-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
-        <span>No people selected</span>
+        <span>{$_("onboarding.noPeopleSelected")}</span>
       </div>
     {:else}
       {#each state.follows as pubkey (pubkey)}
         <PersonSummary hideFollowActions {pubkey}>
           <div slot="actions" class="flex items-start justify-end">
             <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
-              <i class="fa fa-user-slash" /> Unfollow
+              <i class="fa fa-user-slash" />
+              {labelUnfollow}
             </Button>
           </div>
         </PersonSummary>
@@ -218,19 +235,18 @@
     {/if}
     <Button class="btn" on:click={openPersonSearch}>
       <i class="fa fa-search" />
-      Search for more people
+      {$_("onboarding.searchMorePeople")}
     </Button>
     <div />
-    <Subheading>Relays you use</Subheading>
+    <Subheading>{$_("onboarding.relaysYouUse")}</Subheading>
     <p class="text-lg">
-      Relays are where content on nostr lives. Connecting to different relays can result in a
-      different experience.
+      {$_("onboarding.relaysDescription")}
     </p>
     <div />
     {#if state.relays.length === 0}
       <div class="my-8 flex items-center justify-center gap-2 text-center">
         <i class="fa fa-triangle-exclamation" />
-        <span>No relays selected</span>
+        <span>{$_("onboarding.noRelaysSelected")}</span>
       </div>
     {:else}
       <FlexColumn small>
@@ -238,7 +254,8 @@
           <RelayCard {url}>
             <div slot="actions">
               <Button class="btn flex items-center gap-2" on:click={() => removeRelay(url)}>
-                <i class="fa fa-right-from-bracket" /> Leave
+                <i class="fa fa-right-from-bracket" />
+                {labelLeave}
               </Button>
             </div>
           </RelayCard>
@@ -247,14 +264,14 @@
     {/if}
     <Button class="btn" on:click={openRelaySearch}>
       <i class="fa fa-search" />
-      Search for more relays
+      {$_("onboarding.searchMoreRelays")}
     </Button>
   </Modal>
 {/if}
 
 {#if showPersonSearch}
   <Modal onEscape={closePersonSearch} canCloseAll={false}>
-    <Input bind:value={term} placeholder="Search for people...">
+    <Input bind:value={term} placeholder={$_("onboarding.searchPeople")}>
       <i slot="before" class="fa fa-search" />
     </Input>
     {#each $profileSearch.searchValues(term).slice(0, 30) as pubkey (pubkey)}
@@ -262,13 +279,15 @@
         <div slot="actions" class="flex items-start justify-end">
           {#if state.follows.includes(pubkey)}
             <Button class="btn flex items-center gap-2" on:click={() => removeFollow(pubkey)}>
-              <i class="fa fa-user-slash" /> Unfollow
+              <i class="fa fa-user-slash" />
+              {labelUnfollow}
             </Button>
           {:else}
             <Button
               class="btn btn-accent flex items-center gap-2"
               on:click={() => addFollow(pubkey)}>
-              <i class="fa fa-user-plus" /> Follow
+              <i class="fa fa-user-plus" />
+              {labelFollow}
             </Button>
           {/if}
         </div>
@@ -288,7 +307,8 @@
           <div slot="actions">
             {#if urls.includes(url)}
               <Button class="btn flex items-center gap-2" on:click={() => removeRelay(url)}>
-                <i class="fa fa-right-from-bracket" /> Leave
+                <i class="fa fa-right-from-bracket" />
+                {labelLeave}
               </Button>
             {:else}
               <Button class="btn flex items-center gap-2" on:click={() => addRelay(url)}>

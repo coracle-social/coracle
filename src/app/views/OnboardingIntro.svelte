@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {appName} from "src/partials/state"
   import MediaVideo from "src/partials/MediaVideo.svelte"
   import Button from "src/partials/Button.svelte"
@@ -22,15 +23,15 @@
 <div class="flex gap-3">
   <p
     class="-ml-1 -mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 text-lg">
-    1/4
+    {$_("onboarding.step1")}
   </p>
-  <p class="text-2xl font-bold">New to Nostr?</p>
+  <p class="text-2xl font-bold">{$_("onboarding.newToNostr")}</p>
 </div>
 <p class="sm:hidden">
-  Take a moment to get acquainted with {appName} — or skip straight to account setup.
+  {$_("onboarding.getAcquainted", {values: {appName}})}
 </p>
 <p class="hidden sm:block">
-  Learn about the protocol at your own pace by watching one of our tutorial videos.
+  {$_("onboarding.learnProtocol")}
 </p>
 <div class="flex flex-col gap-2 sm:flex-row">
   <Button
@@ -39,7 +40,7 @@
     <div
       class="absolute inset-0 opacity-75 transition-opacity hover:opacity-100"
       style="background: url('/images/jakob-owens-8tyCOqTqdqg-unsplash.png'" />
-    <p class="staatliches relative text-5xl text-white">Nostr in 30 seconds</p>
+    <p class="staatliches relative text-5xl text-white">{$_("onboarding.nostr30s")}</p>
   </Button>
   <Button
     class="relative hidden aspect-[4/3] items-center justify-center overflow-hidden rounded-xl p-8 text-center sm:flex sm:w-1/2"
@@ -48,13 +49,15 @@
     <div
       class="absolute inset-0 opacity-75 transition-opacity hover:opacity-100"
       style="background: url('/images/sean-105m46GatAg-unsplash.png'" />
-    <p class="staatliches relative text-5xl text-white">{appName} deep dive</p>
+    <p class="staatliches relative text-5xl text-white">
+      {$_("onboarding.deepDive", {values: {appName}})}
+    </p>
   </Button>
 </div>
 <p>
-  When you’re ready, click below and we’ll guide you through the process of creating an account.
+  {$_("onboarding.readyClick")}
 </p>
-<Button class="btn btn-accent text-center" on:click={next}>Let's go!</Button>
+<Button class="btn btn-accent text-center" on:click={next}>{$_("onboarding.letsGo")}</Button>
 
 {#if media}
   <Modal onEscape={closeMedia}>

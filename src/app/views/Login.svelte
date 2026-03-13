@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {Capacitor} from "@capacitor/core"
   import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
@@ -48,41 +49,44 @@
     }
   })
 
-  document.title = "Log In"
+  document.title = $_("login.title")
 </script>
 
 <div>
   <FlexColumn narrow large>
     <div class="text-center">
-      <Heading>Welcome!</Heading>
+      <Heading>{$_("login.welcome")}</Heading>
       <p>
-        {appName} is built using the
-        <Link class="underline" external href="https://nostr.com/">nostr protocol</Link>, which
-        allows you to own your social identity.
+        {$_("login.builtWith", {values: {appName}})}
+        <Link class="underline" external href="https://nostr.com/">{$_("login.nostrProtocol")}</Link
+        >{$_("login.ownsIdentity")}
       </p>
     </div>
     <div class="relative flex flex-col gap-4">
       {#if getNip07()}
         <Button class="btn btn-tall btn-accent" on:click={useExtension}>
-          <i class="fa fa-puzzle-piece" /> Use Browser Extension
+          <i class="fa fa-puzzle-piece" />
+          {$_("login.useExtension")}
         </Button>
       {/if}
       {#each signerApps as app}
         <Button class="btn btn-tall" on:click={() => useSigner(app)}>
           <img src={app.iconUrl} alt={app.name} width="20" height="20" />
-          Use {app.name}
+          {$_("login.use", {values: {name: app.name}})}
         </Button>
       {/each}
       <Button class="btn btn-tall" on:click={useBunker}>
-        <i class="fa fa-box" /> Use Remote Signer
+        <i class="fa fa-box" />
+        {$_("login.useRemoteSigner")}
       </Button>
       <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#signers">
-        <i class="fa fa-compass" /> Browse Signer Apps
+        <i class="fa fa-compass" />
+        {$_("login.browseSignerApps")}
       </Link>
     </div>
     <span class="text-center">
-      Need an account?
-      <Button class="underline" on:click={signUp}>Register instead</Button>
+      {$_("login.needAccount")}
+      <Button class="underline" on:click={signUp}>{$_("login.registerInstead")}</Button>
     </span>
   </FlexColumn>
 </div>

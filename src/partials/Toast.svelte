@@ -1,6 +1,7 @@
 <script context="module" lang="ts">
   import {get, writable} from "svelte/store"
   import {identity} from "@welshman/lib"
+  import {_} from "svelte-i18n"
 
   export const toast = writable(null)
 
@@ -41,7 +42,8 @@
   })
 
   window.addEventListener("offline", () => {
-    showInfo("You are currently offline.", {id: "offline", timeout: null})
+    const t = get(_)
+    showInfo(t("common.offline"), {id: "offline", timeout: null})
   })
 </script>
 
@@ -115,13 +117,13 @@
       {#if type === "text"}
         {message}
       {:else if type === "delay"}
-        Sending in {timeLeft} seconds...
+        {$_("common.sendingIn", {values: {seconds: timeLeft}})}
         <Button
           class="ml-3 inline-flex underline"
           on:click={() => {
             onCancel()
             toast.set(null)
-          }}>Cancel</Button>
+          }}>{$_("common.cancel")}</Button>
       {:else if type === "publish"}
         <ThunkStatus {thunk} />
       {/if}

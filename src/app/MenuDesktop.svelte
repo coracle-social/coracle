@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {derived} from "svelte/store"
   import {ago, omit, spec, MINUTE} from "@welshman/lib"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
@@ -82,13 +83,14 @@
         ? import.meta.env.VITE_APP_WORDMARK_DARK
         : import.meta.env.VITE_APP_WORDMARK_LIGHT} />
   </Link>
-  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}>Feeds</MenuDesktopItem>
+  <MenuDesktopItem path="/notes" isActive={isFeedPage || isListPage}
+    >{$_("menu.feeds")}</MenuDesktopItem>
   <MenuDesktopItem
     path="/settings/relays"
     disabled={!$signer}
     isActive={$page?.path.startsWith("/settings/relays")}>
     <div class="relative inline-block">
-      Relays
+      {$_("menu.relays")}
       {#if $slowConnections.length > 0}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
@@ -99,7 +101,7 @@
     disabled={!$signer}
     isActive={$page?.path.startsWith("/notifications")}>
     <div class="relative inline-block">
-      Notifications
+      {$_("menu.notifications")}
       {#if $hasNewNotifications}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
@@ -110,51 +112,56 @@
     disabled={!$signer}
     isActive={$page?.path.startsWith("/channels")}>
     <div class="relative inline-block">
-      Messages
+      {$_("menu.messages")}
       {#if $hasNewMessages}
         <div class="absolute -right-2.5 top-1 h-1.5 w-1.5 rounded bg-accent" />
       {/if}
     </div>
   </MenuDesktopItem>
-  <MenuDesktopItem modal path="/groups" disabled={!$signer}>Groups</MenuDesktopItem>
-  <MenuDesktopItem modal path="/lists" disabled={!$signer}>Lists</MenuDesktopItem>
+  <MenuDesktopItem modal path="/groups" disabled={!$signer}>{$_("menu.groups")}</MenuDesktopItem>
+  <MenuDesktopItem modal path="/lists" disabled={!$signer}>{$_("menu.lists")}</MenuDesktopItem>
   <FlexColumn small class="absolute bottom-0 w-72">
     <Button
       class="staatliches px-8 text-start text-tinted-400 hover:text-tinted-100"
-      on:click={() => setSubMenu("settings")}>Settings</Button>
+      on:click={() => setSubMenu("settings")}>{$_("menu.settings")}</Button>
     <div class="staatliches flex h-8 gap-2 px-8 text-tinted-500">
-      <Link class="hover:text-tinted-100" href="/about">About</Link> /
-      <Link external class="hover:text-tinted-100" href="/terms.html">Terms</Link> /
-      <Link external class="hover:text-tinted-100" href="/privacy.html">Privacy</Link>
+      <Link class="hover:text-tinted-100" href="/about">{$_("menu.about")}</Link> /
+      <Link external class="hover:text-tinted-100" href="/terms.html">{$_("menu.terms")}</Link> /
+      <Link external class="hover:text-tinted-100" href="/privacy.html">{$_("menu.privacy")}</Link>
     </div>
     {#if subMenu === "settings"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" on:click={toggleTheme}>
-          <i class="fa fa-palette" /> Toggle Theme
+          <i class="fa fa-palette" />
+          {$_("menu.toggleTheme")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/data"
           disabled={!$signer}>
-          <i class="fa fa-database" /> Database
+          <i class="fa fa-database" />
+          {$_("menu.database")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/wallet"
           disabled={!$signer}>
-          <i class="fa fa-wallet" /> Wallet
+          <i class="fa fa-wallet" />
+          {$_("menu.wallet")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings"
           disabled={!$signer}>
-          <i class="fa fa-cog" /> App Settings
+          <i class="fa fa-cog" />
+          {$_("menu.appSettings")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href="/settings/content"
           disabled={!$signer}>
-          <i class="fa fa-volume-xmark" /> Content Settings
+          <i class="fa fa-volume-xmark" />
+          {$_("menu.contentSettings")}
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
@@ -162,23 +169,28 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href={router.at("people").of($pubkey).toString()}>
-          <i class="fa fa-user-circle" /> Profile
+          <i class="fa fa-user-circle" />
+          {$_("menu.profile")}
         </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/settings/keys">
-          <i class="fa fa-key" /> Keys
+          <i class="fa fa-key" />
+          {$_("menu.keys")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           href={router.at("invite/create").qp({initialPubkey: $pubkey}).toString()}>
-          <i class="fa fa-paper-plane" /> Create Invite
+          <i class="fa fa-paper-plane" />
+          {$_("menu.createInvite")}
         </MenuItem>
         <MenuItem
           class="staatliches flex items-center gap-4 py-4 pl-8"
           on:click={() => setSubMenu("accounts")}>
-          <i class="fa fa-right-left" /> Switch Account
+          <i class="fa fa-right-left" />
+          {$_("menu.switchAccount")}
         </MenuItem>
         <MenuItem class="staatliches flex items-center gap-4 py-4 pl-8" href="/logout">
-          <i class="fa fa-right-to-bracket" /> Log Out
+          <i class="fa fa-right-to-bracket" />
+          {$_("menu.logOut")}
         </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "accounts"}
@@ -198,7 +210,8 @@
         <MenuItem
           class="staatliches flex items-center gap-4 py-4"
           on:click={() => router.at("login").open()}>
-          <i class="fa fa-plus" /> Add Account
+          <i class="fa fa-plus" />
+          {$_("menu.addAccount")}
         </MenuItem>
       </MenuDesktopSecondary>
     {/if}
@@ -233,7 +246,7 @@
             </div>
           </Button>
         {:else}
-          <Link modal class="btn btn-accent" href="/login">Log In</Link>
+          <Link modal class="btn btn-accent" href="/login">{$_("nav.logIn")}</Link>
         {/if}
       </div>
     </div>

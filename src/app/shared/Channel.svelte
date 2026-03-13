@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
@@ -6,7 +7,7 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
-  import {createScroller, pluralize} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import Link from "src/partials/Link.svelte"
@@ -154,20 +155,21 @@
     {#if !userHasMessaging}
       <div class="m-auto max-w-96 py-20 text-center">
         <div class="mb-4 text-lg text-accent">
-          <i class="fa fa-exclamation-triangle"></i> Messaging is not configured.
+          <i class="fa fa-exclamation-triangle"></i>
+          {$_("channel.notConfigured")}
         </div>
-        In order to deliver messages, Coracle needs to know where to send them. Please visit your
-        <Link class="underline" href="/settings/relays">relay settings page</Link> and set up your messaging
-        relays.
+        {$_("channel.notConfiguredDescription")}
+        <Link class="underline" href="/settings/relays">{$_("channel.relaySettingsPage")}</Link>
+        {$_("channel.setUpRelays")}
       </div>
     {/if}
     {#each groupedMessages as message (message.id)}
       <Message {message} />
     {/each}
     {#await loading}
-      <Spinner>Looking for messages...</Spinner>
+      <Spinner>{$_("channel.lookingForMessages")}</Spinner>
     {:then}
-      <div in:fly={{y: 20}} class="py-20 text-center">End of message history</div>
+      <div in:fly={{y: 20}} class="py-20 text-center">{$_("channel.endOfHistory")}</div>
     {/await}
   </div>
   {#if $hasNip44}
@@ -208,30 +210,33 @@
       class="fixed bottom-32 flex w-full cursor-pointer justify-center"
       transition:fly|local={{y: 20}}
       on:click={scrollToBottom}>
-      <div class="rounded-full bg-accent px-4 py-2 text-neutral-100">New messages found</div>
+      <div class="rounded-full bg-accent px-4 py-2 text-neutral-100">
+        {$_("channel.newMessages")}
+      </div>
     </div>
   {/if}
 </div>
 
 {#if confirmIsOpen}
   <Modal onEscape={closeConfirm}>
-    <Subheading>Missing Messaging Relays</Subheading>
+    <Subheading>{$_("channel.missingRelays")}</Subheading>
     {#if $pubkeysWithoutMessaging.length > 0}
       <p>
         {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
-        {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
-        messaging relays, which means they may not be able to receive DMs.
+        {$pubkeysWithoutMessaging.length === 1
+          ? $_("channel.noMessagingRelays")
+          : $_("channel.noMessagingRelaysPlural")}
       </p>
     {:else if !userHasMessaging}
       <p>
-        You don't have any messaging relays set up yet, which will make it difficult for you to
-        receive replies to this conversation. Click <Link class="underline" href="/settings/relays"
-          >here</Link> to set up your messaging relays.
+        {$_("channel.yourNoRelays")}
+        <Link class="underline" href="/settings/relays">{$_("common.here")}</Link>
+        {$_("channel.yourNoRelaysEnd")}
       </p>
     {/if}
     <div class="flex justify-between">
-      <Button class="btn" on:click={closeConfirm}>Cancel</Button>
-      <Button class="btn btn-accent" on:click={sendAnyway}>Send anyway</Button>
+      <Button class="btn" on:click={closeConfirm}>{$_("common.cancel")}</Button>
+      <Button class="btn btn-accent" on:click={sendAnyway}>{$_("channel.sendAnyway")}</Button>
     </div>
   </Modal>
 {/if}
