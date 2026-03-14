@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {pubkey} from "@welshman/app"
   import Button from "src/partials/Button.svelte"
   import Feed from "src/app/shared/Feed.svelte"
@@ -16,11 +17,11 @@
 
 {#if !$pubkey}
   <div class="py-16 text-center">
-    <p class="text-xl">Don't have an account?</p>
+    <p class="text-xl">{$_("feeds.noAccount")}</p>
     <p>
-      Click <Button
+      {$_("feeds.clickHere", {values: {link: "∅"}}).split("∅")[0]}<Button
         class="text-inherit cursor-pointer bg-transparent p-0 underline"
-        on:click={showLogin}>here</Button> to join the nostr network.
+        on:click={showLogin}>{$_("common.here")}</Button>{$_("feeds.clickHere", {values: {link: "∅"}}).split("∅")[1]}
     </p>
   </div>
 {/if}

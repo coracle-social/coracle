@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {Address} from "@welshman/util"
   import {Router} from "@welshman/router"
   import {loadHandle} from "@welshman/app"
@@ -34,7 +35,7 @@
       <PersonDetail pubkey={$handle.pubkey} />
     {:else}
       <Content size="lg" class="text-center">
-        <div>Sorry, we weren't able to find "{entity}".</div>
+        <div>{$_("bech32.notFound", {values: {entity}})}</div>
       </Content>
     {/if}
   {/await}

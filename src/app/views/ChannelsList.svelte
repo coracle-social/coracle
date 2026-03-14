@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
+  import {_} from "svelte-i18n"
   import {signer, shouldUnwrap} from "@welshman/app"
   import {now} from "@welshman/lib"
   import {createScroller, toTitle} from "src/util/misc"
@@ -45,23 +46,23 @@
 
   const markAllChannelsRead = () => setChecked("channels/*", now())
 
-  document.title = "Direct Messages"
+  document.title = $_("channels.directMessages")
 </script>
 
 <FlexColumn bind:element>
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-comments fa-lg" />
-      <h2 class="staatliches text-2xl">Your conversations</h2>
+      <h2 class="staatliches text-2xl">{$_("channels.yourConversations")}</h2>
     </div>
     <Link modal class="btn btn-accent" href="/channels/create" disabled={!$signer}>
-      <i class="fa-solid fa-plus" /> Create
+      <i class="fa-solid fa-plus" /> {$_("channels.create")}
     </Link>
   </div>
   <div class="relative">
     <Tabs tabs={["conversations", "requests"]} {activeTab} {setActiveTab}>
       <div slot="tab" let:tab class="flex gap-2">
-        <div>{toTitle(tab)}</div>
+        <div>{tab === "conversations" ? $_("channels.conversations") : $_("channels.requests")}</div>
         <div class="h-6 rounded-full bg-neutral-700 px-2">
           {(tab === "conversations" ? $accepted : $requests).length}
         </div>
@@ -73,13 +74,13 @@
             class:text-neutral-600={!$hasNewMessages}
             on:click={markAllChannelsRead} />
         </div>
-        <div slot="tooltip">Mark all as read</div>
+        <div slot="tooltip">{$_("channels.markAllRead")}</div>
       </Popover>
     </Tabs>
   </div>
   {#each tabChannels.slice(0, limit) as channel (channel.id)}
     <ChannelsListItem {channel} />
   {:else}
-    <Content size="lg" class="text-center">No messages found.</Content>
+    <Content size="lg" class="text-center">{$_("channels.noMessages")}</Content>
   {/each}
 </FlexColumn>

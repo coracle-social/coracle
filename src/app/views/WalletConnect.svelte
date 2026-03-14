@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
+  import {get} from "svelte/store"
   import {debounce} from "throttle-debounce"
   import {nwc} from "@getalby/sdk"
   import {assoc, sleep} from "@welshman/lib"
@@ -20,6 +22,8 @@
 
   const next = () => router.at("zap").qp(qp).replaceModal()
 
+  const t = () => get(_)
+
   const connectWithWebLn = async () => {
     loading = true
 
@@ -28,10 +32,10 @@
       const info = await getWebLn().getInfo()
 
       if (!info?.supports?.includes("lightning")) {
-        showWarning("Your extension does not support lightning payments")
+        showWarning(t()("walletConnect.extensionNoSupport"))
       } else {
         updateSession($pubkey, assoc("wallet", {type: "webln", info}))
-        showInfo("Wallet successfully connected!")
+        showInfo(t()("walletConnect.walletConnected"))
 
         await sleep(400)
 
@@ -43,7 +47,7 @@
       }
     } catch (e) {
       console.error(e)
-      showWarning("Wallet failed to connect")
+      showWarning(t()("walletConnect.walletFailed"))
     } finally {
       loading = false
     }
@@ -54,16 +58,16 @@
 
     try {
       const client = new nwc.NWCClient({nostrWalletConnectUrl})
-      const [_, info] = await Promise.all([sleep(800), client.getInfo()])
+      const [__, info] = await Promise.all([sleep(800), client.getInfo()])
 
       if (!info) {
-        showWarning("Wallet failed to connect")
+        showWarning(t()("walletConnect.walletFailed"))
       } else {
         updateSession(
           $pubkey,
           assoc("wallet", {type: "nwc", info: client.options as unknown as NWCInfo}),
         )
-        showInfo("Wallet successfully connected!")
+        showInfo(t()("walletConnect.walletConnected"))
 
         await sleep(400)
 
@@ -75,7 +79,7 @@
       }
     } catch (e) {
       console.error(e)
-      showWarning("Wallet failed to connect")
+      showWarning(t()("walletConnect.walletFailed"))
     } finally {
       loading = false
     }
@@ -98,8 +102,8 @@
 
 <div class="flex flex-col gap-6">
   <div>
-    <h2 class="staatliches text-2xl">Connect a Wallet</h2>
-    <p>Use Nostr Wallet Connect to send Bitcoin payments over Lightning.</p>
+    <h2 class="staatliches text-2xl">{$_("walletConnect.title")}</h2>
+    <p>{$_("walletConnect.description")}</p>
   </div>
   <div>
     {#if getWebLn()}
@@ -110,10 +114,10 @@
           disabled={Boolean(nostrWalletConnectUrl)}
           on:click={connectWithWebLn}>
           {#if loading && !nostrWalletConnectUrl}
-            Connecting...
+            {$_("walletConnect.connecting")}
           {:else}
             <i class="fa fa-puzzle-piece fa-sm" />
-            Connect with WebLN
+            {$_("walletConnect.connectWithWebLN")}
           {/if}
         </Button>
         {#if qp}
@@ -122,13 +126,13 @@
             disabled={Boolean(nostrWalletConnectUrl)}
             on:click={next}>
             <i class="fa fa-qrcode fa-sm" />
-            Pay manually
+            {$_("walletConnect.payManually")}
           </Button>
         {/if}
-        <Divider>Or</Divider>
+        <Divider>{$_("walletConnect.or")}</Divider>
       </div>
     {/if}
-    <Field label="Connection Secret">
+    <Field label={$_("walletConnect.connectionSecret")}>
       <Input
         type="password"
         autocomplete="off"
@@ -140,7 +144,7 @@
         </button>
       </Input>
       <span slot="info">
-        You can find this in any wallet that supports
+        {$_("walletConnect.connectionSecretInfo")}
         <Link external href="https://nwc.getalby.com/about" class="text-primary"
           >Nostr Wallet Connect</Link
         >.
@@ -153,7 +157,7 @@
   <div class="flex justify-between">
     <Button class="btn btn-link" on:click={back}>
       <i class="fa fa-chevron-left" />
-      Go back
+      {$_("walletConnect.goBack")}
     </Button>
     <Button
       class="btn btn-accent"
@@ -161,9 +165,9 @@
       loading={Boolean(loading && nostrWalletConnectUrl)}
       on:click={connectWithNWC}>
       {#if loading && nostrWalletConnectUrl}
-        Connecting...
+        {$_("walletConnect.connecting")}
       {:else}
-        Connect Wallet
+        {$_("wallet.connectWallet")}
         <i class="fa fa-chevron-right" />
       {/if}
     </Button>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import type {TrustedEvent} from "@welshman/util"
   import {isSignedEvent} from "@welshman/util"
   import {repository} from "@welshman/app"
@@ -17,14 +18,14 @@
 
   const submit = () => {
     if (!file) {
-      showWarning("Please select a file to import.")
+      showWarning($_("dataImport.selectFile"))
 
       return
     }
 
     loading = true
 
-    showInfo("Processing your import...", {timeout: 60_000})
+    showInfo($_("dataImport.processing"), {timeout: 60_000})
 
     const reader = new FileReader()
 
@@ -41,7 +42,7 @@
             try {
               newEvents.push(JSON.parse(l))
             } catch (e) {
-              showInfo(`Failed to parse row #${i}`)
+              showInfo($_("dataImport.failedParse", {values: {row: i}}))
               loading = false
               return
             }
@@ -54,13 +55,13 @@
           }
         }
 
-        showInfo("Import complete!")
+        showInfo($_("dataImport.importComplete"))
 
         setTimeout(() => router.clearModals(), 2000)
       } catch (e) {
         error(e)
 
-        showWarning("Something went wrong!")
+        showWarning($_("dataImport.somethingWrong"))
       }
 
       loading = false
@@ -75,18 +76,17 @@
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
-      <Heading>Import Data</Heading>
-      <p>Populate {appName}'s database with a nostr export file</p>
+      <Heading>{$_("dataImport.importData")}</Heading>
+      <p>{$_("dataImport.populateDatabase", {values: {appName}})}</p>
     </div>
     <div class="flex w-full flex-col gap-8">
       <Field label="">
         <input type="file" on:change={setFile} accept=".jsonl" />
         <p slot="info">
-          Nostr exports are .jsonl files. Some software may compress exports, be sure to upload an
-          uncompressed version.
+          {$_("dataImport.jsonlInfo")}
         </p>
       </Field>
-      <Button {loading} class="btn text-center" type="submit">Import</Button>
+      <Button {loading} class="btn text-center" type="submit">{$_("dataImport.importData")}</Button>
     </div>
   </FlexColumn>
 </form>

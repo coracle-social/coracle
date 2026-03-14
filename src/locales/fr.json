@@ -29,6 +29,8 @@
     "notifications": "Notifications",
     "messages": "Messages",
     "groups": "Groupes",
+    "video": "Video",
+    "blog": "Blog",
     "lists": "Listes",
     "settings": "Parametres",
     "about": "A propos",
@@ -107,6 +109,7 @@
     "noRelays": "Cette chaine de connexion ne contient aucun relais.",
     "signerError": "Erreur du signataire : {error}",
     "connectSearching": "Nous recherchons votre profil sur le reseau.",
+    "uplanetDetected": "Relai local detecte : {relay}",
     "connectFailed": "Nous avons du mal a trouver votre profil.",
     "connectSuccess": "Trouve ! Connexion en cours...",
     "selectRelaysManually": "Selectionner les relais manuellement",
@@ -203,6 +206,18 @@
     "yourNoRelaysEnd": "pour configurer vos relais de messagerie.",
     "sendAnyway": "Envoyer quand meme"
   },
+  "relayList": {
+    "title": "Relais",
+    "yourRelays": "Vos relais",
+    "addRelay": "Ajouter un relais",
+    "relaysDescription": "Les relais sont des points d'acces pour votre contenu et vos connexions. Au moins un est necessaire pour interagir avec le reseau, mais vous pouvez en rejoindre autant que vous le souhaitez.",
+    "noRelaysConnected": "Aucun relais connecte",
+    "otherRelays": "Autres relais",
+    "otherRelaysDescription": "Voici des relais utilises par les personnes de votre reseau. Les ajouter peut ameliorer votre capacite a charger les profils et le contenu.",
+    "searchPlaceholder": "Rechercher des relais ou ajouter une URL personnalisee",
+    "addRelayTitle": "Ajouter un relais",
+    "addRelayDescription": "Entrez une URL de relais ci-dessous pour l'ajouter a votre selection de relais."
+  },
   "feedControls": {
     "customize": "Personnaliser",
     "yourFeeds": "Vos fils",
@@ -210,6 +225,310 @@
     "manageLists": "Gerer les listes",
     "manageFeeds": "Gerer les fils",
     "editFeed": "Modifier le fil"
+  },
+  "about": {
+    "title": "A propos",
+    "subtitle": "Un client Nostr pour les fils d'actualite qui met les relais au premier plan.",
+    "runningBuild": "Version {hash}",
+    "supportDev": "Soutenir le developpement",
+    "supportDevDescription": "Tous les fonds seront utilises pour les couts serveur et le developpement.",
+    "zapDeveloper": "Zapper le developpeur",
+    "getInTouch": "Nous contacter",
+    "getInTouchDescription": "Un probleme ? Faites-le nous savoir.",
+    "openIssue": "Ouvrir un ticket",
+    "builtBy": "Construit avec 💜 par @",
+    "sourceCode": "Code source",
+    "website": "Site web",
+    "devBlog": "Blog dev",
+    "podcast": "Podcast"
+  },
+  "userData": {
+    "title": "Donnees",
+    "heading": "Base de donnees",
+    "description": "Consultez, importez et exportez votre base de donnees locale.",
+    "exportTitle": "Exporter la base",
+    "exportDescription": "Cliquez ci-dessous pour telecharger une sauvegarde de {count} evenements de votre base de donnees.",
+    "createBackup": "Creer une sauvegarde",
+    "importTitle": "Importer une base",
+    "importDescription": "Envoyez un fichier d'export nostr pour importer des evenements dans votre base de donnees.",
+    "uploadBackup": "Envoyer une sauvegarde",
+    "created": "Cree le",
+    "author": "Auteur",
+    "kind": "Type"
+  },
+  "wallet": {
+    "title": "Votre portefeuille",
+    "connected": "Connecte",
+    "connectWallet": "Connecter le portefeuille",
+    "connectedTo": "Connecte a {name} via {type}",
+    "balance": "Solde :",
+    "sats": "sats",
+    "disconnectWallet": "Deconnecter le portefeuille",
+    "noWalletConnected": "Aucun portefeuille connecte"
+  },
+  "walletConnect": {
+    "title": "Connecter un portefeuille",
+    "description": "Utilisez Nostr Wallet Connect pour envoyer des paiements Bitcoin via Lightning.",
+    "connecting": "Connexion en cours...",
+    "connectWithWebLN": "Connecter avec WebLN",
+    "payManually": "Payer manuellement",
+    "or": "Ou",
+    "connectionSecret": "Secret de connexion",
+    "connectionSecretInfo": "Vous pouvez trouver ceci dans tout portefeuille qui supporte",
+    "goBack": "Retour",
+    "extensionNoSupport": "Votre extension ne supporte pas les paiements Lightning",
+    "walletConnected": "Portefeuille connecte avec succes !",
+    "walletFailed": "Echec de la connexion du portefeuille"
+  },
+  "walletDisconnect": {
+    "title": "Deconnecter le portefeuille",
+    "confirm": "Etes-vous sur de vouloir deconnecter votre portefeuille bitcoin ?",
+    "goBack": "Retour",
+    "confirmButton": "Confirmer"
+  },
+  "zap": {
+    "title": "Envoyer un Zap",
+    "message": "Message (optionnel)",
+    "amount": "Montant",
+    "zapSplits": "Cette note a les zap splits actives. Vous allez zapper {count} personnes :",
+    "goBack": "Retour",
+    "sendZap": "Envoyer le Zap",
+    "failedToZap": "Echec du zap : {error}",
+    "failedToZapPerson": "Echec du zap pour {name} : {error}",
+    "zapSent": "Zap envoye avec succes !"
+  },
+  "notifications": {
+    "mentionsAndReplies": "Mentions et reponses",
+    "reactions": "Reactions",
+    "title": "Notifications",
+    "noNotifications": "Aucune notification trouvee - revenez plus tard !"
+  },
+  "feedList": {
+    "yourFeeds": "Vos fils",
+    "noFeeds": "Vous n'avez pas encore de fils.",
+    "otherFeeds": "Autres fils",
+    "otherFeedsDescription": "Voici des fils crees par des personnes de votre reseau.",
+    "searchFeeds": "Rechercher des fils"
+  },
+  "listList": {
+    "yourLists": "Vos listes",
+    "noLists": "Vous n'avez pas encore de listes.",
+    "otherLists": "Autres listes",
+    "otherListsDescription": "Voici des listes creees par des personnes de votre reseau.",
+    "searchLists": "Rechercher des listes"
+  },
+  "listSelect": {
+    "selectList": "Selectionner une liste",
+    "selectListDescription": "Selectionnez une liste pour y ajouter votre selection.",
+    "noLists": "Vous n'avez pas encore de listes."
+  },
+  "feeds": {
+    "noAccount": "Vous n'avez pas de compte ?",
+    "clickHere": "Cliquez {link} pour rejoindre le reseau nostr."
+  },
+  "search": {
+    "loadingCamera": "Chargement de votre camera..."
+  },
+  "logout": {
+    "clearingDatabase": "Nettoyage de votre base de donnees locale...",
+    "logOut": "Deconnexion"
+  },
+  "dataExport": {
+    "exportSettings": "Parametres d'export",
+    "selectEvents": "Selectionnez les evenements a exporter",
+    "onlyYourEvents": "Exporter uniquement vos evenements",
+    "onlyYourEventsInfo": "Si active, seuls vos evenements seront exportes.",
+    "export": "Exporter",
+    "errorSaving": "Erreur lors de l'enregistrement du fichier. Veuillez reessayer.",
+    "fileSaved": "Fichier enregistre dans votre dossier documents sous {filename}"
+  },
+  "dataImport": {
+    "importData": "Importer des donnees",
+    "populateDatabase": "Remplir la base de donnees de {appName} avec un fichier d'export nostr",
+    "jsonlInfo": "Les exports Nostr sont des fichiers .jsonl. Certains logiciels compressent les exports, assurez-vous d'envoyer une version non compressee.",
+    "selectFile": "Veuillez selectionner un fichier a importer.",
+    "processing": "Traitement de votre import...",
+    "failedParse": "Echec de l'analyse de la ligne #{row}",
+    "importComplete": "Import termine !",
+    "somethingWrong": "Une erreur est survenue !"
+  },
+  "personDetail": {
+    "edit": "Modifier",
+    "message": "Message",
+    "wotScore": "Score WoT : {score}"
+  },
+  "personInfo": {
+    "details": "Details",
+    "link": "Lien",
+    "publicKey": "Cle publique",
+    "nostrAddress": "Adresse Nostr",
+    "nostrAddressRelays": "Relais de l'adresse Nostr",
+    "noRelaysAdvertised": "Aucun relais annonce a {address}.",
+    "noNostrAddress": "Aucune adresse Nostr trouvee.",
+    "lightningAddress": "Adresse Lightning",
+    "noLightningAddress": "Aucune adresse Lightning trouvee.",
+    "profileJson": "JSON du profil"
+  },
+  "labelCreate": {
+    "addToCollection": "Ajouter a la collection",
+    "addNote": "Ajoutez cette note a vos collections. Vous trouverez vos collections sur votre page de profil.",
+    "searchTopics": "Recherchez des sujets existants ou creez le votre.",
+    "selectCollection": "Veuillez selectionner au moins une collection.",
+    "tagSaved": "Votre tag a ete enregistre !"
+  },
+  "relayReview": {
+    "leaveReview": "Laisser un avis",
+    "yourRating": "Votre note :",
+    "writeReview": "Ecrire un avis...",
+    "send": "Envoyer"
+  },
+  "reportCreate": {
+    "fileReport": "Signaler un contenu",
+    "whyReporting": "Pourquoi signalez-vous ce contenu ?",
+    "reportsSentTo": "Les signalements sont envoyes a {person} pour examen. Aucune information d'identification n'est incluse dans le signalement.",
+    "save": "Enregistrer",
+    "reportSent": "Votre signalement a ete envoye !"
+  },
+  "help": {
+    "wotDescription1": "Le WoT (Web Of Trust) est l'un des meilleurs moyens de determiner la fiabilite d'une personne, base sur votre graphe social.",
+    "wotDescription2": "Dans {appName}, ce nombre correspond au nombre de personnes que vous suivez qui suivent egalement une personne donnee, moins le nombre de personnes que vous suivez qui ont masque cette personne. Cela vous permet de voir en un coup d'oeil si quelqu'un est accepte dans votre reseau. Cela aide a reduire le spam, les imposteurs et le contenu indesirable.",
+    "wotDescription3": "Vous pouvez definir un score minimum de confiance sur votre page de parametres de contenu, ce qui masquera automatiquement toute personne avec un score inferieur a votre seuil.",
+    "signerDescription1": "Nostr utilise des paires de cles cryptographiques au lieu de mots de passe pour authentifier les utilisateurs. Cela signifie que vous et personne d'autre ne controle votre identite sociale - cependant cela necessite aussi un peu d'attention pour eviter de perdre vos cles ou de se les faire voler.",
+    "signerDescription2": "Au lieu de coller votre cle privee (aussi connue sous le nom de \"nsec\") dans chaque application nostr que vous utilisez, il est judicieux de choisir une seule application de signature pour les conserver.",
+    "signerDescription3": "Certains signataires sont en ligne, d'autres peuvent etre installes sur votre telephone ou ordinateur. Si vous etes nouveau sur nostr, nous recommandons de commencer avec",
+    "browseSignerApps": "Parcourir les applications de signature",
+    "dmDescription1": "ameliore l'ancien standard de messages directs NIP 04 en ajoutant le support des conversations de groupe et une meilleure dissimulation des metadonnees.",
+    "dmDescription2": "Par le passe, une quantite significative d'informations sur les messages prives etait publique, meme si le contenu des messages etait chiffre. Cela signifiait que n'importe qui pouvait savoir a qui vous envoyiez des messages et a quelle frequence.",
+    "dmDescription3": "Le nouveau standard de messagerie reduit considerablement la quantite d'informations que les messages revelent, et repose sur un standard de chiffrement plus robuste.",
+    "noInfo": "Aucune information sur \"{topic}\"",
+    "notFound": "Desole, nous n'avons trouve aucune information sur \"{topic}\"."
+  },
+  "bech32": {
+    "notFound": "Desole, nous n'avons pas pu trouver \"{entity}\"."
+  },
+  "chatEnable": {
+    "enableQuestion": "Voulez-vous activer les notes et les messages directs ?",
+    "disabledByDefault": "Par defaut, les notes et les messages directs sont desactives, car leur chargement necessite que {appName} telecharge et dechiffre beaucoup de donnees.",
+    "goBack": "Retour",
+    "enableMessages": "Activer les messages"
+  },
+  "channels": {
+    "yourConversations": "Vos conversations",
+    "create": "Creer",
+    "conversations": "Conversations",
+    "requests": "Demandes",
+    "noMessages": "Aucun message trouve.",
+    "markAllRead": "Tout marquer comme lu",
+    "directMessages": "Messages directs"
+  },
+  "channelCreate": {
+    "title": "Demarrer une conversation",
+    "whoToTalkTo": "A qui voulez-vous parler ?",
+    "startChat": "Demarrer la discussion",
+    "groupChatWarning": "Vous utilisez une methode de connexion qui ne prend pas encore en charge les discussions de groupe. Veuillez envisager de mettre a jour votre signataire pour acceder a cette fonctionnalite.",
+    "doesNotHave": "n'a pas de",
+    "doNotHave": "n'ont pas de",
+    "missingRelaysWarning": "relais de messagerie, ce qui signifie qu'ils ne souhaitent probablement pas recevoir de DMs, ou utilisent un client qui ne prend pas en charge les discussions de groupe nostr."
+  },
+  "noteCreate": {
+    "title": "Creer une note",
+    "whatToSay": "Que voulez-vous dire ?",
+    "characters": "caracteres",
+    "words": "mots",
+    "hidePreview": "Masquer l'apercu",
+    "showPreview": "Afficher l'apercu",
+    "provideDescription": "Veuillez fournir une description.",
+    "failedUpload": "Echec de l'envoi du fichier",
+    "signing": "Signature de votre note...",
+    "generatingWork": "Generation du travail...",
+    "uploadingMedia": "Envoi des medias...",
+    "schedule": "Programmer",
+    "send": "Envoyer"
+  },
+  "noteDelete": {
+    "confirmDelete": "Etes-vous sur de vouloir supprimer cet evenement ?",
+    "deleteWarning": "Cela enverra une demande au reseau pour supprimer cet evenement. Sachez que les relais peuvent ne pas honorer cette demande.",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "inviteCreate": {
+    "title": "Creer une invitation",
+    "description": "Les liens d'invitation vous permettent d'aider vos amis a rejoindre nostr plus facilement, ou d'acceder facilement a des relais.",
+    "people": "Personnes",
+    "suggestPeople": "Suggerez des personnes a suivre - c'est particulierement utile pour les nouveaux utilisateurs.",
+    "relays": "Relais",
+    "inviteRelaysDescription": "Invitez des personnes a utiliser des relais specifiques. Un code d'invitation peut optionnellement etre fourni pour donner acces a des relais prives.",
+    "claimOptional": "Code (optionnel)",
+    "addPeople": "Ajouter des personnes",
+    "addRelays": "Ajouter des relais",
+    "createLink": "Creer le lien d'invitation"
+  },
+  "inviteAccept": {
+    "title": "Vous avez ete invite",
+    "description": "Vous avez recu un lien d'invitation nostr ! Regardez ci-dessous pour trouver des suggestions pour ameliorer votre experience sur nostr.",
+    "people": "Personnes",
+    "peopleDescription": "Voici quelques personnes que vous pourriez avoir envie de suivre.",
+    "relays": "Relais",
+    "relaysDescription": "Voici quelques relais qui pourraient vous aider a vous connecter aux personnes que vous souhaitez atteindre.",
+    "done": "Termine"
+  },
+  "content": {
+    "title": "Preferences de contenu",
+    "heading": "Parametres de contenu",
+    "description": "Controlez qui et quoi vous voyez sur {appName}.",
+    "noteActions": "Actions sur les notes",
+    "noteActionsInfo": "Controle les icones qui apparaissent en bas de chaque note. Les desactiver peut reduire la quantite de donnees utilisees par {appName}.",
+    "showMedia": "Afficher les images et les aperçus de liens",
+    "showMediaInfo": "Si active, {appName} affichera automatiquement les images et les aperçus des liens integres.",
+    "hideSensitive": "Masquer le contenu sensible",
+    "hideSensitiveInfo": "Si active, le contenu signale par l'auteur comme potentiellement sensible sera masque.",
+    "minWotScore": "Score WoT minimum",
+    "minWotScoreInfo": "Selectionnez un score minimum de confiance. Les notes des comptes avec un score inferieur seront automatiquement masquees.",
+    "minPow": "Preuve de travail minimum",
+    "minPowInfo": "Selectionnez une difficulte minimum de preuve de travail pour les notes des personnes hors de votre reseau. Si une note ne respecte ni votre score minimum de confiance ni votre difficulte minimum de preuve de travail, elle sera masquee.",
+    "mutes": "Masquages",
+    "publiclyMutedAccounts": "Comptes masques publiquement",
+    "publiclyMutedAccountsInfo": "Les notes de ces personnes seront masquees par defaut. Cette information peut etre utilisee pour identifier les imposteurs et les spammeurs.",
+    "privatelyMutedAccounts": "Comptes masques en prive",
+    "privatelyMutedAccountsInfo": "Les notes de ces personnes seront masquees par defaut. Cette information sera chiffree.",
+    "publiclyMutedWords": "Mots masques publiquement",
+    "publiclyMutedWordsInfo": "Les notes contenant ces mots seront masquees par defaut. Cette information peut etre utilisee pour identifier les imposteurs et les spammeurs.",
+    "privatelyMutedWords": "Mots masques en prive",
+    "privatelyMutedWordsInfo": "Les notes contenant ces mots seront masquees par defaut. Cette information sera chiffree.",
+    "publiclyMutedTopics": "Sujets masques publiquement",
+    "publiclyMutedTopicsInfo": "Les notes taguees avec ces sujets seront masquees par defaut. Cette information peut etre utilisee pour identifier les imposteurs et les spammeurs.",
+    "privatelyMutedTopics": "Sujets masques en prive",
+    "privatelyMutedTopicsInfo": "Les notes taguees avec ces sujets seront masquees par defaut. Cette information sera chiffree.",
+    "saved": "Vos preferences ont ete enregistrees !"
+  },
+  "keys": {
+    "title": "Cles",
+    "heading": "Vos cles",
+    "description": "Votre compte est identifie sur le reseau par une paire de cles publique/privee. Cela vous permet de posseder entierement votre compte et de migrer vers une autre application si necessaire.",
+    "publicKey": "Cle publique",
+    "publicKeyInfo": "Votre cle publique identifie votre compte. Vous pouvez la partager avec les personnes qui vous cherchent sur nostr.",
+    "privateKey": "Cle privee",
+    "privateKeyInfo": "Votre cle privee est utilisee pour prouver votre identite en signant cryptographiquement les messages. Ne la partagez avec personne. Faites attention en la copiant dans d'autres applications - envisagez plutot d'utiliser une extension navigateur compatible pour stocker votre cle en securite.",
+    "bunkerUrl": "URL Bunker",
+    "bunkerUrlInfo": "Votre URL bunker fonctionne comme un mot de passe et peut etre utilisee a la place de votre cle privee pour vous connecter a d'autres applications. C'est plus sur que de partager votre cle privee, mais vous devez quand meme veiller a garder votre URL bunker privee."
+  },
+  "profile": {
+    "title": "Profil",
+    "heading": "A propos de vous",
+    "description": "Donnez aux gens un moyen simple de vous reconnaitre. Nous vous recommandons de ne pas utiliser votre vrai nom ni de partager vos informations personnelles. L'avenir d'internet est pseudonyme.",
+    "username": "Nom d'utilisateur",
+    "usernameInfo": "Dans la plupart des clients, cette image sera affichee sur votre page de profil.",
+    "nip05": "Identifiant NIP-05",
+    "nip05Info": "Entrez une adresse NIP-05 pour verifier votre cle publique.",
+    "lightningAddress": "Adresse Lightning",
+    "lightningAddressInfo": "Entrez une adresse Lightning pour activer l'envoi et la reception de pourboires en bitcoin.",
+    "website": "Site web",
+    "websiteInfo": "Entrez n'importe quelle URL ou les gens peuvent en apprendre plus sur vous.",
+    "aboutYou": "A propos de vous",
+    "aboutYouInfo": "Parlez de vous au monde. Ceci sera affiche sur votre page de profil.",
+    "profilePicture": "Photo de profil",
+    "profilePictureInfo": "Soyez respectueux des autres et n'utilisez que de petites images.",
+    "saved": "Votre profil a ete enregistre !"
   },
   "zen": {
     "walletStatus": "Statut du portefeuille ZEN",
@@ -239,5 +558,8 @@
     "totalAcquired": "Total acquis :",
     "validShares": "Encore valides :",
     "distributions": "Distributions :"
+  },
+  "video": {
+    "publish": "Publier"
   }
 }

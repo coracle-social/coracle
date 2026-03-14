@@ -13,12 +13,12 @@ export const browser = Bowser.parse(window.navigator.userAgent)
 
 export const locale = synced({
   key: "ui/locale",
-  defaultValue: "en",
+  defaultValue: null as string | null,
   storage: localStorageProvider,
 })
 
 locale.subscribe(value => {
-  svelteLocale.set(value)
+  if (value) svelteLocale.set(value)
 })
 
 // Settings

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
@@ -27,7 +28,7 @@
   let innerWidth = 0
   let element = null
 
-  document.title = "Notifications"
+  document.title = $_("notifications.title")
 
   onMount(() => {
     loadNotifications()
@@ -44,7 +45,7 @@
 
 <Tabs tabs={allTabs} {activeTab} {setActiveTab}>
   <div slot="tab" let:tab class="flex gap-2">
-    <div>{tab}</div>
+    <div>{tab === allTabs[0] ? $_("notifications.mentionsAndReplies") : $_("notifications.reactions")}</div>
     {#if activeTab !== tab}
       {#if tab === allTabs[0] && $unreadMainNotifications.length > 0}
         <div class="h-6 rounded-full bg-neutral-700 px-2">

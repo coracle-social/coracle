@@ -29,6 +29,8 @@
     "notifications": "Notifications",
     "messages": "Messages",
     "groups": "Groups",
+    "video": "Video",
+    "blog": "Blog",
     "lists": "Lists",
     "settings": "Settings",
     "about": "About",
@@ -107,6 +109,7 @@
     "noRelays": "That connection string doesn't have any relays.",
     "signerError": "Received error from signer: {error}",
     "connectSearching": "We're searching for your profile on the network.",
+    "uplanetDetected": "Local relay detected: {relay}",
     "connectFailed": "We're having a hard time finding your profile.",
     "connectSuccess": "Success! Logging you in...",
     "selectRelaysManually": "Select relays manually",
@@ -203,6 +206,18 @@
     "yourNoRelaysEnd": "to set up your messaging relays.",
     "sendAnyway": "Send anyway"
   },
+  "relayList": {
+    "title": "Relays",
+    "yourRelays": "Your relays",
+    "addRelay": "Add Relay",
+    "relaysDescription": "Relays are hubs for your content and connections. At least one is required to interact with the network, but you can join as many as you like.",
+    "noRelaysConnected": "No relays connected",
+    "otherRelays": "Other relays",
+    "otherRelaysDescription": "Below are relays used by people in your network. Adding these may improve your ability to load profiles and content.",
+    "searchPlaceholder": "Search relays or add a custom url",
+    "addRelayTitle": "Add a relay",
+    "addRelayDescription": "Enter a relay url below to add it to your relay selections."
+  },
   "feedControls": {
     "customize": "Customize",
     "yourFeeds": "Your Feeds",
@@ -210,6 +225,310 @@
     "manageLists": "Manage lists",
     "manageFeeds": "Manage feeds",
     "editFeed": "Edit feed"
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "A Nostr client for feeds that puts relays first.",
+    "runningBuild": "Running build {hash}",
+    "supportDev": "Support development",
+    "supportDevDescription": "All funds will be used to support server costs and development.",
+    "zapDeveloper": "Zap the developer",
+    "getInTouch": "Get in touch",
+    "getInTouchDescription": "Having problems? Let us know.",
+    "openIssue": "Open an Issue",
+    "builtBy": "Built with 💜 by @",
+    "sourceCode": "Source Code",
+    "website": "Website",
+    "devBlog": "Dev Blog",
+    "podcast": "Podcast"
+  },
+  "userData": {
+    "title": "Data",
+    "heading": "App Database",
+    "description": "View, import, and export your local database.",
+    "exportTitle": "Export Database",
+    "exportDescription": "Click below to download a backup of all {count} events in your database.",
+    "createBackup": "Create Backup",
+    "importTitle": "Import Database",
+    "importDescription": "Upload a nostr export file to pull events into your database.",
+    "uploadBackup": "Upload Backup",
+    "created": "Created",
+    "author": "Author",
+    "kind": "Kind"
+  },
+  "wallet": {
+    "title": "Your Wallet",
+    "connected": "Connected",
+    "connectWallet": "Connect Wallet",
+    "connectedTo": "Connected to {name} via {type}",
+    "balance": "Balance:",
+    "sats": "sats",
+    "disconnectWallet": "Disconnect Wallet",
+    "noWalletConnected": "No wallet connected"
+  },
+  "walletConnect": {
+    "title": "Connect a Wallet",
+    "description": "Use Nostr Wallet Connect to send Bitcoin payments over Lightning.",
+    "connecting": "Connecting...",
+    "connectWithWebLN": "Connect with WebLN",
+    "payManually": "Pay manually",
+    "or": "Or",
+    "connectionSecret": "Connection Secret",
+    "connectionSecretInfo": "You can find this in any wallet that supports",
+    "goBack": "Go back",
+    "extensionNoSupport": "Your extension does not support lightning payments",
+    "walletConnected": "Wallet successfully connected!",
+    "walletFailed": "Wallet failed to connect"
+  },
+  "walletDisconnect": {
+    "title": "Disconnect Wallet",
+    "confirm": "Are you sure you want to disconnect your bitcoin wallet?",
+    "goBack": "Go Back",
+    "confirmButton": "Confirm"
+  },
+  "zap": {
+    "title": "Send a Zap",
+    "message": "Message (optional)",
+    "amount": "Amount",
+    "zapSplits": "This note has zap splits enabled. You'll be zapping {count} people:",
+    "goBack": "Go back",
+    "sendZap": "Send Zap",
+    "failedToZap": "Failed to zap: {error}",
+    "failedToZapPerson": "Failed to zap {name}: {error}",
+    "zapSent": "Zap successfully sent!"
+  },
+  "notifications": {
+    "mentionsAndReplies": "Mentions & Replies",
+    "reactions": "Reactions",
+    "title": "Notifications",
+    "noNotifications": "No notifications found - check back later!"
+  },
+  "feedList": {
+    "yourFeeds": "Your feeds",
+    "noFeeds": "You don't have any feeds yet.",
+    "otherFeeds": "Other feeds",
+    "otherFeedsDescription": "Below are feeds created by people in your network.",
+    "searchFeeds": "Search feeds"
+  },
+  "listList": {
+    "yourLists": "Your lists",
+    "noLists": "You don't have any lists yet.",
+    "otherLists": "Other lists",
+    "otherListsDescription": "Below are lists created by people in your network.",
+    "searchLists": "Search lists"
+  },
+  "listSelect": {
+    "selectList": "Select a List",
+    "selectListDescription": "Select a list to add your selection to.",
+    "noLists": "You don't have any lists yet."
+  },
+  "feeds": {
+    "noAccount": "Don't have an account?",
+    "clickHere": "Click {link} to join the nostr network."
+  },
+  "search": {
+    "loadingCamera": "Loading your camera..."
+  },
+  "logout": {
+    "clearingDatabase": "Clearing your local database...",
+    "logOut": "Log Out"
+  },
+  "dataExport": {
+    "exportSettings": "Export Settings",
+    "selectEvents": "Select which events you'd like to export",
+    "onlyYourEvents": "Only export your events",
+    "onlyYourEventsInfo": "If enabled, only your events will be exported.",
+    "export": "Export",
+    "errorSaving": "Error saving file. Please try again.",
+    "fileSaved": "File saved to your documents folder as {filename}"
+  },
+  "dataImport": {
+    "importData": "Import Data",
+    "populateDatabase": "Populate {appName}'s database with a nostr export file",
+    "jsonlInfo": "Nostr exports are .jsonl files. Some software may compress exports, be sure to upload an uncompressed version.",
+    "selectFile": "Please select a file to import.",
+    "processing": "Processing your import...",
+    "failedParse": "Failed to parse row #{row}",
+    "importComplete": "Import complete!",
+    "somethingWrong": "Something went wrong!"
+  },
+  "personDetail": {
+    "edit": "Edit",
+    "message": "Message",
+    "wotScore": "WoT Score: {score}"
+  },
+  "personInfo": {
+    "details": "Details",
+    "link": "Link",
+    "publicKey": "Public Key",
+    "nostrAddress": "Nostr Address",
+    "nostrAddressRelays": "Nostr Address Relays",
+    "noRelaysAdvertised": "No relays are advertised at {address}.",
+    "noNostrAddress": "No Nostr address found.",
+    "lightningAddress": "Lightning Address",
+    "noLightningAddress": "No lightning address found.",
+    "profileJson": "Profile JSON"
+  },
+  "labelCreate": {
+    "addToCollection": "Add to collection",
+    "addNote": "Add this note to your collections. You can find your collections on your profile page.",
+    "searchTopics": "Search for existing topics, or create your own.",
+    "selectCollection": "Please select at least one collection.",
+    "tagSaved": "Your tag has been saved!"
+  },
+  "relayReview": {
+    "leaveReview": "Leave a review",
+    "yourRating": "Your rating:",
+    "writeReview": "Write a review...",
+    "send": "Send"
+  },
+  "reportCreate": {
+    "fileReport": "File a Report",
+    "whyReporting": "Why are you reporting this content?",
+    "reportsSentTo": "Reports are sent to {person} for review. No identifying information is included with the report.",
+    "save": "Save",
+    "reportSent": "Your report has been sent!"
+  },
+  "help": {
+    "wotDescription1": "WoT (Web Of Trust) is one of the best ways to determine how trustworthy someone might be, based on your social graph.",
+    "wotDescription2": "In {appName}, this number is equal to how many people you follow that also follow a given person, minus how many people you follow who have muted this person. This allows you to see at a glance if someone is accepted in your network. This helps reduce spam, impostors, and objectionable content.",
+    "wotDescription3": "You can set a minimum web of trust score on your content settings page, which will automatically mute anyone with a lower score than your threshold.",
+    "signerDescription1": "Nostr uses cryptographic key pairs instead of passwords to authenticate users. This means that you and nobody else controls your social identity - however it also requires some care to avoid losing your keys, or having them stolen.",
+    "signerDescription2": "Instead of pasting your private key (also known as an \"nsec\") into every nostr app you use, it's wise to choose a single signer application to keep them for you.",
+    "signerDescription3": "Some signers live on the internet, others can be installed on your phone or computer. If you're new to nostr, we recommend getting started with",
+    "browseSignerApps": "Browse Signer Apps",
+    "dmDescription1": "improves upon the old NIP 04 direct messages standard by adding support for group chats and better metadata hiding.",
+    "dmDescription2": "In the past, a significant amount of information about private messages was public, even though the content of the messages was encrypted. This meant that anyone could find out who you were sending messages to, and how frequently.",
+    "dmDescription3": "The new messaging standard dramatically reduces the amount of information messages leak, and is built on a more robust encryption standard.",
+    "noInfo": "No information on \"{topic}\"",
+    "notFound": "Sorry, we couldn't find any information on \"{topic}\"."
+  },
+  "bech32": {
+    "notFound": "Sorry, we weren't able to find \"{entity}\"."
+  },
+  "chatEnable": {
+    "enableQuestion": "Do you want to enable notes and direct messages?",
+    "disabledByDefault": "By default, notes and direct messages are disabled, since loading them requires {appName} to download and decrypt a lot of data.",
+    "goBack": "Go back",
+    "enableMessages": "Enable Messages"
+  },
+  "channels": {
+    "yourConversations": "Your conversations",
+    "create": "Create",
+    "conversations": "Conversations",
+    "requests": "Requests",
+    "noMessages": "No messages found.",
+    "markAllRead": "Mark all as read",
+    "directMessages": "Direct Messages"
+  },
+  "channelCreate": {
+    "title": "Start a conversation",
+    "whoToTalkTo": "Who do you want to talk to?",
+    "startChat": "Start Chat",
+    "groupChatWarning": "You are using a login method that doesn't yet support group chats. Please consider upgrading your signer to access this feature.",
+    "doesNotHave": "does not have",
+    "doNotHave": "do not have",
+    "missingRelaysWarning": "messaging relays, which means they likely either don't want to receive DMs, or are using a client that does not support nostr group chats."
+  },
+  "noteCreate": {
+    "title": "Create a Note",
+    "whatToSay": "What do you want to say?",
+    "characters": "characters",
+    "words": "words",
+    "hidePreview": "Hide Preview",
+    "showPreview": "Show Preview",
+    "provideDescription": "Please provide a description.",
+    "failedUpload": "Failed to upload file",
+    "signing": "Signing your note...",
+    "generatingWork": "Generating Work...",
+    "uploadingMedia": "Uploading media...",
+    "schedule": "Schedule",
+    "send": "Send"
+  },
+  "noteDelete": {
+    "confirmDelete": "Are you sure you want to delete this event?",
+    "deleteWarning": "This will send a request to the network to delete this event. Be aware that relays may not honor this request.",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "inviteCreate": {
+    "title": "Create an Invite",
+    "description": "Invite links allow you to help your friends onboard to nostr more easily, or get easy access to relays.",
+    "people": "People",
+    "suggestPeople": "Suggest people to follow - this is especially useful for new users.",
+    "relays": "Relays",
+    "inviteRelaysDescription": "Invite people to use specific relays. An invite code can optionally be provided to grant access to private relays.",
+    "claimOptional": "Claim (optional)",
+    "addPeople": "Add people",
+    "addRelays": "Add relays",
+    "createLink": "Create Invite Link"
+  },
+  "inviteAccept": {
+    "title": "You've been invited",
+    "description": "You've been sent a nostr invite link! Take a look below to find some suggestions to improve your experience on nostr.",
+    "people": "People",
+    "peopleDescription": "Here are some people you might be interested in following.",
+    "relays": "Relays",
+    "relaysDescription": "Below are a few relays that might help you connect to the people you want to reach.",
+    "done": "Done"
+  },
+  "content": {
+    "title": "Content Preferences",
+    "heading": "Content Settings",
+    "description": "Control who and what you see on {appName}.",
+    "noteActions": "Note actions",
+    "noteActionsInfo": "Controls which icons appear at the bottom of any given note. Disabling these can reduce how much data {appName} uses.",
+    "showMedia": "Show images and link previews",
+    "showMediaInfo": "If enabled, {appName} will automatically show images and previews for embedded links.",
+    "hideSensitive": "Hide sensitive content",
+    "hideSensitiveInfo": "If enabled, content flagged by the author as potentially sensitive will be hidden.",
+    "minWotScore": "Minimum WoT score",
+    "minWotScoreInfo": "Select a minimum web-of-trust score. Notes from accounts with a lower score will be automatically hidden.",
+    "minPow": "Minimum Proof of Work",
+    "minPowInfo": "Select a minimum proof-of-work difficulty for notes from people outside your network. If a note fails to meet both your minimum web of trust score and minimum proof-of-work difficulty, it will be hidden.",
+    "mutes": "Mutes",
+    "publiclyMutedAccounts": "Publicly muted accounts",
+    "publiclyMutedAccountsInfo": "Notes from these people will be hidden by default. This information may be used to identify impersonators and spammers.",
+    "privatelyMutedAccounts": "Privately muted accounts",
+    "privatelyMutedAccountsInfo": "Notes from these people will be hidden by default. This information will be encrypted.",
+    "publiclyMutedWords": "Publicly muted words",
+    "publiclyMutedWordsInfo": "Notes containing these words will be hidden by default. This information may be used to identify impersonators and spammers.",
+    "privatelyMutedWords": "Privately muted words",
+    "privatelyMutedWordsInfo": "Notes containing these words will be hidden by default. This information will be encrypted.",
+    "publiclyMutedTopics": "Publicly muted topics",
+    "publiclyMutedTopicsInfo": "Notes tagging these topics will be hidden by default. This information may be used to identify impersonators and spammers.",
+    "privatelyMutedTopics": "Privately muted topics",
+    "privatelyMutedTopicsInfo": "Notes tagging these topics will be hidden by default. This information will be encrypted.",
+    "saved": "Your preferences have been saved!"
+  },
+  "keys": {
+    "title": "Keys",
+    "heading": "Your keys",
+    "description": "Your account is identified across the network using a public/private keypair. This allows you to fully own your account, and move to another app if needed.",
+    "publicKey": "Public Key",
+    "publicKeyInfo": "Your public key identifies your account. You can share this with people trying to find you on nostr.",
+    "privateKey": "Private Key",
+    "privateKeyInfo": "Your private key is used to prove your identity by cryptographically signing messages. Do not share this with anyone. Be careful about copying this into other apps - instead, consider using a compatible browser extension to securely store your key.",
+    "bunkerUrl": "Bunker URL",
+    "bunkerUrlInfo": "Your bunker url works like password, and can be used instead of your private key to log in to other apps. This is safer than sharing your private key, but you should still be careful to keep your bunker url private."
+  },
+  "profile": {
+    "title": "Profile",
+    "heading": "About You",
+    "description": "Give people a friendly way to recognize you. We recommend you do not use your real name or share your personal information. The future of the internet is pseudonymous.",
+    "username": "Username",
+    "usernameInfo": "In most clients, this image will be shown on your profile page.",
+    "nip05": "NIP-05 Identifier",
+    "nip05Info": "Enter a NIP-05 address to verify your public key.",
+    "lightningAddress": "Lightning address",
+    "lightningAddressInfo": "Enter a lightning address to enable sending and receiving bitcoin tips.",
+    "website": "Website",
+    "websiteInfo": "Enter any url where people can find out more about you.",
+    "aboutYou": "About you",
+    "aboutYouInfo": "Tell the world about yourself. This will be shown on your profile page.",
+    "profilePicture": "Profile Picture",
+    "profilePictureInfo": "Please be mindful of others and only use small images.",
+    "saved": "Your profile has been saved!"
   },
   "zen": {
     "walletStatus": "ZEN Wallet Status",
@@ -239,5 +558,8 @@
     "totalAcquired": "Total acquired:",
     "validShares": "Currently valid:",
     "distributions": "Distributions:"
+  },
+  "video": {
+    "publish": "Publish"
   }
 }

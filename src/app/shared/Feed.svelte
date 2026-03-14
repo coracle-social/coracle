@@ -183,7 +183,7 @@
 {#if !hideSpinner}
   {#if exhausted}
     <div transition:fly|local={{y: 20, delay: 500}} class="flex flex-col items-center py-24">
-      <img alt="" class="h-20 w-20" src="/images/pumpkin.png" />
+      <img alt="" class="h-20 w-20" src="./images/pumpkin.png" />
       {$_("feed.thatsAll")}
     </div>
   {:else}

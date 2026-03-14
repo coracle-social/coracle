@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import type {RelayProfile} from "@welshman/util"
@@ -148,27 +149,26 @@
     }
   })
 
-  document.title = "Relays"
+  document.title = $_("relayList.title")
 </script>
 
 <FlexColumn bind:element>
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your relays</h2>
+      <h2 class="staatliches text-2xl">{$_("relayList.yourRelays")}</h2>
     </div>
     <Button class="btn btn-accent" on:click={addCustomRelay}>
-      <i class="fa-solid fa-compass" /> Add Relay
+      <i class="fa-solid fa-compass" /> {$_("relayList.addRelay")}
     </Button>
   </div>
   <p>
-    Relays are hubs for your content and connections. At least one is required to interact with the
-    network, but you can join as many as you like.
+    {$_("relayList.relaysDescription")}
   </p>
   {#if currentRelayUrls.length === 0}
     <div class="mt-8 flex items-center justify-center gap-2 text-center">
       <i class="fa fa-triangle-exclamation" />
-      No relays connected
+      {$_("relayList.noRelaysConnected")}
     </div>
   {/if}
   <div class="grid grid-cols-1 gap-4">
@@ -178,11 +178,10 @@
   </div>
   <div class="flex items-center gap-2">
     <i class="fa fa-circle-nodes fa-lg" />
-    <h2 class="staatliches text-2xl">Other relays</h2>
+    <h2 class="staatliches text-2xl">{$_("relayList.otherRelays")}</h2>
   </div>
   <p>
-    Below are relays used by people in your network. Adding these may improve your ability to load
-    profiles and content.
+    {$_("relayList.otherRelaysDescription")}
   </p>
   <Tabs {tabs} {activeTab} {setActiveTab} />
   {#if activeTab === "reviews"}
@@ -194,7 +193,7 @@
       bind:value={q}
       type="text"
       class="flex-grow"
-      placeholder="Search relays or add a custom url">
+      placeholder={$_("relayList.searchPlaceholder")}>
       <i slot="before" class="fa-solid fa-search" />
     </Input>
     {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
@@ -207,11 +206,11 @@
 
 {#if modal}
   <Modal onEscape={closeModal}>
-    <Subheading>Add a relay</Subheading>
-    <p>Enter a relay url below to add it to your relay selections.</p>
+    <Subheading>{$_("relayList.addRelayTitle")}</Subheading>
+    <p>{$_("relayList.addRelayDescription")}</p>
     <Input autofocus bind:value={customRelay} placeholder="wss://...">
       <i slot="before" class="fa fa-server" />
     </Input>
-    <Button class="btn btn-accent" on:click={confirmAddCustomRelay}>Add Relay</Button>
+    <Button class="btn btn-accent" on:click={confirmAddCustomRelay}>{$_("relayList.addRelay")}</Button>
   </Modal>
 {/if}

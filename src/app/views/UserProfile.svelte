@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {pubkey, profilesByPubkey, setProfile} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
@@ -18,65 +19,61 @@
 
   const submit = () => {
     setProfile(values)
-    showInfo("Your profile has been saved!")
+    showInfo($_("profile.saved"))
     router.at("people").of($pubkey).replace()
   }
 
   const values = {...$profilesByPubkey.get($pubkey)}
 
-  document.title = "Profile"
+  document.title = $_("profile.title")
 </script>
 
 <form on:submit|preventDefault={submit} class="relative">
   <div class="mb-4 flex flex-col items-center justify-center">
-    <Heading>About You</Heading>
+    <Heading>{$_("profile.heading")}</Heading>
     <p>
-      Give people a friendly way to recognize you. We recommend you do not use your real name or
-      share your personal information. The future of the internet is
-      <Link class="underline" external href={pseudUrl}>pseudonymous</Link>.
+      {$_("profile.description")}
     </p>
   </div>
   <div class="flex w-full flex-col gap-8">
-    <Field label="Username">
+    <Field label={$_("profile.username")}>
       <Input type="text" name="name" class="flex-grow" bind:value={values.name}>
         <i slot="before" class="fa-solid fa-user-astronaut" />
       </Input>
-      <div slot="info">In most clients, this image will be shown on your profile page.</div>
+      <div slot="info">{$_("profile.usernameInfo")}</div>
     </Field>
-    <Field label="NIP-05 Identifier">
+    <Field label={$_("profile.nip05")}>
       <Input type="text" name="name" class="flex-grow" bind:value={values.nip05}>
         <i slot="before" class="fa-solid fa-user-check" />
       </Input>
       <div slot="info">
-        Enter a <Link class="underline" external href={nip05Url}>NIP-05</Link> address to verify your
-        public key.
+        {$_("profile.nip05Info")}
       </div>
     </Field>
-    <Field label="Lightning address">
+    <Field label={$_("profile.lightningAddress")}>
       <Input type="text" name="name" class="flex-grow" bind:value={values.lud16}>
         <i slot="before" class="fa-solid fa-bolt" />
       </Input>
       <div slot="info">
-        Enter a <Link class="underline" external href={lud16Url}>lightning address</Link> to enable sending
-        and receiving bitcoin tips.
+        {$_("profile.lightningAddressInfo")}
       </div>
     </Field>
-    <Field label="Website">
+    <Field label={$_("profile.website")}>
       <Input type="text" name="name" class="flex-grow" bind:value={values.website}>
         <i slot="before" class="fa-solid fa-link" />
       </Input>
-      <div slot="info">Enter any url where people can find out more about you.</div>
+      <div slot="info">{$_("profile.websiteInfo")}</div>
     </Field>
-    <Field label="About you">
+    <Field label={$_("profile.aboutYou")}>
       <Textarea name="about" bind:value={values.about} />
-      <div slot="info">Tell the world about yourself. This will be shown on your profile page.</div>
+      <div slot="info">{$_("profile.aboutYouInfo")}</div>
     </Field>
-    <Field label="Profile Picture">
+    <Field label={$_("profile.profilePicture")}>
       <ImageInput
         bind:value={values.picture}
         icon="image-portrait"
         opts={{quality: 0.7, maxWidth: 480, maxHeight: 480}} />
-      <p slot="info">Please be mindful of others and only use small images.</p>
+      <p slot="info">{$_("profile.profilePictureInfo")}</p>
     </Field>
   </div>
   <Footer>

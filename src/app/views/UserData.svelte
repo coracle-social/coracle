@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {formatTimestamp} from "@welshman/lib"
   import {Router} from "@welshman/router"
@@ -21,7 +22,7 @@
   let element
   let limit = 50
 
-  document.title = "Data"
+  document.title = $_("userData.title")
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
@@ -31,29 +32,28 @@
 </script>
 
 <div class="mb-4 flex flex-col items-center justify-center">
-  <Heading>App Database</Heading>
-  <p>View, import, and export your local database.</p>
+  <Heading>{$_("userData.heading")}</Heading>
+  <p>{$_("userData.description")}</p>
 </div>
 
 <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
   <Card>
     <FlexColumn class="py-6 text-center">
-      <h3 class="text-xl sm:h-12">Export Database</h3>
+      <h3 class="text-xl sm:h-12">{$_("userData.exportTitle")}</h3>
       <p class="sm:h-24">
-        Click below to download a backup of all {commaFormat(events.length)}
-        events in your database.
+        {$_("userData.exportDescription", {values: {count: commaFormat(events.length)}})}
       </p>
       <div class="flex justify-center">
-        <Link modal class="btn btn-accent" href="/settings/data/export">Create Backup</Link>
+        <Link modal class="btn btn-accent" href="/settings/data/export">{$_("userData.createBackup")}</Link>
       </div>
     </FlexColumn>
   </Card>
   <Card>
     <FlexColumn class="py-6 text-center">
-      <h3 class="text-xl sm:h-12">Import Database</h3>
-      <p class="sm:h-24">Upload a nostr export file to pull events into your database.</p>
+      <h3 class="text-xl sm:h-12">{$_("userData.importTitle")}</h3>
+      <p class="sm:h-24">{$_("userData.importDescription")}</p>
       <div class="flex justify-center">
-        <Link modal class="btn btn-accent" href="/settings/data/import">Upload Backup</Link>
+        <Link modal class="btn btn-accent" href="/settings/data/import">{$_("userData.uploadBackup")}</Link>
       </div>
     </FlexColumn>
   </Card>
@@ -63,9 +63,9 @@
   <thead>
     <tr>
       <th />
-      <th class="px-2 py-1 text-left">Created</th>
-      <th class="px-2 py-1 text-left">Author</th>
-      <th class="py-1 pl-2 text-left">Kind</th>
+      <th class="px-2 py-1 text-left">{$_("userData.created")}</th>
+      <th class="px-2 py-1 text-left">{$_("userData.author")}</th>
+      <th class="py-1 pl-2 text-left">{$_("userData.kind")}</th>
     </tr>
   </thead>
   <tbody>

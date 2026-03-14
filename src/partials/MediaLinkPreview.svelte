@@ -1,17 +1,36 @@
 <script lang="ts">
   import {ellipsize, postJson} from "@welshman/lib"
-  import {dufflepud, imgproxy} from "src/engine"
+  import {dufflepud, imgproxy, getSetting} from "src/engine"
 
   export let url: string
 
-  const loadPreview = async () => {
-    const json = await postJson(dufflepud("link/preview"), {url})
+  const fetchOGMetadata = async (targetUrl: string) => {
+    const res = await fetch(targetUrl, {signal: AbortSignal.timeout(5000)})
+    const html = await res.text()
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    const og = (name: string) =>
+      doc.querySelector(`meta[property="og:${name}"]`)?.getAttribute("content")
+    const title = og("title") || doc.querySelector("title")?.textContent
+    const description = og("description")
+    const image = og("image")
 
-    if (!json?.title && !json?.image) {
-      throw new Error("Failed to load link preview")
+    if (!title && !image) throw new Error("No OG metadata found")
+
+    return {title, description, image}
+  }
+
+  const loadPreview = async () => {
+    // Try Dufflepud first if configured
+    const dufflepudUrl = getSetting("dufflepud_url")
+    if (dufflepudUrl) {
+      try {
+        const json = await postJson(dufflepud("link/preview"), {url})
+        if (json?.title || json?.image) return json
+      } catch {}
     }
 
-    return json
+    // Client-side fallback: fetch URL directly and parse OG tags
+    return await fetchOGMetadata(url)
   }
 
   const onError = () => {

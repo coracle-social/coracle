@@ -29,13 +29,11 @@ export default defineConfig(async () => {
     },
     build: {
       sourcemap: true,
-      rollupOptions: {
-        external: ["nostr-signer-capacitor-plugin"],
-      },
     },
     resolve: {
       alias: {
         src: path.resolve(__dirname, "src"),
+        "nostr-signer-capacitor-plugin": path.resolve(__dirname, "src/util/nostr-signer-stub.js"),
       },
     },
     plugins: [

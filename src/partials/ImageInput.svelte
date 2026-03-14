@@ -8,6 +8,7 @@
   import Button from "src/partials/Button.svelte"
   import {showWarning} from "src/partials/Toast.svelte"
   import {ensureProto} from "src/util/misc"
+  import {getVerifiedUPlanet} from "src/util/uplanet-detect"
   import type {CompressorOpts} from "src/util/html"
   import {listenForFile} from "src/util/html"
   import {env, uploadFile} from "src/engine"
@@ -16,12 +17,30 @@
   export let value = null
   export let opts: CompressorOpts = {}
 
-  const url = ensureProto(
-    getTagValue("server", getListTags($userBlossomServerList)) || first(env.BLOSSOM_URLS),
-  )
+  const userServer = getTagValue("server", getListTags($userBlossomServerList))
+  const up = !userServer && getVerifiedUPlanet()
+  const url = ensureProto(userServer || first(env.BLOSSOM_URLS))
 
   let input, loading
   let isOpen = false
+
+  const doUpload = async (file: File) => {
+    // Try UPlanet upload first when detected and no user-configured server
+    if (up) {
+      try {
+        const formData = new FormData()
+        formData.append("file", file)
+        const res = await fetch(up.uploadUrl, {method: "POST", body: formData})
+        if (res.ok) {
+          const data = await res.json()
+          if (data.url) return data.url
+        }
+      } catch {} // fall through to Blossom
+    }
+
+    const result = await uploadFile(url, file, opts)
+    return result.url
+  }
 
   $: {
     if (input) {
@@ -30,9 +49,7 @@
           loading = true
 
           try {
-            const result = await uploadFile(url, inputFiles[0], opts)
-
-            value = result.url
+            value = await doUpload(inputFiles[0])
           } catch (e) {
             console.error(e)
             showWarning(e.toString())

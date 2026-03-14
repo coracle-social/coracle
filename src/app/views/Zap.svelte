@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
+  import {get} from "svelte/store"
   import {request} from "@welshman/net"
   import {nth, sum} from "@welshman/lib"
   import {Router, addMinimalFallbacks} from "@welshman/router"
@@ -44,6 +46,8 @@
 
   const back = () => router.pop()
 
+  const t = () => get(_)
+
   const sendZap = async () => {
     const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
     const percent = getSetting("platform_zap_split") as number
@@ -67,7 +71,7 @@
         }
 
         if (!zapper) {
-          return showWarning(`Failed to zap: no zapper found`)
+          return showWarning(t()("zap.failedToZap", {values: {error: "no zapper found"}}))
         }
 
         const router = Router.get()
@@ -83,7 +87,7 @@
           if (pubkey === env.PLATFORM_PUBKEY) {
             continue
           } else {
-            return showWarning(`Failed to zap: ${res.error || "no error given"}`)
+            return showWarning(t()("zap.failedToZap", {values: {error: res.error || "no error given"}}))
           }
         }
 
@@ -106,7 +110,7 @@
         } catch (e) {
           const message = String(e).replace(/^.*Error: /, "")
 
-          showWarning(`Failed to zap ${displayProfileByPubkey(pubkey)}: ${message}`)
+          showWarning(t()("zap.failedToZapPerson", {values: {name: displayProfileByPubkey(pubkey), error: message}}))
           hasError = true
         }
       }
@@ -114,7 +118,7 @@
       await Promise.all(requests)
 
       if (!hasError) {
-        showInfo("Zap successfully sent!")
+        showInfo(t()("zap.zapSent"))
         back()
       }
     } finally {
@@ -137,13 +141,13 @@
 
 <div class="flex flex-col gap-6">
   <div>
-    <h2 class="staatliches text-2xl">Send a Zap</h2>
+    <h2 class="staatliches text-2xl">{$_("zap.title")}</h2>
     <p>To <PersonLink underline pubkey={splits[0][1]} /></p>
   </div>
-  <FieldInline label="Message (optional)">
+  <FieldInline label={$_("zap.message")}>
     <Input bind:value={content} />
   </FieldInline>
-  <FieldInline label="Amount">
+  <FieldInline label={$_("zap.amount")}>
     <Input type="number" bind:value={amount} on:input={onAmountChange} />
   </FieldInline>
   <Input
@@ -156,7 +160,7 @@
   {#if splits.length > 1}
     {@const pubkeys = splits.map(nth(1))}
     <div class="flex items-center gap-1 text-sm">
-      <p>This note has zap splits enabled. You'll be zapping {splits.length} people:</p>
+      <p>{$_("zap.zapSplits", {values: {count: splits.length}})}</p>
       <Link modal href={router.at("people/list").qp({pubkeys}).toString()}>
         <PersonCircles class="h-5 w-5" {pubkeys} />
       </Link>
@@ -165,13 +169,13 @@
   <div class="flex justify-between">
     <Button class="btn" on:click={back}>
       <i class="fa fa-chevron-left" />
-      Go back
+      {$_("zap.goBack")}
     </Button>
     <Button class="btn btn-accent" on:click={sendZap} {loading}>
       {#if !loading}
         <i class="fa fa-bolt" />
       {/if}
-      Send Zap
+      {$_("zap.sendZap")}
     </Button>
   </div>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {identity} from "@welshman/lib"
   import {makeEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
@@ -31,7 +32,7 @@
 
   const submit = () => {
     if (names.length === 0) {
-      return showWarning("Please select at least one collection.")
+      return showWarning($_("labelCreate.selectCollection"))
     }
 
     const tags = [
@@ -46,7 +47,7 @@
       relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     })
 
-    showInfo("Your tag has been saved!")
+    showInfo($_("labelCreate.tagSaved"))
     router.pop()
   }
 
@@ -60,9 +61,9 @@
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
-    <Heading class="text-center">Add to collection</Heading>
+    <Heading class="text-center">{$_("labelCreate.addToCollection")}</Heading>
     <p class="text-center">
-      Add this note to your collections. You can find your collections on your profile page.
+      {$_("labelCreate.addNote")}
     </p>
     <SelectButton
       multiple
@@ -77,7 +78,7 @@
           search={$topicSearch.searchValues}
           termToItem={identity}
           onChange={onTopicChange} />
-        <div slot="info">Search for existing topics, or create your own.</div>
+        <div slot="info">{$_("labelCreate.searchTopics")}</div>
       </Field>
     </div>
     <div class="flex justify-end">

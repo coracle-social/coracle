@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {shouldUnwrap} from "@welshman/app"
   import Button from "src/partials/Button.svelte"
   import {loadMessages, env} from "src/engine"
@@ -20,11 +21,10 @@
 </script>
 
 <form class="column gap-4" on:submit|preventDefault={submit}>
-  <h1 class="text-2xl font-bold">Do you want to enable notes and direct messages?</h1>
+  <h1 class="text-2xl font-bold">{$_("chatEnable.enableQuestion")}</h1>
   <br />
   <p>
-    By default, notes and direct messages are disabled, since loading them requires
-    {env.CLIENT_NAME} to download and decrypt a lot of data.
+    {$_("chatEnable.disabledByDefault", {values: {appName: env.CLIENT_NAME}})}
   </p>
   <br />
   <p>
@@ -35,10 +35,10 @@
   <div class="flex justify-between">
     <Button class="btn" on:click={back}>
       <span class="fa fa-arrow-left" />
-      Go back
+      {$_("chatEnable.goBack")}
     </Button>
     <Button class="btn btn-accent" type="submit">
-      Enable Messages
+      {$_("chatEnable.enableMessages")}
       <span class="fa fa-arrow-right" />
     </Button>
   </div>

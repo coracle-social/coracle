@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {asSignedEvent, makeEvent} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
@@ -41,7 +42,7 @@
         .getUrls(),
     })
 
-    showInfo("Your report has been sent!")
+    showInfo($_("reportCreate.reportSent"))
     router.pop()
   }
 
@@ -52,15 +53,14 @@
 
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
-    <Heading class="text-center">File a Report</Heading>
-    <Field label="Why are you reporting this content?">
+    <Heading class="text-center">{$_("reportCreate.fileReport")}</Heading>
+    <Field label={$_("reportCreate.whyReporting")}>
       <Textarea bind:value={message} />
       <div slot="info">
-        Reports are sent to <PersonLink pubkey={tagr} /> for review. No identifying information is included
-        with the report.
+        {$_("reportCreate.reportsSentTo", {values: {person: "∅"}}).split("∅")[0]}<PersonLink pubkey={tagr} />{$_("reportCreate.reportsSentTo", {values: {person: "∅"}}).split("∅")[1]}
       </div>
     </Field>
     <FeedItem note={event} showMedia={false} />
-    <Button class="btn" type="submit">Save</Button>
+    <Button class="btn" type="submit">{$_("reportCreate.save")}</Button>
   </FlexColumn>
 </form>

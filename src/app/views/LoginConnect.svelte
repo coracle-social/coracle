@@ -21,8 +21,11 @@
   import Subheading from "src/partials/Subheading.svelte"
   import Button from "src/partials/Button.svelte"
   import {router} from "src/app/util/router"
+  import {detectUPlanetServices} from "src/util/uplanet-detect"
   import {env, myLoad} from "src/engine"
   import {loadUserData} from "src/app/state"
+
+  const uplanet = detectUPlanetServices()
 
   const t = Date.now()
 
@@ -105,6 +108,11 @@
     <p class="text-2xl">{$_("login.connectFailed")}</p>
   {:else}
     <p class="text-2xl">{$_("login.connectSearching")}</p>
+    {#if uplanet}
+      <p class="text-sm text-neutral-400">
+        {$_("login.uplanetDetected", {values: {relay: uplanet.relayUrl}})}
+      </p>
+    {/if}
     <p>
       {$_("login.selectRelaysHint")}
       <Button

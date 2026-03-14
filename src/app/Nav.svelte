@@ -105,46 +105,44 @@
   </div>
 {/if}
 
-<!-- bottom nav -->
+<!-- top nav (mobile) -->
 {#if innerWidth < 1024}
   <div
-    class="px-sai pb-sai fixed bottom-0 left-0 right-0 z-nav border-neutral-600 bg-tinted-800 dark:bg-black">
-    <div class="flex items-center justify-between rounded-t-xl px-4 py-2">
-      <div class="w-1/3">
+    class="px-sai fixed left-0 right-0 top-0 z-nav border-b border-neutral-600 bg-tinted-800 dark:bg-black">
+    <div class="flex items-center justify-between px-4 py-2">
+      <div class="flex items-center gap-2">
         <div
-          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-solid border-neutral-600 text-accent dark:border-tinted-600 dark:bg-tinted-800"
+          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-accent"
           on:click={openSearch}>
-          <i class="fa fa-search -mb-1 -mr-1 text-xl" />
+          <i class="fa fa-search text-xl" />
         </div>
-      </div>
-      <div>
         {#if $signer}
-          <Button class="btn btn-accent" on:click={createNote}>{$_("nav.post")}</Button>
+          <Button class="btn btn-accent btn-sm" on:click={createNote}>{$_("nav.post")}</Button>
         {:else if !$pubkey}
-          <Link modal class="btn btn-accent" href="/login">{$_("nav.logIn")}</Link>
+          <Link modal class="btn btn-accent btn-sm" href="/login">{$_("nav.logIn")}</Link>
         {/if}
       </div>
-      <div class="relative flex w-1/3 justify-end">
+      <div class="relative flex items-center">
         <div class="flex cursor-pointer items-center" on:click={openMenu}>
+          {#if $signer}
+            <PersonCircle
+              class="h-9 w-9 border-2 border-white dark:border-black"
+              pubkey={$pubkey} />
+            {#if $hasNewNotifications || $hasNewMessages}
+              <div class="absolute right-0 top-0 h-2 w-2 rounded bg-accent" />
+            {/if}
+          {/if}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
             fill="currentColor"
-            class="pt-1 text-neutral-600 dark:text-tinted-600"
-            width="36"
-            height="36">
+            class="ml-1 text-neutral-600 dark:text-tinted-600"
+            width="28"
+            height="28">
             <path
               fill="currentColor"
               d="M0 88C0 74.7 10.7 64 24 64H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24H424c13.3 0 24 10.7 24 24s-10.7 24-24 24H24c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24s10.7-24 24-24H424c13.3 0 24 10.7 24 24z" />
           </svg>
-          {#if $signer}
-            <PersonCircle
-              class="-ml-4 h-11 w-11 border-4 border-white dark:border-black"
-              pubkey={$pubkey} />
-            {#if $hasNewNotifications || $hasNewMessages}
-              <div class="absolute right-1 top-1 h-2 w-2 rounded bg-accent" />
-            {/if}
-          {/if}
         </div>
       </div>
     </div>

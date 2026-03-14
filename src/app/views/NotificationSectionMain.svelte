@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {ago, groupBy, HOUR, int} from "@welshman/lib"
   import {onMount} from "svelte"
   import {mainNotifications, setChecked} from "src/engine"
@@ -29,6 +30,6 @@
       <NoteInteractions {context} {event} />
     </NotificationItem>
   {:else}
-    <p class="py-12 text-center">No notifications found - check back later!</p>
+    <p class="py-12 text-center">{$_("notifications.noNotifications")}</p>
   {/each}
 </FlexColumn>

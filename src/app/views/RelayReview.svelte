@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onDestroy} from "svelte"
   import {makeEvent} from "@welshman/util"
   import {Router, addMaximalFallbacks} from "@welshman/router"
@@ -40,7 +41,7 @@
 
   const editor = makeEditor({
     autofocus: true,
-    placeholder: "Write a review...",
+    placeholder: $_("relayReview.writeReview"),
     submit: onSubmit,
   })
 
@@ -51,18 +52,18 @@
 
 <form on:submit|preventDefault={onSubmit}>
   <Content size="lg">
-    <Heading class="text-center">Leave a review</Heading>
+    <Heading class="text-center">{$_("relayReview.leaveReview")}</Heading>
     <div class="flex w-full flex-col gap-4">
       <div class="flex flex-col gap-1">
         <div class="flex items-center justify-between gap-2">
-          <strong>Your rating:</strong>
+          <strong>{$_("relayReview.yourRating")}</strong>
           <Rating bind:value={rating} />
         </div>
       </div>
       <AltColor background class="overflow-hidden rounded">
         <EditorContent {editor} class="min-h-24 bg-white p-3 text-black" />
       </AltColor>
-      <Button class="btn flex-grow" type="submit">Send</Button>
+      <Button class="btn flex-grow" type="submit">{$_("relayReview.send")}</Button>
     </div>
   </Content>
 </form>

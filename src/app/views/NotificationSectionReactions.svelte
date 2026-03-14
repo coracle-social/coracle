@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onMount} from "svelte"
   import {groupBy, ago, int, DAY} from "@welshman/lib"
   import {pubkey} from "@welshman/app"
@@ -41,6 +42,6 @@
       <NoteReactions {context} {event} />
     </NotificationItem>
   {:else}
-    <p class="py-12 text-center">No notifications found - check back later!</p>
+    <p class="py-12 text-center">{$_("notifications.noNotifications")}</p>
   {/each}
 </FlexColumn>

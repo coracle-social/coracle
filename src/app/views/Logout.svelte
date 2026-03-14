@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {fly} from "src/util/transition"
   import {clearStorage} from "src/engine/storage"
   import Content from "src/partials/Content.svelte"
@@ -12,9 +13,9 @@
     window.location.href = "/notes"
   }, 2000)
 
-  document.title = "Log Out"
+  document.title = $_("logout.logOut")
 </script>
 
 <Content size="lg" class="text-center">
-  <div in:fly={{y: 20}}>Clearing your local database...</div>
+  <div in:fly={{y: 20}}>{$_("logout.clearingDatabase")}</div>
 </Content>

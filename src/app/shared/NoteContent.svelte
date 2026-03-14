@@ -6,6 +6,7 @@
   import NoteContentKind3 from "src/app/shared/NoteContentKind3.svelte"
   import NoteContentKind7 from "src/app/shared/NoteContentKind7.svelte"
   import NoteContentKind20 from "src/app/shared/NoteContentKind20.svelte"
+  import NoteContentKind21 from "src/app/shared/NoteContentKind21.svelte"
   import NoteContentKind40 from "src/app/shared/NoteContentKind40.svelte"
   import NoteContentKind1111 from "src/app/shared/NoteContentKind1111.svelte"
   import NoteContentKind1808 from "src/app/shared/NoteContentKind1808.svelte"
@@ -86,6 +87,8 @@
     <NoteContentKindRelay {note} kind={10050} />
   {:else if note.kind === 30009}
     <NoteContentKind30009 {note} {showMedia} />
+  {:else if note.kind === 21 || note.kind === 22}
+    <NoteContentKind21 {note} {showMedia} />
   {:else if note.kind === 30023}
     <NoteContentKind30023 {note} {showEntire} {showMedia} />
   {:else if note.kind === 30311}

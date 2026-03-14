@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {nwc} from "@getalby/sdk"
   import {LOCALE} from "@welshman/lib"
   import {displayRelayUrl, fromMsats} from "@welshman/util"
@@ -13,16 +14,16 @@
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-server fa-lg" />
-      <h2 class="staatliches text-2xl">Your Wallet</h2>
+      <h2 class="staatliches text-2xl">{$_("wallet.title")}</h2>
     </div>
     {#if $session?.wallet}
       <div class="flex items-center gap-2 text-sm text-success">
         <i class="fa fa-check" />
-        Connected
+        {$_("wallet.connected")}
       </div>
     {:else}
       <Link modal class="btn btn-accent" href={router.at("settings/wallet/connect").toString()}>
-        Connect Wallet
+        {$_("wallet.connectWallet")}
       </Link>
     {/if}
   </div>
@@ -32,11 +33,10 @@
         {@const {node, version} = $session.wallet.info}
         <div class="flex flex-col justify-between gap-2 lg:flex-row">
           <p>
-            Connected to <strong>{node?.alias || version || "unknown wallet"}</strong>
-            via <strong>{$session.wallet.type}</strong>
+            {$_("wallet.connectedTo", {values: {name: node?.alias || version || "unknown wallet", type: $session.wallet.type}})}
           </p>
           <p class="flex gap-2 whitespace-nowrap">
-            Balance:
+            {$_("wallet.balance")}
             {#await getWebLn()
               ?.enable()
               .then(() => getWebLn().getBalance())}
@@ -46,17 +46,17 @@
             {:catch}
               [unknown]
             {/await}
-            sats
+            {$_("wallet.sats")}
           </p>
         </div>
       {:else if $session.wallet.type === "nwc"}
         {@const {lud16, relayUrl, nostrWalletConnectUrl} = $session.wallet.info}
         <div class="flex flex-col justify-between gap-2 lg:flex-row">
           <p>
-            Connected to <strong>{lud16}</strong> via <strong>{displayRelayUrl(relayUrl)}</strong>
+            {$_("wallet.connectedTo", {values: {name: lud16, type: displayRelayUrl(relayUrl)}})}
           </p>
           <p class="flex gap-2 whitespace-nowrap">
-            Balance:
+            {$_("wallet.balance")}
             {#await new nwc.NWCClient({nostrWalletConnectUrl}).getBalance()}
               <span class="loading loading-spinner loading-sm"></span>
             {:then res}
@@ -64,16 +64,16 @@
             {:catch}
               [unknown]
             {/await}
-            sats
+            {$_("wallet.sats")}
           </p>
         </div>
       {/if}
       <Link modal class="btn" href={router.at("settings/wallet/disconnect").toString()}>
         <Icon icon="close-circle" />
-        Disconnect Wallet
+        {$_("wallet.disconnectWallet")}
       </Link>
     {:else}
-      <p class="py-12 text-center opacity-75">No wallet connected</p>
+      <p class="py-12 text-center opacity-75">{$_("wallet.noWalletConnected")}</p>
     {/if}
   </div>
 </div>

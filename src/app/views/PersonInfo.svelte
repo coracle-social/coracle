@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import * as nip19 from "nostr-tools/nip19"
   import {Router} from "@welshman/router"
   import {parseJson} from "@welshman/lib"
@@ -25,38 +26,38 @@
   $: lightningAddress = $profile?.lud16 || $profile?.lud06
 </script>
 
-<h1 class="staatliches text-2xl">Details</h1>
-<CopyValue label="Link" value={nip19.nprofileEncode({pubkey, relays})} />
-<CopyValue label="Public Key" encode={nip19.npubEncode} value={pubkey} />
+<h1 class="staatliches text-2xl">{$_("personInfo.details")}</h1>
+<CopyValue label={$_("personInfo.link")} value={nip19.nprofileEncode({pubkey, relays})} />
+<CopyValue label={$_("personInfo.publicKey")} encode={nip19.npubEncode} value={pubkey} />
 {#if $handle}
   {@const display = displayHandle($handle)}
-  <CopyValue label="Nostr Address" value={display} />
-  <strong>Nostr Address Relays</strong>
+  <CopyValue label={$_("personInfo.nostrAddress")} value={display} />
+  <strong>{$_("personInfo.nostrAddressRelays")}</strong>
   {#each $handle.relays || [] as url}
     <RelayCard {url} />
   {:else}
     <p class="flex gap-2 items-center">
       <i class="fa fa-info-circle" />
-      No relays are advertised at {display}.
+      {$_("personInfo.noRelaysAdvertised", {values: {address: display}})}
     </p>
   {/each}
 {:else}
   <p>
     <i class="fa-solid fa-info-circle" />
-    No Nostr address found.
+    {$_("personInfo.noNostrAddress")}
   </p>
 {/if}
 {#if lightningAddress}
-  <CopyValue label="Lightning Address" value={lightningAddress} />
+  <CopyValue label={$_("personInfo.lightningAddress")} value={lightningAddress} />
 {:else}
   <p>
     <i class="fa-solid fa-info-circle" />
-    No lightning address found.
+    {$_("personInfo.noLightningAddress")}
   </p>
 {/if}
 {#if $profile}
   <Field>
-    <p slot="label">Profile JSON</p>
+    <p slot="label">{$_("personInfo.profileJson")}</p>
     <div class="relative rounded bg-tinted-700 p-1">
       <pre class="overflow-auto text-xs"><code>{json}</code></pre>
       <Button class="absolute right-1 top-1" on:click={copyJson}>

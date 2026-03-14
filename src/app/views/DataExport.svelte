@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {repository, pubkey, profilesByPubkey} from "@welshman/app"
   import {Capacitor} from "@capacitor/core"
   import {Filesystem, Directory, Encoding} from "@capacitor/filesystem"
@@ -26,10 +27,10 @@
         encoding: Encoding.UTF8,
       })
 
-      showInfo(`File saved to your documents folder as ${filename}.jsonl`)
+      showInfo($_("dataExport.fileSaved", {values: {filename: `${filename}.jsonl`}}))
     } catch (error) {
       console.error("Error saving file:", error)
-      showInfo("Error saving file. Please try again.")
+      showInfo($_("dataExport.errorSaving"))
     }
   }
 
@@ -65,15 +66,15 @@
 <form on:submit|preventDefault={submit}>
   <FlexColumn>
     <div class="mb-4 flex flex-col items-center justify-center">
-      <Heading>Export Settings</Heading>
-      <p>Select which events you'd like to export</p>
+      <Heading>{$_("dataExport.exportSettings")}</Heading>
+      <p>{$_("dataExport.selectEvents")}</p>
     </div>
     <div class="flex w-full flex-col gap-8">
-      <FieldInline label="Only export your events">
+      <FieldInline label={$_("dataExport.onlyYourEvents")}>
         <Toggle bind:value={userOnly} />
-        <p slot="info">If enabled, only your events will be exported.</p>
+        <p slot="info">{$_("dataExport.onlyYourEventsInfo")}</p>
       </FieldInline>
-      <Button class="btn" type="submit">Export</Button>
+      <Button class="btn" type="submit">{$_("dataExport.export")}</Button>
     </div>
   </FlexColumn>
 </form>

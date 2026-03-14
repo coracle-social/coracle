@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {stripProtocol} from "@welshman/lib"
   import {
     PINS,
@@ -140,7 +141,7 @@
         <Link
           class="btn w-full !bg-neutral-800 dark:!bg-white"
           href={router.at("settings/profile").toString()}>
-          Edit
+          {$_("personDetail.edit")}
         </Link>
       {:else if $session}
         <Button
@@ -150,7 +151,7 @@
         <Link
           class="btn w-full {$following ? '' : 'btn-low'}"
           href={router.at("channels").of([$session.pubkey, pubkey]).toString()}>
-          Message
+          {$_("personDetail.message")}
         </Link>
       {/if}
     </div>
@@ -175,7 +176,7 @@
                     class="flex items-center gap-1"
                     href="/help/web-of-trust">
                     <i class="fa fa-info-circle" />
-                    WoT Score: {wotScore}
+                    {$_("personDetail.wotScore", {values: {score: wotScore}})}
                   </Link>
                 </Popover>
               </div>

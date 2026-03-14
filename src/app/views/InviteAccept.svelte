@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {session} from "@welshman/app"
   import {normalizeRelayUrl} from "@welshman/util"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -21,17 +22,16 @@
 
 {#if $session}
   <div class="mb-4 flex flex-col items-center justify-center">
-    <Heading>You've been invited</Heading>
+    <Heading>{$_("inviteAccept.title")}</Heading>
     <p>
-      You've been sent a nostr invite link! Take a look below to find some suggestions to improve
-      your experience on nostr.
+      {$_("inviteAccept.description")}
     </p>
   </div>
   {#if people.length > 0}
     <Card>
       <FlexColumn>
-        <Subheading>People</Subheading>
-        <p>Here are some people you might be interested in following.</p>
+        <Subheading>{$_("inviteAccept.people")}</Subheading>
+        <p>{$_("inviteAccept.peopleDescription")}</p>
         <PersonList pubkeys={people} />
       </FlexColumn>
     </Card>
@@ -39,8 +39,8 @@
   {#if parsedRelays.length > 0}
     <Card>
       <FlexColumn>
-        <Subheading>Relays</Subheading>
-        <p>Below are a few relays that might help you connect to the people you want to reach.</p>
+        <Subheading>{$_("inviteAccept.relays")}</Subheading>
+        <p>{$_("inviteAccept.relaysDescription")}</p>
         <div class="grid grid-cols-1 gap-4">
           {#each parsedRelays as relay (relay.url)}
             <RelayCard url={relay.url} claim={relay.claim} />
@@ -49,7 +49,7 @@
       </FlexColumn>
     </Card>
   {/if}
-  <Link class="btn btn-accent" href="/">Done</Link>
+  <Link class="btn btn-accent" href="/">{$_("inviteAccept.done")}</Link>
 {:else}
   <Onboarding invite={{people, relays, parsedRelays}} />
 {/if}

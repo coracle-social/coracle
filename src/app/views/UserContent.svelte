@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {identity, uniq, equals} from "@welshman/lib"
   import {tagger, getTagValues} from "@welshman/util"
   import {topicSearch, setMutes, userMuteList} from "@welshman/app"
@@ -49,7 +50,7 @@
       })
     }
 
-    showInfo("Your preferences have been saved!")
+    showInfo($_("content.saved"))
   }
 
   let mutesDirty = false
@@ -63,48 +64,46 @@
     ...$userSettings.muted_words,
   ])
 
-  document.title = "Content Preferences"
+  document.title = $_("content.title")
 </script>
 
 <form on:submit|preventDefault={submit}>
   <div class="mb-4 flex flex-col items-center justify-center">
-    <Heading>Content Settings</Heading>
-    <p>Control who and what you see on {appName}.</p>
+    <Heading>{$_("content.heading")}</Heading>
+    <p>{$_("content.description", {values: {appName}})}</p>
   </div>
   <div class="flex w-full flex-col gap-8">
-    <Field label="Note actions">
+    <Field label={$_("content.noteActions")}>
       <SelectButton multiple bind:value={values.note_actions} options={noteActionOptions} />
       <p slot="info">
-        Controls which icons appear at the bottom of any given note. Disabling these can reduce how
-        much data {appName} uses.
+        {$_("content.noteActionsInfo", {values: {appName}})}
       </p>
     </Field>
-    <FieldInline label="Show images and link previews">
+    <FieldInline label={$_("content.showMedia")}>
       <Toggle bind:value={values.show_media} />
       <p slot="info">
-        If enabled, {appName} will automatically show images and previews for embedded links.
+        {$_("content.showMediaInfo", {values: {appName}})}
       </p>
     </FieldInline>
-    <FieldInline label="Hide sensitive content">
+    <FieldInline label={$_("content.hideSensitive")}>
       <Toggle bind:value={values.hide_sensitive} />
       <p slot="info">
-        If enabled, content flagged by the author as potentially sensitive will be hidden.
+        {$_("content.hideSensitiveInfo")}
       </p>
     </FieldInline>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Minimum WoT score</strong>
+        <strong>{$_("content.minWotScore")}</strong>
         <div>{values.min_wot_score}</div>
       </div>
       <Input type="range" bind:value={values.min_wot_score} min={-10} max={10} />
       <p slot="info">
-        Select a minimum <Link class="underline" modal href="/help/web-of-trust">web-of-trust</Link>
-        score. Notes from accounts with a lower score will be automatically hidden.
+        {$_("content.minWotScoreInfo")}
       </p>
     </Field>
     <Field>
       <div slot="label" class="flex justify-between">
-        <strong>Minimum Proof of Work</strong>
+        <strong>{$_("content.minPow")}</strong>
         <div>
           difficulty {values.min_pow_difficulty} (<WorkEstimate
             difficulty={values.min_pow_difficulty} />)
@@ -112,26 +111,23 @@
       </div>
       <Input type="range" bind:value={values.min_pow_difficulty} min={0} max={32} />
       <p slot="info">
-        Select a minimum proof-of-work difficulty for notes from people outside your network. If a
-        note fails to meet both your minimum web of trust score and minimum proof-of-work
-        difficulty, it will be hidden.
+        {$_("content.minPowInfo")}
       </p>
     </Field>
-    <p>Mutes</p>
-    <Field label="Publicly muted accounts">
+    <p>{$_("content.mutes")}</p>
+    <Field label={$_("content.publiclyMutedAccounts")}>
       <PersonSelect multiple bind:value={publiclyMutedPubkeys} onChange={setMutesDirty} />
       <p slot="info">
-        Notes from these people will be hidden by default. This information may be used to identify
-        impersonators and spammers.
+        {$_("content.publiclyMutedAccountsInfo")}
       </p>
     </Field>
-    <Field label="Privately muted accounts">
+    <Field label={$_("content.privatelyMutedAccounts")}>
       <PersonSelect multiple bind:value={privatelyMutedPubkeys} onChange={setMutesDirty} />
       <p slot="info">
-        Notes from these people will be hidden by default. This information will be encrypted.
+        {$_("content.privatelyMutedAccountsInfo")}
       </p>
     </Field>
-    <Field label="Publicly muted words">
+    <Field label={$_("content.publiclyMutedWords")}>
       <SearchSelect
         multiple
         bind:value={publiclyMutedWords}
@@ -139,11 +135,10 @@
         onChange={setMutesDirty}
         termToItem={identity} />
       <p slot="info">
-        Notes containing these words will be hidden by default. This information may be used to
-        identify impersonators and spammers.
+        {$_("content.publiclyMutedWordsInfo")}
       </p>
     </Field>
-    <Field label="Privately muted words">
+    <Field label={$_("content.privatelyMutedWords")}>
       <SearchSelect
         multiple
         bind:value={privatelyMutedWords}
@@ -151,10 +146,10 @@
         onChange={setMutesDirty}
         termToItem={identity} />
       <p slot="info">
-        Notes containing these words will be hidden by default. This information will be encrypted.
+        {$_("content.privatelyMutedWordsInfo")}
       </p>
     </Field>
-    <Field label="Publicly muted topics">
+    <Field label={$_("content.publiclyMutedTopics")}>
       <SearchSelect
         multiple
         bind:value={publiclyMutedTopics}
@@ -162,11 +157,10 @@
         onChange={setMutesDirty}
         termToItem={identity} />
       <p slot="info">
-        Notes tagging these topics will be hidden by default. This information may be used to
-        identify impersonators and spammers.
+        {$_("content.publiclyMutedTopicsInfo")}
       </p>
     </Field>
-    <Field label="Privately muted topics">
+    <Field label={$_("content.privatelyMutedTopics")}>
       <SearchSelect
         multiple
         bind:value={privatelyMutedTopics}
@@ -174,7 +168,7 @@
         onChange={setMutesDirty}
         termToItem={identity} />
       <p slot="info">
-        Notes tagging these topics will be hidden by default. This information will be encrypted.
+        {$_("content.privatelyMutedTopicsInfo")}
       </p>
     </Field>
   </div>

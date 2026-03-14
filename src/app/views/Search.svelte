@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {onDestroy} from "svelte"
   import {throttle} from "throttle-debounce"
   import QrScanner from "qr-scanner"
@@ -65,7 +66,7 @@
 
 {#if scanner}
   {#await scanner}
-    <Spinner>Loading your camera...</Spinner>
+    <Spinner>{$_("search.loadingCamera")}</Spinner>
   {:then}
     <span />
   {/await}

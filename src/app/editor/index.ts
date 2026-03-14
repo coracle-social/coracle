@@ -9,6 +9,7 @@ import {Router} from "@welshman/router"
 import {profileSearch, userBlossomServerList} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension, editorProps} from "@welshman/editor"
 import {ensureProto} from "src/util/misc"
+import {getVerifiedUPlanet} from "src/util/uplanet-detect"
 import {env} from "src/engine/state"
 import {uploadFile} from "src/engine/commands"
 import {MentionNodeView} from "./MentionNodeView"
@@ -59,6 +60,21 @@ export const makeEditor = ({
             config: {
               upload: async (attrs: FileAttributes) => {
                 const userServer = getTagValue("server", getListTags(get(userBlossomServerList)))
+
+                // Try UPlanet upload when no user-configured server
+                const up = !userServer && getVerifiedUPlanet()
+                if (up) {
+                  try {
+                    const formData = new FormData()
+                    formData.append("file", attrs.file)
+                    const res = await fetch(up.uploadUrl, {method: "POST", body: formData})
+                    if (res.ok) {
+                      const data = await res.json()
+                      if (data.url) return {result: {url: data.url, tags: []}}
+                    }
+                  } catch {} // fall through to Blossom
+                }
+
                 const server = ensureProto(userServer || first(env.BLOSSOM_URLS))
 
                 try {

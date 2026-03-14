@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {assoc} from "@welshman/lib"
   import {pubkey, updateSession} from "@welshman/app"
   import Button from "src/partials/Button.svelte"
@@ -12,10 +13,10 @@
   }
 </script>
 
-<h1>Disconnect Wallet</h1>
-<p>Are you sure you want to disconnect your bitcoin wallet?</p>
+<h1>{$_("walletDisconnect.title")}</h1>
+<p>{$_("walletDisconnect.confirm")}</p>
 <p></p>
 <div class="flex justify-between">
-  <Button class="btn" on:click={back}>Go Back</Button>
-  <Button class="btn btn-accent" on:click={confirm}>Confirm</Button>
+  <Button class="btn" on:click={back}>{$_("walletDisconnect.goBack")}</Button>
+  <Button class="btn btn-accent" on:click={confirm}>{$_("walletDisconnect.confirmButton")}</Button>
 </div>

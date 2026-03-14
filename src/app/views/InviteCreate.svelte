@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {relaySearch} from "@welshman/app"
   import {identity, without} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
@@ -78,10 +79,9 @@
 </script>
 
 <div class="mb-4 flex flex-col items-center justify-center">
-  <Heading>Create an Invite</Heading>
+  <Heading>{$_("inviteCreate.title")}</Heading>
   <p>
-    Invite links allow you to help your friends onboard to nostr more easily, or get easy access to
-    relays.
+    {$_("inviteCreate.description")}
   </p>
 </div>
 {#each sections as section (section)}
@@ -89,10 +89,10 @@
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
-          <Subheading>People</Subheading>
+          <Subheading>{$_("inviteCreate.people")}</Subheading>
           <i class="fa fa-times cursor-pointer" on:click={() => hideSection("people")} />
         </div>
-        <p>Suggest people to follow - this is especially useful for new users.</p>
+        <p>{$_("inviteCreate.suggestPeople")}</p>
         <PersonSelect multiple bind:value={pubkeys} />
       </FlexColumn>
     </Card>
@@ -100,18 +100,17 @@
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
-          <Subheading>Relays</Subheading>
+          <Subheading>{$_("inviteCreate.relays")}</Subheading>
           <i class="fa fa-times cursor-pointer" on:click={() => hideSection("relays")} />
         </div>
         <p>
-          Invite people to use specific relays. An invite code can optionally be provided to grant
-          access to private relays.
+          {$_("inviteCreate.inviteRelaysDescription")}
         </p>
         {#each relays as relay, i (relay.url + i)}
           <ListItem on:remove={() => removeRelay(i)}>
             <span slot="label">{displayRelayUrl(relay.url)}</span>
             <span slot="data">
-              <Input bind:value={relay.claim} placeholder="Claim (optional)" />
+              <Input bind:value={relay.claim} placeholder={$_("inviteCreate.claimOptional")} />
             </span>
           </ListItem>
         {/each}
@@ -132,12 +131,12 @@
 {/each}
 <div class="flex justify-end gap-4">
   <Button disabled={sections.includes("people")} on:click={() => showSection("people")}>
-    <i class="fa fa-plus" /> Add people
+    <i class="fa fa-plus" /> {$_("inviteCreate.addPeople")}
   </Button>
   <Button disabled={sections.includes("relays")} on:click={() => showSection("relays")}>
-    <i class="fa fa-plus" /> Add relays
+    <i class="fa fa-plus" /> {$_("inviteCreate.addRelays")}
   </Button>
 </div>
 <Button class="btn btn-accent" disabled={[...pubkeys, ...relays].length === 0} on:click={onSubmit}>
-  Create Invite Link
+  {$_("inviteCreate.createLink")}
 </Button>

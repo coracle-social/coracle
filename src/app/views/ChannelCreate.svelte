@@ -1,5 +1,6 @@
 <script lang="ts">
   import {derived} from "svelte/store"
+  import {_} from "svelte-i18n"
   import {displayList, uniq} from "@welshman/lib"
   import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
   import {pubkey, displayProfileByPubkey, messagingRelayListsByPubkey} from "@welshman/app"
@@ -28,25 +29,23 @@
 
 <form on:submit|preventDefault={submit} class="flex justify-center py-12">
   <FlexColumn class="pb-56">
-    <h2 class="staatliches text-center text-6xl">Start a conversation</h2>
-    <Field label="Who do you want to talk to?">
+    <h2 class="staatliches text-center text-6xl">{$_("channelCreate.title")}</h2>
+    <Field label={$_("channelCreate.whoToTalkTo")}>
       <PersonSelect multiple autofocus bind:value />
     </Field>
-    <Button class="btn" disabled={nip44Disabled} type="submit">Start Chat</Button>
+    <Button class="btn" disabled={nip44Disabled} type="submit">{$_("channelCreate.startChat")}</Button>
     {#if nip44Disabled}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
-        You are using a login method that doesn't yet support group chats. Please consider upgrading
-        your signer to access this feature.
+        {$_("channelCreate.groupChatWarning")}
       </p>
     {/if}
     {#if missingMessaging}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
         {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
-        {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
-        messaging relays, which means they likely either don't want to receive DMs, or are using a client
-        that does not support nostr group chats.
+        {pluralize($pubkeysWithoutMessaging.length, $_("channelCreate.doesNotHave"), $_("channelCreate.doNotHave"))}
+        {$_("channelCreate.missingRelaysWarning")}
       </p>
     {/if}
   </FlexColumn>

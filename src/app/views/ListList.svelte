@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {getAddress} from "@welshman/util"
   import {pubkey} from "@welshman/app"
   import {Router} from "@welshman/router"
@@ -43,7 +44,7 @@
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <i class="fa fa-list fa-lg" />
-      <h2 class="staatliches text-2xl">Your lists</h2>
+      <h2 class="staatliches text-2xl">{$_("listList.yourLists")}</h2>
     </div>
     <Button class="btn btn-accent" on:click={createList}>
       <i class="fa fa-plus" /> List
@@ -62,14 +63,14 @@
     </div>
   {/each}
   {#if $userLists.length === 0}
-    <p class="py-12 text-center">You don't have any lists yet.</p>
+    <p class="py-12 text-center">{$_("listList.noLists")}</p>
   {/if}
   <div class="flex items-center gap-2">
     <i class="fa fa-circle-nodes fa-lg" />
-    <h2 class="staatliches text-2xl">Other lists</h2>
+    <h2 class="staatliches text-2xl">{$_("listList.otherLists")}</h2>
   </div>
-  <p>Below are lists created by people in your network.</p>
-  <Input bind:value={q} placeholder="Search lists">
+  <p>{$_("listList.otherListsDescription")}</p>
+  <Input bind:value={q} placeholder={$_("listList.searchLists")}>
     <i slot="before" class="fa-solid fa-search" />
   </Input>
   {#each $listSearch

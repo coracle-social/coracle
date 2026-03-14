@@ -1,5 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
+  import {_} from "svelte-i18n"
   import {last, dateToSeconds, now} from "@welshman/lib"
   import {own, hash} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
@@ -75,7 +76,7 @@
 
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    if (!content) return showWarning("Please provide a description.")
+    if (!content) return showWarning($_("noteCreate.provideDescription"))
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
@@ -239,7 +240,7 @@
     onUpdate: () => {
       drafts.set(DRAFT_KEY, editor.getJSON())
     },
-    onUploadError: task => showWarning(`Failed to upload file: ${task.error}`),
+    onUploadError: task => showWarning(`${$_("noteCreate.failedUpload")}: ${task.error}`),
     uploading,
     charCount,
     wordCount,
@@ -293,10 +294,10 @@
 <form on:submit|preventDefault={() => onSubmit()}>
   <Content size="lg">
     <div class="flex gap-2">
-      <span class="text-2xl font-bold">Create a Note</span>
+      <span class="text-2xl font-bold">{$_("noteCreate.title")}</span>
     </div>
     <FlexColumn>
-      <Field label="What do you want to say?">
+      <Field label={$_("noteCreate.whatToSay")}>
         <div
           class="rounded-xl border border-solid border-neutral-600 p-3"
           class:bg-white={!showPreview}
@@ -312,15 +313,15 @@
         </div>
         <div class="flex items-center justify-end gap-2 text-neutral-200">
           <small>
-            {commaFormat($charCount)} characters
+            {commaFormat($charCount)} {$_("noteCreate.characters")}
           </small>
           <span>•</span>
           <small>
-            {commaFormat($wordCount)} words
+            {commaFormat($wordCount)} {$_("noteCreate.words")}
           </small>
           <span>•</span>
           <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
-            {showPreview ? "Hide" : "Show"} Preview
+            {showPreview ? $_("noteCreate.hidePreview") : $_("noteCreate.showPreview")}
           </button>
           <button type="button" on:click={openOptions} class="cursor-pointer text-sm">
             <i class="fa fa-cog" />
@@ -334,16 +335,16 @@
           loading={$uploading || Boolean(publishing)}>
           {#if $uploading || !!publishing}
             {#if publishing === "signing"}
-              Signing your note...
+              {$_("noteCreate.signing")}
             {:else if publishing === "pow"}
-              Generating Work...
+              {$_("noteCreate.generatingWork")}
             {:else}
-              Uploading media...
+              {$_("noteCreate.uploadingMedia")}
             {/if}
           {:else if options?.publish_at && dateToSeconds(options.publish_at) > now()}
-            Schedule
+            {$_("noteCreate.schedule")}
           {:else}
-            Send
+            {$_("noteCreate.send")}
           {/if}
         </Button>
         <button

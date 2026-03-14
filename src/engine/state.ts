@@ -138,6 +138,8 @@ import {SearchHelper, fromCsv, parseJson, ensureProto} from "src/util/misc"
 import {appDataKeys} from "src/util/nostr"
 import {readable, derived, writable} from "svelte/store"
 
+import {detectUPlanetServices, verifyUPlanetServices} from "src/util/uplanet-detect"
+
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
   CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,
@@ -158,6 +160,13 @@ export const env = {
   APP_URL: import.meta.env.VITE_APP_URL,
   APP_NAME: import.meta.env.VITE_APP_NAME,
   APP_LOGO: import.meta.env.VITE_APP_LOGO,
+}
+
+// Auto-detect UPlanet services from deployment context (IPFS gateway)
+const uplanet = detectUPlanetServices()
+
+if (uplanet && !env.DEFAULT_RELAYS.includes(uplanet.relayUrl)) {
+  env.DEFAULT_RELAYS = [uplanet.relayUrl, ...env.DEFAULT_RELAYS]
 }
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
@@ -797,6 +806,11 @@ if (!initialized) {
 
   // Configure app
   appContext.dufflepudUrl = env.DUFFLEPUD_URL
+
+  // Verify UPlanet API (for upload/NIP-96). Relay stays regardless — WebSocket doesn't need CORS.
+  if (uplanet) {
+    verifyUPlanetServices(uplanet)
+  }
 
   // Configure router
   routerContext.getDefaultRelays = always(env.DEFAULT_RELAYS)

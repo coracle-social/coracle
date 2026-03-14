@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {appName} from "src/partials/state"
   import Heading from "src/partials/Heading.svelte"
   import Link from "src/partials/Link.svelte"
@@ -14,56 +15,43 @@
   <Heading>{toTitle(topic)}</Heading>
   {#if topic === "web-of-trust"}
     <p>
-      WoT (Web Of Trust) is one of the best ways to determine how trustworthy someone might be,
-      based on your social graph.
+      {$_("help.wotDescription1")}
     </p>
     <p>
-      In {appName}, this number is equal to how many people you follow that also follow a given
-      person, minus how many people you follow who have muted this person. This allows you to see at
-      a glance if someone is accepted in your network. This helps reduce spam, impostors, and
-      objectionable content.
+      {$_("help.wotDescription2", {values: {appName}})}
     </p>
     <p>
-      You can set a minimum web of trust score on your content settings page, which will
-      automatically mute anyone with a lower score than your threshold.
+      {$_("help.wotDescription3")}
     </p>
   {:else if topic === "remote-signers"}
     <p>
-      Nostr uses cryptographic key pairs instead of passwords to authenticate users. This means that
-      you and nobody else controls your social identity - however it also requires some care to
-      avoid losing your keys, or having them stolen.
+      {$_("help.signerDescription1")}
     </p>
     <p>
-      Instead of pasting your private key (also known as an "nsec") into every nostr app you use,
-      it's wise to choose a single signer application to keep them for you.
+      {$_("help.signerDescription2")}
     </p>
     <p>
-      Some signers live on the internet, others can be installed on your phone or computer. If
-      you're new to nostr, we recommend getting started with <Link
+      {$_("help.signerDescription3")} <Link
         external
         class="underline"
         href="https://nsec.app/">nsec.app</Link
       >.
     </p>
     <Link external class="btn btn-tall btn-low" href="https://nostrapps.com/#signers">
-      <i class="fa fa-compass" /> Browse Signer Apps
+      <i class="fa fa-compass" /> {$_("help.browseSignerApps")}
     </Link>
   {:else if topic === "nip-17-dms"}
     <p>
-      <Link class="underline" external href={nip17Url}>NIP 17</Link> improves upon the old NIP 04 direct
-      messages standard by adding support for group chats and better metadata hiding.
+      <Link class="underline" external href={nip17Url}>NIP 17</Link> {$_("help.dmDescription1")}
     </p>
     <p>
-      In the past, a significant amount of information about private messages was public, event
-      though the content of the messages was encrypted. This meant that anyone could find out who
-      you were sending messages to, and how frequently.
+      {$_("help.dmDescription2")}
     </p>
     <p>
-      The new messaging standard dramatically reduces the amount of information messages leak, and
-      is built on a more robust encryption standard.
+      {$_("help.dmDescription3")}
     </p>
   {/if}
 {:else}
-  <Heading>No information on "{toTitle(topic)}"</Heading>
-  <p>Sorry, we couldn't find any information on "{toTitle(topic)}".</p>
+  <Heading>{$_("help.noInfo", {values: {topic: toTitle(topic)}})}</Heading>
+  <p>{$_("help.notFound", {values: {topic: toTitle(topic)}})}</p>
 {/if}

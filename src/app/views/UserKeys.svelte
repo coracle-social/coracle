@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import type {Nip46Signer} from "@welshman/signer"
   import {session, signer} from "@welshman/app"
   import * as nip19 from "nostr-tools/nip19"
@@ -11,54 +12,42 @@
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
   const getBunkerUrl = () => ($signer.signer as Nip46Signer).broker.getBunkerUrl()
 
-  document.title = "Keys"
+  document.title = $_("keys.title")
 </script>
 
 <FlexColumn xl>
   <FlexColumn>
     <div class="flex items-center gap-2">
       <i class="fa fa-key fa-lg" />
-      <h2 class="staatliches text-2xl">Your keys</h2>
+      <h2 class="staatliches text-2xl">{$_("keys.heading")}</h2>
     </div>
     <p>
-      Your account is identified across the network using a public/private <Link
-        external
-        href={keypairUrl}
-        class="underline">keypair</Link
-      >. This allows you to fully own your account, and move to another app if needed.
+      {$_("keys.description")}
     </p>
     <div>
-      <CopyValue label="Public Key" value={$session?.pubkey} encode={nip19.npubEncode} />
+      <CopyValue label={$_("keys.publicKey")} value={$session?.pubkey} encode={nip19.npubEncode} />
       <small class="text-neutral-100">
-        Your public key identifies your account. You can share this with people trying to find you
-        on nostr.
+        {$_("keys.publicKeyInfo")}
       </small>
     </div>
     {#if $session?.method === "nip01"}
       <div>
         <CopyValue
           isPassword
-          label="Private Key"
+          label={$_("keys.privateKey")}
           value={$session?.secret}
           encode={nsecEncode}
           hasEncryptPrompt />
         <small class="text-neutral-100">
-          Your private key is used to prove your identity by cryptographically signing messages. <strong
-            >Do not share this with anyone.</strong>
-          Be careful about copying this into other apps - instead, consider using a <Link
-            external
-            href={nip07}
-            class="underline">compatible browser extension</Link> to securely store your key.
+          {$_("keys.privateKeyInfo")}
         </small>
       </div>
     {/if}
     {#if $session?.method === "nip46"}
       <div>
-        <CopyValue label="Bunker URL" value={getBunkerUrl()} />
+        <CopyValue label={$_("keys.bunkerUrl")} value={getBunkerUrl()} />
         <small class="text-neutral-100">
-          Your bunker url works like password, and can be used instead of your private key to log in
-          to other apps. This is safer than sharing your private key, but you should still be
-          careful to keep your bunker url private.
+          {$_("keys.bunkerUrlInfo")}
         </small>
       </div>
     {/if}

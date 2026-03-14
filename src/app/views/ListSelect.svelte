@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {_} from "svelte-i18n"
   import {first} from "@welshman/lib"
   import {getAddress, getTags} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
@@ -26,12 +27,12 @@
 
 <FlexColumn>
   <div class="flex items-center justify-between">
-    <Subheading>Select a List</Subheading>
+    <Subheading>{$_("listSelect.selectList")}</Subheading>
     <Button class="btn btn-accent" on:click={createList}>
       <i class="fa fa-plus" /> List
     </Button>
   </div>
-  <p>Select a list to add your selection to.</p>
+  <p>{$_("listSelect.selectListDescription")}</p>
   {#each $userLists as list (getAddress(list.event))}
     <Card interactive on:click={() => selectList(list)}>
       <FlexColumn>
@@ -50,6 +51,6 @@
       </FlexColumn>
     </Card>
   {:else}
-    <p class="text-center py-12">You don't have any lists yet.</p>
+    <p class="text-center py-12">{$_("listSelect.noLists")}</p>
   {/each}
 </FlexColumn>
