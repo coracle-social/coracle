@@ -13,7 +13,7 @@
   import {router} from "src/app/util/router"
   import {channels, hasNewMessages, setChecked} from "src/engine"
 
-  const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
+  const activeTab = (window.location.hash || "#/").slice(2).split("?")[0] === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {
     const path = tab === "requests" ? "channels/requests" : "channels"
 

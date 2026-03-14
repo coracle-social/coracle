@@ -269,7 +269,9 @@ export class Router {
   current = derived(this.nonVirtual, history => history[0])
 
   init() {
-    this.at(window.location.pathname + window.location.search).push()
+    const hash = window.location.hash || "#/"
+    const initPath = hash.slice(1) || "/"
+    this.at(initPath).push()
     this.page.subscribe($page => {
       if (!$page) {
         logger.error("No page available")

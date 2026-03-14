@@ -1,8 +1,22 @@
 // Adapted from https://raw.githubusercontent.com/EmilTholin/svelte-routing/master/src/history.js
+// Modified for hash-based routing (IPFS compatibility)
+
+const getHashPath = source => {
+  const hash = source.location.hash || "#/"
+  const path = hash.slice(1) || "/"
+  const qIndex = path.indexOf("?")
+  return {
+    pathname: qIndex >= 0 ? path.slice(0, qIndex) : path,
+    search: qIndex >= 0 ? path.slice(qIndex) : "",
+  }
+}
 
 const getLocation = source => {
+  const {pathname, search} = getHashPath(source)
   return {
     ...source.location,
+    pathname,
+    search,
     state: source.history.state,
     key: (source.history.state && source.history.state.key) || "initial",
   }
@@ -26,9 +40,11 @@ const createHistory = source => {
       }
 
       source.addEventListener("popstate", popstateListener)
+      source.addEventListener("hashchange", popstateListener)
 
       return () => {
         source.removeEventListener("popstate", popstateListener)
+        source.removeEventListener("hashchange", popstateListener)
         const index = listeners.indexOf(listener)
         listeners.splice(index, 1)
       }
@@ -38,12 +54,13 @@ const createHistory = source => {
       to,
       {state = {}, replace = false, preserveScroll = false, blurActiveElement = true} = {},
     ) {
+      const hashTo = "#" + to
       // try...catch iOS Safari limits to 100 pushState calls
       try {
-        if (replace) source.history.replaceState(state, "", to)
-        else source.history.pushState(state, "", to)
+        if (replace) source.history.replaceState(state, "", hashTo)
+        else source.history.pushState(state, "", hashTo)
       } catch (e) {
-        source.location[replace ? "replace" : "assign"](to)
+        source.location[replace ? "replace" : "assign"](hashTo)
       }
       location = getLocation(source)
       listeners.forEach(listener => listener({location, action: "PUSH", preserveScroll}))

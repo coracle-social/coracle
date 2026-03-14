@@ -11,9 +11,10 @@ import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
 
 // Nstart login - hash is replaced somewhere else, maybe router?
-if (window.location.hash?.startsWith("#nostr-login")) {
+if (window.location.hash?.startsWith("#nostr-login") || window.location.hash?.startsWith("#/nostr-login")) {
   ;(async () => {
-    const params = new URLSearchParams(window.location.hash.slice(1))
+    const hashContent = window.location.hash.startsWith("#/") ? window.location.hash.slice(2) : window.location.hash.slice(1)
+    const params = new URLSearchParams(hashContent)
     const login = params.get("nostr-login")
 
     let success = false

@@ -31,7 +31,7 @@
 </script>
 
 <a
-  {href}
+  href={external ? href : '#' + href}
   {...$$props}
   on:click={onClick}
   rel={rel === undefined ? (external ? "noopener noreferer" : "") : rel}
