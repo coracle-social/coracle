@@ -2,6 +2,7 @@
   import {_} from "svelte-i18n"
   import {LONG_FORM} from "@welshman/util"
   import {pubkey} from "@welshman/app"
+  import {makeIntersectionFeed, makeKindFeed, makeAuthorFeed} from "@welshman/feeds"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -23,8 +24,8 @@
         : undefined
 
   $: feed = authors
-    ? {definition: [{kinds: [LONG_FORM], authors}]}
-    : {definition: [{kinds: [LONG_FORM]}]}
+    ? {title: "Blogs", identifier: "blogs", description: "Blog feed", definition: makeIntersectionFeed(makeKindFeed(LONG_FORM), makeAuthorFeed(...authors))}
+    : {title: "Blogs", identifier: "blogs", description: "Blog feed", definition: makeIntersectionFeed(makeKindFeed(LONG_FORM))}
 
   document.title = $_("menu.blog")
 </script>

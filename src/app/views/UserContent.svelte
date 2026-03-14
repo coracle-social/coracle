@@ -12,7 +12,6 @@
   import Toggle from "src/partials/Toggle.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
-  import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"

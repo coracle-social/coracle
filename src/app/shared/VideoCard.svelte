@@ -18,7 +18,6 @@
   }
 
   const title = findTag(["title"]) || "Video"
-  const videoUrl = findTag(["url", "r"])
   const thumbUrl = findTag(["image", "thumb", "thumbnail_ipfs"])
   const gifanimUrl = findTag(["gifanim", "gif", "gifanim_ipfs"])
   const duration = parseInt(findTag(["duration"]) || "0")

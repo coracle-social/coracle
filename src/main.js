@@ -1,4 +1,4 @@
-import "src/util/i18n"
+import {i18nReady} from "src/util/i18n"
 import "src/app.css"
 import "@capacitor-community/safe-area"
 import {loginWithNip01, loginWithNip46, nip46Perms} from "@welshman/app"
@@ -77,6 +77,9 @@ CapacitorApp.addListener("backButton", ({canGoBack}) => {
   }
 })
 
-export default new App({
-  target: document.getElementById("app"),
+// Wait for i18n to be ready before mounting the app
+i18nReady.then(() => {
+  new App({
+    target: document.getElementById("app"),
+  })
 })

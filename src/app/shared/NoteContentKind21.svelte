@@ -40,7 +40,7 @@
   const formatDuration = (s: number) =>
     `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 
-  const openVideo = (e: PointerEvent) => {
+  const openVideo = (e: MouseEvent) => {
     if (e.metaKey) return window.open(effectiveVideoUrl, "_blank")
     if (effectiveVideoUrl) {
       router.at("media").of(effectiveVideoUrl).open({overlay: true})

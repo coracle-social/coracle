@@ -26,7 +26,9 @@
       try {
         const json = await postJson(dufflepud("link/preview"), {url})
         if (json?.title || json?.image) return json
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
 
     // Client-side fallback: fetch URL directly and parse OG tags

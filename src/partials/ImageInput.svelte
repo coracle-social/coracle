@@ -35,7 +35,9 @@
           const data = await res.json()
           if (data.url) return data.url
         }
-      } catch {} // fall through to Blossom
+      } catch {
+        // fall through to Blossom
+      }
     }
 
     const result = await uploadFile(url, file, opts)

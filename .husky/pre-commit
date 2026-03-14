@@ -1,4 +1,4 @@
-pnpm run check
+npm run check
 
 if [[ ! -z $(cat package.json | grep 'link:') ]]; then
   echo "Some packages are linked to local files!"

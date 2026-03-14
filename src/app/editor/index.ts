@@ -72,7 +72,9 @@ export const makeEditor = ({
                       const data = await res.json()
                       if (data.url) return {result: {url: data.url, tags: []}}
                     }
-                  } catch {} // fall through to Blossom
+                  } catch {
+                    // fall through to Blossom
+                  }
                 }
 
                 const server = ensureProto(userServer || first(env.BLOSSOM_URLS))

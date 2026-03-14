@@ -4,7 +4,7 @@
   import {_} from "svelte-i18n"
   import {signer, shouldUnwrap} from "@welshman/app"
   import {now} from "@welshman/lib"
-  import {createScroller, toTitle} from "src/util/misc"
+  import {createScroller} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
   import Link from "src/partials/Link.svelte"
   import Popover from "src/partials/Popover.svelte"

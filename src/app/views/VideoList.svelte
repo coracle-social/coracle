@@ -5,6 +5,7 @@
   import type {TrustedEvent} from "@welshman/util"
   import {makeFeedController} from "@welshman/app"
   import {pubkey, signer} from "@welshman/app"
+  import {makeIntersectionFeed, makeKindFeed, makeAuthorFeed} from "@welshman/feeds"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
   import Feed from "src/app/shared/Feed.svelte"
@@ -41,8 +42,8 @@
         : undefined
 
   $: feed = authors
-    ? {definition: [{kinds: [21, 22], authors}]}
-    : {definition: [{kinds: [21, 22]}]}
+    ? {title: "Videos", identifier: "videos", description: "Video feed", definition: makeIntersectionFeed(makeKindFeed(21, 22), makeAuthorFeed(...authors))}
+    : {title: "Videos", identifier: "videos", description: "Video feed", definition: makeIntersectionFeed(makeKindFeed(21, 22))}
 
   const loadGridEvents = () => {
     gridAbort.abort()
@@ -64,7 +65,7 @@
     })
   }
 
-  const loadMoreGrid = () => {
+  const loadMoreGrid = async () => {
     gridBuffer = uniqBy(e => e.id, sortEventsDesc(gridBuffer))
     gridEvents = [...gridEvents, ...gridBuffer.splice(0, 20)]
   }

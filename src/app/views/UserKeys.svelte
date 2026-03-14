@@ -3,13 +3,10 @@
   import type {Nip46Signer} from "@welshman/signer"
   import {session, signer} from "@welshman/app"
   import * as nip19 from "nostr-tools/nip19"
-  import Link from "src/partials/Link.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {nsecEncode} from "src/util/nostr"
 
-  const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
-  const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
   const getBunkerUrl = () => ($signer.signer as Nip46Signer).broker.getBunkerUrl()
 
   document.title = $_("keys.title")

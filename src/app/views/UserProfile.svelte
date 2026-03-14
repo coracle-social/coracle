@@ -4,18 +4,12 @@
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
-  import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import Footer from "src/partials/Footer.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {router} from "src/app/util/router"
-
-  const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
-  const lud16Url = "https://lightningaddress.com/"
-  const pseudUrl =
-    "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
   const submit = () => {
     setProfile(values)

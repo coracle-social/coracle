@@ -58,7 +58,7 @@
 
     try {
       const client = new nwc.NWCClient({nostrWalletConnectUrl})
-      const [__, info] = await Promise.all([sleep(800), client.getInfo()])
+      const [_d, info] = await Promise.all([sleep(800), client.getInfo()])
 
       if (!info) {
         showWarning(t()("walletConnect.walletFailed"))

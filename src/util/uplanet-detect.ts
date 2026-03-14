@@ -66,7 +66,9 @@ export async function verifyUPlanetServices(services: UPlanetServices): Promise<
       console.info("[UPlanet] Services detected:", services.relayUrl, services.apiUrl)
       return true
     }
-  } catch {}
+  } catch {
+    // ignore
+  }
 
   console.info("[UPlanet] Gateway detected but services unreachable, using defaults")
   _verified = null
