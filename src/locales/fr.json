@@ -232,6 +232,12 @@
     "usageDesc": "Credits de service : likes, relais, IA",
     "propertyDesc": "Parts cooperatives (3x1/3 distribues) - Renouvellement via G1society",
     "usageLabel": "JETONS D'USAGE (MULTIPASS)",
-    "propertyLabel": "JETONS DE PROPRIETE (ZEN Card)"
+    "propertyLabel": "JETONS DE PROPRIETE (ZEN Card)",
+    "duniterV2s": "DUNITER V2S",
+    "duniterV2sDesc": "Solde G1 sur Duniter v2s (blockchain Substrate)",
+    "cooperativeShares": "PARTS COOPERATIVES 3x1/3",
+    "totalAcquired": "Total acquis :",
+    "validShares": "Encore valides :",
+    "distributions": "Distributions :"
   }
 }

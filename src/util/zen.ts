@@ -1,3 +1,5 @@
+import {writable} from "svelte/store"
+
 /**
  * ZEN Balance Service
  *
@@ -21,13 +23,12 @@
  *
  * Geolocated messages can be featured in UMAP (NOSTR.UMAP.refresh.sh)
  * if the user has ipns_vault configured for their uDRIVE.
+ *
+ * Duniter v2s (Substrate) support:
+ * - g1v2 field = SS58 address on Duniter v2s blockchain
+ * - Published via nostr_setup_profile.py --g1v2 flag
+ * - Stored in kind:0 metadata content AND as ["i", "g1v2:<address>", ""] tag
  */
-
-import {writable, type Readable} from "svelte/store"
-
-// Token type constants
-export const TOKEN_TYPE_USAGE = "usage" as const // MULTIPASS tokens
-export const TOKEN_TYPE_PROPERTY = "property" as const // ZEN Card tokens
 
 // Types
 export interface ZenBalance {
@@ -36,12 +37,14 @@ export interface ZenBalance {
   g1pub: string
   loading?: boolean
   error?: string
-  tokenType?: typeof TOKEN_TYPE_USAGE | typeof TOKEN_TYPE_PROPERTY
+  tokenType?: "usage" | "property"
 }
 
 export interface ProfileIdentities {
   g1pub?: string // MULTIPASS G1 public key (usage tokens)
-  zencard?: string // ZEN Card wallet address (property tokens)
+  g1v2?: string // Duniter v2s SS58 address (substrate blockchain)
+  zencard?: string // ZEN Card wallet address (property tokens, G1 v1)
+  zencard_v2?: string // ZEN Card SS58 address (Duniter v2s, 1-year history)
   website?: string
   mastodon?: string
   email?: string // Required for notifications
@@ -61,15 +64,15 @@ export interface ZenReceivability {
   canReceive: boolean // Has at least MULTIPASS or ZEN Card
   hasMultipass: boolean // g1pub field present (can receive from likes)
   hasZenCard: boolean // zencard field present (has cooperative shares)
+  hasG1v2: boolean // g1v2 field present (Duniter v2s SS58 address)
   hasEmail: boolean // email field (for payment notifications)
   hasIpnsVault: boolean // ipns_vault field (for uDRIVE geo-content)
   isFeaturedInUMAP: boolean // Messages can appear in UMAP geo-aggregation
   missingFields: string[] // List of missing recommended fields
-  renewalRecommended?: boolean // Property tokens may need renewal
 }
 
-// Configuration
-const LIKE_COST_ZEN = 1
+// Fetch timeout (10 seconds)
+const FETCH_TIMEOUT_MS = 10000
 
 // API URL calculation (from current page URL)
 export function getApiServerUrl(): string {
@@ -91,33 +94,22 @@ export function getApiServerUrl(): string {
   return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`
 }
 
-// Relay URL calculation (for balance verification)
-export function getRelayUrl(): string {
-  if (typeof window === "undefined") return "wss://relay.copylaradio.com"
-
-  const url = new URL(window.location.href)
-  const relayName = url.hostname.replace("ipfs.", "relay.")
-
-  if (url.port === "8080" || url.port !== "") {
-    return "ws://127.0.0.1:7777" // Default local relay
-  }
-
-  return `wss://${relayName}`
-}
-
 /**
- * Check ZEN balance for a Ğ1 public key
- * @param g1pub - The Ğ1 public key to check
+ * Check ZEN balance for a Ğ1 public key or Duniter v2s SS58 address
+ * UPassport /check_balance accepts both formats (auto-converts v1→SS58 via G1check.sh)
+ * @param address - The Ğ1 public key or SS58 address to check
  * @returns Promise<ZenBalance | null>
  */
-export async function checkZenBalance(g1pub: string): Promise<ZenBalance | null> {
+export async function checkZenBalance(address: string): Promise<ZenBalance | null> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
   try {
     const apiUrl = getApiServerUrl()
-    const response = await fetch(`${apiUrl}/check_balance?g1pub=${g1pub}`, {
+    const response = await fetch(`${apiUrl}/check_balance?g1pub=${encodeURIComponent(address)}`, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: {Accept: "application/json"},
+      signal: controller.signal,
     })
 
     if (!response.ok) {
@@ -127,21 +119,26 @@ export async function checkZenBalance(g1pub: string): Promise<ZenBalance | null>
     const data = await response.json()
 
     if (data.balance && data.g1pub) {
-      // Convert Ğ1 to ZEN: (Ğ1_BALANCE - 1) * 10
       const g1Balance = parseFloat(data.balance)
       const zenBalance = Math.floor((g1Balance - 1) * 10)
 
       return {
         g1Balance,
-        zenBalance: Math.max(0, zenBalance), // Ensure non-negative
+        zenBalance: Math.max(0, zenBalance),
         g1pub: data.g1pub,
       }
     }
 
     return null
   } catch (error) {
-    console.error("Error checking ZEN balance for", g1pub, ":", error)
+    if (error instanceof DOMException && error.name === "AbortError") {
+      console.error("Timeout checking ZEN balance for", address)
+    } else {
+      console.error("Error checking ZEN balance for", address, ":", error)
+    }
     return null
+  } finally {
+    clearTimeout(timeoutId)
   }
 }
 
@@ -163,6 +160,10 @@ export function extractIdentitiesFromTags(tags: string[][]): ProfileIdentities {
       // Core identity fields for ẐEN integration
       if (value.startsWith("g1pub:")) {
         identities.g1pub = value.substring(6)
+      } else if (value.startsWith("g1v2:")) {
+        identities.g1v2 = value.substring(5)
+      } else if (value.startsWith("zencard_v2:")) {
+        identities.zencard_v2 = value.substring(11)
       } else if (value.startsWith("zencard:")) {
         identities.zencard = value.substring(8)
       } else if (value.startsWith("email:")) {
@@ -208,13 +209,15 @@ export function checkZenReceivability(identities: ProfileIdentities): ZenReceiva
 
   // Check for ZEN Card (property tokens - cooperative shares)
   const hasZenCard =
-    !!identities.zencard && identities.zencard !== "None" && identities.zencard.trim() !== ""
+    !!identities.zencard && !/^none$/i.test(identities.zencard) && identities.zencard.trim() !== ""
+
+  // Check for Duniter v2s SS58 address
+  const hasG1v2 = !!identities.g1v2 && identities.g1v2.length > 0
 
   // Check for email (needed for payment notifications)
   const hasEmail = !!identities.email && identities.email.length > 0
 
   // Check for IPNS vault (enables uDRIVE and geo-content in UMAP)
-  // From NOSTR.UMAP.refresh.sh: messages from users with ipns_vault can be featured
   const hasIpnsVault = !!identities.ipns_vault && identities.ipns_vault.length > 0
 
   // User can receive ẐEN if they have at least MULTIPASS or ZEN Card
@@ -226,6 +229,7 @@ export function checkZenReceivability(identities: ProfileIdentities): ZenReceiva
   // Build list of missing recommended fields
   if (!hasMultipass) missingFields.push("MULTIPASS (g1pub)")
   if (!hasZenCard) missingFields.push("ZEN Card (zencard)")
+  if (!hasG1v2) missingFields.push("Duniter v2s (g1v2)")
   if (!hasEmail) missingFields.push("Email")
   if (!hasIpnsVault) missingFields.push("uDRIVE (ipns_vault)")
 
@@ -233,11 +237,11 @@ export function checkZenReceivability(identities: ProfileIdentities): ZenReceiva
     canReceive,
     hasMultipass,
     hasZenCard,
+    hasG1v2,
     hasEmail,
     hasIpnsVault,
     isFeaturedInUMAP,
     missingFields,
-    renewalRecommended: false, // TODO: Check from DID metadata lastPayment
   }
 }
 
@@ -247,137 +251,160 @@ export function checkZenReceivability(identities: ProfileIdentities): ZenReceiva
  * @param identities - Profile identities containing g1pub and/or zencard
  * @returns Promise with balance results for each found address
  */
-export async function checkAllZenBalances(identities: ProfileIdentities): Promise<{
+export interface AllZenBalances {
   multipass?: ZenBalance
   g1pub?: ZenBalance
+  g1v2?: ZenBalance // Duniter v2s SS58 balance
   zencard?: ZenBalance
   usageTokens: number // Total MULTIPASS tokens (for likes, services)
   propertyTokens: number // Total ZEN Card tokens (cooperative shares)
-}> {
-  const balanceResults: {
-    multipass?: ZenBalance
-    g1pub?: ZenBalance
-    zencard?: ZenBalance
-    usageTokens: number
-    propertyTokens: number
-  } = {
+}
+
+export async function checkAllZenBalances(identities: ProfileIdentities): Promise<AllZenBalances> {
+  const balanceResults: AllZenBalances = {
     usageTokens: 0,
     propertyTokens: 0,
   }
 
-  // Check Ğ1 balance (handles both MULTIPASS:PRIMAL format and simple g1pub)
-  // MULTIPASS = Usage tokens (for likes, relay operations, AI services)
-  if (identities.g1pub) {
+  // Build parallel fetch promises
+  const promises: Promise<void>[] = []
+
+  // MULTIPASS usage tokens — prefer g1v2 (SS58) over g1pub (v1)
+  const usageAddress = identities.g1v2?.trim() || null
+  if (usageAddress) {
+    // Use Duniter v2s SS58 address (preferred)
+    promises.push(
+      checkZenBalance(usageAddress).then(balance => {
+        if (balance) {
+          balanceResults.g1v2 = {...balance, tokenType: "usage"}
+          balanceResults.usageTokens = balance.zenBalance
+        }
+      }),
+    )
+  } else if (identities.g1pub) {
+    // Fallback to G1 v1 address
     const g1pubParts = identities.g1pub.split(":")
+    const addressToCheck = g1pubParts.length >= 2 ? g1pubParts[0] : identities.g1pub
+    const key = g1pubParts.length >= 2 ? "multipass" : "g1pub"
 
-    if (g1pubParts.length >= 2) {
-      // MULTIPASS:PRIMAL format - check MULTIPASS part only
-      const multipassPub = g1pubParts[0]
-      const multipassBalance = await checkZenBalance(multipassPub)
-      if (multipassBalance) {
-        balanceResults.multipass = {
-          ...multipassBalance,
-          tokenType: TOKEN_TYPE_USAGE,
-        }
-        balanceResults.usageTokens = multipassBalance.zenBalance
-      }
-    } else {
-      // Simple g1pub format - check the entire address
-      const g1Balance = await checkZenBalance(identities.g1pub)
-      if (g1Balance) {
-        balanceResults.g1pub = {
-          ...g1Balance,
-          tokenType: TOKEN_TYPE_USAGE,
-        }
-        balanceResults.usageTokens = g1Balance.zenBalance
-      }
+    if (addressToCheck && /^[a-zA-Z0-9+/=]+$/.test(addressToCheck)) {
+      promises.push(
+        checkZenBalance(addressToCheck).then(balance => {
+          if (balance) {
+            balanceResults[key] = {...balance, tokenType: "usage"}
+            balanceResults.usageTokens = balance.zenBalance
+          }
+        }),
+      )
     }
   }
 
-  // Check ZenCard balance if available
-  // ZEN Card = Property tokens (cooperative shares, must be renewed via G1society.sh)
-  if (identities.zencard && identities.zencard !== "None" && identities.zencard.trim() !== "") {
-    const zencardBalance = await checkZenBalance(identities.zencard)
-    if (zencardBalance) {
-      balanceResults.zencard = {
-        ...zencardBalance,
-        tokenType: TOKEN_TYPE_PROPERTY,
-      }
-      balanceResults.propertyTokens = zencardBalance.zenBalance
-    }
+  // ZEN Card property tokens — prefer zencard_v2 (SS58) over zencard (v1)
+  const zencardAddress =
+    identities.zencard_v2?.trim() ||
+    (identities.zencard?.trim() && !/^none$/i.test(identities.zencard) ? identities.zencard : null)
+  if (zencardAddress) {
+    promises.push(
+      checkZenBalance(zencardAddress).then(balance => {
+        if (balance) {
+          balanceResults.zencard = {...balance, tokenType: "property"}
+          balanceResults.propertyTokens = balance.zenBalance
+        }
+      }),
+    )
   }
 
+  await Promise.all(promises)
   return balanceResults
 }
 
-// Simple balance cache using Map
-const balanceCache = new Map<string, {promise: Promise<ZenBalance | null>; timestamp: number}>()
-const CACHE_TTL = 60000 // 1 minute cache
-
 /**
- * Get cached ZEN balance for a Ğ1 public key
+ * ZEN Card cooperative shares data from /check_zencard API
+ * Returns the 3x1/3 distribution history (TREASURY/RnD/ASSETS)
  */
-export function getCachedZenBalance(g1pub: string): Promise<ZenBalance | null> {
-  const now = Date.now()
-  const cached = balanceCache.get(g1pub)
-
-  // Return cached value if still valid
-  if (cached && now - cached.timestamp < CACHE_TTL) {
-    return cached.promise
-  }
-
-  // Fetch new value
-  const promise = checkZenBalance(g1pub)
-  balanceCache.set(g1pub, {promise, timestamp: now})
-
-  // Cleanup old entries if cache grows too large
-  if (balanceCache.size > 100) {
-    const oldestKey = balanceCache.keys().next().value
-    if (oldestKey) balanceCache.delete(oldestKey)
-  }
-
-  return promise
+export interface ZenCardShares {
+  totalReceivedZen: number // Total cooperative shares acquired (lifetime)
+  validBalanceZen: number // Currently valid shares (after expiration)
+  totalTransfers: number // Number of share distributions received
+  validTransfers: number // Number of still-valid distributions
 }
 
-// Svelte store for reactive balance updates
-export function createZenBalanceStore(g1pub: string): Readable<ZenBalance> {
-  const {subscribe, set} = writable<ZenBalance>({
-    g1Balance: 0,
-    zenBalance: 0,
-    g1pub,
-    loading: true,
-  })
+/**
+ * Fetch ZEN Card cooperative shares history from /check_zencard API
+ * Shows the sum of all 3x1/3 distributions received by this ZEN Card
+ * @param email - ZEN Card holder email (required by API)
+ * @returns Promise<ZenCardShares | null>
+ */
+export async function checkZenCardShares(email: string): Promise<ZenCardShares | null> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-  // Fetch balance on store creation
-  getCachedZenBalance(g1pub).then(balance => {
-    if (balance) {
-      set({...balance, loading: false})
-    } else {
-      set({g1Balance: 0, zenBalance: 0, g1pub, loading: false, error: "Unable to fetch balance"})
+  try {
+    const apiUrl = getApiServerUrl()
+    const response = await fetch(
+      `${apiUrl}/check_zencard?email=${encodeURIComponent(email)}`,
+      {
+        method: "GET",
+        headers: {Accept: "application/json"},
+        signal: controller.signal,
+      },
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
-  })
 
-  return {subscribe}
+    const data = await response.json()
+
+    return {
+      totalReceivedZen: data.total_received_zen ?? 0,
+      validBalanceZen: data.valid_balance_zen ?? 0,
+      totalTransfers: data.total_transfers ?? 0,
+      validTransfers: data.valid_transfers ?? 0,
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      console.error("Timeout checking ZEN Card shares for", email)
+    } else {
+      console.error("Error checking ZEN Card shares:", error)
+    }
+    return null
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
-
-// Constants for display
-export const LIKE_COST = LIKE_COST_ZEN
-export const ZEN_SYMBOL = "Ẑ"
-export const ZEN_CURRENCY_NAME = "ZEN"
 
 /**
- * Format ZEN amount for display
+ * Global store for the current user's MULTIPASS ZEN balance (from g1v2 SS58).
+ * Used to limit the amount of ZEN that can be sent via likes.
  */
-export function formatZen(amount: number): string {
-  return `${amount} ${ZEN_SYMBOL}EN`
-}
+export const myZenBalance = writable<number>(0)
+
+let myBalanceFetchPending = false
 
 /**
- * Check if user's geolocated messages can be featured in UMAP
- * Based on NOSTR.UMAP.refresh.sh requirements
- * @param identities - Profile identities
+ * Refresh the current user's MULTIPASS ZEN balance.
+ * Prefers g1v2 (SS58) address — the MULTIPASS on Duniter v2s.
+ * @param identities - The current user's profile identities
  */
-export function canBeFeaturedInUMAP(identities: ProfileIdentities): boolean {
-  // User needs ipns_vault (uDRIVE) for their content to be featured in UMAP geo-aggregation
-  return !!identities.ipns_vault && identities.ipns_vault.length > 0
+export async function refreshMyZenBalance(identities: ProfileIdentities) {
+  if (myBalanceFetchPending) return
+  myBalanceFetchPending = true
+
+  try {
+    const address =
+      identities.g1v2?.trim() || identities.g1pub?.split(":")[0] || null
+    if (!address) return
+
+    const balance = await checkZenBalance(address)
+    if (balance) {
+      myZenBalance.set(balance.zenBalance)
+    }
+  } finally {
+    myBalanceFetchPending = false
+  }
 }
+
+/** Preset ZEN amounts for the like selector */
+export const ZEN_LIKE_PRESETS = [1, 5, 10, 50, 100] as const
+

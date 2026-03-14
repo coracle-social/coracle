@@ -232,6 +232,12 @@
     "usageDesc": "Service credits: likes, relay usage, AI",
     "propertyDesc": "Cooperative shares (3x1/3 distributed) - Renewal via G1society",
     "usageLabel": "USAGE TOKENS (MULTIPASS)",
-    "propertyLabel": "PROPERTY TOKENS (ZEN Card)"
+    "propertyLabel": "PROPERTY TOKENS (ZEN Card)",
+    "duniterV2s": "DUNITER V2S",
+    "duniterV2sDesc": "Ğ1 balance on Duniter v2s (Substrate blockchain)",
+    "cooperativeShares": "3x1/3 COOPERATIVE SHARES",
+    "totalAcquired": "Total acquired:",
+    "validShares": "Currently valid:",
+    "distributions": "Distributions:"
   }
 }

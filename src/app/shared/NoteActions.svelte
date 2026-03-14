@@ -8,6 +8,7 @@
   import {
     deriveZapper,
     deriveZapperForPubkey,
+    deriveProfile,
     repository,
     signer,
     tagEventForReaction,
@@ -33,6 +34,7 @@
     getAddress,
   } from "@welshman/util"
   import {getPow} from "src/util/pow"
+  import {myZenBalance, refreshMyZenBalance, ZEN_LIKE_PRESETS} from "src/util/zen"
   import {fly} from "src/util/transition"
   import {replyKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
@@ -148,6 +150,31 @@
 
   let view
   let actions = []
+
+  // Load current user's ZEN balance for like limits (MULTIPASS = g1v2 in Ẑen)
+  $: if ($pubkey && $myZenBalance === 0) {
+    const myProfile = deriveProfile($pubkey)
+    const unsub = myProfile.subscribe(p => {
+      const pa = p as any
+      if (pa?.g1v2 || pa?.g1pub) {
+        refreshMyZenBalance({g1v2: pa.g1v2, g1pub: pa.g1pub})
+        unsub?.()
+      }
+    })
+  }
+
+  // Check if the post author has a MULTIPASS (can receive ZEN via like)
+  const authorProfile = deriveProfile(event.pubkey)
+  $: authorHasMultipass = !!(($authorProfile as any)?.g1v2 || ($authorProfile as any)?.g1pub)
+
+  // Filter presets to only show amounts within balance (only for MULTIPASS recipients)
+  $: zenPresets = authorHasMultipass
+    ? ZEN_LIKE_PRESETS.filter(n => n <= $myZenBalance)
+    : []
+
+  const reactZen = (amount: number) => {
+    react(`+${amount}`)
+  }
 
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
   $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
@@ -272,21 +299,62 @@
       </button>
     {/if}
     {#if noteActions.includes("reactions")}
-      <button
-        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-          "pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey,
-        })}
-        on:click={() => (liked ? deleteReaction(liked) : react("+"))}>
-        <Icon
-          icon="heart"
-          color={liked ? "accent" : "neutral-100"}
-          class={cx("cursor-pointer", {
-            "fa-beat fa-beat-custom": liked,
-          })} />
-        {#if $likesCount > 0}
-          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+      <div class="relative flex items-center">
+        {#if liked}
+          <button
+            class="relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0"
+            on:click={() => deleteReaction(liked)}>
+            <Icon icon="heart" color="accent" class="cursor-pointer fa-beat fa-beat-custom" />
+            {#if $likesCount > 0}
+              <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+            {/if}
+          </button>
+        {:else if authorHasMultipass && zenPresets.length > 0}
+          <!-- Author has MULTIPASS: show ZEN amount picker on hover -->
+          <Popover
+            theme="transparent"
+            opts={{hideOnClick: true}}
+            triggerType="mouseenter">
+            <button
+              slot="trigger"
+              class={cx(
+                "relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0",
+                {"pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey},
+              )}
+              on:click={() => reactZen(1)}>
+              <Icon icon="heart" color="neutral-100" class="cursor-pointer" />
+              {#if $likesCount > 0}
+                <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
+                  >{$likesCount}</span>
+              {/if}
+            </button>
+            <div slot="tooltip" class="flex items-center gap-1 rounded-lg bg-neutral-900 p-1">
+              {#each zenPresets as amount}
+                <button
+                  class="rounded px-2 py-1 text-xs font-mono transition-colors hover:bg-accent hover:text-white
+                    {amount === 1 ? 'text-accent' : 'text-neutral-300'}"
+                  on:click|stopPropagation={() => reactZen(amount)}>
+                  +{amount}Ẑ
+                </button>
+              {/each}
+            </div>
+          </Popover>
+        {:else}
+          <!-- No MULTIPASS or no balance: standard like -->
+          <button
+            class={cx(
+              "relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0",
+              {"pointer-events-none opacity-50": disableActions || event.pubkey === $pubkey},
+            )}
+            on:click={() => react("+")}>
+            <Icon icon="heart" color="neutral-100" class="cursor-pointer" />
+            {#if $likesCount > 0}
+              <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px"
+                >{$likesCount}</span>
+            {/if}
+          </button>
         {/if}
-      </button>
+      </div>
     {/if}
     {#if handlers.length > 0 && noteActions.includes("recommended_apps")}
       <Popover theme="transparent" opts={{hideOnClick: true}}>
