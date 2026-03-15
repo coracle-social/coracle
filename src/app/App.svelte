@@ -78,6 +78,7 @@
   import UserKeys from "src/app/views/UserKeys.svelte"
   import UserProfile from "src/app/views/UserProfile.svelte"
   import UserSettings from "src/app/views/UserSettings.svelte"
+  import NamecoinSettings from "src/app/views/NamecoinSettings.svelte"
   import Zap from "src/app/views/Zap.svelte"
   import {onMount} from "svelte"
   import {logUsage} from "src/app/state"
@@ -305,6 +306,9 @@
     requireUser: true,
   })
   router.register("/settings/relays", RelayList)
+  router.register("/settings/namecoin", NamecoinSettings, {
+    requireUser: true,
+  })
 
   router.register("/zap", Zap, {
     required: ["splits"],

@@ -134,6 +134,9 @@
       <MenuMobileItem disabled={!$signer} href="/settings" on:click={closeMenu}>
         <i class="fa fa-sliders" /> App Settings
       </MenuMobileItem>
+      <MenuMobileItem disabled={!$signer} href="/settings/namecoin" on:click={closeMenu}>
+        <i class="fa fa-link" /> Namecoin
+      </MenuMobileItem>
       <MenuMobileItem disabled={!$signer} href="/lists" on:click={closeMenu}>
         <i class="fa fa-list" /> Lists
       </MenuMobileItem>

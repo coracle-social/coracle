@@ -49,7 +49,8 @@
       </Input>
       <div slot="info">
         Enter a <Link class="underline" external href={nip05Url}>NIP-05</Link> address to verify your
-        public key.
+        public key. Namecoin <code>.bit</code> domains are also supported for decentralised blockchain-based
+        verification (e.g. <code>alice@example.bit</code>).
       </div>
     </Field>
     <Field label="Lightning address">

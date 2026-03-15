@@ -145,6 +145,7 @@ export const env = {
   DEFAULT_RELAYS: fromCsv(import.meta.env.VITE_DEFAULT_RELAYS).map(normalizeRelayUrl) as string[],
   INDEXER_RELAYS: fromCsv(import.meta.env.VITE_INDEXER_RELAYS).map(normalizeRelayUrl) as string[],
   DUFFLEPUD_URL: import.meta.env.VITE_DUFFLEPUD_URL as string,
+  NAMECOIN_PROXY_URL: (import.meta.env.VITE_NAMECOIN_PROXY_URL as string) || "",
   DVM_RELAYS: fromCsv(import.meta.env.VITE_DVM_RELAYS).map(normalizeRelayUrl) as string[],
   ENABLE_MARKET: JSON.parse(import.meta.env.VITE_ENABLE_MARKET) as boolean,
   ENABLE_ZAPS: JSON.parse(import.meta.env.VITE_ENABLE_ZAPS) as boolean,
@@ -251,6 +252,9 @@ export const defaultSettings = {
   imgproxy_url: "",
   dufflepud_url: env.DUFFLEPUD_URL,
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
+  // Namecoin NIP-05 resolution settings
+  namecoin_enabled: true,
+  namecoin_proxy_url: env.NAMECOIN_PROXY_URL,
 }
 
 export const settingsEvents = deriveEvents({repository, filters: [{kinds: [APP_DATA]}]})
@@ -275,6 +279,14 @@ export const userSettings = withGetter<typeof defaultSettings>(
 export function getSetting<T = any>(k: string): T {
   return userSettings.get()[k] as T
 }
+
+// Wire Namecoin settings into the resolver module
+import {setNamecoinSettingsAccessor} from "src/util/namecoin"
+setNamecoinSettingsAccessor(() => ({
+  enabled: getSetting<boolean>("namecoin_enabled") ?? true,
+  customServers: [],
+  proxyUrl: getSetting<string>("namecoin_proxy_url") ?? "",
+}))
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
