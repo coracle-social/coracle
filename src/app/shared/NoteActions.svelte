@@ -158,14 +158,15 @@
   let actions = []
 
   // Load current user's ZEN balance for like limits (MULTIPASS = g1v2 in Ẑen)
+  // Note: setTimeout defers unsub() to avoid TDZ when the Svelte store fires synchronously
+  // on subscribe (before the const assignment is complete).
   $: if ($pubkey && $myZenBalance === 0) {
     const myProfile = deriveProfile($pubkey)
-    // eslint-disable-next-line prefer-const
-    let unsub: (() => void) | undefined = myProfile.subscribe(p => {
+    const unsub = myProfile.subscribe(p => {
       const pa = p as any
       if (pa?.g1v2 || pa?.g1pub) {
         refreshMyZenBalance({g1v2: pa.g1v2, g1pub: pa.g1pub})
-        unsub?.()
+        setTimeout(() => unsub?.(), 0)
       }
     })
   }
