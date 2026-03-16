@@ -63,13 +63,19 @@
 
   // Open note detail (with video player + like/reply/zap/share actions)
   const openNote = () => {
-    const nevent = nip19.neventEncode({
-      id: event.id,
-      kind: event.kind,
-      author: event.pubkey,
-      relays: Router.get().Event(event).limit(3).getUrls(),
-    })
-    router.at("notes").of(nevent).open()
+    try {
+      const nevent = nip19.neventEncode({
+        id: event.id,
+        kind: event.kind,
+        author: event.pubkey,
+        relays: Router.get().Event(event).limit(3).getUrls(),
+      })
+      router.at("notes").of(nevent).open()
+    } catch (err) {
+      // Malformed event id/pubkey from some NIP-71 relays — open by raw id
+      console.warn("VideoCard: neventEncode failed", event.id, err)
+      router.at("notes").of(event.id).open()
+    }
   }
 
   const openProfile = (e: MouseEvent) => {
