@@ -68,12 +68,18 @@
   export let onReplyStart: () => void
   export let showHidden = false
 
-  const nevent = nip19.neventEncode({
-    id: event.id,
-    kind: event.kind,
-    author: event.pubkey,
-    relays: Router.get().Event(event).limit(3).getUrls(),
-  })
+  let nevent: string
+  try {
+    nevent = nip19.neventEncode({
+      id: event.id,
+      kind: event.kind,
+      author: event.pubkey,
+      relays: Router.get().Event(event).limit(3).getUrls(),
+    })
+  } catch (_err) {
+    // Malformed event id/pubkey (e.g. NIP-71 events from some relays)
+    nevent = event.id
+  }
 
   const pow = getPow(event)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)

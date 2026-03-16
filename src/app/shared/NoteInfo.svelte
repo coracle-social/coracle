@@ -34,7 +34,12 @@
   export let handlers: Handler[] = []
 
   const relays = Router.get().Event(event).limit(3).getUrls()
-  const nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
+  let nevent: string
+  try {
+    nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
+  } catch (_err) {
+    nevent = event.id
+  }
   const naddr = Address.fromEvent(event, relays).toNaddr()
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const mentions = getPubkeyTagValues(event.tags)
