@@ -560,6 +560,7 @@
     "distributions": "Distributions:"
   },
   "video": {
-    "publish": "Publish"
+    "publish": "Publish",
+    "search": "Search videos..."
   }
 }

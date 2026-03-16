@@ -29,6 +29,11 @@
   let gridBuffer: TrustedEvent[] = []
   let gridExhausted = false
   let gridAbort = new AbortController()
+  let gridCtrl: ReturnType<typeof makeFeedController> | null = null
+  let gridLoading = false
+
+  // Search/filter state
+  let searchQuery = ""
 
   const setActiveTab = tab => {
     activeTab = tab
@@ -51,8 +56,9 @@
     gridEvents = []
     gridBuffer = []
     gridExhausted = false
+    gridLoading = false
 
-    makeFeedController({
+    gridCtrl = makeFeedController({
       feed: feed.definition,
       useWindowing: true,
       signal: gridAbort.signal,
@@ -61,16 +67,48 @@
       },
       onExhausted: () => {
         gridExhausted = true
+        gridLoading = false
       },
     })
+
+    // Trigger initial load
+    loadMoreGrid()
   }
 
   const loadMoreGrid = async () => {
+    if (!gridCtrl || gridLoading) return
+    gridLoading = true
+
+    // Capture current controller reference to detect stale loads
+    const ctrl = gridCtrl
+
+    // Load a batch of events from the network
+    await ctrl.load(20)
+
+    // Discard results if the controller has been replaced (tab/feed change)
+    if (ctrl !== gridCtrl) {
+      gridLoading = false
+      return
+    }
+
+    // Move buffered events to displayed list
     gridBuffer = uniqBy(e => e.id, sortEventsDesc(gridBuffer))
     gridEvents = [...gridEvents, ...gridBuffer.splice(0, 20)]
+
+    gridLoading = false
   }
 
-  $: if (viewMode === "grid") {
+  $: filteredEvents = searchQuery
+    ? gridEvents.filter(e => {
+        const q = searchQuery.toLowerCase()
+        const title = e.tags.find(t => t[0] === "title")?.[1] || ""
+        const content = e.content || ""
+        return title.toLowerCase().includes(q) || content.toLowerCase().includes(q)
+      })
+    : gridEvents
+
+  // Reload when feed changes (tab switch) or when switching to grid mode
+  $: if (viewMode === "grid" && feed) {
     loadGridEvents()
   }
 
@@ -124,22 +162,40 @@
   {#if $pubkey}
     <Tabs {tabs} {activeTab} {setActiveTab} />
   {/if}
+  {#if viewMode === "grid"}
+    <!-- Search bar like youtube.html -->
+    <div class="flex items-center gap-2 rounded-lg bg-neutral-900 px-3 py-2">
+      <i class="fa fa-search text-neutral-500" />
+      <input
+        bind:value={searchQuery}
+        class="flex-1 bg-transparent text-sm text-neutral-100 placeholder-neutral-500 outline-none"
+        placeholder={$_("video.search") || "Rechercher une vidéo..."}
+        type="text" />
+      {#if searchQuery}
+        <button class="text-neutral-500 hover:text-neutral-300" on:click={() => (searchQuery = "")}>
+          <i class="fa fa-times" />
+        </button>
+      {/if}
+    </div>
+  {/if}
   {#key `${activeTab}-${viewMode}`}
     {#if viewMode === "list"}
       <Feed {feed} />
     {:else}
       <div
         class="grid gap-3"
-        style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))">
-        {#each gridEvents as event (event.id)}
+        style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))">
+        {#each filteredEvents as event (event.id)}
           <div in:fly={{y: 20}}>
             <VideoCard {event} />
           </div>
         {/each}
       </div>
-      {#if !gridExhausted}
+      {#if gridLoading && gridEvents.length === 0}
         <Spinner />
-      {:else if gridEvents.length === 0}
+      {:else if !gridExhausted && gridEvents.length > 0}
+        <Spinner />
+      {:else if gridExhausted && filteredEvents.length === 0}
         <p class="py-12 text-center text-neutral-400">{$_("feed.empty")}</p>
       {/if}
     {/if}
