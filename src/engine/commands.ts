@@ -79,7 +79,11 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
   const authEvent = await $signer.sign(makeBlossomAuthEvent({action: "upload", server, hashes}))
   const res = await uploadBlob(server, file, {authEvent})
 
-  return res.json()
+  try {
+    return res.json()
+  } catch (e) {
+    return {error: await res.text()}
+  }
 }
 
 // Key state management
