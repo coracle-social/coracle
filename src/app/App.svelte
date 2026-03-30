@@ -432,6 +432,10 @@
     // before loading app data
     await sleep(350)
 
+    // Finish nstart login
+    // @ts-ignore
+    window.nostrLogin?.()
+
     if ($session) {
       loadUserData()
     }

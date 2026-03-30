@@ -11,13 +11,14 @@ import {installPrompt} from "src/partials/state"
 
 // Nstart login - hash is replaced somewhere else, maybe router?
 if (window.location.hash?.startsWith("#nostr-login")) {
-  ;(async () => {
-    const params = new URLSearchParams(window.location.hash.slice(1))
-    const login = params.get("nostr-login")
+  const params = new URLSearchParams(window.location.hash.slice(1))
+  const login = params.get("nostr-login")
 
+  window.nostrLogin = async () => {
     let success = false
 
     try {
+      console.log(login)
       if (login.startsWith("bunker://")) {
         const clientSecret = makeSecret()
         const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
@@ -48,7 +49,7 @@ if (window.location.hash?.startsWith("#nostr-login")) {
         300,
       )
     }
-  })()
+  }
 }
 
 // Analytics
