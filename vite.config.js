@@ -7,6 +7,7 @@ import {favicons} from "favicons"
 import htmlPlugin from "vite-plugin-html-config"
 import sveltePreprocess from "svelte-preprocess"
 import {svelte} from "@sveltejs/vite-plugin-svelte"
+import namecoinProxy from "./proxy/vite-plugin-namecoin.mjs"
 
 dotenv.config({path: ".env"})
 dotenv.config({path: ".env.template"})
@@ -35,6 +36,7 @@ export default defineConfig(async () => {
       },
     },
     plugins: [
+      namecoinProxy(),
       htmlPlugin({
         title: process.env.VITE_APP_NAME,
         metas: [
