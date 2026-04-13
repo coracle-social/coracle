@@ -1,3 +1,4 @@
+// Kept for reference — the browser now connects directly via WebSocket. See src/util/namecoin/electrumx-ws.ts
 /**
  * Vite plugin that serves /api/namecoin/* during development.
  *
@@ -22,11 +23,13 @@ export default function namecoinProxy() {
         // Health check
         if (req.url === "/api/namecoin/health") {
           res.setHeader("Content-Type", "application/json")
-          res.end(JSON.stringify({
-            status: "ok",
-            electrumx: `${DEFAULT_HOST}:${DEFAULT_PORT}`,
-            tls: USE_TLS,
-          }))
+          res.end(
+            JSON.stringify({
+              status: "ok",
+              electrumx: `${DEFAULT_HOST}:${DEFAULT_PORT}`,
+              tls: USE_TLS,
+            }),
+          )
           return
         }
 

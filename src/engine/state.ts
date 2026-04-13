@@ -254,7 +254,6 @@ export const defaultSettings = {
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
   // Namecoin NIP-05 resolution settings
   namecoin_enabled: true,
-  namecoin_proxy_url: env.NAMECOIN_PROXY_URL,
 }
 
 export const settingsEvents = deriveEvents({repository, filters: [{kinds: [APP_DATA]}]})
@@ -284,8 +283,6 @@ export function getSetting<T = any>(k: string): T {
 import {setNamecoinSettingsAccessor} from "src/util/namecoin"
 setNamecoinSettingsAccessor(() => ({
   enabled: getSetting<boolean>("namecoin_enabled") ?? true,
-  customServers: [],
-  proxyUrl: getSetting<string>("namecoin_proxy_url") ?? "",
 }))
 
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {

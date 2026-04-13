@@ -163,9 +163,7 @@ describe("Domain value parsing (d/ namespace)", () => {
     const value = `{"nostr":"b0635d6a9851d3aed0cd6c495b282167acf761729078d975fc341b22650b07b9"}`
     const result = extractNostrFromValue(value, "d/example", "_")
     expect(result).not.toBeNull()
-    expect(result!.pubkey).toBe(
-      "b0635d6a9851d3aed0cd6c495b282167acf761729078d975fc341b22650b07b9",
-    )
+    expect(result!.pubkey).toBe("b0635d6a9851d3aed0cd6c495b282167acf761729078d975fc341b22650b07b9")
   })
 
   it("parses extended nostr names from domain value", () => {
@@ -210,9 +208,7 @@ describe("Domain value parsing (d/ namespace)", () => {
 
     const result = extractNostrFromValue(value, "d/example", "nonexistent")
     expect(result).not.toBeNull()
-    expect(result!.pubkey).toBe(
-      "aaaa000000000000000000000000000000000000000000000000000000000001",
-    )
+    expect(result!.pubkey).toBe("aaaa000000000000000000000000000000000000000000000000000000000001")
   })
 
   it("root lookup falls back to first entry when no underscore key", () => {
@@ -226,9 +222,7 @@ describe("Domain value parsing (d/ namespace)", () => {
 
     const result = extractNostrFromValue(value, "d/testls", "_")
     expect(result).not.toBeNull()
-    expect(result!.pubkey).toBe(
-      "6cdebccabda1dfa058ab85352a79509b592b2bdfa0370325e28ec1cb4f18667d",
-    )
+    expect(result!.pubkey).toBe("6cdebccabda1dfa058ab85352a79509b592b2bdfa0370325e28ec1cb4f18667d")
     expect(result!.localPart).toBe("m")
   })
 
@@ -256,9 +250,7 @@ describe("Identity value parsing (id/ namespace)", () => {
     })
     const result = extractNostrFromIdentityValue(value, "id/alice")
     expect(result).not.toBeNull()
-    expect(result!.pubkey).toBe(
-      "cccc000000000000000000000000000000000000000000000000000000000003",
-    )
+    expect(result!.pubkey).toBe("cccc000000000000000000000000000000000000000000000000000000000003")
   })
 
   it("parses object nostr field from identity value", () => {
@@ -270,9 +262,7 @@ describe("Identity value parsing (id/ namespace)", () => {
     })
     const result = extractNostrFromIdentityValue(value, "id/bob")
     expect(result).not.toBeNull()
-    expect(result!.pubkey).toBe(
-      "dddd000000000000000000000000000000000000000000000000000000000004",
-    )
+    expect(result!.pubkey).toBe("dddd000000000000000000000000000000000000000000000000000000000004")
     expect(result!.relays.length).toBe(2)
   })
 })
@@ -380,11 +370,10 @@ describe("DEFAULT_ELECTRUMX_SERVERS", () => {
     expect(DEFAULT_ELECTRUMX_SERVERS.length).toBeGreaterThan(0)
   })
 
-  it("all servers have valid host and port", () => {
+  it("all servers have valid WebSocket URLs", () => {
     for (const server of DEFAULT_ELECTRUMX_SERVERS) {
-      expect(server.host).toBeTruthy()
-      expect(server.port).toBeGreaterThan(0)
-      expect(server.port).toBeLessThanOrEqual(65535)
+      expect(server.url).toMatch(/^wss?:\/\//)
+      expect(server.label).toBeTruthy()
     }
   })
 })

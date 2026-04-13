@@ -9,84 +9,34 @@
  *   https://github.com/vitorpamplona/amethyst
  *
  * Architecture:
- *   Browsers cannot make raw TCP/TLS connections to ElectrumX servers.
- *   Instead, the browser makes simple HTTP requests to a lightweight
- *   proxy that bridges HTTP → ElectrumX JSON-RPC over TCP.
+ *   The browser connects directly to ElectrumX servers via WebSocket.
+ *   No proxy or backend is required — works as a fully static web app.
  *
- *   The proxy handles all ElectrumX protocol details (scripthash
- *   computation, transaction fetching, NAME_UPDATE script parsing).
- *   The browser only needs to parse the returned JSON value.
- *
- *   In development, Vite serves the proxy at /api/namecoin/*.
- *   In production, a hosted proxy URL is configured via VITE_NAMECOIN_PROXY_URL.
+ *   Based on the approach from hzrd149/nostrudel#352.
  *
  * Copyright (c) 2025 – MIT License (same terms as Amethyst & Coracle)
  */
+import type {
+  NamecoinNostrResult,
+  NameShowResult,
+  NamecoinSettings,
+  NamecoinResolveOutcome,
+} from "./types"
+import {nameShowWithFallback} from "./electrumx-ws"
+import {DEFAULT_CACHE_TTL} from "./constants"
 
-// ── Types ──────────────────────────────────────────────────────────────
-
-export interface NamecoinNostrResult {
-  /** Hex-encoded 32-byte Schnorr public key */
-  pubkey: string
-  /** Optional relay URLs where this user can be found */
-  relays: string[]
-  /** The Namecoin name that was resolved (e.g. "d/example") */
-  namecoinName: string
-  /** The local-part that was matched (e.g. "alice" or "_") */
-  localPart: string
-}
-
-export interface NameShowResult {
-  name: string
-  value: string
-  txid?: string
-  height?: number
-  expiresIn?: number
-}
-
-export interface ElectrumxServer {
-  host: string
-  port: number
-  /** WebSocket URL override (e.g. "wss://electrumx.example.com:50004") */
-  wsUrl?: string
-  useSsl: boolean
-  trustAllCerts?: boolean
-}
-
-export type NamecoinResolveOutcome =
-  | {type: "success"; result: NamecoinNostrResult}
-  | {type: "name_not_found"; name: string}
-  | {type: "no_nostr_field"; name: string}
-  | {type: "servers_unreachable"; message: string}
-  | {type: "invalid_identifier"; identifier: string}
-  | {type: "timeout"}
-
-export interface NamecoinSettings {
-  enabled: boolean
-  /** Custom ElectrumX servers (used by the proxy, not by the browser directly) */
-  customServers: string[]
-  /** HTTP proxy URL for ElectrumX queries — required for browser resolution */
-  proxyUrl: string
-}
+// Re-export types that consumers need
+export type {NamecoinNostrResult, NameShowResult, NamecoinSettings, NamecoinResolveOutcome}
+export type {ElectrumxWsServer, ParsedNamecoinIdentifier} from "./types"
 
 // ── Constants ──────────────────────────────────────────────────────────
 
 const HEX_PUBKEY_REGEX = /^[0-9a-fA-F]{64}$/
 
-/** Default ElectrumX servers (informational — used by proxy, not browser) */
-export const DEFAULT_ELECTRUMX_SERVERS: ElectrumxServer[] = [
-  {
-    host: "nmc2.bitcoins.sk",
-    port: 57001,
-    useSsl: false,
-    trustAllCerts: true,
-  },
-]
-
 export const DEFAULT_NAMECOIN_SETTINGS: NamecoinSettings = {
   enabled: true,
-  customServers: [],
-  proxyUrl: "",
+  servers: [],
+  cacheTtl: DEFAULT_CACHE_TTL,
 }
 
 // ── Identifier Parsing ─────────────────────────────────────────────────
@@ -108,11 +58,7 @@ interface ParsedIdentifier {
  */
 export function isNamecoinIdentifier(identifier: string): boolean {
   const normalized = identifier.trim().toLowerCase()
-  return (
-    normalized.endsWith(".bit") ||
-    normalized.startsWith("d/") ||
-    normalized.startsWith("id/")
-  )
+  return normalized.endsWith(".bit") || normalized.startsWith("d/") || normalized.startsWith("id/")
 }
 
 /**
@@ -125,7 +71,7 @@ export function isNamecoinIdentifier(identifier: string): boolean {
  *   "d/example"          → d/example, localPart=_
  *   "id/alice"           → id/alice,  localPart=_
  */
-function parseIdentifier(raw: string): ParsedIdentifier | null {
+export function parseNamecoinIdentifier(raw: string): ParsedIdentifier | null {
   const input = raw.trim()
 
   // Direct namespace references
@@ -171,6 +117,9 @@ function parseIdentifier(raw: string): ParsedIdentifier | null {
 
   return null
 }
+
+// Keep old name as alias for backwards compatibility in tests
+export {parseNamecoinIdentifier as parseIdentifier}
 
 // ── Value Extraction ───────────────────────────────────────────────────
 
@@ -311,81 +260,25 @@ function extractFromIdentityValue(
   return null
 }
 
-// ── HTTP Proxy Client ──────────────────────────────────────────────────
-
-/**
- * Resolve the proxy base URL.
- *
- * In order of priority:
- *   1. Explicit proxyUrl from user settings
- *   2. VITE_NAMECOIN_PROXY_URL env var (set at build time)
- *   3. Same-origin /api/namecoin (Vite dev middleware or reverse proxy)
- */
-function resolveProxyUrl(proxyUrl?: string): string {
-  if (proxyUrl) return proxyUrl.replace(/\/+$/, "")
-  const envUrl = import.meta.env?.VITE_NAMECOIN_PROXY_URL
-  if (envUrl) return envUrl.replace(/\/+$/, "")
-  return "/api/namecoin"
-}
-
-/**
- * Perform a name_show lookup via the HTTP proxy.
- *
- * The proxy accepts:
- *   GET /name/d/example   → resolves d/example
- *   GET /name/id/alice    → resolves id/alice
- *
- * Returns: { name, value (JSON string), txid, height, expires_in }
- */
-async function nameShowViaProxy(
-  identifier: string,
-  proxyUrl: string,
-): Promise<NameShowResult | null> {
-  const url = `${proxyUrl}/name/${encodeURIComponent(identifier)}`
-  const response = await fetch(url, {
-    headers: {Accept: "application/json"},
-    signal: AbortSignal.timeout(15_000),
-  })
-
-  if (!response.ok) {
-    if (response.status === 404) {
-      throw {type: "name_not_found", name: identifier}
-    }
-    throw new Error(`Proxy error: ${response.status}`)
-  }
-
-  const data = await response.json()
-  if (data.error) {
-    throw {type: data.error, name: identifier}
-  }
-  return {
-    name: data.name || identifier,
-    value: typeof data.value === "string" ? data.value : JSON.stringify(data.value),
-    txid: data.txid,
-    height: data.height,
-    expiresIn: data.expires_in ?? data.expiresIn,
-  }
-}
-
 // ── Main Resolver ──────────────────────────────────────────────────────
 
 /**
  * Resolve a user-supplied identifier to a Nostr pubkey via Namecoin.
  *
  * @param identifier User input, e.g. "alice@example.bit", "id/alice", "example.bit"
- * @param proxyUrl HTTP proxy URL (resolved automatically if not provided)
+ * @param servers Custom ElectrumX WebSocket server URLs
  * @param timeoutMs Maximum time to wait
  */
 export async function resolveNamecoin(
   identifier: string,
-  proxyUrl?: string,
+  servers?: string[],
   timeoutMs = 20_000,
 ): Promise<NamecoinNostrResult | null> {
-  const parsed = parseIdentifier(identifier)
+  const parsed = parseNamecoinIdentifier(identifier)
   if (!parsed) return null
 
   const result = await Promise.race([
-    performLookup(parsed, proxyUrl),
+    performLookup(parsed, servers),
     new Promise<null>(resolve => setTimeout(() => resolve(null), timeoutMs)),
   ])
 
@@ -397,15 +290,15 @@ export async function resolveNamecoin(
  */
 export async function resolveNamecoinDetailed(
   identifier: string,
-  proxyUrl?: string,
+  servers?: string[],
   timeoutMs = 20_000,
 ): Promise<NamecoinResolveOutcome> {
-  const parsed = parseIdentifier(identifier)
+  const parsed = parseNamecoinIdentifier(identifier)
   if (!parsed) return {type: "invalid_identifier", identifier}
 
   try {
     const result = await Promise.race([
-      performLookupDetailed(parsed, proxyUrl),
+      performLookupDetailed(parsed, servers),
       new Promise<NamecoinResolveOutcome>(resolve =>
         setTimeout(() => resolve({type: "timeout"}), timeoutMs),
       ),
@@ -418,11 +311,10 @@ export async function resolveNamecoinDetailed(
 
 async function performLookup(
   parsed: ParsedIdentifier,
-  proxyUrl?: string,
+  servers?: string[],
 ): Promise<NamecoinNostrResult | null> {
   try {
-    const url = resolveProxyUrl(proxyUrl)
-    const nameResult = await nameShowViaProxy(parsed.namecoinName, url)
+    const nameResult = await nameShowWithFallback(parsed.namecoinName, servers)
     if (!nameResult) return null
 
     let valueJson: Record<string, any>
@@ -442,21 +334,18 @@ async function performLookup(
 
 async function performLookupDetailed(
   parsed: ParsedIdentifier,
-  proxyUrl?: string,
+  servers?: string[],
 ): Promise<NamecoinResolveOutcome> {
-  const url = resolveProxyUrl(proxyUrl)
   let nameResult: NameShowResult | null
   try {
-    nameResult = await nameShowViaProxy(parsed.namecoinName, url)
+    nameResult = await nameShowWithFallback(parsed.namecoinName, servers)
     if (!nameResult) return {type: "name_not_found", name: parsed.namecoinName}
   } catch (e: any) {
-    if (e?.type === "name_not_found" || e?.type === "name_expired") {
-      return {type: "name_not_found", name: parsed.namecoinName}
-    }
-    if (e?.type === "servers_unreachable") {
-      return {type: "servers_unreachable", message: e.message}
-    }
-    return {type: "servers_unreachable", message: e?.message || "Unknown error"}
+    return {type: "servers_unreachable", message: e?.message || "All servers unreachable"}
+  }
+
+  if (nameResult.expired) {
+    return {type: "name_not_found", name: parsed.namecoinName}
   }
 
   let valueJson: Record<string, any>
@@ -521,12 +410,12 @@ export function clearCache(): void {
  */
 export async function resolveNamecoinCached(
   identifier: string,
-  proxyUrl?: string,
+  servers?: string[],
 ): Promise<NamecoinNostrResult | null> {
   const cached = getCached(identifier)
   if (cached !== undefined) return cached
 
-  const result = await resolveNamecoin(identifier, proxyUrl)
+  const result = await resolveNamecoin(identifier, servers)
   setCache(identifier, result)
   return result
 }
@@ -537,15 +426,15 @@ export async function resolveNamecoinCached(
 export async function verifyNamecoinNip05(
   nip05Address: string,
   expectedPubkeyHex: string,
-  proxyUrl?: string,
+  servers?: string[],
 ): Promise<boolean> {
   if (!isNamecoinIdentifier(nip05Address)) return false
-  const result = await resolveNamecoinCached(nip05Address, proxyUrl)
+  const result = await resolveNamecoinCached(nip05Address, servers)
   if (!result) return false
   return result.pubkey.toLowerCase() === expectedPubkeyHex.toLowerCase()
 }
 
-// ── Runtime settings accessor ──────────────────────────────────────────
+// ── Runtime settings ───────────────────────────────────────────────────
 
 let _getSettings: (() => NamecoinSettings) | null = null
 
@@ -566,7 +455,7 @@ export async function resolveNamecoinWithSettings(
 ): Promise<NamecoinNostrResult | null> {
   const settings = getRuntimeSettings()
   if (!settings.enabled) return null
-  return resolveNamecoinCached(identifier, settings.proxyUrl || undefined)
+  return resolveNamecoinCached(identifier, settings.servers)
 }
 
 /**
@@ -585,9 +474,12 @@ export async function verifyNamecoinWithSettings(
 // ── Settings Helpers ───────────────────────────────────────────────────
 
 /**
- * Parse "host:port" or a WebSocket URL into an ElectrumxServer.
+ * Parse a server string (WebSocket URL or host:port) into an ElectrumxServer-like object.
+ * Kept for backwards compatibility with tests.
  */
-export function parseServerString(s: string): ElectrumxServer | null {
+export function parseServerString(
+  s: string,
+): {host: string; port: number; wsUrl?: string; useSsl: boolean; trustAllCerts?: boolean} | null {
   const trimmed = s.trim()
 
   if (trimmed.startsWith("wss://") || trimmed.startsWith("ws://")) {
@@ -619,7 +511,12 @@ export function parseServerString(s: string): ElectrumxServer | null {
   }
 }
 
-export function formatServerString(server: ElectrumxServer): string {
+export function formatServerString(server: {
+  host: string
+  port: number
+  wsUrl?: string
+  useSsl: boolean
+}): string {
   if (server.wsUrl) return server.wsUrl
   const base = `${server.host}:${server.port}`
   return server.useSsl ? base : `${base}:tcp`

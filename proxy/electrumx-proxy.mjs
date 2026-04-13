@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Kept for reference — the browser now connects directly via WebSocket. See src/util/namecoin/electrumx-ws.ts
 /**
  * Namecoin ElectrumX HTTP Proxy
  *
@@ -53,7 +54,13 @@ const server = createServer(async (req, res) => {
 
   if (url.pathname === "/health") {
     res.writeHead(200, {"Content-Type": "application/json"})
-    res.end(JSON.stringify({status: "ok", electrumx: `${ELECTRUMX_HOST}:${ELECTRUMX_PORT}`, tls: USE_TLS}))
+    res.end(
+      JSON.stringify({
+        status: "ok",
+        electrumx: `${ELECTRUMX_HOST}:${ELECTRUMX_PORT}`,
+        tls: USE_TLS,
+      }),
+    )
     return
   }
 

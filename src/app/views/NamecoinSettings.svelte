@@ -19,7 +19,6 @@
 
   const values = {
     namecoin_enabled: $userSettings.namecoin_enabled,
-    namecoin_proxy_url: $userSettings.namecoin_proxy_url || "",
   }
 
   let testIdentifier = ""
@@ -33,7 +32,6 @@
 
   const resetDefaults = () => {
     values.namecoin_enabled = true
-    values.namecoin_proxy_url = ""
     clearCache()
     showInfo("Namecoin settings reset to defaults and cache cleared.")
   }
@@ -44,10 +42,7 @@
     testResult = null
 
     try {
-      const outcome = await resolveNamecoinDetailed(
-        testIdentifier.trim(),
-        values.namecoin_proxy_url || undefined,
-      )
+      const outcome = await resolveNamecoinDetailed(testIdentifier.trim())
 
       switch (outcome.type) {
         case "success":
@@ -60,7 +55,7 @@
           testResult = `✗ Name exists but has no Nostr data: ${outcome.name}`
           break
         case "servers_unreachable":
-          testResult = `✗ Could not reach proxy / ElectrumX servers: ${outcome.message}`
+          testResult = `✗ Could not reach ElectrumX servers: ${outcome.message}`
           break
         case "invalid_identifier":
           testResult = `✗ Invalid Namecoin identifier: ${outcome.identifier}`
@@ -85,9 +80,8 @@
     <p>
       Configure decentralised NIP-05 verification via the
       <Link class="underline" external href={namecoinUrl}>Namecoin</Link> blockchain.
-      When enabled, identifiers ending in <code>.bit</code> are resolved from
-      the blockchain via an ElectrumX proxy — no centralised HTTP server needed for
-      identity verification.
+      When enabled, identifiers ending in <code>.bit</code> are resolved directly
+      from ElectrumX servers via WebSocket — no proxy or backend needed.
     </p>
   </div>
 
@@ -96,23 +90,12 @@
       <Toggle bind:value={values.namecoin_enabled} />
       <p slot="info">
         When enabled, {appName} will resolve <code>.bit</code> domains, <code>d/</code> and
-        <code>id/</code> Namecoin names to Nostr public keys.
+        <code>id/</code> Namecoin names to Nostr public keys. Resolution connects directly
+        to ElectrumX servers via WebSocket from your browser.
       </p>
     </FieldInline>
 
     {#if values.namecoin_enabled}
-      <Field label="Proxy URL (optional)">
-        <Input type="text" bind:value={values.namecoin_proxy_url} placeholder="Leave blank for default">
-          <i slot="before" class="fa-solid fa-shield-halved" />
-        </Input>
-        <p slot="info">
-          Namecoin resolution requires a lightweight proxy that bridges HTTP to ElectrumX
-          servers (browsers cannot make direct TCP connections). Leave blank to use the
-          built-in proxy. Set a custom URL if you run your own proxy for better privacy.
-          The proxy should accept <code>GET /name/d/example</code> requests.
-        </p>
-      </Field>
-
       <Field label="Test Resolution">
         <p slot="info">
           Test that Namecoin resolution is working. Try <code>testls.bit</code>,

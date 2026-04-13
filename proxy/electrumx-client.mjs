@@ -1,3 +1,4 @@
+// Kept for reference — the browser now connects directly via WebSocket. See src/util/namecoin/electrumx-ws.ts
 /**
  * ElectrumX TCP/TLS client for Namecoin name resolution.
  *
@@ -38,7 +39,7 @@ function buildNameIndexScript(name) {
   const namePush = pushData(nameBytes)
   const emptyPush = pushData(Buffer.alloc(0))
   return Buffer.concat([
-    Buffer.from([0x53]),              // OP_NAME_UPDATE
+    Buffer.from([0x53]), // OP_NAME_UPDATE
     namePush,
     emptyPush,
     Buffer.from([0x6d, 0x75, 0x6a]), // OP_2DROP OP_DROP OP_RETURN
@@ -99,9 +100,7 @@ function electrumRpc(host, port, useTls, method, params, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
     const id = Math.floor(Math.random() * 1_000_000)
     const connectFn = useTls ? tlsConnect : netConnect
-    const opts = useTls
-      ? {port, host, rejectUnauthorized: false}
-      : {port, host}
+    const opts = useTls ? {port, host, rejectUnauthorized: false} : {port, host}
 
     const conn = connectFn(opts, () => {
       conn.write(JSON.stringify({jsonrpc: "2.0", id, method, params}) + "\n")
@@ -113,7 +112,7 @@ function electrumRpc(host, port, useTls, method, params, timeoutMs = 15000) {
       reject(new Error("RPC timeout"))
     }, timeoutMs)
 
-    conn.on("data", (d) => {
+    conn.on("data", d => {
       buf += d.toString()
       const lines = buf.split("\n")
       for (let i = 0; i < lines.length - 1; i++) {
@@ -126,12 +125,14 @@ function electrumRpc(host, port, useTls, method, params, timeoutMs = 15000) {
             if (msg.error) reject(new Error(msg.error.message || JSON.stringify(msg.error)))
             else resolve(msg.result)
           }
-        } catch { /* not our message */ }
+        } catch {
+          /* not our message */
+        }
       }
       buf = lines[lines.length - 1]
     })
 
-    conn.on("error", (e) => {
+    conn.on("error", e => {
       clearTimeout(timer)
       reject(e)
     })
@@ -147,9 +148,7 @@ function electrumRpc(host, port, useTls, method, params, timeoutMs = 15000) {
 function electrumSession(host, port, useTls, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     const connectFn = useTls ? tlsConnect : netConnect
-    const opts = useTls
-      ? {port, host, rejectUnauthorized: false}
-      : {port, host}
+    const opts = useTls ? {port, host, rejectUnauthorized: false} : {port, host}
 
     const pending = new Map() // id → {resolve, reject}
     let buf = ""
@@ -170,7 +169,7 @@ function electrumSession(host, port, useTls, timeoutMs = 30000) {
       })
     })
 
-    conn.on("data", (d) => {
+    conn.on("data", d => {
       buf += d.toString()
       const lines = buf.split("\n")
       for (let i = 0; i < lines.length - 1; i++) {
@@ -183,12 +182,14 @@ function electrumSession(host, port, useTls, timeoutMs = 30000) {
             if (msg.error) p.reject(new Error(msg.error.message || JSON.stringify(msg.error)))
             else p.resolve(msg.result)
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
       buf = lines[lines.length - 1]
     })
 
-    conn.on("error", (e) => {
+    conn.on("error", e => {
       for (const p of pending.values()) p.reject(e)
       pending.clear()
       reject(e)
@@ -245,7 +246,9 @@ export async function nameShow(namecoinName, host, port, useTls = false) {
     try {
       const headers = await session.call("blockchain.headers.subscribe", [])
       currentHeight = headers?.height ?? null
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
 
     if (currentHeight !== null && height > 0) {
       if (currentHeight - height >= NAME_EXPIRE_DEPTH) {
@@ -254,7 +257,7 @@ export async function nameShow(namecoinName, host, port, useTls = false) {
     }
 
     // 6. Parse NAME_UPDATE from tx outputs
-    for (const vout of (tx?.vout || [])) {
+    for (const vout of tx?.vout || []) {
       const hex = vout?.scriptPubKey?.hex
       if (!hex || !hex.startsWith("53")) continue
 
@@ -266,9 +269,10 @@ export async function nameShow(namecoinName, host, port, useTls = false) {
         value: parsed.value,
         txid: txHash,
         height,
-        expires_in: currentHeight !== null && height > 0
-          ? NAME_EXPIRE_DEPTH - (currentHeight - height)
-          : undefined,
+        expires_in:
+          currentHeight !== null && height > 0
+            ? NAME_EXPIRE_DEPTH - (currentHeight - height)
+            : undefined,
       }
     }
 
