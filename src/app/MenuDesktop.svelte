@@ -156,6 +156,12 @@
           disabled={!$signer}>
           <i class="fa fa-volume-xmark" /> Content Settings
         </MenuItem>
+        <MenuItem
+          class="staatliches flex items-center gap-4 py-4 pl-8"
+          href="/settings/namecoin"
+          disabled={!$signer}>
+          <i class="fa fa-link" /> Namecoin
+        </MenuItem>
       </MenuDesktopSecondary>
     {:else if subMenu === "account"}
       <MenuDesktopSecondary onEscape={closeSubMenu}>

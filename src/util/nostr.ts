@@ -42,6 +42,7 @@ import type {TrustedEvent} from "@welshman/util"
 import * as nip19 from "nostr-tools/nip19"
 import * as nip05 from "nostr-tools/nip05"
 import {parseJson} from "src/util/misc"
+import {isNamecoinIdentifier, resolveNamecoinWithSettings} from "src/util/namecoin"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
@@ -157,11 +158,27 @@ export const getContentWarning = (e: TrustedEvent) =>
   getTopicTagValues(e.tags).find(t => WARN_TAGS.has(t.toLowerCase()))
 
 export const parseAnything = async entity => {
-  if (entity.includes("@")) {
-    const profile = await nip05.queryProfile(entity)
+  // Namecoin: route .bit domains, d/ and id/ names to blockchain resolver
+  if (isNamecoinIdentifier(entity)) {
+    try {
+      const result = await resolveNamecoinWithSettings(entity)
+      if (result) {
+        return {type: "npub", data: result.pubkey}
+      }
+    } catch {
+      // Fall through to standard NIP-05 / nip19 parsing
+    }
+  }
 
-    if (profile) {
-      return {type: "npub", data: profile.pubkey}
+  if (entity.includes("@")) {
+    // Standard NIP-05: route to HTTP-based verification
+    // Skip .bit domains here since they were already handled above
+    if (!isNamecoinIdentifier(entity)) {
+      const profile = await nip05.queryProfile(entity)
+
+      if (profile) {
+        return {type: "npub", data: profile.pubkey}
+      }
     }
   }
 

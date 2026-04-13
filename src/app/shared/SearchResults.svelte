@@ -4,6 +4,7 @@
   import {derived} from "svelte/store"
   import {topicSearch, profileSearch} from "@welshman/app"
   import {parseAnything} from "src/util/nostr"
+  import {isNamecoinIdentifier} from "src/util/namecoin"
   import {router} from "src/app/util/router"
   import {createPeopleLoader} from "src/engine"
 
@@ -52,7 +53,7 @@
     ([$term, $topicSearch, $profileSearch]) => {
       $term = $term || ""
 
-      if ($term.length > 30) {
+      if ($term.length > 30 || isNamecoinIdentifier($term)) {
         tryParseEntity($term)
       }
 
