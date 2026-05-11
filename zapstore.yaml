@@ -1,0 +1,4 @@
+repository: https://github.com/coracle-social/coracle/
+metadata_sources:
+    - github
+release_source: ./android/app/build/outputs/apk/release/app-release-signed.apk

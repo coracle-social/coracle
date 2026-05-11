@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.32
+
+* Fix bunker login
+* Fix nstart login
+* Fix file upload error handling
+
 # 0.6.31
 
 * Upgrade capacitorjs
