@@ -24,7 +24,7 @@
 <div
   class="flex h-full w-full max-w-[95vw] flex-col justify-center overflow-hidden rounded bg-neutral-800">
   {#await loadPreview()}
-    <div class="shimmer h-64 w-96" />
+    <div class="shimmer h-64 w-full" />
   {:then { title, description, image }}
     {#if image && !hideImage}
       <img

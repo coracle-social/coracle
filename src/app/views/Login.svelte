@@ -30,9 +30,7 @@
     boot()
   }
 
-  console.log("=========== hi")
   const useSigner = async (app: AppInfo) => {
-    console.log("=======", JSON.stringify(app))
     const signer = new Nip55Signer(app.packageName)
     const pubkey = await signer.getPubkey()
 

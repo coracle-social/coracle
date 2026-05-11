@@ -18,7 +18,6 @@ if (window.location.hash?.startsWith("#nostr-login")) {
     let success = false
 
     try {
-      console.log(login)
       if (login.startsWith("bunker://")) {
         const clientSecret = makeSecret()
         const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(login)
