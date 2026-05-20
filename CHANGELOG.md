@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.33
+
+* Add default and relay feeds
+* Move feed controls to a sidebar on desktop
+* Add polls and reposts
+
 # 0.6.32
 
 * Fix bunker login
