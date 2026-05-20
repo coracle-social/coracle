@@ -15,7 +15,7 @@
   } from "@welshman/util"
   import {fly} from "src/util/transition"
   import {copyToClipboard} from "src/util/html"
-  import {replyKinds} from "src/util/nostr"
+  import {replyKinds, repostKinds} from "src/util/nostr"
   import {formatSats, quantify} from "src/util/misc"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -61,6 +61,10 @@
 
   $: json = JSON.stringify(event, null, 2)
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
+  $: reposts = uniqBy(
+    prop("pubkey"),
+    children.filter(e => repostKinds.includes(e.kind)),
+  )
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: $likesCount = likes.length
@@ -85,6 +89,14 @@
   <div class="grid grid-cols-2 gap-2">
     {#each likes as like}
       <PersonBadge pubkey={like.pubkey} />
+    {/each}
+  </div>
+{/if}
+{#if reposts.length > 0}
+  <h1 class="staatliches text-2xl">Reposted By</h1>
+  <div class="grid grid-cols-2 gap-2">
+    {#each reposts as repost}
+      <PersonBadge pubkey={repost.pubkey} />
     {/each}
   </div>
 {/if}
