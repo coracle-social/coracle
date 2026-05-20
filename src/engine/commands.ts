@@ -22,6 +22,7 @@ import {
   FEEDS,
   FOLLOWS,
   MESSAGING_RELAYS,
+  POLL_RESPONSE,
   PROFILE,
   RELAYS,
   DIRECT_MESSAGE,
@@ -94,6 +95,26 @@ export const signAndPublish = async (template, {anonymous = false} = {}) => {
 
   return await publishThunk({event, relays})
 }
+
+// Polls
+
+export type PollResponseParams = {
+  event: TrustedEvent
+  selectedIds: string[]
+}
+
+export const makePollResponse = ({event, selectedIds}: PollResponseParams) =>
+  makeEvent(POLL_RESPONSE, {
+    content: "",
+    tags: [
+      ["e", event.id],
+      ...selectedIds.map(selectedId => ["response", selectedId]),
+      ...getClientTags(),
+    ],
+  })
+
+export const publishPollResponse = (params: PollResponseParams) =>
+  signAndPublish(makePollResponse(params))
 
 // Deletes
 

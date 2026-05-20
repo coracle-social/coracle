@@ -7,6 +7,7 @@ import {
   LONG_FORM,
   NOTE,
   COMMENT,
+  POLL,
   REACTION,
   REPOST,
   ZAP_RESPONSE,
@@ -66,7 +67,7 @@ export const isKeyValid = (key: string) => {
 }
 
 export const replyKinds = [NOTE, COMMENT]
-export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT]
+export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT, POLL]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS] as number[]
