@@ -41,7 +41,7 @@ import {
   makeFeedController,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
-import {noteKinds, reactionKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
 import {env, myRequest, myLoad, userSettings} from "src/engine/state"
 
@@ -186,7 +186,7 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 // Notifications
 
 export const getNotificationKinds = () =>
-  without(env.ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds])
+  without(env.ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, ...repostKinds])
 
 export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}

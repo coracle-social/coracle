@@ -20,7 +20,7 @@
 
   const values = {...$userSettings}
 
-  const noteActionOptions = ["zaps", "replies", "reactions", "recommended_apps"]
+  const noteActionOptions = ["zaps", "replies", "reactions", "reposts", "recommended_apps"]
 
   const setMutesDirty = () => {
     mutesDirty = true

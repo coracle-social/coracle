@@ -5,7 +5,7 @@ import {type TrustedEvent} from "@welshman/util"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsDesc} from "src/engine/utils"
 import {checked, getSeenAt, isEventMuted, sessionWithMeta} from "src/engine/state"
-import {noteKinds, reactionKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
 import {derived} from "svelte/store"
 
 export const isSeen = derived(
@@ -61,7 +61,10 @@ export const reactionNotifications = derived(
   [
     pubkey,
     isEventMuted,
-    throttled(800, deriveEvents({repository, filters: [{kinds: reactionKinds}]})),
+    throttled(
+      800,
+      deriveEvents({repository, filters: [{kinds: [...reactionKinds, ...repostKinds]}]}),
+    ),
   ],
   ([$pubkey, $isEventMuted, $events]) =>
     sortEventsDesc(

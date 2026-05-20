@@ -246,7 +246,7 @@ export const defaultSettings = {
   min_pow_difficulty: 0,
   enable_client_tag: false,
   auto_authenticate2: true,
-  note_actions: ["zaps", "replies", "reactions", "recommended_apps"],
+  note_actions: ["zaps", "replies", "reactions", "reposts", "recommended_apps"],
   upload_type: "blossom",
   imgproxy_url: "",
   dufflepud_url: env.DUFFLEPUD_URL,

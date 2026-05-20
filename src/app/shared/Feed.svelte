@@ -14,7 +14,7 @@
   } from "@welshman/feeds"
   import {makeFeedController} from "@welshman/app"
   import {createScroller} from "src/util/misc"
-  import {noteKinds} from "src/util/nostr"
+  import {noteKinds, repostKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
   import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
@@ -69,7 +69,7 @@
 
     const definition = hasKinds
       ? feed.definition
-      : makeIntersectionFeed(makeKindFeed(...noteKinds), feed.definition)
+      : makeIntersectionFeed(makeKindFeed(...noteKinds, ...repostKinds), feed.definition)
 
     ctrl = makeFeedController({
       feed: definition,

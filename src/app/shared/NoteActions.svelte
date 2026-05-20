@@ -9,6 +9,8 @@
     deriveZapperForPubkey,
     repository,
     signer,
+    tagEvent,
+    tagPubkey,
     tagEventForReaction,
     tagZapSplit,
     mutePrivately,
@@ -27,13 +29,16 @@
     getLnUrl,
     ZAP_RESPONSE,
     REACTION,
+    REPOST,
+    GENERIC_REPOST,
+    NOTE,
     getReplyFilters,
     isChildOf,
     getAddress,
   } from "@welshman/util"
   import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
-  import {replyKinds} from "src/util/nostr"
+  import {replyKinds, repostKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -77,6 +82,7 @@
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
+  const repostsCount = tweened(0, {interpolate})
   const kindHandlers = deriveHandlersForKind(event.kind)
   const noteActions = getSetting("note_actions")
   const seenOn = deriveRelaysForEvent(event)
@@ -103,6 +109,21 @@
 
   const deleteReaction = e => {
     deleteEvent(e)
+  }
+
+  const repost = async () => {
+    if (isSignedEvent(event)) {
+      const kind = event.kind === NOTE ? REPOST : GENERIC_REPOST
+      const tags = [...tagEvent(event), tagPubkey(event.pubkey), ...getClientTags()]
+
+      if (kind === GENERIC_REPOST) {
+        tags.push(["k", String(event.kind)])
+      }
+
+      await signAndPublish(makeEvent(kind, {content: JSON.stringify(event), tags}))
+    } else {
+      showInfo("Unable to republish an unsigned event.")
+    }
   }
 
   const startZap = () => {
@@ -154,6 +175,10 @@
   $: pinned = $userPins.has(event.id)
   $: children = $context.filter(e => isChildOf(e, event))
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
+  $: reposts = uniqBy(
+    prop("pubkey"),
+    children.filter(e => repostKinds.includes(e.kind)),
+  )
   $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
   $: replies = sortEventsDesc(
     children.filter(e => replyKinds.includes(e.kind) && !$isEventMuted(e)),
@@ -161,6 +186,8 @@
   $: disableActions = !$signer || (muted && !showHidden)
   $: liked = likes.find(e => e.pubkey === $pubkey)
   $: $likesCount = likes.length
+  $: reposted = reposts.find(e => e.pubkey === $pubkey)
+  $: $repostsCount = reposts.length
   $: zapped = $zaps.find(e => e.request.pubkey === $pubkey)
   $: $zapsTotal = sum(pluck("invoiceAmount", $zaps)) / 1000
   $: canZap = $zapper?.allowsNostr && event.pubkey !== $pubkey
@@ -253,6 +280,18 @@
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
     </button>
+    {#if noteActions.includes("reposts")}
+      <button
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
+          "pointer-events-none opacity-50": disableActions || !isSignedEvent(event),
+        })}
+        on:click={() => (reposted ? deleteReaction(reposted) : repost())}>
+        <i class="fa fa-rotate cursor-pointer" class:text-accent={reposted} />
+        {#if $repostsCount > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repostsCount}</span>
+        {/if}
+      </button>
+    {/if}
     {#if env.ENABLE_ZAPS && noteActions.includes("zaps")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
