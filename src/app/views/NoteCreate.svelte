@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {last, dateToSeconds, now} from "@welshman/lib"
+  import {last, dateToSeconds, now, randomId} from "@welshman/lib"
   import {own, hash} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {Router, addMinimalFallbacks} from "@welshman/router"
@@ -8,6 +8,8 @@
     makeEvent,
     toNostrURI,
     DVM_REQUEST_PUBLISH_SCHEDULE,
+    POLL,
+    NOTE,
     Address,
     isReplaceable,
   } from "@welshman/util"
@@ -30,7 +32,10 @@
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
+  import FieldInline from "src/partials/FieldInline.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
+  import Input from "src/partials/Input.svelte"
+  import Toggle from "src/partials/Toggle.svelte"
   import {showInfo, showPublishInfo, showToast, showWarning} from "src/partials/Toast.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
@@ -64,6 +69,39 @@
     showOptions = false
   }
 
+  let pollEnabled = false
+  let multipleChoice = false
+  let pollOptions: {id: string; value: string}[] = []
+
+  const makePollOption = () => ({id: randomId(), value: ""})
+
+  const addPoll = () => {
+    pollEnabled = true
+
+    if (pollOptions.length === 0) {
+      pollOptions = [makePollOption(), makePollOption()]
+    }
+  }
+
+  const removePoll = () => {
+    pollEnabled = false
+  }
+
+  const addPollOption = () => {
+    pollOptions = [...pollOptions, makePollOption()]
+  }
+
+  const removePollOption = (id: string) => {
+    pollOptions = pollOptions.filter(option => option.id !== id)
+  }
+
+  const onPollOptionKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      addPollOption()
+    }
+  }
+
   const bypassNsecWarning = () => {
     nsecWarning.set(null)
     onSubmit({skipNsecWarning: true})
@@ -75,7 +113,10 @@
 
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    if (!content) return showWarning("Please provide a description.")
+    if (!content)
+      return showWarning(
+        pollEnabled ? "Please provide a poll question." : "Please provide a description.",
+      )
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
@@ -93,8 +134,30 @@
       tags.push(tagPubkey(quote.pubkey))
     }
 
+    let kind = NOTE
+
+    if (pollEnabled) {
+      const validOptions = pollOptions.filter(option => option.value.trim())
+
+      if (validOptions.length < 2) {
+        return showWarning("Please provide at least two poll options.")
+      }
+
+      kind = POLL
+
+      for (const option of validOptions) {
+        tags.push(["option", option.id, option.value.trim()])
+      }
+
+      tags.push(["polltype", multipleChoice ? "multiplechoice" : "singlechoice"])
+
+      for (const url of Router.get().ForUser().policy(addMinimalFallbacks).getUrls()) {
+        tags.push(["relay", url])
+      }
+    }
+
     const created_at = options.publish_at ? dateToSeconds(options.publish_at) : now()
-    const ownedEvent = own(makeEvent(1, {content, tags, created_at}), $session.pubkey)
+    const ownedEvent = own(makeEvent(kind, {content, tags, created_at}), $session.pubkey)
 
     let hashedEvent = hash(ownedEvent)
 
@@ -319,6 +382,14 @@
             {commaFormat($wordCount)} words
           </small>
           <span>•</span>
+          <button
+            type="button"
+            on:click={pollEnabled ? removePoll : addPoll}
+            class="cursor-pointer text-sm underline">
+            <i class="fa fa-plus" />
+            {pollEnabled ? "Remove poll options" : "Add poll options"}
+          </button>
+          <span>•</span>
           <button type="button" on:click={togglePreview} class="cursor-pointer text-sm underline">
             {showPreview ? "Hide" : "Show"} Preview
           </button>
@@ -327,6 +398,36 @@
           </button>
         </div>
       </Field>
+      {#if pollEnabled}
+        <Field icon="fa-square-poll-horizontal" label="Poll">
+          <FlexColumn small>
+            {#each pollOptions as option, i (option.id)}
+              <div class="flex items-center gap-2">
+                <Input
+                  class="flex-grow"
+                  bind:value={option.value}
+                  placeholder={`Option ${i + 1}`}
+                  on:keydown={onPollOptionKeydown} />
+                <Button
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-neutral-700 text-neutral-100 transition-colors hover:bg-neutral-600"
+                  on:click={() => removePollOption(option.id)}>
+                  <i class="fa fa-times" />
+                </Button>
+              </div>
+            {/each}
+            <button
+              type="button"
+              on:click={addPollOption}
+              class="flex cursor-pointer items-center gap-2 self-start text-sm">
+              <i class="fa fa-plus" />
+              <span class="underline">Add option</span>
+            </button>
+          </FlexColumn>
+        </Field>
+        <FieldInline label="Allow multiple selections">
+          <Toggle bind:value={multipleChoice} />
+        </FieldInline>
+      {/if}
       <div class="flex gap-2">
         <Button
           type="submit"

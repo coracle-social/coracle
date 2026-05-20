@@ -29,6 +29,7 @@ import {
   addToListPublicly,
   makeEvent,
   getAddress,
+  getTagValues,
   isSignedEvent,
   makeList,
   uploadBlob,
@@ -113,8 +114,16 @@ export const makePollResponse = ({event, selectedIds}: PollResponseParams) =>
     ],
   })
 
-export const publishPollResponse = (params: PollResponseParams) =>
-  signAndPublish(makePollResponse(params))
+export const publishPollResponse = async ({event, selectedIds}: PollResponseParams) => {
+  const router = Router.get()
+  const responseEvent = await sign(makePollResponse({event, selectedIds}))
+  const scenario = router.merge([
+    router.PublishEvent(responseEvent),
+    router.FromRelays(getTagValues("relay", event.tags)),
+  ])
+
+  return publishThunk({event: responseEvent, relays: scenario.getUrls()})
+}
 
 // Deletes
 

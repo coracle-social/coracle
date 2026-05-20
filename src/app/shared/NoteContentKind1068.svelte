@@ -2,9 +2,9 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import type {TrustedEvent} from "@welshman/util"
-  import {POLL_RESPONSE} from "@welshman/util"
+  import {POLL_RESPONSE, getTagValues} from "@welshman/util"
   import {formatTimestampRelative} from "@welshman/lib"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {Router} from "@welshman/router"
   import {repository, signer, pubkey} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {myLoad, publishPollResponse} from "src/engine"
@@ -82,10 +82,12 @@
   }
 
   onMount(() => {
-    myLoad({
-      relays: Router.get().Replies(note).policy(addMaximalFallbacks).getUrls(),
-      filters,
-    })
+    const router = Router.get()
+    const relays = router
+      .merge([router.FromRelays(getTagValues("relay", note.tags)), router.Replies(note)])
+      .getUrls()
+
+    myLoad({relays, filters})
   })
 </script>
 
