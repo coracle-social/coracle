@@ -66,6 +66,8 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
+export const RELAY_FEEDS = 10012
+
 export const replyKinds = [NOTE, COMMENT]
 export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT, POLL]
 export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]

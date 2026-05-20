@@ -42,7 +42,7 @@ import {
   makeFeedController,
 } from "@welshman/app"
 import type {AppSyncOpts} from "@welshman/app"
-import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
+import {noteKinds, reactionKinds, repostKinds, RELAY_FEEDS} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
 import {env, myRequest, myLoad, userSettings} from "src/engine/state"
 
@@ -235,7 +235,7 @@ export const loadFeedsAndLists = () =>
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
     filters: [
       addSinceToFilter({
-        kinds: [FEED, FEEDS, NAMED_BOOKMARKS, ...CUSTOM_LIST_KINDS],
+        kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
         authors: [pubkey.get()],
       }),
     ],

@@ -25,7 +25,13 @@ import {
   shouldUnwrap,
   getFollows,
 } from "@welshman/app"
-import {makeAuthorFeed, makeScopeFeed, Scope} from "@welshman/feeds"
+import {
+  makeAuthorFeed,
+  makeScopeFeed,
+  makeIntersectionFeed,
+  makeKindFeed,
+  Scope,
+} from "@welshman/feeds"
 import {
   TaskQueue,
   groupBy,
@@ -95,6 +101,7 @@ import {
   getIdentifier,
   getListTags,
   getPubkeyTagValues,
+  getRelayTagValues,
   getTagValue,
   getTagValues,
   makeList,
@@ -135,7 +142,7 @@ import {
   initStorage,
 } from "src/engine/storage"
 import {SearchHelper, fromCsv, parseJson, ensureProto} from "src/util/misc"
-import {appDataKeys} from "src/util/nostr"
+import {noteKinds, appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 import {readable, derived, writable} from "svelte/store"
 
 export const env = {
@@ -530,14 +537,14 @@ export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [Published
 )
 
 export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $userFeeds]) => {
-  let definition
-  if ($userFollows?.size > 0) {
-    definition = makeScopeFeed(Scope.Follows)
-  } else {
-    definition = makeAuthorFeed(...env.DEFAULT_FOLLOWS)
-  }
+  const baseDefinition =
+    $userFollows?.size > 0 ? makeScopeFeed(Scope.Follows) : makeAuthorFeed(...env.DEFAULT_FOLLOWS)
 
-  return makeFeed({definition: normalizeFeedDefinition(definition)})
+  const definition = normalizeFeedDefinition(
+    makeIntersectionFeed(baseDefinition, makeKindFeed(...noteKinds)),
+  )
+
+  return makeFeed({definition})
 })
 
 export const feedFavoriteEvents = deriveEvents({repository, filters: [{kinds: [FEEDS]}]})
@@ -625,6 +632,22 @@ export const userListFeeds = derived(
       l => l.title.toLowerCase(),
       $listFeeds.filter(feed => feed.list.event.pubkey === $pubkey),
     ),
+)
+
+export const relayFeedEvents = deriveEvents({repository, filters: [{kinds: [RELAY_FEEDS]}]})
+
+export const relayFeedLists = derived([plaintext, relayFeedEvents], ([$plaintext, $events]) =>
+  $events.map(event => readList(asDecryptedEvent(event, {content: $plaintext[event.id]}))),
+)
+
+export const userRelayFeedsList = derived(
+  [relayFeedLists, pubkey],
+  ([$lists, $pubkey]: [PublishedList[], string]) =>
+    $lists.find(list => list.event.pubkey === $pubkey),
+)
+
+export const userRelayFeeds = derived(userRelayFeedsList, $list =>
+  getRelayTagValues(getListTags($list)),
 )
 
 // Handlers

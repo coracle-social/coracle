@@ -36,11 +36,19 @@ import {
   makeBlossomAuthEvent,
   normalizeRelayUrl,
   removeFromList,
+  updateList,
   getRelaysFromList,
 } from "@welshman/util"
-import {anonymous, getClientTags, sign, userFeedFavorites, withIndexers} from "src/engine/state"
+import {
+  anonymous,
+  getClientTags,
+  sign,
+  userFeedFavorites,
+  userRelayFeedsList,
+  withIndexers,
+} from "src/engine/state"
 import {stripExifData} from "src/util/html"
-import {appDataKeys} from "src/util/nostr"
+import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 import {get} from "svelte/store"
 
 // Helpers
@@ -179,6 +187,21 @@ export const addFeedFavorite = async (address: string) => {
 
   return publishThunk({
     event: await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf),
+    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+  })
+}
+
+// Relay feeds
+
+export const setRelayFeeds = async (urls: string[]) => {
+  const list = get(userRelayFeedsList) || makeList({kind: RELAY_FEEDS})
+  const publicTags = [
+    ...list.publicTags.filter(t => !["r", "relay"].includes(t[0])),
+    ...urls.map(url => ["relay", url]),
+  ]
+
+  return publishThunk({
+    event: await updateList(list, {publicTags}).reconcile(nip44EncryptToSelf),
     relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
   })
 }
