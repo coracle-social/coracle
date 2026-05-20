@@ -26,6 +26,7 @@ import {
   NAMED_BOOKMARKS,
   DEPRECATED_DIRECT_MESSAGE,
   FEEDS,
+  POLL_RESPONSE,
   Address,
 } from "@welshman/util"
 import {deriveEvents} from "@welshman/store"
@@ -186,7 +187,12 @@ export const loadPubkeys = async (pubkeys: string[]) => {
 // Notifications
 
 export const getNotificationKinds = () =>
-  without(env.ENABLE_ZAPS ? [] : [9735], [...noteKinds, ...reactionKinds, ...repostKinds])
+  without(env.ENABLE_ZAPS ? [] : [9735], [
+    ...noteKinds,
+    ...reactionKinds,
+    ...repostKinds,
+    POLL_RESPONSE,
+  ])
 
 export const loadNotifications = () => {
   const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}

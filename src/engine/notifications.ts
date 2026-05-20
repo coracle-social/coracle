@@ -1,7 +1,7 @@
 import {pubkey, repository} from "@welshman/app"
 import {now, without} from "@welshman/lib"
 import {deriveEvents, throttled} from "@welshman/store"
-import {type TrustedEvent} from "@welshman/util"
+import {POLL_RESPONSE, type TrustedEvent} from "@welshman/util"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsDesc} from "src/engine/utils"
 import {checked, getSeenAt, isEventMuted, sessionWithMeta} from "src/engine/state"
@@ -21,7 +21,11 @@ export const setChecked = (path: string, ts = now()) =>
 // -- Main Notifications
 
 export const mainNotifications = derived(
-  [pubkey, isEventMuted, throttled(800, deriveEvents({repository, filters: [{kinds: noteKinds}]}))],
+  [
+    pubkey,
+    isEventMuted,
+    throttled(800, deriveEvents({repository, filters: [{kinds: [...noteKinds, POLL_RESPONSE]}]})),
+  ],
   ([$pubkey, $isEventMuted, $events]) =>
     sortEventsDesc(
       $events.filter(

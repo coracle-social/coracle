@@ -109,6 +109,7 @@ export const makePollResponse = ({event, selectedIds}: PollResponseParams) =>
     content: "",
     tags: [
       ["e", event.id],
+      ["p", event.pubkey],
       ...selectedIds.map(selectedId => ["response", selectedId]),
       ...getClientTags(),
     ],
