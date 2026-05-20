@@ -11,7 +11,7 @@
 
   const onConfirm = () => {
     publishDeletion({kind, id})
-    router.pop()
+    router.clearModals()
   }
 </script>
 

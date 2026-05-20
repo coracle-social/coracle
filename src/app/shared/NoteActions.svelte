@@ -280,18 +280,6 @@
         <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repliesCount}</span>
       {/if}
     </button>
-    {#if noteActions.includes("reposts")}
-      <button
-        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
-          "pointer-events-none opacity-50": disableActions || !isSignedEvent(event),
-        })}
-        on:click={() => (reposted ? deleteReaction(reposted) : repost())}>
-        <i class="fa fa-rotate cursor-pointer" class:text-accent={reposted} />
-        {#if $repostsCount > 0}
-          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repostsCount}</span>
-        {/if}
-      </button>
-    {/if}
     {#if env.ENABLE_ZAPS && noteActions.includes("zaps")}
       <button
         class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
@@ -319,6 +307,18 @@
           })} />
         {#if $likesCount > 0}
           <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$likesCount}</span>
+        {/if}
+      </button>
+    {/if}
+    {#if noteActions.includes("reposts")}
+      <button
+        class={cx("relative flex items-center gap-1 pt-1 transition-all hover:pb-1 hover:pt-0", {
+          "pointer-events-none opacity-50": disableActions || !isSignedEvent(event),
+        })}
+        on:click={() => (reposted ? deleteReaction(reposted) : repost())}>
+        <i class="fa fa-rotate cursor-pointer" class:text-accent={reposted} />
+        {#if $repostsCount > 0}
+          <span transition:fly|local={{y: 5, duration: 100}} class="-mt-px">{$repostsCount}</span>
         {/if}
       </button>
     {/if}

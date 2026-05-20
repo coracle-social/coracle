@@ -7,9 +7,7 @@
   import {Router} from "@welshman/router"
   import {repository, signer, pubkey} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
-  import {myLoad, publishPollResponse} from "src/engine"
-  import {showWarning} from "src/partials/Toast.svelte"
-  import Button from "src/partials/Button.svelte"
+  import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {
     getPollType,
@@ -44,29 +42,27 @@
     return latest
   }
 
-  const vote = (selectedIds: string[]) => {
-    if (!$signer || closed || selectedIds.length === 0) return
-
-    publishPollResponse({event: note, selectedIds})
-  }
-
   const onOptionClick = (id: string) => {
+    if (!$signer || closed) return
+
     if (pollType === "singlechoice") {
       selectedIds = [id]
-      vote(selectedIds)
     } else {
       selectedIds = selectedIds.includes(id)
         ? selectedIds.filter(selectedId => selectedId !== id)
         : [...selectedIds, id]
     }
-  }
 
-  const submit = () => {
-    if (selectedIds.length === 0) {
-      return showWarning("Please select at least one option.")
+    const previousResponses = $responses.filter(response => response.pubkey === $pubkey)
+
+    if (selectedIds.length > 0 || previousResponses.length > 0) {
+      publishPollResponse({event: note, selectedIds})
     }
 
-    vote(selectedIds)
+    // Replace our prior responses so superseded votes don't linger on relays
+    for (const response of previousResponses) {
+      deleteEvent(response)
+    }
   }
 
   let selectedIds: string[] = []
@@ -133,9 +129,6 @@
       </button>
     {/each}
   </div>
-  {#if canVote && pollType === "multiplechoice"}
-    <Button stopPropagation class="btn btn-accent" on:click={submit}>Vote</Button>
-  {/if}
   <div class="flex flex-wrap items-center justify-between gap-2 text-sm opacity-75">
     <span>
       {pollType === "multiplechoice" ? "Multiple choice" : "Single choice"}
