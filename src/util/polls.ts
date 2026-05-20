@@ -74,3 +74,29 @@ export const getPollResults = (event: TrustedEvent, responses: TrustedEvent[]) =
     voters: latestByPubkey.size,
   }
 }
+
+export const getPollVotersByOption = (event: TrustedEvent, responses: TrustedEvent[]) => {
+  const pollType = getPollType(event)
+  const latestByPubkey = new Map<string, TrustedEvent>()
+
+  for (const response of responses) {
+    const current = latestByPubkey.get(response.pubkey)
+
+    if (!current || response.created_at > current.created_at) {
+      latestByPubkey.set(response.pubkey, response)
+    }
+  }
+
+  const votersByOption = new Map<string, string[]>()
+
+  for (const response of latestByPubkey.values()) {
+    for (const optionId of getPollResponseSelections(response, pollType)) {
+      const voters = votersByOption.get(optionId) || []
+
+      voters.push(response.pubkey)
+      votersByOption.set(optionId, voters)
+    }
+  }
+
+  return votersByOption
+}

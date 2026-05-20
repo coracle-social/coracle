@@ -55,6 +55,7 @@
   import NoteCreate from "src/app/views/NoteCreate.svelte"
   import NoteDelete from "src/app/views/NoteDelete.svelte"
   import NoteDetail from "src/app/views/NoteDetail.svelte"
+  import PollVoters from "src/app/views/PollVoters.svelte"
   import Notifications from "src/app/views/Notifications.svelte"
   import Onboarding from "src/app/views/Onboarding.svelte"
   import PersonDetail from "src/app/views/PersonDetail.svelte"
@@ -213,6 +214,11 @@
     serializers: {
       entity: asNote,
       kind: asString("kind"),
+    },
+  })
+  router.register("/notes/:entity/votes", PollVoters, {
+    serializers: {
+      entity: asNote,
     },
   })
 

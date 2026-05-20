@@ -8,6 +8,7 @@
   import {repository, signer, pubkey} from "@welshman/app"
   import {deriveEvents} from "@welshman/store"
   import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
+  import {router} from "src/app/util/router"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {
     getPollType,
@@ -64,6 +65,8 @@
       deleteEvent(response)
     }
   }
+
+  const showVoters = () => router.at("notes").of(note.id).at("votes").open()
 
   let selectedIds: string[] = []
 
@@ -137,6 +140,13 @@
         {formatTimestampRelative(endsAt)}
       {/if}
     </span>
-    <span>{results.voters} {results.voters === 1 ? "vote" : "votes"}</span>
+    {#if results.voters > 0}
+      <button type="button" class="cursor-pointer underline" on:click|stopPropagation={showVoters}>
+        {results.voters}
+        {results.voters === 1 ? "vote" : "votes"}
+      </button>
+    {:else}
+      <span>0 votes</span>
+    {/if}
   </div>
 </div>
