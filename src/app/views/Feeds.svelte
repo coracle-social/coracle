@@ -25,4 +25,6 @@
   </div>
 {/if}
 
-<Feed showControls feed={initialFeed} />
+<div class="xl:-ml-40 xl:mr-40">
+  <Feed showControls feed={initialFeed} />
+</div>
