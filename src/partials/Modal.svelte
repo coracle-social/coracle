@@ -129,7 +129,7 @@
           <slot />
         {:else}
           <div
-            class="pointer-events-auto flex min-h-full flex-col justify-center transition-all duration-500"
+            class="pointer-events-auto flex min-h-full flex-col justify-center pt-20 transition-all duration-500"
             class:mt-12={drawer}
             class:mt-[45vh]={mini && window.innerHeight > 600}>
             {#if canClose}
