@@ -286,7 +286,7 @@ export function getSetting<T = any>(k: string): T {
 export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
   const base = getSetting("imgproxy_url")
 
-  if (!base || !url) {
+  if (!base || !url || base.includes("coracle-imgproxy")) {
     return url
   }
 
