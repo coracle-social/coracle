@@ -16,8 +16,9 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {router} from "src/app/util"
   import {noteKinds, reactionKinds, repostKinds} from "src/util/nostr"
-  import {normalizeFeedDefinition, makeFeed, displayFeed} from "src/domain"
+  import {normalizeFeedDefinition, makeFeed, mapListToFeed, displayFeed} from "src/domain"
   import {
+    userLists,
     userListFeeds,
     userFeeds,
     userFavoritedFeeds,
@@ -48,6 +49,8 @@
 
   const editFeeds = () => router.at("feeds").open()
 
+  const editLists = () => router.at("lists").open()
+
   const openRelayModal = () => {
     relayValues = [...$userRelayFeeds]
     $relayModal.enable()
@@ -66,6 +69,7 @@
       definition: normalizeFeedDefinition(makeRelayFeed(url)),
     }),
   )
+  $: listFeeds = sortBy(displayFeed, $userLists.map(mapListToFeed))
   $: allFeeds = uniqBy(
     feed => getAddress(feed.event),
     sortBy(displayFeed, [...$userFeeds, ...$userListFeeds, ...$userFavoritedFeeds]),
@@ -100,6 +104,23 @@
     <Chip class="cursor-pointer" on:click={openRelayModal}>
       <i class="fa fa-edit" />
       Edit relay feeds
+    </Chip>
+  </div>
+</div>
+<div class="flex flex-col gap-2">
+  <strong>Your Lists</strong>
+  <div class="flex flex-wrap gap-1">
+    {#each listFeeds as other}
+      <Chip
+        class="cursor-pointer"
+        accent={equals(other.definition, feed.definition)}
+        on:click={() => setFeed(other)}>
+        {displayFeed(other)}
+      </Chip>
+    {/each}
+    <Chip class="cursor-pointer" on:click={editLists}>
+      <i class="fa fa-edit" />
+      Edit lists
     </Chip>
   </div>
 </div>
