@@ -27,7 +27,8 @@ if (window.location.hash?.startsWith("#nostr-login")) {
 
         // TODO: remove ack result
         if (pubkey && ["ack", connectSecret].includes(result)) {
-          loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+          // connect() may have switched relays, so persist the broker's current relays.
+          loginWithNip46(pubkey, clientSecret, signerPubkey, broker.params.relays)
           success = true
         }
 

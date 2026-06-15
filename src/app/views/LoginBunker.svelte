@@ -27,11 +27,13 @@
   const back = () => history.back()
 
   // Because of ack responses, this sometimes gets called by both flows at once
-  const finalize = debounce(300, async (broker: Nip46Broker, signerPubkey, relays) => {
+  const finalize = debounce(300, async (broker: Nip46Broker, signerPubkey) => {
     const pubkey = await broker.getPublicKey()
 
     if (pubkey) {
-      loginWithNip46(pubkey, clientSecret, signerPubkey, relays)
+      // The signer may have asked us to switch relays during the handshake, so persist
+      // the broker's current relays rather than the ones we started with.
+      loginWithNip46(pubkey, clientSecret, signerPubkey, broker.params.relays)
       abortController.abort()
       broker.cleanup()
       boot()
@@ -57,7 +59,7 @@
 
       // TODO: remove ack result
       if (["ack", connectSecret].includes(result)) {
-        finalize(broker, signerPubkey, relays)
+        finalize(broker, signerPubkey)
       }
     } finally {
       loading = false
@@ -86,7 +88,7 @@
     }
 
     if (response) {
-      finalize(broker, response.event.pubkey, env.SIGNER_RELAYS)
+      finalize(broker, response.event.pubkey)
     }
   })
 
