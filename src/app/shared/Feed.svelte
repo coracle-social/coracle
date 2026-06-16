@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
-  import {WEEK, now, ago, uniqBy, hash} from "@welshman/lib"
+  import {WEEK, not, now, ago, uniqBy, hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {synced, localStorageProvider} from "@welshman/store"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
@@ -60,6 +60,13 @@
     events = []
     buffer = []
 
+    // Capture this reload's signal so callbacks from a feed we've since canceled
+    // can't contribute events to the current feed. The underlying request layer
+    // doesn't reliably stop firing onEvent after an abort (e.g. the local-relay
+    // query that runs after the network race may start with an already-aborted
+    // signal), so we guard explicitly.
+    const {signal} = abortController
+
     let hasKinds = false
 
     walkFeed(feed.definition, (subFeed: FeedDefinition) => {
@@ -74,11 +81,15 @@
     ctrl = makeFeedController({
       feed: definition,
       useWindowing,
-      signal: abortController.signal,
+      signal,
       onEvent: e => {
+        if (signal.aborted) return
+
         buffer.push(e)
       },
       onExhausted: () => {
+        if (signal.aborted) return
+
         exhausted = true
       },
     })
@@ -88,10 +99,7 @@
     }
   }
 
-  const toggleReplies = () => {
-    $shouldHideReplies = !$shouldHideReplies
-    reload()
-  }
+  const toggleReplies = () => shouldHideReplies.update(not)
 
   const updateFeed = newFeed => {
     feed = newFeed
