@@ -1,7 +1,7 @@
 {
   "name": "coracle",
   "private": true,
-  "version": "0.6.34",
+  "version": "0.6.35",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "scripts": {

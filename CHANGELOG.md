@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.35
+
+* Fix reposts being hidden when replies are disabled
+
 # 0.6.34
 
 * Fix stale feed state

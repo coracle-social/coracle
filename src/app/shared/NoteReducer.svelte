@@ -71,6 +71,11 @@
     const original = event
     let currentDepth = depth
 
+    // Always dereference reposts/reactions/zaps
+    if ([...repostKinds, ...reactionKinds].includes(event.kind)) {
+      currentDepth++
+    }
+
     timestamps.set(getIdOrAddress(event), original.created_at)
 
     while (currentDepth > 0) {
