@@ -9,6 +9,8 @@
     getParentIdOrAddr,
     verifyEvent,
     ZAP_RESPONSE,
+    COMMENT,
+    NOTE,
   } from "@welshman/util"
   import {repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
@@ -34,7 +36,8 @@
   const shouldSkip = (event: TrustedEvent, strict: boolean) => {
     if (!showMuted && $isEventMuted(event, strict)) return true
     if (!showDeleted && repository.isDeleted(event)) return true
-    if (hideReplies && getParentIdOrAddr(event)) return true
+    if (hideReplies && event.kind === COMMENT) return true
+    if (hideReplies && event.kind === NOTE && getParentIdOrAddr(event)) return true
     if (timestamps.has(getIdOrAddress(event))) return true
 
     return false
