@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.34
+
+* Fix stale feed state
+* Fix reply toggle filtering everything out
+* Fix nip 46 login
+* Fix toast safe area inset
+* Improve feed/list list views
+* Fix image loading
+
 # 0.6.33
 
 * Add default and relay feeds
