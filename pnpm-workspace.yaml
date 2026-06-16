@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - esbuild
+  - svelte-preprocess
+onlyBuiltDependencies:
+  - sharp
+  - nostr-signer-capacitor-plugin

@@ -94,15 +94,5 @@
     "vite-plugin-html-config": "^2.0.2",
     "vite-plugin-pwa": "^0.20.5",
     "vitest": "^2.1.9"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "esbuild",
-      "svelte-preprocess"
-    ],
-    "onlyBuiltDependencies": [
-      "sharp",
-      "nostr-signer-capacitor-plugin"
-    ]
   }
 }
