@@ -68,14 +68,6 @@
       </Popover>
       <Popover triggerType="mouseenter">
         <div slot="trigger">
-          <Link external href="https://info.coracle.social">
-            <i class="fa fa-earth-americas" />
-          </Link>
-        </div>
-        <div slot="tooltip">Website</div>
-      </Popover>
-      <Popover triggerType="mouseenter">
-        <div slot="trigger">
           <Link external href="https://hodlbod.npub.pro/"><i class="fa fa-pen-clip" /></Link>
         </div>
         <div slot="tooltip">Dev Blog</div>
