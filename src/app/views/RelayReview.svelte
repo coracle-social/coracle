@@ -29,7 +29,8 @@
           ...editor.storage.nostr.getEditorTags(),
           ["L", "review"],
           ["l", "review/relay", "review"],
-          ["rating", rating],
+          // Rating is a number from 0 to 1, but tag values have to be strings
+          ["rating", String(rating)],
           ["r", url],
         ],
       }),

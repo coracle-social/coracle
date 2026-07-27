@@ -119,7 +119,7 @@ export const toHex = (data: string): string | null => {
 export const getRating = (event: TrustedEvent) =>
   event.kind === 1985
     ? parseJson(last(getTags("l", event.tags).find(nthEq(1, "review/relay")) || []))?.quality
-    : parseInt(getTags("rating", event.tags).find(t => t.length === 2)?.[1])
+    : parseFloat(getTags("rating", event.tags).find(t => t.length === 2)?.[1])
 
 export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 

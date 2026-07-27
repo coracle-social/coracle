@@ -61,8 +61,8 @@
 <svelte:window bind:innerWidth />
 
 <AltColor background class="justify-between rounded-md p-6 shadow">
-  <div class="flex items-center justify-between gap-2">
-    <div class="flex min-w-0 items-center gap-3">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex min-w-0 flex-grow basis-48 items-center gap-3">
       {#if $relay?.icon}
         <img
           loading="lazy"
@@ -74,7 +74,7 @@
           <i class="fa fa-server text-xl text-neutral-100"></i>
         </div>
       {/if}
-      <div class="flex min-w-0 flex-col pr-8">
+      <div class="flex min-w-0 flex-col">
         <div class="flex items-center gap-2">
           <div class="text-md overflow-hidden text-ellipsis whitespace-nowrap">
             {displayRelayUrl(url)}
@@ -83,30 +83,32 @@
             <RelayStatus {url} />
           {/if}
         </div>
-        <div class="flex gap-4 text-xs text-neutral-400">
+        <div class="flex flex-wrap gap-x-4 text-xs text-neutral-400">
           {#if $relay?.supported_nips}
-            <span>
+            <span class="whitespace-nowrap">
               {$relay.supported_nips.length} NIPs
             </span>
           {/if}
-          <span>
+          <span class="whitespace-nowrap">
             Connected {quantify($stats?.open_count || 0, "time")}
           </span>
         </div>
+        {#if !showStatus && ratings?.length > 0}
+          <div class="flex items-center gap-1 pt-1 text-sm">
+            <Rating inert value={getAvgRating(ratings)} />
+            {#if !hideRatingsCount}
+              <span class="whitespace-nowrap text-neutral-400">({ratings.length} reviews)</span>
+            {/if}
+          </div>
+        {/if}
       </div>
-      {#if !showStatus && ratings?.length > 0}
-        <div class="hidden items-center gap-1 px-4 text-sm sm:flex">
-          <Rating inert value={getAvgRating(ratings)} />
-          {#if !hideRatingsCount}
-            <span class="text-neutral-400">({ratings.length} reviews)</span>
-          {/if}
-        </div>
-      {/if}
     </div>
     {#if !hideActions}
-      <slot name="actions">
-        <RelayCardActions {url} {claim} bind:details />
-      </slot>
+      <div class="ml-auto flex shrink-0 items-center gap-2">
+        <slot name="actions">
+          <RelayCardActions {url} {claim} bind:details />
+        </slot>
+      </div>
     {/if}
   </div>
   {#if details}
