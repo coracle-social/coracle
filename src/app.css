@@ -349,6 +349,7 @@ body,
   --tiptap-object-fg: var(--neutral-800);
   --tiptap-active-bg: var(--neutral-200);
   --tiptap-active-fg: var(--neutral-800);
+    overflow-wrap: anywhere;
 }
 
 .tiptap-suggestions {
