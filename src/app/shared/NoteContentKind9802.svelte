@@ -2,7 +2,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import {fromPairs, tryCatch} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {Address, getTag, getTopicTagValues} from "@welshman/util"
+  import {Address, getTag, getTopicTagValues, isRelayUrl} from "@welshman/util"
   import {parseLink} from "@welshman/content"
   import Link from "src/partials/Link.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -17,6 +17,17 @@
   const meta = fromPairs(note.tags)
   const aTag = getTag("a", note.tags)
   const eTag = getTag("e", note.tags)
+
+  // Tag values are user-provided, so validate them before encoding
+  const isPubkey = (value?: string) => Boolean(value?.match(/^[0-9a-f]{64}$/))
+  const getRelays = (tag: string[]) => tag.slice(2, 3).filter(isRelayUrl)
+
+  // Marked e tags put the marker at index 3 and the pubkey hint at index 4
+  const author = [eTag?.[4], eTag?.[3]].find(isPubkey)
+
+  const naddr = aTag && tryCatch(() => Address.from(aTag[1], getRelays(aTag)).toNaddr())
+  const nevent =
+    eTag && tryCatch(() => nip19.neventEncode({id: eTag[1], relays: getRelays(eTag), author}))
 </script>
 
 <div class="flex flex-col gap-2">
@@ -28,8 +39,7 @@
       <NoteContentKind1 {note} {showEntire} />
     </div>
   </div>
-  {#if aTag}
-    {@const naddr = Address.from(aTag[1], aTag.slice(2, 3)).toNaddr()}
+  {#if naddr}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-highlighter fa-xs mt-1" />
       <Link
@@ -40,11 +50,7 @@
         {naddr.slice(0, 16) + "…"}
       </Link>
     </div>
-  {:else if eTag}
-    {@const id = eTag[1]}
-    {@const relays = eTag.slice(2, 3)}
-    {@const author = eTag[3]}
-    {@const nevent = tryCatch(() => nip19.neventEncode({id, relays, author}))}
+  {:else if nevent}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-highlighter fa-xs mt-1" />
       <Link
