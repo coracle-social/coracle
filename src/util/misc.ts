@@ -255,3 +255,51 @@ export const toSpliced = <T>(xs: T[], start: number, deleteCount: number = 0, ..
 
 export const ensureMailto = (value: string) =>
   !value.includes(":") && value.includes("@") ? "mailto:" + value : value
+
+// Tracking query params that leak user activity to ad networks.
+// Derived from https://github.com/mpchadwick/tracking-query-params-registry
+const TRACKING_PARAMS = new Set([
+  "_hsenc",
+  "_hsmi",
+  "ck_subscriber_id",
+  "dclid",
+  "fbclid",
+  "gbraid",
+  "gclid",
+  "igshid",
+  "mc_cid",
+  "mc_eid",
+  "mkt_tok",
+  "msclkid",
+  "oly_anon_id",
+  "oly_enc_id",
+  "rb_clickid",
+  "ref",
+  "ref_src",
+  "ref_url",
+  "sc_customer",
+  "sc_uid",
+  "spm",
+  "twclid",
+  "ttclid",
+  "vero_conv",
+  "vero_id",
+  "wbraid",
+  "yclid",
+])
+
+export const stripTrackers = (url: string) => {
+  try {
+    const parsed = new URL(url)
+
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (TRACKING_PARAMS.has(key.toLowerCase()) || key.toLowerCase().startsWith("utm_")) {
+        parsed.searchParams.delete(key)
+      }
+    }
+
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
