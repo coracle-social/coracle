@@ -2,6 +2,7 @@
   import {createEventDispatcher} from "svelte"
   import {randomId} from "@welshman/lib"
   import {router} from "src/app/util/router"
+  import {stripTrackers} from "src/util/misc"
 
   export let href
   export let modal = false
@@ -14,6 +15,8 @@
   export let target: string = undefined
 
   const dispatch = createEventDispatcher()
+
+  $: cleanHref = external ? stripTrackers(href) : href
 
   const onClick = (e: Event) => {
     if (stopPropagation) {
@@ -31,7 +34,7 @@
 </script>
 
 <a
-  {href}
+  {cleanHref}
   {...$$props}
   on:click={onClick}
   rel={rel === undefined ? (external ? "noopener noreferer" : "") : rel}

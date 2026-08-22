@@ -3,11 +3,15 @@
   import MediaGrid from "src/app/shared/MediaGrid.svelte"
   import MediaLink from "src/app/shared/MediaLink.svelte"
   import {router} from "src/app/util/router"
+  import {stripTrackers} from "src/util/misc"
 
   export let urls: string[]
   export let showMedia = false
 
   const coracleRegexp = /^(https?:\/\/)?(app\.)?coracle.social/
+
+  // Avoid leaking referrer data to trackers when people follow content links
+  $: cleanUrls = urls.map(stripTrackers)
 
   const onLinkClick = (url: string, event: PointerEvent) => {
     if (event.metaKey) {
@@ -19,7 +23,7 @@
     } else if (isShareableRelayUrl(url)) {
       router.at("relays").of(url).open()
     } else if (!showMedia) {
-      router.at("media").of(url).cx({urls}).open({overlay: true})
+      router.at("media").of(url).cx({urls: cleanUrls}).open({overlay: true})
     } else {
       window.open(url, "_blank")
     }
@@ -49,9 +53,9 @@
 </script>
 
 {#if showMedia && !hidden}
-  <MediaGrid {urls} {onClose} {onLinkClick} {onImageClick} />
+  <MediaGrid urls={cleanUrls} {onClose} {onLinkClick} {onImageClick} />
 {:else}
-  {#each urls as url}
+  {#each cleanUrls as url}
     <MediaLink {url} {onClick} />
   {/each}
 {/if}
