@@ -16,8 +16,6 @@
 
   const dispatch = createEventDispatcher()
 
-  $: cleanHref = external ? stripTrackers(href) : href
-
   const onClick = (e: Event) => {
     if (stopPropagation) {
       e.stopPropagation()
@@ -34,9 +32,9 @@
 </script>
 
 <a
-  {cleanHref}
   {...$$props}
   on:click={onClick}
+  href={external ? stripTrackers(href) : href}
   rel={rel === undefined ? (external ? "noopener noreferer" : "") : rel}
   target={target === undefined ? (external ? "_blank" : "") : target}
   class="cursor-pointer {$$props.class} {disabled || loading ? 'btn-disabled' : ''}">
