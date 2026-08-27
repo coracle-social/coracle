@@ -138,14 +138,14 @@
                 <div
                   class="pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full
                        border border-solid border-accent bg-accent text-white transition-colors hover:bg-accent"
-                  on:click|stopPropagation={tryClose}>
+                  on:click|stopPropagation={() => router.clearModals()}>
                   <i class="fa fa-times fa-lg cy-modal-close" />
                 </div>
                 <div
                   class:hidden={!isNested || !canCloseAll}
                   class="clear-modals pointer-events-auto flex h-10 w-10 cursor-pointer items-center justify-center
                          rounded-full border border-solid border-tinted-700 bg-neutral-600 text-neutral-100 transition-colors hover:bg-neutral-600"
-                  on:click|stopPropagation={() => router.clearModals()}>
+                  on:click|stopPropagation={tryClose}>
                   <i class="fa-angles-down fa fa-lg" />
                 </div>
               </div>
