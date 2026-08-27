@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.36
+
+* Publish kind 1 replies as comments
+* Show highlight details in notifications
+* Strip tracking query params from links
+* Fix a tag parsing error
+* Fix ratings
+* Wrap long words to avoid compose box stretching
+
 # 0.6.35
 
 * Fix reposts being hidden when replies are disabled
