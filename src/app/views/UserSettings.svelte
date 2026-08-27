@@ -104,6 +104,12 @@
         Allows {appName} to authenticate with relays that have access controls automatically.
       </p>
     </FieldInline>
+    <FieldInline label="Show reactions">
+      <Toggle bind:value={values.show_reactions} />
+      <p slot="info">
+        Display reactions and who reacted to notes.
+      </p>
+    </FieldInline>
     <Field label="Blossom Provider URLs">
       <p slot="info">Enter one or more urls for blossom compatible nostr media servers.</p>
       <SearchSelect

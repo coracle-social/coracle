@@ -9,6 +9,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import NoteContentKind7 from "src/app/shared/NoteContentKind7.svelte"
   import {router, deriveValidZaps} from "src/app/util"
+  import {userSettings} from "src/engine"
 
   export let context: TrustedEvent[]
   export let event: TrustedEvent
@@ -67,7 +68,7 @@
       {/if}
     </p>
   {/if}
-  {#if reactions.length > 0}
+  {#if $userSettings.show_reactions && reactions.length > 0}
     {#if reactions.length === 1}
       <p class="mt-4 flex shrink-0 flex-wrap items-center gap-1 text-neutral-300 first:mt-0">
         <PersonLink pubkey={reactions[0].pubkey} />

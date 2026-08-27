@@ -244,6 +244,7 @@ export const defaultSettings = {
   relay_limit: 3,
   default_zap: 21,
   show_media: true,
+  show_reactions: true,
   send_delay: 0, // undo send delay in ms
   pow_difficulty: 0,
   muted_words: [], // Deprecated
