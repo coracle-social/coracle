@@ -1,15 +1,9 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {without, dateToSeconds, uniq, now} from "@welshman/lib"
-  import {NOTE, COMMENT, own, hash, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
+  import {COMMENT, own, hash, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
   import {Router, addMinimalFallbacks} from "@welshman/router"
-  import {
-    session,
-    displayProfileByPubkey,
-    tagEventForReply,
-    tagEventForComment,
-    publishThunk,
-  } from "@welshman/app"
+  import {session, displayProfileByPubkey, tagEventForComment, publishThunk} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {writable} from "svelte/store"
   import {makePow} from "src/util/pow"
@@ -95,8 +89,7 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const kind = parent.kind === NOTE ? NOTE : COMMENT
-    const parentTags = kind === NOTE ? tagEventForReply(parent) : tagEventForComment(parent)
+    const parentTags = tagEventForComment(parent)
     const editorTags = editor.storage.nostr.getEditorTags()
     const tags = uniqTags([...editorTags, ...parentTags, ...getClientTags()])
     const draft = editor.getJSON()
@@ -112,7 +105,7 @@
     loading = true
     clearDraft()
 
-    const ownedEvent = own(makeEvent(kind, {content, tags, created_at: now()}), $session.pubkey)
+    const ownedEvent = own(makeEvent(COMMENT, {content, tags, created_at: now()}), $session.pubkey)
 
     let hashedEvent = hash(ownedEvent)
 
