@@ -48,6 +48,7 @@ import {
   withIndexers,
 } from "src/engine/state"
 import {stripExifData} from "src/util/html"
+import {safeNip44Encrypt, safeNip04Encrypt, safeNip04Decrypt} from "src/util/signer"
 import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 import {get} from "svelte/store"
 
@@ -75,7 +76,7 @@ export const updateStore = (store, timestamp, updates) =>
   store.set(updateRecord(store.get(), timestamp, updates))
 
 export const nip44EncryptToSelf = (payload: string) =>
-  signer.get().nip44.encrypt(pubkey.get(), payload)
+  safeNip44Encrypt(pubkey.get(), payload)
 
 // Files
 
@@ -315,7 +316,9 @@ export const sendMessage = (channelId: string, content: string, delay: number) =
 export const setAppData = async (d: string, data: any) => {
   if (signer.get()) {
     const {pubkey} = session.get()
-    const content = await signer.get().nip04.encrypt(pubkey, JSON.stringify(data))
+    const content = await safeNip04Encrypt(pubkey, JSON.stringify(data))
+
+    if (!content) return
 
     return publishThunk({
       event: makeEvent(30078, {tags: [["d", d]], content}),

@@ -143,6 +143,7 @@ import {
 } from "src/engine/storage"
 import {SearchHelper, fromCsv, parseJson, ensureProto} from "src/util/misc"
 import {noteKinds, appDataKeys, RELAY_FEEDS} from "src/util/nostr"
+import {safeSignerNip04Decrypt} from "src/util/signer"
 import {readable, derived, writable} from "svelte/store"
 
 export const env = {
@@ -181,10 +182,10 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
     const recipient = getTagValue("p", e.tags)
     const session = getSession(e.pubkey) || getSession(recipient)
     const other = e.pubkey === session?.pubkey ? recipient : e.pubkey
-    const signer = getSigner(session)
+    const signerObj = getSigner(session)
 
-    if (signer) {
-      const result = await signer.nip04.decrypt(other, e.content)
+    if (signerObj) {
+      const result = await safeSignerNip04Decrypt(signerObj, other, e.content)
 
       if (result) {
         setPlaintext(e, result)

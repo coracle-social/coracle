@@ -29,6 +29,7 @@
   import type {ProofOfWork} from "src/util/pow"
   import {warn} from "src/util/logger"
   import {commaFormat} from "src/util/misc"
+  import {safeNip04Encrypt, safeNip04Decrypt} from "src/util/signer"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import Field from "src/partials/Field.svelte"
@@ -184,13 +185,17 @@
     drafts.delete(DRAFT_KEY)
 
     if (options.publish_at) {
-      const dvmContent = await $signer.nip04.encrypt(
+      const dvmContent = await safeNip04Encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
           ["i", JSON.stringify(signedEvent), "text"],
           ["param", "relays", ...relays],
         ]),
       )
+
+      if (!dvmContent) {
+        return
+      }
 
       const dvmEvent = await sign(
         makeEvent(DVM_REQUEST_PUBLISH_SCHEDULE, {
@@ -213,7 +218,8 @@
         filters: [{kinds: [dvmEvent.kind + 1000, 7000], since: now() - 30, "#e": [dvmEvent.id]}],
         onEvent: (event: TrustedEvent, url: string) => {
           if (event.kind === 7000) {
-            $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+            safeNip04Decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+              if (!data) return
               try {
                 data = JSON.parse(data)[0]
                 showInfo(data[2] || "Your note is " + data[1] + "!")
