@@ -6,8 +6,8 @@ set -e
 git fetch --prune --unshallow --tags || true
 git describe --tags --abbrev=0 || true
 
-# Render and Cloudflare Pages expose the commit under different names
-COMMIT="${RENDER_GIT_COMMIT:-${CF_PAGES_COMMIT_SHA:-$(git rev-parse HEAD)}}"
+# Fall back to the checked-out commit when the host does not provide one
+COMMIT="${RENDER_GIT_COMMIT:-$(git rev-parse HEAD)}"
 export VITE_BUILD_VERSION=$COMMIT
 export VITE_BUILD_HASH=$COMMIT
 
