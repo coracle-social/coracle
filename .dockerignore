@@ -1,0 +1,10 @@
+.git
+.github
+.cache
+node_modules
+dist
+android
+ios
+tests
+cypress.config.ts
+*.md
