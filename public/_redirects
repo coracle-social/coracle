@@ -1,2 +1,0 @@
-# SPA fallback: every client-side route (/nevent1..., /npub1..., etc) serves the shell.
-/*  /index.html  200

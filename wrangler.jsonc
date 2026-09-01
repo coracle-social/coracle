@@ -1,0 +1,13 @@
+{
+  // Static-assets-only Worker: no server code, Cloudflare just serves ./dist.
+  // `name` must match the Worker in the Cloudflare dashboard, or `wrangler deploy`
+  // will create a second one instead of updating this project.
+  "name": "coracle",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    // Serves index.html for any unmatched path, so client-side routes
+    // (/nevent1..., /npub1..., etc) resolve to the app shell.
+    "not_found_handling": "single-page-application"
+  }
+}

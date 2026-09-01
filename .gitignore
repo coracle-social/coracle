@@ -40,3 +40,4 @@ android/app/release/*
 icons/*
 .aider*
 .cache
+.wrangler
