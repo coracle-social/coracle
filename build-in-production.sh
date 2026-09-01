@@ -5,8 +5,11 @@ set -e
 # Fetch tags and set to env vars
 git fetch --prune --unshallow --tags || true
 git describe --tags --abbrev=0 || true
-export VITE_BUILD_VERSION=$RENDER_GIT_COMMIT
-export VITE_BUILD_HASH=$RENDER_GIT_COMMIT
+
+# Render and Cloudflare Pages expose the commit under different names
+COMMIT="${RENDER_GIT_COMMIT:-${CF_PAGES_COMMIT_SHA:-$(git rev-parse HEAD)}}"
+export VITE_BUILD_VERSION=$COMMIT
+export VITE_BUILD_HASH=$COMMIT
 
 # Install deps
 pnpm i

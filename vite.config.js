@@ -27,7 +27,7 @@ export default defineConfig(async () => {
       https: false,
     },
     build: {
-      sourcemap: true,
+      sourcemap: false,
     },
     resolve: {
       alias: {

@@ -39,3 +39,4 @@ public/images/pwa-*
 android/app/release/*
 icons/*
 .aider*
+.cache

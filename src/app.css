@@ -37,45 +37,62 @@
   font-family: "Satoshis";
   font-style: normal;
   font-weight: 400;
-  src:
-    local(""),
-    url("/fonts/Satoshi Symbol.ttf") format("truetype");
+  font-display: swap;
+  src: url("/fonts/Satoshi-Symbol.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "Lato";
   font-style: normal;
   font-weight: 400;
-  src:
-    local(""),
-    url("/fonts/Lato-Regular.ttf") format("truetype");
+  font-display: swap;
+  src: url("/fonts/Lato-Regular.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "Lato";
-  font-style: bold;
+  font-style: normal;
   font-weight: 600;
-  src:
-    local(""),
-    url("/fonts/Lato-Bold.ttf") format("truetype");
+  font-display: swap;
+  src: url("/fonts/Lato-Bold.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "Lato";
   font-style: italic;
   font-weight: 400;
-  src:
-    local(""),
-    url("/fonts/Italic.ttf") format("truetype");
+  font-display: swap;
+  src: url("/fonts/Lato-Italic.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "Staatliches";
   font-style: normal;
   font-weight: 400;
-  src:
-    local(""),
-    url("/fonts/Staatliches Regular 400.ttf") format("truetype");
+  font-display: swap;
+  src: url("/fonts/Staatliches-Regular.woff2") format("woff2");
+}
+
+/* Font Awesome 6 Free (solid), subset to the icons this app actually uses.
+   Replaces the upstream solid.css import. Regenerate with ./scripts/subset-icons.sh
+   after adding an fa-* icon that isn't already in the subset. */
+:root,
+:host {
+  --fa-style-family-classic: "Font Awesome 6 Free";
+  --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Free";
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url("/fonts/fa-solid-900-subset.woff2") format("woff2");
+}
+
+.fas,
+.fa-solid {
+  font-weight: 900;
 }
 
 .montserrat {

@@ -1,6 +1,5 @@
 <script lang="ts">
   import "@fortawesome/fontawesome-free/css/fontawesome.css"
-  import "@fortawesome/fontawesome-free/css/solid.css"
 
   import * as nip19 from "nostr-tools/nip19"
   import {get} from "svelte/store"
