@@ -1,7 +1,8 @@
-import {pubkey, repository} from "@welshman/app"
 import {now, without} from "@welshman/lib"
-import {deriveEvents, throttled} from "@welshman/store"
+import {Events} from "@welshman/app"
+import {throttled} from "@welshman/store"
 import {POLL_RESPONSE, type TrustedEvent} from "@welshman/util"
+import {fromApp, pubkey} from "src/engine/core"
 import {OnboardingTask} from "src/engine/model"
 import {sortEventsDesc} from "src/engine/utils"
 import {checked, getSeenAt, isEventMuted, sessionWithMeta} from "src/engine/state"
@@ -18,13 +19,19 @@ export const setChecked = (path: string, ts = now()) =>
 
 // Notifications
 
+// These are bound at module scope, so they read the repository through fromApp — otherwise
+// they'd keep querying the app that was current at import time.
+
 // -- Main Notifications
 
 export const mainNotifications = derived(
   [
     pubkey,
     isEventMuted,
-    throttled(800, deriveEvents({repository, filters: [{kinds: [...noteKinds, POLL_RESPONSE]}]})),
+    throttled(
+      800,
+      fromApp($app => $app.use(Events).all([{kinds: [...noteKinds, POLL_RESPONSE]}]).$),
+    ),
   ],
   ([$pubkey, $isEventMuted, $events]) =>
     sortEventsDesc(
@@ -67,7 +74,7 @@ export const reactionNotifications = derived(
     isEventMuted,
     throttled(
       800,
-      deriveEvents({repository, filters: [{kinds: [...reactionKinds, ...repostKinds]}]}),
+      fromApp($app => $app.use(Events).all([{kinds: [...reactionKinds, ...repostKinds]}]).$),
     ),
   ],
   ([$pubkey, $isEventMuted, $events]) =>
