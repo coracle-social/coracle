@@ -3,7 +3,7 @@
   import {onMount, onDestroy} from "svelte"
   import {makeSecret} from "@welshman/util"
   import {Nip46Broker} from "@welshman/signer"
-  import {nip46Perms, loginWithNip46} from "@welshman/app"
+  import {toSession, nip46} from "@welshman/app"
   import {isKeyValid} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -14,7 +14,12 @@
   import Heading from "src/partials/Heading.svelte"
   import Popover from "src/partials/Popover.svelte"
   import {env} from "src/engine"
+  import {login} from "src/engine/core"
   import {boot} from "src/app/state"
+
+  // Welshman dropped its nip46Perms constant; these are the permissions coracle has always asked
+  // for, and src/main.js requests the same set for the nstart flow.
+  const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
   let url = ""
   let input = ""
@@ -31,11 +36,19 @@
     const pubkey = await broker.getPublicKey()
 
     if (pubkey) {
-      // The signer may have asked us to switch relays during the handshake, so persist
-      // the broker's current relays rather than the ones we started with.
-      loginWithNip46(pubkey, clientSecret, signerPubkey, broker.params.relays)
-      abortController.abort()
-      broker.cleanup()
+      try {
+        // The signer may have asked us to switch relays during the handshake, so persist
+        // the broker's current relays rather than the ones we started with.
+        await login(toSession(nip46, {clientSecret, signerPubkey, relays: broker.params.relays}))
+      } catch (e) {
+        console.error(e)
+
+        return showWarning("We weren't able to log you in with that signer")
+      } finally {
+        abortController.abort()
+        broker.cleanup()
+      }
+
       boot()
     }
   })

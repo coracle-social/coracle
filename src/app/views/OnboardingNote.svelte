@@ -1,12 +1,10 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {NOTE, makeEvent, own} from "@welshman/util"
-  import {publishThunk} from "@welshman/app"
-  import {makePow} from "src/util/pow"
+  import {NOTE, makeEvent, userOutbox} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import Button from "src/partials/Button.svelte"
   import {makeEditor} from "src/app/editor"
+  import {resolveRelays, thunks} from "src/engine/core"
 
   export let state
   export let signup
@@ -22,13 +20,13 @@
     try {
       const content = editor.getText({blockSeparator: "\n"}).trim()
 
-      // Publish our welcome note
+      // Publish our welcome note. Thunks own the template with the signed-in user's pubkey and
+      // calculate proof of work themselves, then re-sign, so the nonce stays valid.
       if (content) {
-        const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
-        const template = makeEvent(NOTE, {content, tags: editor.storage.nostr.getEditorTags()})
-        const event = await makePow(own(template, state.pubkey), 20).result
+        const relays = await resolveRelays([userOutbox()])
+        const event = makeEvent(NOTE, {content, tags: editor.storage.nostr.getEditorTags()})
 
-        await publishThunk({event, relays})
+        thunks.get().publish({event, relays, pow: 20})
       }
 
       signup()

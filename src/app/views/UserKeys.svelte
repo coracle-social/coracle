@@ -1,15 +1,22 @@
 <script lang="ts">
-  import type {Nip46Signer} from "@welshman/signer"
-  import {session, signer} from "@welshman/app"
+  import {Nip46Broker} from "@welshman/signer"
+  import type {Nip46BrokerParams} from "@welshman/signer"
   import * as nip19 from "nostr-tools/nip19"
   import Link from "src/partials/Link.svelte"
   import CopyValue from "src/partials/CopyValue.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import {nsecEncode} from "src/util/nostr"
+  import {session} from "src/engine/core"
 
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
-  const getBunkerUrl = () => ($signer.signer as Nip46Signer).broker.getBunkerUrl()
+
+  // App policies wrap the user's signer, so read the connection out of the stored session rather
+  // than reaching through the wrapper for a Nip46Signer that may no longer be the outermost one.
+  const getBunkerUrl = () =>
+    new Nip46Broker($session!.session.data as Nip46BrokerParams).getBunkerUrl()
+
+  const getSecret = () => ($session!.session.data as {secret: string}).secret
 
   document.title = "Keys"
 </script>
@@ -34,12 +41,12 @@
         on nostr.
       </small>
     </div>
-    {#if $session?.method === "nip01"}
+    {#if $session?.session.method === "nip01"}
       <div>
         <CopyValue
           isPassword
           label="Private Key"
-          value={$session?.secret}
+          value={getSecret()}
           encode={nsecEncode}
           hasEncryptPrompt />
         <small class="text-neutral-100">
@@ -52,7 +59,7 @@
         </small>
       </div>
     {/if}
-    {#if $session?.method === "nip46"}
+    {#if $session?.session.method === "nip46"}
       <div>
         <CopyValue label="Bunker URL" value={getBunkerUrl()} />
         <small class="text-neutral-100">

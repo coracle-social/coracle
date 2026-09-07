@@ -1,7 +1,6 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
   import {isSignedEvent} from "@welshman/util"
-  import {repository} from "@welshman/app"
   import {error} from "src/util/logger"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
@@ -10,6 +9,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {router} from "src/app/util/router"
+  import {app} from "src/engine/core"
 
   const setFile = e => {
     file = e.target.files[0]
@@ -50,7 +50,7 @@
 
         for (const event of newEvents) {
           if (isSignedEvent(event)) {
-            repository.publish(event)
+            $app.repository.publish(event)
           }
         }
 

@@ -1,11 +1,10 @@
 <script lang="ts">
   import {identity, equals} from "@welshman/lib"
-  import {BLOSSOM_SERVERS, tagger, getListTags, getTagValues, makeEvent} from "@welshman/util"
-  import {Router} from "@welshman/router"
-  import {userBlossomServerList, publishThunk} from "@welshman/app"
+  import {userOutbox} from "@welshman/util"
+  import {BlossomServerLists} from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {appName} from "src/partials/state"
-  import {showInfo} from "src/partials/Toast.svelte"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Footer from "src/partials/Footer.svelte"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -17,25 +16,36 @@
   import {fuzzy, pluralize} from "src/util/misc"
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {env, userSettings, publishSettings} from "src/engine"
+  import {env, hasNip44, userSettings, publishSettings} from "src/engine"
+  import {blossomServerLists, deriveUserItem, resolveRelays} from "src/engine/core"
 
-  const initialBlossomServers = getTagValues("server", getListTags($userBlossomServerList))
+  const userBlossomServerList = deriveUserItem(BlossomServerLists)
 
-  const submit = () => {
-    if (!equals($userSettings, values)) {
-      publishSettings(values)
-    }
+  const initialBlossomServers = $userBlossomServerList?.urls() || []
 
-    if (!equals(blossomServers, initialBlossomServers)) {
-      const tags = blossomServers.map(ensureProto).map(tagger("server"))
+  const submit = async () => {
+    try {
+      await save()
+    } catch (e) {
+      console.error(e)
 
-      publishThunk({
-        event: makeEvent(BLOSSOM_SERVERS, {tags}),
-        relays: Router.get().FromUser().getUrls(),
-      })
+      return showWarning("Your settings could not be saved")
     }
 
     showInfo("Your settings have been saved!")
+  }
+
+  // Settings are encrypted through the user's signer, which can reject
+  const save = async () => {
+    if (!equals($userSettings, values)) {
+      await publishSettings(values)
+    }
+
+    if (!equals(blossomServers, initialBlossomServers)) {
+      const eventCommand = await blossomServerLists.get().setUrls(blossomServers.map(ensureProto))
+
+      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+    }
   }
 
   const searchBlossomProviders = fuzzy(env.BLOSSOM_URLS, {keys: ["url"]})
@@ -156,8 +166,14 @@
         with troubleshooting, and allows other people to find out about {appName}.
       </p>
     </FieldInline>
+    {#if !$hasNip44}
+      <p class="text-center">
+        Your signer doesn't support encryption, so {appName} can't save your settings.
+      </p>
+    {/if}
   </div>
   <Footer>
-    <Button class="btn flex-grow" type="submit">Save</Button>
+    <!-- Settings are nip 44 encrypted now, so a signer without it can't save them -->
+    <Button class="btn flex-grow" type="submit" disabled={!$hasNip44}>Save</Button>
   </Footer>
 </form>
