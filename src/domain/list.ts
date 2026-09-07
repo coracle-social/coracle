@@ -21,6 +21,7 @@ import {
   SEARCH_RELAYS,
   ROOMS,
   TOPICS,
+  FOLLOW_PACK,
   getAddress,
   tagSpec,
   tagValue,
@@ -30,31 +31,35 @@ import {KindFactory, ListReader, ListWriter} from "@welshman/domain"
 import {reader, writer} from "src/engine/core"
 import {SearchHelper} from "src/util/misc"
 
-export const FOLLOW_PACK = 39089
-
-export const CUSTOM_LIST_KINDS = [
-  FOLLOWS,
-  FOLLOW_PACK,
-  NAMED_PEOPLE,
-  NAMED_RELAYS,
-  NAMED_CURATIONS,
-  NAMED_WIKI_AUTHORS,
-  NAMED_WIKI_RELAYS,
-  NAMED_EMOJIS,
-  NAMED_TOPICS,
-  NAMED_ARTIFACTS,
-  NAMED_COMMUNITIES,
-  MUTES,
-  PINS,
-  RELAYS,
-  BOOKMARKS,
-  COMMUNITIES,
-  CHANNELS,
-  BLOCKED_RELAYS,
-  SEARCH_RELAYS,
-  ROOMS,
-  TOPICS,
+// Every nip 51 kind coracle lets a user name, paired with the label shown when a list of that kind
+// carries no title of its own.
+const LIST_KIND_LABELS: [number, string][] = [
+  [FOLLOWS, "[follows list]"],
+  [FOLLOW_PACK, "[follow pack]"],
+  [NAMED_PEOPLE, "[named people list]"],
+  [NAMED_RELAYS, "[named relays list]"],
+  [NAMED_CURATIONS, "[named curations list]"],
+  [NAMED_WIKI_AUTHORS, "[named wiki authors list]"],
+  [NAMED_WIKI_RELAYS, "[named wiki relays list]"],
+  [NAMED_EMOJIS, "[named emojis list]"],
+  [NAMED_TOPICS, "[named topics list]"],
+  [NAMED_ARTIFACTS, "[named artifacts list]"],
+  [NAMED_COMMUNITIES, "[named communities list]"],
+  [MUTES, "[mutes list]"],
+  [PINS, "[pins list]"],
+  [RELAYS, "[relays list]"],
+  [BOOKMARKS, "[bookmarks list]"],
+  [COMMUNITIES, "[communities list]"],
+  [CHANNELS, "[channels list]"],
+  [BLOCKED_RELAYS, "[blocked relays list]"],
+  [SEARCH_RELAYS, "[search relays list]"],
+  [ROOMS, "[rooms list]"],
+  [TOPICS, "[topics list]"],
 ]
+
+const listKindLabels = new Map(LIST_KIND_LABELS)
+
+export const CUSTOM_LIST_KINDS = LIST_KIND_LABELS.map(([kind]) => kind)
 
 export const EDITABLE_LIST_KINDS = [NAMED_PEOPLE, NAMED_RELAYS, NAMED_CURATIONS, NAMED_TOPICS]
 
@@ -160,34 +165,8 @@ export const userListWriter = ({kind, title, description, identifier, tags, read
     .setTitle(title)
     .setDescription(description)
 
-export const displayUserList = (list?: UserList) => {
-  if (list) {
-    if (list.title) return list.title
-    if (list.kind === FOLLOWS) return "[follows list]"
-    if (list.kind === FOLLOW_PACK) return "[follow pack]"
-    if (list.kind === NAMED_PEOPLE) return "[named people list]"
-    if (list.kind === NAMED_RELAYS) return "[named relays list]"
-    if (list.kind === NAMED_CURATIONS) return "[named curations list]"
-    if (list.kind === NAMED_WIKI_AUTHORS) return "[named wiki authors list]"
-    if (list.kind === NAMED_WIKI_RELAYS) return "[named wiki relays list]"
-    if (list.kind === NAMED_EMOJIS) return "[named emojis list]"
-    if (list.kind === NAMED_TOPICS) return "[named topics list]"
-    if (list.kind === NAMED_ARTIFACTS) return "[named artifacts list]"
-    if (list.kind === NAMED_COMMUNITIES) return "[named communities list]"
-    if (list.kind === MUTES) return "[mutes list]"
-    if (list.kind === PINS) return "[pins list]"
-    if (list.kind === RELAYS) return "[relays list]"
-    if (list.kind === BOOKMARKS) return "[bookmarks list]"
-    if (list.kind === COMMUNITIES) return "[communities list]"
-    if (list.kind === CHANNELS) return "[channels list]"
-    if (list.kind === BLOCKED_RELAYS) return "[blocked relays list]"
-    if (list.kind === SEARCH_RELAYS) return "[search relays list]"
-    if (list.kind === ROOMS) return "[rooms list]"
-    if (list.kind === TOPICS) return "[topics list]"
-  }
-
-  return "[no name]"
-}
+export const displayUserList = (list?: UserList) =>
+  list?.title || listKindLabels.get(list?.kind) || "[no name]"
 
 export class UserListSearch extends SearchHelper<UserList, string> {
   config = {keys: ["title", "description", "identifier"]}

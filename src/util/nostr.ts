@@ -12,10 +12,6 @@ import {
   REPOST,
   ZAP_RECEIPT,
   Address,
-  RELAYS,
-  PROFILE,
-  MESSAGING_RELAYS,
-  FOLLOWS,
   MUTES,
   matchTags,
   tagSpec,
@@ -38,14 +34,14 @@ import {
   COMMUNITIES,
   CHANNELS,
   TOPICS,
+  LABEL,
   getPubkey,
 } from "@welshman/util"
-import {identity, hexToBytes, bytesToHex} from "@welshman/lib"
+import {identity, hexToBytes, bytesToHex, isHex32, parseJson} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import type {ProfileReader} from "@welshman/domain"
 import * as nip19 from "nostr-tools/nip19"
 import * as nip05 from "nostr-tools/nip05"
-import {parseJson} from "src/util/misc"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
@@ -80,7 +76,6 @@ export const replyKinds = [NOTE, COMMENT]
 export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT, POLL]
 export const reactionKinds = [REACTION, ZAP_RECEIPT] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
-export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS] as number[]
 export const headerlessKinds = [
   ROOMS,
   FEED,
@@ -98,7 +93,6 @@ export const headerlessKinds = [
   BOOKMARKS,
   COMMUNITIES,
   CHANNELS,
-  ROOMS,
   TOPICS,
 ]
 
@@ -106,33 +100,32 @@ export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
 }
 
-export const toHex = (data: string): string | null => {
-  if (data.match(/[a-zA-Z0-9]{64}/)) {
-    return data
-  }
+// Welshman dropped its nip46Perms constant, so coracle owns the set it has always asked a remote
+// signer for.
+export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
-  try {
-    let key = nip19.decode(data).data
+// Deleted from @welshman/util in 0.9. An imeta tag's entries are space-delimited key/value pairs.
+export const tagsFromIMeta = (imeta: string[]) => imeta.map(m => m.split(" "))
 
-    if (key instanceof Uint8Array) {
-      key = Buffer.from(key).toString("hex")
-    }
-
-    return key as string
-  } catch (e) {
-    return null
-  }
-}
+// Nip 57 zap split. The relay hint stays a parameter — resolving it needs the relay list
+// collection, which this module deliberately doesn't reach for.
+export const makeZapSplit = (pubkey: string, relay = "", weight: string | number = "1") => [
+  "zap",
+  pubkey,
+  relay,
+  String(weight),
+]
 
 export const getRating = (event: TrustedEvent) =>
-  event.kind === 1985
+  event.kind === LABEL
     ? parseJson(last(matchTags(tagSpec("l"), event.tags).find(nthEq(1, "review/relay")) || []))
         ?.quality
     : parseFloat(matchTags(tagSpec("rating"), event.tags).find(t => t.length === 2)?.[1])
 
 export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
-export const isHex = x => x?.length === 64 && x?.match(/^[a-f0-9]{64}$/)
+// Alias kept for the call sites that still import isHex from here; @welshman/lib owns the predicate
+export {isHex32 as isHex} from "@welshman/lib"
 
 const BAD_DOMAINS = ["libfans.com", "matrix.org/_matrix/media/v3/download"]
 
@@ -188,7 +181,7 @@ export const parseAnythingSync = entity => {
     entity = Address.from(entity).toNaddr()
   }
 
-  if (isHex(entity)) {
+  if (isHex32(entity)) {
     return {type: "npub", data: entity}
   }
 
@@ -197,11 +190,4 @@ export const parseAnythingSync = entity => {
   } catch (e) {
     return null
   }
-}
-
-export const parsePubkey = async entity => {
-  const result = await parseAnything(entity)
-
-  if (result.type === "npub") return result.data
-  if (result.type === "nprofile") return result.data.pubkey
 }

@@ -8,7 +8,7 @@ import {toSession, nip01, nip46} from "@welshman/app"
 import {Nip46Broker} from "@welshman/signer"
 import {makeSecret} from "@welshman/util"
 import {App as CapacitorApp} from "@capacitor/app"
-import {nsecDecode} from "src/util/nostr"
+import {nsecDecode, nip46Perms} from "src/util/nostr"
 import {router} from "src/app/util"
 import App from "src/app/App.svelte"
 import {installPrompt} from "src/partials/state"
@@ -26,10 +26,7 @@ if (window.location.hash?.startsWith("#nostr-login")) {
         const clientSecret = makeSecret()
         const {signerPubkey, connectSecret, relays} = Nip46Broker.parseBunkerUrl(nstartLogin)
         const broker = new Nip46Broker({relays, clientSecret, signerPubkey})
-        const result = await broker.connect(
-          connectSecret,
-          "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt",
-        )
+        const result = await broker.connect(connectSecret, nip46Perms)
         const pubkey = await broker.getPublicKey()
 
         // TODO: remove ack result

@@ -1,10 +1,9 @@
 import * as nip19 from "nostr-tools/nip19"
 import {fromNostrURI, Address} from "@welshman/util"
-import {last, identity, tryCatch, uniq} from "@welshman/lib"
+import {last, identity, tryCatch, uniq, parseJson} from "@welshman/lib"
 import {RelayLists} from "@welshman/app"
 import {Router} from "src/util/router"
 import {app} from "src/engine/core"
-import {parseJson} from "src/util/misc"
 import {parseAnythingSync} from "src/util/nostr"
 import {getChannelId} from "src/engine"
 

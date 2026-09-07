@@ -1,19 +1,11 @@
-import {
-  stripProtocol,
-  first,
-  sleep,
-  fromPairs,
-  last,
-  sum,
-  identity,
-  pluck,
-  tryCatch,
-  ensurePlural,
-  round,
-} from "@welshman/lib"
+import {first, sleep, fromPairs, last, identity, pluck, round, displayUrl} from "@welshman/lib"
 import {readable} from "svelte/store"
 import Fuse from "fuse.js"
-import logger from "src/util/logger"
+
+// @welshman/lib owns both of these now. Coracle's parseJson answered null where lib's answers
+// undefined, which is the mismatch that shipped a bug; re-exporting here keeps the call sites that
+// still import from this module on one implementation until they're repointed at @welshman/lib.
+export {displayUrl, parseJson} from "@welshman/lib"
 
 export const ticker = () => {
   let seconds = 0
@@ -30,10 +22,6 @@ export const formatDateAsLocalISODate = (date: Date) => {
   const datetime = new Date(date.getTime() - offset).toISOString()
 
   return datetime
-}
-
-export const formatTimestampAsLocalISODate = (ts: number) => {
-  return formatDateAsLocalISODate(new Date(ts * 1000))
 }
 
 type ScrollerOpts = {
@@ -94,23 +82,6 @@ export const stringToHue = (value: string) => {
 export const hsl = (hue: number, {saturation = 100, lightness = 50, opacity = 1} = {}) =>
   `hsl(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-export const parseJson = (json: string) => {
-  if (!json) return null
-
-  try {
-    return JSON.parse(json)
-  } catch (e) {
-    return null
-  }
-}
-
-export const tryFetch = <T>(f: () => T) =>
-  tryCatch(f, (e: Error) => {
-    if (!e.toString().includes("fetch")) {
-      logger.warn(e)
-    }
-  })
-
 export const numberFmt = new Intl.NumberFormat()
 
 export const formatSats = (sats: number) => {
@@ -146,61 +117,24 @@ export const pluralize = (n: number, label: string, pluralLabel?: string) =>
 export const quantify = (n: number, label: string, pluralLabel?: string) =>
   `${commaFormat(n)} ${pluralize(n, label, pluralLabel)}`
 
-export const displayUrl = url => {
-  return stripProtocol(url)
-    .replace(/^(www\.)?/i, "")
-    .replace(/\/$/, "")
-}
-
+// Not @welshman/lib's displayDomain, which splits before stripping the protocol and so answers
+// "https:" for any url carrying a scheme.
 export const displayDomain = url => {
   return first(displayUrl(url).split(/[\/\?]/))
 }
 
-export const sumBy = (f, xs) => sum(xs.map(f))
-
 export const ensureProto = url => (url.includes("://") ? url : "https://" + url)
-
-export const asArray = v => ensurePlural(v).filter(identity)
 
 export const buildQueryString = params => "?" + new URLSearchParams(params)
 
 export const parseQueryString = path =>
   fromPairs(Array.from(new URLSearchParams(last(path.split("?")))))
 
-export const joinPath = (...parts) => {
-  let path = ""
-
-  for (let part of parts) {
-    if (!part.endsWith("/")) {
-      part += "/"
-    }
-
-    path += part
-  }
-
-  return path.slice(0, -1)
-}
-
 export const updateIn =
   <T>(k: string, f: (x: T) => T) =>
   x => ({...x, [k]: f(x[k])})
 
 export const pickVals = <T>(ks: string[], x: Record<string, T>) => ks.map(k => x[k])
-
-export const getStringWidth = (text: string) => {
-  const span = document.createElement("span")
-
-  span.setAttribute("style", "height: 0px")
-  span.textContent = text
-
-  document.body.appendChild(span)
-
-  const {width} = span.getBoundingClientRect()
-
-  span.remove()
-
-  return width
-}
 
 export const fuzzy = <T>(data: T[], opts = {}): ((q: string) => any[]) => {
   const fuse = new Fuse(data, opts) as any

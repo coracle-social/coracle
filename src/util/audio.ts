@@ -1,7 +1,7 @@
-import EventEmitter from "events"
+import {Emitter} from "@welshman/lib"
 import Hls from "hls.js"
 
-export class AudioController extends EventEmitter {
+export class AudioController extends Emitter {
   completed = false
   progress = 0
   interval: any = null

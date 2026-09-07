@@ -54,7 +54,7 @@ export const readHandlers = (event: TrustedEvent): Handler[] => {
   }))
 }
 
-export const getHandlerKey = (handler?: Handler) => `${handler.kind}:${getAddress(handler.event)}`
+export const getHandlerKey = (handler: Handler) => `${handler.kind}:${getAddress(handler.event)}`
 
 export const displayHandler = (handler?: Handler) => handler?.name || "[no name]"
 
