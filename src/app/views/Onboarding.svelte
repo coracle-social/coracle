@@ -1,16 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {uniq, nth} from "@welshman/lib"
-  import {
-    getPubkeyTagValues,
-    RelayMode,
-    getAddress,
-    Address,
-    getIdFilters,
-    getRelaysFromList,
-  } from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {session, userRelayList, thunkIsComplete} from "@welshman/app"
+  import {noop, uniq, nth} from "@welshman/lib"
+  import {getAddress, Address, getIdFilters, hexTags, outbox, tagValues} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import OnboardingIntro from "src/app/views/OnboardingIntro.svelte"
   import OnboardingKeys from "src/app/views/OnboardingKeys.svelte"
@@ -25,6 +16,7 @@
     listenForNotifications,
     broadcastUserData,
   } from "src/engine"
+  import {app, relayLists, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {setChecked} from "src/engine"
 
@@ -39,7 +31,7 @@
       about: "",
       picture: "",
     },
-    follows: $session ? [] : $anonymous.follows.map(nth(1)),
+    follows: $app.user ? [] : $anonymous.follows.map(nth(1)),
     relays:
       $anonymous.relays.length === 0
         ? env.DEFAULT_RELAYS.map(url => ["r", url])
@@ -67,21 +59,19 @@
       if (claim) {
         const thunk = await requestRelayAccess(url, claim)
 
-        await new Promise<void>(resolve => {
-          thunk.subscribe(t => {
-            if (thunkIsComplete(t)) {
-              resolve()
-            }
-          })
-        })
+        await thunk.waitForCompletion()
       }
     }
 
     // Make sure our profile gets to the right relays
-    broadcastUserData(getRelaysFromList($userRelayList, RelayMode.Write))
+    const userPubkey = $app.user?.pubkey
+
+    if (userPubkey) {
+      broadcastUserData($relayLists.writeUrls(userPubkey).get())
+    }
 
     // Start our notifications listener
-    listenForNotifications()
+    listenForNotifications().catch(noop)
     setChecked("*")
   }
 
@@ -95,13 +85,13 @@
     myRequest({
       autoClose: true,
       filters: getIdFilters(env.ONBOARDING_LISTS),
-      relays: Router.get().FromPubkeys(listOwners).policy(addMaximalFallbacks).getUrls(),
+      relays: await resolveRelays(listOwners.map(pubkey => outbox(pubkey))),
       onEvent: e => {
         if (!state.onboardingLists.find(l => getAddress(l) === getAddress(e))) {
           state.onboardingLists = state.onboardingLists.concat(e)
         }
 
-        loadPubkeys(getPubkeyTagValues(e.tags))
+        loadPubkeys(tagValues(hexTags("p"), e.tags))
       },
     })
   })

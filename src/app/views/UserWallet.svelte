@@ -1,12 +1,17 @@
 <script lang="ts">
   import {nwc} from "@getalby/sdk"
   import {LOCALE} from "@welshman/lib"
-  import {displayRelayUrl, fromMsats} from "@welshman/util"
-  import {session} from "@welshman/app"
+  import type {Maybe} from "@welshman/lib"
+  import {displayRelayUrl, fromMsats, isNWCWallet, isWebLNWallet} from "@welshman/util"
+  import type {Wallet} from "@welshman/util"
   import Icon from "src/partials/Icon.svelte"
   import Link from "src/partials/Link.svelte"
   import {getWebLn} from "src/engine"
+  import {session} from "src/engine/core"
   import {router} from "src/app/util"
+
+  // Wallet configuration is coracle's own per-account metadata, stored alongside the session
+  $: wallet = ($session as Maybe<{wallet?: Wallet}>)?.wallet
 </script>
 
 <div class="flex flex-col gap-6">
@@ -15,7 +20,7 @@
       <i class="fa fa-server fa-lg" />
       <h2 class="staatliches text-2xl">Your Wallet</h2>
     </div>
-    {#if $session?.wallet}
+    {#if wallet}
       <div class="flex items-center gap-2 text-sm text-success">
         <i class="fa fa-check" />
         Connected
@@ -27,13 +32,13 @@
     {/if}
   </div>
   <div class="flex flex-col gap-4">
-    {#if $session?.wallet}
-      {#if $session.wallet?.type === "webln"}
-        {@const {node, version} = $session.wallet.info}
+    {#if wallet}
+      {#if isWebLNWallet(wallet)}
+        {@const {node, version} = wallet.info}
         <div class="flex flex-col justify-between gap-2 lg:flex-row">
           <p>
             Connected to <strong>{node?.alias || version || "unknown wallet"}</strong>
-            via <strong>{$session.wallet.type}</strong>
+            via <strong>{wallet.type}</strong>
           </p>
           <p class="flex gap-2 whitespace-nowrap">
             Balance:
@@ -49,8 +54,8 @@
             sats
           </p>
         </div>
-      {:else if $session.wallet.type === "nwc"}
-        {@const {lud16, relayUrl, nostrWalletConnectUrl} = $session.wallet.info}
+      {:else if isNWCWallet(wallet)}
+        {@const {lud16, relayUrl, nostrWalletConnectUrl} = wallet.info}
         <div class="flex flex-col justify-between gap-2 lg:flex-row">
           <p>
             Connected to <strong>{lud16}</strong> via <strong>{displayRelayUrl(relayUrl)}</strong>

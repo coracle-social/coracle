@@ -1,44 +1,57 @@
+<script context="module" lang="ts">
+  import {NostrSignerPlugin} from "nostr-signer-capacitor-plugin"
+  import {setNip55Plugin} from "@welshman/signer"
+
+  // Building a nip 55 signer throws unless the capacitor plugin has been registered, and a stored
+  // nip 55 session is restored before any view mounts. This module is on the static import graph
+  // from src/main.js, so registering here runs at startup, ahead of restoreSession.
+  setNip55Plugin(NostrSignerPlugin)
+</script>
+
 <script lang="ts">
   import {onMount} from "svelte"
   import {Capacitor} from "@capacitor/core"
-  import {getNip07, Nip07Signer, getNip55, Nip55Signer} from "@welshman/signer"
-  import {loginWithNip55, loginWithNip07} from "@welshman/app"
+  import {getNip07, getNip55, Nip55Signer} from "@welshman/signer"
+  import type {Nip55AppInfo} from "@welshman/signer"
+  import {toSession, nip07, nip55} from "@welshman/app"
+  import type {Session} from "@welshman/app"
   import {appName} from "src/partials/state"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {login} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
-
-  // Define the interface for AppInfo
-  interface AppInfo {
-    name: string
-    packageName: string
-    iconUrl?: string
-  }
 
   const signUp = () => router.at("signup").replaceModal()
 
   const useBunker = () => router.at("login/bunker").pushModal()
 
-  const useExtension = async () => {
-    const signer = new Nip07Signer()
-    const pubkey = await signer.getPubkey()
+  // Logging in builds the signer and tears down the anonymous app, and any of that can fail
+  const logIn = async (session: Session) => {
+    try {
+      await login(session)
+    } catch (e) {
+      console.error(e)
 
-    loginWithNip07(pubkey)
+      return showWarning("We weren't able to log you in with that signer")
+    }
+
     boot()
   }
 
-  const useSigner = async (app: AppInfo) => {
-    const signer = new Nip55Signer(app.packageName)
+  const useExtension = () => logIn(toSession(nip07, {}))
+
+  const useSigner = async (signerApp: Nip55AppInfo) => {
+    const signer = new Nip55Signer(signerApp.packageName)
     const pubkey = await signer.getPubkey()
 
-    loginWithNip55(pubkey, app.packageName)
-    boot()
+    return logIn(toSession(nip55, {pubkey, signer: signerApp.packageName}))
   }
 
-  let signerApps: AppInfo[] = []
+  let signerApps: Nip55AppInfo[] = []
 
   onMount(async () => {
     if (Capacitor.isNativePlatform()) {
@@ -65,10 +78,10 @@
           <i class="fa fa-puzzle-piece" /> Use Browser Extension
         </Button>
       {/if}
-      {#each signerApps as app}
-        <Button class="btn btn-tall" on:click={() => useSigner(app)}>
-          <img src={app.iconUrl} alt={app.name} width="20" height="20" />
-          Use {app.name}
+      {#each signerApps as signerApp}
+        <Button class="btn btn-tall" on:click={() => useSigner(signerApp)}>
+          <img src={signerApp.iconUrl} alt={signerApp.name} width="20" height="20" />
+          Use {signerApp.name}
         </Button>
       {/each}
       <Button class="btn btn-tall" on:click={useBunker}>

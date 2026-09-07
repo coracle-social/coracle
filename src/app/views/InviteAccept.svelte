@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {session} from "@welshman/app"
   import {normalizeRelayUrl} from "@welshman/util"
   import PersonList from "src/app/shared/PersonList.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
@@ -10,6 +9,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {updateIn} from "src/util/misc"
+  import {app} from "src/engine/core"
 
   export let people = []
   export let relays = []
@@ -19,7 +19,7 @@
     .map(updateIn("url", normalizeRelayUrl))
 </script>
 
-{#if $session}
+{#if $app.user}
   <div class="mb-4 flex flex-col items-center justify-center">
     <Heading>You've been invited</Heading>
     <p>

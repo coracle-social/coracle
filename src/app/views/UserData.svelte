@@ -1,8 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {formatTimestamp} from "@welshman/lib"
-  import {Router} from "@welshman/router"
-  import {repository} from "@welshman/app"
   import {commaFormat, createScroller} from "src/util/misc"
   import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,8 +9,9 @@
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/util/router"
   import {sortEventsDesc} from "src/engine"
+  import {app, relayLists} from "src/engine/core"
 
-  const events = sortEventsDesc(repository.dump())
+  const events = sortEventsDesc($app.repository.dump())
 
   const loadMore = async () => {
     limit += 50
@@ -75,7 +74,7 @@
           <Link
             href={router
               .at("notes")
-              .of(event.id, {relays: Router.get().Event(event).getUrls()})
+              .of(event.id, {relays: $relayLists.writeUrls(event.pubkey).get()})
               .toString()}>
             <i class="fa fa-link text-accent" />
           </Link>

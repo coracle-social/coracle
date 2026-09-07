@@ -1,9 +1,9 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {nwc} from "@getalby/sdk"
-  import {assoc, sleep} from "@welshman/lib"
-  import type {NWCInfo} from "@welshman/util"
-  import {pubkey, updateSession} from "@welshman/app"
+  import {sleep} from "@welshman/lib"
+  import {WalletType} from "@welshman/util"
+  import type {NWCInfo, Wallet} from "@welshman/util"
   import Link from "src/partials/Link.svelte"
   import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
@@ -12,9 +12,31 @@
   import Divider from "src/partials/Divider.svelte"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import {getWebLn} from "src/engine"
+  import {pubkey, sessions} from "src/engine/core"
+  import type {StoredSession} from "src/engine/core"
   import {router} from "src/app/util"
 
   export let qp
+
+  // Wallet configuration is coracle's own per-account metadata, so it rides alongside welshman's
+  // serializable session in the sessions store rather than inside it.
+  type SessionWithWallet = StoredSession & {wallet?: Wallet}
+
+  const setWallet = (wallet: Wallet) => {
+    const userPubkey = pubkey.get()
+
+    if (!userPubkey) return
+
+    sessions.update($sessions => {
+      const stored = $sessions[userPubkey]
+
+      if (!stored) return $sessions
+
+      const updated: SessionWithWallet = {...stored, wallet}
+
+      return {...$sessions, [userPubkey]: updated}
+    })
+  }
 
   const back = () => router.clearModals()
 
@@ -30,7 +52,7 @@
       if (!info?.supports?.includes("lightning")) {
         showWarning("Your extension does not support lightning payments")
       } else {
-        updateSession($pubkey, assoc("wallet", {type: "webln", info}))
+        setWallet({type: WalletType.WebLN, info})
         showInfo("Wallet successfully connected!")
 
         await sleep(400)
@@ -59,10 +81,7 @@
       if (!info) {
         showWarning("Wallet failed to connect")
       } else {
-        updateSession(
-          $pubkey,
-          assoc("wallet", {type: "nwc", info: client.options as unknown as NWCInfo}),
-        )
+        setWallet({type: WalletType.NWC, info: client.options as unknown as NWCInfo})
         showInfo("Wallet successfully connected!")
 
         await sleep(400)

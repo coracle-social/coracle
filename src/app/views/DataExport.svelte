@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {repository, pubkey, profilesByPubkey} from "@welshman/app"
   import {Capacitor} from "@capacitor/core"
   import {Filesystem, Directory, Encoding} from "@capacitor/filesystem"
   import FieldInline from "src/partials/FieldInline.svelte"
@@ -8,6 +7,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Heading from "src/partials/Heading.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
+  import {app, profiles} from "src/engine/core"
 
   let userOnly = true
 
@@ -47,8 +47,12 @@
   }
 
   const submit = async () => {
-    const filename = $profilesByPubkey.get($pubkey)?.nip05 || $pubkey.slice(0, 16)
-    const events = Array.from(repository.query([userOnly ? {authors: [$pubkey]} : {}]))
+    const userPubkey = $app.user?.pubkey
+
+    if (!userPubkey) return
+
+    const filename = $profiles.get(userPubkey)?.nip05() || userPubkey.slice(0, 16)
+    const events = Array.from($app.repository.query([userOnly ? {authors: [userPubkey]} : {}]))
     const jsonl = events
       .filter(e => e.sig)
       .map(e => JSON.stringify(e))

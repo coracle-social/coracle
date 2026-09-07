@@ -1,8 +1,9 @@
 <script lang="ts">
-  import {fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
-  import {getPubkeyTagValues, getAddress, makeEvent, FOLLOWS} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {relaySearch, publishThunk, profileSearch, tagPubkey} from "@welshman/app"
+  import {first, fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
+  import {getAddress, hexTags, tagValues, userOutbox} from "@welshman/util"
+  import {FollowList} from "@welshman/domain"
+  import {Profiles, Relays} from "@welshman/app"
+  import {showWarning} from "src/partials/Toast.svelte"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -12,10 +13,15 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {createPeopleLoader, setOutboxPolicies} from "src/engine"
+  import {command, fromApp, profiles, relayLists, resolveRelays, writer} from "src/engine/core"
   import {quantify} from "src/util/misc"
 
   export let state
   export let setStage
+
+  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
+
+  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
   let loading = false
   let listEvent
@@ -34,13 +40,28 @@
 
     try {
       // Publish relays
-      await setOutboxPolicies(() => state.relays)
+      await setOutboxPolicies(state.relays)
 
-      // Publish follows
-      await publishThunk({
-        event: makeEvent(FOLLOWS, {tags: state.follows.map(tagPubkey)}),
-        relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-      })
+      // Publish follows, tagged the way coracle has always written them: an outbox hint read
+      // from cache and the profile's display name as a petname
+      const followWriter = writer(FollowList)
+
+      for (const pubkey of state.follows) {
+        followWriter.follow(
+          pubkey,
+          first(relayLists.get().writeUrls(pubkey).get()) || "",
+          profiles.get().display(pubkey).get(),
+        )
+      }
+
+      const eventCommand = await command(followWriter)
+
+      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+    } catch (e) {
+      // Editing a relay list loads it first, and loads reject now rather than swallowing failures
+      console.error(e)
+
+      return showWarning("We weren't able to save your relays and follows")
     } finally {
       loading = false
     }
@@ -74,11 +95,11 @@
   }
 
   const followAll = listEvent => {
-    state.follows = uniq([...state.follows, ...getPubkeyTagValues(listEvent.tags)])
+    state.follows = uniq([...state.follows, ...tagValues(hexTags("p"), listEvent.tags)])
   }
 
   const unfollowAll = listEvent => {
-    state.follows = without(getPubkeyTagValues(listEvent.tags), state.follows)
+    state.follows = without(tagValues(hexTags("p"), listEvent.tags), state.follows)
   }
 
   const removeRelay = url => {
@@ -137,7 +158,7 @@
       <p class="text-xl font-bold">{title}</p>
       <p class="pb-5">{description}</p>
       <div class="absolute bottom-4 text-neutral-200">
-        {getPubkeyTagValues(event.tags).length} people
+        {tagValues(hexTags("p"), event.tags).length} people
       </div>
     </Card>
   {/each}
@@ -158,7 +179,7 @@
 
 {#if showList}
   {@const {title, description} = fromPairs(listEvent.tags)}
-  {@const listPubkeys = uniq(getPubkeyTagValues(listEvent.tags))}
+  {@const listPubkeys = uniq(tagValues(hexTags("p"), listEvent.tags))}
   <Modal onEscape={closeList} canCloseAll={false}>
     <div class="flex items-center justify-between">
       <p class="text-2xl font-bold">{title}</p>

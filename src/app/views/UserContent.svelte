@@ -1,9 +1,9 @@
 <script lang="ts">
   import {identity, uniq, equals} from "@welshman/lib"
-  import {tagger, getTagValues} from "@welshman/util"
-  import {topicSearch, setMutes, userMuteList} from "@welshman/app"
+  import {tagSpec, tagValues, userOutbox} from "@welshman/util"
+  import {MuteLists, Topics} from "@welshman/app"
   import {appName} from "src/partials/state"
-  import {showInfo} from "src/partials/Toast.svelte"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import Field from "src/partials/Field.svelte"
   import Footer from "src/partials/Footer.svelte"
@@ -16,7 +16,12 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {userSettings, publishSettings} from "src/engine"
+  import {hasNip44, userSettings, publishSettings} from "src/engine"
+  import {deriveUserItem, fromApp, muteLists, resolveRelays} from "src/engine/core"
+
+  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
+
+  const userMuteList = deriveUserItem(MuteLists)
 
   const values = {...$userSettings}
 
@@ -26,40 +31,53 @@
     mutesDirty = true
   }
 
-  const submit = () => {
-    if (!equals($userSettings, values) && !mutesDirty) {
-      // Migrate away from muted words
-      publishSettings({...values, muted_words: []})
-    }
+  const submit = async () => {
+    try {
+      await save()
+    } catch (e) {
+      console.error(e)
 
-    if (mutesDirty) {
-      setMutes({
-        privateTags: [
-          ...($userMuteList?.privateTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
-          ...privatelyMutedPubkeys.map(tagger("p")),
-          ...privatelyMutedTopics.map(tagger("t")),
-          ...privatelyMutedWords.map(tagger("word")),
-        ],
-        publicTags: [
-          ...($userMuteList?.publicTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
-          ...publiclyMutedPubkeys.map(tagger("p")),
-          ...publiclyMutedTopics.map(tagger("t")),
-          ...publiclyMutedWords.map(tagger("word")),
-        ],
-      })
+      return showWarning("Your preferences could not be saved")
     }
 
     showInfo("Your preferences have been saved!")
   }
 
+  // Saving encrypts through the user's signer, which can reject
+  const save = async () => {
+    if (!equals($userSettings, values) && !mutesDirty) {
+      // Migrate away from muted words
+      await publishSettings({...values, muted_words: []})
+    }
+
+    if (mutesDirty) {
+      const eventCommand = await muteLists.get().setMutes({
+        privateTags: [
+          ...($userMuteList?.privateTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
+          ...privatelyMutedPubkeys.map(v => ["p", v]),
+          ...privatelyMutedTopics.map(v => ["t", v]),
+          ...privatelyMutedWords.map(v => ["word", v]),
+        ],
+        publicTags: [
+          ...($userMuteList?.publicTags.filter(t => !["p", "t", "word"].includes(t[0])) || []),
+          ...publiclyMutedPubkeys.map(v => ["p", v]),
+          ...publiclyMutedTopics.map(v => ["t", v]),
+          ...publiclyMutedWords.map(v => ["word", v]),
+        ],
+      })
+
+      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+    }
+  }
+
   let mutesDirty = false
-  let publiclyMutedPubkeys = uniq(getTagValues("p", $userMuteList?.publicTags || []))
-  let privatelyMutedPubkeys = uniq(getTagValues("p", $userMuteList?.privateTags || []))
-  let publiclyMutedTopics = uniq(getTagValues("t", $userMuteList?.publicTags || []))
-  let privatelyMutedTopics = uniq(getTagValues("t", $userMuteList?.privateTags || []))
-  let publiclyMutedWords = uniq(getTagValues("word", $userMuteList?.publicTags || []))
+  let publiclyMutedPubkeys = uniq(tagValues(tagSpec("p"), $userMuteList?.publicTags || []))
+  let privatelyMutedPubkeys = uniq(tagValues(tagSpec("p"), $userMuteList?.privateTags || []))
+  let publiclyMutedTopics = uniq(tagValues(tagSpec("t"), $userMuteList?.publicTags || []))
+  let privatelyMutedTopics = uniq(tagValues(tagSpec("t"), $userMuteList?.privateTags || []))
+  let publiclyMutedWords = uniq(tagValues(tagSpec("word"), $userMuteList?.publicTags || []))
   let privatelyMutedWords = uniq([
-    ...getTagValues("word", $userMuteList?.privateTags || []),
+    ...tagValues(tagSpec("word"), $userMuteList?.privateTags || []),
     ...$userSettings.muted_words,
   ])
 
@@ -184,8 +202,14 @@
         Notes tagging these topics will be hidden by default. This information will be encrypted.
       </p>
     </Field>
+    {#if !$hasNip44}
+      <p class="text-center">
+        Your signer doesn't support encryption, so {appName} can't save your preferences.
+      </p>
+    {/if}
   </div>
   <Footer>
-    <Button class="btn flex-grow" type="submit">Save</Button>
+    <!-- Settings and private mutes are nip 44 encrypted now, so a signer without it can't save -->
+    <Button class="btn flex-grow" type="submit" disabled={!$hasNip44}>Save</Button>
   </Footer>
 </form>

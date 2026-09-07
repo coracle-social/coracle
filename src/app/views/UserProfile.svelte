@@ -1,28 +1,43 @@
 <script lang="ts">
-  import {pubkey, profilesByPubkey, setProfile} from "@welshman/app"
+  import {indexers, userOutbox} from "@welshman/util"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import Footer from "src/partials/Footer.svelte"
-  import {showInfo} from "src/partials/Toast.svelte"
+  import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {router} from "src/app/util/router"
+  import {app, profiles, resolveRelays} from "src/engine/core"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://lightningaddress.com/"
   const pseudUrl =
     "https://www.coindesk.com/markets/2020/06/29/many-bitcoin-developers-are-choosing-to-use-pseudonyms-for-good-reason/"
 
-  const submit = () => {
-    setProfile(values)
+  const userPubkey = $app.user?.pubkey
+
+  const submit = async () => {
+    try {
+      // Editing seeds from the current profile, which loads it first — and loads reject now
+      const eventCommand = await profiles.get().update(writer => writer.update(values))
+
+      // Kind 0 routes itself to the user's write relays; coracle has always sent it to the
+      // indexers too, since that's where other clients look for it
+      eventCommand.publishToRelays(await resolveRelays([userOutbox(), indexers()]))
+    } catch (e) {
+      console.error(e)
+
+      return showWarning("Your profile could not be saved")
+    }
+
     showInfo("Your profile has been saved!")
-    router.at("people").of($pubkey).replace()
+    router.at("people").of(userPubkey).replace()
   }
 
-  const values = {...$profilesByPubkey.get($pubkey)}
+  const values = {...(userPubkey ? profiles.get().get(userPubkey)?.values : undefined)}
 
   document.title = "Profile"
 </script>

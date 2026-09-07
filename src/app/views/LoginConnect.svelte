@@ -1,16 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {sleep, spec} from "@welshman/lib"
+  import {noop, sleep, spec} from "@welshman/lib"
   import {
     RELAYS,
     FOLLOWS,
     PROFILE,
-    getRelayTagValues,
     normalizeRelayUrl,
     isRelayUrl,
+    relayTags,
+    tagValues,
   } from "@welshman/util"
-  import {deriveEvents} from "@welshman/store"
-  import {session, repository} from "@welshman/app"
+  import {Events} from "@welshman/app"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -21,17 +21,21 @@
   import Button from "src/partials/Button.svelte"
   import {router} from "src/app/util/router"
   import {env, myLoad} from "src/engine"
+  import {app, fromApp} from "src/engine/core"
   import {loadUserData} from "src/app/state"
 
   const t = Date.now()
 
+  const pubkey = $app.user?.pubkey
+
   const kinds = [PROFILE, RELAYS, FOLLOWS]
-  const filters = [{kinds, authors: [$session.pubkey]}]
-  const events = deriveEvents({repository, filters})
+  const filters = pubkey ? [{kinds, authors: [pubkey]}] : []
+  const events = fromApp($app => $app.use(Events).all(filters).$)
 
   const skip = () => router.at("notes").push()
 
-  const searchRelays = relays => myLoad({filters, relays})
+  // Loads reject now rather than swallowing failures, and nothing here waits on the result
+  const searchRelays = relays => myLoad({filters, relays}).catch(noop)
 
   const confirmCustomRelay = () => {
     const url = normalizeRelayUrl(customRelay)
@@ -67,7 +71,7 @@
     const relaySelectionsEvent = $events.find(spec({kind: RELAYS}))
 
     if (!found && relaySelectionsEvent) {
-      searchRelays(getRelayTagValues(relaySelectionsEvent.tags))
+      searchRelays(tagValues(relayTags(["r", "relay"]), relaySelectionsEvent.tags))
     }
   }
 
@@ -76,7 +80,7 @@
       found = true
 
       // Reload user data and pull in messages, notifications, etc
-      loadUserData()
+      loadUserData().catch(noop)
 
       // Show a success message once they've had time to read the intro message
       sleep(Math.max(0, 2500 - (Date.now() - t))).then(async () => {
