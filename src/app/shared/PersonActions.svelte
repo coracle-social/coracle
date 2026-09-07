@@ -1,13 +1,12 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
-  import {toNostrURI} from "@welshman/util"
-  import {Router} from "@welshman/router"
-  import {session, signer, tagPubkey, mutePrivately, unmute, loginWithPubkey} from "@welshman/app"
+  import {outbox, toNostrURI, userOutbox} from "@welshman/util"
+  import type {Command} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Button from "src/partials/Button.svelte"
   import {userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
-  import {boot} from "src/app/state"
+  import {muteLists, resolveRelays, session, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
 
   export let pubkey
@@ -17,30 +16,25 @@
   const following = derived(userFollows, $m => $m.has(pubkey))
   const muted = derived(userMutedPubkeys, $userMutedPubkeys => $userMutedPubkeys.has(pubkey))
 
-  const loginAsUser = () => {
-    router.clearModals()
-    loginWithPubkey(pubkey)
-    boot()
-  }
+  // Mute list edits build a command without publishing it, and a command publishes to at most
+  // three relays of its own accord — coracle sends its own data to the user's write relays.
+  const publishToUserRelays = async (command: Command) =>
+    command.publishToRelays(await resolveRelays([userOutbox()]))
 
   const unfollowPerson = () => unfollow(pubkey)
 
-  const followPerson = () => follow(tagPubkey(pubkey))
+  const followPerson = () => follow(pubkey)
 
-  const unmutePerson = () => unmute(pubkey)
+  const unmutePerson = () => muteLists.get().unmute(pubkey).then(publishToUserRelays)
 
-  const mutePerson = () => mutePrivately(tagPubkey(pubkey))
+  const mutePerson = () => muteLists.get().mutePrivately(["p", pubkey]).then(publishToUserRelays)
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
-  const share = () =>
+  const share = async () =>
     router
       .at("qrcode")
-      .of(
-        toNostrURI(
-          nip19.nprofileEncode({pubkey, relays: Router.get().FromPubkeys([pubkey]).getUrls()}),
-        ),
-      )
+      .of(toNostrURI(nip19.nprofileEncode({pubkey, relays: await resolveRelays([outbox(pubkey)])})))
       .open()
 
   let actions = []
@@ -78,10 +72,6 @@
         label: "Mention",
         icon: "at",
       })
-    }
-
-    if (!isSelf) {
-      actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
 
     actions.push({onClick: share, label: "Share", icon: "qrcode"})

@@ -1,10 +1,16 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {POLL_RESPONSE, getTagValues} from "@welshman/util"
-  import {Router} from "@welshman/router"
-  import {repository} from "@welshman/app"
-  import {deriveEvents} from "@welshman/store"
+  import {noop} from "@welshman/lib"
+  import {
+    POLL_RESPONSE,
+    inbox,
+    relayTags,
+    relays as relaySelections,
+    tagValues,
+  } from "@welshman/util"
+  import {Events} from "@welshman/app"
   import {myLoad} from "src/engine"
+  import {app, fromApp, resolveRelays} from "src/engine/core"
   import {getPollOptions, getPollVotersByOption} from "src/util/polls"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -12,22 +18,23 @@
 
   export let id
 
-  const event = repository.getEvent(id)
+  const event = app.get().repository.getEvent(id)
   const options = event ? getPollOptions(event) : []
   const filters = [{kinds: [POLL_RESPONSE], "#e": [id]}]
-  const responses = deriveEvents({repository, filters})
+  const responses = fromApp($app => $app.use(Events).all(filters).$)
 
   $: votersByOption = event ? getPollVotersByOption(event, $responses) : new Map<string, string[]>()
 
   onMount(() => {
     if (!event) return
 
-    const router = Router.get()
-    const relays = router
-      .merge([router.FromRelays(getTagValues("relay", event.tags)), router.Replies(event)])
-      .getUrls()
-
-    myLoad({relays, filters})
+    // The relays the poll named, plus the ones its author reads from
+    resolveRelays([
+      ...relaySelections(tagValues(relayTags("relay"), event.tags)),
+      inbox(event.pubkey),
+    ])
+      .then(relays => myLoad({relays, filters}))
+      .catch(noop)
   })
 </script>
 

@@ -1,8 +1,9 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
-  import {Router} from "@welshman/router"
   import {parseJson} from "@welshman/lib"
-  import {deriveProfile, deriveHandleForPubkey, displayHandle} from "@welshman/app"
+  import {displayHandle} from "@welshman/util"
+  import {Handles, Profiles} from "@welshman/app"
+  import {fromApp, relayLists} from "src/engine/core"
   import {copyToClipboard} from "src/util/html"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -12,17 +13,19 @@
 
   export let pubkey
 
-  const profile = deriveProfile(pubkey)
-  const handle = deriveHandleForPubkey(pubkey)
-  const relays = Router.get().FromPubkey(pubkey).getUrls()
+  const profile = fromApp($app => $app.use(Profiles).one(pubkey))
+  const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
+  // Router.FromPubkey was this pubkey's write relays; full relay selection is asynchronous now,
+  // and this is an nprofile that has to be encoded in one pass.
+  const relays = relayLists.get().writeUrls(pubkey).get()
 
   const copyJson = () => {
     copyToClipboard(json)
     showInfo(`Profile JSON copied to clipboard!`)
   }
 
-  $: json = JSON.stringify(parseJson($profile?.event?.content), null, 2)
-  $: lightningAddress = $profile?.lud16 || $profile?.lud06
+  $: json = JSON.stringify(parseJson($profile?.event.content), null, 2)
+  $: lightningAddress = $profile?.values.lud16 || $profile?.values.lud06
 </script>
 
 <h1 class="staatliches text-2xl">Details</h1>

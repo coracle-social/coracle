@@ -1,10 +1,12 @@
 <script lang="ts">
   import cx from "classnames"
-  import {deriveHandleForPubkey, displayHandle} from "@welshman/app"
+  import {displayHandle} from "@welshman/util"
+  import {Handles} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
 
   export let pubkey
 
-  const handle = deriveHandleForPubkey(pubkey)
+  const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
 </script>
 
 {#if $handle}

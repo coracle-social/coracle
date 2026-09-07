@@ -1,13 +1,20 @@
 <script lang="ts">
-  import {Address} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {deriveProfileDisplay} from "@welshman/app"
+  import {noop, uniq} from "@welshman/lib"
+  import {
+    Address,
+    inbox,
+    isShareableRelayUrl,
+    outbox,
+    relay,
+    relays as relaySelections,
+  } from "@welshman/util"
   import {headerlessKinds} from "src/util/nostr"
   import Button from "src/partials/Button.svelte"
   import Link from "src/partials/Link.svelte"
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
+  import {profiles, relayLists, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {isEventMuted, deriveEvent} from "src/engine"
 
@@ -19,11 +26,34 @@
 
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
-  const relays = Router.get()
-    .Quote(note, idOrAddress, relayHints)
-    .policy(addMaximalFallbacks)
-    .getUrls()
+
+  // The old Router.Quote scenario: the hints on the quote itself, the quoting author's relays,
+  // and anything the q tag pointed at. Resolving that is asynchronous now, so seed with the
+  // author's relays as they're already cached and widen once the resolver answers.
+  const tag = note.tags.find(t => t[1] === idOrAddress)
+  const selections = [
+    ...relaySelections(relayHints),
+    inbox(note.pubkey),
+    outbox(note.pubkey),
+    ...(isShareableRelayUrl(tag?.[2] || "") ? [relay(tag[2])] : []),
+    ...(tag?.[3]?.length === 64 ? [outbox(tag[3])] : []),
+  ]
+
+  let relays = uniq([
+    ...relayHints,
+    ...relayLists.get().readUrls(note.pubkey).get(),
+    ...relayLists.get().writeUrls(note.pubkey).get(),
+  ])
+
   const quote = deriveEvent(idOrAddress, {relays})
+
+  // deriveEvent keeps the seed and resolves its own relays; widening here is what the link the
+  // user follows gets, so a quote never opens with fewer relays than the old scenario found.
+  resolveRelays(selections)
+    .then(urls => {
+      relays = uniq([...relays, ...urls])
+    })
+    .catch(noop)
 
   const openQuote = e => {
     const noteId = value.id || $quote?.id
@@ -42,7 +72,7 @@
     showHidden = true
   }
 
-  $: profileDisplay = deriveProfileDisplay($quote?.pubkey)
+  $: profileDisplay = $profiles.display($quote?.pubkey).$
   $: muted = $quote && $isEventMuted($quote, true)
 </script>
 

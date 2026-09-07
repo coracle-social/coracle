@@ -15,8 +15,9 @@
 <script lang="ts">
   import cx from "classnames"
   import * as nip19 from "nostr-tools/nip19"
-  import {displayPubkey} from "@welshman/util"
-  import {session, deriveProfileDisplay} from "@welshman/app"
+  import {displayPubkey} from "@welshman/domain"
+  import {Profiles} from "@welshman/app"
+  import {fromApp, session} from "src/engine/core"
   import PersonHandle from "src/app/shared/PersonHandle.svelte"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
   import WotPopover from "./WotPopover.svelte"
@@ -26,7 +27,7 @@
 
   const npub = nip19.npubEncode(pubkey)
   const npubDisplay = displayPubkey(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
 </script>
 
 <div class={cx("flex gap-1", $$props.class)}>

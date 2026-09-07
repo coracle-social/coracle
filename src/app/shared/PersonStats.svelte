@@ -1,7 +1,7 @@
 <script lang="ts">
   import {tweened} from "svelte/motion"
-  import {getListTags, getPubkeyTagValues} from "@welshman/util"
-  import {deriveFollowList, getFollowers} from "@welshman/app"
+  import {FollowLists, WotScope} from "@welshman/app"
+  import {fromApp, wot} from "src/engine/core"
   import {numberFmt} from "src/util/misc"
   import {router} from "src/app/util/router"
 
@@ -10,15 +10,17 @@
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const followsCount = tweened(0, {interpolate, duration: 1000})
   const followersCount = tweened(0, {interpolate, duration: 1300})
-  const followList = deriveFollowList(pubkey)
+  const followList = fromApp($app => $app.use(FollowLists).one(pubkey))
 
   const showFollows = () => router.at("people").of(pubkey).at("follows").open()
 
   const showFollowers = () => router.at("people").of(pubkey).at("followers").open()
 
-  followersCount.set(getFollowers(pubkey).length)
+  // The count everyone can see, not the count the user's own follows account for — this is a
+  // raw follower total, so it reads the whole graph rather than the user's slice of it.
+  followersCount.set(wot.get().followers(pubkey, WotScope.Global).get().length)
 
-  $: pubkeys = getPubkeyTagValues(getListTags($followList))
+  $: pubkeys = $followList?.pubkeys() || []
 
   $: {
     followsCount.set(pubkeys.length)

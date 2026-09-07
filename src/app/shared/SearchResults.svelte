@@ -2,10 +2,17 @@
   import type {Writable} from "svelte/store"
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
-  import {topicSearch, profileSearch} from "@welshman/app"
+  import type {Topic} from "@welshman/app"
+  import {Profiles, Topics} from "@welshman/app"
+  import type {ProfileReader} from "@welshman/domain"
+  import {fromApp} from "src/engine/core"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
   import {createPeopleLoader} from "src/engine"
+
+  type SearchResult =
+    | {type: "topic"; id: string; topic: Topic}
+    | {type: "profile"; id: string; profile: ProfileReader}
 
   export let term: Writable<string>
   export let replace = false
@@ -15,7 +22,7 @@
 
   const openProfile = pubkey => router.at("people").of(pubkey).open({replace})
 
-  const onClick = result => {
+  const onClick = (result: SearchResult) => {
     if (result.type === "topic") {
       openTopic(result.id)
     }
@@ -47,9 +54,13 @@
 
   const {loading: loadingPeople, load: loadPeople} = createPeopleLoader()
 
+  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
+
+  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
+
   const results = derived(
     [term, topicSearch, profileSearch],
-    ([$term, $topicSearch, $profileSearch]) => {
+    ([$term, $topicSearch, $profileSearch]): SearchResult[] => {
       $term = $term || ""
 
       if ($term.length > 30) {
@@ -59,10 +70,10 @@
       return $term.startsWith("#")
         ? $topicSearch
             .searchOptions($term.slice(1))
-            .map(topic => ({type: "topic", id: topic.name, topic}))
+            .map(topic => ({type: "topic", id: topic.name, topic}) as SearchResult)
         : $profileSearch
             .searchOptions($term)
-            .map(profile => ({type: "profile", id: profile.event.pubkey, profile}))
+            .map(profile => ({type: "profile", id: profile.author(), profile}) as SearchResult)
     },
   )
 

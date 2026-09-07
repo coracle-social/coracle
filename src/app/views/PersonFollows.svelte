@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {getListTags, getPubkeyTagValues} from "@welshman/util"
-  import {deriveFollowList} from "@welshman/app"
+  import {FollowLists} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
   import PersonList from "src/app/shared/PersonList.svelte"
 
   export let pubkey
 
-  const follows = deriveFollowList(pubkey)
+  const follows = fromApp($app => $app.use(FollowLists).one(pubkey))
 </script>
 
-<PersonList pubkeys={getPubkeyTagValues(getListTags($follows))} />
+<PersonList pubkeys={$follows?.pubkeys() || []} />
