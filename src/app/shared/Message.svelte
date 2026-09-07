@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {formatTimestamp} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {abortThunk, session, thunkHasStatus, thunks} from "@welshman/app"
+  import {Thunks} from "@welshman/app"
   import {fly} from "svelte/transition"
   import {ticker} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
@@ -13,6 +13,7 @@
   import PersonName from "src/app/shared/PersonName.svelte"
   import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {ensureMessagePlaintext, userSettings} from "src/engine"
+  import {fromApp, pubkey} from "src/engine/core"
   import {router} from "src/app/util/router"
 
   export let message
@@ -21,9 +22,12 @@
 
   const elapsed = ticker()
 
+  // Thunks live on the app now; the history is a flat list of in-flight publishes
+  const thunkHistory = fromApp($app => $app.use(Thunks).history)
+
   let showDetails = false
 
-  $: thunk = $thunks.find(t => t.event.id === message.id)
+  $: thunk = $thunkHistory.find(t => t.event.id === message.id)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
@@ -31,10 +35,10 @@
   <div
     class={cx("flex max-w-xl flex-col gap-2 rounded-2xl px-4 py-2", {
       "ml-12 justify-self-end rounded-br-none bg-neutral-100 text-neutral-800":
-        message.pubkey === $session.pubkey,
-      "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $session.pubkey,
+        message.pubkey === $pubkey,
+      "mr-12 rounded-bl-none bg-tinted-800": message.pubkey !== $pubkey,
     })}>
-    {#if message.showProfile && message.pubkey !== $session.pubkey}
+    {#if message.showProfile && message.pubkey !== $pubkey}
       <Link
         modal
         href={router.at("people").of(message.pubkey).toString()}
@@ -52,17 +56,17 @@
     </div>
     <small
       class="mt-1 flex items-center justify-between gap-2 text-xs"
-      class:text-tinted-700={message.pubkey === $session.pubkey}
-      class:text-neutral-100={message.pubkey !== $session.pubkey}>
+      class:text-tinted-700={message.pubkey === $pubkey}
+      class:text-neutral-100={message.pubkey !== $pubkey}>
       {#if thunk}
-        {#if thunkHasStatus(PublishStatus.Pending, thunk)}
+        {#if thunk.hasStatus(PublishStatus.Pending)}
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...
             {#if remaining > 0}
               <button
                 class="cursor-pointer py-1 text-tinted-700-d underline"
-                on:click={() => abortThunk(thunk)}>Cancel</button>
+                on:click={() => thunk.abort()}>Cancel</button>
             {/if}
           </div>
         {:else}
@@ -95,7 +99,7 @@
                   href="/help/nip-17-dms">here</Link
                 >.
               </p>
-              {#if message.pubkey === $session.pubkey}
+              {#if message.pubkey === $pubkey}
                 <p>
                   Note that these messages are not yet universally supported. Make sure the person
                   you're chatting with is using a compatible nostr client.

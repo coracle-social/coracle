@@ -1,7 +1,6 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import {signer, shouldUnwrap} from "@welshman/app"
   import {now} from "@welshman/lib"
   import {createScroller, toTitle} from "src/util/misc"
   import Tabs from "src/partials/Tabs.svelte"
@@ -11,7 +10,8 @@
   import Content from "src/partials/Content.svelte"
   import ChannelsListItem from "src/app/views/ChannelsListItem.svelte"
   import {router} from "src/app/util/router"
-  import {channels, hasNewMessages, setChecked} from "src/engine"
+  import {channels, hasNewMessages, setChecked, shouldUnwrap} from "src/engine"
+  import {signer} from "src/engine/core"
 
   const activeTab = window.location.pathname.slice(1) === "channels" ? "conversations" : "requests"
   const setActiveTab = tab => {

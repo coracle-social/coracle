@@ -1,16 +1,9 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {onMount, onDestroy} from "svelte"
-  import {deriveEvents} from "@welshman/store"
-  import {DIRECT_MESSAGE, isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {
-    messagingRelayListsByPubkey,
-    shouldUnwrap,
-    session,
-    repository,
-    displayProfileByPubkey,
-    loadMessagingRelayList,
-  } from "@welshman/app"
+  import {noop} from "@welshman/lib"
+  import {isShareableRelayUrl} from "@welshman/util"
+  import {MessagingRelayLists, Profiles} from "@welshman/app"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import Channel from "src/app/shared/Channel.svelte"
@@ -18,28 +11,42 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router} from "src/app/util/router"
   import Popover from "src/partials/Popover.svelte"
-  import {getChannelIdFromEvent, listenForMessages, setChecked} from "src/engine"
+  import {
+    getChannelIdFromEvent,
+    listenForMessages,
+    messages as allMessages,
+    setChecked,
+    shouldUnwrap,
+  } from "src/engine"
+  import {fromApp, messagingRelayLists, pubkey} from "src/engine/core"
 
-  export let pubkeys
+  export let pubkeys: string[]
   export let channelId
 
-  const messages = derived(
-    deriveEvents({repository, filters: [{kinds: [4, DIRECT_MESSAGE]}]}),
-    $events => $events.filter(e => getChannelIdFromEvent(e) === channelId),
+  const messages = derived(allMessages, $events =>
+    $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
-  const pubkeysWithoutMessaging = derived(
-    messagingRelayListsByPubkey,
-    $messagingRelayListsByPubkey =>
-      pubkeys.filter(
-        pubkey =>
-          !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
-      ),
+  // Read messaging relays off the plugin's projection rather than the reader — the plugin
+  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
+  const pubkeysWithoutMessaging = fromApp($app =>
+    derived(
+      pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),
+      ($urls: string[][]) =>
+        pubkeys.filter((pk: string, i: number) => !$urls[i].some(isShareableRelayUrl)),
+    ),
+  )
+
+  const displays = fromApp($app =>
+    derived(
+      pubkeys.map((pk: string) => $app.use(Profiles).display(pk).$),
+      ($displays: string[]) => $displays,
+    ),
   )
 
   let isAccepted
 
-  const showPerson = pubkey => router.at("people").of(pubkey).open()
+  const showPerson = (pk: string) => router.at("people").of(pk).open()
 
   onMount(() => {
     if (!$shouldUnwrap) {
@@ -48,11 +55,11 @@
 
     const unsubscriber = listenForMessages()
 
-    isAccepted = $messages.some(m => m.pubkey === $session.pubkey)
+    isAccepted = $messages.some(m => m.pubkey === $pubkey)
     setChecked("channels/" + channelId)
 
-    for (const pubkey of pubkeys) {
-      loadMessagingRelayList(pubkey)
+    for (const pk of pubkeys) {
+      messagingRelayLists.get().load(pk).catch(noop)
     }
 
     return () => {
@@ -78,10 +85,10 @@
       </div>
       <div class:h-16={pubkeys.length === 1} class="flex flex-col items-start overflow-hidden pt-2">
         <div>
-          {#each pubkeys as pubkey, i (pubkey)}
+          {#each pubkeys as memberPubkey, i (memberPubkey)}
             {#if i > 0}&bullet;{/if}
-            <Button class="hover:underline" on:click={() => showPerson(pubkey)}>
-              {displayProfileByPubkey(pubkey)}
+            <Button class="hover:underline" on:click={() => showPerson(memberPubkey)}>
+              {$displays[i]}
             </Button>
           {/each}
         </div>
