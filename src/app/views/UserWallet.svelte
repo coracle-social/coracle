@@ -3,15 +3,15 @@
   import {LOCALE} from "@welshman/lib"
   import type {Maybe} from "@welshman/lib"
   import {displayRelayUrl, fromMsats, isNWCWallet, isWebLNWallet} from "@welshman/util"
-  import type {Wallet} from "@welshman/util"
   import Icon from "src/partials/Icon.svelte"
   import Link from "src/partials/Link.svelte"
   import {getWebLn} from "src/engine"
+  import type {SessionWithMeta} from "src/engine"
   import {session} from "src/engine/core"
   import {router} from "src/app/util"
 
   // Wallet configuration is coracle's own per-account metadata, stored alongside the session
-  $: wallet = ($session as Maybe<{wallet?: Wallet}>)?.wallet
+  $: wallet = ($session as Maybe<SessionWithMeta>)?.wallet
 </script>
 
 <div class="flex flex-col gap-6">

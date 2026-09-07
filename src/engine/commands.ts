@@ -31,7 +31,8 @@ import {
   uploadBlob,
   userOutbox,
 } from "@welshman/util"
-import type {TrustedEvent, Wallet} from "@welshman/util"
+import type {TrustedEvent} from "@welshman/util"
+import type {SessionWithMeta} from "src/engine/model"
 import {
   app,
   command,
@@ -405,8 +406,7 @@ export const getWebLn = () => (window as any).webln
 
 export const payInvoice = async (invoice: string) => {
   // Wallet configuration is coracle's own per-account metadata, stored alongside the session.
-  // SessionWithMeta in src/engine/model.ts doesn't declare it yet.
-  const {wallet} = (get(session) || {}) as {wallet?: Wallet}
+  const {wallet} = (get(session) || {}) as SessionWithMeta
 
   if (!wallet) {
     return alert(invoice)

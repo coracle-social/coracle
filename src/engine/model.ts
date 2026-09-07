@@ -1,4 +1,4 @@
-import type {TrustedEvent} from "@welshman/util"
+import type {TrustedEvent, Wallet} from "@welshman/util"
 import type {StoredSession} from "src/engine/core"
 
 export type Notification = {
@@ -31,6 +31,7 @@ export type Channel = {
 // serializable {method, data} rather than inside it.
 export type SessionWithMeta = StoredSession & {
   onboarding_tasks_completed?: string[]
+  wallet?: Wallet
 }
 
 export type AnonymousUserState = {
