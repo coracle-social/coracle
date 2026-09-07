@@ -2,6 +2,7 @@
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
   import {WEEK, noop, not, now, ago, uniqBy, hash} from "@welshman/lib"
+  import {sortEventsDesc} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
   import {synced, localStorageProvider} from "@welshman/store"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
@@ -14,7 +15,7 @@
   } from "@welshman/feeds"
   import {feeds} from "src/engine/core"
   import {createScroller} from "src/util/misc"
-  import {noteKinds, repostKinds} from "src/util/nostr"
+  import {makeZapSplit, noteKinds, repostKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
   import Button from "src/partials/Button.svelte"
   import Card from "src/partials/Card.svelte"
@@ -24,7 +25,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {zap} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {env, sortEventsDesc} from "src/engine"
+  import {env} from "src/engine"
   import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
@@ -36,7 +37,7 @@
 
   let abortController = new AbortController()
 
-  const startZap = () => zap({splits: [["zap", env.PLATFORM_PUBKEY, "", "1"]]})
+  const startZap = () => zap({splits: [makeZapSplit(env.PLATFORM_PUBKEY)]})
 
   const promptDismissed = synced({
     key: "feed/promptDismissed",

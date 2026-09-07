@@ -11,8 +11,9 @@
     isReplaceable,
     makeEvent,
     getLnUrl,
+    getPow,
     outbox,
-    userOutbox,
+    sortEventsDesc,
     ZAP_RECEIPT,
     REACTION,
     REPOST,
@@ -22,9 +23,8 @@
     getAddress,
   } from "@welshman/util"
   import {Reaction} from "@welshman/domain"
-  import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
-  import {replyKinds, repostKinds} from "src/util/nostr"
+  import {makeZapSplit, replyKinds, repostKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
   import {browser} from "src/partials/state"
   import {showInfo} from "src/partials/Toast.svelte"
@@ -40,14 +40,15 @@
   import {router, deriveValidZaps, zap} from "src/app/util"
   import {
     fromApp,
+    getWriteRelays,
     muteLists,
     pinLists,
     profiles,
     pubkey,
-    relayLists,
     resolveRelays,
     signer,
     thunks,
+    userRelays,
     writer,
     zappers,
   } from "src/engine/core"
@@ -59,7 +60,6 @@
     getSetting,
     getClientTags,
     userMutedEvents,
-    sortEventsDesc,
     isChildOf,
     isEventMuted,
     publishToUserRelays,
@@ -70,10 +70,6 @@
   export let event: TrustedEvent
   export let onReplyStart: () => void
   export let showHidden = false
-
-  // Relay selection is async now, and this has to answer synchronously; the author's write relays
-  // are the hint the selection would have started from anyway.
-  const getWriteRelays = (pubkey: string) => $relayLists.writeUrls(pubkey).get()
 
   const nevent = nip19.neventEncode({
     id: event.id,
@@ -144,7 +140,7 @@
 
   const startZap = () => {
     const zapTags = event.tags.filter(nthEq(0, "zap"))
-    const defaultSplit = ["zap", event.pubkey, first(getWriteRelays(event.pubkey)) || "", "1"]
+    const defaultSplit = makeZapSplit(event.pubkey, first(getWriteRelays(event.pubkey)) || "")
     const splits = zapTags.length > 0 ? zapTags : [defaultSplit]
 
     zap({
@@ -157,7 +153,7 @@
   const broadcast = async () => {
     thunks.get().publish({
       event: asSignedEvent(event as SignedEvent),
-      relays: await resolveRelays([userOutbox()]),
+      relays: await userRelays(),
     })
 
     showInfo("Note has been re-published!")

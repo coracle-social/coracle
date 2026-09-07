@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {displayUrl} from "src/util/misc"
+  import {displayUrl} from "@welshman/lib"
 
   export let url: string
   export let onClick: (url: string, event: any) => void

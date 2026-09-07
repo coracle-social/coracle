@@ -9,14 +9,14 @@
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
-  import {relayLists} from "src/engine/core"
+  import {getWriteRelays} from "src/engine/core"
 
   export let note
   export let showMedia = false
 
   // Router.Event was the author's write relays; full relay selection is asynchronous now, and
   // these are hints baked into a naddr that has to be built in one pass.
-  const address = Address.fromEvent(note, relayLists.get().writeUrls(note.pubkey).get())
+  const address = Address.fromEvent(note, getWriteRelays(note.pubkey))
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

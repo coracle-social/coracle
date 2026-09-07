@@ -42,7 +42,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {app, relayLists, resolveRelays, thunks, writer} from "src/engine/core"
+  import {app, getWriteRelays, resolveRelays, thunks, writer} from "src/engine/core"
   import {env, getClientTags, sign, userSettings, broadcastUserRelays} from "src/engine"
 
   export let quote = null
@@ -279,13 +279,12 @@
     showPreview = !showPreview
   }
 
-  // Relay selection is async now, and this has to answer synchronously; the pubkey's own write
-  // relays are the hint the selection would have started from anyway.
-  const getWriteRelays = (pubkey: string) => $relayLists.writeUrls(pubkey).get().slice(0, 3)
-
   const pubkeyEncoder = {
     encode: pubkey => {
-      const nprofile = nip19.nprofileEncode({pubkey, relays: getWriteRelays(pubkey)})
+      const nprofile = nip19.nprofileEncode({
+        pubkey,
+        relays: getWriteRelays(pubkey).slice(0, 3),
+      })
 
       return toNostrURI(nprofile)
     },
@@ -333,7 +332,7 @@
 
   onMount(() => {
     if (quote && isReplaceable(quote)) {
-      const naddr = Address.fromEvent(quote, getWriteRelays(quote.pubkey)).toNaddr()
+      const naddr = Address.fromEvent(quote, getWriteRelays(quote.pubkey).slice(0, 3)).toNaddr()
 
       editor.commands.insertContent("\n")
       editor.commands.insertNAddr({bech32: toNostrURI(naddr)})
@@ -342,7 +341,7 @@
         id: quote.id,
         kind: quote.kind,
         author: quote.pubkey,
-        relays: getWriteRelays(quote.pubkey),
+        relays: getWriteRelays(quote.pubkey).slice(0, 3),
       })
 
       editor.commands.insertContent("\n")

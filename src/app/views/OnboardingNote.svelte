@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {NOTE, makeEvent, userOutbox} from "@welshman/util"
+  import {NOTE, makeEvent} from "@welshman/util"
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import Button from "src/partials/Button.svelte"
   import {makeEditor} from "src/app/editor"
-  import {resolveRelays, thunks} from "src/engine/core"
+  import {thunks, userRelays} from "src/engine/core"
 
   export let state
   export let signup
@@ -23,7 +23,7 @@
       // Publish our welcome note. Thunks own the template with the signed-in user's pubkey and
       // calculate proof of work themselves, then re-sign, so the nonce stays valid.
       if (content) {
-        const relays = await resolveRelays([userOutbox()])
+        const relays = await userRelays()
         const event = makeEvent(NOTE, {content, tags: editor.storage.nostr.getEditorTags()})
 
         thunks.get().publish({event, relays, pow: 20})

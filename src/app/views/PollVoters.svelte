@@ -8,9 +8,8 @@
     relays as relaySelections,
     tagValues,
   } from "@welshman/util"
-  import {Events} from "@welshman/app"
   import {myLoad} from "src/engine"
-  import {app, fromApp, resolveRelays} from "src/engine/core"
+  import {app, deriveEvents, resolveRelays} from "src/engine/core"
   import {getPollOptions, getPollVotersByOption} from "src/util/polls"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -21,7 +20,7 @@
   const event = app.get().repository.getEvent(id)
   const options = event ? getPollOptions(event) : []
   const filters = [{kinds: [POLL_RESPONSE], "#e": [id]}]
-  const responses = fromApp($app => $app.use(Events).all(filters).$)
+  const responses = deriveEvents(filters)
 
   $: votersByOption = event ? getPollVotersByOption(event, $responses) : new Map<string, string[]>()
 

@@ -14,7 +14,7 @@
   import Card from "src/partials/Card.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
-  import {profiles, relayLists, resolveRelays} from "src/engine/core"
+  import {getWriteRelays, profiles, relayLists, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {isEventMuted, deriveEvent} from "src/engine"
 
@@ -42,7 +42,7 @@
   let relays = uniq([
     ...relayHints,
     ...relayLists.get().readUrls(note.pubkey).get(),
-    ...relayLists.get().writeUrls(note.pubkey).get(),
+    ...getWriteRelays(note.pubkey),
   ])
 
   const quote = deriveEvent(idOrAddress, {relays})

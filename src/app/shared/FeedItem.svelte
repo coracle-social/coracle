@@ -5,9 +5,9 @@
     getIdFilters,
     getReplyFilters,
     relays as relaySelections,
+    sortEventsDesc,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {Events} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
@@ -19,8 +19,8 @@
   import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {app, fromApp, resolveRelays} from "src/engine/core"
-  import {getSetting, isChildOf, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
+  import {app, deriveEvents, resolveRelays} from "src/engine/core"
+  import {getSetting, isChildOf, isEventMuted, myRequest} from "src/engine"
 
   export let note
   export let relays = []
@@ -56,10 +56,7 @@
   }
 
   const replies = derived(
-    [
-      fromApp($app => $app.use(Events).all(getReplyFilters([event], {kinds: replyKinds})).$),
-      isEventMuted,
-    ],
+    [deriveEvents(getReplyFilters([event], {kinds: replyKinds})), isEventMuted],
     ([$events, $isEventMuted]) =>
       sortEventsDesc($events.filter(e => isChildOf(e, event) && !$isEventMuted(e))),
   )

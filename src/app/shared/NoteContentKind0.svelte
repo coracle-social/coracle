@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {parseJson} from "src/util/misc"
+  import {parseJson} from "@welshman/lib"
   import Card from "src/partials/Card.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
-  import {relayLists} from "src/engine/core"
+  import {getWriteRelays} from "src/engine/core"
   import {router} from "src/app/util/router"
 
   export let note
@@ -16,7 +16,7 @@
       .of(pubkey)
       // Router.Event was the author's write relays; full relay selection is asynchronous now,
       // and these are route parameters that have to be built in one pass.
-      .cx({relays: relayLists.get().writeUrls(pubkey).get()})
+      .cx({relays: getWriteRelays(pubkey)})
       .open()
 </script>
 

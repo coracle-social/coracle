@@ -1,8 +1,8 @@
 import {describe, expect, it} from "vitest"
-import {Resolver} from "@welshman/util"
+import {Resolver, sortEventsDesc} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {Comment} from "@welshman/domain"
-import {setCommentAncestors, sortEventsDesc} from "../../../../src/engine/utils"
+import {setCommentAncestors} from "../../../../src/engine/utils"
 import {getTestTrustedEvent} from "../../../utils/fake"
 
 // Nothing here needs real relay selection, so resolve every hint to the empty string

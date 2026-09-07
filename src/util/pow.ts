@@ -4,11 +4,6 @@ import {synced, localStorageProvider, withGetter} from "@welshman/store"
 import PowWorker from "src/workers/pow?worker"
 import {isMobile} from "src/util/html"
 
-// Coracle keeps its own miner — src/workers/pow.ts hashes synchronously via hash-wasm, where
-// @welshman/util awaits crypto.subtle once per nonce — but the difficulty check is the same
-// function, so use theirs.
-export {getPow} from "@welshman/util"
-
 export const benchmark = withGetter(
   synced({
     key: "benchmark",

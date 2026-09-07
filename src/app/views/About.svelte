@@ -6,24 +6,18 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Card from "src/partials/Card.svelte"
   import Heading from "src/partials/Heading.svelte"
+  import {makeZapSplit} from "src/util/nostr"
   import {router, zap} from "src/app/util"
   import {loadPubkeys, env} from "src/engine"
-  import {relayLists} from "src/engine/core"
+  import {getWriteRelays} from "src/engine/core"
 
   const hash = import.meta.env.VITE_BUILD_HASH
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
 
-  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
+  // The hint is the recipient's first write relay, as before.
   const startZap = () =>
     zap({
-      splits: [
-        [
-          "zap",
-          env.PLATFORM_PUBKEY,
-          first(relayLists.get().writeUrls(env.PLATFORM_PUBKEY).get()) || "",
-          "1",
-        ],
-      ],
+      splits: [makeZapSplit(env.PLATFORM_PUBKEY, first(getWriteRelays(env.PLATFORM_PUBKEY)) || "")],
     })
 
   loadPubkeys([env.PLATFORM_PUBKEY])

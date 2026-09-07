@@ -1,9 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
+  import {displayUrl} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import {MessagingRelayLists, RelayLists, RelayStats, Relays} from "@welshman/app"
   import {fromApp, signer} from "src/engine/core"
-  import {displayUrl, ensureMailto, quantify} from "src/util/misc"
+  import {ensureMailto, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"

@@ -2,7 +2,7 @@
   import {first} from "@welshman/lib"
   import {NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS, getAddress} from "@welshman/util"
   import {isAuthorFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
-  import {profiles, relayLists} from "src/engine/core"
+  import {getWriteRelays, profiles} from "src/engine/core"
   import Card from "src/partials/Card.svelte"
   import Button from "src/partials/Button.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
@@ -17,7 +17,7 @@
   const makePersonTag = (pubkey: string) => [
     "p",
     pubkey,
-    first($relayLists.writeUrls(pubkey).get()) || "",
+    first(getWriteRelays(pubkey)) || "",
     $profiles.display(pubkey).get(),
   ]
 

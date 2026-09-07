@@ -3,7 +3,7 @@
   import {parseJson} from "@welshman/lib"
   import {displayHandle} from "@welshman/util"
   import {Handles, Profiles} from "@welshman/app"
-  import {fromApp, relayLists} from "src/engine/core"
+  import {fromApp, getWriteRelays} from "src/engine/core"
   import {copyToClipboard} from "src/util/html"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
@@ -17,7 +17,7 @@
   const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
   // Router.FromPubkey was this pubkey's write relays; full relay selection is asynchronous now,
   // and this is an nprofile that has to be encoded in one pass.
-  const relays = relayLists.get().writeUrls(pubkey).get()
+  const relays = getWriteRelays(pubkey)
 
   const copyJson = () => {
     copyToClipboard(json)

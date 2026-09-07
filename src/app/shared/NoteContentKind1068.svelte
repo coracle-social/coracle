@@ -10,9 +10,8 @@
     tagValues,
   } from "@welshman/util"
   import {formatTimestampRelative, noop} from "@welshman/lib"
-  import {Events} from "@welshman/app"
   import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
-  import {fromApp, pubkey, resolveRelays, signer} from "src/engine/core"
+  import {deriveEvents, pubkey, resolveRelays, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {
@@ -32,7 +31,7 @@
   const options = getPollOptions(note)
   const endsAt = getPollEndsAt(note)
   const filters = [{kinds: [POLL_RESPONSE], "#e": [note.id]}]
-  const responses = fromApp($app => $app.use(Events).all(filters).$)
+  const responses = deriveEvents(filters)
 
   const getOwnResponse = (events: TrustedEvent[]) => {
     let latest: TrustedEvent | undefined

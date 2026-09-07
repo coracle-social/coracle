@@ -10,7 +10,6 @@
     relayTags,
     tagValues,
   } from "@welshman/util"
-  import {Events} from "@welshman/app"
   import {showWarning} from "src/partials/Toast.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Field from "src/partials/Field.svelte"
@@ -21,7 +20,7 @@
   import Button from "src/partials/Button.svelte"
   import {router} from "src/app/util/router"
   import {env, myLoad} from "src/engine"
-  import {app, fromApp} from "src/engine/core"
+  import {app, deriveEvents} from "src/engine/core"
   import {loadUserData} from "src/app/state"
 
   const t = Date.now()
@@ -30,7 +29,7 @@
 
   const kinds = [PROFILE, RELAYS, FOLLOWS]
   const filters = pubkey ? [{kinds, authors: [pubkey]}] : []
-  const events = fromApp($app => $app.use(Events).all(filters).$)
+  const events = deriveEvents(filters)
 
   const skip = () => router.at("notes").push()
 

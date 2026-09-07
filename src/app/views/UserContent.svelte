@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity, uniq, equals} from "@welshman/lib"
-  import {tagSpec, tagValues, userOutbox} from "@welshman/util"
+  import {tagSpec, tagValues} from "@welshman/util"
   import {MuteLists} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
@@ -17,7 +17,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {hasNip44, userSettings, publishSettings} from "src/engine"
-  import {deriveUserItem, muteLists, resolveRelays, topicSearch} from "src/engine/core"
+  import {deriveUserItem, muteLists, topicSearch, userRelays} from "src/engine/core"
 
   const userMuteList = deriveUserItem(MuteLists)
 
@@ -64,7 +64,7 @@
         ],
       })
 
-      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+      eventCommand.publishToRelays(await userRelays())
     }
   }
 

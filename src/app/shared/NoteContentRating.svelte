@@ -1,9 +1,9 @@
 <script lang="ts">
   import {isRelayUrl, displayRelayUrl, matchTag, tagSpec} from "@welshman/util"
-  import {isHex} from "src/util/nostr"
+  import {isHex32} from "@welshman/lib"
   import Link from "src/partials/Link.svelte"
   import Rating from "src/partials/Rating.svelte"
-  import {profiles, relayLists} from "src/engine/core"
+  import {getWriteRelays, profiles} from "src/engine/core"
   import {router} from "src/app/util/router"
 
   export let note, rating
@@ -20,15 +20,15 @@
     const [type, value] = tag
     // Router.Event was the note author's write relays; full relay selection is asynchronous
     // now, and these are link parameters that have to be built in one pass.
-    const relays = relayLists.get().writeUrls(note.pubkey).get()
+    const relays = getWriteRelays(note.pubkey)
 
     if (type === "r") {
       display = displayRelayUrl(value)
       href = isRelayUrl(value) ? router.at("relays").of(value).toString() : null
-    } else if (type === "p" && isHex(value)) {
+    } else if (type === "p" && isHex32(value)) {
       display = profiles.get().display(value).get()
       href = router.at("people").of(value, {relays}).toString()
-    } else if (type === "e" && isHex(value)) {
+    } else if (type === "e" && isHex32(value)) {
       display = "a note"
       href = router.at("notes").of(value, {relays}).toString()
     }

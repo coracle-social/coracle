@@ -13,6 +13,7 @@
   import FieldInline from "src/partials/FieldInline.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
+  import {makeZapSplit} from "src/util/nostr"
   import {router} from "src/app/util"
   import {app, profiles, resolveRelays, zappers} from "src/engine/core"
   import {env, getSetting, payInvoice} from "src/engine"
@@ -54,7 +55,7 @@
   const sendZap = async () => {
     const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
     const percent = getSetting("platform_zap_split") as number
-    const platformSplit = ["zap", env.PLATFORM_PUBKEY, "", percent * totalWeight]
+    const platformSplit = makeZapSplit(env.PLATFORM_PUBKEY, "", percent * totalWeight)
     const signer = anonymous ? Nip01Signer.ephemeral() : $app.user?.signer
 
     if (!signer) {

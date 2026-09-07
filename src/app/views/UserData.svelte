@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {formatTimestamp} from "@welshman/lib"
+  import {sortEventsDesc} from "@welshman/util"
   import {commaFormat, createScroller} from "src/util/misc"
   import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -8,7 +9,6 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {router} from "src/app/util/router"
-  import {sortEventsDesc} from "src/engine"
   import {app, relayLists} from "src/engine/core"
 
   const events = sortEventsDesc($app.repository.dump())

@@ -4,7 +4,7 @@
   import {makeSecret} from "@welshman/util"
   import {Nip46Broker} from "@welshman/signer"
   import {toSession, nip46} from "@welshman/app"
-  import {isKeyValid} from "src/util/nostr"
+  import {isKeyValid, nip46Perms} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
   import QRCode from "src/partials/QRCode.svelte"
@@ -16,10 +16,6 @@
   import {env} from "src/engine"
   import {login} from "src/engine/core"
   import {boot} from "src/app/state"
-
-  // Welshman dropped its nip46Perms constant; these are the permissions coracle has always asked
-  // for, and src/main.js requests the same set for the nstart flow.
-  const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
   let url = ""
   let input = ""

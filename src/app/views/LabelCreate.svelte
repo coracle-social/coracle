@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity, noop} from "@welshman/lib"
-  import {makeEvent, userOutbox} from "@welshman/util"
+  import {makeEvent} from "@welshman/util"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -9,7 +9,7 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, resolveRelays, thunks, topicSearch} from "src/engine/core"
+  import {pubkey, thunks, topicSearch, userRelays} from "src/engine/core"
   import {loadLabels, getClientTags, deriveCollections, collectionSearch} from "src/engine"
 
   export let id
@@ -43,7 +43,7 @@
     // A collection is the user's own data, so it goes to their write relays and nowhere else
     thunks.get().publish({
       event: makeEvent(1985, {tags}),
-      relays: await resolveRelays([userOutbox()]),
+      relays: await userRelays(),
     })
 
     showInfo("Your tag has been saved!")
