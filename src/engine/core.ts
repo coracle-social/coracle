@@ -7,6 +7,7 @@ import type {ReadableWithGetter} from "@welshman/store"
 import {addNoFallbacks} from "@welshman/util"
 import type {RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
+import type {ISigner} from "@welshman/signer"
 import {
   App,
   BlockedRelayLists,
@@ -42,7 +43,9 @@ import {
   appPolicyLogSignerMethods,
   appPolicyRelayStats,
   appPolicyWraps,
+  defineSessionHandler,
   makeAppPolicyAuth,
+  registerSessionHandler,
 } from "@welshman/app"
 import type {AppPolicy, DerivedPlugin, Plugin, Session} from "@welshman/app"
 import {env} from "src/engine/env"
@@ -192,6 +195,32 @@ export const resolveRelays = async (selections: RelaySelection[], {limit}: {limi
     .getUrls()
 
 // Sessions
+
+// Coracle lets you view the app as someone else without holding their key. Welshman has no
+// read-only session — every built-in handler produces a signer — so this is coracle's own: a signer
+// that knows a pubkey and refuses everything else.
+const readOnlyError = () => Promise.reject(new Error("This account is read-only"))
+
+class ReadOnlySigner implements ISigner {
+  constructor(readonly pubkey: string) {}
+
+  getPubkey = async () => this.pubkey
+
+  sign = readOnlyError
+
+  nip04 = {encrypt: readOnlyError, decrypt: readOnlyError}
+
+  nip44 = {encrypt: readOnlyError, decrypt: readOnlyError}
+}
+
+export const readOnly = defineSessionHandler({
+  method: "readOnly",
+  getSigner: (data: {pubkey: string}) => new ReadOnlySigner(data.pubkey),
+})
+
+registerSessionHandler(readOnly)
+
+export const isReadOnlySession = ($session: Maybe<Session>) => $session?.method === readOnly.method
 
 // Keyed by pubkey so the account switcher can rebuild an app for any logged-in account. A session
 // is welshman's serializable {method, data}; coracle's own per-account metadata rides alongside it.

@@ -2,12 +2,14 @@
   import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
   import {outbox, toNostrURI, userOutbox} from "@welshman/util"
+  import {toSession} from "@welshman/app"
   import type {Command} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Button from "src/partials/Button.svelte"
   import {userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
-  import {muteLists, resolveRelays, session, signer} from "src/engine/core"
+  import {login, muteLists, readOnly, resolveRelays, session, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
+  import {boot} from "src/app/state"
 
   export let pubkey
   export let showFollowActions = false
@@ -28,6 +30,13 @@
   const unmutePerson = () => muteLists.get().unmute(pubkey).then(publishToUserRelays)
 
   const mutePerson = () => muteLists.get().mutePrivately(["p", pubkey]).then(publishToUserRelays)
+
+  // Viewing the app as someone else, without their key — a read-only session
+  const loginAsUser = async () => {
+    router.clearModals()
+    await login(toSession(readOnly, {pubkey}))
+    boot()
+  }
 
   const openProfileInfo = () => router.at("people").of(pubkey).at("info").open()
 
@@ -72,6 +81,10 @@
         label: "Mention",
         icon: "at",
       })
+    }
+
+    if (!isSelf) {
+      actions.push({onClick: loginAsUser, label: "Login as", icon: "right-to-bracket"})
     }
 
     actions.push({onClick: share, label: "Share", icon: "qrcode"})
