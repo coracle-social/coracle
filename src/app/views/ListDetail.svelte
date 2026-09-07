@@ -1,9 +1,9 @@
 <script lang="ts">
-  import {pubkey} from "@welshman/app"
   import Link from "src/partials/Link.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import {router} from "src/app/util"
   import {deriveEvent} from "src/engine"
+  import {pubkey} from "src/engine/core"
 
   export let address
 

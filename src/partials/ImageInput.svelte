@@ -1,7 +1,6 @@
 <script lang="ts">
   import {displayUrl, first} from "@welshman/lib"
-  import {getTagValue, getListTags} from "@welshman/util"
-  import {userBlossomServerList} from "@welshman/app"
+  import {BlossomServerLists} from "@welshman/app"
   import Input from "src/partials/Input.svelte"
   import Modal from "src/partials/Modal.svelte"
   import Spinner from "src/partials/Spinner.svelte"
@@ -11,14 +10,15 @@
   import type {CompressorOpts} from "src/util/html"
   import {listenForFile} from "src/util/html"
   import {env, uploadFile} from "src/engine"
+  import {deriveUserItem} from "src/engine/core"
 
   export let icon = null
   export let value = null
   export let opts: CompressorOpts = {}
 
-  const url = ensureProto(
-    getTagValue("server", getListTags($userBlossomServerList)) || first(env.BLOSSOM_URLS),
-  )
+  const userBlossomServerList = deriveUserItem(BlossomServerLists)
+
+  const url = ensureProto(first($userBlossomServerList?.urls() || []) || first(env.BLOSSOM_URLS))
 
   let input, loading
   let isOpen = false

@@ -1,9 +1,10 @@
 import type {NodeViewProps} from "@welshman/editor"
-import {deriveProfileDisplay} from "@welshman/app"
+import {Profiles} from "@welshman/app"
+import {fromApp} from "src/engine/core"
 
 export const MentionNodeView = ({node}: NodeViewProps) => {
   const dom = document.createElement("span")
-  const display = deriveProfileDisplay(node.attrs.pubkey)
+  const display = fromApp($app => $app.use(Profiles).display(node.attrs.pubkey).$)
 
   dom.classList.add("tiptap-object")
 

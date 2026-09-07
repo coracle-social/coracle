@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {pubkey, signer} from "@welshman/app"
   import {slide, fly} from "src/util/transition"
   import Input from "src/partials/Input.svelte"
   import Button from "src/partials/Button.svelte"
@@ -10,6 +9,7 @@
   import {menuIsOpen, searchTerm} from "src/app/state"
   import {router} from "src/app/util/router"
   import {hasNewMessages, hasNewNotifications} from "src/engine"
+  import {pubkey, signer} from "src/engine/core"
 
   let innerWidth = 0
   let searching = false

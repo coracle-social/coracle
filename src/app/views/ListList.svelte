@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {getAddress} from "@welshman/util"
-  import {pubkey} from "@welshman/app"
-  import {Router} from "@welshman/router"
+  import {noop} from "@welshman/lib"
+  import {getAddress, outbox} from "@welshman/util"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -14,6 +13,7 @@
   import {router} from "src/app/util/router"
   import {EDITABLE_LIST_KINDS} from "src/domain"
   import {userLists, userFollows, listSearch, myLoad, addSinceToFilter} from "src/engine"
+  import {pubkey, resolveRelays} from "src/engine/core"
 
   const createList = () => router.at("lists/create").open()
 
@@ -27,15 +27,16 @@
 
   const authors = Array.from($userFollows)
 
-  myLoad({
-    skipCache: true,
-    relays: Router.get().FromPubkeys(authors).getUrls(),
-    filters: [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors})],
-  })
+  const filters = [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors})]
+
+  // Relay selection resolves asynchronously now, so this load starts a tick later
+  resolveRelays(authors.map(pk => outbox(pk)))
+    .then(relays => myLoad({skipCache: true, relays, filters}))
+    .catch(noop)
 
   $: otherLists = $listSearch
     .searchValues(q)
-    .filter(address => !address.includes($pubkey))
+    .filter(address => !$pubkey || !address.includes($pubkey))
     .slice(0, limit)
 
   onMount(() => {

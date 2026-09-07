@@ -42,6 +42,7 @@ import {
 } from "@welshman/util"
 import {identity, hexToBytes, bytesToHex} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
+import type {ProfileReader} from "@welshman/domain"
 import * as nip19 from "nostr-tools/nip19"
 import * as nip05 from "nostr-tools/nip05"
 import {parseJson} from "src/util/misc"
@@ -67,6 +68,11 @@ export const isKeyValid = (key: string) => {
 
   return true
 }
+
+// Deleted from @welshman/util in 0.9. A profile with neither name is a stub built from a
+// mention or a relay hint rather than a kind 0 the user actually published.
+export const profileHasName = (profile?: ProfileReader) =>
+  Boolean(profile?.name() || profile?.values.display_name)
 
 export const RELAY_FEEDS = 10012
 
