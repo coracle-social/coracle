@@ -1,28 +1,75 @@
-import {nthEq, sortBy} from "@welshman/lib"
-import {
-  Address,
-  getAddress,
-  getReplyTags,
-  isReplaceableKind,
-  isShareableRelayUrl,
-} from "@welshman/util"
+import {first, mapVals, nthEq, sortBy} from "@welshman/lib"
+import {Address, COMMENT, getIdAndAddress, getIdentifier} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {Router} from "@welshman/router"
-import {repository} from "@welshman/app"
+import {
+  getCommentTagValues,
+  getCommentTags,
+  getReplyTagValues,
+  getReplyTags,
+} from "@welshman/domain"
+import type {CommentWriter} from "@welshman/domain"
 
 export const sortEventsDesc = events => sortBy((e: TrustedEvent) => -e.created_at, events)
 
-type CommentRoot = {
-  kind: number
-  pubkey: string
-  hint: string
-  id?: string
-  address?: string
+// Ancestors
+//
+// Welshman dropped these when it split threading between NIP-10 notes and NIP-22 comments; they're
+// still the only kind-agnostic way to ask what an event is a reply to.
+
+export const getAncestorTags = ({kind, tags}: Pick<TrustedEvent, "kind" | "tags">) =>
+  kind === COMMENT ? getCommentTags(tags) : getReplyTags(tags)
+
+export const getAncestors = ({kind, tags}: Pick<TrustedEvent, "kind" | "tags">) =>
+  kind === COMMENT ? getCommentTagValues(tags) : getReplyTagValues(tags)
+
+export const getParentIdsAndAddrs = (event: TrustedEvent) => {
+  const {roots, replies} = getAncestors(event)
+
+  return replies.length > 0 ? replies : roots
 }
 
-// Find the root of the thread the given event belongs to. Comments are handled by the caller,
-// since they carry their root scope with them.
-const getCommentRoot = (parent: TrustedEvent): CommentRoot => {
+export const getParentIdOrAddr = (event: TrustedEvent) => first(getParentIdsAndAddrs(event))
+
+export const getParentIds = (event: TrustedEvent) => {
+  const {roots, replies} = mapVals(
+    (ids: string[]) => ids.filter(id => !Address.isAddress(id)),
+    getAncestors(event),
+  )
+
+  return replies.length > 0 ? replies : roots
+}
+
+export const getParentId = (event: TrustedEvent) => first(getParentIds(event))
+
+export const getParentAddrs = (event: TrustedEvent) => {
+  const {roots, replies} = mapVals(
+    (ids: string[]) => ids.filter(id => Address.isAddress(id)),
+    getAncestors(event),
+  )
+
+  return replies.length > 0 ? replies : roots
+}
+
+export const getParentAddr = (event: TrustedEvent) => first(getParentAddrs(event))
+
+export const isChildOf = (child: TrustedEvent, parent: TrustedEvent) => {
+  const idsAndAddrs = getParentIdsAndAddrs(child)
+
+  return getIdAndAddress(parent).some(x => idsAndAddrs.includes(x))
+}
+
+// Comment ancestors
+
+// Nip 22 scopes comments to the root of the thread using upper-case tags, and to their immediate
+// parent using lower-case ones. CommentWriter leaves it to the caller to say which event is the
+// root, and naively using the parent is only correct when the parent starts the thread.
+const ROOT_TAG_NAMES = ["K", "E", "A", "I", "P"]
+
+// Look up the thread root by id, so we can tag its real kind and author. Callers that have an app
+// pass `$app.repository.getEvent`; without one we fall back to what the parent's tags tell us.
+export type GetEvent = (id: string) => TrustedEvent | undefined
+
+const setDerivedRoot = (writer: CommentWriter, parent: TrustedEvent, getEvent: GetEvent) => {
   // getReplyTags reports the root as a reply when the parent replies directly to it
   const {roots, replies} = getReplyTags(parent.tags)
   const ancestors = roots.length > 0 ? roots : replies
@@ -31,64 +78,45 @@ const getCommentRoot = (parent: TrustedEvent): CommentRoot => {
 
   // If the parent doesn't have any ancestors, it's the root itself
   if (!eventTag && !addressTag) {
-    return {
-      kind: parent.kind,
-      pubkey: parent.pubkey,
-      hint: Router.get().Event(parent).getUrl() || "",
-      id: parent.id,
-      address: isReplaceableKind(parent.kind) ? getAddress(parent) : undefined,
-    }
+    return writer.setRootFromEvent(parent)
   }
 
   const address =
     addressTag && Address.isAddress(addressTag[1]) ? Address.from(addressTag[1]) : undefined
-  const root = eventTag ? repository.getEvent(eventTag[1]) : undefined
-  const hint = [eventTag?.[2], addressTag?.[2]].find(url => url && isShareableRelayUrl(url))
+  const root = eventTag ? getEvent(eventTag[1]) : undefined
 
-  return {
+  // setRoot rebuilds the A tag out of these three, so an address tag wins over anything we found
+  // in the repository — the two only disagree when one of them is malformed
+  writer.setRoot(
     // Threads are usually homogeneous, so fall back to the parent's kind
-    kind: root?.kind ?? address?.kind ?? parent.kind,
-    pubkey: root?.pubkey || address?.pubkey || eventTag?.[4] || "",
-    hint: hint || Router.get().EventRoots(parent).getUrl() || "",
-    id: eventTag?.[1],
-    address: addressTag?.[1],
-  }
+    address?.kind ?? root?.kind ?? parent.kind,
+    eventTag?.[1] || "",
+    address?.pubkey || root?.pubkey || eventTag?.[4] || "",
+    address?.identifier || (root && getIdentifier(root)),
+  )
+
+  // setRoot always emits E and P; drop them when we don't actually know the value
+  writer.rootTags = writer.rootTags.filter(t => t[1])
+
+  return writer
 }
 
-const tagCommentRoot = ({kind, pubkey, hint, id, address}: CommentRoot) => {
-  const tags = [["K", String(kind)]]
+// Scope a comment to the thread its parent belongs to: the parent's own root when it has one,
+// otherwise the parent itself.
+export const setCommentAncestors = (
+  writer: CommentWriter,
+  parent: TrustedEvent,
+  getEvent: GetEvent = () => undefined,
+) => {
+  // Comments carry their root scope with them, including nip 73 external references that setRoot
+  // has no way to express, so inherit it verbatim
+  const inherited = parent.tags.filter(t => ROOT_TAG_NAMES.includes(t[0]))
 
-  if (pubkey) {
-    tags.push(["P", pubkey, Router.get().FromPubkey(pubkey).getUrl() || ""])
+  if (inherited.length > 0) {
+    writer.rootTags = inherited
+  } else {
+    setDerivedRoot(writer, parent, getEvent)
   }
 
-  if (id) {
-    tags.push(["E", id, hint, pubkey])
-  }
-
-  if (address) {
-    tags.push(["A", address, hint, pubkey])
-  }
-
-  return tags
-}
-
-// Nip 22 scopes comments to the root of the thread using upper-case tags, and to their immediate
-// parent using lower-case ones. Welshman's version of this always uses the parent as the root,
-// which is only correct when the parent starts the thread.
-export const tagEventForComment = (parent: TrustedEvent, relay?: string) => {
-  // Comments carry their root scope with them, so inherit it verbatim
-  const inherited = parent.tags.filter(t => ["K", "E", "A", "I", "P"].includes(t[0]))
-  const tags = inherited.length > 0 ? inherited : tagCommentRoot(getCommentRoot(parent))
-  const hint = relay || Router.get().Event(parent).getUrl() || ""
-
-  tags.push(["k", String(parent.kind)])
-  tags.push(["p", parent.pubkey, Router.get().FromPubkey(parent.pubkey).getUrl() || ""])
-  tags.push(["e", parent.id, hint, parent.pubkey])
-
-  if (isReplaceableKind(parent.kind)) {
-    tags.push(["a", getAddress(parent), hint, parent.pubkey])
-  }
-
-  return tags
+  return writer.setParentFromEvent(parent)
 }
