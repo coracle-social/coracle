@@ -3,9 +3,9 @@
   import {derived} from "svelte/store"
   import type {Relay} from "@welshman/domain"
   import {nthEq, displayList, noop, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
-  import {MessagingRelayLists, RelayLists, Relays} from "@welshman/app"
+  import {MessagingRelayLists, RelayLists} from "@welshman/app"
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, userInbox} from "@welshman/util"
-  import {fromApp, profiles, relayLists, resolveRelays} from "src/engine/core"
+  import {fromApp, profiles, relayLists, relaySearch, resolveRelays} from "src/engine/core"
   import {createScroller} from "src/util/misc"
   import {profileHasName} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -27,8 +27,6 @@
   const userMessagingRelayUrls = fromApp(
     $app => $app.use(MessagingRelayLists).urls($app.user?.pubkey ?? "").$,
   )
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()

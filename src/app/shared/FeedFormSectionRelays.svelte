@@ -1,15 +1,12 @@
 <script lang="ts">
   import {identity} from "@welshman/lib"
   import {FeedType} from "@welshman/feeds"
-  import {Relays} from "@welshman/app"
   import {displayRelayUrl} from "@welshman/util"
-  import {fromApp} from "src/engine/core"
+  import {relaySearch} from "src/engine/core"
   import SearchSelect from "src/partials/SearchSelect.svelte"
 
   export let feed
   export let onChange
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 </script>
 
 <span class="staatliches text-lg">Which relays would you like to use?</span>

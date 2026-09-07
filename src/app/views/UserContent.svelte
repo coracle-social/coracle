@@ -1,7 +1,7 @@
 <script lang="ts">
   import {identity, uniq, equals} from "@welshman/lib"
   import {tagSpec, tagValues, userOutbox} from "@welshman/util"
-  import {MuteLists, Topics} from "@welshman/app"
+  import {MuteLists} from "@welshman/app"
   import {appName} from "src/partials/state"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Input from "src/partials/Input.svelte"
@@ -17,9 +17,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {hasNip44, userSettings, publishSettings} from "src/engine"
-  import {deriveUserItem, fromApp, muteLists, resolveRelays} from "src/engine/core"
-
-  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
+  import {deriveUserItem, muteLists, resolveRelays, topicSearch} from "src/engine/core"
 
   const userMuteList = deriveUserItem(MuteLists)
 

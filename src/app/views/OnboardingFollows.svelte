@@ -2,7 +2,6 @@
   import {first, fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
   import {getAddress, hexTags, tagValues, userOutbox} from "@welshman/util"
   import {FollowList} from "@welshman/domain"
-  import {Profiles, Relays} from "@welshman/app"
   import {showWarning} from "src/partials/Toast.svelte"
   import Card from "src/partials/Card.svelte"
   import Input from "src/partials/Input.svelte"
@@ -13,15 +12,19 @@
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {createPeopleLoader, setOutboxPolicies} from "src/engine"
-  import {command, fromApp, profiles, relayLists, resolveRelays, writer} from "src/engine/core"
+  import {
+    command,
+    profileSearch,
+    profiles,
+    relayLists,
+    relaySearch,
+    resolveRelays,
+    writer,
+  } from "src/engine/core"
   import {quantify} from "src/util/misc"
 
   export let state
   export let setStage
-
-  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
   let loading = false
   let listEvent

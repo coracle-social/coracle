@@ -1,8 +1,7 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {uniq} from "@welshman/lib"
-  import {Profiles} from "@welshman/app"
-  import {fromApp} from "src/engine/core"
+  import {profileSearch} from "src/engine/core"
   import {parseAnything} from "src/util/nostr"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -17,8 +16,6 @@
   let input
 
   const {loading, load} = createPeopleLoader()
-
-  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
 
   const search = derived(profileSearch, $profileSearch => {
     return term => {

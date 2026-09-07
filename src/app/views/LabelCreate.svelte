@@ -1,7 +1,6 @@
 <script lang="ts">
   import {identity, noop} from "@welshman/lib"
   import {makeEvent, userOutbox} from "@welshman/util"
-  import {Topics} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -10,14 +9,12 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
-  import {fromApp, pubkey, resolveRelays, thunks} from "src/engine/core"
+  import {pubkey, resolveRelays, thunks, topicSearch} from "src/engine/core"
   import {loadLabels, getClientTags, deriveCollections, collectionSearch} from "src/engine"
 
   export let id
 
   const collections = deriveCollections($pubkey)
-
-  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
   const onTopicChange = name => {
     if (name) {
