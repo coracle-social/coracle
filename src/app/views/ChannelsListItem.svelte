@@ -1,18 +1,25 @@
 <script lang="ts">
   import {derived} from "svelte/store"
-  import {pubkey, profiles, displayProfileByPubkey} from "@welshman/app"
+  import {Profiles} from "@welshman/app"
   import {without, displayList} from "@welshman/lib"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
   import Card from "src/partials/Card.svelte"
   import {router} from "src/app/util/router"
+  import type {Channel} from "src/engine"
   import {channelHasNewMessages} from "src/engine"
+  import {fromApp, pubkey} from "src/engine/core"
 
-  export let channel
+  export let channel: Channel
 
   const pubkeys = channel.id.split(",")
   const members = pubkeys.length === 1 ? pubkeys : without([$pubkey], pubkeys)
-  const membersDisplay = derived(profiles, () => members.map(displayProfileByPubkey))
+  const membersDisplay = fromApp($app =>
+    derived(
+      members.map((pk: string) => $app.use(Profiles).display(pk).$),
+      ($displays: string[]) => $displays,
+    ),
+  )
 
   const enter = () => router.at("channels").of(pubkeys).push()
 

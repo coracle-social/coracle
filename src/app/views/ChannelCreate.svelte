@@ -1,26 +1,33 @@
 <script lang="ts">
   import {derived} from "svelte/store"
   import {displayList, uniq} from "@welshman/lib"
-  import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {pubkey, displayProfileByPubkey, messagingRelayListsByPubkey} from "@welshman/app"
+  import {isShareableRelayUrl} from "@welshman/util"
+  import {MessagingRelayLists, Profiles} from "@welshman/app"
   import Field from "src/partials/Field.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Button from "src/partials/Button.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {router} from "src/app/util/router"
   import {hasNip44} from "src/engine"
+  import {app, pubkey} from "src/engine/core"
   import {pluralize} from "src/util/misc"
 
   let value = []
 
   const submit = () => router.at("channels").of(pubkeys).push()
 
-  $: pubkeys = uniq(value.concat($pubkey))
-  $: pubkeysWithoutMessaging = derived(messagingRelayListsByPubkey, $messagingRelayListsByPubkey =>
-    pubkeys.filter(
-      pubkey =>
-        !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
-    ),
+  $: pubkeys = uniq<string>(value.concat($pubkey))
+  // Read messaging relays off the plugin's projection rather than the reader — the plugin
+  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
+  $: pubkeysWithoutMessaging = derived(
+    pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),
+    ($urls: string[][]) =>
+      pubkeys.filter((pk: string, i: number) => !$urls[i].some(isShareableRelayUrl)),
+  )
+  $: displayByPubkey = derived(
+    pubkeys.map((pk: string) => $app.use(Profiles).display(pk).$),
+    ($displays: string[]) =>
+      new Map<string, string>(pubkeys.map((pk: string, i: number) => [pk, $displays[i]])),
   )
   $: nip44Disabled = pubkeys.length > 2 && !$hasNip44
   $: missingMessaging = pubkeys.length > 2 && $pubkeysWithoutMessaging.length > 0
@@ -43,7 +50,7 @@
     {#if missingMessaging}
       <p class="flex gap-2">
         <i class="fa fa-info-circle p-1" />
-        {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
+        {displayList($pubkeysWithoutMessaging.map(pk => $displayByPubkey.get(pk)))}
         {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
         messaging relays, which means they likely either don't want to receive DMs, or are using a client
         that does not support nostr group chats.

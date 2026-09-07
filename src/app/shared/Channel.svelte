@@ -1,8 +1,8 @@
 <script lang="ts">
   import {sleep, displayList, prop, sortBy, max, last, pluck} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {isShareableRelayUrl, getRelaysFromList} from "@welshman/util"
-  import {session, displayProfileByPubkey, messagingRelayListsByPubkey} from "@welshman/app"
+  import {isShareableRelayUrl} from "@welshman/util"
+  import {MessagingRelayLists, Profiles} from "@welshman/app"
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import {fly} from "src/util/transition"
@@ -15,11 +15,12 @@
   import Modal from "src/partials/Modal.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {hasNip44, sendMessage, userSettings} from "src/engine"
+  import {fromApp, pubkey} from "src/engine/core"
   import {makeEditor} from "src/app/editor"
   import Message from "src/app/shared/Message.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
 
-  export let pubkeys
+  export let pubkeys: string[]
   export let channelId: string
   export let messages: TrustedEvent[]
 
@@ -44,13 +45,22 @@
     confirmIsOpen = false
   }
 
-  const pubkeysWithoutMessaging = derived(
-    messagingRelayListsByPubkey,
-    $messagingRelayListsByPubkey =>
-      pubkeys.filter(
-        pubkey =>
-          !getRelaysFromList($messagingRelayListsByPubkey.get(pubkey)).some(isShareableRelayUrl),
-      ),
+  // Read messaging relays off the plugin's projection rather than the reader — the plugin
+  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
+  const pubkeysWithoutMessaging = fromApp($app =>
+    derived(
+      pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),
+      ($urls: string[][]) =>
+        pubkeys.filter((pk: string, i: number) => !$urls[i].some(isShareableRelayUrl)),
+    ),
+  )
+
+  const displayByPubkey = fromApp($app =>
+    derived(
+      pubkeys.map((pk: string) => $app.use(Profiles).display(pk).$),
+      ($displays: string[]) =>
+        new Map<string, string>(pubkeys.map((pk: string, i: number) => [pk, $displays[i]])),
+    ),
   )
 
   const scrollToBottom = () => element.scrollIntoView({behavior: "smooth", block: "end"})
@@ -82,6 +92,10 @@
   const send = async () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
+    // Sending can now fail before anything is published — it awaits each recipient's messaging
+    // relay list first — so hold on to the draft until we know it got as far as a thunk
+    const draft = editor.getJSON()
+
     editor.commands.clearContent()
 
     if (content) {
@@ -90,7 +104,8 @@
       try {
         await sendMessage(channelId, content, $userSettings.send_delay)
       } catch (e: any) {
-        showWarning(`Failed to send message: ${e.error || "unknown error"}`)
+        editor.commands.setContent(draft)
+        showWarning(`Failed to send message: ${e?.message || e?.error || "unknown error"}`)
       }
 
       sending = false
@@ -110,7 +125,7 @@
   let showNewMessages = false
   let groupedMessages = []
 
-  $: userHasMessaging = !$pubkeysWithoutMessaging.includes($session?.pubkey)
+  $: userHasMessaging = !$pubkeysWithoutMessaging.includes($pubkey)
 
   // Group messages so we're only showing the person once per chunk
   $: {
@@ -218,7 +233,7 @@
     <Subheading>Missing Messaging Relays</Subheading>
     {#if $pubkeysWithoutMessaging.length > 0}
       <p>
-        {displayList($pubkeysWithoutMessaging.map(displayProfileByPubkey))}
+        {displayList($pubkeysWithoutMessaging.map(pk => $displayByPubkey.get(pk)))}
         {pluralize($pubkeysWithoutMessaging.length, "does not have", "do not have")}
         messaging relays, which means they may not be able to receive DMs.
       </p>

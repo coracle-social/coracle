@@ -1,12 +1,14 @@
 <script lang="ts">
-  import {shouldUnwrap} from "@welshman/app"
+  import {noop} from "@welshman/lib"
   import Button from "src/partials/Button.svelte"
-  import {loadMessages, env} from "src/engine"
+  import {loadMessages, shouldUnwrap, env} from "src/engine"
   import {router} from "src/app/util"
 
-  const enableChat = async () => {
+  const enableChat = () => {
     shouldUnwrap.set(true)
-    loadMessages()
+
+    // Nothing awaits this, and loads reject rather than swallowing now
+    loadMessages().catch(noop)
   }
 
   const submit = () => {
