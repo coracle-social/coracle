@@ -1,5 +1,6 @@
 allowBuilds:
   sharp: true
+  cbor-extract: false
   nostr-signer-capacitor-plugin: true
   esbuild: false
   svelte-preprocess: false
