@@ -686,27 +686,6 @@ export const storagePolicy: AppPolicy = $app => {
   }
 }
 
-let registered = false
-
-/**
- * Register the storage policy with the app bootstrap. Importing this module is enough, but the
- * bootstrap can call this to make the dependency explicit; either way it only happens once, and
- * it has to happen before the first app is built.
- */
-export const initStorage = () => {
-  if (registered) return
-
-  registered = true
-
-  // Every identity used to share one database. Nothing migrates out of it, so drop it rather
-  // than leave a dead copy of the old cache on disk.
-  if (typeof indexedDB !== "undefined") {
-    void deleteDB("coracle")
-  }
-
-  appPolicies.push(storagePolicy)
-}
-
 /**
  * Delete every account's cache. Used by logout, which drops all sessions and reloads the page,
  * so leaving the other accounts' databases behind would only orphan them.
@@ -721,4 +700,11 @@ export const clearStorage = async () => {
   await Promise.all(Array.from(names).map(name => deleteDB(name)))
 }
 
-initStorage()
+// Every identity used to share one database. Nothing migrates out of it, so drop it rather than
+// leave a dead copy of the old cache on disk.
+if (typeof indexedDB !== "undefined") {
+  void deleteDB("coracle")
+}
+
+// Importing this module registers the policy, which has to happen before the first app is built
+appPolicies.push(storagePolicy)

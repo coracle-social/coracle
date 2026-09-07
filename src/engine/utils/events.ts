@@ -1,4 +1,4 @@
-import {first, mapVals, nth, nthEq, sortBy, uniq} from "@welshman/lib"
+import {first, nth, nthEq, uniq} from "@welshman/lib"
 import {
   Address,
   COMMENT,
@@ -9,6 +9,7 @@ import {
   matchTags,
   outbox,
   relays,
+  sortEventsDesc,
 } from "@welshman/util"
 import type {RelaySelection, TrustedEvent} from "@welshman/util"
 import {
@@ -19,7 +20,8 @@ import {
 } from "@welshman/domain"
 import type {CommentWriter} from "@welshman/domain"
 
-export const sortEventsDesc = events => sortBy((e: TrustedEvent) => -e.created_at, events)
+// Re-exported because the components that reach for it go through the src/engine barrel
+export {sortEventsDesc}
 
 // Ancestors
 //
@@ -39,28 +41,6 @@ export const getParentIdsAndAddrs = (event: TrustedEvent) => {
 }
 
 export const getParentIdOrAddr = (event: TrustedEvent) => first(getParentIdsAndAddrs(event))
-
-export const getParentIds = (event: TrustedEvent) => {
-  const {roots, replies} = mapVals(
-    (ids: string[]) => ids.filter(id => !Address.isAddress(id)),
-    getAncestors(event),
-  )
-
-  return replies.length > 0 ? replies : roots
-}
-
-export const getParentId = (event: TrustedEvent) => first(getParentIds(event))
-
-export const getParentAddrs = (event: TrustedEvent) => {
-  const {roots, replies} = mapVals(
-    (ids: string[]) => ids.filter(id => Address.isAddress(id)),
-    getAncestors(event),
-  )
-
-  return replies.length > 0 ? replies : roots
-}
-
-export const getParentAddr = (event: TrustedEvent) => first(getParentAddrs(event))
 
 export const isChildOf = (child: TrustedEvent, parent: TrustedEvent) => {
   const idsAndAddrs = getParentIdsAndAddrs(child)

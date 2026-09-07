@@ -1,5 +1,5 @@
 import {debounce} from "throttle-debounce"
-import {get, writable, derived} from "svelte/store"
+import {writable, derived} from "svelte/store"
 import {
   without,
   assoc,
@@ -13,8 +13,7 @@ import {
   noop,
   sleep,
 } from "@welshman/lib"
-import type {Feed} from "@welshman/feeds"
-import type {AppSyncOpts} from "@welshman/app"
+import type {AppSyncOpts, User} from "@welshman/app"
 import {deriveEvents} from "@welshman/store"
 import {
   Address,
@@ -40,7 +39,6 @@ import type {Filter, RelaySelection, TrustedEvent} from "@welshman/util"
 import {
   app,
   appConfig,
-  feeds,
   followLists,
   fromApp,
   muteLists,
@@ -49,6 +47,7 @@ import {
   relays,
   resolveRelays,
   sync,
+  userRelays,
 } from "src/engine/core"
 import {env} from "src/engine/env"
 import {shouldUnwrap} from "src/engine/state"
@@ -56,6 +55,16 @@ import {noteKinds, reactionKinds, repostKinds, RELAY_FEEDS} from "src/util/nostr
 import {CUSTOM_LIST_KINDS} from "src/domain"
 
 // Utils
+
+// A load that only makes sense signed in: its relay selections all resolve through the user, so
+// there's nothing to ask for and nowhere to ask when nobody is.
+const withUser =
+  <T>(fn: ($user: User) => Promise<T>) =>
+  async () => {
+    const $user = app.get().user
+
+    return $user ? fn($user) : undefined
+  }
 
 export const addSinceToFilter = (filter: Filter, overlap = int(HOUR)) => {
   const limit = 50
@@ -98,29 +107,6 @@ export const pullConservatively = async ({relays: urls, filters}: AppSyncOpts) =
   }
 
   return Promise.all(promises)
-}
-
-export const loadAll = (feed: Feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) => {
-  const loading = writable(true)
-
-  const onExhausted = () => loading.set(false)
-
-  // Every FeedController loader calls onExhausted once each of its sub-feeds has stopped
-  // producing events, which is what ends the loop. Clear `loading` on failure too, or a
-  // rejected load would leave the caller waiting on a spinner forever.
-  const promise = (async () => {
-    const ctrl = feeds.get().makeFeedController({feed, onEvent, onExhausted})
-
-    try {
-      while (get(loading)) {
-        await ctrl.load(100)
-      }
-    } finally {
-      onExhausted()
-    }
-  })()
-
-  return {promise, loading, stop: onExhausted}
 }
 
 export type DeriveEventOptions = {
@@ -232,88 +218,58 @@ export const getNotificationKinds = () =>
     POLL_RESPONSE,
   ])
 
-export const loadNotifications = async () => {
-  const $user = app.get().user
-
-  // userInbox() resolves through User.require, which throws when signed out
-  if (!$user) {
-    return
-  }
-
+export const loadNotifications = withUser(async $user => {
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
 
   return pullConservatively({
     relays: await resolveRelays([userInbox()]),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
-}
+})
 
-export const listenForNotifications = async () => {
-  const $user = app.get().user
-
-  if (!$user) {
-    return
-  }
-
+export const listenForNotifications = withUser(async $user => {
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
   const urls = await resolveRelays([userInbox()])
 
   // Left open on purpose; the Network plugin aborts it when the app is torn down
   network.get().request({relays: urls, filters: [addSinceToFilter(filter)]})
-}
+})
 
 // Other user data
 
 export const loadLabels = async (authors: string[]) =>
   network.get().load({
-    relays: await resolveRelays(
-      authors.map(author => outbox(author)),
-      {},
-    ),
+    relays: await resolveRelays(authors.map(author => outbox(author))),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
-export const loadDeletes = async () => {
-  const $user = app.get().user
-
-  if (!$user) {
-    return
-  }
-
-  return network.get().load({
-    relays: await resolveRelays([userOutbox()]),
+export const loadDeletes = withUser(async $user =>
+  network.get().load({
+    relays: await userRelays(),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
-  })
-}
+  }),
+)
 
-export const loadFeedsAndLists = async () => {
-  const $user = app.get().user
-
-  if (!$user) {
-    return
-  }
-
-  return network.get().load({
-    relays: await resolveRelays([userOutbox()]),
+export const loadFeedsAndLists = withUser(async $user =>
+  network.get().load({
+    relays: await userRelays(),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
         authors: [$user.pubkey],
       }),
     ],
-  })
-}
+  }),
+)
 
-export const loadMessages = async () => {
-  const $user = app.get().user
-
-  if (!$user || !shouldUnwrap.get()) {
+export const loadMessages = withUser(async $user => {
+  if (!shouldUnwrap.get()) {
     return
   }
 
   const [inboxUrls, outboxUrls, messagingUrls] = await Promise.all([
     resolveRelays([userInbox()]),
-    resolveRelays([userOutbox()]),
+    userRelays(),
     resolveRelays([userMessaging()]),
   ])
 
@@ -331,7 +287,7 @@ export const loadMessages = async () => {
       filters: [{kinds: [WRAP], "#p": [$user.pubkey]}],
     }),
   ])
-}
+})
 
 // Stays synchronous so callers can unsubscribe on destroy; relay selection resolves in the
 // background, and a request whose signal already aborted never opens a socket.
