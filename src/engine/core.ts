@@ -4,8 +4,8 @@ import {always, noop} from "@welshman/lib"
 import type {Maybe} from "@welshman/lib"
 import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
-import {Resolver, addNoFallbacks} from "@welshman/util"
-import type {RelaySelection} from "@welshman/util"
+import {Resolver, addNoFallbacks, userOutbox} from "@welshman/util"
+import type {Filter, RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
 import type {ISigner} from "@welshman/signer"
 import {
@@ -30,7 +30,6 @@ import {
   RelayStats,
   Relays,
   Router,
-  SearchRelayLists,
   Sync,
   Thunks,
   Topics,
@@ -143,6 +142,9 @@ export const app: ReadableWithGetter<App> = {
 export const fromApp = <T>(read: ($app: App) => Readable<T>): Readable<T> =>
   derived(app, ($app, set: (value: T) => void) => read($app).subscribe(set))
 
+// Every event query in coracle is this shape, bound to whichever app is current.
+export const deriveEvents = (filters: Filter[]) => fromApp($app => $app.use(Events).all(filters).$)
+
 // A plugin bound to the current app, so `$profiles` in a component and `profiles.get()` in a module
 // both stay pointed at the right one after a switch.
 export const usePlugin = <T>(Ctor: Plugin<T>) => withGetter(derived(app, $app => $app.use(Ctor)))
@@ -163,7 +165,6 @@ export const deriveUserItem = <T>(Ctor: Plugin<DerivedPlugin<T>>): Readable<Mayb
     })
   })
 
-export const blockedRelayLists = usePlugin(BlockedRelayLists)
 export const blossomServerLists = usePlugin(BlossomServerLists)
 export const deletes = usePlugin(Deletes)
 export const domain = usePlugin(Domain)
@@ -183,13 +184,16 @@ export const relayLists = usePlugin(RelayLists)
 export const relayStats = usePlugin(RelayStats)
 export const relays = usePlugin(Relays)
 export const router = usePlugin(Router)
-export const searchRelayLists = usePlugin(SearchRelayLists)
 export const sync = usePlugin(Sync)
 export const thunks = usePlugin(Thunks)
 export const topics = usePlugin(Topics)
 export const wot = usePlugin(Wot)
 export const wraps = usePlugin(Wraps)
 export const zappers = usePlugin(Zappers)
+
+// A pubkey's write relays as of right now. Relay resolution is asynchronous, so callers that need
+// relays in a synchronous initializer seed with these and widen once a resolve settles.
+export const getWriteRelays = (pubkey: string) => relayLists.get().writeUrls(pubkey).get()
 
 // The searches each live on the plugin that owns the collection they index
 export const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
@@ -222,6 +226,11 @@ export const resolveRelays = async (selections: RelaySelection[], {limit}: {limi
     .policy(addNoFallbacks)
     .getUrls()
 
+// A writer resolves its own publish relays at limit 3, which sends a brand new user's lists
+// nowhere at all. Coracle has always published its own data to the user's write relays, so
+// re-resolve rather than take what the writer worked out.
+export const userRelays = () => resolveRelays([userOutbox()])
+
 // Sessions
 
 // Coracle lets you view the app as someone else without holding their key. Welshman has no
@@ -247,8 +256,6 @@ export const readOnly = defineSessionHandler({
 })
 
 registerSessionHandler(readOnly)
-
-export const isReadOnlySession = ($session: Maybe<Session>) => $session?.method === readOnly.method
 
 // Keyed by pubkey so the account switcher can rebuild an app for any logged-in account. A session
 // is welshman's serializable {method, data}; coracle's own per-account metadata rides alongside it.

@@ -1,5 +1,4 @@
 import {nwc} from "@getalby/sdk"
-import {get} from "svelte/store"
 import {append, first, nthNe, remove, sha256, uniq} from "@welshman/lib"
 import {User, publish} from "@welshman/app"
 import type {Command} from "@welshman/app"
@@ -32,7 +31,6 @@ import {
   userOutbox,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import type {SessionWithMeta} from "src/engine/model"
 import {
   app,
   command,
@@ -44,45 +42,18 @@ import {
   reader,
   relayLists,
   resolveRelays,
-  session,
   thunks,
+  userRelays,
   wraps,
   writer,
 } from "src/engine/core"
 import {env} from "src/engine/env"
-import {anonymous, getClientTags, sign} from "src/engine/state"
+import {anonymous, getClientTags, sessionWithMeta, sign} from "src/engine/state"
 import {userListKind} from "src/domain"
 import {stripExifData} from "src/util/html"
 import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 
 // Helpers
-
-export const updateRecord = (record, timestamp, updates) => {
-  for (const [field, value] of Object.entries(updates)) {
-    const tsField = `${field}_updated_at`
-    const lastUpdated = record?.[tsField] || -1
-
-    if (timestamp > lastUpdated) {
-      record = {
-        ...record,
-        [field]: value,
-        [tsField]: timestamp,
-        updated_at: Math.max(timestamp, record?.updated_at || 0),
-      }
-    }
-  }
-
-  return record
-}
-
-export const updateStore = (store, timestamp, updates) =>
-  store.set(updateRecord(store.get(), timestamp, updates))
-
-// A writer resolves its own publish relays at limit 3 with no fallbacks, which sends a brand new
-// user's lists nowhere at all. Coracle has always published its own data to the user's write
-// relays, topping the selection up with defaults, so re-resolve rather than take what the writer
-// worked out.
-const userRelays = () => resolveRelays([userOutbox()])
 
 export const publishToUserRelays = async (eventCommand: Command) =>
   eventCommand.publishToRelays(await userRelays())
@@ -406,7 +377,7 @@ export const getWebLn = () => (window as any).webln
 
 export const payInvoice = async (invoice: string) => {
   // Wallet configuration is coracle's own per-account metadata, stored alongside the session.
-  const {wallet} = (get(session) || {}) as SessionWithMeta
+  const wallet = sessionWithMeta.get()?.wallet
 
   if (!wallet) {
     return alert(invoice)

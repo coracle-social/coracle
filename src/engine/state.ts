@@ -13,7 +13,6 @@ import {
   noop,
   now,
   on,
-  prop,
   pushToMapKey,
   remove,
   simpleCache,
@@ -40,12 +39,12 @@ import {
   synced,
   withGetter,
 } from "@welshman/store"
-import type {EventTemplate, SignedEvent, TrustedEvent, HashedEvent} from "@welshman/util"
+import type {SignedEvent, TrustedEvent, HashedEvent} from "@welshman/util"
 import {
   APP_DATA,
+  DEPRECATED_DIRECT_MESSAGE,
   DIRECT_MESSAGE,
   FEED,
-  FEEDS,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
@@ -66,7 +65,6 @@ import {AppData} from "@welshman/domain"
 import type {AppPolicy, IApp} from "@welshman/app"
 import {
   Domain,
-  Events,
   FeedLists,
   FollowLists,
   MuteLists,
@@ -101,6 +99,7 @@ import {
   app,
   appConfig,
   appPolicies,
+  deriveEvents,
   deriveUserItem,
   fromApp,
   network,
@@ -206,7 +205,7 @@ export const defaultSettings = {
   platform_zap_split: env.PLATFORM_ZAP_SPLIT,
 }
 
-export const settingsEvents = fromApp($app => $app.use(Events).all([{kinds: [APP_DATA]}]).$)
+export const settingsEvents = deriveEvents([{kinds: [APP_DATA]}])
 
 export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $settingsEvents]) =>
   $settingsEvents.find(e => e.pubkey === $pubkey && getIdentifier(e) === appDataKeys.USER_SETTINGS),
@@ -302,12 +301,6 @@ export const dufflepud = (path: string) => {
 
 // User follows/mutes/network
 
-// Scored against the user's own follows, which is what the old getUserWotScore approximated —
-// WotScope.Global would silently re-rank everything that reads a score.
-const getMaxWot = () => max(Array.from(app.get().use(Wot).scores(WotScope.Follows).get().values()))
-
-export const getMinWot = () => getSetting("min_wot_score") / getMaxWot()
-
 export const userFollowList: Readable<Maybe<FollowListReader>> = deriveUserItem(FollowLists)
 
 export const userFollows = withGetter(
@@ -316,18 +309,6 @@ export const userFollows = withGetter(
       ? new Set($followList?.pubkeys() || [])
       : new Set(tagValues(hexTags("p"), $anon.follows)),
   ),
-)
-
-export const userNetwork: Readable<string[]> = derived(
-  [app, pubkey],
-  ([$app, $pubkey], set: (value: string[]) => void) => {
-    if (!$pubkey) {
-      return set([])
-    }
-
-    return $app.use(Wot).network($pubkey).$.subscribe(set)
-  },
-  [],
 )
 
 const userMuteList = deriveUserItem(MuteLists)
@@ -353,8 +334,6 @@ const userPinList = deriveUserItem(PinLists)
 
 export const userPins = derived(userPinList, l => new Set(l?.ids() || []))
 
-const profilesByPubkey = fromApp($app => $app.use(Profiles).index.$)
-
 export const isEventMuted = withGetter(
   derived(
     [
@@ -365,7 +344,6 @@ export const isEventMuted = withGetter(
       userMutedTopics,
       userFollows,
       userSettings,
-      profilesByPubkey,
       pubkey,
     ],
     ([
@@ -376,7 +354,6 @@ export const isEventMuted = withGetter(
       $userMutedTopics,
       $userFollows,
       $userSettings,
-      $profilesByPubkey,
       $pubkey,
     ]) => {
       const words = [...$userSettings.muted_words, ...$userMutedWords]
@@ -410,7 +387,7 @@ export const isEventMuted = withGetter(
           if (regex) {
             if (e.content?.toLowerCase().match(regex)) return true
             if ($app.use(Profiles).display(e.pubkey).get().toLowerCase().match(regex)) return true
-            if (tryCatch(() => $profilesByPubkey.get(e.pubkey)?.nip05()?.match(regex))) return true
+            if (tryCatch(() => $app.use(Profiles).get(e.pubkey)?.nip05()?.match(regex))) return true
           }
 
           if (strict || $userFollows.has(e.pubkey)) return false
@@ -436,8 +413,6 @@ export const checked = synced<Record<string, number>>({
   storage: localStorageProvider,
 })
 
-export const deriveChecked = (key: string) => derived(checked, prop(key))
-
 export const getSeenAt = derived([checked], ([$checked]) => (path: string, event: TrustedEvent) => {
   const ts = max([$checked[path], $checked[path.split("/")[0] + "/*"], $checked["*"]])
 
@@ -453,7 +428,7 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...tagValues(hexTags("p"), event.tags)])
 
-export const messages = fromApp($app => $app.use(Events).all([{kinds: [4, DIRECT_MESSAGE]}]).$)
+export const messages = deriveEvents([{kinds: [DEPRECATED_DIRECT_MESSAGE, DIRECT_MESSAGE]}])
 
 export const channels = derived(
   [pubkey, messages, getSeenAt],
@@ -499,14 +474,6 @@ export const channelHasNewMessages = (channel: Channel) =>
   channel.last_received > Math.max(channel.last_sent, channel.last_checked)
 
 export const hasNewMessages = derived(channels, $channels => $channels.some(channelHasNewMessages))
-
-export const forceRelays = (relays: string[], forceRelays: string[]) =>
-  forceRelays.length > 0 ? forceRelays : relays
-
-export const withRelays = (relays: string[], otherRelays: string[]) =>
-  uniq([...relays, ...otherRelays])
-
-export const withIndexers = (relays: string[]) => withRelays(relays, env.INDEXER_RELAYS)
 
 // Lists
 
@@ -559,8 +526,6 @@ export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $us
 
   return makeFeed({definition})
 })
-
-export const feedFavoriteEvents = fromApp($app => $app.use(Events).all([{kinds: [FEEDS]}]).$)
 
 export const feedFavorites = fromApp($app => $app.use(FeedLists).all.$)
 
@@ -638,8 +603,6 @@ export const userListFeeds = derived(
     ),
 )
 
-export const relayFeedEvents = fromApp($app => $app.use(Events).all([{kinds: [RELAY_FEEDS]}]).$)
-
 // Kind 10012 isn't modeled by @welshman/domain, so it goes through coracle's generic list reader
 const relayFeedListsByPubkey = fromApp($app =>
   deriveItemsByKey<UserListReader>({
@@ -664,18 +627,15 @@ export const userRelayFeeds = derived(userRelayFeedsList, $list =>
 
 // Handlers
 
-export const handlers = derived(
-  fromApp($app => $app.use(Events).all([{kinds: [HANDLER_INFORMATION]}]).$),
-  $events => $events.flatMap(readHandlers),
+export const handlers = derived(deriveEvents([{kinds: [HANDLER_INFORMATION]}]), $events =>
+  $events.flatMap(readHandlers),
 )
 
 export const handlersByKind = derived(handlers, $handlers =>
   groupBy(handler => handler.kind, $handlers),
 )
 
-export const recommendations = fromApp(
-  $app => $app.use(Events).all([{kinds: [HANDLER_RECOMMENDATION]}]).$,
-)
+export const recommendations = deriveEvents([{kinds: [HANDLER_RECOMMENDATION]}])
 
 // Who the user trusts to recommend a handler. Scoped to their own follows, matching the old
 // getFollows(pubkey) call this replaces.
@@ -737,18 +697,12 @@ export const deriveHandlerEvent = simpleCache(([address]: [string]) => {
 
   myLoad({relays: env.DEFAULT_RELAYS, filters}).catch(noop)
 
-  return derived(
-    fromApp($app => $app.use(Events).all(filters).$),
-    first,
-  )
+  return derived(deriveEvents(filters), first)
 })
 
 // Collections
 
-export const collections = derived(
-  fromApp($app => $app.use(Events).all([{kinds: [LABEL], "#L": ["#t"]}]).$),
-  readCollections,
-)
+export const collections = derived(deriveEvents([{kinds: [LABEL], "#L": ["#t"]}]), readCollections)
 
 export const deriveCollections = pubkey =>
   derived(collections, $collections =>
@@ -769,21 +723,13 @@ export type MyRequestOptions = RequestOptions & {
   skipCache?: boolean
 }
 
-export const myRequest = ({skipCache, ...options}: MyRequestOptions) => {
-  if (!skipCache) {
-    options.relays = [...options.relays, LOCAL_RELAY_URL]
-  }
+// Coracle reads its own cache alongside the network unless the caller opts out
+const withCache = ({skipCache, ...options}: MyRequestOptions): RequestOptions =>
+  skipCache ? options : {...options, relays: [...options.relays, LOCAL_RELAY_URL]}
 
-  return network.get().request(options)
-}
+export const myRequest = (options: MyRequestOptions) => network.get().request(withCache(options))
 
-export const myLoad = ({skipCache, ...options}: MyRequestOptions) => {
-  if (!skipCache) {
-    options.relays = [...options.relays, LOCAL_RELAY_URL]
-  }
-
-  return network.get().load(options)
-}
+export const myLoad = (options: MyRequestOptions) => network.get().load(withCache(options))
 
 export const sign = (
   template,
@@ -815,25 +761,27 @@ export const getClientTags = () => {
   return [tag]
 }
 
-export const addClientTags = <T extends Partial<EventTemplate>>({tags = [], ...event}: T) => ({
-  ...event,
-  tags: tags.filter(t => t[0] !== "client").concat(getClientTags()),
-})
-
 // Bootstrap
 
 const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
 
+// An OK arrives for every event published, so keep only enough history per relay to be useful
+const maxNoticesPerRelay = 100
+
 /**
  * Record every relay message worth showing the user in the relay detail view. Sockets belong to
- * the app's pool, so this is registered as an app policy and rebuilt along with the app.
+ * the app's pool, so this is registered as an app policy and rebuilt along with the app — which
+ * also means the notices are one account's, and go away with it.
  */
-const appPolicyNotices: AppPolicy = $app =>
-  $app.pool.subscribe(socket => {
+const appPolicyNotices: AppPolicy = $app => {
+  const unsubscribe = $app.pool.subscribe(socket => {
     const onReceive = (message: RelayMessage, url: string) => {
       if (noticeVerbs.includes(message[0])) {
         subscriptionNotices.update($notices => {
-          pushToMapKey($notices, url, {url, created_at: now(), notice: message})
+          const notices = $notices.get(url) || []
+          const notice = {url, created_at: now(), notice: message}
+
+          $notices.set(url, [...notices, notice].slice(-maxNoticesPerRelay))
 
           return $notices
         })
@@ -844,6 +792,12 @@ const appPolicyNotices: AppPolicy = $app =>
 
     return () => socket.off(SocketEvent.Receive, onReceive)
   })
+
+  return () => {
+    unsubscribe()
+    subscriptionNotices.set(new Map())
+  }
+}
 
 appPolicies.push(appPolicyNotices)
 
