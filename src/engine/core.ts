@@ -4,7 +4,7 @@ import {always, noop} from "@welshman/lib"
 import type {Maybe} from "@welshman/lib"
 import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
-import {addNoFallbacks} from "@welshman/util"
+import {Resolver, addNoFallbacks} from "@welshman/util"
 import type {RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
 import type {ISigner} from "@welshman/signer"
@@ -72,6 +72,26 @@ const appPolicyAuth = makeAppPolicyAuth((socket, app) => {
   return !app.use(BlockedRelayLists).urls(app.user.pubkey).get().includes(socket.url)
 })
 
+// Welshman's router resolves userInbox/userOutbox/userMessaging through User.require, which throws
+// when nobody is signed in — so a single user-scoped selection rejects the whole resolution, and
+// every feed comes up empty for a logged-out visitor. The routes one layer down already treat a
+// missing pubkey as "no relays", so degrade these the same way rather than throwing.
+const appPolicyAnonymousRoutes: AppPolicy = app => {
+  const router = app.use(Router)
+  const resolveRoute = router.resolveRoute
+
+  router.resolveRoute = route =>
+    !app.user && route.type.startsWith("user") ? [] : resolveRoute(route)
+
+  // The resolver captured the original at construction, so it has to be rebuilt to see the guard
+  router.resolver = new Resolver(router.resolveRoute, {
+    getRelayQuality: url => app.use(RelayStats).getQuality(url),
+    getDefaultRelays: app.config.getDefaultRelays,
+  })
+
+  return noop
+}
+
 // Policy modules can't be imported here (they import this one), so they push themselves in and the
 // first app is built lazily, once every module has had a chance to register.
 export const appPolicies: AppPolicy[] = [
@@ -81,6 +101,7 @@ export const appPolicies: AppPolicy[] = [
   appPolicyCacheDecrypt,
   appPolicyLogSignerMethods,
   appPolicyAuth,
+  appPolicyAnonymousRoutes,
 ]
 
 const makeApp = (user?: User) =>
