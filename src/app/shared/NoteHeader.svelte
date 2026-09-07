@@ -1,18 +1,10 @@
 <script lang="ts">
-  import {formatTimestamp, nth, uniq} from "@welshman/lib"
-  import {
-    getIdOrAddress,
-    hexTags,
-    isRelayUrl,
-    matchTags,
-    outbox,
-    relays as relaySelections,
-    type TrustedEvent,
-  } from "@welshman/util"
+  import {formatTimestamp} from "@welshman/lib"
+  import {getIdOrAddress, type TrustedEvent} from "@welshman/util"
   import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
-  import {getAncestors, getAncestorTags} from "src/engine"
+  import {getAncestorRelaySelections, getAncestors} from "src/engine"
   import {relayLists, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util"
 
@@ -29,25 +21,8 @@
 
   const showPerson = () => router.at("people").of(event.pubkey).open()
 
-  // Router.EventParents/EventRoots are gone. Both routed to the write relays of whoever authored
-  // the ancestor (weighted heavily), then to those of anyone mentioned, then to the relay hints
-  // carried on either set of tags.
-  const ancestorRelays = (ancestorTags: string[][]) => {
-    const mentions = matchTags(hexTags("p"), event.tags)
-    const authors = ancestorTags.map(nth(3)).filter(pubkey => pubkey?.length === 64)
-    const hints = uniq(
-      [...ancestorTags, ...mentions].map(nth(2)).filter(url => url && isRelayUrl(url)),
-    )
-
-    return resolveRelays(
-      [
-        ...authors.map(pubkey => outbox(pubkey, 10)),
-        ...mentions.map(nth(1)).map(pubkey => outbox(pubkey)),
-        ...relaySelections(hints),
-      ],
-      {limit: 10},
-    )
-  }
+  const ancestorRelays = (scope: "roots" | "replies") =>
+    resolveRelays(getAncestorRelaySelections(event, scope), {limit: 10})
 
   const goToDetail = () =>
     router
@@ -60,13 +35,13 @@
   const goToParent = async () =>
     router
       .at("notes")
-      .of(reply, {relays: await ancestorRelays(getAncestorTags(event).replies)})
+      .of(reply, {relays: await ancestorRelays("replies")})
       .open()
 
   const goToThread = async () =>
     router
       .at("notes")
-      .of(getIdOrAddress(event), {relays: await ancestorRelays(getAncestorTags(event).roots)})
+      .of(getIdOrAddress(event), {relays: await ancestorRelays("roots")})
       .at("thread")
       .open()
 </script>
