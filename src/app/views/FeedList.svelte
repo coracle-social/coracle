@@ -1,17 +1,18 @@
 <script lang="ts">
-  import {sortBy, uniq, flatten, batch, uniqBy} from "@welshman/lib"
-  import {Router} from "@welshman/router"
+  import {noop, sortBy, uniq, flatten, batch, uniqBy} from "@welshman/lib"
   import {
     FEED,
     FEEDS,
     NAMED_BOOKMARKS,
+    addressTags,
     getAddress,
-    getAddressTagValues,
     getIdFilters,
+    outbox,
+    tagValues,
     Address,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {app, resolveRelays} from "src/engine/core"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -39,20 +40,19 @@
   const editFeed = address => router.at("feeds").of(address).open()
 
   const loadFeeds = batch(300, (addresseses: string[][]) => {
-    const addresses = flatten(addresseses).filter(a => !repository.getEvent(a))
+    const addresses = flatten(addresseses).filter(a => !$app.repository.getEvent(a))
     const pubkeys = uniq(addresses.map(a => Address.from(a).pubkey))
 
     if (addresses.length > 0) {
-      myLoad({
-        skipCache: true,
-        filters: getIdFilters(addresses),
-        relays: Router.get().FromPubkeys(pubkeys).getUrls(),
-      })
+      // Relay selection is asynchronous now, so this fires a tick after the batch flushes
+      resolveRelays(pubkeys.map(pk => outbox(pk)))
+        .then(relays => myLoad({skipCache: true, filters: getIdFilters(addresses), relays}))
+        .catch(noop)
     }
   })
 
   const onRepositoryUpdate = ({added}: {added: TrustedEvent[]}) =>
-    loadFeeds(added.filter(e => e.kind === FEEDS).flatMap(e => getAddressTagValues(e.tags)))
+    loadFeeds(added.filter(e => e.kind === FEEDS).flatMap(e => tagValues(addressTags("a"), e.tags)))
 
   const loadMore = async () => {
     limit += 20
@@ -73,21 +73,25 @@
     .filter(address => !initialAddrs.has(address))
     .slice(0, limit)
 
-  myLoad({
-    skipCache: true,
-    relays: Router.get().FromPubkeys(authors).getUrls(),
-    filters: [addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors})],
-  })
+  resolveRelays(authors.map(pk => outbox(pk)))
+    .then(relays =>
+      myLoad({
+        skipCache: true,
+        relays,
+        filters: [addSinceToFilter({kinds: [FEED, FEEDS, NAMED_BOOKMARKS], authors})],
+      }),
+    )
+    .catch(noop)
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
     initialAddrs = new Set(feeds.map(feed => getAddress(feed.event)))
-    repository.on("update", onRepositoryUpdate)
+    $app.repository.on("update", onRepositoryUpdate)
 
     return () => {
       scroller.stop()
-      repository.off("update", onRepositoryUpdate)
+      $app.repository.off("update", onRepositoryUpdate)
     }
   })
 </script>

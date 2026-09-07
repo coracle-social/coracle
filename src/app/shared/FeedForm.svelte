@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {getAddress} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {pubkey, signer, displayProfileByPubkey, publishThunk} from "@welshman/app"
+  import {spec} from "@welshman/lib"
+  import {getAddress, userOutbox} from "@welshman/util"
+  import {feeds, profiles, pubkey, resolveRelays, signer} from "src/engine/core"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -12,7 +12,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Button from "src/partials/Button.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
-  import {makeFeed, createFeed, editFeed, displayFeed} from "src/domain"
+  import {makeFeed, displayFeed} from "src/domain"
   import {deleteEvent, removeFeedFavorite} from "src/engine"
 
   export let feed
@@ -69,16 +69,32 @@
   }
 
   const saveFeed = async () => {
-    const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
-    const event = draft.event ? editFeed(draft) : createFeed(draft)
-    const thunk = await publishThunk({event, relays})
+    const {title, description, definition} = draft
+    // A draft that carries a list is a kind 30003 being converted into a kind 31890, so it takes
+    // the create path even though it has an event
+    const eventCommand =
+      draft.event && !draft.list
+        ? await $feeds.update(getAddress(draft.event), writer =>
+            // FeedWriter doesn't model nip 31's alt tag, so drop the one older coracle versions
+            // wrote rather than leaving it contradicting a renamed feed
+            writer
+              .setTitle(title)
+              .setDescription(description)
+              .setDefinition(definition)
+              .dropTags(spec(["alt"])),
+          )
+        : await $feeds.create({title, description, definition})
+
+    // The writer routes a feed to the user's write relays; re-resolve so the selection uses
+    // coracle's relay limit rather than the writer's default of three
+    const thunk = eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
 
     showInfo("Your feed has been saved!")
 
     if (draft.list) {
       openListDelete()
     } else {
-      exit(thunk.options.event)
+      exit(thunk.event)
     }
   }
 
@@ -106,9 +122,9 @@
         <p>You are currently editing "{displayFeed(draft)}" feed.</p>
       {:else}
         <p>
-          You are currently cloning "{displayFeed(feed)}" by @{displayProfileByPubkey(
-            event.pubkey,
-          )}.
+          You are currently cloning "{displayFeed(feed)}" by @{$profiles
+            .display(event.pubkey)
+            .get()}.
         </p>
       {/if}
       <Button class="whitespace-nowrap text-neutral-400 underline" on:click={startClone}>

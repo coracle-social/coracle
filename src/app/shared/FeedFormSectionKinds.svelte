@@ -83,7 +83,7 @@
     TOPICS,
     WIKI,
     ZAP_GOAL,
-    ZAP_RESPONSE,
+    ZAP_RECEIPT,
   } from "@welshman/util"
   import {FeedType} from "@welshman/feeds"
   import SearchSelect from "src/partials/SearchSelect.svelte"
@@ -185,7 +185,7 @@
     {label: "Topic List", kind: TOPICS},
     {label: "Wiki Article", kind: WIKI},
     {label: "Zap Goal", kind: ZAP_GOAL},
-    {label: "Zap", kind: ZAP_RESPONSE},
+    {label: "Zap", kind: ZAP_RECEIPT},
   ])
 </script>
 

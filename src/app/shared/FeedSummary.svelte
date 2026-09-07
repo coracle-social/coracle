@@ -17,7 +17,7 @@
     getFeedArgs,
   } from "@welshman/feeds"
   import {displayRelayUrl} from "@welshman/util"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {profiles} from "src/engine/core"
   import {pluralize, quantify} from "src/util/misc"
   import Chip from "src/partials/Chip.svelte"
 
@@ -25,7 +25,7 @@
   export let shallow = false
 
   const displayPeople = pubkeys =>
-    pubkeys.length === 1 ? displayProfileByPubkey(pubkeys[0]) : `${pubkeys.length} people`
+    pubkeys.length === 1 ? $profiles.display(pubkeys[0]).get() : `${pubkeys.length} people`
 
   const displayTopics = topics =>
     topics.length === 1 ? `#${topics[0]}` : `${topics.length} topics`

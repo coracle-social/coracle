@@ -1,7 +1,7 @@
 <script lang="ts">
   import {debounce} from "throttle-debounce"
   import {isSearchFeed, makeSearchFeed, getFeedArgs} from "@welshman/feeds"
-  import {signer} from "@welshman/app"
+  import {signer} from "src/engine/core"
   import {toSpliced} from "src/util/misc"
   import {boolCtrl} from "src/partials/utils"
   import Card from "src/partials/Card.svelte"

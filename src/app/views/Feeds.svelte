@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {pubkey} from "@welshman/app"
+  import {pubkey} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import Feed from "src/app/shared/Feed.svelte"
   import {router} from "src/app/util/router"

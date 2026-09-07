@@ -1,10 +1,13 @@
 <script lang="ts">
   import {remove, first, spec} from "@welshman/lib"
-  import {deriveEvents} from "@welshman/store"
-  import {getIdOrAddress, getIdFilters, getReplyFilters, isChildOf} from "@welshman/util"
+  import {
+    getIdOrAddress,
+    getIdFilters,
+    getReplyFilters,
+    relays as relaySelections,
+  } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {repository} from "@welshman/app"
+  import {Events} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
@@ -16,11 +19,13 @@
   import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {getSetting, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
+  import {app, fromApp, resolveRelays} from "src/engine/core"
+  import {getSetting, isChildOf, isEventMuted, sortEventsDesc, myRequest} from "src/engine"
 
   export let note
   export let relays = []
-  export let getContext = (event: TrustedEvent) => repository.query(getReplyFilters([event]))
+  export let getContext = (event: TrustedEvent) =>
+    app.get().repository.query(getReplyFilters([event]))
   export let depth = 0
   export let anchor = null
   export let pinned = false
@@ -52,7 +57,7 @@
 
   const replies = derived(
     [
-      deriveEvents({repository, filters: getReplyFilters([event], {kinds: replyKinds})}),
+      fromApp($app => $app.use(Events).all(getReplyFilters([event], {kinds: replyKinds})).$),
       isEventMuted,
     ],
     ([$events, $isEventMuted]) =>
@@ -93,13 +98,16 @@
 
   onMount(async () => {
     if (!event.pubkey) {
-      event = first(
-        await myRequest({
-          autoClose: true,
-          relays: Router.get().FromRelays(relays).policy(addMaximalFallbacks).getUrls(),
-          filters: getIdFilters([event.id]),
-        }),
-      )
+      // Selections no longer fall back to default relays, so this can resolve to nothing but the
+      // local cache. Keep the stub when it does, rather than blowing up on the read below.
+      event =
+        first(
+          await myRequest({
+            autoClose: true,
+            relays: await resolveRelays(relaySelections(relays)),
+            filters: getIdFilters([event.id]),
+          }),
+        ) || event
     }
 
     if (event.pubkey) {

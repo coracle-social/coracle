@@ -1,7 +1,8 @@
 <script lang="ts">
+  import {first} from "@welshman/lib"
   import {NAMED_PEOPLE, NAMED_RELAYS, NAMED_TOPICS, getAddress} from "@welshman/util"
-  import {tagPubkey} from "@welshman/app"
   import {isAuthorFeed, isRelayFeed, makeListFeed} from "@welshman/feeds"
+  import {profiles, relayLists} from "src/engine/core"
   import Card from "src/partials/Card.svelte"
   import Button from "src/partials/Button.svelte"
   import Popover2 from "src/partials/Popover2.svelte"
@@ -10,6 +11,15 @@
 
   export let feed
   export let onChange
+
+  // Welshman deleted tagPubkey, so build the list entry here — an outbox hint read from cache and
+  // the profile's display name as a petname, the way coracle has always written them.
+  const makePersonTag = (pubkey: string) => [
+    "p",
+    pubkey,
+    first($relayLists.writeUrls(pubkey).get()) || "",
+    $profiles.display(pubkey).get(),
+  ]
 
   const openForm = () => {
     formIsOpen = true
@@ -27,9 +37,9 @@
 
   $: list = (() => {
     if (isAuthorFeed(feed)) {
-      return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(tagPubkey)})
+      return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(1).map(makePersonTag)})
     } else if (isMentionFeed(feed)) {
-      return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(2).map(tagPubkey)})
+      return makeUserList({kind: NAMED_PEOPLE, tags: feed.slice(2).map(makePersonTag)})
     } else if (isRelayFeed(feed)) {
       return makeUserList({kind: NAMED_RELAYS, tags: feed.slice(1).map(url => ["r", url])})
     } else if (isTopicFeed(feed)) {

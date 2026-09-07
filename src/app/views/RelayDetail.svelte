@@ -1,8 +1,8 @@
 <script lang="ts">
   import {displayRelayUrl, normalizeRelayUrl} from "@welshman/util"
   import {makeRelayFeed, feedFromFilter} from "@welshman/feeds"
-  import {deriveEvents} from "@welshman/store"
-  import {deriveRelay, repository} from "@welshman/app"
+  import {Events, Relays} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
   import {getAvgRating} from "src/util/nostr"
   import Feed from "src/app/shared/Feed.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -13,10 +13,11 @@
 
   export let url
 
-  const relay = deriveRelay(url)
+  // Subscribing lazily loads the relay's nip-11 document
+  const relay = fromApp($app => $app.use(Relays).one(url))
   const tabs = ["notes", "reviews"]
   const filter = {kinds: [1986], "#l": ["review/relay"], "#r": [url]}
-  const reviews = deriveEvents({repository, filters: [filter]})
+  const reviews = fromApp($app => $app.use(Events).all([filter]).$)
 
   const notesFeed = makeFeed({
     definition: makeRelayFeed(url),
