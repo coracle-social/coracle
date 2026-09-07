@@ -1,9 +1,7 @@
 import {debounce} from "throttle-debounce"
 import {get, writable, derived} from "svelte/store"
-import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
   without,
-  partition,
   assoc,
   always,
   chunk,
@@ -15,9 +13,19 @@ import {
   noop,
   sleep,
 } from "@welshman/lib"
-import type {TrustedEvent} from "@welshman/util"
+import type {Feed} from "@welshman/feeds"
+import type {AppSyncOpts} from "@welshman/app"
+import {deriveEvents} from "@welshman/store"
 import {
   getIdFilters,
+  addNoFallbacks,
+  inbox,
+  outbox,
+  relays as relaySelections,
+  searchRelays,
+  userInbox,
+  userMessaging,
+  userOutbox,
   WRAP,
   EPOCH,
   LABEL,
@@ -29,28 +37,30 @@ import {
   POLL_RESPONSE,
   Address,
 } from "@welshman/util"
-import {deriveEvents} from "@welshman/store"
+import type {Filter, RelaySelection, TrustedEvent} from "@welshman/util"
 import {
-  pubkey,
-  repository,
-  loadProfile,
-  loadFollowList,
-  loadMuteList,
-  pull,
-  shouldUnwrap,
-  hasNegentropy,
-  makeFeedController,
-} from "@welshman/app"
-import type {AppSyncOpts} from "@welshman/app"
+  app,
+  appConfig,
+  feeds,
+  followLists,
+  fromApp,
+  muteLists,
+  network,
+  profiles,
+  relays,
+  resolveRelays,
+  sync,
+} from "src/engine/core"
+import {env} from "src/engine/env"
+import {shouldUnwrap} from "src/engine/state"
 import {noteKinds, reactionKinds, repostKinds, RELAY_FEEDS} from "src/util/nostr"
 import {CUSTOM_LIST_KINDS} from "src/domain"
-import {env, myRequest, myLoad, userSettings} from "src/engine/state"
 
 // Utils
 
-export const addSinceToFilter = (filter, overlap = int(HOUR)) => {
+export const addSinceToFilter = (filter: Filter, overlap = int(HOUR)) => {
   const limit = 50
-  const events = repository.query([{...filter, limit}])
+  const events = app.get().repository.query([{...filter, limit}])
 
   // If we only have a few events, it won't hurt to re-fetch everything. This can happen when
   // we fetch notifications with a limit of 1, giving us just a handful of events without pulling
@@ -61,39 +71,55 @@ export const addSinceToFilter = (filter, overlap = int(HOUR)) => {
   return {...filter, since}
 }
 
-export const pullConservatively = ({relays, filters}: AppSyncOpts) => {
-  const [smart, dumb] = partition(hasNegentropy, relays)
-  const promises = [pull({relays: smart, filters})]
+export const pullConservatively = async ({relays: urls, filters}: AppSyncOpts) => {
+  // hasNegentropy loads the relay's nip-11 document now, so it's async and it rejects
+  const negentropy = await Promise.all(
+    urls.map(url =>
+      relays
+        .get()
+        .hasNegentropy(url)
+        .catch(() => false),
+    ),
+  )
+
+  const smart = urls.filter((_, i) => negentropy[i])
+  const dumb = urls.filter((_, i) => !negentropy[i])
+  const promises = [sync.get().pull({relays: smart, filters})]
 
   // Since pulling from relays without negentropy is expensive, limit how many
   // duplicates we repeatedly download
   if (dumb.length > 0) {
-    const events = sortBy(e => -e.created_at, repository.query(filters))
+    const events = sortBy(e => -e.created_at, app.get().repository.query(filters))
 
     if (events.length > 100) {
       filters = filters.map(assoc("since", events[100]!.created_at))
     }
 
-    promises.push(pull({relays: dumb, filters}))
+    promises.push(sync.get().pull({relays: dumb, filters}))
   }
 
   return Promise.all(promises)
 }
 
-export const loadAll = (feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) => {
+export const loadAll = (feed: Feed, {onEvent}: {onEvent: (e: TrustedEvent) => void}) => {
   const loading = writable(true)
 
   const onExhausted = () => loading.set(false)
 
-  const promise = new Promise<void>(async resolve => {
-    const ctrl = makeFeedController({feed, onEvent, onExhausted})
+  // Every FeedController loader calls onExhausted once each of its sub-feeds has stopped
+  // producing events, which is what ends the loop. Clear `loading` on failure too, or a
+  // rejected load would leave the caller waiting on a spinner forever.
+  const promise = (async () => {
+    const ctrl = feeds.get().makeFeedController({feed, onEvent, onExhausted})
 
-    while (get(loading)) {
-      await ctrl.load(100)
+    try {
+      while (get(loading)) {
+        await ctrl.load(100)
+      }
+    } finally {
+      onExhausted()
     }
-
-    resolve()
-  })
+  })()
 
   return {promise, loading, stop: onExhausted}
 }
@@ -102,30 +128,36 @@ export type DeriveEventOptions = {
   relays?: string[]
 }
 
-export const deriveEvent = (idOrAddress: string, {relays = []}: DeriveEventOptions = {}) => {
+export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEventOptions = {}) => {
   let attempted = false
 
-  const router = Router.get()
   const filters = getIdFilters([idOrAddress])
 
+  // Relay selection is asynchronous now, so this fires a tick after we notice the event is
+  // missing rather than inline with the first store update
+  const loadEvent = async () => {
+    const selections: RelaySelection[] = relaySelections(hints)
+
+    if (Address.isAddress(idOrAddress)) {
+      selections.push(inbox(Address.from(idOrAddress).pubkey))
+    }
+
+    const urls = await resolveRelays(selections, {
+      limit: Math.max(hints.length, appConfig.relayLimit),
+    })
+
+    await network.get().load({filters, relays: urls})
+  }
+
   return derived(
-    deriveEvents({repository, filters, includeDeleted: true}),
+    // The Events plugin has no includeDeleted option, and deleted events still have to
+    // render (as a tombstone), so this reads the repository directly
+    fromApp($app => deriveEvents({repository: $app.repository, filters, includeDeleted: true})),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
-        const scenarios = [router.FromRelays(relays)]
-
-        if (Address.isAddress(idOrAddress)) {
-          scenarios.push(router.ForPubkey(Address.from(idOrAddress).pubkey))
-        }
-
-        const scenario = router
-          .merge(scenarios)
-          .limit(Math.max(relays.length, userSettings.get().relay_limit))
-          .policy(addMaximalFallbacks)
-
         attempted = true
 
-        myLoad({skipCache: true, relays: scenario.getUrls(), filters})
+        loadEvent().catch(noop)
       }
 
       return events[0]
@@ -148,24 +180,30 @@ export const createPeopleLoader = ({
 
   return {
     loading,
-    load: debounce(500, term => {
-      if (term.length > 2 && shouldLoad(term)) {
-        const now = Date.now()
+    load: debounce(500, async (term: string) => {
+      if (term.length <= 2 || !shouldLoad(term)) {
+        return
+      }
 
-        loading.set(true)
+      const start = Date.now()
 
-        myRequest({
+      loading.set(true)
+
+      try {
+        // Search relays only. A `search` filter sent to a relay without nip-50 comes back as
+        // an unfiltered dump of profiles, so this must not fall back to the default relays.
+        const urls = await resolveRelays([searchRelays()], {policy: addNoFallbacks})
+
+        await network.get().request({
           autoClose: true,
-          skipCache: true,
-          relays: Router.get().Search().getUrls(),
+          relays: urls,
           filters: [{kinds: [0], search: term, limit: 100}],
           onEvent,
-          onClose: async () => {
-            await sleep(Math.min(1000, Date.now() - now))
-
-            loading.set(false)
-          },
         })
+      } finally {
+        await sleep(Math.min(1000, Date.now() - start))
+
+        loading.set(false)
       }
     }),
   }
@@ -177,9 +215,10 @@ export const loadPubkeys = async (pubkeys: string[]) => {
     await sleep(300)
 
     for (const pubkey of pubkeyChunk) {
-      loadProfile(pubkey)
-      loadFollowList(pubkey)
-      loadMuteList(pubkey)
+      // Loaders reject rather than swallowing failures now, and nothing awaits these
+      profiles.get().load(pubkey).catch(noop)
+      followLists.get().load(pubkey).catch(noop)
+      muteLists.get().load(pubkey).catch(noop)
     }
   }
 }
@@ -194,99 +233,124 @@ export const getNotificationKinds = () =>
     POLL_RESPONSE,
   ])
 
-export const loadNotifications = () => {
-  const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
+export const loadNotifications = async () => {
+  const $user = app.get().user
+
+  // userInbox() resolves through User.require, which throws when signed out
+  if (!$user) {
+    return
+  }
+
+  const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
 
   return pullConservatively({
-    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
+    relays: await resolveRelays([userInbox()]),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
 
-export const listenForNotifications = () => {
-  const filter = {kinds: getNotificationKinds(), "#p": [pubkey.get()]}
+export const listenForNotifications = async () => {
+  const $user = app.get().user
 
-  myRequest({
-    skipCache: true,
-    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
-    filters: [addSinceToFilter(filter)],
-  })
+  if (!$user) {
+    return
+  }
+
+  const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
+  const urls = await resolveRelays([userInbox()])
+
+  // Left open on purpose; the Network plugin aborts it when the app is torn down
+  network.get().request({relays: urls, filters: [addSinceToFilter(filter)]})
 }
 
 // Other user data
 
-export const loadLabels = (authors: string[]) =>
-  myLoad({
-    skipCache: true,
-    relays: Router.get().FromPubkeys(authors).policy(addMaximalFallbacks).getUrls(),
+export const loadLabels = async (authors: string[]) =>
+  network.get().load({
+    relays: await resolveRelays(authors.map(author => outbox(author))),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
-export const loadDeletes = () =>
-  myLoad({
-    skipCache: true,
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-    filters: [addSinceToFilter({kinds: [DELETE], authors: [pubkey.get()]})],
-  })
+export const loadDeletes = async () => {
+  const $user = app.get().user
 
-export const loadFeedsAndLists = () =>
-  myLoad({
-    skipCache: true,
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+  if (!$user) {
+    return
+  }
+
+  return network.get().load({
+    relays: await resolveRelays([userOutbox()]),
+    filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
+  })
+}
+
+export const loadFeedsAndLists = async () => {
+  const $user = app.get().user
+
+  if (!$user) {
+    return
+  }
+
+  return network.get().load({
+    relays: await resolveRelays([userOutbox()]),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
-        authors: [pubkey.get()],
+        authors: [$user.pubkey],
       }),
     ],
   })
-
-export const loadMessages = () => {
-  const router = Router.get()
-
-  if (shouldUnwrap.get()) {
-    pullConservatively({
-      relays: router.ForUser().getUrls(),
-      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [pubkey.get()]}],
-    })
-
-    pullConservatively({
-      relays: router.FromUser().getUrls(),
-      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]}],
-    })
-
-    pullConservatively({
-      relays: router.MessagesForUser().getUrls(),
-      filters: [{kinds: [WRAP], "#p": [pubkey.get()]}],
-    })
-  }
 }
 
+export const loadMessages = async () => {
+  const $user = app.get().user
+
+  if (!$user || !shouldUnwrap.get()) {
+    return
+  }
+
+  // These three had no fallback policy in the 0.8 router, which defaulted to addNoFallbacks
+  const [inboxUrls, outboxUrls, messagingUrls] = await Promise.all([
+    resolveRelays([userInbox()], {policy: addNoFallbacks}),
+    resolveRelays([userOutbox()], {policy: addNoFallbacks}),
+    resolveRelays([userMessaging()], {policy: addNoFallbacks}),
+  ])
+
+  await Promise.all([
+    pullConservatively({
+      relays: inboxUrls,
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [$user.pubkey]}],
+    }),
+    pullConservatively({
+      relays: outboxUrls,
+      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [$user.pubkey]}],
+    }),
+    pullConservatively({
+      relays: messagingUrls,
+      filters: [{kinds: [WRAP], "#p": [$user.pubkey]}],
+    }),
+  ])
+}
+
+// Stays synchronous so callers can unsubscribe on destroy; relay selection resolves in the
+// background, and a request whose signal already aborted never opens a socket.
 export const listenForMessages = () => {
   const controller = new AbortController()
-  const router = Router.get()
+  const $user = app.get().user
 
-  if (shouldUnwrap.get()) {
-    myRequest({
-      skipCache: true,
-      signal: controller.signal,
-      relays: router.ForUser().getUrls(),
-      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [pubkey.get()]}],
-    })
+  if ($user && shouldUnwrap.get()) {
+    const listen = async (selections: RelaySelection[], filters: Filter[]) =>
+      network.get().request({
+        signal: controller.signal,
+        relays: await resolveRelays(selections, {policy: addNoFallbacks}),
+        filters,
+      })
 
-    myRequest({
-      skipCache: true,
-      signal: controller.signal,
-      relays: router.FromUser().getUrls(),
-      filters: [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [pubkey.get()]}],
-    })
-
-    myRequest({
-      skipCache: true,
-      signal: controller.signal,
-      relays: router.MessagesForUser().getUrls(),
-      filters: [{kinds: [WRAP], "#p": [pubkey.get()]}],
-    })
+    listen([userInbox()], [{kinds: [DEPRECATED_DIRECT_MESSAGE], "#p": [$user.pubkey]}]).catch(noop)
+    listen([userOutbox()], [{kinds: [DEPRECATED_DIRECT_MESSAGE], authors: [$user.pubkey]}]).catch(
+      noop,
+    )
+    listen([userMessaging()], [{kinds: [WRAP], "#p": [$user.pubkey]}]).catch(noop)
   }
 
   return () => controller.abort()
