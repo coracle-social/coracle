@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {noop} from "@welshman/lib"
-  import {makeEvent, userOutbox} from "@welshman/util"
-  import {resolveRelays, thunks} from "src/engine/core"
+  import {makeEvent} from "@welshman/util"
+  import {thunks, userRelays} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -35,7 +35,7 @@
     })
 
     // Relay selection is async now, so publish once it resolves rather than making the user wait
-    resolveRelays([userOutbox()])
+    userRelays()
       .then(relays => thunks.get().publish({event, relays}))
       .catch(noop)
 

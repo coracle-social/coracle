@@ -5,7 +5,7 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonName from "src/app/shared/PersonName.svelte"
   import {getAncestorRelaySelections, getAncestors} from "src/engine"
-  import {relayLists, resolveRelays} from "src/engine/core"
+  import {getWriteRelays, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util"
 
   export let event: TrustedEvent
@@ -29,7 +29,7 @@
       .at("notes")
       // Router.Event was the author's write relays, which the relay list collection answers
       // synchronously
-      .of(getIdOrAddress(event), {relays: relayLists.get().writeUrls(event.pubkey).get()})
+      .of(getIdOrAddress(event), {relays: getWriteRelays(event.pubkey)})
       .push()
 
   const goToParent = async () =>

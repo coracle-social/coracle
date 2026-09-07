@@ -23,7 +23,7 @@
   import {headerlessKinds} from "src/util/nostr"
   import NotePending from "src/app/shared/NotePending.svelte"
   import {getSetting, env, isEventMuted, loadPubkeys, myLoad} from "src/engine"
-  import {fromApp, pubkey, relayLists, resolveRelays} from "src/engine/core"
+  import {fromApp, getWriteRelays, pubkey, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util"
 
   export let event: TrustedEvent
@@ -53,7 +53,7 @@
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
       // Router.Event was the author's write relays; full relay selection is asynchronous now,
       // and these are route parameters that have to be built in one pass.
-      const relays = relayLists.get().writeUrls(event.pubkey).get()
+      const relays = getWriteRelays(event.pubkey)
 
       router.at("notes").of(getIdOrAddress(event), {relays}).open()
     }

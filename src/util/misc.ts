@@ -2,11 +2,6 @@ import {first, sleep, fromPairs, last, identity, pluck, round, displayUrl} from 
 import {readable} from "svelte/store"
 import Fuse from "fuse.js"
 
-// @welshman/lib owns both of these now. Coracle's parseJson answered null where lib's answers
-// undefined, which is the mismatch that shipped a bug; re-exporting here keeps the call sites that
-// still import from this module on one implementation until they're repointed at @welshman/lib.
-export {displayUrl, parseJson} from "@welshman/lib"
-
 export const ticker = () => {
   let seconds = 0
 

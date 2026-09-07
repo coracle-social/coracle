@@ -1,9 +1,8 @@
 import * as nip19 from "nostr-tools/nip19"
 import {fromNostrURI, Address} from "@welshman/util"
 import {last, identity, tryCatch, uniq, parseJson} from "@welshman/lib"
-import {RelayLists} from "@welshman/app"
 import {Router} from "src/util/router"
-import {app} from "src/engine/core"
+import {getWriteRelays} from "src/engine/core"
 import {parseAnythingSync} from "src/util/nostr"
 import {getChannelId} from "src/engine"
 
@@ -73,11 +72,6 @@ export const asNote = {
     }
   },
 }
-
-// A pubkey's own write relays, read straight out of the relay list collection. Full relay
-// selection is async now, and these are url serializers that have to answer synchronously — this
-// is the hint the DSL would have started from anyway.
-const getWriteRelays = (pubkey: string) => app.get().use(RelayLists).writeUrls(pubkey).get()
 
 export const asPerson = {
   encode: nip19.npubEncode,

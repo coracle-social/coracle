@@ -1,6 +1,6 @@
 import {writable, get} from "svelte/store"
 import {noop, uniq} from "@welshman/lib"
-import {FEEDS, Address, APP_DATA, getIdFilters, outbox, userOutbox} from "@welshman/util"
+import {FEEDS, Address, APP_DATA, getIdFilters, outbox} from "@welshman/util"
 import {
   BlossomServerLists,
   FollowLists,
@@ -10,7 +10,7 @@ import {
   RelayLists,
   Wot,
 } from "@welshman/app"
-import {app, resolveRelays} from "src/engine/core"
+import {app, resolveRelays, userRelays} from "src/engine/core"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
@@ -67,7 +67,7 @@ export const loadUserData = async () => {
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({
-    relays: await resolveRelays([userOutbox()]),
+    relays: await userRelays(),
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
       {

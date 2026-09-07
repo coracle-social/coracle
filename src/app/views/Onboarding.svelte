@@ -16,7 +16,7 @@
     listenForNotifications,
     broadcastUserData,
   } from "src/engine"
-  import {app, relayLists, resolveRelays} from "src/engine/core"
+  import {app, getWriteRelays, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {setChecked} from "src/engine"
 
@@ -67,7 +67,7 @@
     const userPubkey = $app.user?.pubkey
 
     if (userPubkey) {
-      broadcastUserData($relayLists.writeUrls(userPubkey).get())
+      broadcastUserData(getWriteRelays(userPubkey))
     }
 
     // Start our notifications listener

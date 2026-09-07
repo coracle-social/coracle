@@ -14,7 +14,6 @@
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
   import {
-    Events,
     FollowLists,
     Handles,
     PinLists,
@@ -24,8 +23,16 @@
     WotScope,
     Zappers,
   } from "@welshman/app"
-  import {fromApp, profiles, relayLists, resolveRelays, session} from "src/engine/core"
+  import {
+    deriveEvents,
+    fromApp,
+    getWriteRelays,
+    profiles,
+    resolveRelays,
+    session,
+  } from "src/engine/core"
   import {ensureProto, toTitle} from "src/util/misc"
+  import {makeZapSplit} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Link from "src/partials/Link.svelte"
@@ -79,10 +86,10 @@
   const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
   const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
 
-  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
+  // The hint is the recipient's first write relay, as before.
   const startZap = () =>
     zap({
-      splits: [["zap", pubkey, first(relayLists.get().writeUrls(pubkey).get()) || "", "1"]],
+      splits: [makeZapSplit(pubkey, first(getWriteRelays(pubkey)) || "")],
     })
 
   const setActiveTab = tab => {
@@ -109,7 +116,7 @@
   $: followersCount.set($followers.length)
   $: followsCount.set(($follows?.pubkeys() || []).length)
   $: pinnedIds = $pinList?.ids() || []
-  $: pinnedEvents = fromApp($app => $app.use(Events).all(getIdFilters(pinnedIds)).$)
+  $: pinnedEvents = deriveEvents(getIdFilters(pinnedIds))
   $: zapDisplay = $profile?.values.lud16 || $profile?.values.lud06
 
   $: {

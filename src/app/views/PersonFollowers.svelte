@@ -3,16 +3,15 @@
   import {fly} from "svelte/transition"
   import {noop, uniq} from "@welshman/lib"
   import {FOLLOWS, inbox} from "@welshman/util"
-  import {Events} from "@welshman/app"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import {pullConservatively} from "src/engine"
-  import {fromApp, resolveRelays} from "src/engine/core"
+  import {deriveEvents, resolveRelays} from "src/engine/core"
 
   export let pubkey
 
   const filters = [{kinds: [FOLLOWS], "#p": [pubkey]}]
-  const events = fromApp($app => $app.use(Events).all(filters).$)
+  const events = deriveEvents(filters)
 
   $: pubkeys = uniq($events.map(event => event.pubkey))
 

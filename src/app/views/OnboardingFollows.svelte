@@ -1,6 +1,6 @@
 <script lang="ts">
   import {first, fromPairs, uniq, without, remove, append, nth, nthNe} from "@welshman/lib"
-  import {getAddress, hexTags, tagValues, userOutbox} from "@welshman/util"
+  import {getAddress, hexTags, tagValues} from "@welshman/util"
   import {FollowList} from "@welshman/domain"
   import {showWarning} from "src/partials/Toast.svelte"
   import Card from "src/partials/Card.svelte"
@@ -14,11 +14,11 @@
   import {createPeopleLoader, setOutboxPolicies} from "src/engine"
   import {
     command,
+    getWriteRelays,
     profileSearch,
     profiles,
-    relayLists,
     relaySearch,
-    resolveRelays,
+    userRelays,
     writer,
   } from "src/engine/core"
   import {quantify} from "src/util/misc"
@@ -52,14 +52,14 @@
       for (const pubkey of state.follows) {
         followWriter.follow(
           pubkey,
-          first(relayLists.get().writeUrls(pubkey).get()) || "",
+          first(getWriteRelays(pubkey)) || "",
           profiles.get().display(pubkey).get(),
         )
       }
 
       const eventCommand = await command(followWriter)
 
-      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+      eventCommand.publishToRelays(await userRelays())
     } catch (e) {
       // Editing a relay list loads it first, and loads reject now rather than swallowing failures
       console.error(e)

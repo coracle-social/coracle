@@ -4,8 +4,14 @@
   import type {Relay} from "@welshman/domain"
   import {nthEq, displayList, noop, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
   import {MessagingRelayLists, RelayLists} from "@welshman/app"
-  import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, userInbox} from "@welshman/util"
-  import {fromApp, profiles, relayLists, relaySearch, resolveRelays} from "src/engine/core"
+  import {
+    isShareableRelayUrl,
+    isRelayUrl,
+    normalizeRelayUrl,
+    sortEventsDesc,
+    userInbox,
+  } from "@welshman/util"
+  import {fromApp, getWriteRelays, profiles, relaySearch, resolveRelays} from "src/engine/core"
   import {createScroller} from "src/util/misc"
   import {profileHasName} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
@@ -17,7 +23,7 @@
   import Button from "src/partials/Button.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
-  import {myRequest, userFollows, sortEventsDesc, joinRelay} from "src/engine"
+  import {myRequest, userFollows, joinRelay} from "src/engine"
 
   const tabs = ["search", "reviews"]
 
@@ -36,7 +42,7 @@
         continue
       }
 
-      for (const url of relayLists.get().writeUrls(pk).get()) {
+      for (const url of getWriteRelays(pk)) {
         if (isShareableRelayUrl(url)) {
           pushToMapKey(m, url, pk)
         }

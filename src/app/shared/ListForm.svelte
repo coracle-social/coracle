@@ -5,7 +5,6 @@
     relayTags,
     tagValues,
     topicTags,
-    userOutbox,
     NAMED_PEOPLE,
     NAMED_RELAYS,
     NAMED_TOPICS,
@@ -23,11 +22,11 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {
     command,
+    getWriteRelays,
     profiles,
-    relayLists,
     relaySearch,
-    resolveRelays,
     topicSearch,
+    userRelays,
   } from "src/engine/core"
   import {deleteEvent} from "src/engine"
   import {KindSearch, displayUserList, userListWriter} from "src/domain"
@@ -55,7 +54,7 @@
 
     // The writer routes a list to the user's write relays; re-resolve so the selection uses
     // coracle's relay limit rather than the writer's default of three
-    const thunk = eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+    const thunk = eventCommand.publishToRelays(await userRelays())
 
     showInfo("Your list has been saved!")
     exit(thunk.event)
@@ -77,7 +76,7 @@
   const makePersonTag = (pubkey: string) => [
     "p",
     pubkey,
-    first($relayLists.writeUrls(pubkey).get()) || "",
+    first(getWriteRelays(pubkey)) || "",
     $profiles.display(pubkey).get(),
   ]
 

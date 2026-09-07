@@ -9,7 +9,6 @@ import {
   matchTags,
   outbox,
   relays,
-  sortEventsDesc,
 } from "@welshman/util"
 import type {RelaySelection, TrustedEvent} from "@welshman/util"
 import {
@@ -21,7 +20,6 @@ import {
 import type {CommentWriter} from "@welshman/domain"
 
 // Re-exported because the components that reach for it go through the src/engine barrel
-export {sortEventsDesc}
 
 // Ancestors
 //

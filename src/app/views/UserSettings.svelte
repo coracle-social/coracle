@@ -1,6 +1,5 @@
 <script lang="ts">
   import {identity, equals} from "@welshman/lib"
-  import {userOutbox} from "@welshman/util"
   import {BlossomServerLists} from "@welshman/app"
   import {ensureProto} from "src/util/misc"
   import {appName} from "src/partials/state"
@@ -17,7 +16,7 @@
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {env, hasNip44, userSettings, publishSettings} from "src/engine"
-  import {blossomServerLists, deriveUserItem, resolveRelays} from "src/engine/core"
+  import {blossomServerLists, deriveUserItem, userRelays} from "src/engine/core"
 
   const userBlossomServerList = deriveUserItem(BlossomServerLists)
 
@@ -44,7 +43,7 @@
     if (!equals(blossomServers, initialBlossomServers)) {
       const eventCommand = await blossomServerLists.get().setUrls(blossomServers.map(ensureProto))
 
-      eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
+      eventCommand.publishToRelays(await userRelays())
     }
   }
 

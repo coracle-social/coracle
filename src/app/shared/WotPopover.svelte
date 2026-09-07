@@ -16,7 +16,7 @@
   import {first, formatTimestampRelative, stripProtocol} from "@welshman/lib"
   import {Handles, Profiles} from "@welshman/app"
   import {userFollows} from "src/engine"
-  import {relayLists, session} from "src/engine/core"
+  import {getWriteRelays, session} from "src/engine/core"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -25,6 +25,7 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router, zap} from "src/app/util"
   import {ensureProto} from "src/util/misc"
+  import {makeZapSplit} from "src/util/nostr"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 
   export let pubkey
@@ -36,8 +37,8 @@
   // would re-rank everything that reads a score.
   const wotScore = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
   const showPerson = () => router.at("people").of(pubkey).open()
-  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
-  const zapSplit = ["zap", pubkey, first(relayLists.get().writeUrls(pubkey).get()) || "", "1"]
+  // The hint is the recipient's first write relay, as before.
+  const zapSplit = makeZapSplit(pubkey, first(getWriteRelays(pubkey)) || "")
   const startZap = () => zap({splits: [zapSplit]})
 
   $: following = $userFollows.has(pubkey)

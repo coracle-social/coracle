@@ -1,7 +1,7 @@
 <script lang="ts">
   import {tagSpec, tagValue} from "@welshman/util"
   import * as nip19 from "nostr-tools/nip19"
-  import {parseJson} from "src/util/misc"
+  import {parseJson} from "@welshman/lib"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"

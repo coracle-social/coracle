@@ -124,9 +124,6 @@ export const getRating = (event: TrustedEvent) =>
 
 export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
-// Alias kept for the call sites that still import isHex from here; @welshman/lib owns the predicate
-export {isHex32 as isHex} from "@welshman/lib"
-
 const BAD_DOMAINS = ["libfans.com", "matrix.org/_matrix/media/v3/download"]
 
 const getBadDomainsWarning = (e: TrustedEvent) => {

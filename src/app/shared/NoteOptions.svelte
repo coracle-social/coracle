@@ -10,8 +10,7 @@
 </script>
 
 <script lang="ts">
-  import {userOutbox} from "@welshman/util"
-  import {relaySearch, resolveRelays} from "src/engine/core"
+  import {relaySearch, userRelays} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
@@ -36,7 +35,7 @@
   // Relay selection is asynchronous now; an empty list is what the old scenario handed back when
   // the user had no relay list of their own.
   const initRelays = () => {
-    resolveRelays([userOutbox()])
+    userRelays()
       .catch(() => [])
       .then(urls => {
         values.relays = urls

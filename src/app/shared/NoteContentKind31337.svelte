@@ -2,14 +2,12 @@
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {matchTag, tagSpec, tagValue, tagValues} from "@welshman/util"
+  import {tagsFromIMeta} from "src/util/nostr"
   import Chips from "src/partials/Chips.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note: TrustedEvent
   export let showMedia: boolean
-
-  // Welshman deleted tagsFromIMeta; an imeta tag's entries are space-delimited key/value pairs
-  const tagsFromIMeta = (imeta: string[]) => imeta.map(m => m.split(" "))
 
   const imeta = matchTag(tagSpec("imeta"), note.tags)
   const categories = tagValues(tagSpec("c"), note.tags)
