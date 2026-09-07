@@ -4,7 +4,6 @@ import {always, noop} from "@welshman/lib"
 import type {Maybe} from "@welshman/lib"
 import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
-import {addMaximalFallbacks} from "@welshman/util"
 import type {FallbackPolicy, RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
 import {
@@ -180,14 +179,18 @@ export const writer = <R extends BaseEventReader, W extends EventWriter<R>>(
 export const command = (eventWriter: EventWriter<any>) => domain.get().command(eventWriter)
 
 // Relay selection resolves asynchronously now, since it may have to load relay lists first. This
-// applies coracle's relay limit in one place; publish paths should pass addMinimalFallbacks.
+// applies coracle's relay limit in one place.
+//
+// The fallback policy is deliberately required rather than defaulted: how far a selection widens
+// when it comes up short is a decision per call site, and the old router defaulted to no fallbacks,
+// so any default here would silently change the reach of whichever sites forgot to say.
 export const resolveRelays = async (
   selections: RelaySelection[],
-  {limit, policy}: {limit?: number; policy?: FallbackPolicy} = {},
+  {policy, limit}: {policy: FallbackPolicy; limit?: number},
 ) =>
   (await router.get().resolve(selections))
     .limit(limit ?? appConfig.relayLimit)
-    .policy(policy ?? addMaximalFallbacks)
+    .policy(policy)
     .getUrls()
 
 // Sessions

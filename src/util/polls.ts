@@ -1,6 +1,6 @@
 import {now, removeUndefined, uniq} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {getTagValue, getTags, getTagValues} from "@welshman/util"
+import {matchTags, tagSpec, tagValue, tagValues} from "@welshman/util"
 
 export type PollType = "singlechoice" | "multiplechoice"
 
@@ -11,11 +11,11 @@ export type PollOption = {
 }
 
 export const getPollType = (event: TrustedEvent): PollType =>
-  getTagValue("polltype", event.tags) === "multiplechoice" ? "multiplechoice" : "singlechoice"
+  tagValue(tagSpec("polltype"), event.tags) === "multiplechoice" ? "multiplechoice" : "singlechoice"
 
 export const getPollOptions = (event: TrustedEvent) =>
   removeUndefined(
-    getTags("option", event.tags).map(tag => {
+    matchTags(tagSpec("option"), event.tags).map(tag => {
       const [, id, label = id] = tag
 
       if (!id) return undefined
@@ -25,7 +25,7 @@ export const getPollOptions = (event: TrustedEvent) =>
   )
 
 export const getPollEndsAt = (event: TrustedEvent) => {
-  const endsAt = getTagValue("endsAt", event.tags)
+  const endsAt = tagValue(tagSpec("endsAt"), event.tags)
 
   if (!endsAt) return undefined
 
@@ -41,7 +41,7 @@ export const isPollClosed = (event: TrustedEvent) => {
 }
 
 export const getPollResponseSelections = (event: TrustedEvent, pollType = getPollType(event)) => {
-  const selections = getTagValues("response", event.tags)
+  const selections = tagValues(tagSpec("response"), event.tags)
 
   return pollType === "singlechoice" ? selections.slice(0, 1) : uniq(selections)
 }

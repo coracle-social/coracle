@@ -1,5 +1,5 @@
 import type {OwnedEvent, HashedEvent} from "@welshman/util"
-import {makeEvent, getTag, own, getPubkey, makeSecret} from "@welshman/util"
+import {makeEvent, matchTag, tagSpec, own, getPubkey, makeSecret} from "@welshman/util"
 import {synced, localStorageProvider, withGetter} from "@welshman/store"
 import PowWorker from "src/workers/pow?worker"
 import {isMobile} from "src/util/html"
@@ -43,7 +43,7 @@ export const makePow = (event: OwnedEvent, difficulty: number): ProofOfWork => {
 }
 
 export const getPow = (event: HashedEvent): number => {
-  const difficulty = parseInt(getTag("nonce", event.tags)?.[2])
+  const difficulty = parseInt(matchTag(tagSpec("nonce"), event.tags)?.[2])
 
   if (isNaN(difficulty)) return 0
 

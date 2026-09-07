@@ -17,8 +17,19 @@ import type {Feed} from "@welshman/feeds"
 import type {AppSyncOpts} from "@welshman/app"
 import {deriveEvents} from "@welshman/store"
 import {
-  getIdFilters,
+  Address,
+  DELETE,
+  DEPRECATED_DIRECT_MESSAGE,
+  EPOCH,
+  FEED,
+  FEEDS,
+  LABEL,
+  NAMED_BOOKMARKS,
+  POLL_RESPONSE,
+  WRAP,
+  addMaximalFallbacks,
   addNoFallbacks,
+  getIdFilters,
   inbox,
   outbox,
   relays as relaySelections,
@@ -26,16 +37,6 @@ import {
   userInbox,
   userMessaging,
   userOutbox,
-  WRAP,
-  EPOCH,
-  LABEL,
-  DELETE,
-  FEED,
-  NAMED_BOOKMARKS,
-  DEPRECATED_DIRECT_MESSAGE,
-  FEEDS,
-  POLL_RESPONSE,
-  Address,
 } from "@welshman/util"
 import type {Filter, RelaySelection, TrustedEvent} from "@welshman/util"
 import {
@@ -143,6 +144,7 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
     }
 
     const urls = await resolveRelays(selections, {
+      policy: addMaximalFallbacks,
       limit: Math.max(hints.length, appConfig.relayLimit),
     })
 
@@ -244,7 +246,7 @@ export const loadNotifications = async () => {
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
 
   return pullConservatively({
-    relays: await resolveRelays([userInbox()]),
+    relays: await resolveRelays([userInbox()], {policy: addMaximalFallbacks}),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
@@ -257,7 +259,7 @@ export const listenForNotifications = async () => {
   }
 
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
-  const urls = await resolveRelays([userInbox()])
+  const urls = await resolveRelays([userInbox()], {policy: addMaximalFallbacks})
 
   // Left open on purpose; the Network plugin aborts it when the app is torn down
   network.get().request({relays: urls, filters: [addSinceToFilter(filter)]})
@@ -267,7 +269,12 @@ export const listenForNotifications = async () => {
 
 export const loadLabels = async (authors: string[]) =>
   network.get().load({
-    relays: await resolveRelays(authors.map(author => outbox(author))),
+    relays: await resolveRelays(
+      authors.map(author => outbox(author)),
+      {
+        policy: addMaximalFallbacks,
+      },
+    ),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
@@ -279,7 +286,7 @@ export const loadDeletes = async () => {
   }
 
   return network.get().load({
-    relays: await resolveRelays([userOutbox()]),
+    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
   })
 }
@@ -292,7 +299,7 @@ export const loadFeedsAndLists = async () => {
   }
 
   return network.get().load({
-    relays: await resolveRelays([userOutbox()]),
+    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
