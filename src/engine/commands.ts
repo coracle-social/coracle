@@ -19,6 +19,7 @@ import {
   MESSAGING_RELAYS,
   PROFILE,
   RELAYS,
+  addMaximalFallbacks,
   addMinimalFallbacks,
   hexTags,
   inboxes,
@@ -82,7 +83,7 @@ export const updateStore = (store, timestamp, updates) =>
 // user's lists nowhere at all. Coracle has always published its own data to the user's write
 // relays, topping the selection up with defaults, so re-resolve rather than take what the writer
 // worked out.
-const userRelays = () => resolveRelays([userOutbox()])
+const userRelays = () => resolveRelays([userOutbox()], {policy: addMaximalFallbacks})
 
 const publishToUserRelays = async (eventCommand: Command) =>
   eventCommand.publishToRelays(await userRelays())
