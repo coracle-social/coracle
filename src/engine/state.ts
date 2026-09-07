@@ -8,6 +8,7 @@ import {
   first,
   groupBy,
   identity,
+  isPojo,
   max,
   noop,
   now,
@@ -246,8 +247,10 @@ export const userSettingsPlaintext: Readable<Maybe<string>> = derived(
 
     if (plaintext !== undefined) return plaintext
 
-    // Settings written by an older client aren't encrypted at all
-    if (parseJson(content) !== undefined) return content
+    // Settings written by an older client aren't encrypted at all. parseJson answers null for
+    // anything that isn't json, so test for the object we'd expect rather than against undefined —
+    // otherwise every ciphertext reads as already-plain and the decrypt below never runs.
+    if (isPojo(parseJson(content))) return content
 
     decryptSettings($app, $event)
 
