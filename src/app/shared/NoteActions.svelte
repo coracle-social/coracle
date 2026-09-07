@@ -2,40 +2,27 @@
   import cx from "classnames"
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
-  import {sum, pluck, spec, nthEq, last, sortBy, uniqBy, prop} from "@welshman/lib"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {
-    deriveZapper,
-    deriveZapperForPubkey,
-    repository,
-    signer,
-    tagEvent,
-    tagPubkey,
-    tagEventForReaction,
-    tagZapSplit,
-    mutePrivately,
-    publishThunk,
-    pubkey,
-    unmute,
-    pin,
-    unpin,
-  } from "@welshman/app"
+  import {first, sum, pluck, spec, nthEq, last, sortBy, uniqBy, prop} from "@welshman/lib"
+  import type {Command} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {
     asSignedEvent,
     isSignedEvent,
+    isReplaceable,
     makeEvent,
     getLnUrl,
-    ZAP_RESPONSE,
+    outbox,
+    userOutbox,
+    ZAP_RECEIPT,
     REACTION,
     REPOST,
     GENERIC_REPOST,
     NOTE,
     getReplyFilters,
-    isChildOf,
     getAddress,
   } from "@welshman/util"
+  import {Reaction} from "@welshman/domain"
   import {getPow} from "src/util/pow"
   import {fly} from "src/util/transition"
   import {replyKinds, repostKinds} from "src/util/nostr"
@@ -53,6 +40,19 @@
   import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {router, deriveValidZaps, zap} from "src/app/util"
   import {
+    fromApp,
+    muteLists,
+    pinLists,
+    profiles,
+    pubkey,
+    relayLists,
+    resolveRelays,
+    signer,
+    thunks,
+    writer,
+    zappers,
+  } from "src/engine/core"
+  import {
     env,
     deriveHandlersForKind,
     signAndPublish,
@@ -61,6 +61,7 @@
     getClientTags,
     userMutedEvents,
     sortEventsDesc,
+    isChildOf,
     isEventMuted,
     userPins,
     deriveRelaysForEvent,
@@ -70,12 +71,21 @@
   export let onReplyStart: () => void
   export let showHidden = false
 
+  // Relay selection is async now, and this has to answer synchronously; the author's write relays
+  // are the hint the selection would have started from anyway.
+  const getWriteRelays = (pubkey: string) => $relayLists.writeUrls(pubkey).get()
+
   const nevent = nip19.neventEncode({
     id: event.id,
     kind: event.kind,
     author: event.pubkey,
-    relays: Router.get().Event(event).limit(3).getUrls(),
+    relays: getWriteRelays(event.pubkey).slice(0, 3),
   })
+
+  // The user's own lists go to their write relays, at coracle's relay limit rather than the three
+  // a writer resolves for itself
+  const publishToUserRelays = async (eventCommand: Command) =>
+    eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
 
   const pow = getPow(event)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
@@ -102,9 +112,12 @@
     router.at("notes").of(event.id).at("delete").qp({kind: event.kind}).open()
 
   const react = async content => {
-    const tags = [...tagEventForReaction(event), ...getClientTags()]
-    const template = makeEvent(7, {content, tags})
-    await signAndPublish(template)
+    const eventWriter = writer(Reaction)
+      .setEvent(event)
+      .setContent(content)
+      .addTags(...getClientTags())
+
+    await signAndPublish(await eventWriter.renderTemplate())
   }
 
   const deleteReaction = e => {
@@ -114,7 +127,15 @@
   const repost = async () => {
     if (isSignedEvent(event)) {
       const kind = event.kind === NOTE ? REPOST : GENERIC_REPOST
-      const tags = [...tagEvent(event), tagPubkey(event.pubkey), ...getClientTags()]
+      const hint = first(await resolveRelays([outbox(event.pubkey)], {limit: 1})) || ""
+      const tags = [["e", event.id, hint, "", event.pubkey]]
+
+      if (isReplaceable(event)) {
+        tags.push(["a", getAddress(event), hint, "", event.pubkey])
+      }
+
+      tags.push(["p", event.pubkey, hint, $profiles.display(event.pubkey).get()])
+      tags.push(...getClientTags())
 
       if (kind === GENERIC_REPOST) {
         tags.push(["k", String(event.kind)])
@@ -128,7 +149,7 @@
 
   const startZap = () => {
     const zapTags = event.tags.filter(nthEq(0, "zap"))
-    const defaultSplit = tagZapSplit(event.pubkey)
+    const defaultSplit = ["zap", event.pubkey, first(getWriteRelays(event.pubkey)) || "", "1"]
     const splits = zapTags.length > 0 ? zapTags : [defaultSplit]
 
     zap({
@@ -138,10 +159,10 @@
     })
   }
 
-  const broadcast = () => {
-    publishThunk({
+  const broadcast = async () => {
+    thunks.get().publish({
       event: asSignedEvent(event as SignedEvent),
-      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+      relays: await resolveRelays([userOutbox()]),
     })
 
     showInfo("Note has been re-published!")
@@ -164,13 +185,15 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const context = deriveEvents({repository, filters: getReplyFilters([event])})
+  const context = fromApp($app =>
+    deriveEvents({repository: $app.repository, filters: getReplyFilters([event])}),
+  )
 
   let view
   let actions = []
 
   $: lnurl = getLnUrl(event.tags?.find(nthEq(0, "zap"))?.[1] || "")
-  $: zapper = lnurl ? deriveZapper(lnurl) : deriveZapperForPubkey(event.pubkey)
+  $: zapper = lnurl ? $zappers.one(lnurl) : $zappers.forPubkey(event.pubkey).$
   $: muted = $userMutedEvents.has(event.id) || $userMutedEvents.has(getAddress(event))
   $: pinned = $userPins.has(event.id)
   $: children = $context.filter(e => isChildOf(e, event))
@@ -179,7 +202,7 @@
     prop("pubkey"),
     children.filter(e => repostKinds.includes(e.kind)),
   )
-  $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
+  $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RECEIPT})), event)
   $: replies = sortEventsDesc(
     children.filter(e => replyKinds.includes(e.kind) && !$isEventMuted(e)),
   )
@@ -214,12 +237,16 @@
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
 
       if (muted) {
-        actions.push({label: "Unmute", icon: "microphone", onClick: () => unmute(event.id)})
+        actions.push({
+          label: "Unmute",
+          icon: "microphone",
+          onClick: () => muteLists.get().unmute(event.id).then(publishToUserRelays),
+        })
       } else {
         actions.push({
           label: "Mute",
           icon: "microphone-slash",
-          onClick: () => mutePrivately(["e", event.id]),
+          onClick: () => muteLists.get().mutePrivately(["e", event.id]).then(publishToUserRelays),
         })
       }
 
@@ -243,7 +270,7 @@
         label: "Pin",
         icon: "thumbtack",
         onClick: () => {
-          pin(["e", event.id])
+          pinLists.get().pin(["e", event.id]).then(publishToUserRelays)
         },
       })
     } else {
@@ -251,7 +278,7 @@
         label: "Unpin",
         icon: "thumbtack-slash",
         onClick: () => {
-          unpin(event.id)
+          pinLists.get().unpin(event.id).then(publishToUserRelays)
         },
       })
     }

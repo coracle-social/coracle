@@ -1,9 +1,7 @@
 <script lang="ts">
-  import {asSignedEvent, makeEvent} from "@welshman/util"
+  import {asSignedEvent, makeEvent, messaging, relay} from "@welshman/util"
   import type {SignedEvent} from "@welshman/util"
   import {Nip59, Nip01Signer} from "@welshman/signer"
-  import {Router} from "@welshman/router"
-  import {repository, publishThunk, loadRelayList} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -13,10 +11,11 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import {router} from "src/app/util/router"
+  import {app, resolveRelays, thunks} from "src/engine/core"
 
   export let id
 
-  const event = repository.getEvent(id)
+  const event = $app.repository.getEvent(id)
 
   const tagr = "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65"
 
@@ -31,14 +30,10 @@
     const helper = new Nip59(Nip01Signer.ephemeral())
     const wrap = await helper.wrap(tagr, template)
 
-    publishThunk({
+    // The reviewer's messaging relays are loaded as part of resolving the selection
+    thunks.get().publish({
       event: wrap,
-      relays: Router.get()
-        .merge([
-          Router.get().FromRelays(["wss://relay.nos.social"]),
-          Router.get().MessagesForPubkey(tagr),
-        ])
-        .getUrls(),
+      relays: await resolveRelays([relay("wss://relay.nos.social"), messaging(tagr)]),
     })
 
     showInfo("Your report has been sent!")
@@ -46,8 +41,6 @@
   }
 
   let message = ""
-
-  loadRelayList(tagr)
 </script>
 
 <form on:submit|preventDefault={submit}>

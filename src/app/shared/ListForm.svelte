@@ -1,17 +1,18 @@
 <script lang="ts">
-  import {identity} from "@welshman/lib"
+  import {first, identity} from "@welshman/lib"
   import {
-    getPubkeyTagValues,
-    getRelayTagValues,
-    getTopicTagValues,
+    hexTags,
+    relayTags,
+    tagValues,
+    topicTags,
+    userOutbox,
     NAMED_PEOPLE,
     NAMED_RELAYS,
     NAMED_TOPICS,
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {topicSearch, publishThunk, tagPubkey, relaySearch} from "@welshman/app"
+  import {Relays, Topics} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -21,13 +22,18 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
+  import {command, fromApp, profiles, relayLists, resolveRelays} from "src/engine/core"
   import {deleteEvent} from "src/engine"
-  import {KindSearch, createUserList, displayUserList, editUserList} from "src/domain"
+  import {KindSearch, displayUserList, userListWriter} from "src/domain"
 
   export let list
   export let exit
   export let hide = []
   export let showDelete = false
+
+  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
+
+  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
   const openDelete = () => {
     deleteIsOpen = true
@@ -43,12 +49,14 @@
   }
 
   const submit = async () => {
-    const relays = Router.get().FromUser().policy(addMaximalFallbacks).getUrls()
-    const event = list.event ? editUserList(list) : createUserList(list)
-    const thunk = await publishThunk({event, relays})
+    const eventCommand = await command(userListWriter(list))
+
+    // The writer routes a list to the user's write relays; re-resolve so the selection uses
+    // coracle's relay limit rather than the writer's default of three
+    const thunk = eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
 
     showInfo("Your list has been saved!")
-    exit(thunk.options.event)
+    exit(thunk.event)
   }
 
   const kindsHelper = new KindSearch([
@@ -62,8 +70,17 @@
     list.tags = []
   }
 
+  // Welshman deleted tagPubkey, so build the list entry here — an outbox hint read from cache and
+  // the profile's display name as a petname, the way coracle has always written them.
+  const makePersonTag = (pubkey: string) => [
+    "p",
+    pubkey,
+    first($relayLists.writeUrls(pubkey).get()) || "",
+    $profiles.display(pubkey).get(),
+  ]
+
   const onPubkeysChange = pubkeys => {
-    list.tags = pubkeys.map(tagPubkey)
+    list.tags = pubkeys.map(makePersonTag)
   }
 
   const onRelaysChange = urls => {
@@ -97,11 +114,14 @@
     {#if !hide.includes("tags")}
       <Field label="List contents">
         {#if list.kind === NAMED_PEOPLE}
-          <PersonSelect multiple value={getPubkeyTagValues(list.tags)} onChange={onPubkeysChange} />
+          <PersonSelect
+            multiple
+            value={tagValues(hexTags("p"), list.tags)}
+            onChange={onPubkeysChange} />
         {:else if list.kind === NAMED_RELAYS}
           <SearchSelect
             multiple
-            value={getRelayTagValues(list.tags)}
+            value={tagValues(relayTags(["r", "relay"]), list.tags)}
             search={$relaySearch.searchValues}
             termToItem={normalizeRelayUrl}
             onChange={onRelaysChange}>
@@ -110,7 +130,7 @@
         {:else if list.kind === NAMED_TOPICS}
           <SearchSelect
             multiple
-            value={getTopicTagValues(list.tags)}
+            value={tagValues(topicTags("t"), list.tags)}
             search={$topicSearch.searchValues}
             termToItem={identity}
             onChange={onTopicsChange}>

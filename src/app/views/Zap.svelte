@@ -1,10 +1,11 @@
 <script lang="ts">
   import {request} from "@welshman/net"
-  import {nth, sum} from "@welshman/lib"
-  import {Router, addMinimalFallbacks} from "@welshman/router"
+  import {noop, nth, sum} from "@welshman/lib"
+  import {inbox, relays as relaySelections} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
-  import {signer, loadZapperForPubkey, displayProfileByPubkey} from "@welshman/app"
-  import {requestZap, makeZapRequest, getZapResponseFilter} from "@welshman/util"
+  import type {ISigner} from "@welshman/signer"
+  import {Router} from "@welshman/app"
+  import {ZapRequest} from "@welshman/domain"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Link from "src/partials/Link.svelte"
   import Input from "src/partials/Input.svelte"
@@ -13,6 +14,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {router} from "src/app/util"
+  import {app, profiles, resolveRelays, zappers} from "src/engine/core"
   import {env, getSetting, payInvoice} from "src/engine"
 
   export let splits
@@ -44,10 +46,20 @@
 
   const back = () => router.pop()
 
+  // An anonymous zap is signed with a throwaway key, so bind the kind to that signer rather than
+  // going through the app's domain plugin, which always signs as the current user
+  const makeZapRequest = (signer: ISigner) =>
+    ZapRequest.configure({resolver: $app.use(Router).resolver, signer}).writer()
+
   const sendZap = async () => {
     const totalWeight = sum(splits.map(s => parseFloat(s[3]) || 0))
     const percent = getSetting("platform_zap_split") as number
     const platformSplit = ["zap", env.PLATFORM_PUBKEY, "", percent * totalWeight]
+    const signer = anonymous ? Nip01Signer.ephemeral() : $app.user?.signer
+
+    if (!signer) {
+      return showWarning("Failed to zap: you are not signed in")
+    }
 
     loading = true
 
@@ -60,7 +72,8 @@
         const eventId = id
         const weight = parseFloat(weightString)
         const msats = Math.round(1000 * amount * (weight / totalWeight))
-        const zapper = await loadZapperForPubkey(pubkey)
+        // Loading rejects now, and a missing zapper is reported below either way
+        const zapper = await $zappers.loadForPubkey(pubkey).catch(noop)
 
         if (msats === 0) {
           continue
@@ -70,14 +83,25 @@
           return showWarning(`Failed to zap: no zapper found`)
         }
 
-        const router = Router.get()
-        const scenarios = [router.ForPubkey(pubkey), router.FromRelays([relay])]
-        const relays = router.merge(scenarios).policy(addMinimalFallbacks).getUrls()
-        const filters = [getZapResponseFilter({zapper, pubkey, eventId})]
-        const params = {pubkey, content, eventId, msats, relays, zapper}
-        const sig = anonymous ? Nip01Signer.ephemeral() : signer.get()
-        const event = await sig.sign(makeZapRequest(params))
-        const res = await requestZap({zapper, event})
+        // Ask the recipient's read relays, plus whatever relay the split pointed at, for the receipt
+        const relays = await resolveRelays([
+          inbox(pubkey),
+          ...relaySelections(relay ? [relay] : []),
+        ])
+        const filters = [zapper.getResponseFilter(pubkey, eventId)]
+        const zapRequest = makeZapRequest(signer)
+          .setContent(content)
+          .setAmount(msats)
+          .setLnurl(zapper.lnurl)
+          .setRecipient(pubkey)
+          .setUrls(relays)
+          .setAnonymous(anonymous)
+
+        if (eventId) {
+          zapRequest.setEventId(eventId)
+        }
+
+        const res = await zapRequest.requestInvoice(zapper)
 
         if (!res.invoice) {
           if (pubkey === env.PLATFORM_PUBKEY) {
@@ -106,7 +130,7 @@
         } catch (e) {
           const message = String(e).replace(/^.*Error: /, "")
 
-          showWarning(`Failed to zap ${displayProfileByPubkey(pubkey)}: ${message}`)
+          showWarning(`Failed to zap ${$profiles.display(pubkey).get()}: ${message}`)
           hasError = true
         }
       }

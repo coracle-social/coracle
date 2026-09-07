@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {without, dateToSeconds, uniq, now} from "@welshman/lib"
-  import {COMMENT, own, hash, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
-  import {Router, addMinimalFallbacks} from "@welshman/router"
-  import {session, displayProfileByPubkey, publishThunk} from "@welshman/app"
+  import {without, dateToSeconds, uniq, uniqBy} from "@welshman/lib"
+  import {hexTags, inboxes, own, hash, stamp, tagValues, userOutbox} from "@welshman/util"
+  import {User} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
+  import {Comment} from "@welshman/domain"
   import {writable} from "svelte/store"
   import {makePow} from "src/util/pow"
   import type {ProofOfWork} from "src/util/pow"
@@ -17,11 +17,12 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
+  import {app, profiles, resolveRelays, thunks, writer} from "src/engine/core"
   import {
     getClientTags,
     sign,
     broadcastUserRelays,
-    tagEventForComment,
+    setCommentAncestors,
     userSettings,
   } from "src/engine"
   import {makeEditor} from "src/app/editor"
@@ -35,8 +36,8 @@
   const uploading = writable(false)
 
   $: mentions = without(
-    [$session?.pubkey],
-    uniq([parent.pubkey, ...getPubkeyTagValues(parent.tags)]),
+    [$app.user?.pubkey],
+    uniq([parent.pubkey, ...tagValues(hexTags("p"), parent.tags)]),
   )
 
   let loading
@@ -95,23 +96,35 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const parentTags = tagEventForComment(parent)
-    const editorTags = editor.storage.nostr.getEditorTags()
-    const tags = uniqTags([...editorTags, ...parentTags, ...getClientTags()])
+    // Nip 22 scopes a comment to the root of its thread as well as to its parent, so hand the
+    // repository over for looking the root up
+    const eventWriter = setCommentAncestors(
+      writer(Comment),
+      parent,
+      $app.repository.getEvent,
+    ).setContent(content)
+
+    eventWriter.addTags(...editor.storage.nostr.getEditorTags(), ...getClientTags())
+
     const draft = editor.getJSON()
 
     if (options.warning) {
-      tags.push(["content-warning", options.warning])
+      eventWriter.addTags(["content-warning", options.warning])
     }
 
     if (options.expiration) {
-      tags.push(["expiration", String(dateToSeconds(options.expiration))])
+      eventWriter.setExpiration(dateToSeconds(options.expiration))
     }
 
     loading = true
     clearDraft()
 
-    const ownedEvent = own(makeEvent(COMMENT, {content, tags, created_at: now()}), $session.pubkey)
+    const template = await eventWriter.renderTemplate()
+
+    // The editor and the parent can both tag the same pubkey, so drop repeats — welshman used to
+    // do this via uniqTags
+    const tags = uniqBy(t => t.slice(0, 2).join(":"), template.tags)
+    const ownedEvent = own(stamp({...template, tags}), User.require($app).pubkey)
 
     let hashedEvent = hash(ownedEvent)
 
@@ -122,12 +135,17 @@
       hashedEvent = await pow.result
     }
 
+    // Deliver to the author's write relays and everyone they mentioned, at a raised limit so a
+    // reply with a lot of mentions still reaches all of them
     const relays =
       options.relays?.length > 0
         ? options.relays
-        : Router.get().PublishEvent(hashedEvent).policy(addMinimalFallbacks).getUrls()
+        : await resolveRelays(
+            [userOutbox(), ...inboxes(tagValues(hexTags("p"), hashedEvent.tags), 0.5)],
+            {limit: 30},
+          )
 
-    const thunk = publishThunk({
+    const thunk = thunks.get().publish({
       relays,
       event: await sign(hashedEvent, options),
       delay: $userSettings.send_delay,
@@ -200,7 +218,7 @@
           <div on:click|stopPropagation class="flex items-center">
             {#each mentions as pubkey}
               <Chip class="mb-1 mr-1" onRemove={() => removeMention(pubkey)}>
-                {displayProfileByPubkey(pubkey)}
+                {$profiles.display(pubkey).get()}
               </Chip>
             {:else}
               <div class="text-neutral-100 inline-block py-2">No mentions</div>

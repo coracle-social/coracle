@@ -1,28 +1,25 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {last, dateToSeconds, now, randomId} from "@welshman/lib"
-  import {own, hash} from "@welshman/util"
+  import {own, hash, stamp} from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {Router, addMinimalFallbacks} from "@welshman/router"
   import {
     makeEvent,
     toNostrURI,
+    hexTags,
+    inboxes,
+    tagValues,
+    userInbox,
+    userOutbox,
     DVM_REQUEST_PUBLISH_SCHEDULE,
-    POLL,
-    NOTE,
     Address,
     isReplaceable,
   } from "@welshman/util"
+  import {User} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {request} from "@welshman/net"
-  import {
-    session,
-    publishThunk,
-    thunkIsComplete,
-    tagPubkey,
-    signer,
-    abortThunk,
-  } from "@welshman/app"
+  import {Note, Poll} from "@welshman/domain"
+  import type {EventWriter} from "@welshman/domain"
   import {writable} from "svelte/store"
   import * as nip19 from "nostr-tools/nip19"
   import {makePow} from "src/util/pow"
@@ -45,6 +42,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
+  import {app, relayLists, resolveRelays, thunks, writer} from "src/engine/core"
   import {env, getClientTags, sign, userSettings, broadcastUserRelays} from "src/engine"
 
   export let quote = null
@@ -120,21 +118,9 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    const tags = [...editor.storage.nostr.getEditorTags(), ...getClientTags()]
+    const user = User.require($app)
 
-    if (options.warning) {
-      tags.push(["content-warning", options.warning])
-    }
-
-    if (options.expiration) {
-      tags.push(["expiration", String(dateToSeconds(options.expiration))])
-    }
-
-    if (quote) {
-      tags.push(tagPubkey(quote.pubkey))
-    }
-
-    let kind = NOTE
+    let eventWriter: EventWriter<any>
 
     if (pollEnabled) {
       const validOptions = pollOptions.filter(option => option.value.trim())
@@ -143,21 +129,38 @@
         return showWarning("Please provide at least two poll options.")
       }
 
-      kind = POLL
+      const pollWriter = writer(Poll)
+        .setTitle(content)
+        .setPollType(multipleChoice ? "multiplechoice" : "singlechoice")
 
       for (const option of validOptions) {
-        tags.push(["option", option.id, option.value.trim()])
+        pollWriter.addOption(option.value.trim(), option.id)
       }
 
-      tags.push(["polltype", multipleChoice ? "multiplechoice" : "singlechoice"])
+      // Tell voters where to send their responses
+      pollWriter.setUrls(await resolveRelays([userInbox()]))
 
-      for (const url of Router.get().ForUser().policy(addMinimalFallbacks).getUrls()) {
-        tags.push(["relay", url])
-      }
+      eventWriter = pollWriter
+    } else {
+      eventWriter = writer(Note).setContent(content)
+    }
+
+    eventWriter.addTags(...editor.storage.nostr.getEditorTags(), ...getClientTags())
+
+    if (options.warning) {
+      eventWriter.addTags(["content-warning", options.warning])
+    }
+
+    if (options.expiration) {
+      eventWriter.setExpiration(dateToSeconds(options.expiration))
+    }
+
+    if (quote) {
+      eventWriter.addMention(quote.pubkey)
     }
 
     const created_at = options.publish_at ? dateToSeconds(options.publish_at) : now()
-    const ownedEvent = own(makeEvent(kind, {content, tags, created_at}), $session.pubkey)
+    const ownedEvent = own(stamp(await eventWriter.renderTemplate(), created_at), user.pubkey)
 
     let hashedEvent = hash(ownedEvent)
 
@@ -173,10 +176,16 @@
     publishing = "signing"
 
     const signedEvent = await sign(hashedEvent, options)
+
+    // Deliver to the author's write relays and everyone they mentioned, at a raised limit so a
+    // note with a lot of mentions still reaches all of them
     const relays =
       options.relays?.length > 0
         ? options.relays
-        : Router.get().PublishEvent(signedEvent).policy(addMinimalFallbacks).getUrls()
+        : await resolveRelays(
+            [userOutbox(), ...inboxes(tagValues(hexTags("p"), signedEvent.tags), 0.5)],
+            {limit: 30},
+          )
 
     let thunk: Thunk
 
@@ -184,7 +193,7 @@
     drafts.delete(DRAFT_KEY)
 
     if (options.publish_at) {
-      const dvmContent = await $signer.nip04.encrypt(
+      const dvmContent = await user.signer.nip04.encrypt(
         SHIPYARD_PUBKEY,
         JSON.stringify([
           ["i", JSON.stringify(signedEvent), "text"],
@@ -199,7 +208,7 @@
         }),
       )
 
-      thunk = publishThunk({
+      thunk = thunks.get().publish({
         event: dvmEvent,
         relays: env.DVM_RELAYS,
         delay: $userSettings.send_delay,
@@ -213,7 +222,7 @@
         filters: [{kinds: [dvmEvent.kind + 1000, 7000], since: now() - 30, "#e": [dvmEvent.id]}],
         onEvent: (event: TrustedEvent, url: string) => {
           if (event.kind === 7000) {
-            $signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
+            user.signer.nip04.decrypt(SHIPYARD_PUBKEY, event.content).then(data => {
               try {
                 data = JSON.parse(data)[0]
                 showInfo(data[2] || "Your note is " + data[1] + "!")
@@ -229,12 +238,12 @@
     } else {
       router.clearModals()
 
-      thunk = publishThunk({relays, event: signedEvent, delay: $userSettings.send_delay})
+      thunk = thunks.get().publish({relays, event: signedEvent, delay: $userSettings.send_delay})
     }
 
     new Promise<void>(resolve => {
       thunk.subscribe(t => {
-        if (thunkIsComplete(t)) {
+        if (t.isComplete()) {
           resolve()
         }
       })
@@ -251,7 +260,7 @@
         timeout: $userSettings.send_delay / 1000,
         onCancel: () => {
           aborted = true
-          abortThunk(thunk)
+          thunk.abort()
           router.at("notes/create").open()
           drafts.set(DRAFT_KEY, editor.getJSON())
         },
@@ -270,10 +279,13 @@
     showPreview = !showPreview
   }
 
+  // Relay selection is async now, and this has to answer synchronously; the pubkey's own write
+  // relays are the hint the selection would have started from anyway.
+  const getWriteRelays = (pubkey: string) => $relayLists.writeUrls(pubkey).get().slice(0, 3)
+
   const pubkeyEncoder = {
     encode: pubkey => {
-      const relays = Router.get().FromPubkeys([pubkey]).limit(3).getUrls()
-      const nprofile = nip19.nprofileEncode({pubkey, relays})
+      const nprofile = nip19.nprofileEncode({pubkey, relays: getWriteRelays(pubkey)})
 
       return toNostrURI(nprofile)
     },
@@ -321,8 +333,7 @@
 
   onMount(() => {
     if (quote && isReplaceable(quote)) {
-      const relays = Router.get().Event(quote).limit(3).getUrls()
-      const naddr = Address.fromEvent(quote, relays).toNaddr()
+      const naddr = Address.fromEvent(quote, getWriteRelays(quote.pubkey)).toNaddr()
 
       editor.commands.insertContent("\n")
       editor.commands.insertNAddr({bech32: toNostrURI(naddr)})
@@ -331,14 +342,14 @@
         id: quote.id,
         kind: quote.kind,
         author: quote.pubkey,
-        relays: Router.get().Event(quote).limit(3).getUrls(),
+        relays: getWriteRelays(quote.pubkey),
       })
 
       editor.commands.insertContent("\n")
       editor.commands.insertNEvent({bech32: toNostrURI(nevent)})
     } else if (
       pubkey &&
-      pubkey !== $session.pubkey &&
+      pubkey !== $app.user?.pubkey &&
       !editor.getText({blockSeparator: "\n"}).trim()
     ) {
       editor.commands.insertNProfile({bech32: pubkeyEncoder.encode(pubkey)})
