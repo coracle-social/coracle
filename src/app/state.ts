@@ -1,14 +1,6 @@
 import {writable, get} from "svelte/store"
 import {noop, uniq} from "@welshman/lib"
-import {
-  FEEDS,
-  Address,
-  APP_DATA,
-  addMaximalFallbacks,
-  getIdFilters,
-  outbox,
-  userOutbox,
-} from "@welshman/util"
+import {FEEDS, Address, APP_DATA, getIdFilters, outbox, userOutbox} from "@welshman/util"
 import {
   BlossomServerLists,
   FollowLists,
@@ -75,7 +67,7 @@ export const loadUserData = async () => {
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({
-    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
+    relays: await resolveRelays([userOutbox()]),
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
       {
@@ -90,10 +82,7 @@ export const loadUserData = async () => {
       const pubkeys = uniq(addrs.map(a => Address.from(a).pubkey))
 
       myLoad({
-        relays: await resolveRelays(
-          pubkeys.map(pk => outbox(pk)),
-          {policy: addMaximalFallbacks},
-        ),
+        relays: await resolveRelays(pubkeys.map(pk => outbox(pk))),
         filters: getIdFilters(addrs),
       }).catch(noop)
     })
