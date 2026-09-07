@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type {Wallet} from "@welshman/util"
   import Button from "src/partials/Button.svelte"
   import {pubkey, sessions} from "src/engine/core"
-  import type {StoredSession} from "src/engine/core"
+  import type {SessionWithMeta} from "src/engine"
   import {router} from "src/app/util"
 
   // Wallet configuration is coracle's own per-account metadata, so it rides alongside welshman's
   // serializable session in the sessions store rather than inside it.
-  type SessionWithWallet = StoredSession & {wallet?: Wallet}
-
   const back = () => router.back()
 
   const confirm = async () => {
@@ -16,11 +13,11 @@
 
     if (userPubkey) {
       sessions.update($sessions => {
-        const stored: SessionWithWallet = $sessions[userPubkey]
+        const stored: SessionWithMeta = $sessions[userPubkey]
 
         if (!stored) return $sessions
 
-        const updated: SessionWithWallet = {...stored, wallet: undefined}
+        const updated: SessionWithMeta = {...stored, wallet: undefined}
 
         return {...$sessions, [userPubkey]: updated}
       })

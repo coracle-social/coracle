@@ -12,16 +12,14 @@
   import Divider from "src/partials/Divider.svelte"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import {getWebLn} from "src/engine"
+  import type {SessionWithMeta} from "src/engine"
   import {pubkey, sessions} from "src/engine/core"
-  import type {StoredSession} from "src/engine/core"
   import {router} from "src/app/util"
 
   export let qp
 
   // Wallet configuration is coracle's own per-account metadata, so it rides alongside welshman's
   // serializable session in the sessions store rather than inside it.
-  type SessionWithWallet = StoredSession & {wallet?: Wallet}
-
   const setWallet = (wallet: Wallet) => {
     const userPubkey = pubkey.get()
 
@@ -32,7 +30,7 @@
 
       if (!stored) return $sessions
 
-      const updated: SessionWithWallet = {...stored, wallet}
+      const updated: SessionWithMeta = {...stored, wallet}
 
       return {...$sessions, [userPubkey]: updated}
     })
