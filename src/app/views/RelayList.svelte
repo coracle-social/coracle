@@ -1,27 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
-  import type {RelayProfile} from "@welshman/util"
-  import {nthEq, displayList, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {
-    pubkey,
-    relays,
-    relaySearch,
-    displayProfileByPubkey,
-    profilesByPubkey,
-    deriveRelayList,
-    deriveMessagingRelayList,
-    relayListsByPubkey,
-  } from "@welshman/app"
-  import {
-    isShareableRelayUrl,
-    isRelayUrl,
-    normalizeRelayUrl,
-    profileHasName,
-    getRelaysFromList,
-    RelayMode,
-  } from "@welshman/util"
+  import type {Relay} from "@welshman/domain"
+  import {nthEq, displayList, noop, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {MessagingRelayLists, RelayLists, Relays} from "@welshman/app"
+  import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, userInbox} from "@welshman/util"
+  import {fromApp, profiles, relayLists, resolveRelays} from "src/engine/core"
   import {createScroller} from "src/util/misc"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -36,19 +20,31 @@
 
   const tabs = ["search", "reviews"]
 
-  const userRelayList = deriveRelayList($pubkey)
+  // Relay selections come off the plugin projections, which stay in sync with the repository
+  const userRelayUrls = fromApp($app => $app.use(RelayLists).urls($app.user?.pubkey ?? "").$)
 
-  const userMessagingRelayList = deriveMessagingRelayList($pubkey)
+  const userMessagingRelayUrls = fromApp(
+    $app => $app.use(MessagingRelayLists).urls($app.user?.pubkey ?? "").$,
+  )
+
+  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
+
+  // Stands in for the deleted `profileHasName`
+  const hasName = (pk: string) => {
+    const profile = profiles.get().get(pk)
+
+    return Boolean(profile?.name() || profile?.values.display_name)
+  }
 
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
 
     for (const pk of $userFollows) {
-      if (!profileHasName($profilesByPubkey.get(pk))) {
+      if (!hasName(pk)) {
         continue
       }
 
-      for (const url of getRelaysFromList($relayListsByPubkey.get(pk), RelayMode.Write)) {
+      for (const url of relayLists.get().writeUrls(pk).get()) {
         if (isShareableRelayUrl(url)) {
           pushToMapKey(m, url, pk)
         }
@@ -59,19 +55,20 @@
   })()
 
   const searchRelays = derived(
-    relays,
-    $relays => (term: string) =>
+    relaySearch,
+    $relaySearch => (term: string) =>
       (term
         ? $relaySearch.searchOptions(term)
         : sortBy(p => -(pubkeysByUrl.get(p.url)?.length || 0), $relaySearch.options)
-      ).map((relay: RelayProfile) => {
+      ).map((relay: Relay) => {
         const pubkeys = pubkeysByUrl.get(relay.url) || []
         const description =
           pubkeys.length > 0
-            ? "Used by " + displayList(pubkeys.map(displayProfileByPubkey))
+            ? "Used by " + displayList(pubkeys.map(pk => profiles.get().display(pk).get()))
             : relay.description
 
-        return {...relay, description}
+        // A Relay is a class instance, so spreading it would drop its methods
+        return {url: relay.url, description}
       }),
   )
 
@@ -114,8 +111,8 @@
 
   $: currentRelayUrls = uniq([
     ...currentRelayUrls,
-    ...getRelaysFromList($userRelayList),
-    ...getRelaysFromList($userMessagingRelayList),
+    ...$userRelayUrls,
+    ...$userMessagingRelayUrls,
   ]).sort()
 
   $: ratings = groupBy(e => {
@@ -128,16 +125,21 @@
 
   const controller = new AbortController()
 
-  myRequest({
-    signal: controller.signal,
-    relays: Router.get().ForUser().policy(addMaximalFallbacks).getUrls(),
-    filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
-    onEvent: event => {
-      if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
-        reviews = sortEventsDesc(reviews.concat(event))
-      }
-    },
-  })
+  // Relay selection is async now, so the request starts a tick late; the review tab renders empty
+  // until it lands, which is what it did before any reviews arrived anyway.
+  const loadReviews = async () =>
+    myRequest({
+      signal: controller.signal,
+      relays: await resolveRelays([userInbox()]),
+      filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
+      onEvent: event => {
+        if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
+          reviews = sortEventsDesc(reviews.concat(event))
+        }
+      },
+    })
+
+  loadReviews().catch(noop)
 
   onMount(() => {
     const scroller = createScroller(loadMore, {element})

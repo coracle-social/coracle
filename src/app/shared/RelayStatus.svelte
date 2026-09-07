@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
-  import {Pool} from "@welshman/net"
   import Popover from "src/partials/Popover.svelte"
+  import {app} from "src/engine/core"
   import {ConnectionType, displayConnectionType, getSocketStatus} from "src/domain/connection"
 
   export let url
@@ -10,7 +10,7 @@
 
   onMount(() => {
     const interval = setInterval(() => {
-      status = getSocketStatus(Pool.get().get(url))
+      status = getSocketStatus($app.pool.get(url))
     }, 800)
 
     return () => {

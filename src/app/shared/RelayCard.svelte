@@ -1,7 +1,8 @@
 <script lang="ts">
   import cx from "classnames"
-  import {displayRelayUrl, RelayMode} from "@welshman/util"
-  import {pubkey, signer, deriveRelayStats, deriveRelay, derivePubkeyRelays} from "@welshman/app"
+  import {displayRelayUrl} from "@welshman/util"
+  import {MessagingRelayLists, RelayLists, RelayStats, Relays} from "@welshman/app"
+  import {fromApp, signer} from "src/engine/core"
   import {displayUrl, ensureMailto, quantify} from "src/util/misc"
   import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
@@ -25,11 +26,16 @@
 
   let innerWidth = 0
 
-  const relay = deriveRelay(url)
-  const stats = deriveRelayStats(url)
-  const readRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Read)
-  const writeRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Write)
-  const messagingRelayUrls = derivePubkeyRelays($pubkey, RelayMode.Messaging)
+  // Subscribing lazily loads the relay's nip-11 document
+  const relay = fromApp($app => $app.use(Relays).one(url))
+  const stats = fromApp($app => $app.use(RelayStats).one(url))
+
+  // Relay selections come off the plugin projections, which stay in sync with the repository
+  const readRelayUrls = fromApp($app => $app.use(RelayLists).readUrls($app.user?.pubkey ?? "").$)
+  const writeRelayUrls = fromApp($app => $app.use(RelayLists).writeUrls($app.user?.pubkey ?? "").$)
+  const messagingRelayUrls = fromApp(
+    $app => $app.use(MessagingRelayLists).urls($app.user?.pubkey ?? "").$,
+  )
 
   const policySetter = (mode: string) => () => {
     const read = $readRelayUrls.includes(url)

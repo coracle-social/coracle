@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {makeEvent} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {publishThunk} from "@welshman/app"
+  import {noop} from "@welshman/lib"
+  import {makeEvent, userOutbox} from "@welshman/util"
+  import {resolveRelays, thunks} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -20,21 +20,24 @@
   const onSubmit = () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    publishThunk({
-      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-      event: makeEvent(1986, {
-        content,
-        tags: [
-          ...getClientTags(),
-          ...editor.storage.nostr.getEditorTags(),
-          ["L", "review"],
-          ["l", "review/relay", "review"],
-          // Rating is a number from 0 to 1, but tag values have to be strings
-          ["rating", String(rating)],
-          ["r", url],
-        ],
-      }),
+    // Build the event before popping, since that tears the editor down
+    const event = makeEvent(1986, {
+      content,
+      tags: [
+        ...getClientTags(),
+        ...editor.storage.nostr.getEditorTags(),
+        ["L", "review"],
+        ["l", "review/relay", "review"],
+        // Rating is a number from 0 to 1, but tag values have to be strings
+        ["rating", String(rating)],
+        ["r", url],
+      ],
     })
+
+    // Relay selection is async now, so publish once it resolves rather than making the user wait
+    resolveRelays([userOutbox()])
+      .then(relays => thunks.get().publish({event, relays}))
+      .catch(noop)
 
     router.pop()
   }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getRelayTagValues, isShareableRelayUrl} from "@welshman/util"
+  import {isShareableRelayUrl, relayTags, tagValues} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {RELAYS, BLOCKED_RELAYS, SEARCH_RELAYS, MESSAGING_RELAYS} from "@welshman/util"
@@ -18,7 +18,7 @@
   {:else if kind === MESSAGING_RELAYS}
     <p>New messaging relay selections:</p>
   {/if}
-  {#each getRelayTagValues(note.tags).filter(isShareableRelayUrl) as url}
+  {#each tagValues(relayTags(["r", "relay"]), note.tags).filter(isShareableRelayUrl) as url}
     <RelayCard {url} />
   {/each}
 </FlexColumn>
