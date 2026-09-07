@@ -1,8 +1,7 @@
 <script lang="ts">
-  import {identity} from "@welshman/lib"
-  import {makeEvent} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {pubkey, topicSearch, publishThunk} from "@welshman/app"
+  import {identity, noop} from "@welshman/lib"
+  import {makeEvent, userOutbox} from "@welshman/util"
+  import {Topics} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,11 +10,14 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
+  import {fromApp, pubkey, resolveRelays, thunks} from "src/engine/core"
   import {loadLabels, getClientTags, deriveCollections, collectionSearch} from "src/engine"
 
   export let id
 
   const collections = deriveCollections($pubkey)
+
+  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
   const onTopicChange = name => {
     if (name) {
@@ -29,7 +31,7 @@
     names = newNames
   }
 
-  const submit = () => {
+  const submit = async () => {
     if (names.length === 0) {
       return showWarning("Please select at least one collection.")
     }
@@ -41,9 +43,10 @@
       ...getClientTags(),
     ]
 
-    publishThunk({
+    // A collection is the user's own data, so it goes to their write relays and nowhere else
+    thunks.get().publish({
       event: makeEvent(1985, {tags}),
-      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+      relays: await resolveRelays([userOutbox()]),
     })
 
     showInfo("Your tag has been saved!")
@@ -55,7 +58,9 @@
 
   $: options = $collections.map(c => c.name)
 
-  loadLabels([$pubkey])
+  if ($pubkey) {
+    loadLabels([$pubkey]).catch(noop)
+  }
 </script>
 
 <form on:submit|preventDefault={submit}>
