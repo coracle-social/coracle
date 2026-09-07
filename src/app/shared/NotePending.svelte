@@ -16,7 +16,6 @@
 
 <script lang="ts">
   import {remove} from "@welshman/lib"
-  import {abortThunk, getCompleteThunkUrls, getThunkUrlsWithStatus} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
   import {tweened} from "svelte/motion"
@@ -32,15 +31,15 @@
   const completedDisplay = tweened(0)
 
   const abort = () => {
-    abortThunk(thunk)
+    thunk.abort()
     onReplyAbort(thunk)
   }
 
   $: relays = remove(LOCAL_RELAY_URL, $thunk?.options?.relays)
-  $: completed = remove(LOCAL_RELAY_URL, getCompleteThunkUrls($thunk))
-  $: sending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Sending, $thunk))
-  $: pending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Pending, $thunk))
-  $: success = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Success, $thunk))
+  $: completed = remove(LOCAL_RELAY_URL, $thunk.getCompleteUrls())
+  $: sending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Sending))
+  $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))
   $: showProgress = sending.length === 0
   $: completedDisplay.set((completed.length / relays.length) * 80)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
