@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {stripProtocol} from "@welshman/lib"
+  import {first, max, noop, stripProtocol} from "@welshman/lib"
   import {
     PINS,
     REACTION,
@@ -7,33 +7,24 @@
     RELAYS,
     MESSAGING_RELAYS,
     FOLLOWS,
+    indexers,
     isShareableRelayUrl,
-    getPubkeyTagValues,
-    getListTags,
     getIdFilters,
-    getTagValues,
-    getRelaysFromList,
+    outbox,
   } from "@welshman/util"
   import {feedFromFilter} from "@welshman/feeds"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
-    deriveProfile,
-    deriveHandleForPubkey,
-    deriveZapperForPubkey,
-    displayProfileByPubkey,
-    deriveRelayList,
-    tagZapSplit,
-    deriveProfileDisplay,
-    deriveFollowList,
-    followersByPubkey,
-    getUserWotScore,
-    maxWot,
-    session,
-    tagPubkey,
-    repository,
-    pinListsByPubkey,
+    Events,
+    FollowLists,
+    Handles,
+    PinLists,
+    Profiles,
+    RelayLists,
+    Wot,
+    WotScope,
+    Zappers,
   } from "@welshman/app"
-  import {deriveEvents} from "@welshman/store"
+  import {fromApp, profiles, relayLists, resolveRelays, session} from "src/engine/core"
   import {ensureProto, toTitle} from "src/util/misc"
   import AltColor from "src/partials/AltColor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
@@ -65,23 +56,34 @@
   export let pubkey
   export let relays = []
 
-  const handle = deriveHandleForPubkey(pubkey)
-  const profile = deriveProfile(pubkey, relays)
-  const zapper = deriveZapperForPubkey(pubkey, relays)
-  const relayList = deriveRelayList(pubkey, relays)
+  const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
+  const profile = fromApp($app => $app.use(Profiles).one(pubkey, relays))
+  const zapper = fromApp($app => $app.use(Zappers).forPubkey(pubkey, relays).$)
+  const relayList = fromApp($app => $app.use(RelayLists).one(pubkey, relays))
+  const pinList = fromApp($app => $app.use(PinLists).one(pubkey))
   const notesFeed = makeFeed({definition: feedFromFilter({authors: [pubkey]})})
   const likesFeed = makeFeed({definition: feedFromFilter({kinds: [REACTION], authors: [pubkey]})})
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
   const followsCount = tweened(0, {interpolate, duration: 1000})
   const followersCount = tweened(0, {interpolate, duration: 1300})
-  const follows = deriveFollowList(pubkey)
+  const follows = fromApp($app => $app.use(FollowLists).one(pubkey))
   const following = derived(userFollows, $m => $m.has(pubkey))
-  const wotScore = getUserWotScore(pubkey)
+  // Scored against the user's own follows, which is what the old wot graph counted
+  const wotScore = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
+  const maxWot = fromApp($app =>
+    derived($app.use(Wot).scores(WotScope.Follows).$, $scores => max(Array.from($scores.values()))),
+  )
+  // The count everyone can see, not the count the user's own follows account for
+  const followers = fromApp($app => $app.use(Wot).followers(pubkey, WotScope.Global).$)
   const npub = nip19.npubEncode(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
   const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
 
-  const startZap = () => zap({splits: [tagZapSplit(pubkey)]})
+  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
+  const startZap = () =>
+    zap({
+      splits: [["zap", pubkey, first(relayLists.get().writeUrls(pubkey).get()) || "", "1"]],
+    })
 
   const setActiveTab = tab => {
     activeTab = tab
@@ -94,7 +96,7 @@
       if ($following) {
         await unfollow(pubkey)
       } else {
-        await follow(tagPubkey(pubkey))
+        await follow(pubkey)
       }
     } finally {
       togglingFollowing = undefined
@@ -104,29 +106,32 @@
   let activeTab = "notes"
   let togglingFollowing: boolean = undefined
 
-  $: followersCount.set($followersByPubkey.get(pubkey)?.size || 0)
-  $: followsCount.set(getPubkeyTagValues(getListTags($follows)).length)
-  $: pinnedIds = getTagValues(["e"], getListTags($pinListsByPubkey.get(pubkey)))
-  $: pinnedEvents = deriveEvents({repository, filters: getIdFilters(pinnedIds)})
-  $: zapDisplay = $profile?.lud16 || $profile?.lud06
+  $: followersCount.set($followers.length)
+  $: followsCount.set(($follows?.pubkeys() || []).length)
+  $: pinnedIds = $pinList?.ids() || []
+  $: pinnedEvents = fromApp($app => $app.use(Events).all(getIdFilters(pinnedIds)).$)
+  $: zapDisplay = $profile?.values.lud16 || $profile?.values.lud06
 
   $: {
-    myLoad({
-      relays: Router.get().FromPubkey(pubkey).policy(addMaximalFallbacks).getUrls(),
-      filters: getIdFilters(pinnedIds),
-    })
+    const filters = getIdFilters(pinnedIds)
+
+    // Relay selection is asynchronous now, so this fires a tick after the pins land
+    resolveRelays([outbox(pubkey)])
+      .then(urls => myLoad({relays: urls, filters}))
+      .catch(noop)
   }
 
   // Force load profile when the user visits the detail page
-  myLoad({
-    filters: [{kinds: [PINS, PROFILE, RELAYS, MESSAGING_RELAYS, FOLLOWS], authors: [pubkey]}],
-    relays: Router.get()
-      .merge([Router.get().Index(), Router.get().FromPubkey(pubkey)])
-      .policy(addMaximalFallbacks)
-      .getUrls(),
-  })
+  resolveRelays([indexers(), outbox(pubkey)])
+    .then(urls =>
+      myLoad({
+        relays: urls,
+        filters: [{kinds: [PINS, PROFILE, RELAYS, MESSAGING_RELAYS, FOLLOWS], authors: [pubkey]}],
+      }),
+    )
+    .catch(noop)
 
-  document.title = displayProfileByPubkey(pubkey)
+  document.title = $profiles.display(pubkey).get()
 </script>
 
 <div>
@@ -164,7 +169,7 @@
                   <div slot="trigger">
                     <WotScore
                       class="h-6 w-6"
-                      score={wotScore}
+                      score={$wotScore}
                       max={$maxWot}
                       accent={$following || pubkey === $session?.pubkey} />
                   </div>
@@ -174,7 +179,7 @@
                     class="flex items-center gap-1"
                     href="/help/web-of-trust">
                     <i class="fa fa-info-circle" />
-                    WoT Score: {wotScore}
+                    WoT Score: {$wotScore}
                   </Link>
                 </Popover>
               </div>
@@ -204,13 +209,13 @@
             </div>
           </Button>
         {/if}
-        {#if $profile?.website}
+        {#if $profile?.website()}
           <Link
             external
             class="col-span-2 flex items-center gap-2"
-            href={ensureProto($profile.website)}>
+            href={ensureProto($profile.website())}>
             <i class="fa fa-link w-4 text-accent" />
-            {stripProtocol($profile.website)}
+            {stripProtocol($profile.website())}
           </Link>
         {/if}
       </div>
@@ -251,7 +256,7 @@
   <PersonCollections {pubkey} />
 {:else if activeTab === "relays"}
   {#if $relayList}
-    <PersonRelays urls={getRelaysFromList($relayList).filter(isShareableRelayUrl)} />
+    <PersonRelays urls={$relayList.urls().filter(isShareableRelayUrl)} />
   {:else}
     <Spinner />
   {/if}

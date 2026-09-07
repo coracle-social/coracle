@@ -1,10 +1,20 @@
 <script lang="ts">
+  import {derived} from "svelte/store"
+  import {max as maxValue} from "@welshman/lib"
   import {FeedType} from "@welshman/feeds"
-  import {maxWot} from "@welshman/app"
+  import {Wot, WotScope} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
   import RangeInput from "src/partials/RangeInput.svelte"
 
   export let feed
   export let onChange
+
+  // Scored against the user's own follows, which is what the old wot graph counted
+  const maxWot = fromApp($app =>
+    derived($app.use(Wot).scores(WotScope.Follows).$, $scores =>
+      maxValue(Array.from($scores.values())),
+    ),
+  )
 
   const changeValue = ({min, max}) => onChange([FeedType.WOT, {min, max}])
 

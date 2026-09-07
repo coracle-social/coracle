@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {writable} from "svelte/store"
-  import {WEEK, not, now, ago, uniqBy, hash} from "@welshman/lib"
+  import {WEEK, noop, not, now, ago, uniqBy, hash} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {synced, localStorageProvider} from "@welshman/store"
   import type {FeedController, Feed as FeedDefinition} from "@welshman/feeds"
@@ -12,7 +12,7 @@
     isKindFeed,
     walkFeed,
   } from "@welshman/feeds"
-  import {makeFeedController} from "@welshman/app"
+  import {feeds} from "src/engine/core"
   import {createScroller} from "src/util/misc"
   import {noteKinds, repostKinds} from "src/util/nostr"
   import {fly, fade} from "src/util/transition"
@@ -78,7 +78,9 @@
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds, ...repostKinds), feed.definition)
 
-    ctrl = makeFeedController({
+    // The FeedController now gets its relay routing and net context from the app, so it comes
+    // from the Feeds plugin rather than a module-level factory.
+    ctrl = $feeds.makeFeedController({
       feed: definition,
       useWindowing,
       signal,
@@ -95,7 +97,7 @@
     })
 
     if (!useWindowing) {
-      ctrl.load(1000)
+      ctrl.load(1000).catch(noop)
     }
   }
 
@@ -111,7 +113,7 @@
     events = [...events, ...buffer.splice(0, 10)]
 
     if (useWindowing && buffer.length < 25) {
-      ctrl.load(25)
+      ctrl.load(25).catch(noop)
     }
   }
 

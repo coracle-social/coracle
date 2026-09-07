@@ -1,6 +1,6 @@
 <script lang="ts">
   import {makeListFeed} from "@welshman/feeds"
-  import {repository, displayProfileByPubkey} from "@welshman/app"
+  import {app, profiles} from "src/engine/core"
   import Link from "src/partials/Link.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {listSearch} from "src/engine"
@@ -12,10 +12,10 @@
   const onAddressesChange = addresses => onChange(makeListFeed({addresses}))
 
   const displayAddress = address => {
-    const event = repository.getEvent(address)
+    const event = $app.repository.getEvent(address)
 
     return event
-      ? `${$listSearch.displayValue(address)} by ${displayProfileByPubkey(event.pubkey)}`
+      ? `${$listSearch.displayValue(address)} by ${$profiles.display(event.pubkey).get()}`
       : $listSearch.displayValue(address)
   }
 

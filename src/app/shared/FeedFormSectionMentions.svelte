@@ -1,6 +1,7 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
-  import {profileSearch, displayProfileByPubkey} from "@welshman/app"
+  import {Profiles} from "@welshman/app"
+  import {fromApp, profiles} from "src/engine/core"
   import Link from "src/partials/Link.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -8,6 +9,8 @@
 
   export let feed
   export let onChange
+
+  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
 </script>
 
 <span class="staatliches text-lg">Which mentions would you like to see?</span>
@@ -19,7 +22,7 @@
   <span slot="item" let:item let:context>
     {#if context === "value"}
       <Link modal href={router.at("people").of(item).toString()}>
-        {displayProfileByPubkey(item)}
+        {$profiles.display(item).get()}
       </Link>
     {:else}
       <PersonBadge inert pubkey={item} />
