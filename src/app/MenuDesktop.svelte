@@ -2,15 +2,8 @@
   import {derived} from "svelte/store"
   import {ago, omit, spec, MINUTE} from "@welshman/lib"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import {
-    signer,
-    pubkey,
-    sessions,
-    deriveProfileDisplay,
-    displayProfileByPubkey,
-    thunks,
-    thunkIsComplete,
-  } from "@welshman/app"
+  import {signer, pubkey, sessions, profiles, thunks, switchAccount} from "src/engine/core"
+  import {showWarning} from "src/partials/Toast.svelte"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -39,14 +32,19 @@
     )
   }
 
+  // Switching rebuilds the app around the other account, so it can fail where setting the
+  // active pubkey used to be a plain assignment
+  const setAccount = (theirPubkey: string) =>
+    switchAccount(theirPubkey).catch(() => showWarning("Failed to switch to that account."))
+
   let subMenu
 
-  $: hud = derived(thunks, $thunks => {
+  $: hud = derived($thunks.history, $history => {
     let pending = 0
     let success = 0
     let failure = 0
 
-    for (const thunk of $thunks) {
+    for (const thunk of $history) {
       if (thunk.event.pubkey !== $pubkey) {
         continue
       }
@@ -57,7 +55,7 @@
 
       const results = Object.values(omit([LOCAL_RELAY_URL], thunk.results))
 
-      if (!thunkIsComplete(thunk)) {
+      if (!thunk.isComplete()) {
         pending += 1
       } else if (results.some(spec({status: PublishStatus.Success}))) {
         success += 1
@@ -71,7 +69,7 @@
 
   $: isFeedPage = Boolean($page?.path.match(/^\/(notes)?$/))
   $: isListPage = Boolean($page?.path.match(/^\/(lists)?$/))
-  $: userDisplay = deriveProfileDisplay($pubkey)
+  $: userDisplay = $profiles.display($pubkey).$
 </script>
 
 <div class="bottom-sai left-sai top-sai fixed z-sidebar w-72 bg-tinted-700 transition-colors">
@@ -188,12 +186,12 @@
       <MenuDesktopSecondary onEscape={closeSubMenu}>
         {#each Object.values($sessions) as s (s.pubkey)}
           {#if s.pubkey !== $pubkey}
-            <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
+            <MenuItem class="py-4" on:click={() => setAccount(s.pubkey)}>
               <div class="flex items-center gap-2">
                 <PersonCircle
                   class="h-8 w-8 border border-solid border-tinted-200"
                   pubkey={s.pubkey} />
-                {displayProfileByPubkey(s.pubkey)}
+                {$profiles.display(s.pubkey).get()}
               </div>
             </MenuItem>
           {/if}

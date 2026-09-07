@@ -1,9 +1,9 @@
 <script lang="ts">
   import {formatTimestamp, remove} from "@welshman/lib"
   import type {Thunk} from "@welshman/app"
-  import {getThunkUrlsWithStatus, publishThunk, wrapManager} from "@welshman/app"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import type {SignedEvent, TrustedEvent} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
+  import {app, thunks} from "src/engine/core"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
   import Button from "src/partials/Button.svelte"
@@ -16,10 +16,8 @@
 
   export let thunk: Thunk
 
-  const event = wrapManager.getRumor(thunk.event.id) || thunk.event
-
   const retry = (url: string, event: TrustedEvent) =>
-    publishThunk({relays: [url], event: thunk.event as SignedEvent})
+    $thunks.publish({relays: [url], event: thunk.event})
 
   const expand = () => {
     expanded = true
@@ -31,10 +29,12 @@
 
   let expanded = false
 
-  $: pending = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Pending, $thunk))
-  $: success = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Success, $thunk))
-  $: failure = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Failure, $thunk))
-  $: timeout = remove(LOCAL_RELAY_URL, getThunkUrlsWithStatus(PublishStatus.Timeout, $thunk))
+  // A gift-wrapped event is published as its wrap, so show the rumor it carries
+  $: event = $app.wrapManager.getRumor(thunk.event.id) || thunk.event
+  $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))
+  $: failure = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Failure))
+  $: timeout = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Timeout))
 </script>
 
 {#if event}

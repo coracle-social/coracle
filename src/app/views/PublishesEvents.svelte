@@ -1,14 +1,15 @@
 <script lang="ts">
   import {call, uniqBy, ago, nthNe, nth, DAY, MINUTE, now, remove, sortBy} from "@welshman/lib"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import {thunks} from "@welshman/app"
+  import {thunks} from "src/engine/core"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
   import {pluralize} from "src/util/misc"
 
+  $: thunkHistory = $thunks.history
   $: recent = uniqBy(
     t => t.event.id,
-    $thunks.filter(t => t.event.created_at > ago(DAY)),
+    $thunkHistory.filter(t => t.event.created_at > ago(DAY)),
   )
 
   $: relays = new Set(

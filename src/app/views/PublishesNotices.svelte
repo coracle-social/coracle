@@ -1,10 +1,11 @@
 <script lang="ts">
   import {formatTimestamp} from "@welshman/lib"
-  import {thunks, createSearch, isThunk} from "@welshman/app"
+  import {createSearch} from "@welshman/app"
   import {fly} from "svelte/transition"
   import AltColor from "src/partials/AltColor.svelte"
   import Input from "src/partials/Input.svelte"
   import ThunkNotice from "src/partials/ThunkNotice.svelte"
+  import {thunks} from "src/engine/core"
   import {subscriptionNotices} from "src/domain/connection"
 
   export let search: string = ""
@@ -23,18 +24,17 @@
     }
   }
 
-  $: pubNotices = Object.values($thunks).flatMap(thunk => {
-    if (!isThunk(thunk)) return []
-
-    return Object.entries(thunk.results).map(([url, {status, detail}]) => ({
+  $: thunkHistory = $thunks.history
+  $: pubNotices = $thunkHistory.flatMap(thunk =>
+    Object.entries(thunk.results).map(([url, {status, detail}]) => ({
       url,
       status,
       message: detail,
       eventId: thunk.event.id,
       created_at: thunk.event.created_at,
       eventKind: "Kind" + thunk.event.kind,
-    }))
-  })
+    })),
+  )
 
   $: noticesSearch = createSearch([...pubNotices, ...subNotices], {
     getValue: notice => notice.url,

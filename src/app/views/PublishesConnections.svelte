@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {relaysByUrl, relayStatsByUrl} from "@welshman/app"
   import {addToMapKey} from "@welshman/lib"
-  import {Pool} from "@welshman/net"
   import {displayRelayUrl} from "@welshman/util"
   import {onMount} from "svelte"
+  import {app, relays, relayStats} from "src/engine/core"
   import AltColor from "src/partials/AltColor.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {ConnectionType, displayConnectionType, getSocketStatus} from "src/domain/connection"
@@ -25,13 +24,16 @@
     ConnectionType.UnstableConnection,
   ]
 
-  $: connections = Array.from(Pool.get()._data.keys()).filter(url =>
+  $: relaysByUrl = $relays.index.$
+  $: relayStatsByUrl = $relayStats.index.$
+
+  $: connections = Array.from($app.pool._data.keys()).filter(url =>
     selectedOptions.length ? selectedOptions.some(s => connectionsStatus.get(s)?.has(url)) : true,
   )
 
   function fetchConnectionStatus() {
     const newConnectionStatus: Map<ConnectionType, Set<string>> = new Map()
-    for (const [url, socket] of Pool.get()._data.entries()) {
+    for (const [url, socket] of $app.pool._data.entries()) {
       addToMapKey(newConnectionStatus, getSocketStatus(socket), url)
     }
     connectionsStatus = newConnectionStatus
