@@ -7,14 +7,15 @@
   import * as lib from "@welshman/lib"
   import * as util from "@welshman/util"
   import * as content from "@welshman/content"
-  import * as welshmanRouter from "@welshman/router"
+  import * as welshmanDomain from "@welshman/domain"
   import * as signer from "@welshman/signer"
   import * as net from "@welshman/net"
   import * as app from "@welshman/app"
   import logger from "src/util/logger"
   import * as misc from "src/util/misc"
   import * as nostr from "src/util/nostr"
-  import {ready} from "src/engine"
+  import {session, pubkey} from "src/engine/core"
+  import {storageReady} from "src/engine/storage"
   import * as engine from "src/engine"
   import * as domain from "src/domain"
   import {loadUserData} from "src/app/state"
@@ -94,8 +95,6 @@
     asRelay,
     asEntity,
   } from "src/app/util/router"
-
-  const {session, pubkey} = app
 
   // Routes
 
@@ -341,13 +340,13 @@
     logger,
     router,
     content,
-    ...welshmanRouter,
     ...nostr,
     ...misc,
     ...signer,
     ...lib,
     ...util,
     ...net,
+    ...welshmanDomain,
     ...app,
     ...domain,
     ...engine,
@@ -432,7 +431,9 @@
 
   // App data boostrap and relay meta fetching
 
-  ready.then(async () => {
+  let bootstrapped = false
+
+  const bootstrap = async () => {
     // Our stores are throttled by 300, so wait until they're populated
     // before loading app data
     await sleep(350)
@@ -444,12 +445,16 @@
     if ($session) {
       loadUserData()
     }
-  })
+  }
+
+  // Storage is rebuilt per identity, so this is a store rather than a one-shot promise now
+  $: if ($storageReady && !bootstrapped) {
+    bootstrapped = true
+    bootstrap()
+  }
 </script>
 
-{#await ready}
-  <!-- pass -->
-{:then}
+{#if $storageReady}
   <div class="text-tinted-200">
     <Routes />
     {#key $pubkey}
@@ -459,4 +464,4 @@
       <Toast />
     {/key}
   </div>
-{/await}
+{/if}

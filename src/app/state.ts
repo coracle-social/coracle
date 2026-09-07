@@ -1,24 +1,24 @@
 import {writable, get} from "svelte/store"
-import {uniq} from "@welshman/lib"
+import {noop, uniq} from "@welshman/lib"
 import {
   FEEDS,
   Address,
   APP_DATA,
-  getAddressTagValues,
+  addMaximalFallbacks,
   getIdFilters,
-  getListTags,
+  outbox,
+  userOutbox,
 } from "@welshman/util"
-import {Router, addMaximalFallbacks} from "@welshman/router"
 import {
-  pubkey,
-  loadUserRelayList,
-  loadUserMessagingRelayList,
-  loadUserBlossomServerList,
-  loadUserProfile,
-  loadUserFollowList,
-  loadUserMuteList,
-  getFollows,
+  BlossomServerLists,
+  FollowLists,
+  MessagingRelayLists,
+  MuteLists,
+  Profiles,
+  RelayLists,
+  Wot,
 } from "@welshman/app"
+import {app, resolveRelays} from "src/engine/core"
 import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
@@ -55,24 +55,27 @@ export const slowConnections = writable([])
 // Synchronization from events to state
 
 export const loadUserData = async () => {
-  // Load relays, then load everything else so we have a better chance of finding it
-  const $pubkey = pubkey.get()
+  const $app = app.get()
+  const $pubkey = $app.user?.pubkey
 
-  // Load relay selections first
-  await loadUserRelayList()
+  if (!$pubkey) return
+
+  // Relay selections decide where everything else gets loaded from, so they go first. Loaders
+  // reject now rather than swallowing failures, and a failure here must not stop the rest.
+  await $app.use(RelayLists).load($pubkey).catch(noop)
 
   // Load other crucial user data
   await Promise.all([
-    loadUserMessagingRelayList(),
-    loadUserBlossomServerList(),
-    loadUserProfile(),
-    loadUserFollowList(),
-    loadUserMuteList(),
+    $app.use(MessagingRelayLists).load($pubkey).catch(noop),
+    $app.use(BlossomServerLists).load($pubkey).catch(noop),
+    $app.use(Profiles).load($pubkey).catch(noop),
+    $app.use(FollowLists).load($pubkey).catch(noop),
+    $app.use(MuteLists).load($pubkey).catch(noop),
   ])
 
   // Load user feed selections, app data, and feeds that were favorited by the user
   myLoad({
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
+    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
     filters: [
       {authors: [$pubkey], kinds: [FEEDS]},
       {
@@ -81,18 +84,23 @@ export const loadUserData = async () => {
         "#d": Object.values(appDataKeys),
       },
     ],
-  }).then(() => {
-    const addrs = getAddressTagValues(getListTags(get(userFeedFavorites)))
-    const pubkeys = uniq(addrs.map(a => Address.from(a).pubkey))
-
-    myLoad({
-      relays: Router.get().FromPubkeys(pubkeys).policy(addMaximalFallbacks).getUrls(),
-      filters: getIdFilters(addrs),
-    })
   })
+    .then(async () => {
+      const addrs = get(userFeedFavorites)?.addresses() || []
+      const pubkeys = uniq(addrs.map(a => Address.from(a).pubkey))
+
+      myLoad({
+        relays: await resolveRelays(
+          pubkeys.map(pk => outbox(pk)),
+          {policy: addMaximalFallbacks},
+        ),
+        filters: getIdFilters(addrs),
+      }).catch(noop)
+    })
+    .catch(noop)
 
   // Load enough to figure out web of trust
-  loadPubkeys(getFollows($pubkey))
+  loadPubkeys($app.use(Wot).follows($pubkey).get())
 
   // Load our platform pubkey so we can zap it
   loadPubkeys([env.PLATFORM_PUBKEY])
