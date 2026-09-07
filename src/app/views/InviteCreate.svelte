@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {Relays} from "@welshman/app"
   import {identity, without} from "@welshman/lib"
   import {displayRelayUrl} from "@welshman/util"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
@@ -13,12 +12,10 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import {pickVals, toSpliced} from "src/util/misc"
-  import {fromApp} from "src/engine/core"
+  import {relaySearch} from "src/engine/core"
   import {onMount} from "svelte"
 
   export let initialPubkey = null
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
   const showSection = section => {
     sections = [...sections, section]

@@ -170,6 +170,13 @@ export const wot = usePlugin(Wot)
 export const wraps = usePlugin(Wraps)
 export const zappers = usePlugin(Zappers)
 
+// The searches each live on the plugin that owns the collection they index
+export const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
+
+export const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
+
+export const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
+
 // Domain entry points, since almost every read or write goes through one of them
 export const reader = <R extends BaseEventReader, W extends EventWriter<R>>(
   factory: KindFactory<R, W>,

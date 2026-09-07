@@ -3,9 +3,8 @@
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
   import type {Topic} from "@welshman/app"
-  import {Profiles, Topics} from "@welshman/app"
   import type {ProfileReader} from "@welshman/domain"
-  import {fromApp} from "src/engine/core"
+  import {profileSearch, topicSearch} from "src/engine/core"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
   import {createPeopleLoader} from "src/engine"
@@ -53,10 +52,6 @@
   )
 
   const {loading: loadingPeople, load: loadPeople} = createPeopleLoader()
-
-  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
-
-  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
 
   const results = derived(
     [term, topicSearch, profileSearch],

@@ -1,7 +1,6 @@
 <script lang="ts">
   import {FeedType} from "@welshman/feeds"
-  import {Profiles} from "@welshman/app"
-  import {fromApp, profiles} from "src/engine/core"
+  import {profileSearch, profiles} from "src/engine/core"
   import Link from "src/partials/Link.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
@@ -9,8 +8,6 @@
 
   export let feed
   export let onChange
-
-  const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
 </script>
 
 <span class="staatliches text-lg">Which mentions would you like to see?</span>

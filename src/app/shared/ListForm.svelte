@@ -12,7 +12,6 @@
     normalizeRelayUrl,
     displayRelayUrl,
   } from "@welshman/util"
-  import {Relays, Topics} from "@welshman/app"
   import {showInfo} from "src/partials/Toast.svelte"
   import Field from "src/partials/Field.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -22,7 +21,14 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {command, fromApp, profiles, relayLists, resolveRelays} from "src/engine/core"
+  import {
+    command,
+    profiles,
+    relayLists,
+    relaySearch,
+    resolveRelays,
+    topicSearch,
+  } from "src/engine/core"
   import {deleteEvent} from "src/engine"
   import {KindSearch, displayUserList, userListWriter} from "src/domain"
 
@@ -30,10 +36,6 @@
   export let exit
   export let hide = []
   export let showDelete = false
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
-
-  const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
   const openDelete = () => {
     deleteIsOpen = true

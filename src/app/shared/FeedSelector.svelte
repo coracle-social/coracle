@@ -8,8 +8,7 @@
     makeIntersectionFeed,
     Scope,
   } from "@welshman/feeds"
-  import {Relays} from "@welshman/app"
-  import {fromApp} from "src/engine/core"
+  import {relaySearch} from "src/engine/core"
   import {boolCtrl} from "src/partials/utils"
   import Modal from "src/partials/Modal.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -31,8 +30,6 @@
   export let setFeed
 
   const relayModal = boolCtrl()
-
-  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
   const makeFollowingFeed = (title, kinds) =>
     makeFeed({
