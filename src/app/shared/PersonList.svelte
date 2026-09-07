@@ -1,9 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {flatten, partition} from "@welshman/lib"
-  import {profileHasName} from "@welshman/util"
-  import {profilesByPubkey} from "@welshman/app"
+  import {Profiles} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
   import {createScroller} from "src/util/misc"
+  import {profileHasName} from "src/util/nostr"
   import Card from "src/partials/Card.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonSummary from "src/app/shared/PersonSummary.svelte"
@@ -12,6 +13,8 @@
 
   let element
   let limit = 10
+
+  const profilesByPubkey = fromApp($app => $app.use(Profiles).index.$)
 
   const loadMore = async () => {
     limit += 10

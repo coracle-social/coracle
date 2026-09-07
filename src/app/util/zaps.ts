@@ -1,52 +1,30 @@
-import {writable} from "svelte/store"
-import {identity} from "@welshman/lib"
-import type {TrustedEvent, Zap} from "@welshman/util"
-import {getTagValues, getLnUrl, zapFromEvent} from "@welshman/util"
-import {session, loadProfile, loadZapper} from "@welshman/app"
+import {get} from "svelte/store"
+import type {TrustedEvent, Wallet} from "@welshman/util"
+import {session, zappers} from "src/engine/core"
 import {router} from "./router"
 
-export const getLnUrlsForEvent = async (event: TrustedEvent) => {
-  const lnurls = getTagValues("zap", event.tags).map(getLnUrl)
+// Zap validation moved into the Zappers plugin: it reads the receipt's recipient, matches it
+// against the parent's zap splits, loads that recipient's zapper and validates the receipt with
+// it. The old lookup always used the first split's lnurl, so zaps to any other recipient of a
+// split note were silently discarded.
 
-  if (lnurls.length > 0) {
-    return lnurls
-  }
+export const getValidZap = (zap: TrustedEvent, parent: TrustedEvent) =>
+  zappers.get().validateZapReceipt(zap, parent)
 
-  const profile = await loadProfile(event.pubkey)
+export const getValidZaps = (zaps: TrustedEvent[], parent: TrustedEvent) =>
+  zappers.get().validateZapReceipts(zaps, parent)
 
-  return profile?.lnurl ? [profile.lnurl] : []
-}
-
-export const getZapperForZap = async (zap: TrustedEvent, parent: TrustedEvent) => {
-  const lnurls = await getLnUrlsForEvent(parent)
-
-  return lnurls.length > 0 ? loadZapper(lnurls[0]) : undefined
-}
-
-export const getValidZap = async (zap: TrustedEvent, parent: TrustedEvent) => {
-  const zapper = await getZapperForZap(zap, parent)
-
-  return zapper ? zapFromEvent(zap, zapper) : undefined
-}
-
-export const getValidZaps = async (zaps: TrustedEvent[], parent: TrustedEvent) => {
-  const validatedZaps = await Promise.all(zaps.map(zap => getValidZap(zap, parent)))
-
-  return validatedZaps.filter(identity)
-}
-
-export const deriveValidZaps = (zaps: TrustedEvent[], parent: TrustedEvent) => {
-  const store = writable<Zap[]>([])
-
-  getValidZaps(zaps, parent).then(validZaps => {
-    store.set(validZaps)
-  })
-
-  return store
-}
+// A live projection rather than the old one-shot store, so a zap that arrives (or a zapper that
+// finishes loading) after the first pass shows up without re-rendering the note
+export const deriveValidZaps = (zaps: TrustedEvent[], parent: TrustedEvent) =>
+  zappers.get().validZapReceipts(zaps, parent).$
 
 export const zap = (qp: Record<string, any>) => {
-  if (!session.get().wallet) {
+  // Wallet configuration is coracle's own per-account metadata, stored alongside the session.
+  // SessionWithMeta in src/engine/model.ts doesn't declare it yet.
+  const {wallet} = (get(session) || {}) as {wallet?: Wallet}
+
+  if (!wallet) {
     router.at("settings/wallet/connect").cx({qp}).open()
   } else {
     router.at("zap").qp(qp).open()

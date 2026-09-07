@@ -4,15 +4,22 @@ import type {Writable} from "svelte/store"
 import {get} from "svelte/store"
 import type {UploadTask, FileAttributes} from "@welshman/editor"
 import {first} from "@welshman/lib"
-import {getTagValue, getListTags} from "@welshman/util"
-import {Router} from "@welshman/router"
-import {profileSearch, userBlossomServerList} from "@welshman/app"
+import {BlossomServerLists} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension, editorProps} from "@welshman/editor"
 import {ensureProto} from "src/util/misc"
-import {env} from "src/engine/state"
+import {app, appConfig, profiles, relayLists} from "src/engine/core"
+import {env} from "src/engine/env"
 import {uploadFile} from "src/engine/commands"
 import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
+
+// The user's own blossom server list, read straight off the plugin. Reading it per upload rather
+// than per editor keeps a list that loads late from being missed.
+const getUserBlossomServer = () => {
+  const $app = app.get()
+
+  return $app.user ? first($app.use(BlossomServerLists).urls($app.user.pubkey).get()) : undefined
+}
 
 export const makeEditor = ({
   aggressive = false,
@@ -58,8 +65,7 @@ export const makeEditor = ({
           fileUpload: {
             config: {
               upload: async (attrs: FileAttributes) => {
-                const userServer = getTagValue("server", getListTags(get(userBlossomServerList)))
-                const server = ensureProto(userServer || first(env.BLOSSOM_URLS))
+                const server = ensureProto(getUserBlossomServer() || first(env.BLOSSOM_URLS))
 
                 try {
                   let {uploaded, url, ...task} = await uploadFile(server, attrs.file)
@@ -108,8 +114,14 @@ export const makeEditor = ({
                 return [
                   MentionSuggestion({
                     editor: (this as any).editor,
-                    search: (term: string) => get(profileSearch).searchValues(term),
-                    getRelays: (pubkey: string) => Router.get().FromPubkey(pubkey).getUrls(),
+                    search: (term: string) => get(profiles.get().profileSearch).searchValues(term),
+                    // Relay hints for the nprofile have to be produced synchronously, so this
+                    // reads the mentioned pubkey's write relays directly rather than going
+                    // through the async relay selection DSL. Still capped at the user's relay
+                    // limit, which is what the old scenario applied, so a mention doesn't carry
+                    // a twenty-relay bech32 into the note.
+                    getRelays: (pubkey: string) =>
+                      relayLists.get().writeUrls(pubkey).get().slice(0, appConfig.relayLimit),
                     createSuggestion: (value: string) => {
                       const target = document.createElement("div")
 

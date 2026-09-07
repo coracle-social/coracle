@@ -1,23 +1,21 @@
 <script lang="ts">
-  import {displayPubkey, getPubkeyTagValues, getListTags} from "@welshman/util"
-  import {
-    userFollowList,
-    deriveUserWotScore,
-    deriveHandleForPubkey,
-    displayHandle,
-    deriveProfileDisplay,
-  } from "@welshman/app"
+  import {displayHandle} from "@welshman/util"
+  import {displayPubkey} from "@welshman/domain"
+  import {Handles, Profiles, Wot, WotScope} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
+  import {userFollows} from "src/engine"
   import WotScore from "src/partials/WotScore.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
 
   export let value
 
   const pubkey = value
-  const profileDisplay = deriveProfileDisplay(pubkey)
-  const handle = deriveHandleForPubkey(pubkey)
-  const score = deriveUserWotScore(pubkey)
+  const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
+  const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
+  // Scored against the user's own follows, which is what deriveUserWotScore did
+  const score = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
 
-  $: following = getPubkeyTagValues(getListTags($userFollowList)).includes(pubkey)
+  $: following = $userFollows.has(pubkey)
 </script>
 
 <div class="flex max-w-full gap-3">

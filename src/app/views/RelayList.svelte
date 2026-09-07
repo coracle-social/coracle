@@ -7,6 +7,7 @@
   import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl, userInbox} from "@welshman/util"
   import {fromApp, profiles, relayLists, resolveRelays} from "src/engine/core"
   import {createScroller} from "src/util/misc"
+  import {profileHasName} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -29,18 +30,11 @@
 
   const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
-  // Stands in for the deleted `profileHasName`
-  const hasName = (pk: string) => {
-    const profile = profiles.get().get(pk)
-
-    return Boolean(profile?.name() || profile?.values.display_name)
-  }
-
   const pubkeysByUrl = (() => {
     const m = new Map<string, string[]>()
 
     for (const pk of $userFollows) {
-      if (!hasName(pk)) {
+      if (!profileHasName(profiles.get().get(pk))) {
         continue
       }
 

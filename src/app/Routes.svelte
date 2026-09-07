@@ -1,10 +1,10 @@
 <script lang="ts">
   import cx from "classnames"
-  import {signer, pubkey} from "@welshman/app"
   import {isMobile} from "src/util/html"
   import Modal from "src/partials/Modal.svelte"
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/util/router"
+  import {pubkey, signer} from "src/engine/core"
 
   const {current, page, modals} = router
 
