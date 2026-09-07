@@ -83,7 +83,7 @@ export const updateStore = (store, timestamp, updates) =>
 // worked out.
 const userRelays = () => resolveRelays([userOutbox()])
 
-const publishToUserRelays = async (eventCommand: Command) =>
+export const publishToUserRelays = async (eventCommand: Command) =>
   eventCommand.publishToRelays(await userRelays())
 
 // Relay and messaging relay lists also go to the indexers, which is where other clients look for
