@@ -1,8 +1,13 @@
 import type {OwnedEvent, HashedEvent} from "@welshman/util"
-import {makeEvent, matchTag, tagSpec, own, getPubkey, makeSecret} from "@welshman/util"
+import {makeEvent, own, getPubkey, makeSecret} from "@welshman/util"
 import {synced, localStorageProvider, withGetter} from "@welshman/store"
 import PowWorker from "src/workers/pow?worker"
 import {isMobile} from "src/util/html"
+
+// Coracle keeps its own miner — src/workers/pow.ts hashes synchronously via hash-wasm, where
+// @welshman/util awaits crypto.subtle once per nonce — but the difficulty check is the same
+// function, so use theirs.
+export {getPow} from "@welshman/util"
 
 export const benchmark = withGetter(
   synced({
@@ -13,9 +18,6 @@ export const benchmark = withGetter(
 )
 
 export const benchmarkDifficulty = isMobile ? 14 : 16
-
-export const estimateWork = (difficulty: number) =>
-  Math.ceil(benchmark.get() * Math.pow(2, difficulty - benchmarkDifficulty))
 
 export type ProofOfWork = {
   worker: Worker
@@ -42,29 +44,16 @@ export const makePow = (event: OwnedEvent, difficulty: number): ProofOfWork => {
   return {worker, result}
 }
 
-export const getPow = (event: HashedEvent): number => {
-  const difficulty = parseInt(matchTag(tagSpec("nonce"), event.tags)?.[2])
+let benchmarkStarted = false
 
-  if (isNaN(difficulty)) return 0
+// Mine a throwaway event to estimate what this device can do. Running it at module load spun a
+// worker during first paint, so it waits until something actually asks for an estimate. The result
+// is persisted, so this only costs anything on a device's first visit.
+export const startBenchmark = () => {
+  if (benchmarkStarted || benchmark.get() > 0) return
 
-  let count = 0
+  benchmarkStarted = true
 
-  // Convert hex string to array of bytes
-  for (let i = 0; i < event.id.length; i += 2) {
-    const byte = parseInt(event.id.slice(i, i + 2), 16)
-    if (byte === 0) {
-      count += 8
-    } else {
-      count += Math.clz32(byte) - 24
-      break
-    }
-  }
-
-  return count >= difficulty ? difficulty : 0
-}
-
-// Generate a simple pow to estimate the device capacities
-if (benchmark.get() === 0) {
   const secret = makeSecret()
   const pubkey = getPubkey(secret)
   const event = own(makeEvent(1, {}), pubkey)
@@ -74,4 +63,10 @@ if (benchmark.get() === 0) {
   pow.result.then(() => {
     benchmark.set(Date.now() - start)
   })
+}
+
+export const estimateWork = (difficulty: number) => {
+  startBenchmark()
+
+  return Math.ceil(benchmark.get() * Math.pow(2, difficulty - benchmarkDifficulty))
 }

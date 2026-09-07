@@ -95,13 +95,13 @@ export const loadUserData = async () => {
   loadPubkeys([env.PLATFORM_PUBKEY])
 
   // Load anything they might need to be notified about
-  loadMessages()
-  loadNotifications()
-  loadFeedsAndLists()
-  loadDeletes()
+  loadMessages().catch(noop)
+  loadNotifications().catch(noop)
+  loadFeedsAndLists().catch(noop)
+  loadDeletes().catch(noop)
 
   // Start listening for notifications
-  listenForNotifications()
+  listenForNotifications().catch(noop)
 }
 
 export const boot = () => {

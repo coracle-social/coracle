@@ -1,5 +1,5 @@
 import {AuthStatus, Socket, PublishStatus, SocketStatus} from "@welshman/net"
-import {derived, writable} from "svelte/store"
+import {writable} from "svelte/store"
 import {relayStats} from "src/engine/core"
 
 export type PublishNotice = {
@@ -14,10 +14,6 @@ export type PublishNotice = {
 export type SubscriptionNotice = {created_at: number; url: string; notice: string[]}
 
 export const subscriptionNotices = writable<Map<string, SubscriptionNotice[]>>(new Map())
-
-export const subscriptionNoticesByRelay = derived(subscriptionNotices, $notices => {
-  return $notices.values()
-})
 
 const pendingStatuses = [
   AuthStatus.Requested,

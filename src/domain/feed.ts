@@ -1,5 +1,4 @@
-import {fromPairs, randomId} from "@welshman/lib"
-import {FEED, Address} from "@welshman/util"
+import {randomId} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import {
   feedFromTags,
@@ -10,7 +9,8 @@ import {
   isScopeFeed,
 } from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
-import {parseJson} from "src/util/misc"
+import {Feed as FeedKind} from "@welshman/domain"
+import {reader} from "src/engine/core"
 import type {PublishedUserList} from "./list"
 
 export type Feed = {
@@ -52,36 +52,19 @@ export const mapListToFeed = (list: PublishedUserList) =>
     definition: feedFromTags(list.event.tags),
   }) as PublishedListFeed
 
+// FeedReader.definition() answers undefined for a feed with no (or unparseable) feed tag, where
+// everything downstream expects a definition
 export const readFeed = (event: TrustedEvent) => {
-  const {d: identifier, title = "", description = "", feed = ""} = fromPairs(event.tags)
-  const definition = parseJson(feed) || makeIntersectionFeed()
+  const feedReader = reader(FeedKind)(event)
 
-  return {title, identifier, description, definition, event} as PublishedFeed
+  return {
+    event,
+    title: feedReader.title(),
+    identifier: feedReader.identifier(),
+    description: feedReader.description(),
+    definition: feedReader.definition() || makeIntersectionFeed(),
+  } as PublishedFeed
 }
-
-export const createFeed = ({identifier, definition, title, description}: Feed) => ({
-  kind: FEED,
-  content: "",
-  tags: [
-    ["d", identifier],
-    ["alt", title],
-    ["title", title],
-    ["description", description],
-    ["feed", JSON.stringify(definition)],
-  ],
-})
-
-export const editFeed = (feed: PublishedFeed) => ({
-  kind: FEED,
-  content: feed.event.content,
-  tags: Object.entries({
-    ...fromPairs(feed.event.tags),
-    title: feed.title,
-    alt: feed.title,
-    description: feed.description,
-    feed: JSON.stringify(feed.definition),
-  }),
-})
 
 export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"
 
@@ -90,8 +73,5 @@ export const isTopicFeed = f => isTagFeed(f) && f[1] === "#t"
 export const isMentionFeed = f => isTagFeed(f) && f[1] === "#p"
 
 export const isAddressFeed = f => isTagFeed(f) && f[1] === "#a"
-
-export const isContextFeed = f =>
-  isTagFeed(f) && f[1] === "#a" && f.slice(2).every(Address.isAddress)
 
 export const isPeopleFeed = f => isAuthorFeed(f) || isScopeFeed(f)
