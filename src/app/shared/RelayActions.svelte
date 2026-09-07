@@ -1,6 +1,7 @@
 <script lang="ts">
-  import {getRelaysFromList} from "@welshman/util"
-  import {signer, userRelayList, userMessagingRelayList, deriveRelay} from "@welshman/app"
+  import {derived} from "svelte/store"
+  import {MessagingRelayLists, RelayLists, Relays} from "@welshman/app"
+  import {fromApp, signer} from "src/engine/core"
   import {ensureMailto} from "src/util/misc"
   import OverflowMenu from "src/partials/OverflowMenu.svelte"
   import {joinRelay, leaveRelay} from "src/engine"
@@ -8,25 +9,32 @@
 
   export let url
 
-  const relay = deriveRelay(url)
+  // Subscribing lazily loads the relay's nip-11 document
+  const relay = fromApp($app => $app.use(Relays).one(url))
+
+  // Relay selections come off the plugin projections, which stay in sync with the repository
+  const userRelayUrls = fromApp($app =>
+    derived(
+      [
+        $app.use(RelayLists).urls($app.user?.pubkey ?? "").$,
+        $app.use(MessagingRelayLists).urls($app.user?.pubkey ?? "").$,
+      ],
+      ([$relayUrls, $messagingUrls]) => [...$relayUrls, ...$messagingUrls],
+    ),
+  )
 
   let actions = []
 
   $: {
     actions = []
 
-    const userRelayUrls = [
-      ...getRelaysFromList($userRelayList),
-      ...getRelaysFromList($userMessagingRelayList),
-    ]
-
-    if (!userRelayUrls.includes(url)) {
+    if (!$userRelayUrls.includes(url)) {
       actions.push({
         onClick: () => joinRelay(url),
         label: "Join",
         icon: "right-to-bracket",
       })
-    } else if (userRelayUrls.length > 1) {
+    } else if ($userRelayUrls.length > 1) {
       actions.push({
         onClick: () => leaveRelay(url),
         label: "Leave",
