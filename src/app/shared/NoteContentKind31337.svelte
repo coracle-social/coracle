@@ -1,15 +1,18 @@
 <script lang="ts">
   import {fromPairs} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getTag, getTagValues, getTagValue, tagsFromIMeta} from "@welshman/util"
+  import {matchTag, tagSpec, tagValue, tagValues} from "@welshman/util"
   import Chips from "src/partials/Chips.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
   export let note: TrustedEvent
   export let showMedia: boolean
 
-  const imeta = getTag("imeta", note.tags)
-  const categories = getTagValues("c", note.tags)
+  // Welshman deleted tagsFromIMeta; an imeta tag's entries are space-delimited key/value pairs
+  const tagsFromIMeta = (imeta: string[]) => imeta.map(m => m.split(" "))
+
+  const imeta = matchTag(tagSpec("imeta"), note.tags)
+  const categories = tagValues(tagSpec("c"), note.tags)
   const {cover, subject, title} = fromPairs(note.tags)
 </script>
 
@@ -24,7 +27,9 @@
     </Chips>
   </div>
   {#if imeta}
-    <NoteContentLinks {showMedia} urls={[getTagValue("url", tagsFromIMeta(imeta.slice(1)))]} />
+    <NoteContentLinks
+      {showMedia}
+      urls={[tagValue(tagSpec("url"), tagsFromIMeta(imeta.slice(1)))]} />
   {/if}
   {#if cover}
     <NoteContentLinks {showMedia} urls={[cover]} />

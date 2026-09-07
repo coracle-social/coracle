@@ -1,8 +1,16 @@
 <script lang="ts">
-  import {pubkey} from "@welshman/app"
   import {max, pluck, spec, uniq, formatTimestamp} from "@welshman/lib"
-  import {Address, HIGHLIGHT, LONG_FORM, POLL, getTags, type TrustedEvent} from "@welshman/util"
+  import {
+    Address,
+    HIGHLIGHT,
+    LONG_FORM,
+    POLL,
+    matchTags,
+    tagSpec,
+    type TrustedEvent,
+  } from "@welshman/util"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
+  import {pubkey} from "src/engine/core"
   import PeopleAction from "./PeopleAction.svelte"
 
   export let context: TrustedEvent[]
@@ -20,7 +28,7 @@
   // their own. Use the address to figure out whether what was highlighted is ours.
   $: highlightedAddress =
     event.kind === HIGHLIGHT
-      ? getTags("a", event.tags)
+      ? matchTags(tagSpec("a"), event.tags)
           .filter(t => Address.isAddress(t[1]))
           .map(t => Address.from(t[1]))
           .find(a => a.pubkey === $pubkey)

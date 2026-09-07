@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
-  import {getTagValue} from "@welshman/util"
+  import {tagSpec, tagValue} from "@welshman/util"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
 
@@ -8,7 +8,7 @@
   export let showEntire: boolean
   export let showMedia: boolean
 
-  const linkParent = getTagValue("I", note.tags)
+  const linkParent = tagValue(tagSpec("I"), note.tags)
 </script>
 
 <div class="flex flex-col gap-2">

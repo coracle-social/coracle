@@ -1,8 +1,8 @@
 <script lang="ts">
-  import {Router} from "@welshman/router"
   import {parseJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
   import ImageCircle from "src/partials/ImageCircle.svelte"
+  import {relayLists} from "src/engine/core"
   import {router} from "src/app/util/router"
 
   export let note
@@ -14,7 +14,9 @@
     router
       .at("people")
       .of(pubkey)
-      .cx({relays: Router.get().Event(note).getUrls()})
+      // Router.Event was the author's write relays; full relay selection is asynchronous now,
+      // and these are route parameters that have to be built in one pass.
+      .cx({relays: relayLists.get().writeUrls(pubkey).get()})
       .open()
 </script>
 

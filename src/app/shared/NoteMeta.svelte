@@ -1,7 +1,7 @@
 <script lang="ts">
   import {uniq, identity, spec, groupBy, pluck, uniqBy, prop} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {REACTION, ZAP_RESPONSE, getTagValue} from "@welshman/util"
+  import {REACTION, ZAP_RECEIPT, tagSpec, tagValue} from "@welshman/util"
   import {repostKinds} from "src/util/nostr"
   import Icon from "src/partials/Icon.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
@@ -14,11 +14,11 @@
 
   $: reactions = uniqBy(prop("pubkey"), context.filter(spec({kind: REACTION})))
   $: reposts = context.filter(e => repostKinds.includes(e.kind))
-  $: zaps = context.filter(spec({kind: ZAP_RESPONSE}))
+  $: zaps = context.filter(spec({kind: ZAP_RECEIPT}))
 </script>
 
 {#if zaps.length > 0}
-  {@const pubkeys = uniq(zaps.map(e => getTagValue("P", e.tags)).filter(identity))}
+  {@const pubkeys = uniq(zaps.map(e => tagValue(tagSpec("P"), e.tags)).filter(identity))}
   <p class="flex items-center gap-1 pb-2 text-sm text-neutral-300">
     <Icon icon="bolt" />
     Zapped by

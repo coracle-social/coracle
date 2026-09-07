@@ -1,7 +1,6 @@
 <script lang="ts">
-  import {getTagValue} from "@welshman/util"
-  import {deriveIsDeleted} from "@welshman/store"
-  import {repository} from "@welshman/app"
+  import {tagSpec, tagValue} from "@welshman/util"
+  import {Events} from "@welshman/app"
   import {
     fromPairs,
     formatTimestamp,
@@ -13,17 +12,18 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {getSetting} from "src/engine"
+  import {fromApp} from "src/engine/core"
 
   export let event
   export let showDate = false
 
   const timeFmt = new Intl.DateTimeFormat(LOCALE, {timeStyle: "short"})
   const datetimeFmt = new Intl.DateTimeFormat(LOCALE, {dateStyle: "short", timeStyle: "short"})
-  const deleted = deriveIsDeleted(repository, event)
+  const deleted = fromApp($app => $app.use(Events).isDeleted(event).$)
 
   $: ({name, title, location} = fromPairs(event.tags))
-  $: end = parseInt(getTagValue("end", event.tags))
-  $: start = parseInt(getTagValue("start", event.tags))
+  $: end = parseInt(tagValue(tagSpec("end"), event.tags))
+  $: start = parseInt(tagValue(tagSpec("start"), event.tags))
   $: startDate = secondsToDate(start)
   $: endDate = secondsToDate(end)
   $: startDateDisplay = formatTimestampAsDate(start)
