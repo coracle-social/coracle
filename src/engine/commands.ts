@@ -1,55 +1,59 @@
 import {nwc} from "@getalby/sdk"
-import {
-  follow as baseFollow,
-  unfollow as baseUnfollow,
-  userMessagingRelayList,
-  pubkey,
-  repository,
-  session,
-  signer,
-  tagPubkey,
-  userRelayList,
-  publishThunk,
-  sendWrapped,
-} from "@welshman/app"
-import {append, sha256, remove, nthNe, uniq} from "@welshman/lib"
+import {get} from "svelte/store"
+import {append, first, nthNe, remove, sha256, uniq} from "@welshman/lib"
+import {User, publish} from "@welshman/app"
+import type {Command} from "@welshman/app"
 import {Nip01Signer} from "@welshman/signer"
-import type {TrustedEvent} from "@welshman/util"
-import {Router, addMaximalFallbacks, addMinimalFallbacks} from "@welshman/router"
 import {
-  Address,
-  DELETE,
-  FEEDS,
+  AppData,
+  Delete,
+  DirectMessage,
+  Poll,
+  PollResponse,
+  RelayJoin,
+  RelayList,
+} from "@welshman/domain"
+import type {RelayListWriter} from "@welshman/domain"
+import {
   FOLLOWS,
   MESSAGING_RELAYS,
-  POLL_RESPONSE,
   PROFILE,
   RELAYS,
-  DIRECT_MESSAGE,
-  addToListPublicly,
-  makeEvent,
-  getAddress,
-  getTagValues,
+  addMinimalFallbacks,
+  hexTags,
+  inboxes,
+  isNWCWallet,
   isSignedEvent,
-  makeList,
-  uploadBlob,
+  isWebLNWallet,
   makeBlossomAuthEvent,
   normalizeRelayUrl,
-  removeFromList,
-  updateList,
-  getRelaysFromList,
+  relays as relaySelections,
+  tagValues,
+  uploadBlob,
+  userOutbox,
 } from "@welshman/util"
+import type {TrustedEvent, Wallet} from "@welshman/util"
 import {
-  anonymous,
-  getClientTags,
-  sign,
-  userFeedFavorites,
-  userRelayFeedsList,
-  withIndexers,
-} from "src/engine/state"
+  app,
+  command,
+  deletes,
+  feedLists,
+  followLists,
+  messagingRelayLists,
+  profiles,
+  reader,
+  relayLists,
+  resolveRelays,
+  session,
+  thunks,
+  wraps,
+  writer,
+} from "src/engine/core"
+import {env} from "src/engine/env"
+import {anonymous, getClientTags, sign} from "src/engine/state"
+import {userListKind} from "src/domain"
 import {stripExifData} from "src/util/html"
 import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
-import {get} from "svelte/store"
 
 // Helpers
 
@@ -74,8 +78,29 @@ export const updateRecord = (record, timestamp, updates) => {
 export const updateStore = (store, timestamp, updates) =>
   store.set(updateRecord(store.get(), timestamp, updates))
 
-export const nip44EncryptToSelf = (payload: string) =>
-  signer.get().nip44.encrypt(pubkey.get(), payload)
+// A writer resolves its own publish relays at limit 3 with no fallbacks, which sends a brand new
+// user's lists nowhere at all. Coracle has always published its own data to the user's write
+// relays, topping the selection up with defaults, so re-resolve rather than take what the writer
+// worked out.
+const userRelays = () => resolveRelays([userOutbox()])
+
+const publishToUserRelays = async (eventCommand: Command) =>
+  eventCommand.publishToRelays(await userRelays())
+
+// Relay and messaging relay lists also go to the indexers, which is where other clients look for
+// them. Kind 10002 routes itself there; kind 10050 doesn't.
+const publishToUserRelaysAndIndexers = async (eventCommand: Command) =>
+  eventCommand.publishToRelays(uniq([...(await userRelays()), ...env.INDEXER_RELAYS]))
+
+// The user's own copy of a replaceable kind, read straight from the repository. Welshman keeps an
+// index for the kinds it models; coracle's own kinds have to be looked up.
+const getUserEvent = (kind: number) => {
+  const $app = app.get()
+
+  return $app.user
+    ? first($app.repository.query([{kinds: [kind], authors: [$app.user.pubkey]}]))
+    : undefined
+}
 
 // Files
 
@@ -85,7 +110,7 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
   }
 
   const hashes = [await sha256(await file.arrayBuffer())]
-  const $signer = signer.get() || Nip01Signer.ephemeral()
+  const $signer = app.get().user?.signer || Nip01Signer.ephemeral()
   const authEvent = await $signer.sign(makeBlossomAuthEvent({action: "upload", server, hashes}))
   const res = await uploadBlob(server, file, {authEvent})
 
@@ -98,11 +123,20 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
 
 // Key state management
 
-export const signAndPublish = async (template, {anonymous = false} = {}) => {
-  const event = await sign(template, {anonymous})
-  const relays = Router.get().PublishEvent(event).policy(addMinimalFallbacks).getUrls()
+export const signAndPublish = async (template, {anonymous: asAnonymous = false} = {}) => {
+  const event = await sign(template, {anonymous: asAnonymous})
 
-  return await publishThunk({event, relays})
+  // Deliver to the author's write relays and everyone they mentioned. An anonymous note is signed
+  // with a throwaway key which has no relay list, so asking for its outbox would only stall on a
+  // load that can't succeed.
+  const relays = await resolveRelays(
+    [...(asAnonymous ? [] : [userOutbox()]), ...inboxes(tagValues(hexTags("p"), event.tags), 0.5)],
+    // Notes carry mentions, so raise the limit to keep them deliverable, and fall back to a
+    // default relay only when nothing else resolved
+    {limit: 30, policy: addMinimalFallbacks},
+  )
+
+  return thunks.get().publish({event, relays})
 }
 
 // Polls
@@ -112,259 +146,279 @@ export type PollResponseParams = {
   selectedIds: string[]
 }
 
-export const makePollResponse = ({event, selectedIds}: PollResponseParams) =>
-  makeEvent(POLL_RESPONSE, {
-    content: "",
-    tags: [
-      ["e", event.id],
-      ["p", event.pubkey],
-      ...selectedIds.map(selectedId => ["response", selectedId]),
-      ...getClientTags(),
-    ],
-  })
-
 export const publishPollResponse = async ({event, selectedIds}: PollResponseParams) => {
-  const router = Router.get()
-  const responseEvent = await sign(makePollResponse({event, selectedIds}))
-  const scenario = router.merge([
-    router.PublishEvent(responseEvent),
-    router.FromRelays(getTagValues("relay", event.tags)),
+  const eventWriter = writer(PollResponse)
+    .setPollId(event.id)
+    .addMention(event.pubkey)
+    .addTags(...getClientTags())
+
+  for (const selectedId of selectedIds) {
+    eventWriter.addSelection(selectedId)
+  }
+
+  const [eventCommand, relays] = await Promise.all([
+    command(eventWriter),
+    // A vote goes to the author's relays and to whatever relays the poll itself nominated
+    resolveRelays(
+      [
+        userOutbox(),
+        ...inboxes([event.pubkey], 0.5),
+        ...relaySelections(reader(Poll)(event).urls()),
+      ],
+      {policy: addMinimalFallbacks},
+    ),
   ])
 
-  return publishThunk({event: responseEvent, relays: scenario.getUrls()})
+  return eventCommand.publishToRelays(relays)
 }
 
 // Deletes
 
-export const publishDeletion = ({kind, address = null, id = null}) => {
-  const tags = [["k", String(kind)]]
+// The deleted event is what a delete routes by — its relays, its kind, its address — so the plugin
+// takes the event itself and fans the request out to every relay it was seen on.
+export const deleteEvent = (event: TrustedEvent) => deletes.get().deleteEvent(event).then(publish)
 
-  if (address) {
-    tags.push(["a", address])
-  }
-
-  if (id) {
-    tags.push(["e", id])
-  }
-
-  return publishThunk({
-    event: makeEvent(DELETE, {tags}),
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-  })
+export type DeletionParams = {
+  kind: number
+  id?: string
+  address?: string
 }
 
-export const deleteEvent = (event: TrustedEvent) =>
-  publishDeletion({id: event.id, address: getAddress(event), kind: event.kind})
+export const publishDeletion = async ({kind, id, address}: DeletionParams) => {
+  const $repository = app.get().repository
+  const event = (id && $repository.getEvent(id)) || (address && $repository.getEvent(address))
 
-export const deleteEventByAddress = (address: string) =>
-  publishDeletion({address, kind: Address.from(address).kind})
+  if (event) {
+    return deleteEvent(event)
+  }
+
+  // Without the event we can't route by where it was seen, so fall back to the user's own relays
+  const eventWriter = writer(Delete).addTags(["k", String(kind)])
+
+  if (id) {
+    eventWriter.addTags(["e", id])
+  }
+
+  if (address) {
+    eventWriter.addTags(["a", address])
+  }
+
+  return command(eventWriter).then(publishToUserRelays)
+}
 
 // Follows
 
-export const unfollow = async (value: string) =>
-  signer.get()
-    ? baseUnfollow(value)
-    : anonymous.update($a => ({...$a, follows: $a.follows.filter(nthNe(1, value))}))
+// Welshman deleted tagPubkey, so build the follow entry here — an outbox hint read from cache and
+// the profile's display name as a petname, the way coracle has always written them.
+const makeFollowTag = (pubkey: string) => [
+  "p",
+  pubkey,
+  first(relayLists.get().writeUrls(pubkey).get()) || "",
+  profiles.get().display(pubkey).get(),
+]
 
-export const follow = async (tag: string[]) =>
-  signer.get()
-    ? baseFollow(tag)
-    : anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
+export const follow = async (pubkey: string) => {
+  const tag = makeFollowTag(pubkey)
+
+  if (!app.get().user) {
+    return anonymous.update($a => ({...$a, follows: append(tag, $a.follows)}))
+  }
+
+  // FollowLists.follow appends the tag without deduping, so drop any existing entry first
+  return followLists
+    .get()
+    .update(eventWriter => eventWriter.unfollow(pubkey).addTags(tag))
+    .then(publishToUserRelays)
+}
+
+export const unfollow = async (value: string) => {
+  if (!app.get().user) {
+    return anonymous.update($a => ({...$a, follows: $a.follows.filter(nthNe(1, value))}))
+  }
+
+  return followLists.get().unfollow(value).then(publishToUserRelays)
+}
 
 // Feed favorites
 
-export const removeFeedFavorite = async (address: string) => {
-  const list = get(userFeedFavorites) || makeList({kind: FEEDS})
+export const addFeedFavorite = async (address: string) =>
+  feedLists.get().addFeed(address).then(publishToUserRelays)
 
-  return publishThunk({
-    event: await removeFromList(list, address).reconcile(nip44EncryptToSelf),
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-  })
-}
-
-export const addFeedFavorite = async (address: string) => {
-  const list = get(userFeedFavorites) || makeList({kind: FEEDS})
-
-  return publishThunk({
-    event: await addToListPublicly(list, ["a", address]).reconcile(nip44EncryptToSelf),
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-  })
-}
+export const removeFeedFavorite = async (address: string) =>
+  feedLists.get().removeFeed(address).then(publishToUserRelays)
 
 // Relay feeds
 
 export const setRelayFeeds = async (urls: string[]) => {
-  const list = get(userRelayFeedsList) || makeList({kind: RELAY_FEEDS})
-  const publicTags = [
-    ...list.publicTags.filter(t => !["r", "relay"].includes(t[0])),
-    ...urls.map(url => ["relay", url]),
-  ]
+  const kind = userListKind(RELAY_FEEDS)
+  const event = getUserEvent(RELAY_FEEDS)
+  const eventWriter = writer(kind, event ? await reader(kind)(event) : undefined)
+    .dropPublic(t => ["r", "relay"].includes(t[0]))
+    .addPublic(...urls.map(url => ["relay", url]))
 
-  return publishThunk({
-    event: await updateList(list, {publicTags}).reconcile(nip44EncryptToSelf),
-    relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-  })
+  return command(eventWriter).then(publishToUserRelays)
 }
 
 // Relays
 
 export const requestRelayAccess = async (url: string, claim: string) =>
-  publishThunk({event: makeEvent(28934, {tags: [["claim", claim]]}), relays: [url]})
+  command(writer(RelayJoin).setClaim(claim).forceRelays(url)).then(publish)
 
-export const setOutboxPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
-  if (signer.get()) {
-    const list = get(userRelayList) || makeList({kind: RELAYS})
+// Signed out, coracle keeps relay selections in memory. A RelayListWriter edits the tags it holds,
+// so the same edit runs without an event, a signer or a publish.
+const editRelayList = async (fn: (writer: RelayListWriter) => void) => {
+  if (!app.get().user) {
+    const eventWriter = writer(RelayList).addTags(...anonymous.get().relays)
 
-    publishThunk({
-      event: makeEvent(list.kind, {
-        content: list.event?.content || "",
-        tags: modifyTags(list.publicTags),
-      }),
-      relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
-    })
-  } else {
-    anonymous.update($a => ({...$a, relays: modifyTags($a.relays)}))
+    fn(eventWriter)
+
+    return anonymous.update($a => ({...$a, relays: eventWriter.extraTags}))
   }
+
+  // A relay list routes itself to the indexers and to every relay it gains or loses, without a
+  // limit, so a relay always hears when it's added to or dropped from the list
+  return relayLists.get().update(fn).then(publish)
 }
 
-export const setMessagingPolicies = async (modifyTags: (tags: string[][]) => string[][]) => {
-  const list = get(userMessagingRelayList) || makeList({kind: MESSAGING_RELAYS})
-
-  publishThunk({
-    event: makeEvent(list.kind, {
-      content: list.event?.content || "",
-      tags: modifyTags(list.publicTags),
-    }),
-    relays: withIndexers(Router.get().FromUser().policy(addMaximalFallbacks).getUrls()),
+export const setOutboxPolicies = (tags: string[][]) =>
+  editRelayList(eventWriter => {
+    eventWriter.setTags(tags)
   })
-}
-
-export const setMessagingPolicy = (url: string, enabled: boolean) => {
-  const urls = getRelaysFromList(get(userMessagingRelayList))
-
-  // Only update messaging policies if they already exist or we're adding them
-  if (enabled || urls.includes(url)) {
-    setMessagingPolicies($tags => {
-      $tags = $tags.filter(t => normalizeRelayUrl(t[1]) !== url)
-
-      if (enabled) {
-        $tags.push(["relay", url])
-      }
-
-      return $tags
-    })
-  }
-}
 
 export const setOutboxPolicy = (url: string, read: boolean, write: boolean) =>
-  setOutboxPolicies($tags => {
-    $tags = $tags.filter(t => normalizeRelayUrl(t[1]) !== url)
-
-    if (read && write) {
-      $tags.push(["r", url])
-    } else if (read) {
-      $tags.push(["r", url, "read"])
-    } else if (write) {
-      $tags.push(["r", url, "write"])
+  editRelayList(eventWriter => {
+    if (read) {
+      eventWriter.addReadUrl(url)
+    } else {
+      eventWriter.removeReadUrl(url)
     }
 
-    return $tags
+    if (write) {
+      eventWriter.addWriteUrl(url)
+    } else {
+      eventWriter.removeWriteUrl(url)
+    }
   })
+
+export const setMessagingPolicy = async (url: string, enabled: boolean) => {
+  const $app = app.get()
+
+  if (!$app.user) {
+    return
+  }
+
+  const $messagingRelayLists = messagingRelayLists.get()
+  const urls = $messagingRelayLists.urls($app.user.pubkey).get()
+
+  // Don't publish a messaging relay list just to remove a relay that was never on it
+  if (!enabled && !urls.includes(normalizeRelayUrl(url))) {
+    return
+  }
+
+  return (
+    $messagingRelayLists
+      // removeUrl first, since addUrl doesn't dedupe
+      .update(eventWriter =>
+        enabled ? eventWriter.removeUrl(url).addUrl(url) : eventWriter.removeUrl(url),
+      )
+      .then(publishToUserRelaysAndIndexers)
+  )
+}
 
 export const leaveRelay = async (url: string) => {
   await Promise.all([setMessagingPolicy(url, false), setOutboxPolicy(url, false, false)])
 
   // Make sure the new relay selections get to the old relay
-  if (pubkey.get()) {
-    broadcastUserData([url])
+  if (app.get().user) {
+    await broadcastUserData([url])
   }
 }
 
 export const joinRelay = async (url: string, claim?: string) => {
   url = normalizeRelayUrl(url)
 
-  if (claim && signer.get()) {
+  if (claim && app.get().user) {
     await requestRelayAccess(url, claim)
   }
 
   await setOutboxPolicy(url, true, true)
 
   // Re-publish user meta to the new relay
-  if (pubkey.get()) {
-    broadcastUserData([url])
+  if (app.get().user) {
+    await broadcastUserData([url])
   }
 }
 
 // Messages
 
 export const sendMessage = (channelId: string, content: string, delay: number) => {
-  const recipients = uniq(channelId.split(",").concat(pubkey.get()))
+  const {pubkey} = User.require(app.get())
+  const recipients = uniq(channelId.split(",").concat(pubkey))
+  const others = remove(pubkey, recipients)
+  const eventWriter = writer(DirectMessage)
+    .setContent(content)
+    .addTags(...getClientTags())
 
-  return sendWrapped({
-    delay,
-    recipients,
-    event: makeEvent(DIRECT_MESSAGE, {
-      content,
-      tags: [...remove(pubkey.get(), recipients).map(tagPubkey), ...getClientTags()],
-    }),
-  })
+  // A note to self has no other party, and a direct message has to p-tag someone
+  for (const recipient of others.length > 0 ? others : [pubkey]) {
+    eventWriter.addRecipient(recipient)
+  }
+
+  // Wraps publishes directly, since a single rumor fans out to one wrap per recipient, each
+  // addressed to that recipient's own messaging relays
+  return eventWriter.renderTemplate().then(event => wraps.get().publish({event, recipients, delay}))
 }
 
 // Settings
 
 export const setAppData = async (d: string, data: any) => {
-  if (signer.get()) {
-    const {pubkey} = session.get()
-    const content = await signer.get().nip04.encrypt(pubkey, JSON.stringify(data))
-
-    return publishThunk({
-      event: makeEvent(30078, {tags: [["d", d]], content}),
-      relays: Router.get().FromUser().policy(addMaximalFallbacks).getUrls(),
-    })
+  if (!app.get().user) {
+    return
   }
+
+  const eventWriter = writer(AppData).setIdentifier(d).setValues(data).setEncrypted(true)
+
+  return command(eventWriter).then(publishToUserRelays)
 }
 
 export const publishSettings = ($settings: Record<string, any>) =>
   setAppData(appDataKeys.USER_SETTINGS, $settings)
 
-export const broadcastUserRelays = async (relays: string[]) => {
-  const authors = [pubkey.get()]
-  const kinds = [RELAYS]
-  const events = repository.query([{kinds, authors}])
+const broadcast = async (kinds: number[], relays: string[]) => {
+  const $app = app.get()
 
-  for (const event of events) {
+  if (!$app.user || relays.length === 0) {
+    return
+  }
+
+  for (const event of $app.repository.query([{kinds, authors: [$app.user.pubkey]}])) {
     if (isSignedEvent(event)) {
-      await publishThunk({event, relays})
+      thunks.get().publish({event, relays})
     }
   }
 }
 
-export const broadcastUserData = async (relays: string[]) => {
-  const authors = [pubkey.get()]
-  const kinds = [RELAYS, MESSAGING_RELAYS, FOLLOWS, PROFILE]
-  const events = repository.query([{kinds, authors}])
+export const broadcastUserRelays = (relays: string[]) => broadcast([RELAYS], relays)
 
-  for (const event of events) {
-    if (isSignedEvent(event)) {
-      await publishThunk({event, relays})
-    }
-  }
-}
+export const broadcastUserData = (relays: string[]) =>
+  broadcast([RELAYS, MESSAGING_RELAYS, FOLLOWS, PROFILE], relays)
 
 // Lightning
 
 export const getWebLn = () => (window as any).webln
 
 export const payInvoice = async (invoice: string) => {
-  const {wallet} = session.get()
+  // Wallet configuration is coracle's own per-account metadata, stored alongside the session.
+  // SessionWithMeta in src/engine/model.ts doesn't declare it yet.
+  const {wallet} = (get(session) || {}) as {wallet?: Wallet}
 
   if (!wallet) {
     return alert(invoice)
   }
 
-  if (wallet.type === "nwc") {
+  if (isNWCWallet(wallet)) {
     return new nwc.NWCClient(wallet.info).payInvoice({invoice})
-  } else if (wallet.type === "webln") {
+  } else if (isWebLNWallet(wallet)) {
     return getWebLn()
       .enable()
       .then(() => getWebLn().sendPayment(invoice))
