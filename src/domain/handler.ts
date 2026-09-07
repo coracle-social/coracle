@@ -1,8 +1,12 @@
-import {fromPairs, last, first} from "@welshman/lib"
-import {getAddress, getTags, getTagValues} from "@welshman/util"
+import {HANDLER_INFORMATION, getAddress} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {SearchHelper, parseJson} from "src/util/misc"
+import {Handler as HandlerKind, HandlerRecommendation} from "@welshman/domain"
+import type {HandlerMeta} from "@welshman/domain"
+import {reader} from "src/engine/core"
+import {SearchHelper} from "src/util/misc"
 
+// Nip 89 models one handler event advertising many kinds; coracle renders one card per kind, so
+// this is the flattened per-kind view rather than a re-implementation of HandlerReader.
 export type Handler = {
   kind: number
   name: string
@@ -15,16 +19,26 @@ export type Handler = {
   nip05?: string
 }
 
-export const readHandlers = (event: TrustedEvent) => {
-  const {d: identifier} = fromPairs(event.tags)
-  const meta = parseJson(event.content)
+export const readHandlers = (event: TrustedEvent): Handler[] => {
+  if (event?.kind !== HANDLER_INFORMATION) {
+    return []
+  }
+
+  const handler = reader(HandlerKind)(event)
+
+  // Handlers predate nip 24's naming, so accept the profile-style aliases too
+  const {display_name, image} = handler.values as HandlerMeta & {
+    display_name?: string
+    image?: string
+  }
+
   const normalizedMeta = {
-    name: meta?.name || meta?.display_name || "",
-    image: meta?.image || meta?.picture || "",
-    about: meta?.about || "",
-    website: meta?.website || "",
-    lud16: meta?.lud16 || "",
-    nip05: meta?.nip05 || "",
+    name: handler.name() || display_name || "",
+    image: image || handler.picture() || "",
+    about: handler.about() || "",
+    website: handler.website() || "",
+    lud16: handler.lud16() || "",
+    nip05: handler.nip05() || "",
   }
 
   // If our meta is missing important stuff, don't bother showing it
@@ -32,12 +46,12 @@ export const readHandlers = (event: TrustedEvent) => {
     return []
   }
 
-  return getTagValues("k", event.tags).map(kind => ({
+  return handler.kinds().map(kind => ({
     ...normalizedMeta,
-    kind: parseInt(kind),
-    identifier,
+    kind,
+    identifier: handler.identifier() || "",
     event,
-  })) as Handler[]
+  }))
 }
 
 export const getHandlerKey = (handler?: Handler) => `${handler.kind}:${getAddress(handler.event)}`
@@ -50,9 +64,5 @@ export class HandlerSearch extends SearchHelper<Handler, string> {
   displayValue = (address: string) => displayHandler(this.getOption(address))
 }
 
-export const getHandlerAddress = (event: TrustedEvent) => {
-  const tags = getTags("a", event.tags)
-  const tag = tags.find(t => last(t) === "web") || first(tags)
-
-  return tag?.[1]
-}
+export const getHandlerAddress = (event: TrustedEvent) =>
+  reader(HandlerRecommendation)(event).handlerAddress()

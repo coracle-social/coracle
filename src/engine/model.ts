@@ -1,10 +1,5 @@
-import type {Session} from "@welshman/app"
-import type {TrustedEvent, Zapper as WelshmanZapper} from "@welshman/util"
-
-export type Zapper = WelshmanZapper & {
-  lnurl: string
-  pubkey: string
-}
+import type {TrustedEvent} from "@welshman/util"
+import type {StoredSession} from "src/engine/core"
 
 export type Notification = {
   key: string
@@ -32,7 +27,9 @@ export type Channel = {
   messages: TrustedEvent[]
 }
 
-export type SessionWithMeta = Session & {
+// A stored session plus coracle's own per-account metadata, which rides alongside welshman's
+// serializable {method, data} rather than inside it.
+export type SessionWithMeta = StoredSession & {
   onboarding_tasks_completed?: string[]
 }
 

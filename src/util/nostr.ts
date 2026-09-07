@@ -10,16 +10,18 @@ import {
   POLL,
   REACTION,
   REPOST,
-  ZAP_RESPONSE,
+  ZAP_RECEIPT,
   Address,
   RELAYS,
   PROFILE,
   MESSAGING_RELAYS,
   FOLLOWS,
   MUTES,
-  getTags,
-  getTagValue,
-  getTopicTagValues,
+  matchTags,
+  tagSpec,
+  tagValue,
+  tagValues,
+  topicTags,
   ROOMS,
   FEED,
   NAMED_PEOPLE,
@@ -70,7 +72,7 @@ export const RELAY_FEEDS = 10012
 
 export const replyKinds = [NOTE, COMMENT]
 export const noteKinds = [...replyKinds, PICTURE_NOTE, LONG_FORM, HIGHLIGHT, POLL]
-export const reactionKinds = [REACTION, ZAP_RESPONSE] as number[]
+export const reactionKinds = [REACTION, ZAP_RECEIPT] as number[]
 export const repostKinds = [REPOST, GENERIC_REPOST] as number[]
 export const metaKinds = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS] as number[]
 export const headerlessKinds = [
@@ -118,8 +120,9 @@ export const toHex = (data: string): string | null => {
 
 export const getRating = (event: TrustedEvent) =>
   event.kind === 1985
-    ? parseJson(last(getTags("l", event.tags).find(nthEq(1, "review/relay")) || []))?.quality
-    : parseFloat(getTags("rating", event.tags).find(t => t.length === 2)?.[1])
+    ? parseJson(last(matchTags(tagSpec("l"), event.tags).find(nthEq(1, "review/relay")) || []))
+        ?.quality
+    : parseFloat(matchTags(tagSpec("rating"), event.tags).find(t => t.length === 2)?.[1])
 
 export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
@@ -156,8 +159,8 @@ const WARN_TAGS = new Set([
 
 export const getContentWarning = (e: TrustedEvent) =>
   getBadDomainsWarning(e) ||
-  getTagValue("content-warning", e.tags) ||
-  getTopicTagValues(e.tags).find(t => WARN_TAGS.has(t.toLowerCase()))
+  tagValue(tagSpec("content-warning"), e.tags) ||
+  tagValues(topicTags("t"), e.tags).find(t => WARN_TAGS.has(t.toLowerCase()))
 
 export const parseAnything = async entity => {
   if (entity.includes("@")) {

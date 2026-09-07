@@ -1,6 +1,6 @@
-import {getRelayQuality} from "@welshman/app"
 import {AuthStatus, Socket, PublishStatus, SocketStatus} from "@welshman/net"
 import {derived, writable} from "svelte/store"
+import {relayStats} from "src/engine/core"
 
 export type PublishNotice = {
   eventId: string
@@ -46,7 +46,7 @@ export const getSocketStatus = (socket: Socket): ConnectionType => {
     return ConnectionType.ConnectFailed
   } else if (socket.status === SocketStatus.Closed) {
     return ConnectionType.WaitReconnect
-  } else if (getRelayQuality(socket.url) < 0.5) {
+  } else if (relayStats.get().getQuality(socket.url) < 0.5) {
     return ConnectionType.UnstableConnection
   } else {
     return ConnectionType.Connected
