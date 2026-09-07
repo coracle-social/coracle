@@ -1,6 +1,16 @@
-import {first, mapVals, nthEq, sortBy} from "@welshman/lib"
-import {Address, COMMENT, getIdAndAddress, getIdentifier} from "@welshman/util"
-import type {TrustedEvent} from "@welshman/util"
+import {first, mapVals, nth, nthEq, sortBy, uniq} from "@welshman/lib"
+import {
+  Address,
+  COMMENT,
+  getIdAndAddress,
+  getIdentifier,
+  hexTags,
+  isRelayUrl,
+  matchTags,
+  outbox,
+  relays,
+} from "@welshman/util"
+import type {RelaySelection, TrustedEvent} from "@welshman/util"
 import {
   getCommentTagValues,
   getCommentTags,
@@ -119,4 +129,26 @@ export const setCommentAncestors = (
   }
 
   return writer.setParentFromEvent(parent)
+}
+
+// Where to look for an event's ancestors. Welshman's router used to answer this with EventParents
+// and EventRoots; the relay-selection DSL has no equivalent, so coracle asks the same question of
+// the ancestor tags directly: the ancestors' authors weigh heaviest, then anyone the event mentions,
+// then whatever hints the tags themselves carry.
+export const getAncestorRelaySelections = (
+  event: TrustedEvent,
+  scope: "roots" | "replies",
+): RelaySelection[] => {
+  const ancestorTags = getAncestorTags(event)[scope]
+  const mentions = matchTags(hexTags("p"), event.tags)
+  const authors = ancestorTags.map(nth(3)).filter(pubkey => pubkey?.length === 64)
+  const hints = uniq(
+    [...ancestorTags, ...mentions].map(nth(2)).filter(url => url && isRelayUrl(url)),
+  )
+
+  return [
+    ...authors.map(pubkey => outbox(pubkey, 10)),
+    ...mentions.map(nth(1)).map(pubkey => outbox(pubkey)),
+    ...relays(hints),
+  ]
 }

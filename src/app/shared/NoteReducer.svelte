@@ -1,14 +1,9 @@
 <script lang="ts">
-  import {insertAt, addToMapKey, nth, parseJson, uniq} from "@welshman/lib"
+  import {insertAt, addToMapKey, parseJson} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
     getIdFilters,
-    hexTags,
-    isRelayUrl,
-    matchTags,
-    outbox,
-    relays as relaySelections,
     verifyEvent,
     ZAP_RECEIPT,
     COMMENT,
@@ -16,9 +11,9 @@
   } from "@welshman/util"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {
-    getAncestorTags,
-    getParentIdsAndAddrs,
+    getAncestorRelaySelections,
     getParentIdOrAddr,
+    getParentIdsAndAddrs,
     isEventMuted,
     myLoad,
   } from "src/engine"
@@ -68,21 +63,7 @@
 
       if (cached) return cached
 
-      // Router.EventParents is gone: it routed to the write relays of whoever authored the
-      // parent (weighted heavily), then to those of anyone mentioned, then to the relay hints
-      // carried on either set of tags.
-      const parentTags = getAncestorTags(event).replies
-      const mentions = matchTags(hexTags("p"), event.tags)
-      const authors = parentTags.map(nth(3)).filter(pubkey => pubkey?.length === 64)
-      const hints = uniq(
-        [...parentTags, ...mentions].map(nth(2)).filter(url => url && isRelayUrl(url)),
-      )
-
-      const relays = await resolveRelays([
-        ...authors.map(pubkey => outbox(pubkey, 10)),
-        ...mentions.map(nth(1)).map(pubkey => outbox(pubkey)),
-        ...relaySelections(hints),
-      ])
+      const relays = await resolveRelays(getAncestorRelaySelections(event, "replies"))
 
       const [parent] = await myLoad({filters, relays})
 
