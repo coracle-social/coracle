@@ -3,7 +3,7 @@
   import {without, dateToSeconds, uniq, now} from "@welshman/lib"
   import {COMMENT, own, hash, getPubkeyTagValues, makeEvent, uniqTags} from "@welshman/util"
   import {Router, addMinimalFallbacks} from "@welshman/router"
-  import {session, displayProfileByPubkey, tagEventForComment, publishThunk} from "@welshman/app"
+  import {session, displayProfileByPubkey, publishThunk} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {writable} from "svelte/store"
   import {makePow} from "src/util/pow"
@@ -17,7 +17,13 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {getClientTags, sign, broadcastUserRelays, userSettings} from "src/engine"
+  import {
+    getClientTags,
+    sign,
+    broadcastUserRelays,
+    tagEventForComment,
+    userSettings,
+  } from "src/engine"
   import {makeEditor} from "src/app/editor"
 
   export let parent
