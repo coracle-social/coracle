@@ -1,12 +1,11 @@
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
-  import {outbox, toNostrURI, userOutbox} from "@welshman/util"
+  import {outbox, toNostrURI} from "@welshman/util"
   import {toSession} from "@welshman/app"
-  import type {Command} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Button from "src/partials/Button.svelte"
-  import {userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
+  import {publishToUserRelays, userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
   import {login, muteLists, readOnly, resolveRelays, session, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
@@ -17,11 +16,6 @@
   const isSelf = $session?.pubkey === pubkey
   const following = derived(userFollows, $m => $m.has(pubkey))
   const muted = derived(userMutedPubkeys, $userMutedPubkeys => $userMutedPubkeys.has(pubkey))
-
-  // Mute list edits build a command without publishing it, and a command publishes to at most
-  // three relays of its own accord — coracle sends its own data to the user's write relays.
-  const publishToUserRelays = async (command: Command) =>
-    command.publishToRelays(await resolveRelays([userOutbox()]))
 
   const unfollowPerson = () => unfollow(pubkey)
 

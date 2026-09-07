@@ -3,7 +3,6 @@
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {first, sum, pluck, spec, nthEq, last, sortBy, uniqBy, prop} from "@welshman/lib"
-  import type {Command} from "@welshman/app"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
   import {deriveEvents} from "@welshman/store"
   import {
@@ -63,6 +62,7 @@
     sortEventsDesc,
     isChildOf,
     isEventMuted,
+    publishToUserRelays,
     userPins,
     deriveRelaysForEvent,
   } from "src/engine"
@@ -81,11 +81,6 @@
     author: event.pubkey,
     relays: getWriteRelays(event.pubkey).slice(0, 3),
   })
-
-  // The user's own lists go to their write relays, at coracle's relay limit rather than the three
-  // a writer resolves for itself
-  const publishToUserRelays = async (eventCommand: Command) =>
-    eventCommand.publishToRelays(await resolveRelays([userOutbox()]))
 
   const pow = getPow(event)
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
