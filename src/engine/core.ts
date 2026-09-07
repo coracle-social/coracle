@@ -4,7 +4,8 @@ import {always, noop} from "@welshman/lib"
 import type {Maybe} from "@welshman/lib"
 import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
-import type {FallbackPolicy, RelaySelection} from "@welshman/util"
+import {addNoFallbacks} from "@welshman/util"
+import type {RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
 import {
   App,
@@ -178,19 +179,16 @@ export const writer = <R extends BaseEventReader, W extends EventWriter<R>>(
 
 export const command = (eventWriter: EventWriter<any>) => domain.get().command(eventWriter)
 
-// Relay selection resolves asynchronously now, since it may have to load relay lists first. This
-// applies coracle's relay limit in one place.
+// Relay selection resolves asynchronously now, since it may have to load relay lists first.
 //
-// The fallback policy is deliberately required rather than defaulted: how far a selection widens
-// when it comes up short is a decision per call site, and the old router defaulted to no fallbacks,
-// so any default here would silently change the reach of whichever sites forgot to say.
-export const resolveRelays = async (
-  selections: RelaySelection[],
-  {policy, limit}: {policy: FallbackPolicy; limit?: number},
-) =>
+// Selections never fall back to default relays. Padding a short selection out with relays nobody
+// involved actually reads or writes to mostly wastes requests, and it hides the real problem: when
+// this comes back empty, either the user or the person they're addressing has no relays set up.
+// TODO: surface that to the user instead of silently publishing or querying nowhere.
+export const resolveRelays = async (selections: RelaySelection[], {limit}: {limit?: number} = {}) =>
   (await router.get().resolve(selections))
     .limit(limit ?? appConfig.relayLimit)
-    .policy(policy)
+    .policy(addNoFallbacks)
     .getUrls()
 
 // Sessions

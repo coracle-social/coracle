@@ -19,8 +19,6 @@ import {
   MESSAGING_RELAYS,
   PROFILE,
   RELAYS,
-  addMaximalFallbacks,
-  addMinimalFallbacks,
   hexTags,
   inboxes,
   isNWCWallet,
@@ -83,7 +81,7 @@ export const updateStore = (store, timestamp, updates) =>
 // user's lists nowhere at all. Coracle has always published its own data to the user's write
 // relays, topping the selection up with defaults, so re-resolve rather than take what the writer
 // worked out.
-const userRelays = () => resolveRelays([userOutbox()], {policy: addMaximalFallbacks})
+const userRelays = () => resolveRelays([userOutbox()])
 
 const publishToUserRelays = async (eventCommand: Command) =>
   eventCommand.publishToRelays(await userRelays())
@@ -134,7 +132,7 @@ export const signAndPublish = async (template, {anonymous: asAnonymous = false} 
     [...(asAnonymous ? [] : [userOutbox()]), ...inboxes(tagValues(hexTags("p"), event.tags), 0.5)],
     // Notes carry mentions, so raise the limit to keep them deliverable, and fall back to a
     // default relay only when nothing else resolved
-    {limit: 30, policy: addMinimalFallbacks},
+    {limit: 30},
   )
 
   return thunks.get().publish({event, relays})
@@ -160,14 +158,11 @@ export const publishPollResponse = async ({event, selectedIds}: PollResponsePara
   const [eventCommand, relays] = await Promise.all([
     command(eventWriter),
     // A vote goes to the author's relays and to whatever relays the poll itself nominated
-    resolveRelays(
-      [
-        userOutbox(),
-        ...inboxes([event.pubkey], 0.5),
-        ...relaySelections(reader(Poll)(event).urls()),
-      ],
-      {policy: addMinimalFallbacks},
-    ),
+    resolveRelays([
+      userOutbox(),
+      ...inboxes([event.pubkey], 0.5),
+      ...relaySelections(reader(Poll)(event).urls()),
+    ]),
   ])
 
   return eventCommand.publishToRelays(relays)

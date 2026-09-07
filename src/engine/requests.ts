@@ -27,8 +27,6 @@ import {
   NAMED_BOOKMARKS,
   POLL_RESPONSE,
   WRAP,
-  addMaximalFallbacks,
-  addNoFallbacks,
   getIdFilters,
   inbox,
   outbox,
@@ -144,7 +142,6 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
     }
 
     const urls = await resolveRelays(selections, {
-      policy: addMaximalFallbacks,
       limit: Math.max(hints.length, appConfig.relayLimit),
     })
 
@@ -194,7 +191,7 @@ export const createPeopleLoader = ({
       try {
         // Search relays only. A `search` filter sent to a relay without nip-50 comes back as
         // an unfiltered dump of profiles, so this must not fall back to the default relays.
-        const urls = await resolveRelays([searchRelays()], {policy: addNoFallbacks})
+        const urls = await resolveRelays([searchRelays()])
 
         await network.get().request({
           autoClose: true,
@@ -246,7 +243,7 @@ export const loadNotifications = async () => {
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
 
   return pullConservatively({
-    relays: await resolveRelays([userInbox()], {policy: addMaximalFallbacks}),
+    relays: await resolveRelays([userInbox()]),
     filters: [addSinceToFilter(filter, int(WEEK))],
   })
 }
@@ -259,7 +256,7 @@ export const listenForNotifications = async () => {
   }
 
   const filter = {kinds: getNotificationKinds(), "#p": [$user.pubkey]}
-  const urls = await resolveRelays([userInbox()], {policy: addMaximalFallbacks})
+  const urls = await resolveRelays([userInbox()])
 
   // Left open on purpose; the Network plugin aborts it when the app is torn down
   network.get().request({relays: urls, filters: [addSinceToFilter(filter)]})
@@ -271,9 +268,7 @@ export const loadLabels = async (authors: string[]) =>
   network.get().load({
     relays: await resolveRelays(
       authors.map(author => outbox(author)),
-      {
-        policy: addMaximalFallbacks,
-      },
+      {},
     ),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
@@ -286,7 +281,7 @@ export const loadDeletes = async () => {
   }
 
   return network.get().load({
-    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
+    relays: await resolveRelays([userOutbox()]),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
   })
 }
@@ -299,7 +294,7 @@ export const loadFeedsAndLists = async () => {
   }
 
   return network.get().load({
-    relays: await resolveRelays([userOutbox()], {policy: addMaximalFallbacks}),
+    relays: await resolveRelays([userOutbox()]),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
@@ -316,11 +311,10 @@ export const loadMessages = async () => {
     return
   }
 
-  // These three had no fallback policy in the 0.8 router, which defaulted to addNoFallbacks
   const [inboxUrls, outboxUrls, messagingUrls] = await Promise.all([
-    resolveRelays([userInbox()], {policy: addNoFallbacks}),
-    resolveRelays([userOutbox()], {policy: addNoFallbacks}),
-    resolveRelays([userMessaging()], {policy: addNoFallbacks}),
+    resolveRelays([userInbox()]),
+    resolveRelays([userOutbox()]),
+    resolveRelays([userMessaging()]),
   ])
 
   await Promise.all([
@@ -349,7 +343,7 @@ export const listenForMessages = () => {
     const listen = async (selections: RelaySelection[], filters: Filter[]) =>
       network.get().request({
         signal: controller.signal,
-        relays: await resolveRelays(selections, {policy: addNoFallbacks}),
+        relays: await resolveRelays(selections),
         filters,
       })
 
