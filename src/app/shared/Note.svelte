@@ -1,18 +1,18 @@
 <script lang="ts">
   import {onMount, getContext} from "svelte"
-  import {nth, now, nthEq} from "@welshman/lib"
+  import {noop, nth, now, nthEq} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
   import {
     getIdOrAddress,
     getReplyFilters,
+    inbox,
     NOTE,
     COMMENT,
     REACTION,
-    ZAP_RESPONSE,
+    ZAP_RECEIPT,
   } from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
   import type {Thunk} from "@welshman/app"
-  import {thunks, pubkey} from "@welshman/app"
+  import {Thunks} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteHeader from "src/app/shared/NoteHeader.svelte"
@@ -23,6 +23,7 @@
   import {headerlessKinds} from "src/util/nostr"
   import NotePending from "src/app/shared/NotePending.svelte"
   import {getSetting, env, isEventMuted, loadPubkeys, myLoad} from "src/engine"
+  import {fromApp, pubkey, relayLists, resolveRelays} from "src/engine/core"
   import {router} from "src/app/util"
 
   export let event: TrustedEvent
@@ -44,14 +45,17 @@
 
   const elapsed = ticker()
 
+  const thunkHistory = fromApp($app => $app.use(Thunks).history)
+
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
-      router
-        .at("notes")
-        .of(getIdOrAddress(event), {relays: Router.get().Event(event).getUrls()})
-        .open()
+      // Router.Event was the author's write relays; full relay selection is asynchronous now,
+      // and these are route parameters that have to be built in one pass.
+      const relays = relayLists.get().writeUrls(event.pubkey).get()
+
+      router.at("notes").of(getIdOrAddress(event), {relays}).open()
     }
   }
 
@@ -74,7 +78,7 @@
   }
 
   $: hidden = $isEventMuted(event, true)
-  $: thunk = $thunks.find(t => t.event.id === event.id)
+  $: thunk = $thunkHistory.find(t => t.event.id === event.id)
   $: pending = event.created_at + 60 > start + $elapsed
 
   onMount(() => {
@@ -93,13 +97,13 @@
     }
 
     if (env.ENABLE_ZAPS && actions.includes("zaps")) {
-      kinds.push(ZAP_RESPONSE)
+      kinds.push(ZAP_RECEIPT)
     }
 
-    myLoad({
-      relays: Router.get().Replies(event).policy(addMaximalFallbacks).getUrls(),
-      filters: getReplyFilters([event], {kinds}),
-    })
+    // Replies land on the author's inbox relays
+    resolveRelays([inbox(event.pubkey)])
+      .then(relays => myLoad({relays, filters: getReplyFilters([event], {kinds})}))
+      .catch(noop)
   })
 </script>
 

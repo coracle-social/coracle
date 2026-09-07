@@ -1,13 +1,13 @@
 <script lang="ts">
   import {LOCALE, secondsToDate} from "@welshman/lib"
-  import {getTagValue} from "@welshman/util"
+  import {tagSpec, tagValue} from "@welshman/util"
 
   export let event
 
   const monthFmt = new Intl.DateTimeFormat(LOCALE, {month: "short"})
   const dayFmt = new Intl.DateTimeFormat(LOCALE, {day: "numeric"})
 
-  $: date = secondsToDate(parseInt(getTagValue("start", event.tags)))
+  $: date = secondsToDate(parseInt(tagValue(tagSpec("start"), event.tags)))
 </script>
 
 <div class="flex flex-col gap-1 px-12">

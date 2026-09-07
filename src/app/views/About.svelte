@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {tagZapSplit} from "@welshman/app"
+  import {first} from "@welshman/lib"
   import Popover from "src/partials/Popover.svelte"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
@@ -8,10 +8,23 @@
   import Heading from "src/partials/Heading.svelte"
   import {router, zap} from "src/app/util"
   import {loadPubkeys, env} from "src/engine"
+  import {relayLists} from "src/engine/core"
 
   const hash = import.meta.env.VITE_BUILD_HASH
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
-  const startZap = () => zap({splits: [tagZapSplit(env.PLATFORM_PUBKEY)]})
+
+  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
+  const startZap = () =>
+    zap({
+      splits: [
+        [
+          "zap",
+          env.PLATFORM_PUBKEY,
+          first(relayLists.get().writeUrls(env.PLATFORM_PUBKEY).get()) || "",
+          "1",
+        ],
+      ],
+    })
 
   loadPubkeys([env.PLATFORM_PUBKEY])
 

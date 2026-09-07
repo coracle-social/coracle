@@ -1,11 +1,11 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {groupBy, ago, int, DAY} from "@welshman/lib"
-  import {pubkey} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import NotificationItem from "src/app/shared/NotificationItem.svelte"
   import NoteReactions from "src/app/shared/NoteReactions.svelte"
   import {reactionNotifications, setChecked} from "src/engine"
+  import {pubkey} from "src/engine/core"
 
   export let limit
 

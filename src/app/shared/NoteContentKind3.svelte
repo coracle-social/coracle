@@ -1,6 +1,6 @@
 <script lang="ts">
   import {take} from "@welshman/lib"
-  import {getPubkeyTagValues} from "@welshman/util"
+  import {hexTags, tagValues} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import NoteContentEllipsis from "src/app/shared/NoteContentEllipsis.svelte"
@@ -14,7 +14,7 @@
 
   let limit = showEntire ? Infinity : 5
 
-  $: isSliced = getPubkeyTagValues(note.tags).length > limit
+  $: isSliced = tagValues(hexTags("p"), note.tags).length > limit
 </script>
 
 <FlexColumn small>
@@ -26,7 +26,7 @@
       Updated follow list:
     </div>
     <div>
-      {#each take(limit, getPubkeyTagValues(note.tags)) as pubkey}
+      {#each take(limit, tagValues(hexTags("p"), note.tags)) as pubkey}
         <div class="inline-block rounded-full px-3 py-2 transition-colors hover:bg-neutral-800">
           <PersonBadgeSmall {pubkey} />
         </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getTagValue} from "@welshman/util"
+  import {tagSpec, tagValue} from "@welshman/util"
   import * as nip19 from "nostr-tools/nip19"
   import {parseJson} from "src/util/misc"
   import Card from "src/partials/Card.svelte"
@@ -9,7 +9,7 @@
   export let note
 
   const {name, picture, about} = parseJson(note.content)
-  const noteId = nip19.noteEncode(note.kind === 40 ? note.id : getTagValue("e", note.tags))
+  const noteId = nip19.noteEncode(note.kind === 40 ? note.id : tagValue(tagSpec("e"), note.tags))
 
   const goToChat = () => window.open(`https://chat.coracle.social/chat/${noteId}`)
 </script>

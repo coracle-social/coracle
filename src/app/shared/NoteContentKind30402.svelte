@@ -1,23 +1,23 @@
 <script lang="ts">
   import cx from "classnames"
-  import {deriveIsDeleted} from "@welshman/store"
   import {fromPairs} from "@welshman/lib"
-  import {getTagValue} from "@welshman/util"
-  import {repository} from "@welshman/app"
+  import {tagSpec, tagValue} from "@welshman/util"
+  import {Events} from "@welshman/app"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import CurrencySymbol from "src/partials/CurrencySymbol.svelte"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {commaFormat} from "src/util/misc"
+  import {fromApp} from "src/engine/core"
 
   export let note
   export let showMedia = false
   export let showEntire = false
 
   const {title, summary, location, status} = fromPairs(note.tags)
-  const [price, code = "SAT"] = getTagValue("price", note.tags)?.slice(1) || []
-  const deleted = deriveIsDeleted(repository, note)
+  const [price, code = "SAT"] = tagValue(tagSpec("price"), note.tags)?.slice(1) || []
+  const deleted = fromApp($app => $app.use(Events).isDeleted(note).$)
 </script>
 
 <FlexColumn>

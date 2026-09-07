@@ -1,20 +1,28 @@
 <script lang="ts">
-  import {insertAt, addToMapKey, parseJson} from "@welshman/lib"
+  import {insertAt, addToMapKey, nth, parseJson, uniq} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
   import {
     getIdOrAddress,
     getIdFilters,
-    getParentIdsAndAddrs,
-    getParentIdOrAddr,
+    hexTags,
+    isRelayUrl,
+    matchTags,
+    outbox,
+    relays as relaySelections,
     verifyEvent,
-    ZAP_RESPONSE,
+    ZAP_RECEIPT,
     COMMENT,
     NOTE,
   } from "@welshman/util"
-  import {repository} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
-  import {isEventMuted, myLoad} from "src/engine"
+  import {
+    getAncestorTags,
+    getParentIdsAndAddrs,
+    getParentIdOrAddr,
+    isEventMuted,
+    myLoad,
+  } from "src/engine"
+  import {app, resolveRelays} from "src/engine/core"
   import {getValidZap} from "src/app/util"
 
   type GetContext = (event: TrustedEvent) => TrustedEvent[]
@@ -35,7 +43,7 @@
 
   const shouldSkip = (event: TrustedEvent, strict: boolean) => {
     if (!showMuted && $isEventMuted(event, strict)) return true
-    if (!showDeleted && repository.isDeleted(event)) return true
+    if (!showDeleted && $app.repository.isDeleted(event)) return true
     if (hideReplies && event.kind === COMMENT) return true
     if (hideReplies && event.kind === NOTE && getParentIdOrAddr(event)) return true
     if (timestamps.has(getIdOrAddress(event))) return true
@@ -56,11 +64,26 @@
 
     if (parentIds.length > 0) {
       const filters = getIdFilters(parentIds)
-      const [cached] = repository.query(filters)
+      const [cached] = $app.repository.query(filters)
 
       if (cached) return cached
 
-      const relays = Router.get().EventParents(event).policy(addMaximalFallbacks).getUrls()
+      // Router.EventParents is gone: it routed to the write relays of whoever authored the
+      // parent (weighted heavily), then to those of anyone mentioned, then to the relay hints
+      // carried on either set of tags.
+      const parentTags = getAncestorTags(event).replies
+      const mentions = matchTags(hexTags("p"), event.tags)
+      const authors = parentTags.map(nth(3)).filter(pubkey => pubkey?.length === 64)
+      const hints = uniq(
+        [...parentTags, ...mentions].map(nth(2)).filter(url => url && isRelayUrl(url)),
+      )
+
+      const relays = await resolveRelays([
+        ...authors.map(pubkey => outbox(pubkey, 10)),
+        ...mentions.map(nth(1)).map(pubkey => outbox(pubkey)),
+        ...relaySelections(hints),
+      ])
+
       const [parent] = await myLoad({filters, relays})
 
       return parent
@@ -87,7 +110,7 @@
       }
 
       // Skip zaps that fail our zapper check
-      if (event.kind === ZAP_RESPONSE && !(await getValidZap(event, parent))) {
+      if (event.kind === ZAP_RECEIPT && !(await getValidZap(event, parent))) {
         return
       }
 

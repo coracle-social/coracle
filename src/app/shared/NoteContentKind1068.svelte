@@ -2,12 +2,17 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import type {TrustedEvent} from "@welshman/util"
-  import {POLL_RESPONSE, getTagValues} from "@welshman/util"
-  import {formatTimestampRelative} from "@welshman/lib"
-  import {Router} from "@welshman/router"
-  import {repository, signer, pubkey} from "@welshman/app"
-  import {deriveEvents} from "@welshman/store"
+  import {
+    POLL_RESPONSE,
+    inbox,
+    relayTags,
+    relays as relaySelections,
+    tagValues,
+  } from "@welshman/util"
+  import {formatTimestampRelative, noop} from "@welshman/lib"
+  import {Events} from "@welshman/app"
   import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
+  import {fromApp, pubkey, resolveRelays, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {
@@ -27,7 +32,7 @@
   const options = getPollOptions(note)
   const endsAt = getPollEndsAt(note)
   const filters = [{kinds: [POLL_RESPONSE], "#e": [note.id]}]
-  const responses = deriveEvents({repository, filters})
+  const responses = fromApp($app => $app.use(Events).all(filters).$)
 
   const getOwnResponse = (events: TrustedEvent[]) => {
     let latest: TrustedEvent | undefined
@@ -57,12 +62,12 @@
     const previousResponses = $responses.filter(response => response.pubkey === $pubkey)
 
     if (selectedIds.length > 0 || previousResponses.length > 0) {
-      publishPollResponse({event: note, selectedIds})
+      publishPollResponse({event: note, selectedIds}).catch(noop)
     }
 
     // Replace our prior responses so superseded votes don't linger on relays
     for (const response of previousResponses) {
-      deleteEvent(response)
+      deleteEvent(response).catch(noop)
     }
   }
 
@@ -81,12 +86,13 @@
   }
 
   onMount(() => {
-    const router = Router.get()
-    const relays = router
-      .merge([router.FromRelays(getTagValues("relay", note.tags)), router.Replies(note)])
-      .getUrls()
-
-    myLoad({relays, filters})
+    // The relays the poll named, plus the ones its author reads from
+    resolveRelays([
+      ...relaySelections(tagValues(relayTags("relay"), note.tags)),
+      inbox(note.pubkey),
+    ])
+      .then(relays => myLoad({relays, filters}))
+      .catch(noop)
   })
 </script>
 

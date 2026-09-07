@@ -1,13 +1,21 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
-  import {identity, sortBy, uniqBy} from "@welshman/lib"
+  import {identity, noop, nth, sortBy, uniq, uniqBy} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {getIdAndAddress, getIdFilters, getAncestors} from "@welshman/util"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
+  import {
+    getIdAndAddress,
+    getIdFilters,
+    hexTags,
+    isRelayUrl,
+    matchTags,
+    outbox,
+    relays as relaySelections,
+  } from "@welshman/util"
   import Button from "src/partials/Button.svelte"
   import Spinner from "src/partials/Spinner.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
-  import {deriveEvent, myRequest} from "src/engine"
+  import {deriveEvent, getAncestors, getAncestorTags, myRequest} from "src/engine"
+  import {resolveRelays} from "src/engine/core"
   import {quantify} from "src/util/misc"
 
   export let id = null
@@ -16,7 +24,25 @@
 
   const event = deriveEvent(id || address, {relays})
 
-  const loadParents = (event: TrustedEvent) => {
+  // Router.EventParents is gone: it routed to the write relays of whoever authored the parent
+  // (weighted heavily), then to those of anyone mentioned, then to the relay hints carried on
+  // either set of tags.
+  const parentRelays = (event: TrustedEvent) => {
+    const parentTags = getAncestorTags(event).replies
+    const mentions = matchTags(hexTags("p"), event.tags)
+    const authors = parentTags.map(nth(3)).filter(pubkey => pubkey?.length === 64)
+    const hints = uniq(
+      [...parentTags, ...mentions].map(nth(2)).filter(url => url && isRelayUrl(url)),
+    )
+
+    return resolveRelays([
+      ...authors.map(pubkey => outbox(pubkey, 10)),
+      ...mentions.map(nth(1)).map(pubkey => outbox(pubkey)),
+      ...relaySelections(hints),
+    ])
+  }
+
+  const loadParents = async (event: TrustedEvent) => {
     if (stopped) {
       return
     }
@@ -26,13 +52,20 @@
     const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
+      // Relay selection is asynchronous now, so re-check that we haven't been torn down
+      const parentUrls = await parentRelays(event)
+
+      if (stopped) {
+        return
+      }
+
       myRequest({
         autoClose: true,
-        relays: Router.get().EventParents(event).policy(addMaximalFallbacks).getUrls(),
+        relays: parentUrls,
         filters: getIdFilters(filteredIds),
         onEvent: (event: TrustedEvent) => {
           addToThread(event)
-          loadParents(event)
+          loadParents(event).catch(noop)
         },
       })
     }
@@ -65,7 +98,7 @@
 
   $: {
     if ($event) {
-      loadParents($event)
+      loadParents($event).catch(noop)
     }
   }
 

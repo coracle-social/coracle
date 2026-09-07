@@ -2,7 +2,7 @@
   import * as nip19 from "nostr-tools/nip19"
   import {fromPairs, tryCatch} from "@welshman/lib"
   import type {TrustedEvent} from "@welshman/util"
-  import {Address, getTag, getTopicTagValues, isRelayUrl} from "@welshman/util"
+  import {Address, isRelayUrl, matchTag, tagSpec, tagValues, topicTags} from "@welshman/util"
   import {parseLink} from "@welshman/content"
   import Link from "src/partials/Link.svelte"
   import Chip from "src/partials/Chip.svelte"
@@ -15,8 +15,8 @@
   export let showMedia: boolean
 
   const meta = fromPairs(note.tags)
-  const aTag = getTag("a", note.tags)
-  const eTag = getTag("e", note.tags)
+  const aTag = matchTag(tagSpec("a"), note.tags)
+  const eTag = matchTag(tagSpec("e"), note.tags)
 
   // Tag values are user-provided, so validate them before encoding
   const isPubkey = (value?: string) => Boolean(value?.match(/^[0-9a-f]{64}$/))
@@ -72,7 +72,7 @@
     </div>
   {/if}
   <div>
-    {#each getTopicTagValues(note.tags) as topic}
+    {#each tagValues(topicTags("t"), note.tags) as topic}
       <NoteContentTopic value={topic}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
       </NoteContentTopic>

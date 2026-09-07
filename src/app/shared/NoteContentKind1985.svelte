@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getTagValue} from "@welshman/util"
+  import {tagSpec, tagValue} from "@welshman/util"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import NoteContentLabel from "src/app/shared/NoteContentLabel.svelte"
@@ -7,8 +7,8 @@
 
   export let note, showEntire
 
-  const isRelayReview = getTagValue("l", note.tags) === "review/relay"
-  const url = getTagValue("r", note.tags)
+  const isRelayReview = tagValue(tagSpec("l"), note.tags) === "review/relay"
+  const url = tagValue(tagSpec("r"), note.tags)
 </script>
 
 <FlexColumn>

@@ -2,15 +2,16 @@
   import * as nip19 from "nostr-tools/nip19"
   import {tweened} from "svelte/motion"
   import {sum, pluck, spec, uniqBy, prop} from "@welshman/lib"
-  import {Router} from "@welshman/router"
-  import type {TrustedEvent, Handler} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {
     isReplaceable,
     Address,
     toNostrURI,
-    getTag,
-    getPubkeyTagValues,
-    ZAP_RESPONSE,
+    hexTags,
+    matchTag,
+    tagSpec,
+    tagValues,
+    ZAP_RECEIPT,
     REACTION,
   } from "@welshman/util"
   import {fly} from "src/util/transition"
@@ -27,21 +28,25 @@
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {deriveValidZaps} from "src/app/util"
   import {sortEventsDesc, deriveHandlerEvent, deriveRelaysForEvent} from "src/engine"
+  import {relayLists} from "src/engine/core"
   import {getHandlerKey, readHandlers, displayHandler} from "src/domain"
+  import type {Handler} from "src/domain"
 
   export let event: TrustedEvent
   export let children: TrustedEvent[] = []
   export let handlers: Handler[] = []
 
-  const relays = Router.get().Event(event).limit(3).getUrls()
+  // Router.Event was the author's write relays; full relay selection is asynchronous now, and
+  // these are hints baked into a bech32 link that has to be built in one pass.
+  const relays = relayLists.get().writeUrls(event.pubkey).get().slice(0, 3)
   const nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
   const naddr = Address.fromEvent(event, relays).toNaddr()
   const interpolate = (a, b) => t => a + Math.round((b - a) * t)
-  const mentions = getPubkeyTagValues(event.tags)
+  const mentions = tagValues(hexTags("p"), event.tags)
   const likesCount = tweened(0, {interpolate})
   const zapsTotal = tweened(0, {interpolate})
   const repliesCount = tweened(0, {interpolate})
-  const handlerEvent = deriveHandlerEvent(getTag("client", event.tags)?.[2] || "")
+  const handlerEvent = deriveHandlerEvent(matchTag(tagSpec("client"), event.tags)?.[2] || "")
   const seenOn = deriveRelaysForEvent(event)
 
   const showHandlers = () => {
@@ -65,7 +70,7 @@
     prop("pubkey"),
     children.filter(e => repostKinds.includes(e.kind)),
   )
-  $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RESPONSE})), event)
+  $: zaps = deriveValidZaps(children.filter(spec({kind: ZAP_RECEIPT})), event)
   $: replies = sortEventsDesc(children.filter(e => replyKinds.includes(e.kind)))
   $: $likesCount = likes.length
   $: $zapsTotal = sum(pluck("invoiceAmount", $zaps)) / 1000

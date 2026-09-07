@@ -2,7 +2,6 @@
   import {fromPairs} from "@welshman/lib"
   import {Address} from "@welshman/util"
   import {urlIsMedia} from "@welshman/content"
-  import {Router} from "@welshman/router"
   import Card from "src/partials/Card.svelte"
   import Chip from "src/partials/Chip.svelte"
   import Link from "src/partials/Link.svelte"
@@ -10,11 +9,14 @@
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import NoteContentTopics from "src/app/shared/NoteContentTopics.svelte"
   import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import {relayLists} from "src/engine/core"
 
   export let note
   export let showMedia = false
 
-  const address = Address.fromEvent(note, Router.get().Event(note).getUrls())
+  // Router.Event was the author's write relays; full relay selection is asynchronous now, and
+  // these are hints baked into a naddr that has to be built in one pass.
+  const address = Address.fromEvent(note, relayLists.get().writeUrls(note.pubkey).get())
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>
 

@@ -10,8 +10,9 @@
 </script>
 
 <script lang="ts">
-  import {relaySearch} from "@welshman/app"
-  import {Router} from "@welshman/router"
+  import {userOutbox} from "@welshman/util"
+  import {Relays} from "@welshman/app"
+  import {fromApp, resolveRelays} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import DateTimeInput from "src/partials/DateTimeInput.svelte"
   import Field from "src/partials/Field.svelte"
@@ -33,8 +34,16 @@
     ...initialValues,
   }
 
+  const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
+
+  // Relay selection is asynchronous now; an empty list is what the old scenario handed back when
+  // the user had no relay list of their own.
   const initRelays = () => {
-    values.relays = Router.get().FromUser().getUrls()
+    resolveRelays([userOutbox()])
+      .catch(() => [])
+      .then(urls => {
+        values.relays = urls
+      })
   }
 
   const submit = () =>

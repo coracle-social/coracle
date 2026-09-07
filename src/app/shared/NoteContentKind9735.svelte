@@ -1,24 +1,29 @@
 <script lang="ts">
-  import {onMount} from "svelte"
-  import {nth, removeUndefined} from "@welshman/lib"
-  import {zapFromEvent, getTags, getTagValue} from "@welshman/util"
-  import {deriveZapperForPubkey, loadZapper} from "@welshman/app"
+  import {readable} from "svelte/store"
+  import {nth, removeUndefined, tryCatch} from "@welshman/lib"
+  import type {Maybe} from "@welshman/lib"
+  import {matchTags, tagSpec, tagValue} from "@welshman/util"
+  import {Zappers} from "@welshman/app"
+  import {ZapReceipt} from "@welshman/domain"
+  import type {Zapper} from "@welshman/domain"
   import {formatSats} from "src/util/misc"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
+  import {fromApp, reader} from "src/engine/core"
 
   export let note, showEntire, showMedia
 
-  const recipient = getTagValue("p", note.tags)
-  const urls = removeUndefined(getTags("i", note.tags).map(nth(2)))
-  const zapper = deriveZapperForPubkey(recipient)
+  const recipient = tagValue(tagSpec("p"), note.tags)
+  const urls = removeUndefined(matchTags(tagSpec("i"), note.tags).map(nth(2)))
 
-  $: zap = zapFromEvent(note, $zapper)
+  // forPubkey kicks off the zapper load itself, which is what the old loadZapper call did
+  const zapper = fromApp($app =>
+    recipient ? $app.use(Zappers).forPubkey(recipient).$ : readable<Maybe<Zapper>>(undefined),
+  )
 
-  onMount(() => {
-    loadZapper(recipient)
-  })
+  // zapFromEvent is gone; Zapper.validate is its successor, and takes a parsed receipt
+  $: zap = $zapper && tryCatch(() => $zapper.validate(reader(ZapReceipt)(note)))
 </script>
 
 {#if zap}

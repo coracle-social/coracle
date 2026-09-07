@@ -1,9 +1,9 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {postJson} from "@welshman/lib"
-  import {pubkey} from "@welshman/app"
   import Button from "src/partials/Button.svelte"
   import {dufflepud, getSetting, userFollows} from "src/engine"
+  import {pubkey} from "src/engine/core"
 
   export let urls: string[]
   export let author: string
