@@ -1,24 +1,26 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {fly} from "svelte/transition"
-  import {uniq} from "@welshman/lib"
-  import {deriveEvents} from "@welshman/store"
-  import {Router, addMaximalFallbacks} from "@welshman/router"
-  import {repository} from "@welshman/app"
+  import {noop, uniq} from "@welshman/lib"
+  import {FOLLOWS, inbox} from "@welshman/util"
+  import {Events} from "@welshman/app"
   import Spinner from "src/partials/Spinner.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import {pullConservatively} from "src/engine"
+  import {fromApp, resolveRelays} from "src/engine/core"
 
   export let pubkey
 
-  const relays = Router.get().ForPubkey(pubkey).policy(addMaximalFallbacks).getUrls()
-  const filters = [{kinds: [3], "#p": [pubkey]}]
-  const events = deriveEvents({repository, filters})
+  const filters = [{kinds: [FOLLOWS], "#p": [pubkey]}]
+  const events = fromApp($app => $app.use(Events).all(filters).$)
 
   $: pubkeys = uniq($events.map(event => event.pubkey))
 
   onMount(() => {
-    pullConservatively({relays, filters})
+    // Relay selection resolves asynchronously now, so this pull starts a tick later
+    resolveRelays([inbox(pubkey)])
+      .then(relays => pullConservatively({relays, filters}))
+      .catch(noop)
   })
 </script>
 

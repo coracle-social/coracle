@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {signer, pubkey, sessions, displayProfileByPubkey} from "@welshman/app"
+  import {signer, pubkey, sessions, profiles, switchAccount} from "src/engine/core"
+  import {showWarning} from "src/partials/Toast.svelte"
   import {toggleTheme, installPrompt, installAsPWA} from "src/partials/state"
   import Button from "src/partials/Button.svelte"
   import Link from "src/partials/Link.svelte"
@@ -38,6 +39,11 @@
     closeMenu()
   }
 
+  // Switching rebuilds the app around the other account, so it can fail where setting the
+  // active pubkey used to be a plain assignment
+  const setAccount = (theirPubkey: string) =>
+    switchAccount(theirPubkey).catch(() => showWarning("Failed to switch to that account."))
+
   let subMenu
 </script>
 
@@ -51,7 +57,7 @@
           on:click={openAccount}>
           <PersonCircle class="h-10 w-10" pubkey={$pubkey} />
           <div class="flex min-w-0 flex-col">
-            <span>@{displayProfileByPubkey($pubkey)}</span>
+            <span>@{$profiles.display($pubkey).get()}</span>
             <PersonHandle class="text-sm" pubkey={$pubkey} />
           </div>
         </Button>
@@ -170,10 +176,10 @@
   <SliderMenu onEscape={closeMenu}>
     {#each Object.values($sessions) as s (s.pubkey)}
       {#if s.pubkey !== $pubkey}
-        <MenuItem class="py-4" on:click={() => pubkey.set(s.pubkey)}>
+        <MenuItem class="py-4" on:click={() => setAccount(s.pubkey)}>
           <div class="flex items-center justify-center gap-2">
             <PersonCircle class="h-8 w-8 border border-solid border-tinted-200" pubkey={s.pubkey} />
-            {displayProfileByPubkey(s.pubkey)}
+            {$profiles.display(s.pubkey).get()}
           </div>
         </MenuItem>
       {/if}

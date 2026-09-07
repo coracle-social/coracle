@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {tagPubkey} from "@welshman/app"
   import Button from "src/partials/Button.svelte"
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
@@ -19,7 +18,7 @@
 
   const unfollowPerson = () => unfollow(pubkey)
 
-  const followPerson = () => follow(tagPubkey(pubkey))
+  const followPerson = () => follow(pubkey)
 
   const showDetail = () => router.at("people").of(pubkey).open()
 

@@ -4,8 +4,8 @@
   import {onMount} from "svelte"
   import * as nip19 from "nostr-tools/nip19"
   import {fromPairs} from "@welshman/lib"
-  import {fromNostrURI, getTopicTagValues} from "@welshman/util"
-  import {displayProfileByPubkey} from "@welshman/app"
+  import {fromNostrURI, tagValues, topicTags} from "@welshman/util"
+  import {profiles} from "src/engine/core"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
@@ -33,9 +33,9 @@
 
       let display = entity.slice(0, 16) + "..."
       if (type === "npub") {
-        display = "@" + displayProfileByPubkey(data)
+        display = "@" + profiles.get().display(data).get()
       } else if (type === "nprofile") {
-        display = "@" + displayProfileByPubkey(data.pubkey)
+        display = "@" + profiles.get().display(data.pubkey).get()
       }
 
       markdown = markdown.replace(uri, `[${display}](${entity})`)
@@ -82,7 +82,7 @@
     <NoteContentLinks urls={[image]} showMedia />
   {/if}
   <div>
-    {#each getTopicTagValues(note.tags) as topic}
+    {#each tagValues(topicTags("t"), note.tags) as topic}
       <NoteContentTopic value={topic}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
       </NoteContentTopic>

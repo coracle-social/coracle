@@ -1,17 +1,22 @@
+<script context="module" lang="ts">
+  import {derived} from "svelte/store"
+  import {max} from "@welshman/lib"
+  import {Wot, WotScope} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
+
+  // Shared by every popover on screen: scores() walks the whole web of trust, so a store per
+  // rendered name would rebuild the same map dozens of times per graph update.
+  const maxWot = fromApp($app =>
+    derived($app.use(Wot).scores(WotScope.Follows).$, $scores => max(Array.from($scores.values()))),
+  )
+</script>
+
 <script lang="ts">
   import * as nip19 from "nostr-tools/nip19"
-  import {formatTimestampRelative} from "@welshman/lib"
-  import {
-    deriveProfile,
-    getUserWotScore,
-    maxWot,
-    session,
-    deriveProfileDisplay,
-    tagZapSplit,
-    deriveHandleForPubkey,
-    profilesByPubkey,
-  } from "@welshman/app"
+  import {first, formatTimestampRelative, stripProtocol} from "@welshman/lib"
+  import {Handles, Profiles} from "@welshman/app"
   import {userFollows} from "src/engine"
+  import {relayLists, session} from "src/engine/core"
   import Link from "src/partials/Link.svelte"
   import Button from "src/partials/Button.svelte"
   import Popover from "src/partials/Popover.svelte"
@@ -20,35 +25,38 @@
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import {router, zap} from "src/app/util"
   import {ensureProto} from "src/util/misc"
-  import {stripProtocol} from "@welshman/lib"
   import CopyValueSimple from "src/partials/CopyValueSimple.svelte"
 
   export let pubkey
 
-  const profile = deriveProfile(pubkey)
-  const wotScore = getUserWotScore(pubkey)
-  const handle = deriveHandleForPubkey(pubkey)
-  const profileDisplay = deriveProfileDisplay(pubkey)
+  const profile = fromApp($app => $app.use(Profiles).one(pubkey))
+  const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
+  const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
+  // Scored against the user's own follows, which is what the old wot graph did — WotScope.Global
+  // would re-rank everything that reads a score.
+  const wotScore = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
   const showPerson = () => router.at("people").of(pubkey).open()
-  const startZap = () => zap({splits: [tagZapSplit(pubkey)]})
+  // Welshman deleted tagZapSplit; the hint is the recipient's first write relay, as before.
+  const zapSplit = ["zap", pubkey, first(relayLists.get().writeUrls(pubkey).get()) || "", "1"]
+  const startZap = () => zap({splits: [zapSplit]})
 
   $: following = $userFollows.has(pubkey)
-  $: zapDisplay = $profile?.lud16 || $profile?.lud06
+  $: zapDisplay = $profile?.values.lud16 || $profile?.values.lud06
   $: accent = following || pubkey === $session?.pubkey
-  $: profileUpdated = $profilesByPubkey.get(pubkey)?.event?.created_at
+  $: profileUpdated = $profile?.createdAt()
 </script>
 
 <div on:click|stopPropagation>
   <Popover triggerType="mouseenter" opts={{hideOnClick: true}} placement="right">
     <div slot="trigger">
-      <WotScore score={wotScore} max={$maxWot} {accent} />
+      <WotScore score={$wotScore} max={$maxWot} {accent} />
     </div>
     <div slot="tooltip" class="p-4">
       <strong class="cursor-pointer font-bold" on:click={showPerson}>{$profileDisplay}</strong>
       {#if profileUpdated}
         <div class="text-neutral-400">Updated {formatTimestampRelative(profileUpdated)}</div>
       {/if}
-      {#if $profile?.about}
+      {#if $profile?.about()}
         <PersonAbout class="mt-4 font-thin" {pubkey} />
       {/if}
       {#if $handle}
@@ -65,13 +73,13 @@
           </div>
         </Button>
       {/if}
-      {#if $profile?.website}
+      {#if $profile?.website()}
         <Link
           external
           class="mt-4 flex items-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
-          href={ensureProto($profile.website)}>
+          href={ensureProto($profile.website())}>
           <i class="fa fa-link text-accent" />
-          {stripProtocol($profile.website)}
+          {stripProtocol($profile.website())}
         </Link>
       {/if}
       <div class="mt-4 break-all">
@@ -80,7 +88,7 @@
       </div>
       <div class="mt-4 flex items-center gap-2">
         <Link modal class="flex items-center gap-1" href="/help/web-of-trust">
-          WoT Score: {wotScore}
+          WoT Score: {$wotScore}
           <i class="fa fa-info-circle" />
         </Link>
       </div>
