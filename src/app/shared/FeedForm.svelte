@@ -1,7 +1,7 @@
 <script lang="ts">
   import {spec} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
-  import {feeds, profiles, pubkey, signer, userRelays} from "src/engine/core"
+  import {feeds, profiles, pubkey, signer} from "src/engine/core"
   import Field from "src/partials/Field.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
@@ -85,9 +85,7 @@
           )
         : await $feeds.create({title, description, definition})
 
-    // The writer routes a feed to the user's write relays; re-resolve so the selection uses
-    // coracle's relay limit rather than the writer's default of three
-    const thunk = eventCommand.publishToRelays(await userRelays())
+    const thunk = eventCommand.publish()
 
     showInfo("Your feed has been saved!")
 

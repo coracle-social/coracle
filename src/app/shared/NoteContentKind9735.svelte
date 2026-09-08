@@ -2,7 +2,7 @@
   import {readable} from "svelte/store"
   import {nth, removeUndefined, tryCatch} from "@welshman/lib"
   import type {Maybe} from "@welshman/lib"
-  import {matchTags, tagSpec, tagValue} from "@welshman/util"
+  import {matchTags, tagSpec} from "@welshman/util"
   import {Zappers} from "@welshman/app"
   import {ZapReceipt} from "@welshman/domain"
   import type {Zapper} from "@welshman/domain"
@@ -14,7 +14,9 @@
 
   export let note, showEntire, showMedia
 
-  const recipient = tagValue(tagSpec("p"), note.tags)
+  const receipt = reader(ZapReceipt)(note)
+  const recipient = receipt.recipient()
+  // ZapReceiptReader doesn't model the i tags coracle reads media urls out of
   const urls = removeUndefined(matchTags(tagSpec("i"), note.tags).map(nth(2)))
 
   // forPubkey kicks off the zapper load itself, which is what the old loadZapper call did
@@ -23,7 +25,7 @@
   )
 
   // zapFromEvent is gone; Zapper.validate is its successor, and takes a parsed receipt
-  $: zap = $zapper && tryCatch(() => $zapper.validate(reader(ZapReceipt)(note)))
+  $: zap = $zapper && tryCatch(() => $zapper.validate(receipt))
 </script>
 
 {#if zap}

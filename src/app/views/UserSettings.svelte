@@ -16,7 +16,7 @@
   import WorkEstimate from "src/partials/WorkEstimate.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import {env, hasNip44, userSettings, publishSettings} from "src/engine"
-  import {blossomServerLists, deriveUserItem, userRelays} from "src/engine/core"
+  import {blossomServerLists, deriveUserItem} from "src/engine/core"
 
   const userBlossomServerList = deriveUserItem(BlossomServerLists)
 
@@ -43,7 +43,7 @@
     if (!equals(blossomServers, initialBlossomServers)) {
       const eventCommand = await blossomServerLists.get().setUrls(blossomServers.map(ensureProto))
 
-      eventCommand.publishToRelays(await userRelays())
+      eventCommand.publish()
     }
   }
 

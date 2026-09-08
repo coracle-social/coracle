@@ -20,14 +20,7 @@
   import Input from "src/partials/Input.svelte"
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
-  import {
-    command,
-    getWriteRelays,
-    profiles,
-    relaySearch,
-    topicSearch,
-    userRelays,
-  } from "src/engine/core"
+  import {command, getWriteRelays, profiles, relaySearch, topicSearch} from "src/engine/core"
   import {deleteEvent} from "src/engine"
   import {KindSearch, displayUserList, userListWriter} from "src/domain"
 
@@ -51,10 +44,7 @@
 
   const submit = async () => {
     const eventCommand = await command(userListWriter(list))
-
-    // The writer routes a list to the user's write relays; re-resolve so the selection uses
-    // coracle's relay limit rather than the writer's default of three
-    const thunk = eventCommand.publishToRelays(await userRelays())
+    const thunk = eventCommand.publish()
 
     showInfo("Your list has been saved!")
     exit(thunk.event)

@@ -47,7 +47,6 @@ import {
   relays,
   resolveRelays,
   sync,
-  userRelays,
 } from "src/engine/core"
 import {env} from "src/engine/env"
 import {shouldUnwrap} from "src/engine/state"
@@ -245,14 +244,14 @@ export const loadLabels = async (authors: string[]) =>
 
 export const loadDeletes = withUser(async $user =>
   network.get().load({
-    relays: await userRelays(),
+    relays: await resolveRelays([userOutbox()]),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
   }),
 )
 
 export const loadFeedsAndLists = withUser(async $user =>
   network.get().load({
-    relays: await userRelays(),
+    relays: await resolveRelays([userOutbox()]),
     filters: [
       addSinceToFilter({
         kinds: [FEED, FEEDS, NAMED_BOOKMARKS, RELAY_FEEDS, ...CUSTOM_LIST_KINDS],
@@ -269,7 +268,7 @@ export const loadMessages = withUser(async $user => {
 
   const [inboxUrls, outboxUrls, messagingUrls] = await Promise.all([
     resolveRelays([userInbox()]),
-    userRelays(),
+    resolveRelays([userOutbox()]),
     resolveRelays([userMessaging()]),
   ])
 

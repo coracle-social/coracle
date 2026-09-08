@@ -17,7 +17,7 @@
   import Heading from "src/partials/Heading.svelte"
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {hasNip44, userSettings, publishSettings} from "src/engine"
-  import {deriveUserItem, muteLists, topicSearch, userRelays} from "src/engine/core"
+  import {deriveUserItem, muteLists, topicSearch} from "src/engine/core"
 
   const userMuteList = deriveUserItem(MuteLists)
 
@@ -64,7 +64,7 @@
         ],
       })
 
-      eventCommand.publishToRelays(await userRelays())
+      eventCommand.publish()
     }
   }
 

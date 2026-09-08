@@ -1,4 +1,5 @@
 import type {TrustedEvent} from "@welshman/util"
+import {inbox, relays as relaySelections} from "@welshman/util"
 import {Poll, PollResponse} from "@welshman/domain"
 import type {PollType} from "@welshman/domain"
 import {reader} from "src/engine/core"
@@ -20,6 +21,12 @@ export const getPollOptions = (event: TrustedEvent) =>
 export const getPollEndsAt = (event: TrustedEvent) => reader(Poll)(event).endsAt()
 
 export const isPollClosed = (event: TrustedEvent) => reader(Poll)(event).isClosed()
+
+// Responses live on whatever relays the poll nominated, plus the ones its author reads from
+export const getPollRelaySelections = (event: TrustedEvent) => [
+  ...relaySelections(reader(Poll)(event).urls()),
+  inbox(event.pubkey),
+]
 
 export const getPollResponseSelections = (event: TrustedEvent, pollType = getPollType(event)) => {
   const selections = reader(PollResponse)(event).selections()

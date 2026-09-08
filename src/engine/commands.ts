@@ -1,17 +1,8 @@
 import {nwc} from "@getalby/sdk"
 import {append, first, nthNe, remove, sha256, uniq} from "@welshman/lib"
 import {User, publish} from "@welshman/app"
-import type {Command} from "@welshman/app"
 import {Nip01Signer} from "@welshman/signer"
-import {
-  AppData,
-  Delete,
-  DirectMessage,
-  Poll,
-  PollResponse,
-  RelayJoin,
-  RelayList,
-} from "@welshman/domain"
+import {AppData, Delete, DirectMessage, Poll, RelayJoin, RelayList} from "@welshman/domain"
 import type {RelayListWriter} from "@welshman/domain"
 import {
   FOLLOWS,
@@ -25,7 +16,6 @@ import {
   isWebLNWallet,
   makeBlossomAuthEvent,
   normalizeRelayUrl,
-  relays as relaySelections,
   tagValues,
   uploadBlob,
   userOutbox,
@@ -43,25 +33,15 @@ import {
   relayLists,
   resolveRelays,
   thunks,
-  userRelays,
   wraps,
   writer,
 } from "src/engine/core"
-import {env} from "src/engine/env"
 import {anonymous, getClientTags, sessionWithMeta, sign} from "src/engine/state"
-import {userListKind} from "src/domain"
+import {PollVote, userListKind} from "src/domain"
 import {stripExifData} from "src/util/html"
 import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 
 // Helpers
-
-export const publishToUserRelays = async (eventCommand: Command) =>
-  eventCommand.publishToRelays(await userRelays())
-
-// Relay and messaging relay lists also go to the indexers, which is where other clients look for
-// them. Kind 10002 routes itself there; kind 10050 doesn't.
-const publishToUserRelaysAndIndexers = async (eventCommand: Command) =>
-  eventCommand.publishToRelays(uniq([...(await userRelays()), ...env.INDEXER_RELAYS]))
 
 // The user's own copy of a replaceable kind, read straight from the repository. Welshman keeps an
 // index for the kinds it models; coracle's own kinds have to be looked up.
@@ -97,15 +77,13 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
 export const signAndPublish = async (template, {anonymous: asAnonymous = false} = {}) => {
   const event = await sign(template, {anonymous: asAnonymous})
 
-  // Deliver to the author's write relays and everyone they mentioned. An anonymous note is signed
-  // with a throwaway key which has no relay list, so asking for its outbox would only stall on a
-  // load that can't succeed.
-  const relays = await resolveRelays(
-    [...(asAnonymous ? [] : [userOutbox()]), ...inboxes(tagValues(hexTags("p"), event.tags), 0.5)],
-    // Notes carry mentions, so raise the limit to keep them deliverable, and fall back to a
-    // default relay only when nothing else resolved
-    {limit: 30},
-  )
+  // A writer's default routes, for the kinds welshman doesn't model — the author's write relays
+  // and everyone they mentioned. An anonymous note is signed with a throwaway key which has no
+  // relay list, so asking for its outbox would only stall on a load that can't succeed.
+  const relays = await resolveRelays([
+    ...(asAnonymous ? [] : [userOutbox()]),
+    ...inboxes(tagValues(hexTags("p"), event.tags), 0.5),
+  ])
 
   return thunks.get().publish({event, relays})
 }
@@ -118,7 +96,8 @@ export type PollResponseParams = {
 }
 
 export const publishPollResponse = async ({event, selectedIds}: PollResponseParams) => {
-  const eventWriter = writer(PollResponse)
+  const eventWriter = writer(PollVote)
+    .setPollUrls(reader(Poll)(event).urls())
     .setPollId(event.id)
     .addMention(event.pubkey)
     .addTags(...getClientTags())
@@ -127,17 +106,7 @@ export const publishPollResponse = async ({event, selectedIds}: PollResponsePara
     eventWriter.addSelection(selectedId)
   }
 
-  const [eventCommand, relays] = await Promise.all([
-    command(eventWriter),
-    // A vote goes to the author's relays and to whatever relays the poll itself nominated
-    resolveRelays([
-      userOutbox(),
-      ...inboxes([event.pubkey], 0.5),
-      ...relaySelections(reader(Poll)(event).urls()),
-    ]),
-  ])
-
-  return eventCommand.publishToRelays(relays)
+  return command(eventWriter).then(publish)
 }
 
 // Deletes
@@ -160,7 +129,7 @@ export const publishDeletion = async ({kind, id, address}: DeletionParams) => {
     return deleteEvent(event)
   }
 
-  // Without the event we can't route by where it was seen, so fall back to the user's own relays
+  // Without the event to route by, the writer falls back to the user's own relays
   const eventWriter = writer(Delete).addTags(["k", String(kind)])
 
   if (id) {
@@ -171,7 +140,7 @@ export const publishDeletion = async ({kind, id, address}: DeletionParams) => {
     eventWriter.addTags(["a", address])
   }
 
-  return command(eventWriter).then(publishToUserRelays)
+  return command(eventWriter).then(publish)
 }
 
 // Follows
@@ -196,7 +165,7 @@ export const follow = async (pubkey: string) => {
   return followLists
     .get()
     .update(eventWriter => eventWriter.unfollow(pubkey).addTags(tag))
-    .then(publishToUserRelays)
+    .then(publish)
 }
 
 export const unfollow = async (value: string) => {
@@ -204,16 +173,16 @@ export const unfollow = async (value: string) => {
     return anonymous.update($a => ({...$a, follows: $a.follows.filter(nthNe(1, value))}))
   }
 
-  return followLists.get().unfollow(value).then(publishToUserRelays)
+  return followLists.get().unfollow(value).then(publish)
 }
 
 // Feed favorites
 
 export const addFeedFavorite = async (address: string) =>
-  feedLists.get().addFeed(address).then(publishToUserRelays)
+  feedLists.get().addFeed(address).then(publish)
 
 export const removeFeedFavorite = async (address: string) =>
-  feedLists.get().removeFeed(address).then(publishToUserRelays)
+  feedLists.get().removeFeed(address).then(publish)
 
 // Relay feeds
 
@@ -224,7 +193,7 @@ export const setRelayFeeds = async (urls: string[]) => {
     .dropPublic(t => ["r", "relay"].includes(t[0]))
     .addPublic(...urls.map(url => ["relay", url]))
 
-  return command(eventWriter).then(publishToUserRelays)
+  return command(eventWriter).then(publish)
 }
 
 // Relays
@@ -289,7 +258,7 @@ export const setMessagingPolicy = async (url: string, enabled: boolean) => {
       .update(eventWriter =>
         enabled ? eventWriter.removeUrl(url).addUrl(url) : eventWriter.removeUrl(url),
       )
-      .then(publishToUserRelaysAndIndexers)
+      .then(publish)
   )
 }
 
@@ -346,7 +315,7 @@ export const setAppData = async (d: string, data: any) => {
 
   const eventWriter = writer(AppData).setIdentifier(d).setValues(data).setEncrypted(true)
 
-  return command(eventWriter).then(publishToUserRelays)
+  return command(eventWriter).then(publish)
 }
 
 export const publishSettings = ($settings: Record<string, any>) =>
