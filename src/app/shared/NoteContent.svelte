@@ -10,7 +10,6 @@
   import NoteContentKind1111 from "src/app/shared/NoteContentKind1111.svelte"
   import NoteContentKind1808 from "src/app/shared/NoteContentKind1808.svelte"
   import NoteContentKind1985 from "src/app/shared/NoteContentKind1985.svelte"
-  import NoteContentKind1986 from "src/app/shared/NoteContentKind1986.svelte"
   import NoteContentKind9041 from "src/app/shared/NoteContentKind9041.svelte"
   import NoteContentKind9735 from "src/app/shared/NoteContentKind9735.svelte"
   import NoteContentKind9802 from "src/app/shared/NoteContentKind9802.svelte"
@@ -69,8 +68,6 @@
     <NoteContentKind1985 {note} {showEntire} />
   {:else if note.kind === 9735}
     <NoteContentKind9735 {note} {showEntire} {showMedia} />
-  {:else if note.kind === 1986}
-    <NoteContentKind1986 {note} {showEntire} />
   {:else if note.kind === 9802}
     <NoteContentKind9802 {note} {showEntire} {showMedia} />
   {:else if note.kind === 1063}

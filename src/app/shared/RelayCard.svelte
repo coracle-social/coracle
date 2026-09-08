@@ -5,10 +5,8 @@
   import {MessagingRelayLists, RelayLists, RelayStats, Relays} from "@welshman/app"
   import {fromApp, signer} from "src/engine/core"
   import {ensureMailto, quantify} from "src/util/misc"
-  import {getAvgRating} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
-  import Rating from "src/partials/Rating.svelte"
   import Link from "src/partials/Link.svelte"
   import Popover from "src/partials/Popover.svelte"
   import RelayStatus from "src/app/shared/RelayStatus.svelte"
@@ -19,9 +17,7 @@
 
   export let url
   export let claim = null
-  export let ratings = null
   export let showStatus = false
-  export let hideRatingsCount = false
   export let hideActions = false
   export let showControls = false
 
@@ -98,14 +94,6 @@
             Connected {quantify($stats?.open_count || 0, "time")}
           </span>
         </div>
-        {#if !showStatus && ratings?.length > 0}
-          <div class="flex items-center gap-1 pt-1 text-sm">
-            <Rating inert value={getAvgRating(ratings)} />
-            {#if !hideRatingsCount}
-              <span class="whitespace-nowrap text-neutral-400">({ratings.length} reviews)</span>
-            {/if}
-          </div>
-        {/if}
       </div>
     </div>
     {#if !hideActions}
