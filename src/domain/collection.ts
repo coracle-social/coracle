@@ -1,5 +1,6 @@
-import {nth} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
+import {Label} from "@welshman/domain"
+import {reader} from "src/engine/core"
 import {makeSearch} from "src/util/misc"
 
 export type Collection = {
@@ -14,9 +15,11 @@ export const readCollections = (events: TrustedEvent[]) => {
   const collections = new Map<string, Collection>()
 
   for (const event of events) {
-    for (const name of event.tags.filter(t => t[0] === "l" && t[2] === "#t").map(nth(1))) {
+    const label = reader(Label)(event)
+    const ids = label.eventIds()
+
+    for (const name of label.labels("#t")) {
       const key = `${event.pubkey}:${name}`
-      const ids = event.tags.filter(t => t[0] === "e").map(nth(1))
       const collection: Collection = collections.get(key) || {
         name,
         ids: [],

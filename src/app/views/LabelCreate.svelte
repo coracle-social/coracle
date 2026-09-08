@@ -11,7 +11,7 @@
   import {router} from "src/app/util/router"
   import {command, pubkey, topicSearch, writer} from "src/engine/core"
   import {loadLabels, getClientTags, deriveCollections, collectionSearch} from "src/engine"
-  import {Label} from "src/domain"
+  import {Label} from "@welshman/domain"
 
   export let id
 
@@ -34,7 +34,7 @@
       return showWarning("Please select at least one collection.")
     }
 
-    const eventWriter = writer(Label).setEventId(id)
+    const eventWriter = writer(Label).addEventId(id)
 
     for (const name of names) {
       eventWriter.addLabel(name, "#t")
