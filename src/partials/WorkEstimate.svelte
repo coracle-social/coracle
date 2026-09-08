@@ -3,8 +3,8 @@
 
   export let difficulty
 
-  // estimateWork kicks the benchmark off on first use and reads its result synchronously, so
-  // depend on the store as well or a first-ever visit stays on "Calculating..." forever.
+  // estimateWork reads the benchmark synchronously, so depend on the store too or a first
+  // visit stays on "Calculating..." forever.
   $: ms = (void $benchmark, estimateWork(difficulty))
 </script>
 

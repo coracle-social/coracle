@@ -29,7 +29,6 @@
 
   const filters = [addSinceToFilter({kinds: EDITABLE_LIST_KINDS, authors})]
 
-  // Relay selection resolves asynchronously now, so this load starts a tick later
   resolveRelays(authors.map(pk => outbox(pk)))
     .then(relays => myLoad({skipCache: true, relays, filters}))
     .catch(noop)

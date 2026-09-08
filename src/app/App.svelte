@@ -447,7 +447,6 @@
     }
   }
 
-  // Storage is rebuilt per identity, so this is a store rather than a one-shot promise now
   $: if ($storageReady && !bootstrapped) {
     bootstrapped = true
     bootstrap()

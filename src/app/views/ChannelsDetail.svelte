@@ -27,8 +27,6 @@
     $events.filter(e => getChannelIdFromEvent(e) === channelId),
   )
 
-  // Read messaging relays off the plugin's projection rather than the reader — the plugin
-  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
   const pubkeysWithoutMessaging = fromApp($app =>
     derived(
       pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),

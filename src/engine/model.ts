@@ -27,8 +27,6 @@ export type Channel = {
   messages: TrustedEvent[]
 }
 
-// A stored session plus coracle's own per-account metadata, which rides alongside welshman's
-// serializable {method, data} rather than inside it.
 export type SessionWithMeta = StoredSession & {
   onboarding_tasks_completed?: string[]
   wallet?: Wallet

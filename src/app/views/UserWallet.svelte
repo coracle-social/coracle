@@ -10,7 +10,6 @@
   import {session} from "src/engine/core"
   import {router} from "src/app/util"
 
-  // Wallet configuration is coracle's own per-account metadata, stored alongside the session
   $: wallet = ($session as Maybe<SessionWithMeta>)?.wallet
 </script>
 

@@ -16,15 +16,12 @@
 
   const receipt = reader(ZapReceipt)(note)
   const recipient = receipt.recipient()
-  // ZapReceiptReader doesn't model the i tags coracle reads media urls out of
   const urls = removeUndefined(matchTags(tagSpec("i"), note.tags).map(nth(2)))
 
-  // forPubkey kicks off the zapper load itself, which is what the old loadZapper call did
   const zapper = fromApp($app =>
     recipient ? $app.use(Zappers).forPubkey(recipient).$ : readable<Maybe<Zapper>>(undefined),
   )
 
-  // zapFromEvent is gone; Zapper.validate is its successor, and takes a parsed receipt
   $: zap = $zapper && tryCatch(() => $zapper.validate(receipt))
 </script>
 

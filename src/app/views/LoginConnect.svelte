@@ -33,7 +33,6 @@
 
   const skip = () => router.at("notes").push()
 
-  // Loads reject now rather than swallowing failures, and nothing here waits on the result
   const searchRelays = relays => myLoad({filters, relays}).catch(noop)
 
   const confirmCustomRelay = () => {

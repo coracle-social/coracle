@@ -7,7 +7,6 @@
   const enableChat = () => {
     shouldUnwrap.set(true)
 
-    // Nothing awaits this, and loads reject rather than swallowing now
     loadMessages().catch(noop)
   }
 

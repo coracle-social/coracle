@@ -20,8 +20,6 @@
     try {
       const content = editor.getText({blockSeparator: "\n"}).trim()
 
-      // Publish our welcome note. Thunks own the template with the signed-in user's pubkey and
-      // calculate proof of work themselves, then re-sign, so the nonce stays valid.
       if (content) {
         const {event, relays} = await writer(Note)
           .setContent(content)

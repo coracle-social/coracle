@@ -1,8 +1,6 @@
 import {normalizeRelayUrl} from "@welshman/util"
 import {fromCsv} from "src/util/misc"
 
-// Environment lives on its own so the app bootstrap in src/engine/core.ts can read it without
-// importing src/engine/state.ts, which depends on the bootstrap.
 export const env = {
   CLIENT_ID: import.meta.env.VITE_CLIENT_ID as string,
   CLIENT_NAME: import.meta.env.VITE_CLIENT_NAME as string,

@@ -15,8 +15,6 @@
 
   const profile = fromApp($app => $app.use(Profiles).one(pubkey))
   const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
-  // Router.FromPubkey was this pubkey's write relays; full relay selection is asynchronous now,
-  // and this is an nprofile that has to be encoded in one pass.
   const relays = getWriteRelays(pubkey)
 
   const copyJson = () => {

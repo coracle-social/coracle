@@ -18,7 +18,6 @@
   const listing = reader(Classified)(note)
   const summary = listing.summary()
   const {amount = 0, currency = "SAT"} = listing.price() || {}
-  // ClassifiedReader doesn't model nip 99's location tag
   const location = tagValue(tagSpec("location"), note.tags)
   const deleted = fromApp($app => $app.use(Events).isDeleted(note).$)
 </script>

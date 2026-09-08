@@ -16,8 +16,6 @@
 
   const showFollowers = () => router.at("people").of(pubkey).at("followers").open()
 
-  // The count everyone can see, not the count the user's own follows account for — this is a
-  // raw follower total, so it reads the whole graph rather than the user's slice of it.
   followersCount.set(wot.get().followers(pubkey, WotScope.Global).get().length)
 
   $: pubkeys = $followList?.pubkeys() || []

@@ -34,7 +34,6 @@
     showInfo("Your settings have been saved!")
   }
 
-  // Settings are encrypted through the user's signer, which can reject
   const save = async () => {
     if (!equals($userSettings, values)) {
       await publishSettings(values)
@@ -172,7 +171,6 @@
     {/if}
   </div>
   <Footer>
-    <!-- Settings are nip 44 encrypted now, so a signer without it can't save them -->
     <Button class="btn flex-grow" type="submit" disabled={!$hasNip44}>Save</Button>
   </Footer>
 </form>

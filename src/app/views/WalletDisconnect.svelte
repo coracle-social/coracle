@@ -4,8 +4,6 @@
   import type {SessionWithMeta} from "src/engine"
   import {router} from "src/app/util"
 
-  // Wallet configuration is coracle's own per-account metadata, so it rides alongside welshman's
-  // serializable session in the sessions store rather than inside it.
   const back = () => router.back()
 
   const confirm = async () => {

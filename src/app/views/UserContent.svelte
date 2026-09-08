@@ -41,7 +41,6 @@
     showInfo("Your preferences have been saved!")
   }
 
-  // Saving encrypts through the user's signer, which can reject
   const save = async () => {
     if (!equals($userSettings, values) && !mutesDirty) {
       // Migrate away from muted words
@@ -207,7 +206,6 @@
     {/if}
   </div>
   <Footer>
-    <!-- Settings and private mutes are nip 44 encrypted now, so a signer without it can't save -->
     <Button class="btn flex-grow" type="submit" disabled={!$hasNip44}>Save</Button>
   </Footer>
 </form>

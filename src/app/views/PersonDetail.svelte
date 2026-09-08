@@ -75,18 +75,15 @@
   const followersCount = tweened(0, {interpolate, duration: 1300})
   const follows = fromApp($app => $app.use(FollowLists).one(pubkey))
   const following = derived(userFollows, $m => $m.has(pubkey))
-  // Scored against the user's own follows, which is what the old wot graph counted
   const wotScore = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
   const maxWot = fromApp($app =>
     derived($app.use(Wot).scores(WotScope.Follows).$, $scores => max(Array.from($scores.values()))),
   )
-  // The count everyone can see, not the count the user's own follows account for
   const followers = fromApp($app => $app.use(Wot).followers(pubkey, WotScope.Global).$)
   const npub = nip19.npubEncode(pubkey)
   const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
   const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
 
-  // The hint is the recipient's first write relay, as before.
   const startZap = () =>
     zap({
       splits: [makeZapSplit(pubkey, first(getWriteRelays(pubkey)) || "")],
@@ -122,7 +119,6 @@
   $: {
     const filters = getIdFilters(pinnedIds)
 
-    // Relay selection is asynchronous now, so this fires a tick after the pins land
     resolveRelays([outbox(pubkey)])
       .then(urls => myLoad({relays: urls, filters}))
       .catch(noop)

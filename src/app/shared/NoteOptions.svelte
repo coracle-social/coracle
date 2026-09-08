@@ -33,8 +33,6 @@
     ...initialValues,
   }
 
-  // Relay selection is asynchronous now; an empty list is what the old scenario handed back when
-  // the user had no relay list of their own.
   const initRelays = () => {
     resolveRelays([userOutbox()])
       .catch(() => [])

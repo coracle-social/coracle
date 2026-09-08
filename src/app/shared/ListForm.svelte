@@ -61,8 +61,6 @@
     list.tags = []
   }
 
-  // Welshman deleted tagPubkey, so build the list entry here — an outbox hint read from cache and
-  // the profile's display name as a petname, the way coracle has always written them.
   const makePersonTag = (pubkey: string) => [
     "p",
     pubkey,

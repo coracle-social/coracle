@@ -12,7 +12,6 @@
 
   const exit = () => router.clearModals()
 
-  // Reading a list decrypts it, so this is asynchronous now
   const getFeed = async (e: TrustedEvent) =>
     address.startsWith(NAMED_BOOKMARKS) ? mapListToFeed(await readUserList(e)) : readFeed(e)
 </script>

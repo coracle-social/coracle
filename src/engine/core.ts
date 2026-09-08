@@ -49,20 +49,12 @@ import {
 import type {AppPolicy, DerivedPlugin, Plugin, Session} from "@welshman/app"
 import {env} from "src/engine/env"
 
-// An App owns a repository, a socket pool and the signer state for exactly one identity, and its
-// policies capture that identity when they run, so coracle keeps one app per account and rebuilds
-// it on switch rather than reassigning `app.user`.
-
-// Config the user can change at runtime. Settings live in src/engine/state.ts, which imports this
-// module, so state writes here instead of core reading from it.
 export const appConfig = {
   dufflepudUrl: env.DUFFLEPUD_URL,
   autoAuthenticate: false,
   relayLimit: 10,
 }
 
-// Auth unless the relay is blocked, and only when the user has opted in — the welshman default
-// omits the second half.
 const appPolicyAuth = makeAppPolicyAuth((socket, app) => {
   if (!app.user || !appConfig.autoAuthenticate) {
     return false
@@ -71,14 +63,6 @@ const appPolicyAuth = makeAppPolicyAuth((socket, app) => {
   return !app.use(BlockedRelayLists).urls(app.user.pubkey).get().includes(socket.url)
 })
 
-// Welshman's router resolves userInbox/userOutbox/userMessaging through User.require, which throws
-// when nobody is signed in — so a single user-scoped selection rejects the whole resolution, and
-// every feed comes up empty for a logged-out visitor. The routes one layer down already treat a
-// missing pubkey as "no relays", so degrade these the same way rather than throwing.
-//
-// The rebuilt resolver also carries coracle's scenario defaults, so everything that resolves relays
-// for itself — a domain writer working out where to publish, a feed, a relay hint — lands on the
-// same selection coracle would have made by hand.
 const appPolicyRouter: AppPolicy = app => {
   const router = app.use(Router)
   const resolveRoute = router.resolveRoute
@@ -86,17 +70,12 @@ const appPolicyRouter: AppPolicy = app => {
   router.resolveRoute = route =>
     !app.user && route.type.startsWith("user") ? [] : resolveRoute(route)
 
-  // The resolver captured the original at construction, so it has to be rebuilt to see the guard
   router.resolver = new Resolver(router.resolveRoute, {
-    // A getter, so changing the setting takes effect without rebuilding the app
     get limit() {
       return appConfig.relayLimit
     },
-    // Selections never fall back to default relays. Padding a short selection out with relays
-    // nobody involved actually reads or writes to mostly wastes requests, and it hides the real
-    // problem: when a selection comes back empty, either the user or the person they're addressing
-    // has no relays set up.
-    // TODO: surface that to the user instead of silently publishing or querying nowhere.
+    // An empty selection means the user or the person they're addressing has no relays set up.
+    // TODO: surface that instead of silently publishing or querying nowhere.
     policy: addNoFallbacks,
     getRelayQuality: url => app.use(RelayStats).getQuality(url),
     getDefaultRelays: app.config.getDefaultRelays,
@@ -105,8 +84,6 @@ const appPolicyRouter: AppPolicy = app => {
   return noop
 }
 
-// Policy modules can't be imported here (they import this one), so they push themselves in and the
-// first app is built lazily, once every module has had a chance to register.
 export const appPolicies: AppPolicy[] = [
   appPolicyIngest,
   appPolicyRelayStats,
@@ -122,7 +99,6 @@ const makeApp = (user?: User) =>
     user,
     policies: appPolicies,
     config: {
-      // A getter, so changing the setting takes effect without rebuilding the app
       get dufflepudUrl() {
         return appConfig.dufflepudUrl
       },
@@ -151,19 +127,13 @@ export const app: ReadableWithGetter<App> = {
   },
 }
 
-// Read a store off the current app, re-subscribing when a login swaps in a new one. Anything bound
-// at module load has to go through this or it will keep reading a discarded app.
 export const fromApp = <T>(read: ($app: App) => Readable<T>): Readable<T> =>
   derived(app, ($app, set: (value: T) => void) => read($app).subscribe(set))
 
-// Every event query in coracle is this shape, bound to whichever app is current.
 export const deriveEvents = (filters: Filter[]) => fromApp($app => $app.use(Events).all(filters).$)
 
-// A plugin bound to the current app, so `$profiles` in a component and `profiles.get()` in a module
-// both stay pointed at the right one after a switch.
 export const usePlugin = <T>(Ctor: Plugin<T>) => withGetter(derived(app, $app => $app.use(Ctor)))
 
-// The signed-in user's own entry in a keyed collection, e.g. deriveUserItem(Profiles).
 export const deriveUserItem = <T>(Ctor: Plugin<DerivedPlugin<T>>): Readable<Maybe<T>> =>
   derived(app, ($app, set: (item: Maybe<T>) => void) => {
     let previous: Maybe<T>
@@ -205,18 +175,14 @@ export const wot = usePlugin(Wot)
 export const wraps = usePlugin(Wraps)
 export const zappers = usePlugin(Zappers)
 
-// A pubkey's write relays as of right now. Relay resolution is asynchronous, so callers that need
-// relays in a synchronous initializer seed with these and widen once a resolve settles.
 export const getWriteRelays = (pubkey: string) => relayLists.get().writeUrls(pubkey).get()
 
-// The searches each live on the plugin that owns the collection they index
 export const profileSearch = fromApp($app => $app.use(Profiles).profileSearch)
 
 export const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
 export const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
-// Domain entry points, since almost every read or write goes through one of them
 export const reader = <R extends BaseEventReader, W extends EventWriter<R>>(
   factory: KindFactory<R, W>,
 ) => domain.get().reader(factory)
@@ -228,9 +194,6 @@ export const writer = <R extends BaseEventReader, W extends EventWriter<R>>(
 
 export const command = (eventWriter: EventWriter<any>) => domain.get().command(eventWriter)
 
-// Relay selection resolves asynchronously now, since it may have to load relay lists first. The
-// resolver carries the limit and the fallback policy, so this is for selections nothing else
-// already owns — pass a limit to widen or narrow a single case.
 export const resolveRelays = async (
   selections: RelaySelection[],
   {limit}: {limit?: number} = {},
@@ -242,9 +205,6 @@ export const resolveRelays = async (
 
 // Sessions
 
-// Coracle lets you view the app as someone else without holding their key. Welshman has no
-// read-only session — every built-in handler produces a signer — so this is coracle's own: a signer
-// that knows a pubkey and refuses everything else.
 const readOnlyError = () => Promise.reject(new Error("This account is read-only"))
 
 class ReadOnlySigner implements ISigner {
@@ -266,8 +226,6 @@ export const readOnly = defineSessionHandler({
 
 registerSessionHandler(readOnly)
 
-// Keyed by pubkey so the account switcher can rebuild an app for any logged-in account. A session
-// is welshman's serializable {method, data}; coracle's own per-account metadata rides alongside it.
 export type StoredSession = {
   pubkey: string
   session: Session
@@ -295,7 +253,6 @@ export const session = derived([sessions, pubkey], ([$sessions, $pubkey]) =>
 
 export const signer = derived(app, $app => $app.user?.signer)
 
-// Reading this while signed out throws, so use `$app.user?.pubkey` wherever absence is legitimate
 export const user = derived(app, $app => User.require($app))
 
 const setUser = ($user?: User) => {
@@ -304,7 +261,6 @@ const setUser = ($user?: User) => {
   return setApp(makeApp($user))
 }
 
-// Log in, remembering the session so the account can be switched back to later
 export const login = async ($session: Session) => {
   const $user = await User.fromSession($session)
 
@@ -323,8 +279,6 @@ export const login = async ($session: Session) => {
   return $user
 }
 
-// Rebuild the app around another logged-in account. Its repository starts cold and re-hydrates
-// from that account's own database.
 export const switchAccount = async ($pubkey: string) => {
   const stored = sessions.get()[$pubkey]
 
@@ -346,8 +300,6 @@ export const logout = () => {
   setUser(undefined)
 }
 
-// Restore the last-used account at startup. Sessions hydrate from localStorage asynchronously, and
-// the app is built lazily, so nothing constructs an anonymous app before this resolves.
 export const restoreSession = async () => {
   await Promise.all([sessionsStore.ready, pubkeyStore.ready])
 

@@ -27,9 +27,6 @@
   const {id, identifier, kind, pubkey, relays: relayHints = []} = value
   const idOrAddress = id || new Address(kind, pubkey, identifier).toString()
 
-  // The old Router.Quote scenario: the hints on the quote itself, the quoting author's relays,
-  // and anything the q tag pointed at. Resolving that is asynchronous now, so seed with the
-  // author's relays as they're already cached and widen once the resolver answers.
   const tag = note.tags.find(t => t[1] === idOrAddress)
   const selections = [
     ...relaySelections(relayHints),
@@ -47,8 +44,6 @@
 
   const quote = deriveEvent(idOrAddress, {relays})
 
-  // deriveEvent keeps the seed and resolves its own relays; widening here is what the link the
-  // user follows gets, so a quote never opens with fewer relays than the old scenario found.
   resolveRelays(selections)
     .then(urls => {
       relays = uniq([...relays, ...urls])

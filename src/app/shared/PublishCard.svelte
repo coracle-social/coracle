@@ -29,7 +29,6 @@
 
   let expanded = false
 
-  // A gift-wrapped event is published as its wrap, so show the rumor it carries
   $: event = $app.wrapManager.getRumor(thunk.event.id) || thunk.event
   $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
   $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))

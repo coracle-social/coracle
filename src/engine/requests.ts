@@ -55,8 +55,6 @@ import {CUSTOM_LIST_KINDS} from "src/domain"
 
 // Utils
 
-// A load that only makes sense signed in: its relay selections all resolve through the user, so
-// there's nothing to ask for and nowhere to ask when nobody is.
 const withUser =
   <T>(fn: ($user: User) => Promise<T>) =>
   async () => {
@@ -79,7 +77,6 @@ export const addSinceToFilter = (filter: Filter, overlap = int(HOUR)) => {
 }
 
 export const pullConservatively = async ({relays: urls, filters}: AppSyncOpts) => {
-  // hasNegentropy loads the relay's nip-11 document now, so it's async and it rejects
   const negentropy = await Promise.all(
     urls.map(url =>
       relays
@@ -117,8 +114,6 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
 
   const filters = getIdFilters([idOrAddress])
 
-  // Relay selection is asynchronous now, so this fires a tick after we notice the event is
-  // missing rather than inline with the first store update
   const loadEvent = async () => {
     const selections: RelaySelection[] = relaySelections(hints)
 
@@ -134,8 +129,6 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
   }
 
   return derived(
-    // The Events plugin has no includeDeleted option, and deleted events still have to
-    // render (as a tombstone), so this reads the repository directly
     fromApp($app => deriveEvents({repository: $app.repository, filters, includeDeleted: true})),
     (events: TrustedEvent[]) => {
       if (!attempted && events.length === 0) {
@@ -174,8 +167,8 @@ export const createPeopleLoader = ({
       loading.set(true)
 
       try {
-        // Search relays only. A `search` filter sent to a relay without nip-50 comes back as
-        // an unfiltered dump of profiles, so this must not fall back to the default relays.
+        // Search relays only. A `search` filter sent to a relay without nip 50 comes back as
+        // an unfiltered dump of profiles.
         const urls = await resolveRelays([searchRelays()])
 
         await network.get().request({
@@ -199,7 +192,6 @@ export const loadPubkeys = async (pubkeys: string[]) => {
     await sleep(300)
 
     for (const pubkey of pubkeyChunk) {
-      // Loaders reject rather than swallowing failures now, and nothing awaits these
       profiles.get().load(pubkey).catch(noop)
       followLists.get().load(pubkey).catch(noop)
       muteLists.get().load(pubkey).catch(noop)
@@ -288,8 +280,6 @@ export const loadMessages = withUser(async $user => {
   ])
 })
 
-// Stays synchronous so callers can unsubscribe on destroy; relay selection resolves in the
-// background, and a request whose signal already aborted never opens a socket.
 export const listenForMessages = () => {
   const controller = new AbortController()
   const $user = app.get().user

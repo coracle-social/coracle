@@ -18,8 +18,6 @@
   // events come from the network.
   if (tag) {
     const [type, value] = tag
-    // Router.Event was the note author's write relays; full relay selection is asynchronous
-    // now, and these are link parameters that have to be built in one pass.
     const relays = getWriteRelays(note.pubkey)
 
     if (type === "r") {

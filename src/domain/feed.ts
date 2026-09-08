@@ -52,8 +52,6 @@ export const mapListToFeed = (list: PublishedUserList) =>
     definition: feedFromTags(list.event.tags),
   }) as PublishedListFeed
 
-// FeedReader.definition() answers undefined for a feed with no (or unparseable) feed tag, where
-// everything downstream expects a definition
 export const readFeed = (event: TrustedEvent) => {
   const feedReader = reader(FeedKind)(event)
 

@@ -27,8 +27,6 @@
   const goToDetail = () =>
     router
       .at("notes")
-      // Router.Event was the author's write relays, which the relay list collection answers
-      // synchronously
       .of(getIdOrAddress(event), {relays: getWriteRelays(event.pubkey)})
       .push()
 

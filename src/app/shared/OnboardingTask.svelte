@@ -9,8 +9,6 @@
 
   export let task
 
-  // Onboarding progress is coracle's own per-account metadata, so it rides alongside welshman's
-  // serializable session in the sessions store rather than inside it.
   const hideTask = () => {
     const userPubkey = pubkey.get()
 

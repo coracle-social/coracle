@@ -40,7 +40,6 @@
       ...getClientTags(),
     ]
 
-    // A collection is the user's own data, so it goes to their write relays and nowhere else
     thunks.get().publish({
       event: makeEvent(1985, {tags}),
       relays: await resolveRelays([userOutbox()]),

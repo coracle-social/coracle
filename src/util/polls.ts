@@ -6,13 +6,9 @@ import {reader} from "src/engine/core"
 
 export type {PollType}
 
-// A poll type coracle doesn't know is a single choice poll; PollReader.pollType() passes the tag's
-// value through, so anything but "singlechoice" would count as multiple choice.
 export const getPollType = (event: TrustedEvent): PollType =>
   reader(Poll)(event).pollType() === "multiplechoice" ? "multiplechoice" : "singlechoice"
 
-// PollReader.options() keeps ["option"] tags with no id; an option nobody can vote for isn't worth
-// rendering, so drop them the way coracle always has.
 export const getPollOptions = (event: TrustedEvent) =>
   reader(Poll)(event)
     .options()
@@ -22,7 +18,6 @@ export const getPollEndsAt = (event: TrustedEvent) => reader(Poll)(event).endsAt
 
 export const isPollClosed = (event: TrustedEvent) => reader(Poll)(event).isClosed()
 
-// Responses live on whatever relays the poll nominated, plus the ones its author reads from
 export const getPollRelaySelections = (event: TrustedEvent) => [
   ...relaySelections(reader(Poll)(event).urls()),
   inbox(event.pubkey),
@@ -34,7 +29,6 @@ export const getPollResponseSelections = (event: TrustedEvent, pollType = getPol
   return pollType === "singlechoice" ? selections.slice(0, 1) : selections
 }
 
-// One response per pubkey, most recent wins
 const getLatestResponses = (responses: TrustedEvent[]) => {
   const byPubkey = new Map<string, TrustedEvent>()
 
@@ -49,8 +43,6 @@ const getLatestResponses = (responses: TrustedEvent[]) => {
   return Array.from(byPubkey.values())
 }
 
-// Not PollReader.results(), which reads its options and poll type off the reader directly and so
-// misses both normalizations above
 export const getPollResults = (event: TrustedEvent, responses: TrustedEvent[]) => {
   const pollType = getPollType(event)
   const options = getPollOptions(event).map(option => ({...option, votes: 0}))

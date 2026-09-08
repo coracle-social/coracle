@@ -9,10 +9,8 @@
 
   export let url
 
-  // Subscribing lazily loads the relay's nip-11 document
   const relay = fromApp($app => $app.use(Relays).one(url))
 
-  // Relay selections come off the plugin projections, which stay in sync with the repository
   const userRelayUrls = fromApp($app =>
     derived(
       [

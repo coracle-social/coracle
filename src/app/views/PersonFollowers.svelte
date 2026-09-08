@@ -16,7 +16,6 @@
   $: pubkeys = uniq($events.map(event => event.pubkey))
 
   onMount(() => {
-    // Relay selection resolves asynchronously now, so this pull starts a tick later
     resolveRelays([inbox(pubkey)])
       .then(relays => pullConservatively({relays, filters}))
       .catch(noop)

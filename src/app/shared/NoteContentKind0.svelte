@@ -14,8 +14,6 @@
     router
       .at("people")
       .of(pubkey)
-      // Router.Event was the author's write relays; full relay selection is asynchronous now,
-      // and these are route parameters that have to be built in one pass.
       .cx({relays: getWriteRelays(pubkey)})
       .open()
 </script>

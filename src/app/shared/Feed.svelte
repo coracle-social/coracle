@@ -79,8 +79,6 @@
       ? feed.definition
       : makeIntersectionFeed(makeKindFeed(...noteKinds, ...repostKinds), feed.definition)
 
-    // The FeedController now gets its relay routing and net context from the app, so it comes
-    // from the Feeds plugin rather than a module-level factory.
     ctrl = $feeds.makeFeedController({
       feed: definition,
       useWindowing,

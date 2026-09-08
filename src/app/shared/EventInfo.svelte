@@ -19,7 +19,6 @@
   $: timeEvent = reader(TimeEvent)(event)
   $: title = timeEvent.title()
   $: location = timeEvent.location()
-  // TimeEventReader doesn't model the name tag older clients used for a title
   $: name = tagValue(tagSpec("name"), event.tags)
   $: end = timeEvent.end()
   $: start = timeEvent.start()

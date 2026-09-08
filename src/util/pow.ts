@@ -41,9 +41,6 @@ export const makePow = (event: OwnedEvent, difficulty: number): ProofOfWork => {
 
 let benchmarkStarted = false
 
-// Mine a throwaway event to estimate what this device can do. Running it at module load spun a
-// worker during first paint, so it waits until something actually asks for an estimate. The result
-// is persisted, so this only costs anything on a device's first visit.
 export const startBenchmark = () => {
   if (benchmarkStarted || benchmark.get() > 0) return
 

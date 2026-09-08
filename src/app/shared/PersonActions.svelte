@@ -25,7 +25,6 @@
 
   const mutePerson = () => muteLists.get().mutePrivately(["p", pubkey]).then(publish)
 
-  // Viewing the app as someone else, without their key — a read-only session
   const loginAsUser = async () => {
     router.clearModals()
     await login(toSession(readOnly, {pubkey}))

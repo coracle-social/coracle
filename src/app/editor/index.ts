@@ -13,8 +13,6 @@ import {uploadFile} from "src/engine/commands"
 import {MentionNodeView} from "./MentionNodeView"
 import ProfileSuggestion from "./ProfileSuggestion.svelte"
 
-// The user's own blossom server list, read straight off the plugin. Reading it per upload rather
-// than per editor keeps a list that loads late from being missed.
 const getUserBlossomServer = () => {
   const $app = app.get()
 
@@ -115,11 +113,6 @@ export const makeEditor = ({
                   MentionSuggestion({
                     editor: (this as any).editor,
                     search: (term: string) => get(profiles.get().profileSearch).searchValues(term),
-                    // Relay hints for the nprofile have to be produced synchronously, so this
-                    // reads the mentioned pubkey's write relays directly rather than going
-                    // through the async relay selection DSL. Still capped at the user's relay
-                    // limit, which is what the old scenario applied, so a mention doesn't carry
-                    // a twenty-relay bech32 into the note.
                     getRelays: (pubkey: string) =>
                       relayLists.get().writeUrls(pubkey).get().slice(0, appConfig.relayLimit),
                     createSuggestion: (value: string) => {

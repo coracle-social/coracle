@@ -18,8 +18,6 @@
 
   export let qp
 
-  // Wallet configuration is coracle's own per-account metadata, so it rides alongside welshman's
-  // serializable session in the sessions store rather than inside it.
   const setWallet = (wallet: Wallet) => {
     const userPubkey = pubkey.get()
 

@@ -95,8 +95,6 @@
 
   onMount(async () => {
     if (!event.pubkey) {
-      // Selections no longer fall back to default relays, so this can resolve to nothing but the
-      // local cache. Keep the stub when it does, rather than blowing up on the read below.
       event =
         first(
           await myRequest({

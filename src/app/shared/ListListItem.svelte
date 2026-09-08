@@ -31,7 +31,6 @@
     }
   }
 
-  // Reading a list decrypts it, so it arrives a tick later than it used to
   let list
 
   readUserList(event).then(userList => {

@@ -12,7 +12,6 @@
   const pubkey = value
   const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
   const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
-  // Scored against the user's own follows, which is what deriveUserWotScore did
   const score = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
 
   $: following = $userFollows.has(pubkey)

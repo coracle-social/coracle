@@ -33,8 +33,6 @@
 
     if (pubkey) {
       try {
-        // The signer may have asked us to switch relays during the handshake, so persist
-        // the broker's current relays rather than the ones we started with.
         await login(toSession(nip46, {clientSecret, signerPubkey, relays: broker.params.relays}))
       } catch (e) {
         console.error(e)

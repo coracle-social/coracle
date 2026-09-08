@@ -5,7 +5,6 @@ import {Comment} from "@welshman/domain"
 import {setCommentAncestors} from "../../../../src/engine/utils"
 import {getTestTrustedEvent} from "../../../utils/fake"
 
-// Nothing here needs real relay selection, so resolve every hint to the empty string
 const makeWriter = () => Comment.configure({resolver: new Resolver(() => [])}).writer()
 
 const tagComment = (parent: TrustedEvent, getEvent?: (id: string) => TrustedEvent | undefined) =>
