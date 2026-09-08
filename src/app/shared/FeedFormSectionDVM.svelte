@@ -13,7 +13,7 @@
   import Field from "src/partials/Field.svelte"
   import Input from "src/partials/Input.svelte"
   import HandlerSummary from "src/app/shared/HandlerSummary.svelte"
-  import {HandlerSearch} from "src/domain"
+  import {makeHandlerSearch} from "src/domain"
   import {handlersByKind} from "src/engine"
 
   export let feed: DVMFeed
@@ -45,7 +45,7 @@
 
   const allKinds = [...discoverKinds, ...searchKinds]
 
-  const handlerSearch = new HandlerSearch(allKinds.flatMap(k => $handlersByKind.get(k) || []))
+  const handlerSearch = makeHandlerSearch(allKinds.flatMap(k => $handlersByKind.get(k) || []))
 
   const addresses = getFeedArgs(feed).flatMap(item => {
     const handlers = $handlersByKind.get(item.kind) || []

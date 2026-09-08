@@ -87,7 +87,7 @@
   } from "@welshman/util"
   import {FeedType} from "@welshman/feeds"
   import SearchSelect from "src/partials/SearchSelect.svelte"
-  import {KindSearch} from "src/domain"
+  import {makeKindSearch} from "src/domain"
 
   export let feed
   export let onChange
@@ -98,7 +98,7 @@
 
   const termIsValid = (s: string) => !isNaN(parseInt(s))
 
-  const helper = new KindSearch([
+  const helper = makeKindSearch([
     {label: "Note", kind: NOTE},
     {label: "Profile", kind: PROFILE},
     {label: "Reaction", kind: REACTION},

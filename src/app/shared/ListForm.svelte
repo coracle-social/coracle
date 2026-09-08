@@ -22,7 +22,7 @@
   import PersonSelect from "src/app/shared/PersonSelect.svelte"
   import {command, getWriteRelays, profiles, relaySearch, topicSearch} from "src/engine/core"
   import {deleteEvent} from "src/engine"
-  import {KindSearch, displayUserList, userListWriter} from "src/domain"
+  import {makeKindSearch, displayUserList, userListWriter} from "src/domain"
 
   export let list
   export let exit
@@ -50,7 +50,7 @@
     exit(thunk.event)
   }
 
-  const kindsHelper = new KindSearch([
+  const kindsHelper = makeKindSearch([
     {label: "People", kind: NAMED_PEOPLE},
     {label: "Relays", kind: NAMED_RELAYS},
     {label: "Topics", kind: NAMED_TOPICS},

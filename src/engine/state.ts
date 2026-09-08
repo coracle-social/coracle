@@ -1,4 +1,3 @@
-import Fuse from "fuse.js"
 import {derived, readable, writable} from "svelte/store"
 import type {Readable} from "svelte/store"
 import {
@@ -77,9 +76,9 @@ import {
 } from "@welshman/app"
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
-  CollectionSearch,
+  makeCollectionSearch,
   EDITABLE_LIST_KINDS,
-  UserListSearch,
+  makeUserListSearch,
   displayFeed,
   getHandlerAddress,
   mapListToFeed,
@@ -108,7 +107,7 @@ import {
   signer,
 } from "src/engine/core"
 import {env} from "src/engine/env"
-import {SearchHelper, ensureProto} from "src/util/misc"
+import {makeSearch, ensureProto} from "src/util/misc"
 import {noteKinds, appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 
 export {env}
@@ -474,7 +473,7 @@ export const userLists = derived(
     ),
 )
 
-export const listSearch = derived(lists, $lists => new UserListSearch($lists))
+export const listSearch = derived(lists, $lists => makeUserListSearch($lists))
 
 // Feeds
 
@@ -529,35 +528,29 @@ export const userFavoritedFeeds = derived([app, userFeedFavorites], ([$app, $lis
     .map(readFeed),
 )
 
-export class FeedSearch extends SearchHelper<PublishedFeed, string> {
-  getSearch = () => {
-    const $feedFavoritesByAddress = feedFavoritesByAddress.get()
-    const getScore = feed => $feedFavoritesByAddress.get(getAddress(feed.event))?.length || 0
-    const options = this.options.map(feed => ({feed, score: getScore(feed)}))
-    const fuse = new Fuse(options, {
-      keys: ["feed.title", "feed.description"],
-      shouldSort: false,
-      includeScore: true,
-    })
+export const makeFeedSearch = (feeds: PublishedFeed[]) => {
+  // Re-read favorites per search rather than at construction, since the search is built from the
+  // feed collection alone and favorites can land after it.
+  let $feedFavoritesByAddress = feedFavoritesByAddress.get()
 
-    return (term: string) => {
-      if (!term) {
-        return sortBy(item => -item.score, options).map(item => item.feed)
-      }
+  const getScore = (feed: PublishedFeed) =>
+    $feedFavoritesByAddress.get(getAddress(feed.event))?.length || 0
 
-      return sortBy(
-        (r: any) => r.score - Math.pow(Math.max(0, r.item.score), 1 / 100),
-        fuse.search(term),
-      ).map((r: any) => r.item.feed)
-    }
-  }
-
-  getValue = (option: PublishedFeed) => getAddress(option.event)
-
-  displayValue = (address: string) => displayFeed(this.getOption(address))
+  return makeSearch<string, PublishedFeed>(feeds, {
+    getValue: (feed: PublishedFeed) => getAddress(feed.event),
+    fuseOptions: {keys: ["title", "description"], shouldSort: false},
+    onSearch: () => {
+      $feedFavoritesByAddress = feedFavoritesByAddress.get()
+    },
+    // Lower sorts first. With a term, being favorited at all buys about a full point of fuse
+    // score; with no term there is no fuse score, so favorite count is the whole ordering.
+    sortFn: ({item, score}) =>
+      score === undefined ? -getScore(item) : score - Math.pow(getScore(item), 1 / 100),
+    displayValue: (address: string, feed?: PublishedFeed) => displayFeed(feed),
+  })
 }
 
-export const feedSearch = derived(feeds, $feeds => new FeedSearch($feeds))
+export const feedSearch = derived(feeds, $feeds => makeFeedSearch($feeds))
 
 export const listFeedsById = fromApp($app =>
   deriveItemsByKey<PublishedListFeed>({
@@ -686,9 +679,8 @@ export const deriveCollections = pubkey =>
     ),
   )
 
-export const collectionSearch = derived(
-  collections,
-  $collections => new CollectionSearch($collections),
+export const collectionSearch = derived(collections, $collections =>
+  makeCollectionSearch($collections),
 )
 
 // Network

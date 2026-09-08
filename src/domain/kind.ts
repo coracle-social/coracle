@@ -1,18 +1,14 @@
-import {SearchHelper} from "src/util/misc"
+import {makeSearch} from "src/util/misc"
 
 export type KindOption = {
   label: string
   kind: number
 }
 
-export class KindSearch extends SearchHelper<KindOption, number> {
-  config = {keys: ["kind", "label"]}
-
-  getValue = (option: KindOption) => option.kind
-
-  displayValue = (kind: number) => {
-    const option = this.getOption(kind)
-
-    return option ? `${option.label} (kind ${kind})` : `Kind ${kind}`
-  }
-}
+export const makeKindSearch = (options: KindOption[]) =>
+  makeSearch<number, KindOption>(options, {
+    getValue: (option: KindOption) => option.kind,
+    fuseOptions: {keys: ["kind", "label"]},
+    displayValue: (kind: number, option?: KindOption) =>
+      option ? `${option.label} (kind ${kind})` : `Kind ${kind}`,
+  })

@@ -1,4 +1,6 @@
 import {first, sleep, fromPairs, last, identity, pluck, round, displayUrl} from "@welshman/lib"
+import {createSearch} from "@welshman/app"
+import type {Search, SearchOptions} from "@welshman/app"
 import {readable} from "svelte/store"
 import Fuse from "fuse.js"
 
@@ -140,38 +142,28 @@ export const fuzzy = <T>(data: T[], opts = {}): ((q: string) => any[]) => {
   }
 }
 
-export class SearchHelper<T, V> {
-  config: Record<string, any> = {}
-  _optionsByValue = new Map<V, T>()
-  _search?: (term: string) => T[]
+export type MakeSearchOptions<V, T> = SearchOptions<V, T> & {
+  displayValue: (value: V, option?: T) => string
+}
 
-  constructor(readonly options: T[]) {}
+export type LocalSearch<V, T> = Search<V, T> & {
+  displayValue: (value: V) => string
+  displayOption: (option: T) => string
+}
 
-  _setup() {
-    if (!this._search) {
-      for (const option of this.options) {
-        this._optionsByValue.set(this.getValue(option), option)
-      }
+// welshman's createSearch, plus the display helpers our select components expect. `displayValue`
+// gets the matching option along with the value, since most of ours only render the option.
+export const makeSearch = <V, T>(
+  options: T[],
+  {displayValue, ...opts}: MakeSearchOptions<V, T>,
+): LocalSearch<V, T> => {
+  const search = createSearch<V, T>(options, opts)
 
-      this._search = this.getSearch()
-    }
-
-    return this
+  return {
+    ...search,
+    displayValue: (value: V) => displayValue(value, search.getOption(value)),
+    displayOption: (option: T) => displayValue(search.getValue(option), option),
   }
-
-  getSearch = () => fuzzy<T>(this.options, this.config)
-
-  getOption = (value: V) => this._setup()._optionsByValue.get(value)
-
-  getValue = (option: T) => option as unknown as V
-
-  displayValue = (value: V) => String(value)
-
-  displayOption = (option: T) => this.displayValue(this.getValue(option))
-
-  searchOptions = (term: string) => this._setup()._search(term)
-
-  searchValues = (term: string) => this.searchOptions(term).map(this.getValue)
 }
 
 export const fromCsv = s => (s || "").split(",").filter(identity)

@@ -29,7 +29,7 @@ import {
 } from "@welshman/util"
 import {EventQuery, KindFactory, ListReader, ListWriter} from "@welshman/domain"
 import {reader, writer} from "src/engine/core"
-import {SearchHelper} from "src/util/misc"
+import {makeSearch} from "src/util/misc"
 
 const LIST_KIND_LABELS: [number, string][] = [
   [FOLLOWS, "[follows list]"],
@@ -168,8 +168,9 @@ export const userListWriter = ({kind, title, description, identifier, tags, read
 export const displayUserList = (list?: UserList) =>
   list?.title || listKindLabels.get(list?.kind) || "[no name]"
 
-export class UserListSearch extends SearchHelper<UserList, string> {
-  config = {keys: ["title", "description", "identifier"]}
-  getValue = (option: UserList) => getAddress(option.event)
-  displayValue = (address: string) => displayUserList(this.getOption(address))
-}
+export const makeUserListSearch = (lists: UserList[]) =>
+  makeSearch<string, UserList>(lists, {
+    getValue: (list: UserList) => getAddress(list.event),
+    fuseOptions: {keys: ["title", "description", "identifier"]},
+    displayValue: (address: string, list?: UserList) => displayUserList(list),
+  })
