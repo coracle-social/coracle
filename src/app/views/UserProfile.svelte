@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {indexers, userOutbox} from "@welshman/util"
   import Input from "src/partials/Input.svelte"
   import ImageInput from "src/partials/ImageInput.svelte"
   import Textarea from "src/partials/Textarea.svelte"
@@ -10,7 +9,7 @@
   import Heading from "src/partials/Heading.svelte"
   import Field from "src/partials/Field.svelte"
   import {router} from "src/app/util/router"
-  import {app, profiles, resolveRelays} from "src/engine/core"
+  import {app, profiles} from "src/engine/core"
 
   const nip05Url = "https://github.com/nostr-protocol/nips/blob/master/05.md"
   const lud16Url = "https://lightningaddress.com/"
@@ -24,9 +23,7 @@
       // Editing seeds from the current profile, which loads it first — and loads reject now
       const eventCommand = await profiles.get().update(writer => writer.update(values))
 
-      // Kind 0 routes itself to the user's write relays; coracle has always sent it to the
-      // indexers too, since that's where other clients look for it
-      eventCommand.publishToRelays(await resolveRelays([userOutbox(), indexers()]))
+      eventCommand.publish()
     } catch (e) {
       console.error(e)
 

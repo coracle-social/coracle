@@ -1,17 +1,20 @@
 <script lang="ts">
   import type {TrustedEvent} from "@welshman/util"
-  import {ensureNumber, formatTimestamp, fromPairs} from "@welshman/lib"
+  import {formatTimestamp} from "@welshman/lib"
+  import {ZapGoal} from "@welshman/domain"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
+  import {reader} from "src/engine/core"
 
   export let note: TrustedEvent
 
-  const {closed_at, amount} = fromPairs(note.tags)
+  const goal = reader(ZapGoal)(note)
+  const closedAt = goal.closedAt()
 </script>
 
 <div>
-  Raising <strong class="text-accent">{amount} Sats</strong>
-  {#if closed_at}
-    by {formatTimestamp(ensureNumber(closed_at))}
+  Raising <strong class="text-accent">{goal.amount()} Sats</strong>
+  {#if closedAt}
+    by {formatTimestamp(closedAt)}
   {/if}
 </div>
 {#if note.content}

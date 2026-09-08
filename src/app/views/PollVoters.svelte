@@ -1,16 +1,10 @@
 <script lang="ts">
   import {onMount} from "svelte"
   import {noop} from "@welshman/lib"
-  import {
-    POLL_RESPONSE,
-    inbox,
-    relayTags,
-    relays as relaySelections,
-    tagValues,
-  } from "@welshman/util"
+  import {POLL_RESPONSE} from "@welshman/util"
   import {myLoad} from "src/engine"
   import {app, deriveEvents, resolveRelays} from "src/engine/core"
-  import {getPollOptions, getPollVotersByOption} from "src/util/polls"
+  import {getPollOptions, getPollRelaySelections, getPollVotersByOption} from "src/util/polls"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
@@ -27,11 +21,7 @@
   onMount(() => {
     if (!event) return
 
-    // The relays the poll named, plus the ones its author reads from
-    resolveRelays([
-      ...relaySelections(tagValues(relayTags("relay"), event.tags)),
-      inbox(event.pubkey),
-    ])
+    resolveRelays(getPollRelaySelections(event))
       .then(relays => myLoad({relays, filters}))
       .catch(noop)
   })

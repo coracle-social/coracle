@@ -1,11 +1,29 @@
 <script lang="ts">
-  import {isShareableRelayUrl, relayTags, tagValues} from "@welshman/util"
+  import {
+    isShareableRelayUrl,
+    RELAYS,
+    BLOCKED_RELAYS,
+    SEARCH_RELAYS,
+    MESSAGING_RELAYS,
+  } from "@welshman/util"
+  import {BlockedRelayList, MessagingRelayList, RelayList, SearchRelayList} from "@welshman/domain"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import {RELAYS, BLOCKED_RELAYS, SEARCH_RELAYS, MESSAGING_RELAYS} from "@welshman/util"
+  import {reader} from "src/engine/core"
 
   export let note
   export let kind: 10002 | 10006 | 10007 | 10050 = RELAYS
+
+  // Each of these lists spells its relays differently — kind 10002 uses r tags, the rest use
+  // relay tags — so read them through the kind rather than guessing at the tag name
+  const readUrls = {
+    [RELAYS]: () => reader(RelayList)(note).urls(),
+    [BLOCKED_RELAYS]: () => reader(BlockedRelayList)(note).urls(),
+    [SEARCH_RELAYS]: () => reader(SearchRelayList)(note).urls(),
+    [MESSAGING_RELAYS]: () => reader(MessagingRelayList)(note).urls(),
+  }
+
+  const urls = readUrls[kind]().filter(isShareableRelayUrl)
 </script>
 
 <FlexColumn small>
@@ -18,7 +36,7 @@
   {:else if kind === MESSAGING_RELAYS}
     <p>New messaging relay selections:</p>
   {/if}
-  {#each tagValues(relayTags(["r", "relay"]), note.tags).filter(isShareableRelayUrl) as url}
+  {#each urls as url}
     <RelayCard {url} />
   {/each}
 </FlexColumn>

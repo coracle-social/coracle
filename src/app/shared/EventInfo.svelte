@@ -1,18 +1,13 @@
 <script lang="ts">
   import {tagSpec, tagValue} from "@welshman/util"
   import {Events} from "@welshman/app"
-  import {
-    fromPairs,
-    formatTimestamp,
-    formatTimestampAsDate,
-    LOCALE,
-    secondsToDate,
-  } from "@welshman/lib"
+  import {TimeEvent} from "@welshman/domain"
+  import {formatTimestamp, formatTimestampAsDate, LOCALE, secondsToDate} from "@welshman/lib"
   import Chip from "src/partials/Chip.svelte"
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {getSetting} from "src/engine"
-  import {fromApp} from "src/engine/core"
+  import {fromApp, reader} from "src/engine/core"
 
   export let event
   export let showDate = false
@@ -21,9 +16,13 @@
   const datetimeFmt = new Intl.DateTimeFormat(LOCALE, {dateStyle: "short", timeStyle: "short"})
   const deleted = fromApp($app => $app.use(Events).isDeleted(event).$)
 
-  $: ({name, title, location} = fromPairs(event.tags))
-  $: end = parseInt(tagValue(tagSpec("end"), event.tags))
-  $: start = parseInt(tagValue(tagSpec("start"), event.tags))
+  $: timeEvent = reader(TimeEvent)(event)
+  $: title = timeEvent.title()
+  $: location = timeEvent.location()
+  // TimeEventReader doesn't model the name tag older clients used for a title
+  $: name = tagValue(tagSpec("name"), event.tags)
+  $: end = timeEvent.end()
+  $: start = timeEvent.start()
   $: startDate = secondsToDate(start)
   $: endDate = secondsToDate(end)
   $: startDateDisplay = formatTimestampAsDate(start)

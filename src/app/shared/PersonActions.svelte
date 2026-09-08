@@ -2,10 +2,10 @@
   import * as nip19 from "nostr-tools/nip19"
   import {derived} from "svelte/store"
   import {outbox, toNostrURI} from "@welshman/util"
-  import {toSession} from "@welshman/app"
+  import {publish, toSession} from "@welshman/app"
   import Popover from "src/partials/Popover.svelte"
   import Button from "src/partials/Button.svelte"
-  import {publishToUserRelays, userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
+  import {userMutedPubkeys, userFollows, follow, unfollow} from "src/engine"
   import {login, muteLists, readOnly, resolveRelays, session, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
   import {boot} from "src/app/state"
@@ -21,9 +21,9 @@
 
   const followPerson = () => follow(pubkey)
 
-  const unmutePerson = () => muteLists.get().unmute(pubkey).then(publishToUserRelays)
+  const unmutePerson = () => muteLists.get().unmute(pubkey).then(publish)
 
-  const mutePerson = () => muteLists.get().mutePrivately(["p", pubkey]).then(publishToUserRelays)
+  const mutePerson = () => muteLists.get().mutePrivately(["p", pubkey]).then(publish)
 
   // Viewing the app as someone else, without their key — a read-only session
   const loginAsUser = async () => {

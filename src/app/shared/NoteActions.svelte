@@ -13,6 +13,7 @@
     getLnUrl,
     getPow,
     outbox,
+    userOutbox,
     sortEventsDesc,
     ZAP_RECEIPT,
     REACTION,
@@ -23,6 +24,7 @@
     getAddress,
   } from "@welshman/util"
   import {Reaction} from "@welshman/domain"
+  import {publish} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {makeZapSplit, replyKinds, repostKinds} from "src/util/nostr"
   import {formatSats, pluralize} from "src/util/misc"
@@ -39,6 +41,7 @@
   import NoteInfo from "src/app/shared/NoteInfo.svelte"
   import {router, deriveValidZaps, zap} from "src/app/util"
   import {
+    command,
     fromApp,
     getWriteRelays,
     muteLists,
@@ -48,7 +51,6 @@
     resolveRelays,
     signer,
     thunks,
-    userRelays,
     writer,
     zappers,
   } from "src/engine/core"
@@ -62,7 +64,6 @@
     userMutedEvents,
     isChildOf,
     isEventMuted,
-    publishToUserRelays,
     userPins,
     deriveRelaysForEvent,
   } from "src/engine"
@@ -108,7 +109,7 @@
       .setContent(content)
       .addTags(...getClientTags())
 
-    await signAndPublish(await eventWriter.renderTemplate())
+    await command(eventWriter).then(publish)
   }
 
   const deleteReaction = e => {
@@ -153,7 +154,7 @@
   const broadcast = async () => {
     thunks.get().publish({
       event: asSignedEvent(event as SignedEvent),
-      relays: await userRelays(),
+      relays: await resolveRelays([userOutbox()]),
     })
 
     showInfo("Note has been re-published!")
@@ -231,13 +232,13 @@
         actions.push({
           label: "Unmute",
           icon: "microphone",
-          onClick: () => muteLists.get().unmute(event.id).then(publishToUserRelays),
+          onClick: () => muteLists.get().unmute(event.id).then(publish),
         })
       } else {
         actions.push({
           label: "Mute",
           icon: "microphone-slash",
-          onClick: () => muteLists.get().mutePrivately(["e", event.id]).then(publishToUserRelays),
+          onClick: () => muteLists.get().mutePrivately(["e", event.id]).then(publish),
         })
       }
 
@@ -261,7 +262,7 @@
         label: "Pin",
         icon: "thumbtack",
         onClick: () => {
-          pinLists.get().pin(["e", event.id]).then(publishToUserRelays)
+          pinLists.get().pin(["e", event.id]).then(publish)
         },
       })
     } else {
@@ -269,7 +270,7 @@
         label: "Unpin",
         icon: "thumbtack-slash",
         onClick: () => {
-          pinLists.get().unpin(event.id).then(publishToUserRelays)
+          pinLists.get().unpin(event.id).then(publish)
         },
       })
     }

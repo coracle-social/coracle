@@ -1,7 +1,7 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {without, dateToSeconds, uniq, uniqBy} from "@welshman/lib"
-  import {hexTags, inboxes, own, hash, stamp, tagValues, userOutbox} from "@welshman/util"
+  import {hexTags, own, hash, stamp, tagValues} from "@welshman/util"
   import {User} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
   import {Comment} from "@welshman/domain"
@@ -17,7 +17,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {app, profiles, resolveRelays, thunks, writer} from "src/engine/core"
+  import {app, profiles, thunks, writer} from "src/engine/core"
   import {
     getClientTags,
     sign,
@@ -135,15 +135,8 @@
       hashedEvent = await pow.result
     }
 
-    // Deliver to the author's write relays and everyone they mentioned, at a raised limit so a
-    // reply with a lot of mentions still reaches all of them
-    const relays =
-      options.relays?.length > 0
-        ? options.relays
-        : await resolveRelays(
-            [userOutbox(), ...inboxes(tagValues(hexTags("p"), hashedEvent.tags), 0.5)],
-            {limit: 30},
-          )
+    // The writer knows where its event goes — the author's write relays and everyone they mentioned
+    const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
     const thunk = thunks.get().publish({
       relays,

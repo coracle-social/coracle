@@ -4,7 +4,7 @@ import {always, noop} from "@welshman/lib"
 import type {Maybe} from "@welshman/lib"
 import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
-import {Resolver, addNoFallbacks, userOutbox} from "@welshman/util"
+import {Resolver, addNoFallbacks} from "@welshman/util"
 import type {Filter, RelaySelection} from "@welshman/util"
 import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
 import type {ISigner} from "@welshman/signer"
@@ -75,7 +75,11 @@ const appPolicyAuth = makeAppPolicyAuth((socket, app) => {
 // when nobody is signed in — so a single user-scoped selection rejects the whole resolution, and
 // every feed comes up empty for a logged-out visitor. The routes one layer down already treat a
 // missing pubkey as "no relays", so degrade these the same way rather than throwing.
-const appPolicyAnonymousRoutes: AppPolicy = app => {
+//
+// The rebuilt resolver also carries coracle's scenario defaults, so everything that resolves relays
+// for itself — a domain writer working out where to publish, a feed, a relay hint — lands on the
+// same selection coracle would have made by hand.
+const appPolicyRouter: AppPolicy = app => {
   const router = app.use(Router)
   const resolveRoute = router.resolveRoute
 
@@ -84,6 +88,16 @@ const appPolicyAnonymousRoutes: AppPolicy = app => {
 
   // The resolver captured the original at construction, so it has to be rebuilt to see the guard
   router.resolver = new Resolver(router.resolveRoute, {
+    // A getter, so changing the setting takes effect without rebuilding the app
+    get limit() {
+      return appConfig.relayLimit
+    },
+    // Selections never fall back to default relays. Padding a short selection out with relays
+    // nobody involved actually reads or writes to mostly wastes requests, and it hides the real
+    // problem: when a selection comes back empty, either the user or the person they're addressing
+    // has no relays set up.
+    // TODO: surface that to the user instead of silently publishing or querying nowhere.
+    policy: addNoFallbacks,
     getRelayQuality: url => app.use(RelayStats).getQuality(url),
     getDefaultRelays: app.config.getDefaultRelays,
   })
@@ -100,7 +114,7 @@ export const appPolicies: AppPolicy[] = [
   appPolicyCacheDecrypt,
   appPolicyLogSignerMethods,
   appPolicyAuth,
-  appPolicyAnonymousRoutes,
+  appPolicyRouter,
 ]
 
 const makeApp = (user?: User) =>
@@ -214,22 +228,17 @@ export const writer = <R extends BaseEventReader, W extends EventWriter<R>>(
 
 export const command = (eventWriter: EventWriter<any>) => domain.get().command(eventWriter)
 
-// Relay selection resolves asynchronously now, since it may have to load relay lists first.
-//
-// Selections never fall back to default relays. Padding a short selection out with relays nobody
-// involved actually reads or writes to mostly wastes requests, and it hides the real problem: when
-// this comes back empty, either the user or the person they're addressing has no relays set up.
-// TODO: surface that to the user instead of silently publishing or querying nowhere.
-export const resolveRelays = async (selections: RelaySelection[], {limit}: {limit?: number} = {}) =>
-  (await router.get().resolve(selections))
-    .limit(limit ?? appConfig.relayLimit)
-    .policy(addNoFallbacks)
-    .getUrls()
+// Relay selection resolves asynchronously now, since it may have to load relay lists first. The
+// resolver carries the limit and the fallback policy, so this is for selections nothing else
+// already owns — pass a limit to widen or narrow a single case.
+export const resolveRelays = async (
+  selections: RelaySelection[],
+  {limit}: {limit?: number} = {},
+) => {
+  const scenario = await router.get().resolve(selections)
 
-// A writer resolves its own publish relays at limit 3, which sends a brand new user's lists
-// nowhere at all. Coracle has always published its own data to the user's write relays, so
-// re-resolve rather than take what the writer worked out.
-export const userRelays = () => resolveRelays([userOutbox()])
+  return (limit ? scenario.limit(limit) : scenario).getUrls()
+}
 
 // Sessions
 

@@ -6,11 +6,7 @@
   import {
     makeEvent,
     toNostrURI,
-    hexTags,
-    inboxes,
-    tagValues,
     userInbox,
-    userOutbox,
     DVM_REQUEST_PUBLISH_SCHEDULE,
     Address,
     isReplaceable,
@@ -177,15 +173,8 @@
 
     const signedEvent = await sign(hashedEvent, options)
 
-    // Deliver to the author's write relays and everyone they mentioned, at a raised limit so a
-    // note with a lot of mentions still reaches all of them
-    const relays =
-      options.relays?.length > 0
-        ? options.relays
-        : await resolveRelays(
-            [userOutbox(), ...inboxes(tagValues(hexTags("p"), signedEvent.tags), 0.5)],
-            {limit: 30},
-          )
+    // The writer knows where its event goes — the author's write relays and everyone they mentioned
+    const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
     let thunk: Thunk
 

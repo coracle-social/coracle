@@ -2,13 +2,7 @@
   import cx from "classnames"
   import {onMount} from "svelte"
   import type {TrustedEvent} from "@welshman/util"
-  import {
-    POLL_RESPONSE,
-    inbox,
-    relayTags,
-    relays as relaySelections,
-    tagValues,
-  } from "@welshman/util"
+  import {POLL_RESPONSE} from "@welshman/util"
   import {formatTimestampRelative, noop} from "@welshman/lib"
   import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
   import {deriveEvents, pubkey, resolveRelays, signer} from "src/engine/core"
@@ -18,6 +12,7 @@
     getPollType,
     getPollOptions,
     getPollEndsAt,
+    getPollRelaySelections,
     getPollResponseSelections,
     getPollResults,
     isPollClosed,
@@ -85,11 +80,7 @@
   }
 
   onMount(() => {
-    // The relays the poll named, plus the ones its author reads from
-    resolveRelays([
-      ...relaySelections(tagValues(relayTags("relay"), note.tags)),
-      inbox(note.pubkey),
-    ])
+    resolveRelays(getPollRelaySelections(note))
       .then(relays => myLoad({relays, filters}))
       .catch(noop)
   })

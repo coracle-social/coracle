@@ -3,9 +3,9 @@
   import {marked} from "marked"
   import {onMount} from "svelte"
   import * as nip19 from "nostr-tools/nip19"
-  import {fromPairs} from "@welshman/lib"
-  import {fromNostrURI, tagValues, topicTags} from "@welshman/util"
-  import {profiles} from "src/engine/core"
+  import {fromNostrURI, tagSpec, tagValue} from "@welshman/util"
+  import {Article} from "@welshman/domain"
+  import {profiles, reader} from "src/engine/core"
   import {warn} from "src/util/logger"
   import Chip from "src/partials/Chip.svelte"
   import NoteContentLinks from "src/app/shared/NoteContentLinks.svelte"
@@ -17,7 +17,9 @@
 
   let content
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w{10,1000}/g
-  const {title, summary, image, alt} = fromPairs(note.tags) as Record<string, string>
+  const article = reader(Article)(note)
+  // ArticleReader doesn't model nip 31's alt tag, which coracle falls back to for a summary
+  const alt = tagValue(tagSpec("alt"), note.tags)
 
   const convertEntities = markdown => {
     for (const uri of markdown.match(regex) || []) {
@@ -74,15 +76,15 @@
 </script>
 
 <div class="flex flex-col gap-4 overflow-hidden text-ellipsis">
-  <h3 class="text-2xl">{title}</h3>
-  {#if summary || alt}
-    <p>{summary || alt}</p>
+  <h3 class="text-2xl">{article.title()}</h3>
+  {#if article.summary() || alt}
+    <p>{article.summary() || alt}</p>
   {/if}
-  {#if showMedia && image}
-    <NoteContentLinks urls={[image]} showMedia />
+  {#if showMedia && article.image()}
+    <NoteContentLinks urls={[article.image()]} showMedia />
   {/if}
   <div>
-    {#each tagValues(topicTags("t"), note.tags) as topic}
+    {#each article.topics() as topic}
       <NoteContentTopic value={topic}>
         <Chip class="mb-2 mr-2 inline-block cursor-pointer">#{topic}</Chip>
       </NoteContentTopic>

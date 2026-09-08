@@ -18,7 +18,6 @@
     profileSearch,
     profiles,
     relaySearch,
-    userRelays,
     writer,
   } from "src/engine/core"
   import {quantify} from "src/util/misc"
@@ -59,7 +58,7 @@
 
       const eventCommand = await command(followWriter)
 
-      eventCommand.publishToRelays(await userRelays())
+      eventCommand.publish()
     } catch (e) {
       // Editing a relay list loads it first, and loads reject now rather than swallowing failures
       console.error(e)
