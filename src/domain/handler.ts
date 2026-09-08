@@ -3,7 +3,7 @@ import type {TrustedEvent} from "@welshman/util"
 import {Handler as HandlerKind, HandlerRecommendation} from "@welshman/domain"
 import type {HandlerMeta} from "@welshman/domain"
 import {reader} from "src/engine/core"
-import {SearchHelper} from "src/util/misc"
+import {makeSearch} from "src/util/misc"
 
 export type Handler = {
   kind: number
@@ -55,11 +55,12 @@ export const getHandlerKey = (handler: Handler) => `${handler.kind}:${getAddress
 
 export const displayHandler = (handler?: Handler) => handler?.name || "[no name]"
 
-export class HandlerSearch extends SearchHelper<Handler, string> {
-  config = {keys: ["name", "about"]}
-  getValue = (option: Handler) => getAddress(option.event)
-  displayValue = (address: string) => displayHandler(this.getOption(address))
-}
+export const makeHandlerSearch = (handlers: Handler[]) =>
+  makeSearch<string, Handler>(handlers, {
+    getValue: (handler: Handler) => getAddress(handler.event),
+    fuseOptions: {keys: ["name", "about"]},
+    displayValue: (address: string, handler?: Handler) => displayHandler(handler),
+  })
 
 export const getHandlerAddress = (event: TrustedEvent) =>
   reader(HandlerRecommendation)(event).handlerAddress()

@@ -1,6 +1,6 @@
 import {nth} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
-import {SearchHelper} from "src/util/misc"
+import {makeSearch} from "src/util/misc"
 
 export type Collection = {
   name: string
@@ -39,8 +39,9 @@ export const readCollections = (events: TrustedEvent[]) => {
 
 export const displayCollection = (collection?: {name: string}) => collection?.name || "[no name]"
 
-export class CollectionSearch extends SearchHelper<Collection, string> {
-  config = {keys: ["name"]}
-  getValue = ({pubkey, name}: Collection) => `${pubkey}:${name}`
-  displayValue = (name: string) => displayCollection({name})
-}
+export const makeCollectionSearch = (collections: Collection[]) =>
+  makeSearch<string, Collection>(collections, {
+    getValue: ({pubkey, name}: Collection) => `${pubkey}:${name}`,
+    fuseOptions: {keys: ["name"]},
+    displayValue: (name: string) => displayCollection({name}),
+  })
