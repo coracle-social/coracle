@@ -36,12 +36,12 @@ import {
   TOPICS,
   LABEL,
   getPubkey,
+  queryProfile,
 } from "@welshman/util"
 import {identity, hexToBytes, bytesToHex, isHex32, parseJson} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import type {ProfileReader} from "@welshman/domain"
 import * as nip19 from "nostr-tools/nip19"
-import * as nip05 from "nostr-tools/nip05"
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
@@ -153,10 +153,10 @@ export const getContentWarning = (e: TrustedEvent) =>
 
 export const parseAnything = async entity => {
   if (entity.includes("@")) {
-    const profile = await nip05.queryProfile(entity)
+    const handle = await queryProfile(entity)
 
-    if (profile) {
-      return {type: "npub", data: profile.pubkey}
+    if (handle?.pubkey) {
+      return {type: "npub", data: handle.pubkey}
     }
   }
 

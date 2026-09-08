@@ -4,8 +4,9 @@
   import type {TrustedEvent} from "@welshman/util"
   import {POLL_RESPONSE} from "@welshman/util"
   import {formatTimestampRelative, noop} from "@welshman/lib"
+  import {Poll} from "@welshman/domain"
   import {myLoad, publishPollResponse, deleteEvent} from "src/engine"
-  import {deriveEvents, pubkey, resolveRelays, signer} from "src/engine/core"
+  import {deriveEvents, pubkey, reader, resolveRelays, signer} from "src/engine/core"
   import {router} from "src/app/util/router"
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
   import {
@@ -14,7 +15,6 @@
     getPollEndsAt,
     getPollRelaySelections,
     getPollResponseSelections,
-    getPollResults,
     isPollClosed,
   } from "src/util/polls"
 
@@ -71,7 +71,7 @@
 
   $: closed = isPollClosed(note)
   $: canVote = Boolean($signer) && !closed
-  $: results = getPollResults(note, $responses)
+  $: results = reader(Poll)(note).results($responses)
   $: ownResponse = getOwnResponse($responses)
 
   // Keep the displayed selection in sync with our latest published response
