@@ -43,7 +43,6 @@ import {
   APP_DATA,
   DEPRECATED_DIRECT_MESSAGE,
   DIRECT_MESSAGE,
-  FEED,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
@@ -64,7 +63,9 @@ import {AppData} from "@welshman/domain"
 import type {AppPolicy, IApp} from "@welshman/app"
 import {
   Domain,
+  Events,
   FeedLists,
+  Feeds,
   FollowLists,
   MuteLists,
   PinLists,
@@ -80,6 +81,7 @@ import {
   EDITABLE_LIST_KINDS,
   makeUserListSearch,
   displayFeed,
+  feedFromReader,
   getHandlerAddress,
   mapListToFeed,
   readCollections,
@@ -477,19 +479,16 @@ export const listSearch = derived(lists, $lists => makeUserListSearch($lists))
 
 // Feeds
 
-export const feedsById = fromApp($app =>
-  deriveItemsByKey<PublishedFeed>({
-    repository: $app.repository,
-    getKey: feed => feed.event.id,
-    filters: [{kinds: [FEED]}],
-    eventToItem: readFeed,
-  }),
+// Keyed by address by the plugin, so a feed only ever appears once regardless of how many
+// versions of it have been seen
+export const savedFeeds = fromApp($app =>
+  derived($app.use(Feeds).all.$, $feeds => $feeds.map(feedFromReader)),
 )
 
-export const feeds = deriveItems(feedsById)
-
-export const userFeeds = derived([feeds, pubkey], ([$feeds, $pubkey]: [PublishedFeed[], string]) =>
-  $feeds.filter(feed => feed.event.pubkey === $pubkey),
+export const userFeeds = derived(
+  [savedFeeds, pubkey],
+  ([$savedFeeds, $pubkey]: [PublishedFeed[], string]) =>
+    $savedFeeds.filter(feed => feed.event.pubkey === $pubkey),
 )
 
 export const defaultFeed = derived([userFollows, userFeeds], ([$userFollows, $userFeeds]) => {
@@ -521,11 +520,22 @@ export const feedFavoritesByAddress = withGetter(
 
 export const userFeedFavorites: Readable<Maybe<FeedListReader>> = deriveUserItem(FeedLists)
 
-export const userFavoritedFeeds = derived([app, userFeedFavorites], ([$app, $list]) =>
-  ($list?.addresses() || [])
-    .map(address => $app.repository.getEvent(address))
-    .filter(identity)
-    .map(readFeed),
+export const userFavoritedFeeds = derived(
+  [app, userFeedFavorites],
+  ([$app, $list], set: (feeds: PublishedFeed[]) => void) => {
+    const addresses = $list?.addresses() || []
+
+    if (addresses.length === 0) {
+      return set([])
+    }
+
+    // Subscribe per address so a favorited feed shows up when its event lands later
+    return derived(
+      addresses.map(address => $app.use(Events).one(address).$),
+      (events: Maybe<TrustedEvent>[]) => events.filter(identity).map(readFeed),
+    ).subscribe(set)
+  },
+  [] as PublishedFeed[],
 )
 
 export const makeFeedSearch = (feeds: PublishedFeed[]) => {
@@ -550,7 +560,7 @@ export const makeFeedSearch = (feeds: PublishedFeed[]) => {
   })
 }
 
-export const feedSearch = derived(feeds, $feeds => makeFeedSearch($feeds))
+export const feedSearch = derived(savedFeeds, $feeds => makeFeedSearch($feeds))
 
 export const listFeedsById = fromApp($app =>
   deriveItemsByKey<PublishedListFeed>({
