@@ -43,25 +43,6 @@ const getLatestResponses = (responses: TrustedEvent[]) => {
   return Array.from(byPubkey.values())
 }
 
-export const getPollResults = (event: TrustedEvent, responses: TrustedEvent[]) => {
-  const pollType = getPollType(event)
-  const options = getPollOptions(event).map(option => ({...option, votes: 0}))
-  const counts = new Map(options.map(option => [option.id, option]))
-  const latestResponses = getLatestResponses(responses)
-
-  for (const response of latestResponses) {
-    for (const optionId of getPollResponseSelections(response, pollType)) {
-      const option = counts.get(optionId)
-
-      if (option) {
-        option.votes += 1
-      }
-    }
-  }
-
-  return {options, voters: latestResponses.length}
-}
-
 export const getPollVotersByOption = (event: TrustedEvent, responses: TrustedEvent[]) => {
   const pollType = getPollType(event)
   const votersByOption = new Map<string, string[]>()

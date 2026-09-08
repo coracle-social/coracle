@@ -1,5 +1,4 @@
 import Fuse from "fuse.js"
-import {getPow} from "nostr-tools/nip13"
 import {derived, readable, writable} from "svelte/store"
 import type {Readable} from "svelte/store"
 import {
@@ -54,8 +53,8 @@ import {
   getIdAndAddress,
   getIdFilters,
   getIdentifier,
+  getPow,
   hexTags,
-  matchTag,
   relayTags,
   tagSpec,
   tagValue,
@@ -374,9 +373,7 @@ export const isEventMuted = withGetter(
 
           const wotScore = $app.use(Wot).score(e.pubkey, WotScope.Follows).get()
           const okWot = wotScore >= minWot
-          const powDifficulty = Number(matchTag(tagSpec("nonce"), e.tags)?.[2] || "0")
-          const isValidPow = getPow(e.id) >= powDifficulty
-          const okPow = isValidPow && powDifficulty > minPow
+          const okPow = getPow(e) > minPow
 
           return !okWot && !okPow
         },
