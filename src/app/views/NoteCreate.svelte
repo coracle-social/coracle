@@ -13,7 +13,6 @@
   } from "@welshman/util"
   import {User} from "@welshman/app"
   import type {Thunk} from "@welshman/app"
-  import {request} from "@welshman/net"
   import {Note, Poll} from "@welshman/domain"
   import type {EventWriter} from "@welshman/domain"
   import {writable} from "svelte/store"
@@ -38,7 +37,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {app, getWriteRelays, resolveRelays, thunks, writer} from "src/engine/core"
+  import {app, getWriteRelays, network, resolveRelays, thunks, writer} from "src/engine/core"
   import {env, getClientTags, sign, userSettings, broadcastUserRelays} from "src/engine"
 
   export let quote = null
@@ -203,7 +202,7 @@
 
       const abortController = new AbortController()
 
-      await request({
+      await network.get().request({
         relays: env.DVM_RELAYS,
         signal: AbortSignal.any([abortController.signal, AbortSignal.timeout(30_000)]),
         filters: [{kinds: [dvmEvent.kind + 1000, 7000], since: now() - 30, "#e": [dvmEvent.id]}],

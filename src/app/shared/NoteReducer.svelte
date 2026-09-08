@@ -9,6 +9,7 @@
     COMMENT,
     NOTE,
   } from "@welshman/util"
+  import {Events} from "@welshman/app"
   import {repostKinds, reactionKinds} from "src/util/nostr"
   import {
     getAncestorRelaySelections,
@@ -38,7 +39,7 @@
 
   const shouldSkip = (event: TrustedEvent, strict: boolean) => {
     if (!showMuted && $isEventMuted(event, strict)) return true
-    if (!showDeleted && $app.repository.isDeleted(event)) return true
+    if (!showDeleted && $app.use(Events).isDeleted(event).get()) return true
     if (hideReplies && event.kind === COMMENT) return true
     if (hideReplies && event.kind === NOTE && getParentIdOrAddr(event)) return true
     if (timestamps.has(getIdOrAddress(event))) return true
@@ -59,7 +60,7 @@
 
     if (parentIds.length > 0) {
       const filters = getIdFilters(parentIds)
-      const [cached] = $app.repository.query(filters)
+      const [cached] = $app.use(Events).all(filters).get()
 
       if (cached) return cached
 

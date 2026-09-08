@@ -4,7 +4,6 @@
   import {tweened} from "svelte/motion"
   import {first, sum, pluck, spec, nthEq, last, sortBy, uniqBy, prop} from "@welshman/lib"
   import type {TrustedEvent, SignedEvent} from "@welshman/util"
-  import {deriveEvents} from "@welshman/store"
   import {
     asSignedEvent,
     isSignedEvent,
@@ -42,7 +41,7 @@
   import {router, deriveValidZaps, zap} from "src/app/util"
   import {
     command,
-    fromApp,
+    deriveEvents,
     getWriteRelays,
     muteLists,
     pinLists,
@@ -177,9 +176,7 @@
     window.open(templateTag[1].replace("<bech32>", entity))
   }
 
-  const context = fromApp($app =>
-    deriveEvents({repository: $app.repository, filters: getReplyFilters([event])}),
-  )
+  const context = deriveEvents(getReplyFilters([event]))
 
   let view
   let actions = []

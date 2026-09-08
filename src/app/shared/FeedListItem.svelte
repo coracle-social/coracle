@@ -2,6 +2,8 @@
   import cx from "classnames"
   import {noop, remove, formatTimestamp} from "@welshman/lib"
   import {NAMED_BOOKMARKS, toNostrURI, Address, seen} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
+  import {Events} from "@welshman/app"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import Card from "src/partials/Card.svelte"
@@ -11,7 +13,7 @@
   import FeedSummary from "src/app/shared/FeedSummary.svelte"
   import PersonBadgeSmall from "src/app/shared/PersonBadgeSmall.svelte"
   import {readFeed, readUserList, displayFeed, mapListToFeed} from "src/domain"
-  import {app, pubkey, resolveRelays} from "src/engine/core"
+  import {app, fromApp, pubkey, resolveRelays} from "src/engine/core"
   import {
     addFeedFavorite,
     removeFeedFavorite,
@@ -23,29 +25,44 @@
   export let address
 
   const expandDefinition = boolCtrl()
-  const event = $app.repository.getEvent(address)
-  const deleted = $app.repository.isDeleted(event)
+  const eventStore = fromApp($app => $app.use(Events).one(address).$)
 
   const toggleFavorite = () => (isFavorite ? removeFeedFavorite(address) : addFeedFavorite(address))
 
   const loadFeed = () => router.at("notes").cx({feed}).push()
 
-  let feed = address.startsWith(NAMED_BOOKMARKS) ? undefined : readFeed(event)
+  const deriveDeleted = (event: TrustedEvent) =>
+    fromApp($app => $app.use(Events).isDeleted(event).$)
 
-  if (!feed) {
-    readUserList(event).then(list => {
-      feed = mapListToFeed(list)
-    }, noop)
+  const setFeed = (event: TrustedEvent) => {
+    feed = address.startsWith(NAMED_BOOKMARKS) ? undefined : readFeed(event)
+
+    if (!feed) {
+      readUserList(event).then(list => {
+        feed = mapListToFeed(list)
+      }, noop)
+    }
   }
 
-  let naddr = Address.from(address, Array.from($app.tracker.getRelays(event.id))).toNaddr()
+  const setNaddr = (event: TrustedEvent) => {
+    naddr = Address.from(address, Array.from($app.tracker.getRelays(event.id))).toNaddr()
 
-  resolveRelays([seen(event)])
-    .then(urls => {
-      naddr = Address.from(address, urls).toNaddr()
-    })
-    .catch(noop)
+    resolveRelays([seen(event)])
+      .then(urls => {
+        naddr = Address.from(address, urls).toNaddr()
+      })
+      .catch(noop)
+  }
 
+  let feed
+  let naddr = Address.from(address).toNaddr()
+
+  $: event = $eventStore
+  $: if (event) {
+    setFeed(event)
+    setNaddr(event)
+  }
+  $: deleted = event && deriveDeleted(event)
   $: feedPubkey = feed && (feed.event ? feed.event.pubkey : feed.list.event.pubkey)
   $: isFavorite = Boolean($userFeedFavorites?.includes(address))
   $: favoritedPubkeys = remove(
@@ -64,10 +81,10 @@
             <span
               class="staatliches truncate text-2xl"
               class:text-neutral-400={!feed.title}
-              class:line-through={deleted}>
+              class:line-through={$deleted}>
               {displayFeed(feed)}
             </span>
-            {#if deleted}
+            {#if $deleted}
               <Chip danger small>Deleted</Chip>
             {/if}
           </div>
