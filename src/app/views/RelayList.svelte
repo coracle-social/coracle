@@ -2,30 +2,20 @@
   import {onMount} from "svelte"
   import {derived} from "svelte/store"
   import type {Relay} from "@welshman/domain"
-  import {nthEq, displayList, noop, sortBy, uniq, groupBy, pushToMapKey} from "@welshman/lib"
+  import {displayList, sortBy, uniq, pushToMapKey} from "@welshman/lib"
   import {MessagingRelayLists, RelayLists} from "@welshman/app"
-  import {
-    isShareableRelayUrl,
-    isRelayUrl,
-    normalizeRelayUrl,
-    sortEventsDesc,
-    userInbox,
-  } from "@welshman/util"
-  import {fromApp, getWriteRelays, profiles, relaySearch, resolveRelays} from "src/engine/core"
+  import {isShareableRelayUrl, isRelayUrl, normalizeRelayUrl} from "@welshman/util"
+  import {fromApp, getWriteRelays, profiles, relaySearch} from "src/engine/core"
   import {createScroller} from "src/util/misc"
   import {profileHasName} from "src/util/nostr"
   import {showWarning} from "src/partials/Toast.svelte"
-  import Tabs from "src/partials/Tabs.svelte"
   import Modal from "src/partials/Modal.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Input from "src/partials/Input.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Button from "src/partials/Button.svelte"
   import RelayCard from "src/app/shared/RelayCard.svelte"
-  import FeedItem from "src/app/shared/FeedItem.svelte"
-  import {myRequest, userFollows, joinRelay} from "src/engine"
-
-  const tabs = ["search", "reviews"]
+  import {userFollows, joinRelay} from "src/engine"
 
   const userRelayUrls = fromApp($app => $app.use(RelayLists).urls($app.user?.pubkey ?? "").$)
 
@@ -69,10 +59,6 @@
       }),
   )
 
-  const setActiveTab = tab => {
-    activeTab = tab
-  }
-
   const loadMore = async () => {
     limit += 20
   }
@@ -101,8 +87,6 @@
   let limit = 20
   let modal = null
   let element = null
-  let reviews = []
-  let activeTab = "search"
   let customRelay = ""
   let currentRelayUrls: string[] = []
 
@@ -112,35 +96,10 @@
     ...$userMessagingRelayUrls,
   ]).sort()
 
-  $: ratings = groupBy(e => {
-    try {
-      return normalizeRelayUrl(e.tags.find(nthEq(0, "r"))?.[1])
-    } catch (e) {
-      return ""
-    }
-  }, reviews)
-
-  const controller = new AbortController()
-
-  const loadReviews = async () =>
-    myRequest({
-      signal: controller.signal,
-      relays: await resolveRelays([userInbox()]),
-      filters: [{kinds: [1985, 1986], "#l": ["review/relay"]}],
-      onEvent: event => {
-        if (isShareableRelayUrl(event.tags.find(nthEq(0, "r"))?.[1] || "")) {
-          reviews = sortEventsDesc(reviews.concat(event))
-        }
-      },
-    })
-
-  loadReviews().catch(noop)
-
   onMount(() => {
     const scroller = createScroller(loadMore, {element})
 
     return () => {
-      controller.abort()
       scroller.stop()
     }
   })
@@ -170,7 +129,7 @@
   {/if}
   <div class="grid grid-cols-1 gap-4">
     {#each currentRelayUrls as url (url)}
-      <RelayCard showStatus showControls {url} ratings={ratings[url]} />
+      <RelayCard showStatus showControls {url} />
     {/each}
   </div>
   <div class="flex items-center gap-2">
@@ -181,25 +140,18 @@
     Below are relays used by people in your network. Adding these may improve your ability to load
     profiles and content.
   </p>
-  <Tabs {tabs} {activeTab} {setActiveTab} />
-  {#if activeTab === "reviews"}
-    {#each reviews.slice(0, limit) as review (review.id)}
-      <FeedItem note={review} />
-    {/each}
-  {:else}
-    <Input
-      bind:value={q}
-      type="text"
-      class="flex-grow"
-      placeholder="Search relays or add a custom url">
-      <i slot="before" class="fa-solid fa-search" />
-    </Input>
-    {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
-      <RelayCard {url} ratings={ratings[url]}>
-        <p slot="description">{description}</p>
-      </RelayCard>
-    {/each}
-  {/if}
+  <Input
+    bind:value={q}
+    type="text"
+    class="flex-grow"
+    placeholder="Search relays or add a custom url">
+    <i slot="before" class="fa-solid fa-search" />
+  </Input>
+  {#each $searchRelays(q).slice(0, limit) as { url, description } (url)}
+    <RelayCard {url}>
+      <p slot="description">{description}</p>
+    </RelayCard>
+  {/each}
 </FlexColumn>
 
 {#if modal}

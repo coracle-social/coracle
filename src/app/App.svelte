@@ -67,7 +67,6 @@
   import QRCode from "src/app/views/QRCode.svelte"
   import RelayDetail from "src/app/views/RelayDetail.svelte"
   import RelayList from "src/app/views/RelayList.svelte"
-  import RelayReview from "src/app/views/RelayReview.svelte"
   import ReportCreate from "src/app/views/ReportCreate.svelte"
   import Search from "src/app/views/Search.svelte"
   import ThreadDetail from "src/app/views/ThreadDetail.svelte"
@@ -272,12 +271,6 @@
       entity: asRelay,
     },
   })
-  router.register("/relays/:entity/review", RelayReview, {
-    serializers: {
-      entity: asRelay,
-    },
-  })
-
   router.register("/settings", UserSettings, {
     requireUser: true,
   })

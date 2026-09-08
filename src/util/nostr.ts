@@ -1,4 +1,3 @@
-import {avg, last, nthEq} from "@welshman/lib"
 import {
   fromNostrURI,
   GENERIC_REPOST,
@@ -13,7 +12,6 @@ import {
   ZAP_RECEIPT,
   Address,
   MUTES,
-  matchTags,
   tagSpec,
   tagValue,
   tagValues,
@@ -34,11 +32,10 @@ import {
   COMMUNITIES,
   CHANNELS,
   TOPICS,
-  LABEL,
   getPubkey,
   queryProfile,
 } from "@welshman/util"
-import {identity, hexToBytes, bytesToHex, isHex32, parseJson} from "@welshman/lib"
+import {hexToBytes, bytesToHex, isHex32} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import type {ProfileReader} from "@welshman/domain"
 import * as nip19 from "nostr-tools/nip19"
@@ -108,14 +105,6 @@ export const makeZapSplit = (pubkey: string, relay = "", weight: string | number
   relay,
   String(weight),
 ]
-
-export const getRating = (event: TrustedEvent) =>
-  event.kind === LABEL
-    ? parseJson(last(matchTags(tagSpec("l"), event.tags).find(nthEq(1, "review/relay")) || []))
-        ?.quality
-    : parseFloat(matchTags(tagSpec("rating"), event.tags).find(t => t.length === 2)?.[1])
-
-export const getAvgRating = (events: TrustedEvent[]) => avg(events.map(getRating).filter(identity))
 
 const BAD_DOMAINS = ["libfans.com", "matrix.org/_matrix/media/v3/download"]
 

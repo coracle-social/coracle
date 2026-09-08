@@ -46,12 +46,6 @@
         label: "Add to list",
         icon: "list",
       })
-
-      actions.push({
-        onClick: () => router.at("relays").of(url).at("review").open(),
-        label: "Review",
-        icon: "feather",
-      })
     }
 
     if ($relay?.contact) {
