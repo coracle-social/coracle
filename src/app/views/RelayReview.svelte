@@ -1,8 +1,8 @@
 <script lang="ts">
   import {onDestroy} from "svelte"
   import {noop} from "@welshman/lib"
-  import {makeEvent, userOutbox} from "@welshman/util"
-  import {resolveRelays, thunks} from "src/engine/core"
+  import {publish} from "@welshman/app"
+  import {command, writer} from "src/engine/core"
   import Button from "src/partials/Button.svelte"
   import Content from "src/partials/Content.svelte"
   import AltColor from "src/partials/AltColor.svelte"
@@ -11,6 +11,7 @@
   import Rating from "src/partials/Rating.svelte"
   import {router} from "src/app/util/router"
   import {getClientTags} from "src/engine"
+  import {Review} from "src/domain"
   import {makeEditor} from "src/app/editor"
 
   export let url
@@ -20,21 +21,13 @@
   const onSubmit = () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    const event = makeEvent(1986, {
-      content,
-      tags: [
-        ...getClientTags(),
-        ...editor.storage.nostr.getEditorTags(),
-        ["L", "review"],
-        ["l", "review/relay", "review"],
-        ["rating", String(rating)],
-        ["r", url],
-      ],
-    })
+    const eventWriter = writer(Review)
+      .setContent(content)
+      .setRating(rating)
+      .setRelayUrl(url)
+      .addTags(...getClientTags(), ...editor.storage.nostr.getEditorTags())
 
-    resolveRelays([userOutbox()])
-      .then(relays => thunks.get().publish({event, relays}))
-      .catch(noop)
+    command(eventWriter).then(publish).catch(noop)
 
     router.pop()
   }

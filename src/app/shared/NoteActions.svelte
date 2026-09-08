@@ -7,18 +7,12 @@
   import {
     asSignedEvent,
     isSignedEvent,
-    isReplaceable,
-    makeEvent,
     getLnUrl,
     getPow,
-    outbox,
     userOutbox,
     sortEventsDesc,
     ZAP_RECEIPT,
     REACTION,
-    REPOST,
-    GENERIC_REPOST,
-    NOTE,
     getReplyFilters,
     getAddress,
   } from "@welshman/util"
@@ -45,7 +39,6 @@
     getWriteRelays,
     muteLists,
     pinLists,
-    profiles,
     pubkey,
     resolveRelays,
     signer,
@@ -56,7 +49,6 @@
   import {
     env,
     deriveHandlersForKind,
-    signAndPublish,
     deleteEvent,
     getSetting,
     getClientTags,
@@ -66,6 +58,7 @@
     userPins,
     deriveRelaysForEvent,
   } from "src/engine"
+  import {repostKind} from "src/domain"
 
   export let event: TrustedEvent
   export let onReplyStart: () => void
@@ -117,22 +110,11 @@
 
   const repost = async () => {
     if (isSignedEvent(event)) {
-      const kind = event.kind === NOTE ? REPOST : GENERIC_REPOST
-      const hint = first(await resolveRelays([outbox(event.pubkey)], {limit: 1})) || ""
-      const tags = [["e", event.id, hint, "", event.pubkey]]
+      const eventWriter = writer(repostKind(event.kind))
+        .setEvent(event)
+        .addTags(...getClientTags())
 
-      if (isReplaceable(event)) {
-        tags.push(["a", getAddress(event), hint, "", event.pubkey])
-      }
-
-      tags.push(["p", event.pubkey, hint, $profiles.display(event.pubkey).get()])
-      tags.push(...getClientTags())
-
-      if (kind === GENERIC_REPOST) {
-        tags.push(["k", String(event.kind)])
-      }
-
-      await signAndPublish(makeEvent(kind, {content: JSON.stringify(event), tags}))
+      await command(eventWriter).then(publish)
     } else {
       showInfo("Unable to republish an unsigned event.")
     }

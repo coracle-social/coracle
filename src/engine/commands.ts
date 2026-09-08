@@ -9,17 +9,13 @@ import {
   MESSAGING_RELAYS,
   PROFILE,
   RELAYS,
-  hexTags,
-  inboxes,
   isNWCWallet,
   isSignedEvent,
   isWebLNWallet,
   makeBlossomAuthEvent,
   normalizeRelayUrl,
   relay,
-  tagValues,
   uploadBlob,
-  userOutbox,
 } from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {
@@ -32,12 +28,11 @@ import {
   profiles,
   reader,
   relayLists,
-  resolveRelays,
   thunks,
   wraps,
   writer,
 } from "src/engine/core"
-import {anonymous, getClientTags, sessionWithMeta, sign} from "src/engine/state"
+import {anonymous, getClientTags, sessionWithMeta} from "src/engine/state"
 import {PollVote, userListKind} from "src/domain"
 import {stripExifData} from "src/util/html"
 import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
@@ -69,19 +64,6 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
   } catch (e) {
     return {error: await res.text()}
   }
-}
-
-// Key state management
-
-export const signAndPublish = async (template, {anonymous: asAnonymous = false} = {}) => {
-  const event = await sign(template, {anonymous: asAnonymous})
-
-  const relays = await resolveRelays([
-    ...(asAnonymous ? [] : [userOutbox()]),
-    ...inboxes(tagValues(hexTags("p"), event.tags), 0.5),
-  ])
-
-  return thunks.get().publish({event, relays})
 }
 
 // Polls

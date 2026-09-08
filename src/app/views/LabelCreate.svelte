@@ -1,6 +1,6 @@
 <script lang="ts">
   import {identity, noop} from "@welshman/lib"
-  import {makeEvent, userOutbox} from "@welshman/util"
+  import {publish} from "@welshman/app"
   import {showWarning, showInfo} from "src/partials/Toast.svelte"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -9,8 +9,9 @@
   import SearchSelect from "src/partials/SearchSelect.svelte"
   import SelectButton from "src/partials/SelectButton.svelte"
   import {router} from "src/app/util/router"
-  import {pubkey, resolveRelays, thunks, topicSearch} from "src/engine/core"
+  import {command, pubkey, topicSearch, writer} from "src/engine/core"
   import {loadLabels, getClientTags, deriveCollections, collectionSearch} from "src/engine"
+  import {Label} from "src/domain"
 
   export let id
 
@@ -33,17 +34,15 @@
       return showWarning("Please select at least one collection.")
     }
 
-    const tags = [
-      ["e", id],
-      ["L", "#t"],
-      ...names.map(name => ["l", name, "#t"]),
-      ...getClientTags(),
-    ]
+    const eventWriter = writer(Label).setEventId(id)
 
-    thunks.get().publish({
-      event: makeEvent(1985, {tags}),
-      relays: await resolveRelays([userOutbox()]),
-    })
+    for (const name of names) {
+      eventWriter.addLabel(name, "#t")
+    }
+
+    eventWriter.addTags(...getClientTags())
+
+    await command(eventWriter).then(publish)
 
     showInfo("Your tag has been saved!")
     router.pop()
