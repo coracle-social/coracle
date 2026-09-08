@@ -1,8 +1,10 @@
 <script lang="ts">
   import {first, noop, formatTimestamp} from "@welshman/lib"
   import {matchTags, tagSpec, toNostrURI, Address} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
   import {defaultTagFeedMappings} from "@welshman/feeds"
-  import {app} from "src/engine/core"
+  import {Events} from "@welshman/app"
+  import {fromApp} from "src/engine/core"
   import {slide} from "src/util/transition"
   import {boolCtrl} from "src/partials/utils"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -19,8 +21,10 @@
 
   const expandTags = boolCtrl()
   const tagTypes = defaultTagFeedMappings.map(first) as string[]
-  const event = $app.repository.getEvent(address)
-  const deleted = $app.repository.isDeleted(event)
+  const eventStore = fromApp($app => $app.use(Events).one(address).$)
+
+  const deriveDeleted = (event: TrustedEvent) =>
+    fromApp($app => $app.use(Events).isDeleted(event).$)
 
   const loadFeed = () => {
     if (!inert) {
@@ -33,9 +37,13 @@
 
   let list
 
-  readUserList(event).then(userList => {
-    list = userList
-  }, noop)
+  $: event = $eventStore
+  $: if (event) {
+    readUserList(event).then(userList => {
+      list = userList
+    }, noop)
+  }
+  $: deleted = event && deriveDeleted(event)
 </script>
 
 {#if list}
@@ -53,10 +61,10 @@
             <span
               class="staatliches text-xl"
               class:text-neutral-400={!list.title}
-              class:line-through={deleted}>
+              class:line-through={$deleted}>
               {displayUserList(list)}
             </span>
-            {#if deleted}
+            {#if $deleted}
               <Chip danger small>Deleted</Chip>
             {/if}
           </div>

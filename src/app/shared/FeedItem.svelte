@@ -19,13 +19,12 @@
   import {fly, slide} from "src/util/transition"
   import NoteMeta from "src/app/shared/NoteMeta.svelte"
   import Note from "src/app/shared/Note.svelte"
-  import {app, deriveEvents, resolveRelays} from "src/engine/core"
+  import {deriveEvents, events, resolveRelays} from "src/engine/core"
   import {getSetting, isChildOf, isEventMuted, myRequest} from "src/engine"
 
   export let note
   export let relays = []
-  export let getContext = (event: TrustedEvent) =>
-    app.get().repository.query(getReplyFilters([event]))
+  export let getContext = (event: TrustedEvent) => $events.all(getReplyFilters([event])).get()
   export let depth = 0
   export let anchor = null
   export let pinned = false

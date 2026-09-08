@@ -1,9 +1,10 @@
 <script lang="ts">
-  import {onMount} from "svelte"
   import {noop} from "@welshman/lib"
   import {POLL_RESPONSE} from "@welshman/util"
+  import type {TrustedEvent} from "@welshman/util"
+  import {Events} from "@welshman/app"
   import {myLoad} from "src/engine"
-  import {app, deriveEvents, resolveRelays} from "src/engine/core"
+  import {deriveEvents, fromApp, resolveRelays} from "src/engine/core"
   import {getPollOptions, getPollRelaySelections, getPollVotersByOption} from "src/util/polls"
   import Heading from "src/partials/Heading.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
@@ -11,20 +12,19 @@
 
   export let id
 
-  const event = app.get().repository.getEvent(id)
-  const options = event ? getPollOptions(event) : []
   const filters = [{kinds: [POLL_RESPONSE], "#e": [id]}]
   const responses = deriveEvents(filters)
+  const eventStore = fromApp($app => $app.use(Events).one(id).$)
 
-  $: votersByOption = event ? getPollVotersByOption(event, $responses) : new Map<string, string[]>()
-
-  onMount(() => {
-    if (!event) return
-
+  const loadResponses = (event: TrustedEvent) =>
     resolveRelays(getPollRelaySelections(event))
       .then(relays => myLoad({relays, filters}))
       .catch(noop)
-  })
+
+  $: event = $eventStore
+  $: options = event ? getPollOptions(event) : []
+  $: votersByOption = event ? getPollVotersByOption(event, $responses) : new Map<string, string[]>()
+  $: if (event) loadResponses(event)
 </script>
 
 <FlexColumn>

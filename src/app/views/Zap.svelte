@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {request} from "@welshman/net"
   import {noop, nth, sum} from "@welshman/lib"
   import {inbox, relays as relaySelections} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
@@ -15,7 +14,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {makeZapSplit} from "src/util/nostr"
   import {router} from "src/app/util"
-  import {app, profiles, resolveRelays, zappers} from "src/engine/core"
+  import {app, network, profiles, resolveRelays, zappers} from "src/engine/core"
   import {env, getSetting, payInvoice} from "src/engine"
 
   export let splits
@@ -115,7 +114,7 @@
 
           requests.push(
             new Promise<void>(resolve =>
-              request({
+              network.get().request({
                 filters,
                 relays,
                 signal: AbortSignal.any([AbortSignal.timeout(8000), ctrl.signal]),

@@ -13,8 +13,9 @@ import {
   noop,
   sleep,
 } from "@welshman/lib"
+import type {Maybe} from "@welshman/lib"
+import {Events} from "@welshman/app"
 import type {AppSyncOpts, User} from "@welshman/app"
-import {deriveEvents} from "@welshman/store"
 import {
   Address,
   DELETE,
@@ -128,16 +129,18 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
     await network.get().load({filters, relays: urls})
   }
 
+  // `Events.one` reads through the repository with `includeDeleted: true`, and its own
+  // load is a no-op without hints, so we keep our richer relay resolution here.
   return derived(
-    fromApp($app => deriveEvents({repository: $app.repository, filters, includeDeleted: true})),
-    (events: TrustedEvent[]) => {
-      if (!attempted && events.length === 0) {
+    fromApp($app => $app.use(Events).one(idOrAddress).$),
+    (event: Maybe<TrustedEvent>) => {
+      if (!attempted && !event) {
         attempted = true
 
         loadEvent().catch(noop)
       }
 
-      return events[0]
+      return event
     },
   )
 }

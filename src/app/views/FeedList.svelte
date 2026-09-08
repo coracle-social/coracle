@@ -12,7 +12,7 @@
     Address,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import {app, resolveRelays} from "src/engine/core"
+  import {app, events, resolveRelays} from "src/engine/core"
   import {onMount} from "svelte"
   import {createScroller} from "src/util/misc"
   import {fly} from "src/util/transition"
@@ -40,7 +40,7 @@
   const editFeed = address => router.at("feeds").of(address).open()
 
   const loadFeeds = batch(300, (addresseses: string[][]) => {
-    const addresses = flatten(addresseses).filter(a => !$app.repository.getEvent(a))
+    const addresses = flatten(addresseses).filter(a => !$events.one(a).get())
     const pubkeys = uniq(addresses.map(a => Address.from(a).pubkey))
 
     if (addresses.length > 0) {
