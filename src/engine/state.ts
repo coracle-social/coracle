@@ -31,13 +31,7 @@ import {
 import type {RelayMessage, RequestOptions} from "@welshman/net"
 import {LOCAL_RELAY_URL, SocketEvent} from "@welshman/net"
 import {Nip01Signer} from "@welshman/signer"
-import {
-  deriveItems,
-  deriveItemsByKey,
-  localStorageProvider,
-  synced,
-  withGetter,
-} from "@welshman/store"
+import {localStorageProvider, synced, withGetter} from "@welshman/store"
 import type {SignedEvent, TrustedEvent, HashedEvent} from "@welshman/util"
 import {
   APP_DATA,
@@ -46,7 +40,6 @@ import {
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
-  NAMED_BOOKMARKS,
   getAddress,
   getIdAndAddress,
   getIdFilters,
@@ -78,20 +71,16 @@ import {
 import type {PublishedFeed, PublishedListFeed, PublishedUserList} from "src/domain"
 import {
   makeCollectionSearch,
-  EDITABLE_LIST_KINDS,
   makeUserListSearch,
   displayFeed,
   feedFromReader,
   getHandlerAddress,
-  mapListToFeed,
   readCollections,
   readFeed,
   readHandlers,
-  readUserList,
   subscriptionNotices,
   makeFeed,
   normalizeFeedDefinition,
-  userListKind,
 } from "src/domain"
 import type {UserListReader} from "src/domain"
 import type {AnonymousUserState, Channel, SessionWithMeta} from "src/engine/model"
@@ -108,9 +97,10 @@ import {
   session,
   signer,
 } from "src/engine/core"
+import {ListFeeds, Lists, RelayFeedLists} from "src/engine/plugins"
 import {env} from "src/engine/env"
 import {makeSearch, ensureProto} from "src/util/misc"
-import {noteKinds, appDataKeys, RELAY_FEEDS} from "src/util/nostr"
+import {noteKinds, appDataKeys} from "src/util/nostr"
 
 export {env}
 
@@ -455,16 +445,7 @@ export const hasNewMessages = derived(channels, $channels => $channels.some(chan
 
 // Lists
 
-export const listsById = fromApp($app =>
-  deriveItemsByKey<PublishedUserList>({
-    repository: $app.repository,
-    getKey: list => list.event.id,
-    filters: [{kinds: EDITABLE_LIST_KINDS}],
-    eventToItem: (event: TrustedEvent) => (event.tags.length > 1 ? readUserList(event) : undefined),
-  }),
-)
-
-export const lists = deriveItems(listsById)
+export const lists = fromApp($app => $app.use(Lists).all.$)
 
 export const userLists = derived(
   [lists, pubkey],
@@ -562,17 +543,7 @@ export const makeFeedSearch = (feeds: PublishedFeed[]) => {
 
 export const feedSearch = derived(savedFeeds, $feeds => makeFeedSearch($feeds))
 
-export const listFeedsById = fromApp($app =>
-  deriveItemsByKey<PublishedListFeed>({
-    repository: $app.repository,
-    getKey: feed => feed.event.id,
-    filters: [{kinds: [NAMED_BOOKMARKS]}],
-    eventToItem: async (event: TrustedEvent) =>
-      event.tags.length > 1 ? mapListToFeed(await readUserList(event)) : undefined,
-  }),
-)
-
-export const listFeeds = deriveItems(listFeedsById)
+export const listFeeds = fromApp($app => $app.use(ListFeeds).all.$)
 
 export const userListFeeds = derived(
   [listFeeds, pubkey],
@@ -583,22 +554,7 @@ export const userListFeeds = derived(
     ),
 )
 
-const relayFeedListsByPubkey = fromApp($app =>
-  deriveItemsByKey<UserListReader>({
-    repository: $app.repository,
-    getKey: list => list.event.pubkey,
-    filters: [{kinds: [RELAY_FEEDS]}],
-    eventToItem: $app.use(Domain).reader(userListKind(RELAY_FEEDS)),
-  }),
-)
-
-export const relayFeedLists = deriveItems(relayFeedListsByPubkey)
-
-export const userRelayFeedsList: Readable<Maybe<UserListReader>> = derived(
-  [relayFeedLists, pubkey],
-  ([$lists, $pubkey]: [UserListReader[], string]) =>
-    $lists.find(list => list.event.pubkey === $pubkey),
-)
+export const userRelayFeedsList: Readable<Maybe<UserListReader>> = deriveUserItem(RelayFeedLists)
 
 export const userRelayFeeds = derived(userRelayFeedsList, $list =>
   tagValues(relayTags("relay"), $list?.tags() || []),
