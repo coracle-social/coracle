@@ -32,10 +32,10 @@ describe("engine events utils", () => {
 
       expect(tags).toContainEqual(["K", "1"])
       expect(tags).toContainEqual(["P", "parentpubkey", ""])
-      expect(tags).toContainEqual(["E", "parentid", ""])
+      expect(tags).toContainEqual(["E", "parentid", "", "parentpubkey"])
       expect(tags).toContainEqual(["k", "1"])
       expect(tags).toContainEqual(["p", "parentpubkey", ""])
-      expect(tags).toContainEqual(["e", "parentid", ""])
+      expect(tags).toContainEqual(["e", "parentid", "", "parentpubkey"])
     })
 
     it("should scope a comment on a legacy reply to the root of the thread", async () => {
@@ -51,8 +51,8 @@ describe("engine events utils", () => {
 
       expect(tags).toContainEqual(["K", "1"])
       expect(tags).toContainEqual(["P", "rootpubkey", ""])
-      expect(tags).toContainEqual(["E", "rootid", ""])
-      expect(tags).toContainEqual(["e", "parentid", ""])
+      expect(tags).toContainEqual(["E", "rootid", "", "rootpubkey"])
+      expect(tags).toContainEqual(["e", "parentid", "", "parentpubkey"])
       expect(tags.filter(t => t[0] === "E")).toHaveLength(1)
     })
 
@@ -64,8 +64,8 @@ describe("engine events utils", () => {
       })
       const tags = await tagComment(parent)
 
-      expect(tags).toContainEqual(["E", "rootid", ""])
-      expect(tags).toContainEqual(["e", "parentid", ""])
+      expect(tags).toContainEqual(["E", "rootid", "", "rootpubkey"])
+      expect(tags).toContainEqual(["e", "parentid", "", "parentpubkey"])
     })
 
     it("should take the root's kind and author from the repository when the tag omits them", async () => {
@@ -86,7 +86,7 @@ describe("engine events utils", () => {
       const tags = await tagComment(parent, id => (id === "rootid" ? root : undefined))
 
       expect(tags).toContainEqual(["K", "30023"])
-      expect(tags).toContainEqual(["E", "rootid", ""])
+      expect(tags).toContainEqual(["E", "rootid", "", "rootpubkey"])
       expect(tags).toContainEqual(["P", "rootpubkey", ""])
       expect(tags).toContainEqual(["A", "30023:rootpubkey:my-article", ""])
     })
@@ -102,7 +102,7 @@ describe("engine events utils", () => {
       })
       const tags = await tagComment(parent)
 
-      expect(tags).toContainEqual(["E", "rootid", ""])
+      expect(tags).toContainEqual(["E", "rootid", "", ""])
       expect(tags.filter(t => t[0] === "P")).toHaveLength(0)
     })
 
@@ -116,7 +116,7 @@ describe("engine events utils", () => {
       const tags = await tagComment(parent)
 
       expect(tags).toContainEqual(["K", "30023"])
-      expect(tags).toContainEqual(["E", "parentid", ""])
+      expect(tags).toContainEqual(["E", "parentid", "", "parentpubkey"])
       expect(tags).toContainEqual(["A", "30023:parentpubkey:my-article", ""])
       expect(tags).toContainEqual(["a", "30023:parentpubkey:my-article", ""])
     })
@@ -138,7 +138,7 @@ describe("engine events utils", () => {
       expect(tags).toContainEqual(["K", "web"])
       expect(tags).toContainEqual(["I", "https://example.com/article"])
       expect(tags).toContainEqual(["k", "1111"])
-      expect(tags).toContainEqual(["e", "parentid", ""])
+      expect(tags).toContainEqual(["e", "parentid", "", "parentpubkey"])
       expect(tags.filter(t => t[0] === "E")).toHaveLength(0)
     })
   })

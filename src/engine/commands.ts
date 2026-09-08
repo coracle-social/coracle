@@ -16,6 +16,7 @@ import {
   isWebLNWallet,
   makeBlossomAuthEvent,
   normalizeRelayUrl,
+  relay,
   tagValues,
   uploadBlob,
   userOutbox,
@@ -189,7 +190,7 @@ export const setRelayFeeds = async (urls: string[]) => {
 // Relays
 
 export const requestRelayAccess = async (url: string, claim: string) =>
-  command(writer(RelayJoin).setClaim(claim).forceRelays(url)).then(publish)
+  command(writer(RelayJoin).setClaim(claim).forceRoutes(relay(url))).then(publish)
 
 const editRelayList = async (fn: (writer: RelayListWriter) => void) => {
   if (!app.get().user) {
