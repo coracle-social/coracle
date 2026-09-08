@@ -6,7 +6,7 @@ import {withGetter, synced, localStorageProvider} from "@welshman/store"
 import type {ReadableWithGetter} from "@welshman/store"
 import {Resolver, addNoFallbacks} from "@welshman/util"
 import type {Filter, RelaySelection} from "@welshman/util"
-import type {BaseEventReader, EventWriter, KindFactory} from "@welshman/domain"
+import type {BaseEventReader, EventQuery, EventWriter, KindFactory} from "@welshman/domain"
 import type {ISigner} from "@welshman/signer"
 import {
   App,
@@ -183,12 +183,12 @@ export const relaySearch = fromApp($app => $app.use(Relays).relaySearch)
 
 export const topicSearch = fromApp($app => $app.use(Topics).topicSearch)
 
-export const reader = <R extends BaseEventReader, W extends EventWriter<R>>(
-  factory: KindFactory<R, W>,
+export const reader = <R extends BaseEventReader, W extends EventWriter<R>, Q extends EventQuery>(
+  factory: KindFactory<R, W, Q>,
 ) => domain.get().reader(factory)
 
-export const writer = <R extends BaseEventReader, W extends EventWriter<R>>(
-  factory: KindFactory<R, W>,
+export const writer = <R extends BaseEventReader, W extends EventWriter<R>, Q extends EventQuery>(
+  factory: KindFactory<R, W, Q>,
   seed?: R,
 ) => domain.get().writer(factory, seed)
 

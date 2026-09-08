@@ -27,7 +27,7 @@ import {
   tagValue,
   userOutbox,
 } from "@welshman/util"
-import {KindFactory, ListReader, ListWriter} from "@welshman/domain"
+import {EventQuery, KindFactory, ListReader, ListWriter} from "@welshman/domain"
 import {reader, writer} from "src/engine/core"
 import {SearchHelper} from "src/util/misc"
 
@@ -89,7 +89,14 @@ export class UserListWriter extends ListWriter<UserListReader> {
   }
 }
 
-const kindFactories = new Map<number, KindFactory<UserListReader, UserListWriter>>()
+export class UserListQuery extends EventQuery {
+  protected renderRoutes() {
+    // A list is the author's own data, so it comes from their outbox and nowhere else
+    return this.authorRoutes()
+  }
+}
+
+const kindFactories = new Map<number, KindFactory<UserListReader, UserListWriter, UserListQuery>>()
 
 export const userListKind = (kind: number) => {
   let factory = kindFactories.get(kind)
@@ -97,7 +104,12 @@ export const userListKind = (kind: number) => {
   if (!factory) {
     kindFactories.set(
       kind,
-      (factory = new KindFactory({kind, reader: UserListReader, writer: UserListWriter})),
+      (factory = new KindFactory({
+        kind,
+        reader: UserListReader,
+        writer: UserListWriter,
+        query: UserListQuery,
+      })),
     )
   }
 
