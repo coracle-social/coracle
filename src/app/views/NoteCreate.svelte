@@ -133,7 +133,6 @@
         pollWriter.addOption(option.value.trim(), option.id)
       }
 
-      // Tell voters where to send their responses
       pollWriter.setUrls(await resolveRelays([userInbox()]))
 
       eventWriter = pollWriter
@@ -173,7 +172,6 @@
 
     const signedEvent = await sign(hashedEvent, options)
 
-    // The writer knows where its event goes — the author's write relays and everyone they mentioned
     const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
     let thunk: Thunk

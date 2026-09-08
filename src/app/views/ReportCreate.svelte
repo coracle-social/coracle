@@ -30,7 +30,6 @@
     const helper = new Nip59(Nip01Signer.ephemeral())
     const wrap = await helper.wrap(tagr, template)
 
-    // The reviewer's messaging relays are loaded as part of resolving the selection
     thunks.get().publish({
       event: wrap,
       relays: await resolveRelays([relay("wss://relay.nos.social"), messaging(tagr)]),

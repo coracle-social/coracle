@@ -52,8 +52,6 @@ export const loadUserData = async () => {
 
   if (!$pubkey) return
 
-  // Relay selections decide where everything else gets loaded from, so they go first. Loaders
-  // reject now rather than swallowing failures, and a failure here must not stop the rest.
   await $app.use(RelayLists).load($pubkey).catch(noop)
 
   // Load other crucial user data

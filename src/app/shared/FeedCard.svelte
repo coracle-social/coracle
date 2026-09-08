@@ -31,7 +31,6 @@
 
   const loadFeed = () => router.at("notes").cx({feed}).push()
 
-  // Reading a list decrypts it, so the feed arrives a tick later than it used to
   let feed = address.startsWith(NAMED_BOOKMARKS) ? undefined : readFeed(event)
 
   if (!feed) {
@@ -40,8 +39,6 @@
     }, noop)
   }
 
-  // Router.Event was the relays the event was seen on; that's asynchronous now, so seed the hints
-  // from the tracker and widen once the resolver answers
   let naddr = Address.from(address, Array.from($app.tracker.getRelays(event.id))).toNaddr()
 
   resolveRelays([seen(event)])

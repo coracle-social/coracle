@@ -5,8 +5,6 @@ import type {HandlerMeta} from "@welshman/domain"
 import {reader} from "src/engine/core"
 import {SearchHelper} from "src/util/misc"
 
-// Nip 89 models one handler event advertising many kinds; coracle renders one card per kind, so
-// this is the flattened per-kind view rather than a re-implementation of HandlerReader.
 export type Handler = {
   kind: number
   name: string
@@ -26,7 +24,6 @@ export const readHandlers = (event: TrustedEvent): Handler[] => {
 
   const handler = reader(HandlerKind)(event)
 
-  // Handlers predate nip 24's naming, so accept the profile-style aliases too
   const {display_name, image} = handler.values as HandlerMeta & {
     display_name?: string
     image?: string

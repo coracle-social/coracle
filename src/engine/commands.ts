@@ -43,8 +43,6 @@ import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 
 // Helpers
 
-// The user's own copy of a replaceable kind, read straight from the repository. Welshman keeps an
-// index for the kinds it models; coracle's own kinds have to be looked up.
 const getUserEvent = (kind: number) => {
   const $app = app.get()
 
@@ -77,9 +75,6 @@ export const uploadFile = async (server: string, file: File, compressorOpts = {}
 export const signAndPublish = async (template, {anonymous: asAnonymous = false} = {}) => {
   const event = await sign(template, {anonymous: asAnonymous})
 
-  // A writer's default routes, for the kinds welshman doesn't model — the author's write relays
-  // and everyone they mentioned. An anonymous note is signed with a throwaway key which has no
-  // relay list, so asking for its outbox would only stall on a load that can't succeed.
   const relays = await resolveRelays([
     ...(asAnonymous ? [] : [userOutbox()]),
     ...inboxes(tagValues(hexTags("p"), event.tags), 0.5),
@@ -111,8 +106,6 @@ export const publishPollResponse = async ({event, selectedIds}: PollResponsePara
 
 // Deletes
 
-// The deleted event is what a delete routes by — its relays, its kind, its address — so the plugin
-// takes the event itself and fans the request out to every relay it was seen on.
 export const deleteEvent = (event: TrustedEvent) => deletes.get().deleteEvent(event).then(publish)
 
 export type DeletionParams = {
@@ -129,7 +122,6 @@ export const publishDeletion = async ({kind, id, address}: DeletionParams) => {
     return deleteEvent(event)
   }
 
-  // Without the event to route by, the writer falls back to the user's own relays
   const eventWriter = writer(Delete).addTags(["k", String(kind)])
 
   if (id) {
@@ -145,8 +137,6 @@ export const publishDeletion = async ({kind, id, address}: DeletionParams) => {
 
 // Follows
 
-// Welshman deleted tagPubkey, so build the follow entry here — an outbox hint read from cache and
-// the profile's display name as a petname, the way coracle has always written them.
 const makeFollowTag = (pubkey: string) => [
   "p",
   pubkey,
@@ -201,8 +191,6 @@ export const setRelayFeeds = async (urls: string[]) => {
 export const requestRelayAccess = async (url: string, claim: string) =>
   command(writer(RelayJoin).setClaim(claim).forceRelays(url)).then(publish)
 
-// Signed out, coracle keeps relay selections in memory. A RelayListWriter edits the tags it holds,
-// so the same edit runs without an event, a signer or a publish.
 const editRelayList = async (fn: (writer: RelayListWriter) => void) => {
   if (!app.get().user) {
     const eventWriter = writer(RelayList).addTags(...anonymous.get().relays)
@@ -212,8 +200,6 @@ const editRelayList = async (fn: (writer: RelayListWriter) => void) => {
     return anonymous.update($a => ({...$a, relays: eventWriter.extraTags}))
   }
 
-  // A relay list routes itself to the indexers and to every relay it gains or loses, without a
-  // limit, so a relay always hears when it's added to or dropped from the list
   return relayLists.get().update(fn).then(publish)
 }
 
@@ -247,7 +233,6 @@ export const setMessagingPolicy = async (url: string, enabled: boolean) => {
   const $messagingRelayLists = messagingRelayLists.get()
   const urls = $messagingRelayLists.urls($app.user.pubkey).get()
 
-  // Don't publish a messaging relay list just to remove a relay that was never on it
   if (!enabled && !urls.includes(normalizeRelayUrl(url))) {
     return
   }
@@ -296,13 +281,10 @@ export const sendMessage = (channelId: string, content: string, delay: number) =
     .setContent(content)
     .addTags(...getClientTags())
 
-  // A note to self has no other party, and a direct message has to p-tag someone
   for (const recipient of others.length > 0 ? others : [pubkey]) {
     eventWriter.addRecipient(recipient)
   }
 
-  // Wraps publishes directly, since a single rumor fans out to one wrap per recipient, each
-  // addressed to that recipient's own messaging relays
   return eventWriter.renderTemplate().then(event => wraps.get().publish({event, recipients, delay}))
 }
 
@@ -345,7 +327,6 @@ export const broadcastUserData = (relays: string[]) =>
 export const getWebLn = () => (window as any).webln
 
 export const payInvoice = async (invoice: string) => {
-  // Wallet configuration is coracle's own per-account metadata, stored alongside the session.
   const wallet = sessionWithMeta.get()?.wallet
 
   if (!wallet) {

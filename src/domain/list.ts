@@ -31,8 +31,6 @@ import {KindFactory, ListReader, ListWriter} from "@welshman/domain"
 import {reader, writer} from "src/engine/core"
 import {SearchHelper} from "src/util/misc"
 
-// Every nip 51 kind coracle lets a user name, paired with the label shown when a list of that kind
-// carries no title of its own.
 const LIST_KIND_LABELS: [number, string][] = [
   [FOLLOWS, "[follows list]"],
   [FOLLOW_PACK, "[follow pack]"],
@@ -63,9 +61,6 @@ export const CUSTOM_LIST_KINDS = LIST_KIND_LABELS.map(([kind]) => kind)
 
 export const EDITABLE_LIST_KINDS = [NAMED_PEOPLE, NAMED_RELAYS, NAMED_CURATIONS, NAMED_TOPICS]
 
-// Coracle lets the user name a list of any nip 51 kind, including the many @welshman/domain doesn't
-// model individually, so it needs one generic pair on top of ListReader's public/private tag
-// handling rather than a class per kind.
 export class UserListReader extends ListReader {
   title() {
     return tagValue(tagSpec("title"), this.publicTags) || tagValue(tagSpec("name"), this.publicTags)
@@ -77,14 +72,12 @@ export class UserListReader extends ListReader {
 }
 
 export class UserListWriter extends ListWriter<UserListReader> {
-  // A list is the author's own data, so it goes to their outbox and nowhere else — the default
-  // would fan a people list out to every member's inbox
   protected async renderRoutes() {
+    // A list is the author's own data, so it goes to their outbox and nowhere else
     return [userOutbox()]
   }
 
   setTitle(title: string) {
-    // Coracle has always mirrored the title into alt so nip 31 clients have something to show
     return this.dropPublic(t => ["title", "name", "alt"].includes(t[0])).addPublic(
       ["title", title],
       ["alt", title],
@@ -98,7 +91,6 @@ export class UserListWriter extends ListWriter<UserListReader> {
 
 const kindFactories = new Map<number, KindFactory<UserListReader, UserListWriter>>()
 
-// Memoized per kind, since Domain caches its configuration per factory instance
 export const userListKind = (kind: number) => {
   let factory = kindFactories.get(kind)
 
@@ -137,8 +129,6 @@ export const makeUserList = (list: Partial<UserList> = {}): UserList => ({
   ...list,
 })
 
-// Async, because a list reader decrypts its private tags. Without the author's own signer it
-// silently yields only the public ones, which is all coracle displays anyway.
 export const readUserList = async (event: TrustedEvent): Promise<PublishedUserList> => {
   const listReader = await reader(userListKind(event.kind))(event)
 
@@ -155,8 +145,6 @@ export const readUserList = async (event: TrustedEvent): Promise<PublishedUserLi
 
 const META_TAG_NAMES = ["d", "title", "name", "alt", "description"]
 
-// A writer for creating or editing a list; pass it to `command` to publish. The list's tags replace
-// the event's public ones, while any private tags the reader carries are preserved.
 export const userListWriter = ({kind, title, description, identifier, tags, reader}: UserList) =>
   writer(userListKind(kind), reader)
     .dropPublic(() => true)

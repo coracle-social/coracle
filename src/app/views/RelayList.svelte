@@ -27,7 +27,6 @@
 
   const tabs = ["search", "reviews"]
 
-  // Relay selections come off the plugin projections, which stay in sync with the repository
   const userRelayUrls = fromApp($app => $app.use(RelayLists).urls($app.user?.pubkey ?? "").$)
 
   const userMessagingRelayUrls = fromApp(
@@ -123,8 +122,6 @@
 
   const controller = new AbortController()
 
-  // Relay selection is async now, so the request starts a tick late; the review tab renders empty
-  // until it lands, which is what it did before any reviews arrived anyway.
   const loadReviews = async () =>
     myRequest({
       signal: controller.signal,

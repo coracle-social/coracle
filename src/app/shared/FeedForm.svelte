@@ -70,13 +70,9 @@
 
   const saveFeed = async () => {
     const {title, description, definition} = draft
-    // A draft that carries a list is a kind 30003 being converted into a kind 31890, so it takes
-    // the create path even though it has an event
     const eventCommand =
       draft.event && !draft.list
         ? await $feeds.update(getAddress(draft.event), writer =>
-            // FeedWriter doesn't model nip 31's alt tag, so drop the one older coracle versions
-            // wrote rather than leaving it contradicting a renamed feed
             writer
               .setTitle(title)
               .setDescription(description)

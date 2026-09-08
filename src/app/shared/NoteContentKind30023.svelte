@@ -18,7 +18,6 @@
   let content
   const regex = /(nostr:)?n(event|ote|pub|profile|addr)\w{10,1000}/g
   const article = reader(Article)(note)
-  // ArticleReader doesn't model nip 31's alt tag, which coracle falls back to for a summary
   const alt = tagValue(tagSpec("alt"), note.tags)
 
   const convertEntities = markdown => {

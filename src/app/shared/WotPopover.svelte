@@ -4,8 +4,6 @@
   import {Wot, WotScope} from "@welshman/app"
   import {fromApp} from "src/engine/core"
 
-  // Shared by every popover on screen: scores() walks the whole web of trust, so a store per
-  // rendered name would rebuild the same map dozens of times per graph update.
   const maxWot = fromApp($app =>
     derived($app.use(Wot).scores(WotScope.Follows).$, $scores => max(Array.from($scores.values()))),
   )
@@ -33,11 +31,8 @@
   const profile = fromApp($app => $app.use(Profiles).one(pubkey))
   const handle = fromApp($app => $app.use(Handles).forPubkey(pubkey).$)
   const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
-  // Scored against the user's own follows, which is what the old wot graph did — WotScope.Global
-  // would re-rank everything that reads a score.
   const wotScore = fromApp($app => $app.use(Wot).score(pubkey, WotScope.Follows).$)
   const showPerson = () => router.at("people").of(pubkey).open()
-  // The hint is the recipient's first write relay, as before.
   const zapSplit = makeZapSplit(pubkey, first(getWriteRelays(pubkey)) || "")
   const startZap = () => zap({splits: [zapSplit]})
 

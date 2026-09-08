@@ -65,8 +65,6 @@ export const isKeyValid = (key: string) => {
   return true
 }
 
-// Deleted from @welshman/util in 0.9. A profile with neither name is a stub built from a
-// mention or a relay hint rather than a kind 0 the user actually published.
 export const profileHasName = (profile?: ProfileReader) =>
   Boolean(profile?.name() || profile?.values.display_name)
 
@@ -100,15 +98,10 @@ export const appDataKeys = {
   USER_SETTINGS: "nostr-engine/User/settings/v1",
 }
 
-// Welshman dropped its nip46Perms constant, so coracle owns the set it has always asked a remote
-// signer for.
 export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
-// Deleted from @welshman/util in 0.9. An imeta tag's entries are space-delimited key/value pairs.
 export const tagsFromIMeta = (imeta: string[]) => imeta.map(m => m.split(" "))
 
-// Nip 57 zap split. The relay hint stays a parameter — resolving it needs the relay list
-// collection, which this module deliberately doesn't reach for.
 export const makeZapSplit = (pubkey: string, relay = "", weight: string | number = "1") => [
   "zap",
   pubkey,

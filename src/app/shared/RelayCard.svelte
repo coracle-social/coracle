@@ -27,11 +27,9 @@
 
   let innerWidth = 0
 
-  // Subscribing lazily loads the relay's nip-11 document
   const relay = fromApp($app => $app.use(Relays).one(url))
   const stats = fromApp($app => $app.use(RelayStats).one(url))
 
-  // Relay selections come off the plugin projections, which stay in sync with the repository
   const readRelayUrls = fromApp($app => $app.use(RelayLists).readUrls($app.user?.pubkey ?? "").$)
   const writeRelayUrls = fromApp($app => $app.use(RelayLists).writeUrls($app.user?.pubkey ?? "").$)
   const messagingRelayUrls = fromApp(

@@ -11,8 +11,6 @@
   const nip07 = "https://github.com/nostr-protocol/nips/blob/master/07.md"
   const keypairUrl = "https://www.cloudflare.com/learning/ssl/how-does-public-key-encryption-work/"
 
-  // App policies wrap the user's signer, so read the connection out of the stored session rather
-  // than reaching through the wrapper for a Nip46Signer that may no longer be the outermost one.
   const getBunkerUrl = () =>
     new Nip46Broker($session!.session.data as Nip46BrokerParams).getBunkerUrl()
 

@@ -47,8 +47,6 @@
 
   const back = () => router.pop()
 
-  // An anonymous zap is signed with a throwaway key, so bind the kind to that signer rather than
-  // going through the app's domain plugin, which always signs as the current user
   const makeZapRequest = (signer: ISigner) =>
     ZapRequest.configure({resolver: $app.use(Router).resolver, signer}).writer()
 
@@ -73,7 +71,6 @@
         const eventId = id
         const weight = parseFloat(weightString)
         const msats = Math.round(1000 * amount * (weight / totalWeight))
-        // Loading rejects now, and a missing zapper is reported below either way
         const zapper = await $zappers.loadForPubkey(pubkey).catch(noop)
 
         if (msats === 0) {
@@ -84,7 +81,6 @@
           return showWarning(`Failed to zap: no zapper found`)
         }
 
-        // Ask the recipient's read relays, plus whatever relay the split pointed at, for the receipt
         const relays = await resolveRelays([
           inbox(pubkey),
           ...relaySelections(relay ? [relay] : []),

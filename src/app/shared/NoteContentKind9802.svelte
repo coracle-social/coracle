@@ -19,14 +19,12 @@
   const highlight = reader(Highlight)(note)
   const comment = highlight.comment()
   const sources = highlight.sources()
-  // Whoever the highlight credits for the source doubles as the author hint on an nevent
   const author = first(highlight.attributions())?.pubkey
 
   const addressSource = sources.find(source => source.type === "address")
   const eventSource = sources.find(source => source.type === "event")
   const referenceSource = sources.find(source => source.type === "reference")
 
-  // A source's relay hint is user-provided, and may well be missing or malformed
   const hints = (url: string) => [url].filter(isRelayUrl)
 
   const naddr =

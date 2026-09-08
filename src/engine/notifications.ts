@@ -17,11 +17,6 @@ export const setChecked = (path: string, ts = now()) =>
 
 // Notifications
 
-/**
- * Events of the given kinds that tag the user, newest first. The repository indexes `#p`, so the
- * match belongs in the filter rather than in a scan of every note we've ever seen — but only once
- * there's a pubkey to match on, since a filter built around an undefined value is malformed.
- */
 const deriveNotifications = (kinds: number[]) => {
   const mentions = derived(
     [events, pubkey],
@@ -30,8 +25,6 @@ const deriveNotifications = (kinds: number[]) => {
     [] as TrustedEvent[],
   )
 
-  // The throttle can still be holding a batch gathered for the account we just switched away
-  // from, so match the tag here too rather than trusting what the filter caught
   return derived(
     [pubkey, isEventMuted, throttled(800, mentions)],
     ([$pubkey, $isEventMuted, $mentions]) =>

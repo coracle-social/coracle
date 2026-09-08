@@ -20,7 +20,6 @@
   const onSubmit = () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    // Build the event before popping, since that tears the editor down
     const event = makeEvent(1986, {
       content,
       tags: [
@@ -28,13 +27,11 @@
         ...editor.storage.nostr.getEditorTags(),
         ["L", "review"],
         ["l", "review/relay", "review"],
-        // Rating is a number from 0 to 1, but tag values have to be strings
         ["rating", String(rating)],
         ["r", url],
       ],
     })
 
-    // Relay selection is async now, so publish once it resolves rather than making the user wait
     resolveRelays([userOutbox()])
       .then(relays => thunks.get().publish({event, relays}))
       .catch(noop)

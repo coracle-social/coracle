@@ -22,7 +22,6 @@
 
   const elapsed = ticker()
 
-  // Thunks live on the app now; the history is a flat list of in-flight publishes
   const thunkHistory = fromApp($app => $app.use(Thunks).history)
 
   let showDetails = false

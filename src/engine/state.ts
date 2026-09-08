@@ -112,8 +112,6 @@ import {env} from "src/engine/env"
 import {SearchHelper, ensureProto} from "src/util/misc"
 import {noteKinds, appDataKeys, RELAY_FEEDS} from "src/util/nostr"
 
-// Re-exported so the ~40 modules that read the environment through `src/engine` don't have to
-// know it moved out to break a cycle with the app bootstrap.
 export {env}
 
 export const sessionWithMeta = withGetter(derived(session, $s => $s as SessionWithMeta))
@@ -122,7 +120,6 @@ export const hasNip44 = derived(signer, $signer => Boolean($signer?.nip44))
 
 export const anonymous = withGetter(writable<AnonymousUserState>({follows: [], relays: []}))
 
-// Whether to unwrap gift wraps. This used to be a @welshman/app global; it's coracle's setting now.
 export const shouldUnwrap = withGetter(
   synced<boolean>({
     key: "shouldUnwrap",
@@ -133,10 +130,6 @@ export const shouldUnwrap = withGetter(
 
 // Plaintext
 
-/**
- * Decrypt a legacy (kind 4) direct message. One app is one identity, so the only signer that can
- * read a message is the current user's, whether they sent it or received it.
- */
 export const ensureMessagePlaintext = async (e: TrustedEvent) => {
   if (!e.content) return undefined
 
@@ -150,7 +143,6 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 
   if (!other) return undefined
 
-  // Keyed by ciphertext, so a message decrypted once stays decrypted across re-renders
   return $app
     .use(Plaintext)
     .ensure(e.content, () => $user.signer.nip04.decrypt(other, e.content))
@@ -214,11 +206,8 @@ export const userSettingsEvent = derived([pubkey, settingsEvents], ([$pubkey, $s
 
 const plaintextByCiphertext = fromApp($app => $app.use(Plaintext).index.$)
 
-// Ciphertexts we've already asked for, so a re-derive doesn't queue a second decrypt
 const decryptingSettings = new Set<string>()
 
-// Parsing an app data event decrypts it through the user's signer, which appPolicyCacheDecrypt
-// routes into the plaintext cache — that's what carries the result back to the store below.
 const decryptSettings = ($app: IApp, event: TrustedEvent) => {
   if (decryptingSettings.has(event.content)) return
 
@@ -229,13 +218,6 @@ const decryptSettings = ($app: IApp, event: TrustedEvent) => {
     .finally(() => decryptingSettings.delete(event.content))
 }
 
-/**
- * The user's settings event, decrypted. Nip 78 app data is either plain json or nip 44 encrypted
- * to its author, and only the author's own signer can read the latter — which is exactly the
- * signer this app owns. Reading through the plaintext cache keeps this synchronous once the
- * event has been decrypted once, so an unrelated app data event can't flap settings back to
- * their defaults for a frame.
- */
 export const userSettingsPlaintext: Readable<Maybe<string>> = derived(
   [app, plaintextByCiphertext, userSettingsEvent],
   ([$app, $plaintext, $event]) => {
@@ -247,9 +229,6 @@ export const userSettingsPlaintext: Readable<Maybe<string>> = derived(
 
     if (plaintext !== undefined) return plaintext
 
-    // Settings written by an older client aren't encrypted at all. Test for the object we expect
-    // rather than for "parsed to anything" — a ciphertext that happens to parse would otherwise
-    // read as already-plain and the decrypt below would never run.
     if (isPojo(parseJson(content))) return content
 
     decryptSettings($app, $event)
@@ -604,7 +583,6 @@ export const userListFeeds = derived(
     ),
 )
 
-// Kind 10012 isn't modeled by @welshman/domain, so it goes through coracle's generic list reader
 const relayFeedListsByPubkey = fromApp($app =>
   deriveItemsByKey<UserListReader>({
     repository: $app.repository,
@@ -638,8 +616,6 @@ export const handlersByKind = derived(handlers, $handlers =>
 
 export const recommendations = deriveEvents([{kinds: [HANDLER_RECOMMENDATION]}])
 
-// Who the user trusts to recommend a handler. Scoped to their own follows, matching the old
-// getFollows(pubkey) call this replaces.
 const getUserFollows = () => {
   const $app = app.get()
   const $pubkey = $app.user?.pubkey
@@ -724,7 +700,6 @@ export type MyRequestOptions = RequestOptions & {
   skipCache?: boolean
 }
 
-// Coracle reads its own cache alongside the network unless the caller opts out
 const withCache = ({skipCache, ...options}: MyRequestOptions): RequestOptions =>
   skipCache ? options : {...options, relays: [...options.relays, LOCAL_RELAY_URL]}
 
@@ -766,14 +741,8 @@ export const getClientTags = () => {
 
 const noticeVerbs = ["NOTICE", "CLOSED", "OK", "NEG-MSG"]
 
-// An OK arrives for every event published, so keep only enough history per relay to be useful
 const maxNoticesPerRelay = 100
 
-/**
- * Record every relay message worth showing the user in the relay detail view. Sockets belong to
- * the app's pool, so this is registered as an app policy and rebuilt along with the app — which
- * also means the notices are one account's, and go away with it.
- */
 const appPolicyNotices: AppPolicy = $app => {
   const unsubscribe = $app.pool.subscribe(socket => {
     const onReceive = (message: RelayMessage, url: string) => {
@@ -802,11 +771,6 @@ const appPolicyNotices: AppPolicy = $app => {
 
 appPolicies.push(appPolicyNotices)
 
-/**
- * Mirror the settings the app bootstrap reads into its config bag, which is the only thing that
- * writes to it. Subscribing to settings builds an app, so the caller starts this once the session
- * has been restored rather than at import time — see src/main.js.
- */
 export const syncAppConfig = () =>
   userSettings.subscribe($settings => {
     appConfig.autoAuthenticate = $settings.auto_authenticate2

@@ -96,8 +96,6 @@
 
     if (!skipNsecWarning && content.match(/\bnsec1.+/)) return nsecWarning.set(true)
 
-    // Nip 22 scopes a comment to the root of its thread as well as to its parent, so hand the
-    // repository over for looking the root up
     const eventWriter = setCommentAncestors(
       writer(Comment),
       parent,
@@ -121,8 +119,6 @@
 
     const template = await eventWriter.renderTemplate()
 
-    // The editor and the parent can both tag the same pubkey, so drop repeats — welshman used to
-    // do this via uniqTags
     const tags = uniqBy(t => t.slice(0, 2).join(":"), template.tags)
     const ownedEvent = own(stamp({...template, tags}), User.require($app).pubkey)
 
@@ -135,7 +131,6 @@
       hashedEvent = await pow.result
     }
 
-    // The writer knows where its event goes — the author's write relays and everyone they mentioned
     const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
     const thunk = thunks.get().publish({

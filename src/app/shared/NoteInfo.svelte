@@ -37,8 +37,6 @@
   export let children: TrustedEvent[] = []
   export let handlers: Handler[] = []
 
-  // Router.Event was the author's write relays; full relay selection is asynchronous now, and
-  // these are hints baked into a bech32 link that has to be built in one pass.
   const relays = getWriteRelays(event.pubkey).slice(0, 3)
   const nevent = nip19.neventEncode({id: event.id, kind: event.kind, author: event.pubkey, relays})
   const naddr = Address.fromEvent(event, relays).toNaddr()

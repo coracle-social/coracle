@@ -51,8 +51,6 @@
     const target = (e.detail?.target || e.target) as HTMLElement
 
     if (interactive && !["I"].includes(target.tagName) && !target.closest("a")) {
-      // Router.Event was the author's write relays; full relay selection is asynchronous now,
-      // and these are route parameters that have to be built in one pass.
       const relays = getWriteRelays(event.pubkey)
 
       router.at("notes").of(getIdOrAddress(event), {relays}).open()
@@ -100,7 +98,6 @@
       kinds.push(ZAP_RECEIPT)
     }
 
-    // Replies land on the author's inbox relays
     resolveRelays([inbox(event.pubkey)])
       .then(relays => myLoad({relays, filters: getReplyFilters([event], {kinds})}))
       .catch(noop)

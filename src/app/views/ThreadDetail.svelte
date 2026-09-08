@@ -16,9 +16,6 @@
 
   const event = deriveEvent(id || address, {relays})
 
-  // Router.EventParents is gone: it routed to the write relays of whoever authored the parent
-  // (weighted heavily), then to those of anyone mentioned, then to the relay hints carried on
-  // either set of tags.
   const parentRelays = (event: TrustedEvent) =>
     resolveRelays(getAncestorRelaySelections(event, "replies"))
 
@@ -32,7 +29,6 @@
     const filteredIds = [...roots, ...replies].filter(id => id && !seen.has(id))
 
     if (filteredIds.length > 0) {
-      // Relay selection is asynchronous now, so re-check that we haven't been torn down
       const parentUrls = await parentRelays(event)
 
       if (stopped) {

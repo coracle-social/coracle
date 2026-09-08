@@ -1,6 +1,5 @@
 import "src/app.css"
 import "@capacitor-community/safe-area"
-// Storage registers an app policy, so it has to be imported before anything builds an app
 import "src/engine/storage"
 import {login, restoreSession} from "src/engine/core"
 import {syncAppConfig} from "src/engine/state"
@@ -80,8 +79,6 @@ CapacitorApp.addListener("backButton", ({canGoBack}) => {
   }
 })
 
-// Sessions hydrate from local storage asynchronously and the app is built lazily around whoever is
-// signed in, so nothing may touch it until the last-used account has been restored.
 export default restoreSession().then(() => {
   syncAppConfig()
 

@@ -17,8 +17,6 @@
   const submit = () => router.at("channels").of(pubkeys).push()
 
   $: pubkeys = uniq<string>(value.concat($pubkey))
-  // Read messaging relays off the plugin's projection rather than the reader — the plugin
-  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
   $: pubkeysWithoutMessaging = derived(
     pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),
     ($urls: string[][]) =>

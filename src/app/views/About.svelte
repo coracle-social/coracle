@@ -14,7 +14,6 @@
   const hash = import.meta.env.VITE_BUILD_HASH
   const hodlbodPubkey = "97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322"
 
-  // The hint is the recipient's first write relay, as before.
   const startZap = () =>
     zap({
       splits: [makeZapSplit(env.PLATFORM_PUBKEY, first(getWriteRelays(env.PLATFORM_PUBKEY)) || "")],

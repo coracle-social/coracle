@@ -44,8 +44,6 @@
       // Publish relays
       await setOutboxPolicies(state.relays)
 
-      // Publish follows, tagged the way coracle has always written them: an outbox hint read
-      // from cache and the profile's display name as a petname
       const followWriter = writer(FollowList)
 
       for (const pubkey of state.follows) {
@@ -60,7 +58,6 @@
 
       eventCommand.publish()
     } catch (e) {
-      // Editing a relay list loads it first, and loads reject now rather than swallowing failures
       console.error(e)
 
       return showWarning("We weren't able to save your relays and follows")

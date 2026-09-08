@@ -29,17 +29,12 @@ export type IDBOptions = {
 
 export class IDB {
   connection: Maybe<Promise<Maybe<IDBPDatabase>>>
-  // The connection once it's resolved, so a write issued while the page is being torn down can
-  // open its transaction in the same task instead of a microtask later
   resolved: Maybe<IDBPDatabase>
   failedToConnect = false
   closed = false
 
   constructor(readonly options: IDBOptions) {}
 
-  // Object stores can only be created during a version change, and which stores we need depends on
-  // the app version, so open at whatever version exists and bump it to reconcile the schema. That
-  // way adding a store never requires remembering to bump a hard-coded version number.
   private open = async () => {
     const {name, stores} = this.options
     const blocking = () => this.close()
@@ -53,6 +48,8 @@ export class IDB {
       return db
     }
 
+    // Object stores can only be created during a version change, so bump past whatever
+    // version is on disk rather than hard-coding one.
     const version = db.version + 1
 
     db.close()
@@ -144,8 +141,6 @@ export class IDB {
     await tx.done
   }
 
-  // Drop the connection, letting the next read or write re-open it. This is what another tab's
-  // schema upgrade needs, so it deliberately doesn't retire the database.
   close = async () => {
     const connection = this.connection
 
@@ -155,8 +150,6 @@ export class IDB {
     await connection?.then(c => c?.close())
   }
 
-  // Close for good, so a write that was already in flight when the app was torn down can't
-  // silently re-open a database belonging to an account we've switched away from.
   destroy = async () => {
     this.closed = true
 
@@ -196,17 +189,12 @@ const TABLES: IDBStore[] = [
   {name: "wraps", keyPath: "id"},
 ]
 
-// How many events we're willing to keep on disk
 const EVENT_LIMIT = 10_000
 
-// How long to accumulate changes before writing them
 const FLUSH_INTERVAL = 3000
 
-// Kinds that are worth caching for people the user follows, since they're needed to render
-// anything that mentions them
 const META_KINDS = [PROFILE, FOLLOWS, MUTES, RELAYS, MESSAGING_RELAYS]
 
-// Relays we talk to no matter who's logged in, whose metadata is worth having up front
 const INITIAL_RELAYS = [
   ...env.DEFAULT_RELAYS,
   ...env.DVM_RELAYS,
@@ -214,8 +202,6 @@ const INITIAL_RELAYS = [
   ...env.SEARCH_RELAYS,
 ]
 
-// An event together with where it came from, so the tracker can be restored along with the
-// repository rather than kept in a second table that nothing ever prunes.
 type EventItem = {
   id: string
   event: TrustedEvent
@@ -227,18 +213,10 @@ type PlaintextItem = {
   value: string
 }
 
-// Every account gets its own database, since an app's caches only make sense for the identity
-// they were built for. Signed-out users get one too — they can browse, and relay metadata is
-// worth keeping across visits.
 export const getDatabaseName = (pubkey?: string) => `coracle-${pubkey || "anonymous"}`
 
 const onWriteError = (e: unknown) => console.error("Failed to write to storage", e)
 
-/**
- * Caches an app's repository, tracker and local collections in indexeddb. Everything in here
- * belongs to a single identity, so each gets its own database named for its pubkey, and the
- * policy below builds and tears one down along with the app.
- */
 export class Storage {
   ready: Promise<void>
 
@@ -249,14 +227,11 @@ export class Storage {
   private stopped = false
   private destroyed: Maybe<Promise<void>>
 
-  // Ids waiting to be written or deleted. Both the repository and the tracker feed this one
-  // buffer, so a flush drains everything at once and the two can't write the same row twice.
   private pendingWrites = new Set<string>()
   private pendingDeletes = new Set<string>()
   private flushTimeout: Maybe<ReturnType<typeof setTimeout>>
   private pruning = false
 
-  // Drains for the collections that buffer their own writes, so one flush covers all of them
   private flushers: (() => void)[] = []
 
   constructor(private readonly app: IApp) {
@@ -265,9 +240,6 @@ export class Storage {
   }
 
   cleanup = () => {
-    // Get anything buffered onto disk before the connection goes away, so switching accounts
-    // doesn't discard the outgoing account's last few seconds. Closing a database waits for
-    // transactions that have already been opened, so this write survives the destroy below.
     this.flush()
 
     this.stopped = true
@@ -279,7 +251,6 @@ export class Storage {
   clear = async () => {
     this.cleanup()
 
-    // Deleting is blocked until the connection this just closed is actually gone
     await this.destroyed
     await this.db.clear()
   }
@@ -287,8 +258,6 @@ export class Storage {
   private start = async () => {
     await this.db.connect()
 
-    // The feed can't render without events, and relay metadata decides where we'd load them from,
-    // so those two gate the first paint and everything else follows it.
     const [, unsubscribeRelays] = await Promise.all([this.loadEvents(), this.initRelays()])
 
     this.addUnsubscriber(this.syncEvents())
@@ -300,7 +269,6 @@ export class Storage {
     this.defer(this.initPlaintext)
     this.defer(this.initWraps)
 
-    // Refresh metadata for the relays we always use, now that whatever we had cached is loaded
     for (const url of INITIAL_RELAYS) {
       this.app.use(Relays).load(url).catch(noop)
     }
@@ -324,11 +292,6 @@ export class Storage {
     }
   }
 
-  /**
-   * How much we care about keeping an event around: anything belonging to or mentioning one of
-   * the user's accounts, plus metadata for people they follow. Both snapshots are read once per
-   * pass rather than per event, since a pass can rank the entire cache.
-   */
   private makeRankEvent = () => {
     const $sessions = sessions.get()
     const $pubkey = this.app.user?.pubkey
@@ -347,7 +310,6 @@ export class Storage {
 
   private loadEvents = async () => {
     const table = this.db.table<EventItem>("events")
-    // Ignore rows written in a shape we no longer understand rather than failing to start
     const items = (await table.getAll()).filter(item => item.event)
     const stale: string[] = []
 
@@ -361,8 +323,6 @@ export class Storage {
     const relaysById = new Map<string, Set<string>>()
 
     for (const {id, relays} of items) {
-      // Anything the repository dropped was superseded by a newer version of the same
-      // replaceable, so its row is dead weight
       if (this.app.repository.getEvent(id)) {
         relaysById.set(id, new Set(relays))
       } else {
@@ -395,9 +355,6 @@ export class Storage {
     })
 
   private syncTracker = () => {
-    // Provenance changes rewrite the event's row, so they queue the same way an event does. The
-    // row is built at flush time, which is also how a brand-new event — tracked before it's
-    // published, and so not yet in the repository — ends up stored with its relays.
     const onChange = (id: string) => {
       if (!this.pendingDeletes.has(id)) {
         this.pendingWrites.add(id)
@@ -420,20 +377,11 @@ export class Storage {
     }
   }
 
-  /**
-   * Write everything that's queued. Every buffer is drained synchronously and its transaction is
-   * opened before this returns, so it can be called while the page is going away — see the
-   * pagehide/visibilitychange listeners in the policy below.
-   */
   flush = () => {
     this.flushEvents()
     this.flushers.forEach(call)
   }
 
-  /**
-   * A write buffer the shared flush can drain on demand, which is the one thing `batch` from the
-   * library can't do — it only ever fires on its own timer.
-   */
   private buffered = <T>(write: (items: T[]) => void) => {
     const items: T[] = []
 
@@ -484,8 +432,6 @@ export class Storage {
     for (const id of writes) {
       const event = this.app.repository.getEvent(id)
 
-      // Only keep events we care about, and skip anything that left the repository while it was
-      // sitting in the buffer
       if (event && rankEvent(event) > 0) {
         items.push({id, event, relays: Array.from(this.app.tracker.getRelays(id))})
       }
@@ -499,15 +445,11 @@ export class Storage {
       table.bulkDelete(deletes).catch(onWriteError)
     }
 
-    // Keep track of our total number of events. This isn't strictly accurate — an update to an
-    // event we already have counts twice — but it's close enough to decide when to prune.
     this.eventCount = this.eventCount + items.length - deletes.length
 
     void this.prune(rankEvent)
   }
 
-  // If we're well above our retention limit, drop the lowest-ranked events. This reads the whole
-  // table, so it's deliberately left out of the synchronous part of a flush.
   private prune = async (rankEvent: (event: TrustedEvent) => number) => {
     if (this.pruning || this.eventCount <= EVENT_LIMIT * 1.5) {
       return
@@ -568,8 +510,6 @@ export class Storage {
     const table = this.db.table<ZapperValues>("zappers")
 
     for (const row of await table.getAll()) {
-      // Validation is meaningless without these, and rows cached before they were required
-      // won't have them
       if (row.pubkey && row.nostrPubkey) {
         this.app.use(Zappers).set(row.lnurl, new Zapper(row))
       }
@@ -623,13 +563,8 @@ export class Storage {
   }
 }
 
-// The current app's cache. There's exactly one, and it's replaced when the app is.
 export const storage = withGetter(writable<Maybe<Storage>>(undefined))
 
-// Whether the current app's cache has finished hydrating the repository. The UI waits on this
-// before its first render so it doesn't paint an empty feed and then swap it out. Subscribing
-// builds the app if nothing else has yet, so this can't deadlock waiting for a cache that was
-// never constructed.
 export const storageReady: Readable<boolean> = derived(
   [app, storage],
   ([_$app, $storage], set: (ready: boolean) => void) => {
@@ -650,17 +585,12 @@ export const storageReady: Readable<boolean> = derived(
   false,
 )
 
-// Storage is scoped to one app's repository, tracker and caches, so it's built and torn down
-// with the app rather than living on as a module-level singleton.
 export const storagePolicy: AppPolicy = $app => {
   const $storage = new Storage($app)
   const unsubscribers: Unsubscriber[] = []
 
   storage.set($storage)
 
-  // Writes are buffered, so they need a last call before the page goes away. Mobile browsers
-  // routinely discard a backgrounded tab without ever firing beforeunload or unload, and coracle
-  // ships to mobile, so hidden and pagehide are the only two points worth listening to.
   if (typeof document !== "undefined") {
     const onPageHide = () => $storage.flush()
 
@@ -686,13 +616,7 @@ export const storagePolicy: AppPolicy = $app => {
   }
 }
 
-/**
- * Delete every account's cache. Used by logout, which drops all sessions and reloads the page,
- * so leaving the other accounts' databases behind would only orphan them.
- */
 export const clearStorage = async () => {
-  // Clear the current app's cache through its own storage, so it stops writing before the
-  // database goes away rather than re-creating it with a queued flush
   await storage.get()?.clear()
 
   const names = new Set([getDatabaseName(), ...Object.keys(sessions.get()).map(getDatabaseName)])
@@ -700,11 +624,8 @@ export const clearStorage = async () => {
   await Promise.all(Array.from(names).map(name => deleteDB(name)))
 }
 
-// Every identity used to share one database. Nothing migrates out of it, so drop it rather than
-// leave a dead copy of the old cache on disk.
 if (typeof indexedDB !== "undefined") {
   void deleteDB("coracle")
 }
 
-// Importing this module registers the policy, which has to happen before the first app is built
 appPolicies.push(storagePolicy)

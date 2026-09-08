@@ -39,8 +39,6 @@
     closeMenu()
   }
 
-  // Switching rebuilds the app around the other account, so it can fail where setting the
-  // active pubkey used to be a plain assignment
   const setAccount = (theirPubkey: string) =>
     switchAccount(theirPubkey).catch(() => showWarning("Failed to switch to that account."))
 

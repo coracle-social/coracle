@@ -2,9 +2,6 @@
   import {NostrSignerPlugin} from "nostr-signer-capacitor-plugin"
   import {setNip55Plugin} from "@welshman/signer"
 
-  // Building a nip 55 signer throws unless the capacitor plugin has been registered, and a stored
-  // nip 55 session is restored before any view mounts. This module is on the static import graph
-  // from src/main.js, so registering here runs at startup, ahead of restoreSession.
   setNip55Plugin(NostrSignerPlugin)
 </script>
 
@@ -29,7 +26,6 @@
 
   const useBunker = () => router.at("login/bunker").pushModal()
 
-  // Logging in builds the signer and tears down the anonymous app, and any of that can fail
   const logIn = async (session: Session) => {
     try {
       await login(session)

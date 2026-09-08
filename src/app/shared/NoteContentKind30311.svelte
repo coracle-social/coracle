@@ -14,8 +14,6 @@
   export let note
   export let showMedia = false
 
-  // Router.Event was the author's write relays; full relay selection is asynchronous now, and
-  // these are hints baked into a naddr that has to be built in one pass.
   const address = Address.fromEvent(note, getWriteRelays(note.pubkey))
   const {title, summary, image, status, p} = fromPairs(note.tags) as Record<string, string>
 </script>

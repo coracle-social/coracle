@@ -13,7 +13,6 @@
 
   export let url
 
-  // Subscribing lazily loads the relay's nip-11 document
   const relay = fromApp($app => $app.use(Relays).one(url))
   const tabs = ["notes", "reviews"]
   const filter = {kinds: [1986], "#l": ["review/relay"], "#r": [url]}

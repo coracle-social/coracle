@@ -15,7 +15,6 @@
 
   const leave = () => leaveRelay(url)
 
-  // Relay selections come off the plugin projections, which stay in sync with the repository
   const userRelayUrls = fromApp($app =>
     derived(
       [

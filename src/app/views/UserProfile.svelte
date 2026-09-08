@@ -20,7 +20,6 @@
 
   const submit = async () => {
     try {
-      // Editing seeds from the current profile, which loads it first — and loads reject now
       const eventCommand = await profiles.get().update(writer => writer.update(values))
 
       eventCommand.publish()

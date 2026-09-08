@@ -45,8 +45,6 @@
     confirmIsOpen = false
   }
 
-  // Read messaging relays off the plugin's projection rather than the reader — the plugin
-  // normalizes urls, and subscribing to it is what triggers the lazy load for each pubkey.
   const pubkeysWithoutMessaging = fromApp($app =>
     derived(
       pubkeys.map((pk: string) => $app.use(MessagingRelayLists).urls(pk).$),
@@ -92,8 +90,6 @@
   const send = async () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
-    // Sending can now fail before anything is published — it awaits each recipient's messaging
-    // relay list first — so hold on to the draft until we know it got as far as a thunk
     const draft = editor.getJSON()
 
     editor.commands.clearContent()

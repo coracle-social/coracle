@@ -44,7 +44,6 @@
     const pubkeys = uniq(addresses.map(a => Address.from(a).pubkey))
 
     if (addresses.length > 0) {
-      // Relay selection is asynchronous now, so this fires a tick after the batch flushes
       resolveRelays(pubkeys.map(pk => outbox(pk)))
         .then(relays => myLoad({skipCache: true, filters: getIdFilters(addresses), relays}))
         .catch(noop)
