@@ -15,8 +15,9 @@
     REACTION,
     getReplyFilters,
     getAddress,
+    NOTE,
   } from "@welshman/util"
-  import {Reaction} from "@welshman/domain"
+  import {GenericRepost, Reaction, Repost} from "@welshman/domain"
   import {publish} from "@welshman/app"
   import {fly} from "src/util/transition"
   import {makeZapSplit, replyKinds, repostKinds} from "src/util/nostr"
@@ -58,7 +59,6 @@
     userPins,
     deriveRelaysForEvent,
   } from "src/engine"
-  import {repostKind} from "src/domain"
 
   export let event: TrustedEvent
   export let onReplyStart: () => void
@@ -110,7 +110,7 @@
 
   const repost = async () => {
     if (isSignedEvent(event)) {
-      const eventWriter = writer(repostKind(event.kind))
+      const eventWriter = writer(event.kind === NOTE ? Repost : GenericRepost)
         .setEvent(event)
         .addTags(...getClientTags())
 
