@@ -10,6 +10,7 @@ import {
 } from "@welshman/feeds"
 import type {Feed as IFeed} from "@welshman/feeds"
 import {Feed as FeedKind} from "@welshman/domain"
+import type {FeedReader} from "@welshman/domain"
 import {reader} from "src/engine/core"
 import type {PublishedUserList} from "./list"
 
@@ -52,17 +53,16 @@ export const mapListToFeed = (list: PublishedUserList) =>
     definition: feedFromTags(list.event.tags),
   }) as PublishedListFeed
 
-export const readFeed = (event: TrustedEvent) => {
-  const feedReader = reader(FeedKind)(event)
+export const feedFromReader = (feed: FeedReader) =>
+  ({
+    event: feed.event,
+    title: feed.title(),
+    identifier: feed.identifier(),
+    description: feed.description(),
+    definition: feed.definition() || makeIntersectionFeed(),
+  }) as PublishedFeed
 
-  return {
-    event,
-    title: feedReader.title(),
-    identifier: feedReader.identifier(),
-    description: feedReader.description(),
-    definition: feedReader.definition() || makeIntersectionFeed(),
-  } as PublishedFeed
-}
+export const readFeed = (event: TrustedEvent) => feedFromReader(reader(FeedKind)(event))
 
 export const displayFeed = (feed?: Feed) => feed?.title || "[no name]"
 
