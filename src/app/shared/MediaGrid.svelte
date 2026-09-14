@@ -1,11 +1,13 @@
 <script lang="ts">
   import Media from "src/partials/Media.svelte"
   import AltColor from "src/partials/AltColor.svelte"
+  import {getSetting} from "src/engine"
 
   export let urls: string[]
   export let onClose: (e: any) => void
   export let onLinkClick: (url: string, event: PointerEvent) => void
   export let onImageClick: (url: string, event: PointerEvent) => void
+  export let showLinkPreviews = getSetting("show_link_previews")
 
   const useGrid = urls.length > 2
   const className = useGrid ? "p-2" : ""
@@ -19,7 +21,7 @@
   {#each urls as url, i}
     {@const className = i === 0 ? "col-span-" + getSpan(urls.length - 1) : ""}
     <AltColor background={!useGrid} class="h-full w-full object-cover {className}">
-      <Media {url} {onLinkClick} {onImageClick} />
+      <Media {url} {onLinkClick} {onImageClick} {showLinkPreviews} />
     </AltColor>
   {/each}
   {#if onClose}
