@@ -5,11 +5,13 @@
   import MediaVideo from "src/partials/MediaVideo.svelte"
   import MediaImage from "src/partials/MediaImage.svelte"
   import MediaLinkPreview from "src/partials/MediaLinkPreview.svelte"
+  import {displayUrl} from "src/util/misc"
 
   export let url: string
   export let fullSize = false
   export let onLinkClick: (url: string, event: any) => void
   export let onImageClick: (url: string, event: any) => void
+  export let showLinkPreviews = true
 
   const isAudio = url.match(/\.(wav|mp3|m3u8)$/)
   const isSpotify = url.match(/open.spotify.com/)
@@ -39,9 +41,16 @@
         <MediaImage {url} {fullSize} />
       </div>
     </a>
-  {:else}
+  {:else if showLinkPreviews}
     <a href={url} on:click|preventDefault={linkClickHandler}>
       <MediaLinkPreview {url} />
+    </a>
+  {:else}
+    <a
+      href={url}
+      on:click|preventDefault={linkClickHandler}
+      class="overflow-hidden text-ellipsis whitespace-nowrap underline">
+      {displayUrl(url)}
     </a>
   {/if}
 </div>

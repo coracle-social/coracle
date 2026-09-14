@@ -79,10 +79,17 @@
         much data {appName} uses.
       </p>
     </Field>
-    <FieldInline label="Show images and link previews">
+    <FieldInline label="Show media">
       <Toggle bind:value={values.show_media} />
       <p slot="info">
-        If enabled, {appName} will automatically show images and previews for embedded links.
+        If enabled, {appName} will automatically show images, video, and audio embedded in notes.
+      </p>
+    </FieldInline>
+    <FieldInline label="Show link previews">
+      <Toggle bind:value={values.show_link_previews} />
+      <p slot="info">
+        If enabled, {appName} will show a preview card for links to other websites. If disabled, they
+        appear as plain hyperlinks. This only applies when media is shown.
       </p>
     </FieldInline>
     <FieldInline label="Hide sensitive content">
