@@ -90,6 +90,9 @@
   const send = async () => {
     const content = editor.getText({blockSeparator: "\n"}).trim()
 
+    // Attachments are encrypted, and these carry the keys that make them readable
+    const tags = editor.storage.nostr.getEditorTags()
+
     const draft = editor.getJSON()
 
     editor.commands.clearContent()
@@ -98,7 +101,7 @@
       sending = true
 
       try {
-        await sendMessage(channelId, content, $userSettings.send_delay)
+        await sendMessage(channelId, content, $userSettings.send_delay, tags)
       } catch (e: any) {
         editor.commands.setContent(draft)
         showWarning(`Failed to send message: ${e?.message || e?.error || "unknown error"}`)
@@ -112,6 +115,7 @@
   const editor = makeEditor({
     autofocus: true,
     aggressive: true,
+    encryptFiles: true,
     placeholder: "Say hello...",
     submit: sendOrConfirm,
   })

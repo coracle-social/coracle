@@ -11,7 +11,9 @@ import {
   REPOST,
   ZAP_RECEIPT,
   Address,
+  DIRECT_MESSAGE_FILE,
   MUTES,
+  matchTags,
   tagSpec,
   tagValue,
   tagValues,
@@ -98,6 +100,20 @@ export const appDataKeys = {
 export const nip46Perms = "sign_event:22242,nip04_encrypt,nip04_decrypt,nip44_encrypt,nip44_decrypt"
 
 export const tagsFromIMeta = (imeta: string[]) => imeta.map(m => m.split(" "))
+
+// Everything an event has to say about one of its urls: its dimensions, its mime type, and for an
+// attachment to an encrypted message, the key it takes to read it.
+export const getUrlTags = (url: string, event: TrustedEvent) => {
+  const imetas = matchTags(tagSpec("imeta"), event.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
+  const imeta = imetas.find(tags => tagValue(tagSpec("url"), tags) === url)
+
+  if (imeta) {
+    return imeta
+  }
+
+  // A nip-17 file message is about one file, and describes it on the event itself
+  return event.kind === DIRECT_MESSAGE_FILE ? event.tags : []
+}
 
 export const makeZapSplit = (pubkey: string, relay = "", weight: string | number = "1") => [
   "zap",

@@ -1,9 +1,21 @@
 import {nwc} from "@getalby/sdk"
-import {append, first, nthNe, remove, sha256, uniq} from "@welshman/lib"
+import {
+  append,
+  first,
+  nthEq,
+  nthNe,
+  now,
+  parseJson,
+  partition,
+  remove,
+  sha256,
+  uniq,
+} from "@welshman/lib"
 import {User, publish} from "@welshman/app"
 import {Nip01Signer} from "@welshman/signer"
+import {isLink, parse} from "@welshman/content"
 import {AppData, Delete, DirectMessage, Poll, RelayJoin, RelayList} from "@welshman/domain"
-import type {RelayListWriter} from "@welshman/domain"
+import type {DirectMessageWriter, RelayListWriter} from "@welshman/domain"
 import {
   FOLLOWS,
   MESSAGING_RELAYS,
@@ -12,12 +24,17 @@ import {
   isNWCWallet,
   isSignedEvent,
   isWebLNWallet,
+  canUploadBlob,
+  encryptFile,
   makeBlossomAuthEvent,
   normalizeRelayUrl,
   relay,
+  stamp,
+  tagSpec,
+  tagValue,
   uploadBlob,
 } from "@welshman/util"
-import type {TrustedEvent} from "@welshman/util"
+import type {EventTemplate, TrustedEvent} from "@welshman/util"
 import {
   app,
   command,
@@ -33,9 +50,10 @@ import {
   writer,
 } from "src/engine/core"
 import {anonymous, getClientTags, sessionWithMeta} from "src/engine/state"
-import {PollVote, userListKind} from "src/domain"
+import {DirectMessageFile, PollVote, userListKind} from "src/domain"
+import type {CompressorOpts} from "src/util/html"
 import {stripExifData} from "src/util/html"
-import {appDataKeys, RELAY_FEEDS} from "src/util/nostr"
+import {appDataKeys, RELAY_FEEDS, tagsFromIMeta} from "src/util/nostr"
 
 // Helpers
 
@@ -49,21 +67,86 @@ const getUserEvent = (kind: number) => {
 
 // Files
 
-export const uploadFile = async (server: string, file: File, compressorOpts = {}) => {
+export type UploadFileOptions = {
+  encrypt?: boolean
+  compressorOpts?: CompressorOpts
+}
+
+// A subtype worth putting on a url is a plain word; anything else keeps whatever the server named
+// the blob, since the extension is only ever a hint about how to display it.
+const getExtension = (type: string) => {
+  const [, subtype = ""] = type.split("/")
+
+  return /^[a-z0-9]+$/.test(subtype) ? "." + subtype : ""
+}
+
+export const uploadFile = async (
+  server: string,
+  file: File,
+  {encrypt, compressorOpts}: UploadFileOptions = {},
+) => {
+  const {name} = file
+  const tags: string[][] = []
+
   if (!file.type.match("image/(webp|gif)")) {
     file = await stripExifData(file, compressorOpts)
+  }
+
+  // Read the type off the compressed file, since compressorjs re-encodes a large png as a jpeg
+  const {type} = file
+
+  // Encrypt before the upload rather than after, so the server only ever holds ciphertext. The key
+  // travels with the message instead, which is why this is only worth doing where the message
+  // itself is encrypted.
+  if (encrypt) {
+    const {ciphertext, key, nonce, algorithm} = await encryptFile(file)
+
+    tags.push(
+      ["decryption-key", key],
+      ["decryption-nonce", nonce],
+      ["encryption-algorithm", algorithm],
+    )
+
+    file = new File([ciphertext], name, {type: "application/octet-stream"})
   }
 
   const hashes = [await sha256(await file.arrayBuffer())]
   const $signer = app.get().user?.signer || Nip01Signer.ephemeral()
   const authEvent = await $signer.sign(makeBlossomAuthEvent({action: "upload", server, hashes}))
-  const res = await uploadBlob(server, file, {authEvent})
 
-  try {
-    return res.json()
-  } catch (e) {
-    return {error: await res.text()}
+  // What a server takes is its own business, so ask before spending the upload — an encrypted file
+  // arrives as octet-stream, which a server that only wanted images will turn away. Only an answer
+  // that refuses stops us: a 404, a 405, or a request that doesn't come back at all is a server
+  // without BUD-06 rather than one saying no, and the upload itself is the better judge.
+  const check = await canUploadBlob(server, {
+    authEvent,
+    headers: {
+      "X-Content-Type": file.type,
+      "X-Content-Length": String(file.size),
+      "X-SHA-256": hashes[0],
+    },
+  }).catch(() => undefined)
+
+  if (check && ![200, 404, 405].includes(check.status)) {
+    return {
+      error: check.headers.get("X-Reason") || `${name} was refused (HTTP ${check.status})`,
+      tags,
+    }
   }
+
+  const res = await uploadBlob(server, file, {authEvent})
+  const text = await res.text()
+  const task = parseJson(text)
+
+  if (!task) {
+    return {error: text, tags}
+  }
+
+  // An encrypted blob is uploaded as octet-stream, so the server names it accordingly. Put the real
+  // extension back — it's how the recipient decides whether the url is an image, a video or a link.
+  const url = encrypt ? task.url.replace(/\.\w+$/, "") + getExtension(type) : task.url
+
+  return {...task, url, tags}
 }
 
 // Polls
@@ -256,19 +339,73 @@ export const joinRelay = async (url: string, claim?: string) => {
 
 // Messages
 
-export const sendMessage = (channelId: string, content: string, delay: number) => {
+export const sendMessage = async (
+  channelId: string,
+  content: string,
+  delay: number,
+  tags: string[][] = [],
+) => {
   const {pubkey} = User.require(app.get())
   const recipients = uniq(channelId.split(",").concat(pubkey))
   const others = remove(pubkey, recipients)
-  const eventWriter = writer(DirectMessage)
-    .setContent(content)
-    .addTags(...getClientTags())
 
-  for (const recipient of others.length > 0 ? others : [pubkey]) {
-    eventWriter.addRecipient(recipient)
+  // The channel is identified by its p tags, so a mention would fork the conversation
+  const [imetaTags, extraTags] = partition(nthEq(0, "imeta"), tags.filter(nthNe(0, "p")))
+  const imetas = imetaTags.map(tag => tagsFromIMeta(tag.slice(1)))
+
+  const addRecipients = <T extends DirectMessageWriter>(eventWriter: T) => {
+    for (const recipient of others.length > 0 ? others : [pubkey]) {
+      eventWriter.addRecipient(recipient)
+    }
+
+    return eventWriter
   }
 
-  return eventWriter.renderTemplate().then(event => wraps.get().publish({event, recipients, delay}))
+  const templates: EventTemplate[] = []
+  const buffer: string[] = []
+
+  const flushText = async () => {
+    const text = buffer.splice(0).join("").trim()
+
+    if (text) {
+      const eventWriter = writer(DirectMessage)
+        .setContent(text)
+        .addTags(...extraTags, ...getClientTags())
+
+      templates.push(await addRecipients(eventWriter).renderTemplate())
+    }
+  }
+
+  // NIP-17 gives each file its own kind 15, so split the message around its attachments rather
+  // than sending the urls as text that only a client reading our imeta could make sense of.
+  for (const parsed of parse({content, tags})) {
+    const url = isLink(parsed) ? parsed.value.url.toString() : undefined
+    const imeta = url ? imetas.find(meta => tagValue(tagSpec("url"), meta) === url) : undefined
+
+    if (!imeta) {
+      buffer.push(parsed.raw)
+      continue
+    }
+
+    await flushText()
+
+    const eventWriter = writer(DirectMessageFile)
+      .setFile(url, imeta)
+      .addTags(...getClientTags())
+
+    templates.push(await addRecipients(eventWriter).renderTemplate())
+  }
+
+  await flushText()
+
+  // Stamp them a second apart so the pieces of one message keep their order in the conversation
+  const created_at = now()
+
+  return Promise.all(
+    templates.map((event, i) =>
+      wraps.get().publish({event: stamp(event, created_at + i), recipients, delay}),
+    ),
+  )
 }
 
 // Settings

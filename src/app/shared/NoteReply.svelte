@@ -9,7 +9,6 @@
   import {makePow} from "src/util/pow"
   import type {ProofOfWork} from "src/util/pow"
   import {slide} from "src/util/transition"
-  import {showWarning} from "src/partials/Toast.svelte"
   import AltColor from "src/partials/AltColor.svelte"
   import Chip from "src/partials/Chip.svelte"
   import EditorContent from "src/app/editor/EditorContent.svelte"
@@ -158,7 +157,6 @@
     submit: send,
     autofocus: true,
     content: drafts.get(parent.id) || "",
-    onUploadError: task => showWarning(`Failed to upload file: ${task.error}`),
   })
 
   onDestroy(() => {
