@@ -37,6 +37,7 @@ import {
   APP_DATA,
   DEPRECATED_DIRECT_MESSAGE,
   DIRECT_MESSAGE,
+  DIRECT_MESSAGE_FILE,
   HANDLER_INFORMATION,
   HANDLER_RECOMMENDATION,
   LABEL,
@@ -246,6 +247,11 @@ export const imgproxy = (url: string, {w = 640, h = 1024} = {}) => {
     return url
   }
 
+  // A decrypted attachment is already local, and the proxy couldn't fetch it anyway
+  if (url.startsWith("blob:") || url.startsWith("data:")) {
+    return url
+  }
+
   url = url.split("?")[0]
 
   if (url.match(/gif$/i)) {
@@ -396,7 +402,9 @@ export const getChannelId = (pubkeys: string[]) => sort(uniq(pubkeys)).join(",")
 export const getChannelIdFromEvent = (event: TrustedEvent) =>
   getChannelId([event.pubkey, ...tagValues(hexTags("p"), event.tags)])
 
-export const messages = deriveEvents([{kinds: [DEPRECATED_DIRECT_MESSAGE, DIRECT_MESSAGE]}])
+export const messages = deriveEvents([
+  {kinds: [DEPRECATED_DIRECT_MESSAGE, DIRECT_MESSAGE, DIRECT_MESSAGE_FILE]},
+])
 
 export const channels = derived(
   [pubkey, messages, getSeenAt],

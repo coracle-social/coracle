@@ -6,6 +6,7 @@ import type {UploadTask, FileAttributes} from "@welshman/editor"
 import {first} from "@welshman/lib"
 import {BlossomServerLists} from "@welshman/app"
 import {Editor, MentionSuggestion, WelshmanExtension, editorProps} from "@welshman/editor"
+import {showWarning} from "src/partials/Toast.svelte"
 import {ensureProto} from "src/util/misc"
 import {app, appConfig, profiles, relayLists} from "src/engine/core"
 import {env} from "src/engine/env"
@@ -23,10 +24,10 @@ export const makeEditor = ({
   aggressive = false,
   autofocus = false,
   content = "",
+  encryptFiles = false,
   placeholder = "",
   submit,
   onUpdate,
-  onUploadError,
   uploading,
   charCount,
   wordCount,
@@ -34,10 +35,12 @@ export const makeEditor = ({
   aggressive?: boolean
   autofocus?: boolean
   content?: string
+  // Only for composers whose event is itself encrypted, since the key comes back in the upload's
+  // tags for the caller to publish alongside the url
+  encryptFiles?: boolean
   placeholder?: string
   submit: () => void
   onUpdate?: () => void
-  onUploadError?: (task: UploadTask) => void
   uploading?: Writable<boolean>
   charCount?: Writable<number>
   wordCount?: Writable<number>
@@ -66,10 +69,12 @@ export const makeEditor = ({
                 const server = ensureProto(getUserBlossomServer() || first(env.BLOSSOM_URLS))
 
                 try {
-                  let {uploaded, url, ...task} = await uploadFile(server, attrs.file)
+                  let {uploaded, url, tags, error, ...task} = await uploadFile(server, attrs.file, {
+                    encrypt: encryptFiles,
+                  })
 
-                  if (!uploaded) {
-                    return {error: "Server refused to process the file"}
+                  if (error || !uploaded) {
+                    return {error: error || "Server refused to process the file"}
                   }
 
                   // Always append file extension if missing
@@ -77,7 +82,7 @@ export const makeEditor = ({
                     url += "." + attrs.file.type.split("/")[1]
                   }
 
-                  const result = {...task, url, tags: []}
+                  const result = {...task, url, tags}
 
                   return {result}
                 } catch (e) {
@@ -99,8 +104,10 @@ export const makeEditor = ({
                 uploading?.set(false)
               },
               onUploadError(currentEditor, task: UploadTask) {
+                // The failed attachment is removed from the document, so saying nothing would just
+                // make it disappear
                 currentEditor.commands.removeFailedUploads()
-                onUploadError?.(task)
+                showWarning(`Failed to upload file: ${task.error}`)
                 uploading?.set(false)
               },
             },

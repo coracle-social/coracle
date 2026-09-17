@@ -30,7 +30,11 @@
           loading = true
 
           try {
-            const result = await uploadFile(url, inputFiles[0], opts)
+            const result = await uploadFile(url, inputFiles[0], {compressorOpts: opts})
+
+            if (result.error) {
+              throw new Error(result.error)
+            }
 
             value = result.url
           } catch (e) {

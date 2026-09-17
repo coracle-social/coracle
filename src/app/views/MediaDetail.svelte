@@ -2,9 +2,11 @@
   import Media from "src/partials/Media.svelte"
   import Carousel from "src/partials/Carousel.svelte"
   import {router} from "src/app/util"
+  import {getUrlTags} from "src/util/nostr"
 
   export let url
   export let urls: string[] = [url]
+  export let note = undefined
 
   const onClose = () => router.pop()
 
@@ -16,7 +18,12 @@
 <div class="flex h-screen w-full items-center justify-center">
   <Carousel {urls} {onClose} bind:currentIndex let:url>
     <div class="m-auto flex h-full w-full max-w-2xl items-center justify-center">
-      <Media fullSize {url} onLinkClick={onClick} onImageClick={onClick} />
+      <Media
+        fullSize
+        {url}
+        tags={note ? getUrlTags(url, note) : []}
+        onLinkClick={onClick}
+        onImageClick={onClick} />
     </div>
   </Carousel>
 </div>

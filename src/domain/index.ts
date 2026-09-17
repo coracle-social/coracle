@@ -1,5 +1,6 @@
 export * from "./collection"
 export * from "./connection"
+export * from "./directMessageFile"
 export * from "./feed"
 export * from "./handler"
 export * from "./kind"

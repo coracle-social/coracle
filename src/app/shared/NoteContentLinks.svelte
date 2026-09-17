@@ -7,6 +7,7 @@
 
   export let urls: string[]
   export let showMedia = false
+  export let note = undefined
 
   const coracleRegexp = /^(https?:\/\/)?(app\.)?coracle.social/
 
@@ -23,7 +24,7 @@
     } else if (isShareableRelayUrl(url)) {
       router.at("relays").of(url).open()
     } else if (!showMedia) {
-      router.at("media").of(url).cx({urls: cleanUrls}).open({overlay: true})
+      router.at("media").of(url).cx({urls: cleanUrls, note}).open({overlay: true})
     } else {
       window.open(url, "_blank")
     }
@@ -34,7 +35,7 @@
       return window.open(url, "_blank")
     }
 
-    router.at("media").of(url).cx({urls}).open({overlay: true})
+    router.at("media").of(url).cx({urls, note}).open({overlay: true})
   }
 
   const onClick = (url: string, event: PointerEvent) => {
@@ -53,7 +54,7 @@
 </script>
 
 {#if showMedia && !hidden}
-  <MediaGrid urls={cleanUrls} {onClose} {onLinkClick} {onImageClick} />
+  <MediaGrid urls={cleanUrls} {note} {onClose} {onLinkClick} {onImageClick} />
 {:else}
   {#each cleanUrls as url}
     <MediaLink {url} {onClick} />

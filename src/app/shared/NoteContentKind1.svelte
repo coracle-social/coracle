@@ -107,9 +107,9 @@
           <QRCode code={parsed.value} />
         </div>
       {:else if isLink(parsed)}
-        <NoteContentLinks urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
+        <NoteContentLinks {note} urls={getUrls([parsed.value])} showMedia={showMedia && isEnd(i)} />
       {:else if isLinkGrid(parsed)}
-        <NoteContentLinks urls={getUrls(parsed.value.links)} {showMedia} />
+        <NoteContentLinks {note} urls={getUrls(parsed.value.links)} {showMedia} />
       {:else if isProfile(parsed)}
         <PersonLink pubkey={parsed.value.pubkey} />
       {:else if isEvent(parsed) || isAddress(parsed)}
