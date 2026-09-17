@@ -30,9 +30,9 @@
       url,
       status,
       message: detail,
-      eventId: thunk.event.id,
-      created_at: thunk.event.created_at,
-      eventKind: "Kind" + thunk.event.kind,
+      eventId: thunk.options.event.id,
+      created_at: thunk.options.event.created_at,
+      eventKind: "Kind" + thunk.options.event.kind,
     })),
   )
 

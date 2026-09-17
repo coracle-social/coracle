@@ -26,7 +26,7 @@
 
   let showDetails = false
 
-  $: thunk = $thunkHistory.find(t => t.event.id === message.id)
+  $: thunk = $thunkHistory.find(t => t.options.event.id === message.id)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 

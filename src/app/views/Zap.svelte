@@ -1,6 +1,5 @@
 <script lang="ts">
   import {noop, nth, sum} from "@welshman/lib"
-  import {inbox, relays as relaySelections} from "@welshman/util"
   import {Nip01Signer} from "@welshman/signer"
   import type {ISigner} from "@welshman/signer"
   import {Router} from "@welshman/app"
@@ -14,7 +13,7 @@
   import PersonCircles from "src/app/shared/PersonCircles.svelte"
   import {makeZapSplit} from "src/util/nostr"
   import {router} from "src/app/util"
-  import {app, network, profiles, resolveRelays, zappers} from "src/engine/core"
+  import {app, network, profiles, zappers} from "src/engine/core"
   import {env, getSetting, payInvoice} from "src/engine"
 
   export let splits
@@ -54,6 +53,7 @@
     const percent = getSetting("platform_zap_split") as number
     const platformSplit = makeZapSplit(env.PLATFORM_PUBKEY, "", percent * totalWeight)
     const signer = anonymous ? Nip01Signer.ephemeral() : $app.user?.signer
+    const event = id ? $app.repository.getEvent(id) : undefined
 
     if (!signer) {
       return showWarning("Failed to zap: you are not signed in")
@@ -66,8 +66,7 @@
     try {
       const requests: Promise<unknown>[] = []
 
-      for (const [_, pubkey, relay, weightString] of [...splits, platformSplit]) {
-        const eventId = id
+      for (const [, pubkey, , weightString] of [...splits, platformSplit]) {
         const weight = parseFloat(weightString)
         const msats = Math.round(1000 * amount * (weight / totalWeight))
         const zapper = await $zappers.loadForPubkey(pubkey).catch(noop)
@@ -80,22 +79,21 @@
           return showWarning(`Failed to zap: no zapper found`)
         }
 
-        const relays = await resolveRelays([
-          inbox(pubkey),
-          ...relaySelections(relay ? [relay] : []),
-        ])
-        const filters = [zapper.getResponseFilter(pubkey, eventId)]
         const zapRequest = makeZapRequest(signer)
           .setContent(content)
           .setAmount(msats)
           .setLnurl(zapper.lnurl)
           .setRecipient(pubkey)
-          .setUrls(relays)
           .setAnonymous(anonymous)
 
-        if (eventId) {
-          zapRequest.setEventId(eventId)
+        if (event) {
+          zapRequest.setEvent(event)
         }
+
+        // The writer routes the receipt to the recipient's inbox, and to a zap goal's own
+        // relays, so listen for it wherever it asked the zapper to publish.
+        const relays = await zapRequest.relays()
+        const filters = [zapper.getResponseFilter(pubkey, id)]
 
         const res = await zapRequest.requestInvoice(zapper)
 
