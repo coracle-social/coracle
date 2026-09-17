@@ -6,7 +6,6 @@
   import {makeEditor} from "src/app/editor"
   import {thunks, writer} from "src/engine/core"
 
-  export let state
   export let signup
   export let setStage
 
