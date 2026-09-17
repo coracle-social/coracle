@@ -76,7 +76,7 @@
   }
 
   $: hidden = $isEventMuted(event, true)
-  $: thunk = $thunkHistory.find(t => t.event.id === event.id)
+  $: thunk = $thunkHistory.find(t => t.options.event.id === event.id)
   $: pending = event.created_at + 60 > start + $elapsed
 
   onMount(() => {

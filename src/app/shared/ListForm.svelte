@@ -47,7 +47,7 @@
     const thunk = eventCommand.publish()
 
     showInfo("Your list has been saved!")
-    exit(thunk.event)
+    exit(thunk.options.event)
   }
 
   const kindsHelper = makeKindSearch([

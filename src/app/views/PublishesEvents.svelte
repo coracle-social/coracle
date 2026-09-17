@@ -8,8 +8,8 @@
 
   $: thunkHistory = $thunks.history
   $: recent = uniqBy(
-    t => t.event.id,
-    $thunkHistory.filter(t => t.event.created_at > ago(DAY)),
+    t => t.options.event.id,
+    $thunkHistory.filter(t => t.options.event.created_at > ago(DAY)),
   )
 
   $: relays = new Set(
@@ -39,7 +39,7 @@
   // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
   $: {
     for (const t of recent) {
-      if (t.event.created_at < now() - MINUTE) {
+      if (t.options.event.created_at < now() - MINUTE) {
         for (const [url, {status}] of Object.entries(t.results)) {
           if (status === PublishStatus.Pending) {
             t.results[url].status = PublishStatus.Failure
@@ -72,6 +72,6 @@
     <span class="text-sm">Failed</span>
   </Tile>
 </div>
-{#each sortBy(t => -t.event.created_at, recent) as thunk (thunk.event.id)}
+{#each sortBy(t => -t.options.event.created_at, recent) as thunk (thunk.options.event.id)}
   <PublishCard {thunk} />
 {/each}

@@ -17,7 +17,7 @@
   export let thunk: Thunk
 
   const retry = (url: string, event: TrustedEvent) =>
-    $thunks.publish({relays: [url], event: thunk.event})
+    $thunks.publish({relays: [url], event: thunk.options.event})
 
   const expand = () => {
     expanded = true
@@ -29,7 +29,7 @@
 
   let expanded = false
 
-  $: event = $app.wrapManager.getRumor(thunk.event.id) || thunk.event
+  $: event = $app.wrapManager.getRumor(thunk.options.event.id) || thunk.options.event
   $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
   $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))
   $: failure = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Failure))
@@ -41,7 +41,8 @@
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
-          <span>Kind {event.kind}, published {formatTimestamp(thunk.event.created_at)}</span>
+          <span
+            >Kind {event.kind}, published {formatTimestamp(thunk.options.event.created_at)}</span>
           <Link class="text-sm underline" modal href={router.at("notes").of(event.id).toString()}
             >View Note</Link>
         </div>

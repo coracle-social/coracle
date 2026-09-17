@@ -43,11 +43,11 @@
     let failure = 0
 
     for (const thunk of $history) {
-      if (thunk.event.pubkey !== $pubkey) {
+      if (thunk.options.event.pubkey !== $pubkey) {
         continue
       }
 
-      if (thunk.event.created_at < ago(5, MINUTE)) {
+      if (thunk.options.event.created_at < ago(5, MINUTE)) {
         continue
       }
 

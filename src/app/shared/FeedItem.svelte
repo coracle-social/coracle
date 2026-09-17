@@ -67,7 +67,7 @@
     visibleReplies = []
 
     for (const e of $replies) {
-      if (pendingReplies.some(thunk => thunk.event.id === e.id)) {
+      if (pendingReplies.some(thunk => thunk.options.event.id === e.id)) {
         visibleReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)

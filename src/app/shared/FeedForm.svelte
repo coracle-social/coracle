@@ -88,7 +88,7 @@
     if (draft.list) {
       openListDelete()
     } else {
-      exit(thunk.event)
+      exit(thunk.options.event)
     }
   }
 
