@@ -1,5 +1,18 @@
 # Changelog
 
+# 0.6.37
+
+* Support encrypted files in direct messages
+* Add a setting for turning off link previews
+* Add social preview tags for shared coracle.social links
+* Rebuild the app on welshman 0.10
+* Cache events separately for each logged-in account
+* Remove relay reviews
+* Fix comment tags
+* Fix encrypted settings being read as plaintext
+* Fix errors when signed out
+* Reduce bandwidth and speed up page loads
+
 # 0.6.36
 
 * Publish kind 1 replies as comments
