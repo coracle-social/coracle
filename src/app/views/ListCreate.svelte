@@ -5,8 +5,11 @@
   import {makeUserList} from "src/domain"
 
   export let tags = []
+  export let kind: number | undefined = undefined
+  export let title = ""
+  export let description = ""
 
-  const list = makeUserList({tags})
+  const list = makeUserList({tags, title, description, ...(kind !== undefined ? {kind} : {})})
 
   const hide = tags.length > 0 ? ["type"] : []
 

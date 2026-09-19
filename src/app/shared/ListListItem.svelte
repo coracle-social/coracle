@@ -34,6 +34,17 @@
     }
   }
 
+  const copyList = () =>
+    router
+      .at("lists/create")
+      .cx({
+        kind: list.kind,
+        title: `${list.title || "Untitled"} (copy)`,
+        description: list.description,
+        tags: list.tags,
+      })
+      .open()
+
   let list
 
   $: event = $eventStore
@@ -88,6 +99,12 @@
           </span>
         </div>
         <div class="flex items-center gap-1" on:click|stopPropagation>
+          <button
+            class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"
+            title="Copy list"
+            on:click={copyList}>
+            <i class="fa fa-copy" /> Copy
+          </button>
           <button
             class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"
             title="Show raw tags"

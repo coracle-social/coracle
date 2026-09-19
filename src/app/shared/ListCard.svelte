@@ -35,6 +35,17 @@
     }
   }
 
+  const copyList = () =>
+    router
+      .at("lists/create")
+      .cx({
+        kind: list.kind,
+        title: `${list.title || "Untitled"} (copy)`,
+        description: list.description,
+        tags: list.tags,
+      })
+      .open()
+
   let list
 
   $: event = $eventStore
@@ -82,6 +93,12 @@
       <div class="flex items-center justify-between">
         {quantify(matchTags(tagSpec(tagTypes), event.tags).length, "item")}
         <div class="flex gap-1">
+          <button
+            class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"
+            title="Copy list"
+            on:click={copyList}>
+            <i class="fa fa-copy" /> Copy
+          </button>
           <div
             class="cursor-pointer p-1 text-neutral-400 transition-colors hover:text-neutral-100"
             on:click={$expandTags.toggle}>
