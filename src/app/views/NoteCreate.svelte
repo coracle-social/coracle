@@ -149,6 +149,10 @@
       eventWriter.setExpiration(dateToSeconds(options.expiration))
     }
 
+    if (options.protected) {
+      eventWriter.setProtected(true)
+    }
+
     if (quote) {
       eventWriter.addMention(quote.pubkey)
     }
@@ -311,6 +315,7 @@
   let options: Values = {
     warning: "",
     anonymous: false,
+    protected: false,
     publish_at: null,
     pow_difficulty: $userSettings.pow_difficulty,
   }
