@@ -2,6 +2,7 @@
   export type Values = {
     warning: string
     anonymous: boolean
+    protected: boolean
     pow_difficulty: number
     publish_at?: Date
     expiration?: Date
@@ -77,6 +78,10 @@
       <FieldInline icon="fa-user-secret" label="Post anonymously">
         <Toggle bind:value={values.anonymous} />
         <p slot="info">Enable this to create an anonymous note.</p>
+      </FieldInline>
+      <FieldInline icon="fa-lock" label="Protect note">
+        <Toggle bind:value={values.protected} />
+        <p slot="info">Ask relays to only accept this note from you (NIP 70).</p>
       </FieldInline>
       {#if values.relays}
         <Field icon="fa-server" label="Relays">

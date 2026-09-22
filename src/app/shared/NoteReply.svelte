@@ -45,6 +45,7 @@
   let options: Values = {
     warning: "",
     anonymous: false,
+    protected: false,
     pow_difficulty: $userSettings.pow_difficulty,
   }
 
@@ -111,6 +112,10 @@
 
     if (options.expiration) {
       eventWriter.setExpiration(dateToSeconds(options.expiration))
+    }
+
+    if (options.protected) {
+      eventWriter.setProtected(true)
     }
 
     loading = true
