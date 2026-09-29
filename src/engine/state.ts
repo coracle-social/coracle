@@ -1,3 +1,4 @@
+import {ensurePendingMessagePlaintext} from "src/util/messagePlaintext"
 import {derived, readable, writable} from "svelte/store"
 import type {Readable} from "svelte/store"
 import {
@@ -134,10 +135,9 @@ export const ensureMessagePlaintext = async (e: TrustedEvent) => {
 
   if (!other) return undefined
 
-  return $app
-    .use(Plaintext)
-    .ensure(e.content, () => $user.signer.nip04.decrypt(other, e.content))
-    .catch(() => undefined)
+  return ensurePendingMessagePlaintext($user.signer, other, e.content, () =>
+    $app.use(Plaintext).ensure(e.content, () => $user.signer.nip04.decrypt(other, e.content)),
+  ).catch(() => undefined)
 }
 
 // Tracker
