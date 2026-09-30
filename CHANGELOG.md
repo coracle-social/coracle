@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.6.38
+
+* Upgrade to welshman 0.12
+* Fix retrying a failed direct message on the publishes page
+* Retry decrypting direct messages instead of dropping them
+* Back off when reconnecting to unreachable relays
+* Upgrade insecure requests to https
+
 # 0.6.37
 
 * Support encrypted files in direct messages
