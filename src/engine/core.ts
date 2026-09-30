@@ -44,10 +44,17 @@ import {
   appPolicyWraps,
   defineSessionHandler,
   makeAppPolicyAuth,
+  nip01,
+  nip07,
+  nip46,
+  nip55,
+  pomade,
   registerSessionHandler,
+  toSession,
 } from "@welshman/app"
 import type {AppPolicy, DerivedPlugin, Plugin, Session} from "@welshman/app"
 import {env} from "src/engine/env"
+import type {SessionWithMeta} from "src/engine/model"
 
 export const appConfig = {
   dufflepudUrl: env.DUFFLEPUD_URL,
@@ -231,6 +238,46 @@ export type StoredSession = {
   session: Session
 }
 
+// Sessions written before welshman 0.9 are flat ({method, pubkey, ...method fields, ...meta}) and
+// live under the same storage key, so convert them in place or the user is never restored.
+const legacySessionData: Record<string, (s: Record<string, any>) => Session> = {
+  nip01: s => toSession(nip01, {secret: s.secret}),
+  nip07: _ => toSession(nip07, {}),
+  nip46: s =>
+    toSession(nip46, {
+      clientSecret: s.secret,
+      signerPubkey: s.handler?.pubkey,
+      relays: s.handler?.relays || [],
+    }),
+  nip55: s => toSession(nip55, {signer: s.signer, pubkey: s.pubkey}),
+  pomade: s => toSession(pomade, {clientOptions: s.clientOptions, email: s.email}),
+  pubkey: s => toSession(readOnly, {pubkey: s.pubkey}),
+}
+
+const migrateSessions = ($sessions: Record<string, any>) => {
+  let changed = false
+  const migrated: Record<string, SessionWithMeta> = {}
+
+  for (const [key, stored] of Object.entries($sessions)) {
+    if (stored?.session) {
+      migrated[key] = stored
+      continue
+    }
+
+    changed = true
+
+    const $session = legacySessionData[stored?.method]?.(stored)
+
+    if ($session && stored.pubkey) {
+      const {pubkey, wallet, onboarding_tasks_completed} = stored
+
+      migrated[key] = {pubkey, wallet, onboarding_tasks_completed, session: $session}
+    }
+  }
+
+  return changed ? migrated : $sessions
+}
+
 const sessionsStore = synced<Record<string, StoredSession>>({
   key: "sessions",
   storage: localStorageProvider,
@@ -268,9 +315,10 @@ export const login = async ($session: Session) => {
     throw new Error(`Unable to log in using ${$session.method}`)
   }
 
+  // Keep the wallet and onboarding state stored alongside the session
   sessions.update($sessions => ({
     ...$sessions,
-    [$user.pubkey]: {pubkey: $user.pubkey, session: $session},
+    [$user.pubkey]: {...$sessions[$user.pubkey], pubkey: $user.pubkey, session: $session},
   }))
 
   setUser($user)
@@ -302,6 +350,13 @@ export const logout = () => {
 
 export const restoreSession = async () => {
   await Promise.all([sessionsStore.ready, pubkeyStore.ready])
+
+  const $sessions = sessions.get()
+  const $migrated = migrateSessions($sessions)
+
+  if ($migrated !== $sessions) {
+    sessions.set($migrated)
+  }
 
   const $pubkey = pubkey.get()
   const stored = $pubkey ? sessions.get()[$pubkey] : undefined
