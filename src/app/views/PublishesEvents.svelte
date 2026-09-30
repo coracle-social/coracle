@@ -1,21 +1,21 @@
 <script lang="ts">
   import {call, uniqBy, ago, nthNe, nth, DAY, MINUTE, now, remove, sortBy} from "@welshman/lib"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import {thunks} from "src/engine/core"
+  import {publisher} from "src/engine/core"
   import Tile from "src/partials/Tile.svelte"
   import PublishCard from "src/app/shared/PublishCard.svelte"
   import {pluralize} from "src/util/misc"
 
-  $: thunkHistory = $thunks.history
+  $: publications = $publisher.history
   $: recent = uniqBy(
-    t => t.options.event.id,
-    $thunkHistory.filter(t => t.options.event.created_at > ago(DAY)),
+    p => p.event.id,
+    $publications.filter(p => p.event.created_at > ago(DAY)),
   )
 
   $: relays = new Set(
     remove(
       LOCAL_RELAY_URL,
-      recent.flatMap(thunk => thunk.options.relays),
+      recent.flatMap(publication => publication.relays),
     ),
   )
 
@@ -23,8 +23,10 @@
     let pending = 0
     let success = 0
 
-    for (const thunk of recent) {
-      const statuses = Object.entries(thunk.results).filter(nthNe(0, LOCAL_RELAY_URL)).map(nth(1))
+    for (const publication of recent) {
+      const statuses = Object.entries(publication.results)
+        .filter(nthNe(0, LOCAL_RELAY_URL))
+        .map(nth(1))
 
       if (statuses.includes(PublishStatus.Success)) {
         success += 1
@@ -39,7 +41,7 @@
   // If the page gets refreshed before pending finishes, it hangs. Set stuff to failed
   $: {
     for (const t of recent) {
-      if (t.options.event.created_at < now() - MINUTE) {
+      if (t.event.created_at < now() - MINUTE) {
         for (const [url, {status}] of Object.entries(t.results)) {
           if (status === PublishStatus.Pending) {
             t.results[url].status = PublishStatus.Failure
@@ -72,6 +74,6 @@
     <span class="text-sm">Failed</span>
   </Tile>
 </div>
-{#each sortBy(t => -t.options.event.created_at, recent) as thunk (thunk.options.event.id)}
-  <PublishCard {thunk} />
+{#each sortBy(p => -p.event.created_at, recent) as publication (publication.event.id)}
+  <PublishCard {publication} />
 {/each}

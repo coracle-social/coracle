@@ -1,13 +1,13 @@
 <script lang="ts">
   import {remove, omit, spec} from "@welshman/lib"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
   import Link from "src/partials/Link.svelte"
 
-  export let thunk: Thunk
+  export let publication: Publication
 
-  $: relays = remove(LOCAL_RELAY_URL, thunk.options.relays)
-  $: pending = Object.values(omit([LOCAL_RELAY_URL], $thunk.results)).filter(
+  $: relays = remove(LOCAL_RELAY_URL, publication.relays)
+  $: pending = Object.values(omit([LOCAL_RELAY_URL], $publication.results)).filter(
     spec({status: PublishStatus.Pending}),
   )
 </script>

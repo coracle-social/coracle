@@ -2,7 +2,7 @@
   import {derived} from "svelte/store"
   import {ago, omit, spec, MINUTE} from "@welshman/lib"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import {signer, pubkey, sessions, profiles, thunks, switchAccount} from "src/engine/core"
+  import {signer, pubkey, sessions, profiles, publisher, switchAccount} from "src/engine/core"
   import {showWarning} from "src/partials/Toast.svelte"
   import {toggleTheme, theme} from "src/partials/state"
   import MenuItem from "src/partials/MenuItem.svelte"
@@ -37,23 +37,23 @@
 
   let subMenu
 
-  $: hud = derived($thunks.history, $history => {
+  $: hud = derived($publisher.history, $history => {
     let pending = 0
     let success = 0
     let failure = 0
 
-    for (const thunk of $history) {
-      if (thunk.options.event.pubkey !== $pubkey) {
+    for (const publication of $history) {
+      if (publication.event.pubkey !== $pubkey) {
         continue
       }
 
-      if (thunk.options.event.created_at < ago(5, MINUTE)) {
+      if (publication.event.created_at < ago(5, MINUTE)) {
         continue
       }
 
-      const results = Object.values(omit([LOCAL_RELAY_URL], thunk.results))
+      const results = Object.values(omit([LOCAL_RELAY_URL], publication.results))
 
-      if (!thunk.isComplete()) {
+      if (!publication.isComplete()) {
         pending += 1
       } else if (results.some(spec({status: PublishStatus.Success}))) {
         success += 1

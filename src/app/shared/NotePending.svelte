@@ -16,36 +16,36 @@
 
 <script lang="ts">
   import {remove} from "@welshman/lib"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
   import {tweened} from "svelte/motion"
   import {userSettings} from "src/engine"
   import Link from "src/partials/Link.svelte"
   import {ticker} from "src/util/misc"
 
-  export let thunk: Thunk
-  export let onReplyAbort: (thunk: Thunk) => void
+  export let publication: Publication
+  export let onReplyAbort: (publication: Publication) => void
 
   const elapsed = ticker()
 
   const completedDisplay = tweened(0)
 
   const abort = () => {
-    thunk.abort()
-    onReplyAbort(thunk)
+    publication.abort()
+    onReplyAbort(publication)
   }
 
-  $: relays = remove(LOCAL_RELAY_URL, $thunk?.options?.relays)
-  $: completed = remove(LOCAL_RELAY_URL, $thunk.getCompleteUrls())
-  $: sending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Sending))
-  $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
-  $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))
+  $: relays = remove(LOCAL_RELAY_URL, $publication?.relays)
+  $: completed = remove(LOCAL_RELAY_URL, $publication.getCompleteUrls())
+  $: sending = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Sending))
+  $: pending = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Success))
   $: showProgress = sending.length === 0
   $: completedDisplay.set((completed.length / relays.length) * 80)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
-{#if $thunk}
+{#if $publication}
   <div
     on:click|stopPropagation
     class="loading-bar-content relative flex h-6 w-full items-center justify-between overflow-hidden rounded-md pl-4 text-sm"

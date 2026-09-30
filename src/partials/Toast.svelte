@@ -31,8 +31,8 @@
 
   export const showWarning = (message, opts = {}) => showToast({message, theme: "warning", ...opts})
 
-  export const showPublishInfo = (thunk: Thunk, opts = {}) =>
-    showToast({thunk, type: "publish", ...opts})
+  export const showPublishInfo = (publication: Publication, opts = {}) =>
+    showToast({publication, type: "publish", ...opts})
 
   window.addEventListener("online", () => {
     if (get(toast)?.id === "offline") {
@@ -46,12 +46,12 @@
 </script>
 
 <script lang="ts">
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {onDestroy} from "svelte"
   import cx from "classnames"
   import {fly} from "src/util/transition"
   import Button from "src/partials/Button.svelte"
-  import ThunkStatus from "src/partials/ThunkStatus.svelte"
+  import PublicationStatus from "src/partials/PublicationStatus.svelte"
   import {randomId} from "@welshman/lib"
 
   let touchStart = 0
@@ -95,7 +95,7 @@
   })
 </script>
 
-{#each [$toast].filter(identity) as { id, type, theme, thunk, message, onCancel } (id)}
+{#each [$toast].filter(identity) as { id, type, theme, publication, message, onCancel } (id)}
   <div
     on:touchstart={onTouchStart}
     on:touchmove={onTouchMove}
@@ -123,7 +123,7 @@
             toast.set(null)
           }}>Cancel</Button>
       {:else if type === "publish"}
-        <ThunkStatus {thunk} />
+        <PublicationStatus {publication} />
       {/if}
       <div class="absolute right-1 top-0 cursor-pointer p-3" on:click={() => toast.set(null)}>
         <i class="fa fa-times" />

@@ -3,7 +3,7 @@
   import {without, dateToSeconds, uniq, uniqBy} from "@welshman/lib"
   import {hexTags, own, hash, stamp, tagValues} from "@welshman/util"
   import {User} from "@welshman/app"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {Comment} from "@welshman/domain"
   import {writable} from "svelte/store"
   import {makePow} from "src/util/pow"
@@ -16,7 +16,7 @@
   import NoteOptions from "src/app/shared/NoteOptions.svelte"
   import NsecWarning from "src/app/shared/NsecWarning.svelte"
   import {drafts} from "src/app/state"
-  import {app, profiles, thunks, writer} from "src/engine/core"
+  import {app, profiles, publisher, writer} from "src/engine/core"
   import {
     getClientTags,
     sign,
@@ -29,7 +29,7 @@
   export let parent
   export let replyIsOpen: boolean
   export let onReplyCancel: () => void
-  export let onReplyPublish: (thunk: Thunk) => void
+  export let onReplyPublish: (publication: Publication) => void
 
   const nsecWarning = writable(null)
   const uploading = writable(false)
@@ -132,16 +132,16 @@
 
     const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
-    const thunk = thunks.get().publish({
+    const publication = publisher.get().publish({
       relays,
       event: await sign(hashedEvent, options),
       delay: $userSettings.send_delay,
     })
 
-    thunk.controller.signal.addEventListener("abort", () => restoreDraft(draft))
+    publication.controller.signal.addEventListener("abort", () => restoreDraft(draft))
 
     loading = false
-    onReplyPublish(thunk)
+    onReplyPublish(publication)
     broadcastUserRelays(relays)
   }
 

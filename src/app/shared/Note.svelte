@@ -11,8 +11,8 @@
     REACTION,
     ZAP_RECEIPT,
   } from "@welshman/util"
-  import type {Thunk} from "@welshman/app"
-  import {Thunks} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
+  import {Publisher} from "@welshman/app"
   import NoteActions from "src/app/shared/NoteActions.svelte"
   import NoteContent from "src/app/shared/NoteContent.svelte"
   import NoteHeader from "src/app/shared/NoteHeader.svelte"
@@ -34,8 +34,8 @@
   export let showEntire = false
   export let showMedia = getSetting("show_media")
   export let replyIsOpen = false
-  export let addPendingReply = (thunk: Thunk) => undefined
-  export let removePendingReply = (thunk: Thunk) => undefined
+  export let addPendingReply = (publication: Publication) => undefined
+  export let removePendingReply = (publication: Publication) => undefined
 
   let showHidden = false
 
@@ -45,7 +45,7 @@
 
   const elapsed = ticker()
 
-  const thunkHistory = fromApp($app => $app.use(Thunks).history)
+  const publications = fromApp($app => $app.use(Publisher).history)
 
   const onClick = e => {
     const target = (e.detail?.target || e.target) as HTMLElement
@@ -65,18 +65,18 @@
     replyIsOpen = false
   }
 
-  const onReplyPublish = (thunk: Thunk) => {
-    addPendingReply(thunk)
+  const onReplyPublish = (publication: Publication) => {
+    addPendingReply(publication)
     replyIsOpen = false
   }
 
-  const onReplyAbort = (thunk: Thunk) => {
-    removePendingReply(thunk)
+  const onReplyAbort = (publication: Publication) => {
+    removePendingReply(publication)
     replyIsOpen = true
   }
 
   $: hidden = $isEventMuted(event, true)
-  $: thunk = $thunkHistory.find(t => t.options.event.id === event.id)
+  $: publication = $publications.find(p => p.event.id === event.id)
   $: pending = event.created_at + 60 > start + $elapsed
 
   onMount(() => {
@@ -127,8 +127,8 @@
         <NoteContent note={event} {depth} {showEntire} {showMedia} />
       </div>
       <div class:!pl-10={headerlessKinds.includes(event.kind)} class="pt-4 sm:pl-14">
-        {#if pending && event.pubkey === $pubkey && !topLevel && thunk}
-          <NotePending {thunk} {onReplyAbort} />
+        {#if pending && event.pubkey === $pubkey && !topLevel && publication}
+          <NotePending {publication} {onReplyAbort} />
         {:else}
           <NoteActions {event} {onReplyStart} />
         {/if}

@@ -228,8 +228,8 @@ export const userSettingsPlaintext: Readable<Maybe<string>> = derived(
   },
 )
 
-export const userSettings = withGetter<typeof defaultSettings>(
-  derived(userSettingsPlaintext, $userSettingsPlaintext => {
+export const userSettings = withGetter(
+  derived(userSettingsPlaintext, ($userSettingsPlaintext): typeof defaultSettings => {
     const overrides = parseJson($userSettingsPlaintext) || {}
 
     return {...defaultSettings, ...overrides}
@@ -668,7 +668,7 @@ const withCache = ({skipCache, ...options}: MyRequestOptions): RequestOptions =>
 
 export const myRequest = (options: MyRequestOptions) => network.get().request(withCache(options))
 
-export const myLoad = (options: MyRequestOptions) => network.get().load(withCache(options))
+export const myLoad = (options: MyRequestOptions) => network.get().loadLenient(withCache(options))
 
 export const sign = (
   template,

@@ -1,9 +1,8 @@
 <script lang="ts">
   import {formatTimestamp, remove} from "@welshman/lib"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {PublishStatus, LOCAL_RELAY_URL} from "@welshman/net"
-  import type {TrustedEvent} from "@welshman/util"
-  import {app, thunks} from "src/engine/core"
+  import {app, publisher} from "src/engine/core"
   import RelayCard from "src/app/shared/RelayCard.svelte"
   import {router} from "src/app/util/router"
   import Button from "src/partials/Button.svelte"
@@ -14,10 +13,9 @@
   import NoteReducer from "src/app/shared/NoteReducer.svelte"
   import {fly, slide} from "src/util/transition"
 
-  export let thunk: Thunk
+  export let publication: Publication
 
-  const retry = (url: string, event: TrustedEvent) =>
-    $thunks.publish({relays: [url], event: thunk.options.event})
+  const retry = (url: string) => $publisher.retry(publication, [url])
 
   const expand = () => {
     expanded = true
@@ -29,11 +27,11 @@
 
   let expanded = false
 
-  $: event = $app.wrapManager.getRumor(thunk.options.event.id) || thunk.options.event
-  $: pending = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Pending))
-  $: success = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Success))
-  $: failure = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Failure))
-  $: timeout = remove(LOCAL_RELAY_URL, $thunk.getUrlsWithStatus(PublishStatus.Timeout))
+  $: event = $app.wrapManager.getRumor(publication.event.id) || publication.event
+  $: pending = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Pending))
+  $: success = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Success))
+  $: failure = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Failure))
+  $: timeout = remove(LOCAL_RELAY_URL, $publication.getUrlsWithStatus(PublishStatus.Timeout))
 </script>
 
 {#if event}
@@ -41,8 +39,7 @@
     <Card>
       <FlexColumn>
         <div class="flex justify-between">
-          <span
-            >Kind {event.kind}, published {formatTimestamp(thunk.options.event.created_at)}</span>
+          <span>Kind {event.kind}, published {formatTimestamp(publication.event.created_at)}</span>
           <Link class="text-sm underline" modal href={router.at("notes").of(event.id).toString()}
             >View Note</Link>
         </div>
@@ -110,9 +107,7 @@
                 {#each failure as url}
                   <RelayCard {url}>
                     <div slot="actions">
-                      <Button
-                        on:click={() => retry(url, event)}
-                        class="flex items-center gap-2 text-sm">
+                      <Button on:click={() => retry(url)} class="flex items-center gap-2 text-sm">
                         <i class="fa fa-rotate" /> Retry
                       </Button>
                     </div>
@@ -124,9 +119,7 @@
                 {#each timeout as url}
                   <RelayCard {url}>
                     <div slot="actions">
-                      <Button
-                        on:click={() => retry(url, event)}
-                        class="flex items-center gap-2 text-sm">
+                      <Button on:click={() => retry(url)} class="flex items-center gap-2 text-sm">
                         <i class="fa fa-rotate" /> Retry
                       </Button>
                     </div>

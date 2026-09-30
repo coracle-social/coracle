@@ -8,7 +8,7 @@
     sortEventsDesc,
   } from "@welshman/util"
   import type {TrustedEvent} from "@welshman/util"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {onMount, setContext} from "svelte"
   import {derived} from "svelte/store"
   import {quantify} from "src/util/misc"
@@ -42,16 +42,16 @@
   let replyIsOpen = false
   let collapsed = depth === 0
   let showHiddenReplies = anchor === getIdOrAddress(event)
-  let pendingReplies: Thunk[] = []
+  let pendingReplies: Publication[] = []
 
   const showEntire = showHiddenReplies
 
-  const addPendingReply = (thunk: Thunk) => {
-    pendingReplies = [...pendingReplies, thunk]
+  const addPendingReply = (publication: Publication) => {
+    pendingReplies = [...pendingReplies, publication]
   }
 
-  const removePendingReply = (thunk: Thunk) => {
-    pendingReplies = remove(thunk, pendingReplies)
+  const removePendingReply = (publication: Publication) => {
+    pendingReplies = remove(publication, pendingReplies)
   }
 
   const replies = derived(
@@ -67,7 +67,7 @@
     visibleReplies = []
 
     for (const e of $replies) {
-      if (pendingReplies.some(thunk => thunk.options.event.id === e.id)) {
+      if (pendingReplies.some(publication => publication.event.id === e.id)) {
         visibleReplies.push(e)
       } else if (collapsed) {
         hiddenReplies.push(e)

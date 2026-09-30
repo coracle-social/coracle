@@ -12,7 +12,7 @@
   import PersonLink from "src/app/shared/PersonLink.svelte"
   import FeedItem from "src/app/shared/FeedItem.svelte"
   import {router} from "src/app/util/router"
-  import {fromApp, resolveRelays, thunks} from "src/engine/core"
+  import {fromApp, resolveRelays, publisher} from "src/engine/core"
 
   export let id
 
@@ -33,7 +33,7 @@
     const helper = new Nip59(Nip01Signer.ephemeral())
     const wrap = await helper.wrap(tagr, template)
 
-    thunks.get().publish({
+    publisher.get().publish({
       event: wrap,
       relays: await resolveRelays([relay("wss://relay.nos.social"), messaging(tagr)]),
     })

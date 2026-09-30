@@ -126,7 +126,7 @@ export const deriveEvent = (idOrAddress: string, {relays: hints = []}: DeriveEve
       limit: Math.max(hints.length, appConfig.relayLimit),
     })
 
-    await network.get().load({filters, relays: urls})
+    await network.get().loadLenient({filters, relays: urls})
   }
 
   // `Events.one` reads through the repository with `includeDeleted: true`, and its own
@@ -232,20 +232,20 @@ export const listenForNotifications = withUser(async $user => {
 // Other user data
 
 export const loadLabels = async (authors: string[]) =>
-  network.get().load({
+  network.get().loadLenient({
     relays: await resolveRelays(authors.map(author => outbox(author))),
     filters: [addSinceToFilter({kinds: [LABEL], authors, "#L": ["#t"]})],
   })
 
 export const loadDeletes = withUser(async $user =>
-  network.get().load({
+  network.get().loadLenient({
     relays: await resolveRelays([userOutbox()]),
     filters: [addSinceToFilter({kinds: [DELETE], authors: [$user.pubkey]})],
   }),
 )
 
 export const loadFeedsAndLists = withUser(async $user =>
-  network.get().load({
+  network.get().loadLenient({
     relays: await resolveRelays([userOutbox()]),
     filters: [
       addSinceToFilter({

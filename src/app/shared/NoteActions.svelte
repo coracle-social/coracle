@@ -43,7 +43,7 @@
     pubkey,
     resolveRelays,
     signer,
-    thunks,
+    publisher,
     writer,
     zappers,
   } from "src/engine/core"
@@ -133,7 +133,7 @@
   }
 
   const broadcast = async () => {
-    thunks.get().publish({
+    publisher.get().publish({
       event: asSignedEvent(event as SignedEvent),
       relays: await resolveRelays([userOutbox()]),
     })

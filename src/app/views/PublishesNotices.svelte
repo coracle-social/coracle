@@ -5,7 +5,7 @@
   import AltColor from "src/partials/AltColor.svelte"
   import Input from "src/partials/Input.svelte"
   import ThunkNotice from "src/partials/ThunkNotice.svelte"
-  import {thunks} from "src/engine/core"
+  import {publisher} from "src/engine/core"
   import {subscriptionNotices} from "src/domain/connection"
 
   export let search: string = ""
@@ -24,15 +24,15 @@
     }
   }
 
-  $: thunkHistory = $thunks.history
-  $: pubNotices = $thunkHistory.flatMap(thunk =>
-    Object.entries(thunk.results).map(([url, {status, detail}]) => ({
+  $: publications = $publisher.history
+  $: pubNotices = $publications.flatMap(publication =>
+    Object.entries(publication.results).map(([url, {status, detail}]) => ({
       url,
       status,
       message: detail,
-      eventId: thunk.options.event.id,
-      created_at: thunk.options.event.created_at,
-      eventKind: "Kind" + thunk.options.event.kind,
+      eventId: publication.event.id,
+      created_at: publication.event.created_at,
+      eventKind: "Kind" + publication.event.kind,
     })),
   )
 

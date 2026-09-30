@@ -25,13 +25,13 @@ import {
   PinLists,
   Plaintext,
   Profiles,
+  Publisher,
   Reactions,
   RelayLists,
   RelayStats,
   Relays,
   Router,
   Sync,
-  Thunks,
   Topics,
   User,
   Wot,
@@ -163,13 +163,13 @@ export const network = usePlugin(Network)
 export const pinLists = usePlugin(PinLists)
 export const plaintext = usePlugin(Plaintext)
 export const profiles = usePlugin(Profiles)
+export const publisher = usePlugin(Publisher)
 export const reactions = usePlugin(Reactions)
 export const relayLists = usePlugin(RelayLists)
 export const relayStats = usePlugin(RelayStats)
 export const relays = usePlugin(Relays)
 export const router = usePlugin(Router)
 export const sync = usePlugin(Sync)
-export const thunks = usePlugin(Thunks)
 export const topics = usePlugin(Topics)
 export const wot = usePlugin(Wot)
 export const wraps = usePlugin(Wraps)

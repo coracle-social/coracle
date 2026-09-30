@@ -2,7 +2,7 @@
   import cx from "classnames"
   import {formatTimestamp} from "@welshman/lib"
   import {PublishStatus} from "@welshman/net"
-  import {Thunks} from "@welshman/app"
+  import {Publisher} from "@welshman/app"
   import {fly} from "svelte/transition"
   import {ticker} from "src/util/misc"
   import Modal from "src/partials/Modal.svelte"
@@ -22,11 +22,11 @@
 
   const elapsed = ticker()
 
-  const thunkHistory = fromApp($app => $app.use(Thunks).history)
+  const publications = fromApp($app => $app.use(Publisher).history)
 
   let showDetails = false
 
-  $: thunk = $thunkHistory.find(t => t.options.event.id === message.id)
+  $: publication = $publications.find(p => p.event.id === message.id)
   $: remaining = Math.ceil($userSettings.send_delay / 1000) - $elapsed
 </script>
 
@@ -57,15 +57,15 @@
       class="mt-1 flex items-center justify-between gap-2 text-xs"
       class:text-tinted-700={message.pubkey === $pubkey}
       class:text-neutral-100={message.pubkey !== $pubkey}>
-      {#if thunk}
-        {#if thunk.hasStatus(PublishStatus.Pending)}
+      {#if publication}
+        {#if publication.hasStatus(PublishStatus.Pending)}
           <div class="flex items-center gap-1">
             <i class="fa fa-circle-notch fa-spin"></i>
             Sending...
             {#if remaining > 0}
               <button
                 class="cursor-pointer py-1 text-tinted-700-d underline"
-                on:click={() => thunk.abort()}>Cancel</button>
+                on:click={() => publication.abort()}>Cancel</button>
             {/if}
           </div>
         {:else}

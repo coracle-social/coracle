@@ -81,14 +81,14 @@
           )
         : await $feeds.create({title, description, definition})
 
-    const thunk = eventCommand.publish()
+    const publication = eventCommand.publish()
 
     showInfo("Your feed has been saved!")
 
     if (draft.list) {
       openListDelete()
     } else {
-      exit(thunk.options.event)
+      exit(publication.event)
     }
   }
 

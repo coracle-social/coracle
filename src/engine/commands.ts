@@ -45,7 +45,7 @@ import {
   profiles,
   reader,
   relayLists,
-  thunks,
+  publisher,
   wraps,
   writer,
 } from "src/engine/core"
@@ -432,7 +432,7 @@ const broadcast = async (kinds: number[], relays: string[]) => {
 
   for (const event of $app.repository.query([{kinds, authors: [$app.user.pubkey]}])) {
     if (isSignedEvent(event)) {
-      thunks.get().publish({event, relays})
+      publisher.get().publish({event, relays})
     }
   }
 }

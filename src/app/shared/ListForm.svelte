@@ -44,10 +44,10 @@
 
   const submit = async () => {
     const eventCommand = await command(userListWriter(list))
-    const thunk = eventCommand.publish()
+    const publication = eventCommand.publish()
 
     showInfo("Your list has been saved!")
-    exit(thunk.options.event)
+    exit(publication.event)
   }
 
   const kindsHelper = makeKindSearch([

@@ -12,7 +12,7 @@
     isReplaceable,
   } from "@welshman/util"
   import {User} from "@welshman/app"
-  import type {Thunk} from "@welshman/app"
+  import type {Publication} from "@welshman/app"
   import {Note, Poll} from "@welshman/domain"
   import type {EventWriter} from "@welshman/domain"
   import {writable} from "svelte/store"
@@ -37,7 +37,7 @@
   import {makeEditor} from "src/app/editor"
   import {drafts} from "src/app/state"
   import {router} from "src/app/util/router"
-  import {app, getWriteRelays, network, resolveRelays, thunks, writer} from "src/engine/core"
+  import {app, getWriteRelays, network, resolveRelays, publisher, writer} from "src/engine/core"
   import {env, getClientTags, sign, userSettings, broadcastUserRelays} from "src/engine"
 
   export let quote = null
@@ -173,7 +173,7 @@
 
     const relays = options.relays?.length > 0 ? options.relays : await eventWriter.relays()
 
-    let thunk: Thunk
+    let publication: Publication
 
     router.clearModals()
     drafts.delete(DRAFT_KEY)
@@ -194,7 +194,7 @@
         }),
       )
 
-      thunk = thunks.get().publish({
+      publication = publisher.get().publish({
         event: dvmEvent,
         relays: env.DVM_RELAYS,
         delay: $userSettings.send_delay,
@@ -224,11 +224,13 @@
     } else {
       router.clearModals()
 
-      thunk = thunks.get().publish({relays, event: signedEvent, delay: $userSettings.send_delay})
+      publication = publisher
+        .get()
+        .publish({relays, event: signedEvent, delay: $userSettings.send_delay})
     }
 
     new Promise<void>(resolve => {
-      thunk.subscribe(t => {
+      publication.subscribe(t => {
         if (t.isComplete()) {
           resolve()
         }
@@ -246,7 +248,7 @@
         timeout: $userSettings.send_delay / 1000,
         onCancel: () => {
           aborted = true
-          thunk.abort()
+          publication.abort()
           router.at("notes/create").open()
           drafts.set(DRAFT_KEY, editor.getJSON())
         },
@@ -254,7 +256,7 @@
     }
 
     if (!aborted) {
-      showPublishInfo(thunk)
+      showPublishInfo(publication)
       broadcastUserRelays(relays)
     }
 

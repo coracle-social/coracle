@@ -4,7 +4,7 @@
   import EditorContent from "src/app/editor/EditorContent.svelte"
   import Button from "src/partials/Button.svelte"
   import {makeEditor} from "src/app/editor"
-  import {thunks, writer} from "src/engine/core"
+  import {publisher, writer} from "src/engine/core"
 
   export let signup
   export let setStage
@@ -25,7 +25,7 @@
           .addTags(...editor.storage.nostr.getEditorTags())
           .render()
 
-        thunks.get().publish({event, relays, pow: 20})
+        publisher.get().publish({event, relays, pow: 20})
       }
 
       signup()

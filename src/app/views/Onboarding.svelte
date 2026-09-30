@@ -57,9 +57,9 @@
     // Immediately request access to any relays with a claim
     for (const {url, claim} of invite?.parsedRelays || []) {
       if (claim) {
-        const thunk = await requestRelayAccess(url, claim)
+        const publication = await requestRelayAccess(url, claim)
 
-        await thunk.waitForCompletion()
+        await publication.settled()
       }
     }
 
