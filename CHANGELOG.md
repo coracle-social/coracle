@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.6.39
+
+* Fix sessions from before 0.6.36 not being restored after upgrading
+* Keep wallet and onboarding state when logging in
+
 # 0.6.38
 
 * Upgrade to welshman 0.12
