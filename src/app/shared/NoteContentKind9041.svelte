@@ -6,6 +6,7 @@
   import {reader} from "src/engine/core"
 
   export let note: TrustedEvent
+  export let depth = 0
 
   const goal = reader(ZapGoal)(note)
   const closedAt = goal.closedAt()
@@ -20,6 +21,10 @@
 {#if note.content}
   <div class="mt-2 flex space-x-2">
     <span>Goal:</span>
-    <NoteContentKind1 {note} />
+    <NoteContentKind1 {note} {depth}>
+      <div slot="note-content" let:quote>
+        <slot name="note-content" {quote} />
+      </div>
+    </NoteContentKind1>
   </div>
 {/if}

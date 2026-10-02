@@ -7,12 +7,17 @@
   export let note: TrustedEvent
   export let showEntire: boolean
   export let showMedia: boolean
+  export let depth = 0
 
   const linkParent = tagValue(tagSpec("I"), note.tags)
 </script>
 
 <div class="flex flex-col gap-2">
-  <NoteContentKind1 {note} {showEntire} {showMedia} />
+  <NoteContentKind1 {note} {showEntire} {showMedia} {depth}>
+    <div slot="note-content" let:quote>
+      <slot name="note-content" {quote} />
+    </div>
+  </NoteContentKind1>
   {#if linkParent}
     <div class="flex items-center gap-1 text-end text-sm text-neutral-400">
       <i class="fa fa-link fa-xs mt-1" />

@@ -21,6 +21,7 @@
   export let note: TrustedEvent
   export let showEntire = false
   export let showMedia = false
+  export let depth = 0
 
   const pollType = getPollType(note)
   const options = getPollOptions(note)
@@ -88,7 +89,11 @@
 
 <div class="flex flex-col gap-3">
   {#if note.content}
-    <NoteContentKind1 {note} {showEntire} {showMedia} />
+    <NoteContentKind1 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <slot name="note-content" {quote} />
+      </div>
+    </NoteContentKind1>
   {/if}
   <div class="flex flex-col gap-2">
     {#each options as option (option.id)}

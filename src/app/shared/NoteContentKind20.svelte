@@ -9,6 +9,7 @@
   export let note: TrustedEvent
   export let showEntire = true
   export let showMedia = getSetting("show_media")
+  export let depth = 0
 
   const {title, alt} = fromPairs(note.tags)
   const imeta = matchTags(tagSpec("imeta"), note.tags).map(imeta => tagsFromIMeta(imeta.slice(1)))
@@ -23,7 +24,11 @@
 {/if}
 {#if note.content}
   <div class="h-2" />
-  <NoteContentKind1 {note} {showEntire} />
+  <NoteContentKind1 {note} {showEntire} {depth}>
+    <div slot="note-content" let:quote>
+      <slot name="note-content" {quote} />
+    </div>
+  </NoteContentKind1>
 {:else if alt}
   <div class="h-2" />
   <p>{alt}</p>

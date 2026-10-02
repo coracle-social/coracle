@@ -116,7 +116,9 @@
         {#if isStartOrEnd(i) && depth < 2}
           <NoteContentQuote {depth} {note} value={parsed.value}>
             <div slot="note-content" let:quote>
-              <slot name="note-content" {quote} />
+              <slot name="note-content" {quote}>
+                <svelte:self note={quote} depth={depth + 1} {showMedia} />
+              </slot>
             </div>
           </NoteContentQuote>
         {:else}

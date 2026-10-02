@@ -57,25 +57,57 @@
   {:else if note.kind === 7}
     <NoteContentKind7 {note} />
   {:else if note.kind === 20}
-    <NoteContentKind20 {note} {showEntire} />
+    <NoteContentKind20 {note} {showEntire} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind20>
   {:else if [40, 41].includes(note.kind)}
     <NoteContentKind40 {note} />
   {:else if note.kind === 1111}
-    <NoteContentKind1111 {note} {showEntire} {showMedia} />
+    <NoteContentKind1111 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind1111>
   {:else if note.kind === 1808}
-    <NoteContentKind1808 {note} {showEntire} />
+    <NoteContentKind1808 {note} {showEntire} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind1808>
   {:else if note.kind === 1985}
-    <NoteContentKind1985 {note} {showEntire} />
+    <NoteContentKind1985 {note} {showEntire} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind1985>
   {:else if note.kind === 9735}
-    <NoteContentKind9735 {note} {showEntire} {showMedia} />
+    <NoteContentKind9735 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind9735>
   {:else if note.kind === 9802}
-    <NoteContentKind9802 {note} {showEntire} {showMedia} />
+    <NoteContentKind9802 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind9802>
   {:else if note.kind === 1063}
     <NoteContentKind1063 {note} {showMedia} />
   {:else if note.kind === 1068}
-    <NoteContentKind1068 {note} {showEntire} {showMedia} />
+    <NoteContentKind1068 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind1068>
   {:else if note.kind === 9041}
-    <NoteContentKind9041 {note} />
+    <NoteContentKind9041 {note} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind9041>
   {:else if note.kind === 10002}
     <NoteContentKindRelay {note} kind={10002} />
   {:else if note.kind === 10006}
@@ -91,7 +123,11 @@
   {:else if note.kind === 30311}
     <NoteContentKind30311 {note} {showMedia} />
   {:else if note.kind === 30402}
-    <NoteContentKind30402 {note} {showEntire} {showMedia} />
+    <NoteContentKind30402 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <svelte:self isQuote depth={depth + 1} note={quote} />
+      </div>
+    </NoteContentKind30402>
   {:else if note.kind === 31337}
     <NoteContentKind31337 {note} {showMedia} />
   {:else if note.kind === 31890}
