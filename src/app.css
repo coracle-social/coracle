@@ -369,6 +369,10 @@ body,
   overflow-wrap: anywhere;
 }
 
+.tiptap.ProseMirror p code {
+  white-space: pre-wrap;
+}
+
 .tiptap-suggestions {
   --tiptap-object-bg: var(--neutral-800);
   --tiptap-object-fg: var(--neutral-200);
