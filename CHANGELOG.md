@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.6.40
+
+* Fix quoted notes not rendering inside comments and other note kinds
+
 # 0.6.39
 
 * Fix sessions from before 0.6.36 not being restored after upgrading
