@@ -53,7 +53,7 @@
 
         await sleep(400)
 
-        if (next) {
+        if (qp) {
           next()
         } else {
           back()
@@ -82,7 +82,7 @@
 
         await sleep(400)
 
-        if (next) {
+        if (qp) {
           next()
         } else {
           back()
