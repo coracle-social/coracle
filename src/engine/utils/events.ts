@@ -14,6 +14,7 @@ import type {RelaySelection, TrustedEvent} from "@welshman/util"
 import {
   getCommentTagValues,
   getCommentTags,
+  getQuotes,
   getReplyTagValues,
   getReplyTags,
 } from "@welshman/domain"
@@ -40,6 +41,12 @@ export const isChildOf = (child: TrustedEvent, parent: TrustedEvent) => {
 
   return getIdAndAddress(parent).some(x => idsAndAddrs.includes(x))
 }
+
+// Quotes
+
+// Only q tags that name the quoted author count, since the quoted event may not be loaded
+export const quotesAnyPubkey = (event: TrustedEvent, pubkeys: Set<string>) =>
+  getQuotes(event).some(quote => quote.pubkey && pubkeys.has(quote.pubkey))
 
 // Comment ancestors
 

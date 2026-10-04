@@ -2,7 +2,7 @@ import {describe, expect, it} from "vitest"
 import {Resolver, sortEventsDesc} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
 import {Comment} from "@welshman/domain"
-import {setCommentAncestors} from "../../../../src/engine/utils"
+import {quotesAnyPubkey, setCommentAncestors} from "../../../../src/engine/utils"
 import {getTestTrustedEvent} from "../../../utils/fake"
 
 const makeWriter = () => Comment.configure({resolver: new Resolver(() => [])}).writer()
@@ -22,6 +22,59 @@ describe("engine events utils", () => {
 
       expect(sortedEvents[0].content).toEqual("I love Bitcoin!")
       expect(sortedEvents[0].created_at).toEqual(200)
+    })
+  })
+
+  describe("quotesAnyPubkey", () => {
+    const mutedPubkey = "a".repeat(64)
+    const otherPubkey = "b".repeat(64)
+    const quotedId = "1".repeat(64)
+    const otherQuotedId = "2".repeat(64)
+    const muted = new Set([mutedPubkey])
+
+    it("should match a quote whose q tag names a matching author", () => {
+      const event = getTestTrustedEvent({tags: [["q", quotedId, "wss://relay/", mutedPubkey]]})
+
+      expect(quotesAnyPubkey(event, muted)).toBe(true)
+    })
+
+    it("should not match a quote of some other author", () => {
+      const event = getTestTrustedEvent({tags: [["q", quotedId, "wss://relay/", otherPubkey]]})
+
+      expect(quotesAnyPubkey(event, muted)).toBe(false)
+    })
+
+    it("should not match a quote whose q tag has no author", () => {
+      const event = getTestTrustedEvent({
+        tags: [
+          ["q", quotedId, "wss://relay/"],
+          ["p", mutedPubkey],
+        ],
+      })
+
+      expect(quotesAnyPubkey(event, muted)).toBe(false)
+    })
+
+    it("should match when any of several quotes names a matching author", () => {
+      const event = getTestTrustedEvent({
+        tags: [
+          ["q", otherQuotedId, "wss://relay/", otherPubkey],
+          ["q", quotedId, "wss://relay/", mutedPubkey],
+        ],
+      })
+
+      expect(quotesAnyPubkey(event, muted)).toBe(true)
+    })
+
+    it("should not match an event without quotes", () => {
+      const event = getTestTrustedEvent({
+        tags: [
+          ["e", "parentid", "", "root", mutedPubkey],
+          ["p", mutedPubkey],
+        ],
+      })
+
+      expect(quotesAnyPubkey(event, muted)).toBe(false)
     })
   })
 

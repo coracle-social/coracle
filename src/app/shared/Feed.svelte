@@ -25,7 +25,7 @@
   import FeedControls from "src/app/shared/FeedControls.svelte"
   import {zap} from "src/app/util"
   import type {Feed} from "src/domain"
-  import {env} from "src/engine"
+  import {env, quotesAnyPubkey, userMutedPubkeys} from "src/engine"
   import FeedItem from "src/app/shared/FeedItem.svelte"
 
   export let feed: Feed
@@ -102,6 +102,8 @@
 
   const toggleReplies = () => shouldHideReplies.update(not)
 
+  const shouldAddEvent = (event: TrustedEvent) => !quotesAnyPubkey(event, $userMutedPubkeys)
+
   const updateFeed = newFeed => {
     feed = newFeed
     reload()
@@ -161,6 +163,7 @@
       {shouldSort}
       {depth}
       {events}
+      {shouldAddEvent}
       shouldAwait
       hideReplies={$shouldHideReplies}
       let:event
