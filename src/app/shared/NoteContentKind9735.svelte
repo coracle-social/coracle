@@ -13,6 +13,7 @@
   import {fromApp, reader} from "src/engine/core"
 
   export let note, showEntire, showMedia
+  export let depth = 0
 
   const receipt = reader(ZapReceipt)(note)
   const recipient = receipt.recipient()
@@ -31,7 +32,11 @@
       <PersonLink pubkey={zap.request?.pubkey} /> zapped <PersonLink pubkey={recipient} />
       {formatSats(zap.invoiceAmount / 1000)} sats!
     </div>
-    <NoteContentKind1 note={zap.request} {showEntire} />
+    <NoteContentKind1 note={zap.request} {showEntire} {depth}>
+      <div slot="note-content" let:quote>
+        <slot name="note-content" {quote} />
+      </div>
+    </NoteContentKind1>
     {#if urls.length > 0}
       <NoteContentLinks {urls} {showMedia} />
     {/if}

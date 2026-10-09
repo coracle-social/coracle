@@ -14,6 +14,7 @@
   export let note
   export let showMedia = false
   export let showEntire = false
+  export let depth = 0
 
   const listing = reader(Classified)(note)
   const summary = listing.summary()
@@ -52,7 +53,11 @@
       <p class="text-neutral-200">{summary}</p>
     {/if}
     <div class="h-px bg-neutral-600" />
-    <NoteContentKind1 {note} {showEntire} {showMedia} />
+    <NoteContentKind1 {note} {showEntire} {showMedia} {depth}>
+      <div slot="note-content" let:quote>
+        <slot name="note-content" {quote} />
+      </div>
+    </NoteContentKind1>
   </div>
   <NoteContentTopics {note} />
 </FlexColumn>

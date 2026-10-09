@@ -15,6 +15,7 @@
   export let note: TrustedEvent
   export let showEntire: boolean
   export let showMedia: boolean
+  export let depth = 0
 
   const highlight = reader(Highlight)(note)
   const comment = highlight.comment()
@@ -40,11 +41,19 @@
 
 <div class="flex flex-col gap-2">
   {#if comment}
-    <NoteContentKind1 note={{content: comment}} {showMedia} {showEntire} />
+    <NoteContentKind1 note={{content: comment}} {showMedia} {showEntire} {depth}>
+      <div slot="note-content" let:quote>
+        <slot name="note-content" {quote} />
+      </div>
+    </NoteContentKind1>
   {/if}
   <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
     <div class="border-l-2 border-solid border-neutral-600 pl-4">
-      <NoteContentKind1 {note} {showEntire} />
+      <NoteContentKind1 {note} {showEntire} {depth}>
+        <div slot="note-content" let:quote>
+          <slot name="note-content" {quote} />
+        </div>
+      </NoteContentKind1>
     </div>
   </div>
   {#if naddr}

@@ -5,12 +5,17 @@
   import NoteContentKind1 from "src/app/shared/NoteContentKind1.svelte"
 
   export let note, showEntire
+  export let depth = 0
 
   const url = tagValue(tagSpec("stream_url"), note.tags)
 </script>
 
 <div class="flex flex-col gap-2 overflow-hidden text-ellipsis">
-  <NoteContentKind1 {note} {showEntire} />
+  <NoteContentKind1 {note} {showEntire} {depth}>
+    <div slot="note-content" let:quote>
+      <slot name="note-content" {quote} />
+    </div>
+  </NoteContentKind1>
   {#if url}
     <NoteContentLinks urls={[url]} />
   {/if}
