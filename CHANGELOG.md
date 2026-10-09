@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.6.41
+
+* Upgrade to welshman 0.13
+* Add an option to publish protected notes (NIP 70)
+* Add a copy action to duplicate a list
+* Fix the list editor rendering before the list has been read
+* Fix wallet connection redirect when opened from settings
+* Wrap long inline code in the editor
+
 # 0.6.40
 
 * Fix quoted notes not rendering inside comments and other note kinds
