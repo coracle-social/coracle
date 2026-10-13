@@ -63,7 +63,11 @@ export const appConfig = {
 }
 
 const appPolicyAuth = makeAppPolicyAuth((socket, app) => {
-  if (!app.user || !appConfig.autoAuthenticate) {
+  if (
+    !app.user ||
+    isReadOnlySession(sessions.get()[app.user.pubkey]) ||
+    !appConfig.autoAuthenticate
+  ) {
     return false
   }
 
@@ -238,6 +242,9 @@ export type StoredSession = {
   session: Session
 }
 
+const isReadOnlySession = (stored: Maybe<StoredSession>) =>
+  stored?.session.method === readOnly.method
+
 // Sessions written before welshman 0.9 are flat ({method, pubkey, ...method fields, ...meta}) and
 // live under the same storage key, so convert them in place or the user is never restored.
 const legacySessionData: Record<string, (s: Record<string, any>) => Session> = {
@@ -298,7 +305,11 @@ export const session = derived([sessions, pubkey], ([$sessions, $pubkey]) =>
   $pubkey ? $sessions[$pubkey] : undefined,
 )
 
-export const signer = derived(app, $app => $app.user?.signer)
+// A read-only user has a signer because welshman needs one, but nothing can be signed with it,
+// so the app treats it the same as having no signer.
+export const signer = derived([app, sessions], ([$app, $sessions]) =>
+  $app.user && !isReadOnlySession($sessions[$app.user.pubkey]) ? $app.user.signer : undefined,
+)
 
 export const user = derived(app, $app => User.require($app))
 
