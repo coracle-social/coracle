@@ -69,8 +69,6 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 # Tests
 
 - Run all tests: `pnpm run test`
-- Run unit tests: `pnpm run test:unit`
-- Run e2e tests: `pnpm run test:e2e`
 
 # Building for Android
 

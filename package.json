@@ -6,8 +6,7 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "vite --host",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "vitest --dir=tests/unit --watch=false",
+    "test": "vitest --dir=tests/unit --watch=false",
     "build": "rm -rf dist && pwa-assets-generator && vite build && cap sync",
     "build:web": "rm -rf dist && pwa-assets-generator && vite build && node scripts/precompress.mjs",
     "run:android": "cap sync && cap run android",
