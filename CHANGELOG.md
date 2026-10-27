@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.6.42
+
+* Add direct links to feeds, with a copy action in the feed editor
+* Rewrite privacy policy and terms of service to reflect the services Coracle actually uses
+* Fix pre-commit hook on case-sensitive filesystems
+
 # 0.6.41
 
 * Upgrade to welshman 0.13
