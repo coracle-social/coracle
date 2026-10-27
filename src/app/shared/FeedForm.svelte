@@ -2,7 +2,9 @@
   import {spec} from "@welshman/lib"
   import {getAddress} from "@welshman/util"
   import {feeds, profiles, pubkey, signer} from "src/engine/core"
+  import {copyToClipboard} from "src/util/html"
   import Field from "src/partials/Field.svelte"
+  import Link from "src/partials/Link.svelte"
   import {showInfo} from "src/partials/Toast.svelte"
   import Subheading from "src/partials/Subheading.svelte"
   import Modal from "src/partials/Modal.svelte"
@@ -12,6 +14,7 @@
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import Button from "src/partials/Button.svelte"
   import FeedField from "src/app/shared/FeedField.svelte"
+  import {router} from "src/app/util"
   import {makeFeed, displayFeed} from "src/domain"
   import {deleteEvent, removeFeedFavorite} from "src/engine"
 
@@ -99,6 +102,15 @@
 
   // Sync definition in case they're editing it
   $: draft.definition = feed.definition
+  $: feedEvent = feed.event || feed.list?.event
+  $: feedAddress = feedEvent ? getAddress(feedEvent) : null
+  $: feedUrl = feedAddress ? router.at("feeds").of(feedAddress).at("view").toString() : null
+  $: fullUrl = feedUrl ? `${location.origin}${feedUrl}` : null
+
+  const copyFeedLink = () => {
+    copyToClipboard(fullUrl)
+    showInfo("Feed link copied to clipboard!")
+  }
 </script>
 
 <FeedField bind:feed={feed.definition} />
@@ -153,6 +165,22 @@
         <i class="fa fa-times" />
       </button>
     {/if}
+  </Card>
+{/if}
+
+{#if feedUrl}
+  <Card>
+    <FlexColumn small>
+      <span class="staatliches text-lg">Direct link</span>
+      <div class="flex items-center justify-between gap-2">
+        <Link class="truncate underline" href={feedUrl} on:click={() => exit()}>
+          {feedUrl}
+        </Link>
+        <div class="cursor-pointer px-1 text-neutral-400 transition-colors hover:text-neutral-100">
+          <i class="fa-solid fa-copy" on:click={copyFeedLink} />
+        </div>
+      </div>
+    </FlexColumn>
   </Card>
 {/if}
 
