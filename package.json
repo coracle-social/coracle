@@ -10,7 +10,7 @@
     "build": "rm -rf dist && pwa-assets-generator && vite build && cap sync",
     "build:web": "rm -rf dist && pwa-assets-generator && vite build && node scripts/precompress.mjs",
     "run:android": "cap sync && cap run android",
-    "release:android": "cap sync && cap build android --androidreleasetype APK --signing-type apksigner",
+    "release:android": "set -a && . ./.env && set +a && cap sync && cap build android --androidreleasetype APK --signing-type apksigner --keystorepath \"$KEYSTORE_PATH\" --keystorepass \"$KEYSTORE_PASS\" --keystorealias \"$KEYSTORE_ALIAS\" --keystorealiaspass \"$KEYSTORE_ALIAS_PASS\"",
     "check:es": "eslint 'src/**/*.{js,ts,svelte}' --quiet",
     "check:ts": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:fmt": "git diff HEAD --name-only --diff-filter d | grep -E '(js|ts|svelte)$' | xargs -r prettier --check",
