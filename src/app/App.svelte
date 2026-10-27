@@ -144,6 +144,11 @@
       address: asNaddr("address"),
     },
   })
+  router.register("/feeds/:address/view", Home, {
+    serializers: {
+      address: asNaddr("address"),
+    },
+  })
 
   router.register("/lists", ListList)
   router.register("/lists/create", ListCreate)

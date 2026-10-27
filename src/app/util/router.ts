@@ -129,6 +129,7 @@ router.extend("channels", getChannelId)
 router.extend("events", encodeNaddr)
 router.extend("lists", encodeNaddr)
 router.extend("listings", encodeNaddr)
+router.extend("feeds", encodeNaddr)
 
 router.extend("notes", (id, {relays = []} = {}) => {
   if (Address.isAddress(id)) {
