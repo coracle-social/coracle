@@ -317,6 +317,14 @@ export class Router {
       throw new Error("router.go called without a path")
     }
 
+    // Re-opening the modal that is already on top stacks a second copy of the
+    // same pane; make it a no-op instead.
+    const [cur] = get(this.history)
+
+    if (state.modal && cur?.modal && cur.path === state.path) {
+      return
+    }
+
     if (!state.key) {
       state.key = randomId()
     }
