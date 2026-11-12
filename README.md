@@ -72,23 +72,25 @@ You can find a more complete changelog [here](./CHANGELOG.md).
 
 # Building for Android
 
-Make sure you have the android build tools in your path and run:
+Make sure you have the android build tools in your path, set `KEYSTORE_PATH`, `KEYSTORE_PASS`, `KEYSTORE_ALIAS` and `KEYSTORE_ALIAS_PASS` in `.env`, and run:
 
 ```
-pnpm run build:android --keystorepath <path> --keystorepass <password> --keystorealias <alias> --keystorealiaspass <password>
+pnpm run release:android
 ```
 
 # Customization
 
-Coracle is intended to be fully white-labeled by groups of various kinds. The following environment variables can be set in `.env.local` to customize Coracle's appearance and behavior:
+Coracle is intended to be fully white-labeled by groups of various kinds. The following environment variables can be set in `.env` to customize Coracle's appearance and behavior:
 
 - `VITE_DARK_THEME` and `VITE_LIGHT_THEME` are comma-separate lists of key/value pairs defining theme colors.
 - `VITE_DVM_RELAYS` is a comma-separated list of relays to use when making requests against DVMs.
 - `VITE_SEARCH_RELAYS` is a comma-separated list of relays to use when using NIP 50 search.
 - `VITE_DEFAULT_RELAYS` is a comma-separated list of relays to use as defaults/fallbacks.
+- `VITE_INDEXER_RELAYS` is a comma-separated list of relays to use when looking up users' relay lists.
+- `VITE_SIGNER_RELAYS` is a comma-separated list of relays to use for `nostrconnect://` login with a remote signer.
 - `VITE_DEFAULT_FOLLOWS` is a comma-separated list of hex pubkeys to fetch content from when the user isn't following anyone.
-- `VITE_ONBOARDING_LISTS` is a comma-separated list of `kind:30003` person lists to populate onboarding with.
-- `VITE_NIP96_URLS` is a comma-separated list of default upload providers.
+- `VITE_ONBOARDING_LISTS` is a comma-separated list of `kind:30000` person lists to populate onboarding with.
+- `VITE_BLOSSOM_URLS` is a comma-separated list of default Blossom servers for uploads.
 - `VITE_DUFFLEPUD_URL` is a [Dufflepud](https://github.com/coracle-social/dufflepud) instance url, which helps Coracle with things like link previews and image uploads.
 - `VITE_PLATFORM_ZAP_SPLIT` is a decimal between 0 and 1 defining the default zap split percent.
 - `VITE_PLATFORM_PUBKEY` is the pubkey of the platform owner. This gets zapped when using the platform zap split.
@@ -103,5 +105,6 @@ Coracle is intended to be fully white-labeled by groups of various kinds. The fo
 - `VITE_BUILD_HASH` can be set during build to indicate the software version on the about page.
 - `VITE_LOG_LEVEL` can be set to `info`, `warn`, or `error`. This controls how much shows up in the console.
 - `VITE_ENABLE_MARKET` can be set to `false` to disable the marketplace tab.
+- `VITE_BLUR_CONTENT` can be set to `true` to blur note content.
 
-See `.env` for default values.
+See `.env.template` for default values.
