@@ -3,6 +3,7 @@
   import {Nip01Signer} from "@welshman/signer"
   import type {ISigner} from "@welshman/signer"
   import {Router} from "@welshman/app"
+  import {isShareableRelayUrl, relay} from "@welshman/util"
   import {ZapRequest} from "@welshman/domain"
   import {showInfo, showWarning} from "src/partials/Toast.svelte"
   import Link from "src/partials/Link.svelte"
@@ -66,7 +67,7 @@
     try {
       const requests: Promise<unknown>[] = []
 
-      for (const [, pubkey, , weightString] of [...splits, platformSplit]) {
+      for (const [, pubkey, relayHint, weightString] of [...splits, platformSplit]) {
         const weight = parseFloat(weightString)
         const msats = Math.round(1000 * amount * (weight / totalWeight))
         const zapper = await $zappers.loadForPubkey(pubkey).catch(noop)
@@ -92,10 +93,23 @@
 
         // The writer routes the receipt to the recipient's inbox, and to a zap goal's own
         // relays, so listen for it wherever it asked the zapper to publish.
-        const relays = await zapRequest.relays()
+        let relays = await zapRequest.relays()
+
+        if (!relays.length && isShareableRelayUrl(relayHint || "")) {
+          zapRequest.forceRoutes(relay(relayHint))
+          relays = await zapRequest.relays()
+        }
+
+        if (!relays.length) {
+          if (pubkey === env.PLATFORM_PUBKEY) continue
+          return showWarning("Failed to zap: no relay available for the receipt")
+        }
         const filters = [zapper.getResponseFilter(pubkey, id)]
 
-        const res = await zapRequest.requestInvoice(zapper)
+        const res = await zapRequest.requestInvoice(zapper).catch(() => ({
+          invoice: undefined,
+          error: "Could not request a Lightning invoice",
+        }))
 
         if (!res.invoice) {
           if (pubkey === env.PLATFORM_PUBKEY) {
