@@ -37,10 +37,14 @@ import {
   getPubkey,
   queryProfile,
 } from "@welshman/util"
-import {hexToBytes, bytesToHex, isHex32} from "@welshman/lib"
+import {hexToBytes, bytesToHex, isHex32, uniq} from "@welshman/lib"
 import type {TrustedEvent} from "@welshman/util"
 import type {ProfileReader} from "@welshman/domain"
 import * as nip19 from "nostr-tools/nip19"
+
+// Pubkeys of the people a list's tags point at, in tag order and without duplicates
+export const getListPubkeys = (tags: string[][]) =>
+  uniq(tags.filter(t => t[0] === "p" && isHex32(t[1])).map(t => t[1]))
 
 export const nsecEncode = secret => nip19.nsecEncode(hexToBytes(secret))
 
