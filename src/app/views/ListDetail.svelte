@@ -1,12 +1,12 @@
 <script lang="ts">
-  import {noop} from "@welshman/lib"
+  import {noop, uniq} from "@welshman/lib"
+  import {hexTags, tagValues} from "@welshman/util"
   import Link from "src/partials/Link.svelte"
   import FlexColumn from "src/partials/FlexColumn.svelte"
   import ListCard from "src/app/shared/ListCard.svelte"
   import PersonList from "src/app/shared/PersonList.svelte"
   import {router} from "src/app/util"
   import {readUserList} from "src/domain"
-  import {getListPubkeys} from "src/util/nostr"
   import {deriveEvent} from "src/engine"
   import {pubkey} from "src/engine/core"
 
@@ -18,7 +18,7 @@
 
   $: if ($event) {
     readUserList($event).then(list => {
-      pubkeys = getListPubkeys(list.tags)
+      pubkeys = uniq(tagValues(hexTags("p"), list.tags))
     }, noop)
   }
 </script>
