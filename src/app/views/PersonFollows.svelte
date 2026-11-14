@@ -8,4 +8,4 @@
   const follows = fromApp($app => $app.use(FollowLists).one(pubkey))
 </script>
 
-<PersonList pubkeys={$follows?.pubkeys() || []} />
+<PersonList sortByWot pubkeys={$follows?.pubkeys() || []} />
