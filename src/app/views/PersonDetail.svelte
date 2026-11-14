@@ -12,7 +12,7 @@
     getIdFilters,
     outbox,
   } from "@welshman/util"
-  import {feedFromFilter} from "@welshman/feeds"
+  import {feedFromFilter, makeUnionFeed} from "@welshman/feeds"
   import {
     FollowLists,
     Handles,
@@ -32,7 +32,7 @@
     session,
   } from "src/engine/core"
   import {ensureProto, toTitle} from "src/util/misc"
-  import {makeZapSplit} from "src/util/nostr"
+  import {makeZapSplit, noteKinds} from "src/util/nostr"
   import AltColor from "src/partials/AltColor.svelte"
   import Tabs from "src/partials/Tabs.svelte"
   import Link from "src/partials/Link.svelte"
@@ -82,7 +82,15 @@
   const followers = fromApp($app => $app.use(Wot).followers(pubkey, WotScope.Global).$)
   const npub = nip19.npubEncode(pubkey)
   const profileDisplay = fromApp($app => $app.use(Profiles).display(pubkey).$)
-  const tabs = ["notes", "likes", "collections", "relays", "following", "followers"]
+
+  // Replies and mentions between the current user and this person, in either direction
+  const makeConversationsFeed = (userPubkey: string) =>
+    makeFeed({
+      definition: makeUnionFeed(
+        feedFromFilter({kinds: noteKinds, authors: [pubkey], "#p": [userPubkey]}),
+        feedFromFilter({kinds: noteKinds, authors: [userPubkey], "#p": [pubkey]}),
+      ),
+    })
 
   const startZap = () =>
     zap({
@@ -109,6 +117,19 @@
 
   let activeTab = "notes"
   let togglingFollowing: boolean = undefined
+
+  $: userPubkey = $session?.pubkey
+  $: conversationsFeed =
+    userPubkey && userPubkey !== pubkey ? makeConversationsFeed(userPubkey) : undefined
+  $: tabs = [
+    "notes",
+    ...(conversationsFeed ? ["conversations"] : []),
+    "likes",
+    "collections",
+    "relays",
+    "following",
+    "followers",
+  ]
 
   $: followersCount.set($followers.length)
   $: followsCount.set(($follows?.pubkeys() || []).length)
@@ -253,6 +274,10 @@
     </div>
   {/each}
   <Feed shouldSort maxDepth={1} feed={notesFeed} />
+{:else if activeTab === "conversations" && conversationsFeed}
+  {#key conversationsFeed}
+    <Feed shouldSort maxDepth={1} feed={conversationsFeed} />
+  {/key}
 {:else if activeTab === "likes"}
   <Feed feed={likesFeed} />
 {:else if activeTab === "collections"}
