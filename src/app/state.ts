@@ -15,6 +15,7 @@ import {appDataKeys} from "src/util/nostr"
 import {router} from "src/app/util/router"
 import {
   env,
+  BookmarkLists,
   myLoad,
   loadPubkeys,
   loadDeletes,
@@ -91,6 +92,9 @@ export const loadUserData = async () => {
 
   // Load our platform pubkey so we can zap it
   loadPubkeys([env.PLATFORM_PUBKEY])
+
+  // Load bookmarks so note menus know which notes are already bookmarked
+  $app.use(BookmarkLists).load($pubkey).catch(noop)
 
   // Load anything they might need to be notified about
   loadMessages().catch(noop)
