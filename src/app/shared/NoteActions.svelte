@@ -15,6 +15,8 @@
     REACTION,
     getReplyFilters,
     getAddress,
+    getIdOrAddress,
+    isReplaceable,
     NOTE,
   } from "@welshman/util"
   import {GenericRepost, Reaction, Repost} from "@welshman/domain"
@@ -49,6 +51,7 @@
   } from "src/engine/core"
   import {
     env,
+    bookmarkLists,
     deriveHandlersForKind,
     deleteEvent,
     getSetting,
@@ -57,6 +60,7 @@
     isChildOf,
     isEventMuted,
     userPins,
+    userBookmarks,
     deriveRelaysForEvent,
   } from "src/engine"
 
@@ -102,6 +106,16 @@
       .addTags(...getClientTags())
 
     await command(eventWriter).then(publish)
+  }
+
+  const bookmark = () => {
+    const tag = isReplaceable(event) ? ["a", getAddress(event)] : ["e", event.id]
+
+    bookmarkLists.get().bookmarkPublicly(tag).then(publish)
+  }
+
+  const removeBookmark = () => {
+    bookmarkLists.get().removeBookmark(getIdOrAddress(event)).then(publish)
   }
 
   const deleteReaction = e => {
@@ -167,6 +181,7 @@
   $: zapper = lnurl ? $zappers.one(lnurl) : $zappers.forPubkey(event.pubkey).$
   $: muted = $userMutedEvents.has(event.id) || $userMutedEvents.has(getAddress(event))
   $: pinned = $userPins.has(event.id)
+  $: bookmarked = $userBookmarks.has(getIdOrAddress(event))
   $: children = $context.filter(e => isChildOf(e, event))
   $: likes = uniqBy(prop("pubkey"), children.filter(spec({kind: REACTION})))
   $: reposts = uniqBy(
@@ -206,6 +221,12 @@
       actions.push({label: "Quote", icon: "quote-left", onClick: quote})
 
       actions.push({label: "Tag", icon: "tag", onClick: createLabel})
+
+      if (bookmarked) {
+        actions.push({label: "Remove bookmark", icon: "bookmark", onClick: removeBookmark})
+      } else {
+        actions.push({label: "Bookmark", icon: "bookmark", onClick: bookmark})
+      }
 
       if (muted) {
         actions.push({

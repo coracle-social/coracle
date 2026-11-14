@@ -1,6 +1,8 @@
-import {Address, NAMED_BOOKMARKS, getAddress} from "@welshman/util"
+import {Address, BOOKMARKS, NAMED_BOOKMARKS, getAddress} from "@welshman/util"
 import type {TrustedEvent} from "@welshman/util"
-import {DerivedPlugin, Domain, Network} from "@welshman/app"
+import {BookmarkList} from "@welshman/domain"
+import type {BookmarkListReader, BookmarkListWriter} from "@welshman/domain"
+import {DerivedPlugin, Domain, Network, User} from "@welshman/app"
 import type {IApp} from "@welshman/app"
 import {EDITABLE_LIST_KINDS, mapListToFeed, readUserList, userListKind} from "src/domain"
 import type {PublishedListFeed, PublishedUserList, UserListReader} from "src/domain"
@@ -71,4 +73,35 @@ export class RelayFeedLists extends DerivedPlugin<UserListReader> {
   fetch(pubkey: string, relayHints: string[] = []) {
     return this.app.use(Network).loadUsingOutbox(pubkey, {kinds: [RELAY_FEEDS]}, relayHints)
   }
+}
+
+/**
+ * NIP-51 bookmark lists (kind 10003), keyed by pubkey. Private entries are NIP-44 encrypted,
+ * so they're only readable for the user's own list.
+ */
+export class BookmarkLists extends DerivedPlugin<BookmarkListReader> {
+  constructor(app: IApp) {
+    super(app, {
+      filters: [{kinds: [BOOKMARKS]}],
+      eventToItem: app.use(Domain).reader(BookmarkList),
+      getKey: list => list.author(),
+    })
+  }
+
+  fetch(pubkey: string, relayHints: string[] = []) {
+    return this.app.use(Network).loadUsingOutbox(pubkey, {kinds: [BOOKMARKS]}, relayHints)
+  }
+
+  update = async (fn: (writer: BookmarkListWriter) => void) => {
+    const user = User.require(this.app)
+    const writer = this.app.use(Domain).writer(BookmarkList, await this.forceLoad(user.pubkey))
+
+    fn(writer)
+
+    return this.app.use(Domain).command(writer)
+  }
+
+  bookmarkPublicly = (tag: string[]) => this.update(writer => writer.bookmarkPublicly(tag))
+
+  removeBookmark = (value: string) => this.update(writer => writer.removeBookmark(value))
 }

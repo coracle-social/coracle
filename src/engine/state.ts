@@ -97,8 +97,9 @@ import {
   pubkey,
   session,
   signer,
+  usePlugin,
 } from "src/engine/core"
-import {ListFeeds, Lists, RelayFeedLists} from "src/engine/plugins"
+import {BookmarkLists, ListFeeds, Lists, RelayFeedLists} from "src/engine/plugins"
 import {env} from "src/engine/env"
 import {makeSearch, ensureProto} from "src/util/misc"
 import {noteKinds, appDataKeys} from "src/util/nostr"
@@ -309,6 +310,15 @@ export const userMutedTopics = derived(
 const userPinList = deriveUserItem(PinLists)
 
 export const userPins = derived(userPinList, l => new Set(l?.ids() || []))
+
+export const bookmarkLists = usePlugin(BookmarkLists)
+
+const userBookmarkList = deriveUserItem(BookmarkLists)
+
+export const userBookmarks = derived(
+  userBookmarkList,
+  l => new Set([...(l?.ids() || []), ...(l?.addresses() || [])]),
+)
 
 export const isEventMuted = withGetter(
   derived(
