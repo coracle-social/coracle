@@ -28,6 +28,6 @@
   </div>
 {:else}
   <div transition:fly|local={{y: 20}}>
-    <PersonList {pubkeys} />
+    <PersonList sortByWot {pubkeys} />
   </div>
 {/if}
