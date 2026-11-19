@@ -22,6 +22,7 @@
     reduceLinks,
     isLinkGrid,
   } from "@welshman/content"
+  import {linkExternalContent} from "src/util/nostr"
   import QRCode from "src/partials/QRCode.svelte"
   import Link from "src/partials/Link.svelte"
   import NoteContentNewline from "src/app/shared/NoteContentNewline.svelte"
@@ -72,7 +73,7 @@
 
   const getUrls = (links: ParsedLinkValue[]) => links.map(link => link.url.toString())
 
-  $: rawContent = parse(note)
+  $: rawContent = parse({...note, content: linkExternalContent(note)})
   $: fullContent = showMedia ? reduceLinks(rawContent) : rawContent
   $: shortContent = showEntire
     ? fullContent
