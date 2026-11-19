@@ -74,7 +74,10 @@
                   slot="result"
                   let:result
                   class="cursor-pointer px-4 py-2 transition-colors hover:bg-neutral-800">
-                  {#if result.type === "topic"}
+                  {#if result.type === "notes"}
+                    <i class="fa fa-search mr-1" />
+                    Search notes for "{result.id}"
+                  {:else if result.type === "topic"}
                     #{result.topic.name}
                   {:else if result.type === "profile"}
                     <PersonBadge inert pubkey={result.id} />
