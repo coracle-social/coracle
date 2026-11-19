@@ -186,3 +186,52 @@ export const parseAnythingSync = entity => {
     return null
   }
 }
+
+// External content ids (nip-73)
+
+const externalContentUrls: [RegExp, (...match: string[]) => string][] = [
+  [/^isbn:([\dx]+)$/i, id => `https://isbnsearch.org/isbn/${id}`],
+  [/^doi:(.+)$/, id => `https://doi.org/${encodeURI(id)}`],
+  [/^osm:(node|way|relation):(\d+)$/, (type, id) => `https://www.openstreetmap.org/${type}/${id}`],
+  [/^podcast:guid:([-\w]+)$/, guid => `https://podcastindex.org/podcast/${guid}`],
+  [/^isan:([-\w]+)$/, id => `https://web.isan.org/public/en/isan/${id}`],
+  [/^bitcoin:(tx|address):(\w+)$/, (type, id) => `https://blockstream.info/${type}/${id}`],
+]
+
+const isHttpUrl = (url?: string) => Boolean(url?.match(/^https?:\/\/\S+$/i))
+
+// A link for an `i` or `I` tag: the id itself if it's a web page, otherwise the url hint, falling
+// back to a well-known site for kinds of ids that have one.
+export const getExternalContentUrl = ([_, id = "", hint]: string[]) => {
+  if (isHttpUrl(id)) return id
+  if (isHttpUrl(hint)) return hint
+
+  for (const [regexp, makeUrl] of externalContentUrls) {
+    const match = id.match(regexp)
+
+    if (match) {
+      return makeUrl(...match.slice(1))
+    }
+  }
+}
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+// Swap any external content ids an event mentions in its content for their links, so they get
+// rendered like any other link. Urls and hashtags are already rendered, so leave those alone.
+export const linkExternalContent = (event: TrustedEvent) => {
+  let content = event.content
+
+  for (const tag of matchTags(tagSpec(["i", "I"]), event.tags)) {
+    const id = tag[1]
+    const url = getExternalContentUrl(tag)
+
+    if (!id || !url || isHttpUrl(id) || id.startsWith("#")) continue
+
+    const regexp = new RegExp(`(^|[\\s(])${escapeRegExp(id)}(?=$|[\\s),.!?;:])`, "g")
+
+    content = content.replace(regexp, (_, prefix) => prefix + url)
+  }
+
+  return content
+}
