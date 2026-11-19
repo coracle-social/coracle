@@ -82,7 +82,12 @@
   <div class="relative max-h-full">
     <SearchResults replace term={searchTerm}>
       <div slot="result" let:result>
-        {#if result.type === "topic"}
+        {#if result.type === "notes"}
+          <Card interactive class="flex items-center gap-2">
+            <i class="fa fa-search" />
+            Search notes for "{result.id}"
+          </Card>
+        {:else if result.type === "topic"}
           <Card interactive>
             #{result.topic.name}
           </Card>

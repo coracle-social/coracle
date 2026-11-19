@@ -2,14 +2,17 @@
   import type {Writable} from "svelte/store"
   import {throttle} from "throttle-debounce"
   import {derived} from "svelte/store"
+  import {makeSearchFeed} from "@welshman/feeds"
   import type {Topic} from "@welshman/app"
   import type {ProfileReader} from "@welshman/domain"
   import {profileSearch, topicSearch} from "src/engine/core"
   import {parseAnything} from "src/util/nostr"
   import {router} from "src/app/util/router"
-  import {createPeopleLoader} from "src/engine"
+  import {makeFeed} from "src/domain"
+  import {createPeopleLoader, env} from "src/engine"
 
   type SearchResult =
+    | {type: "notes"; id: string}
     | {type: "topic"; id: string; topic: Topic}
     | {type: "profile"; id: string; profile: ProfileReader}
 
@@ -21,7 +24,17 @@
 
   const openProfile = pubkey => router.at("people").of(pubkey).open({replace})
 
+  const openNotes = (search: string) =>
+    router
+      .at("notes")
+      .cx({feed: makeFeed({definition: makeSearchFeed(search)})})
+      .open({replace})
+
   const onClick = (result: SearchResult) => {
+    if (result.type === "notes") {
+      openNotes(result.id)
+    }
+
     if (result.type === "topic") {
       openTopic(result.id)
     }
@@ -62,13 +75,21 @@
         tryParseEntity($term)
       }
 
-      return $term.startsWith("#")
-        ? $topicSearch
-            .searchOptions($term.slice(1))
-            .map(topic => ({type: "topic", id: topic.name, topic}) as SearchResult)
-        : $profileSearch
-            .searchOptions($term)
-            .map(profile => ({type: "profile", id: profile.author(), profile}) as SearchResult)
+      if ($term.startsWith("#")) {
+        return $topicSearch
+          .searchOptions($term.slice(1))
+          .map(topic => ({type: "topic", id: topic.name, topic}) as SearchResult)
+      }
+
+      const search = $term.trim()
+      const profileResults = $profileSearch
+        .searchOptions($term)
+        .map(profile => ({type: "profile", id: profile.author(), profile}) as SearchResult)
+
+      // Notes are only searchable through nip 50 relays, so only offer it if we have some
+      return search && env.SEARCH_RELAYS.length > 0
+        ? [{type: "notes", id: search}, ...profileResults]
+        : profileResults
     },
   )
 
